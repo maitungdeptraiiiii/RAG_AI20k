@@ -1,0 +1,34 @@
+# Secrets / local settings
+.env
+.env.*
+!.env.example
+.DS_Store
+.idea/
+.vscode/
+
+# Python / JS environments and outputs
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+node_modules/
+dist/
+build/
+coverage/
+
+# Local data and large artifacts
+data/raw/
+data/processed/
+data/indexes/
+*.log
+*.mp4
+*.mov
+*.sqlite
+*.sqlite3
+
+# Per-team local datasets and indexes
+data/team-*/raw/
+data/team-*/processed/
+data/team-*/indexes/

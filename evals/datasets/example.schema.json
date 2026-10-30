@@ -1,0 +1,12 @@
+{
+  "id": "EXAMPLE-ONLY",
+  "question": "<câu hỏi>",
+  "category": "direct",
+  "data_snapshot": "<snapshot-id>",
+  "expected_behavior": "answer",
+  "reference_answer_or_rubric": "<đáp án hoặc rubric>",
+  "evidence": [{"document_id": "<id>", "version": "<version>", "locator": "<page/section/row>"}],
+  "split": "dev",
+  "annotator": "<name>",
+  "reviewer": "<name>"
+}

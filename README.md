@@ -54,7 +54,8 @@ agentic-rag/
 - [Terminology and writing conventions](docs/TERMINOLOGY.md)
 
 - [Tiến độ toàn khóa](docs/PROGRESS.md)
-- [Lịch, phân vai và Git workflow](docs/WORKING-AGREEMENTS.md)
+- [Working agreements](docs/WORKING-AGREEMENTS.md)
+- [Git workflow and review policy](docs/GIT-WORKFLOW.md)
 - [Evaluation](docs/EVALUATION.md)
 - [Rubric và buổi demo 45 phút](docs/ASSESSMENT.md)
 - [Tài liệu tham khảo](docs/REFERENCES.md)

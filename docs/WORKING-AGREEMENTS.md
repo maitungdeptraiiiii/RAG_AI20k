@@ -23,20 +23,9 @@ Mỗi task có một owner và một reviewer khác người. Vai trò là trác
 
 ## Git workflow
 
-- Mỗi team làm trong `app/team-4.x/`, `data/team-4.x/`, `evals/team-4.x/`, `experiments/team-4.x/` và `scripts/team-4.x/`. Đề cương và quy chuẩn dùng chung.
-- `main`: phiên bản tích hợp chạy được; không dùng nhánh tuần để giữ các codebase tách biệt.
-- Nhánh task ngắn: `feat/team-4.1/w02-table-parser`, `fix/team-4.2/w03-version-filter`.
-- PR nhỏ, có reviewer, mô tả cách kiểm tra và liên kết task.
-- Không commit API key, `.env`, tài liệu riêng tư, vector index, model weights hoặc log nhạy cảm.
-- Sau nghiệm thu, tạo annotated tag `team-4.1/week-01-demo` ... `team-4.1/week-05-demo` (tương tự cho `team-4.2`) và ghi commit/tag trong báo cáo. Không ghi đè tag nghiệm thu; nếu cần sửa dùng hậu tố `-v2`.
+Áp dụng [Git workflow and review policy](GIT-WORKFLOW.md): branch riêng cho từng task, PR vào `main`, reviewer theo ownership matrix và Squash and merge. Tài liệu này quy định command walkthrough, conflict resolution, remote protection, weekly tags và rollback.
 
-Ví dụ sau khi thay đổi đã được review và commit:
-
-```bash
-git tag -a team-4.1/week-01-demo -m "Team 4.1 Week 1 accepted demo"
-```
-
-Chỉ push khi đã cấu hình remote phù hợp. GitHub/GitLab không bắt buộc; các tracker Markdown vẫn dùng được khi làm local.
+Mỗi team chỉ định integration owner và backup mỗi tuần. Team PR cần reviewer khác author; shared/cross-team PR cần các approval bổ sung theo matrix. Remote settings chỉ có hiệu lực sau khi maintainer cấu hình, không tự được bật bởi tài liệu.
 
 ## Definition of Done
 

@@ -10,6 +10,8 @@ Team: 4.1 / 4.2 / Chung
 Tuần: W01/W02/W03/W04/W05
 Owner:
 Reviewer:
+Scope: Team 4.1 / Team 4.2 / Shared / Cross-team
+Merge owner:
 Liên kết tracker:
 
 ## Acceptance criteria

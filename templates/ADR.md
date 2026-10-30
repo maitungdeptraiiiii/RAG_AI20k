@@ -1,13 +1,13 @@
 # ADR <ID>: <Quyết định>
 
 - Ngày:
-- Trạng thái: Đề xuất / Chấp nhận / Thay thế
+- Status: Proposed / Accepted / Superseded
 - Owner và reviewer:
 
-## Bối cảnh
+## Context
 
-## Các lựa chọn và trade-off
+## Alternatives and trade-offs
 
-## Quyết định và bằng chứng
+## Decision and evidence
 
-## Hệ quả, giới hạn và điều kiện xem xét lại
+## Consequences, limitations and review triggers

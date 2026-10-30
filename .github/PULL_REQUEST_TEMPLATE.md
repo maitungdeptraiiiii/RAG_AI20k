@@ -1,12 +1,12 @@
-## Vấn đề và thay đổi
+## Problem and changes
 
 Team / tuần / issue / tracker:
 
-## Cách kiểm tra và kết quả
+## Validation and results
 
 Lệnh, cấu hình, snapshot và bằng chứng; ghi rõ nếu chưa chạy.
 
-## Ảnh hưởng chất lượng và giới hạn
+## Quality impact and limitations
 
 ## Checklist
 

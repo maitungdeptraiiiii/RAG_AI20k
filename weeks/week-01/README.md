@@ -2,11 +2,11 @@
 
 [Trang chủ](../../README.md) · [Tracker](TRACKER.md) · [Bài nộp](../../reports/week-01/README.md)
 
-## Mục tiêu
+## Objectives
 
 Xây app RAG baseline end-to-end và hiểu ingestion, keyword/dense retrieval, fusion, generation và evaluation. Chưa yêu cầu Agent tự quyết định vòng lặp.
 
-## Phạm vi và bài thực hành bắt buộc
+## Scope and required exercises
 
 - Ingest PDF có text và Markdown; crawler là bonus. Tách interface reader/parser/chunker/indexer để thêm nguồn sau này.
 - BM25, Dense và RRF đều chạy độc lập; UI hiển thị raw chunks, nguồn, thứ hạng và phương pháp.
@@ -24,7 +24,7 @@ Xây app RAG baseline end-to-end và hiểu ingestion, keyword/dense retrieval, 
 | 4 | Tích hợp chat/citation; gán nhãn, chạy evaluation và phân tích lỗi. |
 | 5 | Kiểm tra chạy lại từ README, đóng gói báo cáo và trình bày. |
 
-## Deliverables và checklist nghiệm thu
+## Deliverables and acceptance checklist
 
 - [ ] App có UI chạy upload → ingest → hỏi → trả lời có citation.
 - [ ] Chứng minh BM25, Dense và Fusion đều hoạt động với kết quả riêng.
@@ -46,6 +46,6 @@ Xây app RAG baseline end-to-end và hiểu ingestion, keyword/dense retrieval, 
 
 Q&A không giới hạn danh sách này. Mỗi người phải hiểu toàn bộ pipeline.
 
-## Cách nộp
+## Submission guidelines
 
 Cập nhật tracker, điền báo cáo trong `reports/week-01/team-4.1/` hoặc `reports/week-01/team-4.2/`, liên kết config/kết quả thực nghiệm, README chạy lại và slides. Ghi commit trước demo; bổ sung tag sau nghiệm thu. Áp dụng [evaluation](../../docs/EVALUATION.md) và [rubric 45 phút](../../docs/ASSESSMENT.md).

@@ -1,4 +1,4 @@
-# Thí nghiệm <ID>
+# Experiments <ID>
 
 - Team: 4.1 / 4.2
 - Câu hỏi và giả thuyết:

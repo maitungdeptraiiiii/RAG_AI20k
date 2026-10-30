@@ -2,11 +2,11 @@
 
 [Trang chủ](../../README.md) · [Tracker](TRACKER.md) · [Bài nộp](../../reports/week-04/README.md)
 
-## Mục tiêu
+## Objectives
 
 Hoàn thiện sản phẩm chuyên ngành và chứng minh Agent cải thiện ít nhất một nhóm tác vụ; không cần multi-agent.
 
-## Phạm vi và bài thực hành bắt buộc
+## Scope and required exercises
 
 - Chốt ba việc hệ thống làm tốt và ba việc ngoài phạm vi; tái sử dụng dữ liệu tuần 2–3.
 - Chọn phạm vi nhỏ: một tỉnh và 20–30 địa điểm; một bảo tàng; một công ty với vài kỳ báo cáo; một giai đoạn lịch sử; hoặc một nhóm tình huống giao thông.
@@ -27,7 +27,7 @@ Hoàn thiện sản phẩm chuyên ngành và chứng minh Agent cải thiện �
 | 4 | Evaluation, tình huống lỗi, so sánh baseline và sửa lỗi ưu tiên. |
 | 5 | Demo, phản biện, tổng kết giới hạn và chuẩn bị tuần 5. |
 
-## Deliverables và checklist nghiệm thu
+## Deliverables and acceptance checklist
 
 - [ ] App chuyên ngành với Agent, tool, trace và điều kiện dừng.
 - [ ] ≥50 câu tổng, có test chưa dùng tuning; báo cáo so sánh với baseline.
@@ -50,6 +50,6 @@ Hoàn thiện sản phẩm chuyên ngành và chứng minh Agent cải thiện �
 
 Q&A không giới hạn danh sách này. Mỗi người phải hiểu toàn bộ pipeline.
 
-## Cách nộp
+## Submission guidelines
 
 Cập nhật tracker, điền báo cáo trong `reports/week-04/team-4.1/` hoặc `reports/week-04/team-4.2/`, liên kết config/kết quả thực nghiệm, README chạy lại và slides. Ghi commit trước demo; bổ sung tag sau nghiệm thu. Áp dụng [evaluation](../../docs/EVALUATION.md) và [rubric 45 phút](../../docs/ASSESSMENT.md).

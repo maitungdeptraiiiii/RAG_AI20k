@@ -1,8 +1,8 @@
-# Quy chuẩn evaluation
+# Evaluation guidelines
 
 Mỗi team lưu dataset/config/kết quả riêng trong `evals/team-4.1/` hoặc `evals/team-4.2/`. Các yêu cầu số lượng câu hỏi áp dụng **cho từng team**, không cộng gộp. Chỉ so sánh điểm giữa hai team khi dataset, snapshot, rubric và điều kiện chạy tương đương; nếu khác lĩnh vực, đánh giá tiến bộ của từng team so với baseline của chính team đó.
 
-## Dataset và nhãn
+## Dataset and labels
 
 Mỗi câu hỏi cần: `id`, câu hỏi, nhóm tác vụ, snapshot dữ liệu, đáp án/rubric, vị trí bằng chứng nguồn, hành vi mong đợi (`answer`, `clarify`, `abstain`), split (`dev`, `test`), người gán nhãn và reviewer.
 
@@ -22,11 +22,11 @@ Thống nhất đơn vị bằng chứng và cách ánh xạ kết quả trướ
 
 Câu không có bằng chứng trong corpus được đánh giá khả năng báo thiếu dữ liệu riêng, không chia cho mẫu số 0. Với câu nhiều bước, đo thêm đủ toàn bộ bằng chứng. SQL/graph cần metric phù hợp như đúng phép tính hoặc đủ quan hệ, không ép mọi đầu ra thành chunk.
 
-## Generation và hành vi
+## Generation and behavior
 
 Chấm riêng độ đúng/đủ, mức độ được nguồn hỗ trợ, citation đúng vị trí và thực sự hỗ trợ phát biểu. Báo cáo tỷ lệ hỏi lại hoặc báo thiếu dữ liệu đúng theo nhóm tương ứng. Nếu dùng LLM judge, ghi model/prompt/version và đối chiếu thủ công một phần; không coi judge là ground truth.
 
-## Thí nghiệm công bằng
+## Experiment design
 
 - Giữ cố định câu hỏi, snapshot, generation và điều kiện chạy khi so sánh retrieval.
 - So sánh BM25, Dense, Hybrid RRF, Hybrid + phương pháp mới.

@@ -1,14 +1,14 @@
 # Báo cáo tuần <N>
 
-## Phạm vi và phiên bản
+## Scope and version
 
 - Team: 4.1 / 4.2
 - Thành viên và đóng góp:
 - Mục tiêu, việc hoàn thành/chưa hoàn thành:
 - Commit/tag, snapshot dữ liệu, cấu hình/model:
-- Hướng dẫn tái lập và link demo/slides:
+- Reproduction steps và link demo/slides:
 
-## Thiết kế và quyết định
+## Design decisions
 
 Bài toán → lựa chọn → phương án đã cân nhắc → trade-off. Liên kết ADR nếu có.
 
@@ -26,6 +26,6 @@ Mô tả dataset, số câu từng nhóm/split, nhãn, metric và điều kiện
 |---|---|---|---|---|
 | Chưa phân tích | — | — | — | — |
 
-## Kết luận và giới hạn
+## Findings and limitations
 
 Giả thuyết được/không được dữ liệu hỗ trợ, giới hạn mẫu, rủi ro còn lại và hành động tiếp theo có owner.

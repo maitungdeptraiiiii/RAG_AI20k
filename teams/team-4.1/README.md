@@ -18,7 +18,7 @@ Mentor: chưa điền. Lĩnh vực: chưa chọn. Lịch: chưa chốt.
 
 Áp dụng bảng luân phiên vai trò A–E trong [cách làm việc](../../docs/WORKING-AGREEMENTS.md) riêng cho team này.
 
-## Không gian sản phẩm
+## Project workspace
 
 - [Ứng dụng](../../app/team-4.1/README.md)
 - [Dữ liệu](../../data/team-4.1/README.md)
@@ -26,7 +26,7 @@ Mentor: chưa điền. Lĩnh vực: chưa chọn. Lịch: chưa chốt.
 - [Thí nghiệm](../../experiments/team-4.1/README.md)
 - [Scripts](../../scripts/team-4.1/README.md)
 
-## Tiến độ từng tuần
+## Weekly progress
 
 | Tuần | Tracker | Bài nộp |
 |---|---|---|

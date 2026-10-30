@@ -2,20 +2,20 @@
 
 [Kế hoạch](README.md) · [Tiến độ toàn khóa](../../docs/PROGRESS.md)
 
-Thời gian: chưa chốt. Trạng thái: Chưa bắt đầu. Owner tích hợp: chưa điền. Team: 4.2.
+Thời gian: chưa chốt. Status: Not started. Owner tích hợp: chưa điền. Team: 4.2.
 
-## Task và acceptance criteria
+## Tasks and acceptance criteria
 
-Trạng thái: Chưa bắt đầu / Đang làm / Bị chặn / Chờ review / Hoàn thành. Tách task lớn thành các dòng nhỏ; mỗi dòng có một owner và reviewer.
+Trạng thái: Not started / In progress / Blocked / In review / Done. Tách task lớn thành các dòng nhỏ; mỗi dòng có một owner và reviewer.
 
-| ID | Task/tiêu chí hoàn thành | Owner | Reviewer | Trạng thái | Issue/PR/bằng chứng |
+| ID | Task / acceptance criteria | Owner | Reviewer | Status | Issue / PR / evidence |
 |---|---|---|---|---|---|
-| T4.2-W04-01 | App chuyên ngành với Agent, tool, trace và điều kiện dừng. | Chưa điền | Chưa điền | Chưa bắt đầu | — |
-| T4.2-W04-02 | ≥50 câu tổng, có test chưa dùng tuning; báo cáo so sánh với baseline. | Chưa điền | Chưa điền | Chưa bắt đầu | — |
-| T4.2-W04-03 | Demo đủ các tình huống bắt buộc và chốt human review. | Chưa điền | Chưa điền | Chưa bắt đầu | — |
-| T4.2-W04-04 | README, kiến trúc, giới hạn, backlog, slides và video dự phòng. | Chưa điền | Chưa điền | Chưa bắt đầu | — |
+| T4.2-W04-01 | App chuyên ngành với Agent, tool, trace và điều kiện dừng. | Chưa điền | Chưa điền | Not started | — |
+| T4.2-W04-02 | ≥50 câu tổng, có test chưa dùng tuning; báo cáo so sánh với baseline. | Chưa điền | Chưa điền | Not started | — |
+| T4.2-W04-03 | Demo đủ các tình huống bắt buộc và chốt human review. | Chưa điền | Chưa điền | Not started | — |
+| T4.2-W04-04 | README, kiến trúc, giới hạn, backlog, slides và video dự phòng. | Chưa điền | Chưa điền | Not started | — |
 
-## Nhật ký hằng ngày
+## Daily log
 
 | Ngày | Hoàn thành và bằng chứng | Blocker | Bước tiếp theo / owner |
 |---|---|---|---|
@@ -27,7 +27,7 @@ Trạng thái: Chưa bắt đầu / Đang làm / Bị chặn / Chờ review / Ho
 
 Bài nộp: [Team 4.2](../../reports/week-04/team-4.2/README.md).
 
-## Nghiệm thu và retrospective
+## Acceptance review and retrospective
 
 - Commit/tag: chưa có.
 - Báo cáo và demo: chưa nộp.

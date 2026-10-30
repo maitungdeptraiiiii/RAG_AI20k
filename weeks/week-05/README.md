@@ -2,11 +2,11 @@
 
 [Trang chủ](../../README.md) · [Tracker](TRACKER.md) · [Bài nộp](../../reports/week-05/README.md)
 
-## Mục tiêu
+## Objectives
 
 Xây Agent phát hiện thay đổi, tạo nội dung có bằng chứng, monitor chất lượng và cho phép con người duyệt/chỉnh/từ chối tại các chốt rõ ràng.
 
-## Phạm vi và bài thực hành bắt buộc
+## Scope and required exercises
 
 - Luồng dữ liệu: kiểm tra nguồn → diff → parse/validate → conflict check → regression evaluation → đề xuất → người duyệt → cập nhật index.
 - Luồng sáng tạo: brief → bằng chứng → outline → người chỉnh/duyệt → bản nháp có citation → kiểm tra → duyệt xuất bản.
@@ -27,7 +27,7 @@ Xây Agent phát hiện thay đổi, tạo nội dung có bằng chứng, monito
 | 4 | Monitoring, regression gate, audit và diễn tập rollback. |
 | 5 | Demo tích hợp toàn khóa, báo cáo cuối và bàn giao vận hành. |
 
-## Deliverables và checklist nghiệm thu
+## Deliverables and acceptance checklist
 
 - [ ] Demo nguồn đổi số liệu → đề xuất có diff → người duyệt → cập nhật.
 - [ ] Demo dữ liệu conflict → review; regression → chặn phát hành.
@@ -52,6 +52,6 @@ Xây Agent phát hiện thay đổi, tạo nội dung có bằng chứng, monito
 
 Q&A không giới hạn danh sách này. Mỗi người phải hiểu toàn bộ pipeline.
 
-## Cách nộp
+## Submission guidelines
 
 Cập nhật tracker, điền báo cáo trong `reports/week-05/team-4.1/` hoặc `reports/week-05/team-4.2/`, liên kết config/kết quả thực nghiệm, README chạy lại và slides. Ghi commit trước demo; bổ sung tag sau nghiệm thu. Áp dụng [evaluation](../../docs/EVALUATION.md) và [rubric 45 phút](../../docs/ASSESSMENT.md).

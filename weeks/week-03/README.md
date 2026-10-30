@@ -2,11 +2,11 @@
 
 [Trang chủ](../../README.md) · [Tracker](TRACKER.md) · [Bài nộp](../../reports/week-03/README.md)
 
-## Mục tiêu
+## Objectives
 
 Nối loại câu hỏi với bằng chứng cần thiết và retrieval phù hợp; triển khai sâu một phương pháp có lợi ích đo được.
 
-## Phạm vi và bài thực hành bắt buộc
+## Scope and required exercises
 
 - Khảo sát metadata + hybrid, parent–child, reranking, tabular/SQL, temporal, knowledge graph và multimodal.
 - Phân loại câu hỏi: trực tiếp, metadata, tính toán, thời điểm, nhiều bước, không đủ dữ liệu.
@@ -27,12 +27,12 @@ Nối loại câu hỏi với bằng chứng cần thiết và retrieval phù h�
 | 4 | Chạy baseline/ablation, phân tích trade-off và lỗi. |
 | 5 | Demo kết quả, bảo vệ lựa chọn và quyết định giữ/bỏ phương pháp mới. |
 
-## Deliverables và checklist nghiệm thu
+## Deliverables and acceptance checklist
 
 - [ ] Bảng ánh xạ loại câu hỏi → phương pháp → bằng chứng.
 - [ ] Một phương pháp chuyên sâu chạy end-to-end.
 - [ ] Evaluation ≥40 câu tổng; kết quả theo nhóm, latency và chi phí cùng điều kiện.
-- [ ] Cấu hình tái lập, ablation và ít nhất 5 failure cases.
+- [ ] Reproducible configuration, ablation và ít nhất 5 failure cases.
 - [ ] README và slides; kết luận dựa trên dữ liệu kể cả khi phương pháp mới không thắng.
 
 ## Bonus
@@ -51,6 +51,6 @@ Nối loại câu hỏi với bằng chứng cần thiết và retrieval phù h�
 
 Q&A không giới hạn danh sách này. Mỗi người phải hiểu toàn bộ pipeline.
 
-## Cách nộp
+## Submission guidelines
 
 Cập nhật tracker, điền báo cáo trong `reports/week-03/team-4.1/` hoặc `reports/week-03/team-4.2/`, liên kết config/kết quả thực nghiệm, README chạy lại và slides. Ghi commit trước demo; bổ sung tag sau nghiệm thu. Áp dụng [evaluation](../../docs/EVALUATION.md) và [rubric 45 phút](../../docs/ASSESSMENT.md).

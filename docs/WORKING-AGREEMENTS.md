@@ -1,6 +1,6 @@
-# Cách làm việc
+# Working agreements
 
-## Phân vai luân phiên
+## Role rotation
 
 Điền tên tại [Team 4.1](../teams/team-4.1/README.md) và [Team 4.2](../teams/team-4.2/README.md). Bảng dưới áp dụng độc lập cho từng team. A–E là ký hiệu chỗ trống trong mỗi team, không phải 5 người dùng chung cho cả khóa.
 
@@ -14,7 +14,7 @@
 
 Mỗi task có một owner và một reviewer khác người. Vai trò là trách nhiệm tích hợp, không phải độc quyền kiến thức. Cả nhóm gán nhãn và kiểm tra chéo evaluation; mỗi người phải hiểu toàn pipeline.
 
-## Nhịp làm việc
+## Working cadence
 
 - Đầu tuần: chốt phạm vi, acceptance criteria, owner và reviewer.
 - Hằng ngày: cập nhật tracker về việc hoàn thành, bằng chứng, blocker và bước tiếp theo.
@@ -46,6 +46,6 @@ Chỉ push khi đã cấu hình remote phù hợp. GitHub/GitLab không bắt bu
 - Nếu ảnh hưởng chất lượng, có evaluation và phân tích trade-off.
 - Task và tracker đã cập nhật; tồn đọng được ghi thành việc tiếp theo.
 
-## Theo dõi mà không trùng lặp
+## Progress tracking
 
 `docs/PROGRESS.md` chỉ ghi trạng thái và liên kết tổng quan. Tracker tuần là nguồn tiến độ chi tiết mặc định. Nếu dùng GitHub Issues, ghi issue URL vào tracker và cập nhật trạng thái từ issue trước mỗi demo; nội dung kỹ thuật dài nằm trong PR/báo cáo, không sao chép ở mọi nơi.

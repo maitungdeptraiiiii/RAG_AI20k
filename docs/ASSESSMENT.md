@@ -1,4 +1,4 @@
-# Nghiệm thu và đánh giá
+# Assessment and acceptance review
 
 ## Buổi trình bày 45 phút mỗi team mỗi tuần
 
@@ -22,12 +22,12 @@ Cả năm thành viên đều trình bày. Mỗi người có thể được h�
 | Sản phẩm chạy được và đáp ứng phạm vi | 25% |
 | Evaluation và chất lượng bằng chứng | 25% |
 | Quyết định kỹ thuật, thí nghiệm, failure analysis | 20% |
-| Code, README và khả năng tái lập | 10% |
+| Code, README và reproducibility | 10% |
 | Hiểu biết cá nhân qua Q&A/quiz | 20% |
 
 80% đầu đánh giá theo nhóm; 20% cuối theo cá nhân. Mentor ghi điểm và nhận xét sau nghiệm thu. Nếu cần điểm toàn khóa, dùng trung bình năm tuần; có thể thống nhất cách khác trước tuần 1.
 
-Bonus chỉ ghi nhận sau khi phần bắt buộc hoàn thành. Không thưởng chỉ vì dùng nhiều framework. Không giả định metric càng cao là đủ: cần kiểm tra bộ test, nhãn và khả năng tái lập.
+Bonus chỉ ghi nhận sau khi phần bắt buộc hoàn thành. Không thưởng chỉ vì dùng nhiều framework. Không giả định metric càng cao là đủ: cần kiểm tra bộ test, nhãn và reproducibility.
 
 ## Bài nộp
 

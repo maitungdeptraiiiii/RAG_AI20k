@@ -2,7 +2,7 @@
 
 Khóa học có **Team 4.1 và Team 4.2, mỗi team 5 thành viên**, làm việc full-time. Mỗi team phát triển một sản phẩm và nộp kết quả riêng, dùng chung chương trình và tiêu chí.
 
-## Mục tiêu cuối khóa
+## Learning outcomes
 
 Mỗi thành viên giải thích và vận hành được toàn bộ pipeline: ingestion → tổ chức dữ liệu → retrieval → generation → evaluation → Agent và human review. Nhóm chứng minh quyết định kỹ thuật bằng thí nghiệm, biết phân biệt lỗi dữ liệu, retrieval và generation.
 
@@ -16,7 +16,7 @@ Mỗi thành viên giải thích và vận hành được toàn bộ pipeline: i
 - Dữ liệu gốc, nội dung mô hình sinh và nội dung đã được duyệt phải phân biệt được.
 - Dùng dữ liệu công khai phù hợp hoặc dữ liệu giả lập; không commit bí mật hay thông tin cá nhân thực.
 
-## Mốc nghiệm thu
+## Acceptance milestones
 
 | Tuần | Câu hỏi trọng tâm | Mốc |
 |---|---|---|

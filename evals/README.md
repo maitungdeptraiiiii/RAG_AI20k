@@ -1,6 +1,6 @@
-# Bộ đánh giá
+# Evaluation suite
 
-## Không gian theo team
+## Team workspace
 
 - [Team 4.1](team-4.1/README.md)
 - [Team 4.2](team-4.2/README.md)

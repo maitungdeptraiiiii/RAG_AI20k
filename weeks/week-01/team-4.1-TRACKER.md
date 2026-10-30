@@ -2,20 +2,20 @@
 
 [Kế hoạch](README.md) · [Tiến độ toàn khóa](../../docs/PROGRESS.md)
 
-Thời gian: chưa chốt. Trạng thái: Chưa bắt đầu. Owner tích hợp: chưa điền. Team: 4.1.
+Thời gian: chưa chốt. Status: Not started. Owner tích hợp: chưa điền. Team: 4.1.
 
-## Task và acceptance criteria
+## Tasks and acceptance criteria
 
-Trạng thái: Chưa bắt đầu / Đang làm / Bị chặn / Chờ review / Hoàn thành. Tách task lớn thành các dòng nhỏ; mỗi dòng có một owner và reviewer.
+Trạng thái: Not started / In progress / Blocked / In review / Done. Tách task lớn thành các dòng nhỏ; mỗi dòng có một owner và reviewer.
 
-| ID | Task/tiêu chí hoàn thành | Owner | Reviewer | Trạng thái | Issue/PR/bằng chứng |
+| ID | Task / acceptance criteria | Owner | Reviewer | Status | Issue / PR / evidence |
 |---|---|---|---|---|---|
-| T4.1-W01-01 | App có UI chạy upload → ingest → hỏi → trả lời có citation. | Chưa điền | Chưa điền | Chưa bắt đầu | — |
-| T4.1-W01-02 | Chứng minh BM25, Dense và Fusion đều hoạt động với kết quả riêng. | Chưa điền | Chưa điền | Chưa bắt đầu | — |
-| T4.1-W01-03 | Evaluation report ≥10 câu/bộ tài liệu, Recall@5 và MRR@5, ít nhất 3 failure cases. | Chưa điền | Chưa điền | Chưa bắt đầu | — |
-| T4.1-W01-04 | README cài đặt/chạy lại, cấu hình mẫu không có bí mật; 5–10 slides. | Chưa điền | Chưa điền | Chưa bắt đầu | — |
+| T4.1-W01-01 | App có UI chạy upload → ingest → hỏi → trả lời có citation. | Chưa điền | Chưa điền | Not started | — |
+| T4.1-W01-02 | Chứng minh BM25, Dense và Fusion đều hoạt động với kết quả riêng. | Chưa điền | Chưa điền | Not started | — |
+| T4.1-W01-03 | Evaluation report ≥10 câu/bộ tài liệu, Recall@5 và MRR@5, ít nhất 3 failure cases. | Chưa điền | Chưa điền | Not started | — |
+| T4.1-W01-04 | README cài đặt/chạy lại, cấu hình mẫu không có bí mật; 5–10 slides. | Chưa điền | Chưa điền | Not started | — |
 
-## Nhật ký hằng ngày
+## Daily log
 
 | Ngày | Hoàn thành và bằng chứng | Blocker | Bước tiếp theo / owner |
 |---|---|---|---|
@@ -27,7 +27,7 @@ Trạng thái: Chưa bắt đầu / Đang làm / Bị chặn / Chờ review / Ho
 
 Bài nộp: [Team 4.1](../../reports/week-01/team-4.1/README.md).
 
-## Nghiệm thu và retrospective
+## Acceptance review and retrospective
 
 - Commit/tag: chưa có.
 - Báo cáo và demo: chưa nộp.

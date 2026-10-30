@@ -1,12 +1,12 @@
-# Tuần 2 — Ingestion và chất lượng dữ liệu
+# Tuần 2 — Ingestion and data quality
 
 [Trang chủ](../../README.md) · [Tracker](TRACKER.md) · [Bài nộp](../../reports/week-02/README.md)
 
-## Mục tiêu
+## Objectives
 
 Hiểu garbage in, garbage out: nhận diện thông tin mất khi parsing, chọn cách biểu diễn và kiểm soát chất lượng trước retrieval.
 
-## Phạm vi và bài thực hành bắt buộc
+## Scope and required exercises
 
 - Khảo sát HTML, PDF text/scan, bảng, hình, slide, org chart, biểu đồ, flowchart, báo cáo và chuỗi số liệu.
 - Triển khai hoàn chỉnh ba nhóm: văn bản; bảng/CSV; một nhóm khó như scan, slide hoặc biểu đồ.
@@ -28,7 +28,7 @@ Hiểu garbage in, garbage out: nhận diện thông tin mất khi parsing, ch�
 | 4 | So sánh chunking và ảnh hưởng retrieval; kiểm tra lỗi phát hiện/bỏ sót/báo nhầm. |
 | 5 | Hoàn thiện data quality report, demo và phản biện. |
 
-## Deliverables và checklist nghiệm thu
+## Deliverables and acceptance checklist
 
 - [ ] Data inventory và lý do biểu diễn từng loại dữ liệu.
 - [ ] Pipeline hoàn chỉnh cho ba nhóm; demo ingest lặp và cập nhật phiên bản.
@@ -52,6 +52,6 @@ Hiểu garbage in, garbage out: nhận diện thông tin mất khi parsing, ch�
 
 Q&A không giới hạn danh sách này. Mỗi người phải hiểu toàn bộ pipeline.
 
-## Cách nộp
+## Submission guidelines
 
 Cập nhật tracker, điền báo cáo trong `reports/week-02/team-4.1/` hoặc `reports/week-02/team-4.2/`, liên kết config/kết quả thực nghiệm, README chạy lại và slides. Ghi commit trước demo; bổ sung tag sau nghiệm thu. Áp dụng [evaluation](../../docs/EVALUATION.md) và [rubric 45 phút](../../docs/ASSESSMENT.md).

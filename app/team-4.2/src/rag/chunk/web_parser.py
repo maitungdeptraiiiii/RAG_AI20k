@@ -1,66 +1,135 @@
-"""HTML and plain text parser producing section-bounded TextUnits."""
+"""Web and plain text parser producing `list[Page]` compliant with `rag.schema`.
+
+Extracts clean textual content from HTML or plain text, removing boilerplate
+scripts/styles/navigation. Sets `page=None` for all web/text pages as required
+by the schema.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+import urllib.request
+import urllib.error
 
 from bs4 import BeautifulSoup
+from rag.schema import Page, make_doc_id, nfc
+from .models import ParseError
 
-from .chunker import normalize_text
-from .models import ParseError, TextUnit
 
+def parse_web(
+    data: bytes | str,
+    source: str,
+    doc_id: str | None = None,
+    media_type: str = "text/html",
+    encoding: str = "utf-8",
+) -> list[Page]:
+    """Parse HTML or plain text content into a `list[Page]`.
 
-def parse_web(data: bytes, media_type: str = "text/html", encoding: str = "utf-8") -> tuple[str, list[TextUnit]]:
-    """Extract section-level TextUnits from HTML or plain text bytes.
-    
-    Boilerplate elements (scripts, styles, navigation, headers, footers) are stripped.
-    Content is grouped under headings (h1-h6) to maintain section boundaries for citations.
+    Args:
+        data: Raw HTML/text bytes or decoded string.
+        source: URL or filename for citations.
+        doc_id: Optional document hash (defaults to `make_doc_id(data)`).
+        media_type: "text/html" or "text/plain".
+        encoding: Text decoding fallback.
+
+    Returns:
+        A list containing a single `Page` with `page=None`.
+
+    Raises:
+        ParseError: If parsing fails or resulting text is empty.
     """
+    clean_source = nfc(source.strip() or "web_document")
+
+    # Plain text parsing
     if media_type == "text/plain":
-        try:
-            text = normalize_text(data.decode(encoding, errors="replace"))
-        except LookupError:
-            text = normalize_text(data.decode("utf-8", errors="replace"))
+        if isinstance(data, bytes):
+            try:
+                raw_text = data.decode(encoding, errors="replace")
+            except Exception:
+                raw_text = data.decode("utf-8", errors="replace")
+        else:
+            raw_text = str(data)
+
+        text = nfc(raw_text.strip())
         if not text:
-            raise ParseError("URL_NO_TEXT", "Trang không có nội dung văn bản.")
-        return "Trang văn bản", [TextUnit(text)]
+            raise ParseError("URL_NO_TEXT", "Tài liệu văn bản không có nội dung.")
+
+        computed_doc_id = doc_id or make_doc_id(text)
+        return [
+            Page(
+                doc_id=computed_doc_id,
+                source=clean_source,
+                page=None,
+                text=text,
+            )
+        ]
+
+    # HTML parsing: Try trafilatura first if available
+    raw_html = data.decode(encoding, errors="replace") if isinstance(data, bytes) else str(data)
+    extracted_text = ""
 
     try:
-        soup = BeautifulSoup(data, "html.parser", from_encoding=encoding)
-    except Exception:
-        soup = BeautifulSoup(data, "html.parser")
+        import trafilatura  # type: ignore
+        extracted_text = trafilatura.extract(raw_html, include_links=False, include_comments=False) or ""
+    except ImportError:
+        pass
 
-    title = normalize_text(soup.title.get_text(" ")) if soup.title else "Trang web"
+    # Fallback to BeautifulSoup
+    if not extracted_text:
+        try:
+            soup = BeautifulSoup(raw_html, "html.parser")
+        except Exception as exc:
+            raise ParseError("HTML_PARSE_ERROR", f"Lỗi phân tích cú pháp HTML: {exc}") from exc
 
-    # Remove irrelevant boilerplate elements
-    for tag in soup(["script", "style", "nav", "header", "footer", "aside", "noscript", "svg", "iframe"]):
-        tag.decompose()
+        # Remove boilerplate elements
+        for tag in soup(["script", "style", "nav", "header", "footer", "aside", "noscript", "svg", "iframe", "form"]):
+            tag.decompose()
 
-    root = soup.find("main") or soup.find("article") or soup.body or soup
-    blocks = ["h1", "h2", "h3", "h4", "h5", "h6", "p", "li", "pre", "blockquote", "td"]
-    units: list[TextUnit] = []
-    section = None
-    lines: list[str] = []
+        root = soup.find("main") or soup.find("article") or soup.body or soup
+        extracted_text = root.get_text("\n", strip=True)
 
-    for tag in root.find_all(blocks):
-        if tag.find_parent(blocks):
-            continue
-        text = normalize_text(tag.get_text(" ", strip=True))
-        if not text:
-            continue
-        if tag.name in blocks[:6]:  # Heading tag
-            if lines:
-                units.append(TextUnit("\n".join(lines), section=section))
-            section, lines = text, [text]
-        else:
-            lines.append(text)
+    text = nfc(extracted_text.strip())
+    if not text:
+        raise ParseError(
+            "URL_NO_TEXT",
+            "Trang web không có nội dung văn bản trích xuất được; trang có thể yêu cầu JavaScript.",
+        )
 
-    if lines:
-        units.append(TextUnit("\n".join(lines), section=section))
+    computed_doc_id = doc_id or make_doc_id(text)
+    return [
+        Page(
+            doc_id=computed_doc_id,
+            source=clean_source,
+            page=None,
+            text=text,
+        )
+    ]
 
-    if not units:
-        text = normalize_text(root.get_text("\n", strip=True))
-        if text:
-            units = [TextUnit(text)]
 
-    if not units:
-        raise ParseError("URL_NO_TEXT", "Trang không có văn bản; trang yêu cầu JavaScript chưa được hỗ trợ.")
+def load_url(url: str, timeout: int = 15) -> list[Page]:
+    """Fetch a web page via HTTP GET and parse it into `list[Page]`."""
+    req = urllib.request.Request(
+        url,
+        headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Team4.2-RAG/1.0"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            content_type = resp.headers.get("Content-Type", "")
+            media_type = "text/plain" if "text/plain" in content_type else "text/html"
+            data = resp.read()
+    except urllib.error.URLError as exc:
+        raise ParseError("FETCH_ERROR", f"Không thể tải URL '{url}': {exc}") from exc
+    except Exception as exc:
+        raise ParseError("FETCH_ERROR", f"Lỗi khi tải URL '{url}': {exc}") from exc
 
-    return title[:200], units
+    return parse_web(data, source=url, media_type=media_type)
 
+
+def load_text(path: Path | str, doc_id: str | None = None, encoding: str = "utf-8") -> list[Page]:
+    """Read a local plain text file into `list[Page]`."""
+    file_path = Path(path)
+    if not file_path.is_file():
+        raise ParseError("FILE_NOT_FOUND", f"Không tìm thấy tệp: {file_path}")
+
+    data = file_path.read_bytes()
+    return parse_web(data, source=file_path.name, doc_id=doc_id, media_type="text/plain", encoding=encoding)

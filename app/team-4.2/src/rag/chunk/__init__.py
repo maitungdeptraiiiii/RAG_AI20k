@@ -1,20 +1,38 @@
-"""Standalone Parsing and Chunking module for RAG pipelines.
+"""Parsing and Chunking module for Team 4.2 RAG pipeline.
 
-Contains boundary-aware document extraction (PDF, Web) and sliding-window chunking
-with exact metadata (page, section, chunk_id).
+Strictly adheres to `rag.schema`:
+- Output of Parsing: `list[Page]`
+- Input of Chunking: `list[Page]`
+- Output of Chunking: `list[Chunk]`
 """
 
-from .models import ParseError, TextUnit
-from .chunker import make_chunks, normalize_text
-from .pdf_parser import parse_pdf
-from .web_parser import parse_web
+from .models import (
+    Chunk,
+    Page,
+    ParseError,
+    TextUnit,
+    make_chunk_id,
+    make_doc_id,
+    nfc,
+)
+from .pdf_parser import load_pdf, parse_pdf
+from .web_parser import load_text, load_url, parse_web
+from .chunker import chunk_document, make_chunks, normalize_text
 
 __all__ = [
+    "Chunk",
+    "Page",
     "ParseError",
     "TextUnit",
+    "chunk_document",
+    "load_pdf",
+    "load_text",
+    "load_url",
+    "make_chunk_id",
     "make_chunks",
+    "make_doc_id",
+    "nfc",
     "normalize_text",
     "parse_pdf",
     "parse_web",
 ]
-

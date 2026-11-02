@@ -1,77 +1,78 @@
-# RAG Parsing & Chunking Module
+# Module Chunking & Parsing (TV1) — Team 4.2 Sprint 1
 
-Thư mục này chứa toàn bộ mã nguồn xử lý độc lập cho giai đoạn **Document Parsing** và **Chunking** trong hệ thống RAG:
+Module chịu trách nhiệm Ingestion trong kiến trúc RAG của Team 4.2:
+1. **Parsing:** Đọc tài liệu (PDF, URL, Plain Text) $\rightarrow$ `list[Page]`.
+2. **Chunking:** Nhận `list[Page]` $\rightarrow$ sinh danh sách `list[Chunk]` chuẩn hoá theo `rag.schema`.
 
 ---
 
-## 1. Cấu trúc thư mục
+## 1. Hợp đồng dữ liệu (Data Contract)
 
-```text
-chunk/
-├── __init__.py      # Re-export các hàm và class chính
-├── models.py        # Định nghĩa TextUnit (hỗ trợ single-page & multi-page span) và ParseError
-├── pdf_parser.py    # Xử lý PDF với lọc số trang rác & nối câu xuyên trang (cross-page stitching)
-├── web_parser.py    # Xử lý bóc tách HTML/Web theo đề mục h1-h6 (dùng BeautifulSoup)
-├── chunker.py       # Thuật toán Recursive Sentence-Aware Chunking với semantic overlap
-├── demo.py          # Script chạy thử nghiệm độc lập (in trực quan các chunks)
-└── README.md        # Tài liệu hướng dẫn
+Tuân thủ nghiêm ngặt theo `rag.schema`:
+
+### `Page`
+```python
+@dataclass(frozen=True)
+class Page:
+    doc_id: str          # hash nội dung (make_doc_id), ổn định khi ingest lại
+    source: str          # tên tệp hoặc URL
+    page: int | None     # 1-indexed đối với PDF; None đối với URL/TXT
+    text: str            # Chuẩn hoá Unicode NFC
+```
+
+### `Chunk`
+```python
+@dataclass(frozen=True)
+class Chunk:
+    chunk_id: str             # Định dạng: f"{doc_id}:{index:04d}" (make_chunk_id)
+    doc_id: str               # Khớp với doc_id của Page
+    source: str               # Tên tệp hoặc URL
+    page_start: int | None    # Trang bắt đầu (None với URL/TXT)
+    page_end: int | None      # Trang kết thúc (page_start == page_end nếu nằm gọn 1 trang)
+    section: str | None       # Tiêu đề mục / Điều / Chương gần nhất
+    text: str                 # Văn bản chunk (chuẩn hoá NFC)
 ```
 
 ---
 
-## 2. Phương pháp Chunking: Recursive Sentence-Aware với Cross-Page Stitching
+## 2. Các tính năng chính
 
-### A. Vấn đề của cách chunk theo trang cũ:
-- Câu văn vắt qua 2 trang bị cắt đứt đôi giữa chừng.
-- Dính rác số trang hoặc header/footer độc lập (ví dụ số `2` đơn độc ở đầu trang).
-- Cắt cứng theo số ký tự làm câu văn bị chém ngang từ (như `và L` -> `bổ sung...`).
-
-### B. Giải pháp cải tiến mới:
-1. **Lọc rác số trang & Header/Footer ([`pdf_parser.py`](pdf_parser.py)):**
-   * Tự động phát hiện và loại bỏ các dòng số trang độc lập ở đầu/cuối mỗi trang.
-2. **Nối câu xuyên trang (Cross-page Stitching):**
-   * Nếu dòng cuối trang $N$ chưa kết thúc câu (không có dấu chấm, chấm than, hỏi, hai chấm) và đầu trang $N+1$ là văn bản tiếp diễn, hệ thống tự động nối liền mạch.
-   * Gán nhãn `pages=(3, 4)` để biết chính xác đoạn văn vắt qua những trang nào.
-3. **Cắt phân cấp theo ranh giới câu ([`chunker.py`](chunker.py)):**
-   * Gom các câu hoàn chỉnh (`.`, `!`, `?`, `;`, `\n`) cho đến khi đạt `size` mong muốn.
-   * **Tuyệt đối không cắt ngang một câu** (trừ phi câu đó dài hơn toàn bộ kích thước chunk).
-   * Overlap lấy trọn vẹn câu trước đó để giữ ngữ cảnh liền mạch cho câu tiếp theo.
+- **Bảo toàn ranh giới câu (Sentence Integrity):** Không cắt ngang câu giữa chừng trừ khi một câu vượt quá `size`.
+- **Nối câu vắt qua trang (Cross-page Stitching):** Khi câu ở cuối trang $N$ chưa có dấu kết thúc (`.`, `!`, `?`, `:`) và đầu trang $N+1$ không phải tiêu đề mới, parser/chunker tự động ghép nối và gán `page_start=N, page_end=N+1`.
+- **Nhận diện Heading/Section:** Tự động bắt tiêu đề Điều, Chương, Mục (`Điều 1`, `Chương I`, v.v.) và gắn vào `section`.
+- **Lọc nhiễu:** Tự động loại bỏ số trang đơn độc ở đầu trang (header) hoặc chân trang (footer).
+- **Fallback linh hoạt:**
+  - PDF: Ưu tiên PyMuPDF (`fitz`), tự động fallback sang `pypdf`.
+  - Web: Ưu tiên `trafilatura`, tự động fallback sang `BeautifulSoup`.
 
 ---
 
-## 3. Cách chạy thử nghiệm độc lập
-
-Không cần khởi động backend FastAPI hay frontend React:
-
-```bash
-# 1. Chạy với dữ liệu mẫu HTML có sẵn:
-python demo.py
-
-# 2. Chạy với tệp PDF của riêng bạn:
-python demo.py "D:\duong_dan_file.pdf"
-```
-
----
-
-## 4. Cách import và sử dụng trong code Python
+## 3. Cách sử dụng
 
 ```python
-from chunk import parse_pdf, parse_web, make_chunks
+from rag.chunk import load_pdf, load_url, load_text, chunk_document
 
-# Với PDF:
-units = parse_pdf(pdf_bytes)
+# 1. Parse PDF thành list[Page]
+pages = load_pdf("data/luat_dien_luc.pdf")
 
-# Với HTML:
-title, units = parse_web(html_bytes)
-
-# Cắt chunks:
-chunks = make_chunks(
-    document_id="doc_001",
-    units=units,
-    size=800,       # Kích thước chunk mục tiêu
-    overlap=150     # Kích thước overlap giữa các câu
-)
+# 2. Chunking thành list[Chunk]
+chunks = chunk_document(pages, size=1200, overlap=200)
 
 for chunk in chunks:
-    print(chunk["chunk_id"], chunk["pages"], chunk["text"][:60])
+    print(chunk.chunk_id, chunk.page_start, chunk.page_end, chunk.section)
+```
+
+---
+
+## 4. Chạy kiểm thử & Demo
+
+```bash
+# Chạy demo tích hợp
+python -m rag.chunk.demo
+
+# Chạy demo với tệp PDF cục bộ
+python -m rag.chunk.demo "D:/tailieu.pdf"
+
+# Chạy unit tests
+pytest tests/test_chunk.py -p no:cacheprovider
 ```

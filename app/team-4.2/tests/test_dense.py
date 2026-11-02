@@ -71,9 +71,13 @@ def test_embedding_cache_avoids_second_call():
     with tempfile.TemporaryDirectory() as d:
         path = Path(d) / "emb.sqlite"
         client = FakeOpenAI(4)
-        _openai(client, cache=EmbeddingCache(path)).embed(["a", "bb"])
+        cache1 = EmbeddingCache(path)
+        _openai(client, cache=cache1).embed(["a", "bb"])
+        cache1.close()
         client2 = FakeOpenAI(4)
-        vecs = _openai(client2, cache=EmbeddingCache(path)).embed(["bb", "a", "ccc"])
+        cache2 = EmbeddingCache(path)
+        vecs = _openai(client2, cache=cache2).embed(["bb", "a", "ccc"])
+        cache2.close()
         assert client2.batches == [["ccc"]]
         assert [v[0] for v in vecs] == [2.0, 1.0, 3.0]
 

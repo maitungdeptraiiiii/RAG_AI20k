@@ -116,10 +116,14 @@ def test_cache_persists_on_disk():
     with tempfile.TemporaryDirectory() as d:
         path = Path(d) / "sub" / "rerank.sqlite"
         chunks = _chunks("a")
-        jev, _ = _jev({"a": 0.4}, cache=ScoreCache(path))
+        cache1 = ScoreCache(path)
+        jev, _ = _jev({"a": 0.4}, cache=cache1)
         jev.rerank("q", _fused(chunks), chunks, k=1)
-        again, client = _jev({"a": 0.4}, cache=ScoreCache(path))
+        cache1.close()
+        cache2 = ScoreCache(path)
+        again, client = _jev({"a": 0.4}, cache=cache2)
         again.rerank("q", _fused(chunks), chunks, k=1)
+        cache2.close()
         assert client.states == []
 
 

@@ -57,6 +57,10 @@ class ScoreCache:
             )
             self._conn.commit()
 
+    def close(self) -> None:
+        with self._lock:
+            self._conn.close()
+
     @staticmethod
     def key(model_id: str, query: str, chunk: Chunk) -> str:
         raw = "\x00".join((model_id, query, chunk.chunk_id, chunk.text))

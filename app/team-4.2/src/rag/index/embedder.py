@@ -55,6 +55,10 @@ class EmbeddingCache:
             )
             self._conn.commit()
 
+    def close(self) -> None:
+        with self._lock:
+            self._conn.close()
+
     @staticmethod
     def key(model_id: str, text: str) -> str:
         return hashlib.sha256(f"{model_id}\x00{text}".encode("utf-8")).hexdigest()

@@ -36,6 +36,10 @@ class LLMCache:
             )
             self._conn.commit()
 
+    def close(self) -> None:
+        with self._lock:
+            self._conn.close()
+
     @staticmethod
     def key(model_id: str, temperature: float | None, messages: Sequence[dict[str, str]]) -> str:
         raw = json.dumps([model_id, temperature, list(messages)], ensure_ascii=False, sort_keys=True)

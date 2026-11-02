@@ -318,3 +318,55 @@ Quy tắc chung: đánh số `[1]…[n]` theo thứ tự xếp hạng (TV4 dùng
 - Cách gọi Jev (`TypeSafeClient(model=...)`, `system_one(state=..., questions=...)`, `answers[...].noul`) lấy theo tutorial của DataCamp. Nếu SDK khác thì chỉ sửa `JevReranker._get_client`, `_get_question`, `_score_one`.
 - Chưa xác nhận client đồng bộ của `typesafe-sdk` an toàn khi dùng chung giữa nhiều thread. Nếu gặp lỗi, đặt `max_workers=1`.
 - `QdrantVectorStore` dùng `collection_exists`, `get_collection`, `retrieve`, `upsert`, `query_points`, `count` của `qdrant-client`; cần chạy thử một lần với bản đã cài.
+
+---
+
+## 10. Phương pháp nâng cao dạng plugin (bonus #8) — `src/rag/advanced/`
+
+Mỗi phương pháp là một module riêng, đăng ký vào registry và bật bằng biến `ADVANCED` trong `.env`. Pipeline chính không phải sửa khi thêm, bớt hay đổi phương pháp.
+
+| Điểm gắn | Chạy khi nào | Tác dụng | Ví dụ |
+|---|---|---|---|
+| `index_enhancer` | Lúc ingest, sau chunking, trước khi index | Thêm `Chunk.context`. BM25/Dense index `context + text` (`Chunk.index_text`); text gốc giữ nguyên để hiển thị, đưa cho LLM và trích dẫn | Contextual Retrieval |
+| `arms` | Lúc truy vấn | Thêm arm retrieval vào `HybridRetriever`, gộp cùng BM25 + Dense bằng RRF | HyDE |
+
+```bash
+ADVANCED=                                  # baseline sprint 1
+ADVANCED=hyde                              # thêm arm HyDE
+ADVANCED=contextual_header,hyde            # nhiều phương pháp, theo đúng thứ tự
+```
+
+**Thêm phương pháp mới:** tạo file trong `src/rag/advanced/`, viết hàm factory có `@register("tên")` nhận `Components` (settings, llm, embedder, index Dense) và trả `Enhancement(index_enhancer=..., arms=...)`, thêm một dòng import vào `advanced/__init__.py`, rồi bật bằng `ADVANCED`. **Bỏ:** xoá tên khỏi `ADVANCED` (hoặc xoá file và dòng import).
+
+### 10.1. HyDE — `advanced/hyde.py` (`ADVANCED=hyde`)
+
+- GPT 5.6 Lunar viết một đoạn trả lời **giả** 3–5 câu theo văn phong văn bản luật. Embed `câu hỏi + đoạn giả`, rồi tìm trên chính index Dense. Kết quả thành arm `hyde`, gộp với BM25 + Dense bằng RRF.
+- Chỉ áp dụng cho Dense. BM25 vẫn tìm bằng câu hỏi gốc, để số Điều hay thuật ngữ LLM bịa ra không làm lệch kết quả keyword.
+- Mỗi câu hỏi tốn thêm 1 lần gọi LLM, có cache. LLM lỗi thì arm `hyde` lỗi, BM25 + Dense vẫn chạy.
+- **Rủi ro:** câu ngoài phạm vi cũng sinh được đoạn giả nghe hợp lý, nên phải đo cả tỉ lệ từ chối nhầm.
+
+### 10.2. Contextual Retrieval — `advanced/contextual.py`
+
+| Biến thể | Cách làm | Chi phí |
+|---|---|---|
+| `contextual_header` | Bối cảnh = tên tài liệu + heading (`section`) | Không gọi LLM, nên thử trước |
+| `contextual` | GPT 5.6 Lunar viết 1–2 câu bối cảnh cho từng chunk, dựa trên phần đầu tài liệu (4000 ký tự) + heading + đoạn liền trước/sau. Chạy song song 8 luồng | 1 lần gọi LLM mỗi chunk lúc ingest, có cache. Chunk lưu kèm `context` trong `chunks.jsonl` nên khởi động lại không gọi lại |
+
+- Bài gốc của Anthropic đưa **toàn bộ** tài liệu vào prompt cho mỗi chunk. Văn bản luật dài hàng trăm trang nên ở đây chỉ dùng phần đầu tài liệu và các đoạn lân cận. Phần đầu tài liệu đứng đầu prompt và giống nhau cho mọi chunk, để tận dụng prompt caching tự động nếu API hỗ trợ.
+- LLM lỗi ở một số chunk thì các chunk đó không có bối cảnh (ghi cảnh báo). Lỗi ở mọi chunk thì ingest báo lỗi (thường do sai key, model hoặc mất mạng).
+- Một người trên thread Reddit thử ghép metadata vào text embed và không thấy cải thiện. Phải đo, không mặc định là tốt hơn.
+
+### 10.3. Bảo vệ index và cách làm ablation
+
+- `data/team-4.2/indexes/index_config.json` ghi model embedding, `MAX_SYLLABLES` và các phương pháp chạy lúc index. Mở index bằng cấu hình khác thì pipeline báo `IndexConfigMismatchError`, không trộn chunk có và không có bối cảnh.
+- **HyDE** (lúc truy vấn): cùng một index, so bằng `run_eval.py --configs hybrid hybrid+hyde hyde`.
+- **Contextual** (lúc index): mỗi biến thể một `DATA_DIR` riêng, ingest cùng bộ tài liệu, chạy `run_eval.py` cho từng thư mục rồi so từng câu:
+
+  ```bash
+  DATA_DIR=data/team-4.2            ADVANCED=                   python scripts/team-4.2/ingest.py data/team-4.2/raw/
+  DATA_DIR=data/team-4.2-ctxheader  ADVANCED=contextual_header  python scripts/team-4.2/ingest.py data/team-4.2/raw/
+  DATA_DIR=data/team-4.2-ctx        ADVANCED=contextual         python scripts/team-4.2/ingest.py data/team-4.2/raw/
+  ```
+
+  Thư mục `raw/` dùng chung; các `DATA_DIR` mới phải được gitignore (thêm vào `.gitignore` ở gốc repo).
+

@@ -80,7 +80,18 @@ class Settings:
     context_max_blocks: int = 8
     context_max_words: int = 2400
 
+    # Phương pháp nâng cao (src/rag/advanced/), vd. "hyde,contextual"; rỗng = baseline
+    advanced: str = ""
+
     # --- đường dẫn suy ra ---------------------------------------------------
+
+    @property
+    def advanced_methods(self) -> list[str]:
+        return list(dict.fromkeys(x.strip().lower() for x in self.advanced.split(",") if x.strip()))
+
+    @property
+    def index_config_path(self) -> Path:
+        return self.data_dir / "indexes" / "index_config.json"
 
     @property
     def chunks_path(self) -> Path:

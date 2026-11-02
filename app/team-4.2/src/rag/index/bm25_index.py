@@ -98,7 +98,7 @@ class BM25Index:
         for c in chunks:
             if c.chunk_id in self._pos:
                 continue
-            tokens = self._tokenize(c.text)
+            tokens = self._tokenize(c.index_text)   # gồm bối cảnh nếu dùng Contextual Retrieval
             idx = len(self._ids)
             self._ids.append(c.chunk_id)
             self._pos[c.chunk_id] = idx

@@ -17,6 +17,7 @@ app/team-4.2/
 │   ├── index/            # store (chunks.jsonl), bm25_index, embedder, vector_index
 │   ├── retrieve/         # fusion (RRF), hybrid, rerank (Jev), context (chọn đoạn cho LLM)
 │   ├── generate/         # llm (GPT 5.6 Lunar + cache), answer (prompt + citation)
+│   ├── advanced/         # phương pháp nâng cao dạng plugin: hyde, contextual (bật bằng ADVANCED)
 │   ├── eval/             # metrics (Recall@k, MRR@k), runner
 │   └── pipeline.py       # RAGPipeline: ingest(), ask(), ask_debug()
 ├── ui/                   # streamlit_app.py

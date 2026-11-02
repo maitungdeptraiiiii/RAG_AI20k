@@ -1,7 +1,7 @@
 """Chạy evaluation trên index hiện có (chạy tại gốc repo, sau khi đã ingest).
 
     python evals/team-4.2/runners/run_eval.py                               # retrieval: bm25, dense, hybrid
-    python evals/team-4.2/runners/run_eval.py --configs bm25 dense hybrid hybrid+rerank
+    python evals/team-4.2/runners/run_eval.py --configs bm25 dense hybrid hybrid+hyde hybrid+rerank all
     python evals/team-4.2/runners/run_eval.py --answers                     # thêm: chạy LLM, đo từ chối
 
 Đầu ra trong --out (mặc định evals/team-4.2/results/<thời gian>/):
@@ -41,8 +41,8 @@ def main() -> int:
     args = ap.parse_args()
 
     settings = Settings.load()
-    if "hybrid+rerank" in args.configs and settings.rerank_backend == "none":
-        print("hybrid+rerank cần RERANK_BACKEND=jev trong .env", file=sys.stderr)
+    if any(RETRIEVAL_CONFIGS[c][1] for c in args.configs) and settings.rerank_backend == "none":
+        print("Cấu hình có rerank cần RERANK_BACKEND=jev trong .env", file=sys.stderr)
         return 2
     questions = load_questions(args.questions)
     pipeline = RAGPipeline.from_settings(settings)
@@ -61,7 +61,7 @@ def main() -> int:
         f"- Số câu: {len(questions)} ({sum(q.in_scope for q in questions)} trong phạm vi)",
         f"- Index: {len(pipeline.store)} chunk, {len(pipeline.store.docs())} tài liệu",
         f"- Embedding: {settings.embed_model} · LLM: {settings.llm_model} · RRF k={settings.rrf_k} · "
-        f"rerank: {settings.rerank_backend}", "",
+        f"rerank: {settings.rerank_backend} · nâng cao: {settings.advanced or 'không'}", "",
     ]
     body = summary_markdown(rows)
     if args.answers:

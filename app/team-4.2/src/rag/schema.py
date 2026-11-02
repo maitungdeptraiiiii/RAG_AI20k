@@ -23,6 +23,7 @@ Luồng dữ liệu:
 from __future__ import annotations
 
 import hashlib
+import re
 import unicodedata
 from dataclasses import asdict, dataclass, field
 from collections.abc import Mapping
@@ -37,6 +38,9 @@ REFUSAL = "Không có trong tài liệu."
 
 Arm = Literal["bm25", "dense", "fused", "rerank"]
 ARMS: tuple[str, ...] = get_args(Arm)
+"""Arm lõi. Phương pháp nâng cao (src/rag/advanced/) có thể thêm arm riêng, vd. "hyde"."""
+
+_ARM_NAME_RE = re.compile(r"^[a-z][a-z0-9_]*$")
 
 QuestionType = Literal["lookup", "paraphrase", "multi", "out_of_scope"]
 QUESTION_TYPES: tuple[str, ...] = get_args(QuestionType)
@@ -113,7 +117,8 @@ class Chunk:
     page_start: int | None    # None với URL/TXT
     page_end: int | None      # = page_start nếu chunk nằm gọn trong một trang
     section: str | None       # heading / mục gần nhất
-    text: str                 # text gốc (NFC); Dense encode trường này, BM25 tự tách từ
+    text: str                 # text gốc (NFC): hiển thị, đưa cho LLM, trích dẫn
+    context: str | None = None  # bối cảnh thêm vào khi INDEX (Contextual Retrieval); không hiển thị/cite
 
     def __post_init__(self) -> None:
         _require(bool(self.chunk_id), "Chunk.chunk_id không được rỗng")
@@ -128,7 +133,12 @@ class Chunk:
                 self.page_start <= self.page_end,
                 f"Chunk.page_start ({self.page_start}) > page_end ({self.page_end})",
             )
-        _set_nfc(self, "source", "section", "text")
+        _set_nfc(self, "source", "section", "text", "context")
+
+    @property
+    def index_text(self) -> str:
+        """Text BM25 tách từ và Dense embed: bối cảnh (nếu có) + text gốc."""
+        return f"{self.context}\n{self.text}" if self.context else self.text
 
     def covers_page(self, page: int) -> bool:
         """Chunk có chứa nội dung của trang `page` không (dùng để quy đổi gold)."""
@@ -156,12 +166,15 @@ class Hit:
     chunk_id: str
     score: float         # thang điểm riêng của từng arm, KHÔNG so sánh giữa các arm
     rank: int            # bắt đầu từ 1
-    arm: Arm             # "bm25" | "dense" | "fused"
+    arm: str             # "bm25" | "dense" | "fused" | "rerank" | arm nâng cao (vd. "hyde")
 
     def __post_init__(self) -> None:
         _require(bool(self.chunk_id), "Hit.chunk_id không được rỗng")
         _require(self.rank >= 1, f"Hit.rank phải >= 1, nhận {self.rank}")
-        _require(self.arm in ARMS, f"Hit.arm phải thuộc {ARMS}, nhận {self.arm!r}")
+        _require(
+            bool(_ARM_NAME_RE.match(self.arm)),
+            f"Hit.arm phải là tên dạng snake_case (vd. {ARMS}), nhận {self.arm!r}",
+        )
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

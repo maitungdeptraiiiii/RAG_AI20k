@@ -72,7 +72,7 @@ def test_hit_rank_and_arm_validation():
     with pytest.raises(ValueError):
         Hit("d:0000", 1.2, 0, "bm25")
     with pytest.raises(ValueError):
-        Hit("d:0000", 1.2, 1, "tfidf")
+        Hit("d:0000", 1.2, 1, "TF IDF")
 
 
 # --- Citation / Answer ------------------------------------------------------

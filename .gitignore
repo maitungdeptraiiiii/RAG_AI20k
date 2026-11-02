@@ -16,3 +16,5 @@ data/team-4.2/raw/
 data/team-4.2/processed/
 data/team-4.2/indexes/
 data/team-4.2/cache/
+# DATA_DIR riêng cho ablation (vd. data/team-4.2-ctx)
+data/team-4.2-*/

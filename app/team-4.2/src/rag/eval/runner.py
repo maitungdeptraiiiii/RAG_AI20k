@@ -27,12 +27,15 @@ from rag.index.store import ChunkStore
 from rag.retrieve.hybrid import HybridRetriever
 from rag.schema import LLM, Question
 
-# tên cấu hình -> (mode, rerank)
-RETRIEVAL_CONFIGS: dict[str, tuple[str, bool]] = {
-    "bm25": ("bm25", False),
-    "dense": ("dense", False),
-    "hybrid": ("hybrid", False),
-    "hybrid+rerank": ("hybrid", True),
+# tên cấu hình -> (các arm, có rerank không); arms=None = mọi arm đang bật (kể cả arm nâng cao)
+RETRIEVAL_CONFIGS: dict[str, tuple[tuple[str, ...] | None, bool]] = {
+    "bm25": (("bm25",), False),
+    "dense": (("dense",), False),
+    "hyde": (("hyde",), False),
+    "hybrid": (("bm25", "dense"), False),                  # baseline sprint 1
+    "hybrid+hyde": (("bm25", "dense", "hyde"), False),
+    "hybrid+rerank": (("bm25", "dense"), True),
+    "all": (None, True),                                   # mọi arm đang bật + rerank (cấu hình chạy thật)
 }
 
 METRICS = ("recall@5", "hit@5", "mrr@5", "recall@20")
@@ -49,14 +52,17 @@ def retrieval_rows(
     unknown = [c for c in configs if c not in RETRIEVAL_CONFIGS]
     if unknown:
         raise ValueError(f"Cấu hình không hợp lệ: {unknown}; chọn trong {list(RETRIEVAL_CONFIGS)}")
+    missing = {c: a for c in configs for a in (RETRIEVAL_CONFIGS[c][0] or ()) if a not in retriever.arms}
+    if missing:
+        raise ValueError(f"Cấu hình cần arm chưa bật (thêm vào ADVANCED): {missing}")
     chunks = retriever.chunks
     rows: list[dict[str, Any]] = []
     for q in questions:
         if not q.in_scope:
             continue
         for name in configs:
-            mode, rerank = RETRIEVAL_CONFIGS[name]
-            res = retriever.retrieve(q.question, k, mode=mode, rerank=rerank)   # type: ignore[arg-type]
+            arms, rerank = RETRIEVAL_CONFIGS[name]
+            res = retriever.retrieve(q.question, k, arms=arms, rerank=rerank)
             top = [h.chunk_id for h in res.hits]
             pool = [h.chunk_id for h in res.ranked]
             rows.append({

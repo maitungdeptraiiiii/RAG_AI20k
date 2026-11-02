@@ -1,7 +1,7 @@
 """Hỏi trên dòng lệnh, in câu trả lời, citation và kết quả từng arm (chạy tại gốc repo).
 
     python scripts/team-4.2/ask.py "Thời giờ làm việc bình thường là bao nhiêu?"
-    python scripts/team-4.2/ask.py --mode bm25 "..."        # chỉ chạy một arm
+    python scripts/team-4.2/ask.py --mode bm25 "..."        # chỉ chạy một arm (bm25 | dense | hyde)
     python scripts/team-4.2/ask.py --retrieve-only "..."     # không gọi LLM
 """
 
@@ -24,7 +24,7 @@ def _row(hit, chunks) -> str:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("query")
-    ap.add_argument("--mode", choices=["hybrid", "bm25", "dense"], default="hybrid")
+    ap.add_argument("--mode", default="hybrid", help="hybrid | bm25 | dense | arm nâng cao đang bật (vd. hyde)")
     ap.add_argument("--no-rerank", action="store_true")
     ap.add_argument("--retrieve-only", action="store_true", help="chỉ retrieve, không gọi LLM")
     args = ap.parse_args()

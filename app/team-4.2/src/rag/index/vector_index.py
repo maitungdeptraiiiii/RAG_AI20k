@@ -191,7 +191,7 @@ class VectorIndex:
 
         for start in range(0, len(new), self.batch_size):
             batch = new[start : start + self.batch_size]
-            vectors = self.embedder.embed([c.text for c in batch])
+            vectors = self.embedder.embed([c.index_text for c in batch])   # gồm bối cảnh nếu có
             self.store.upsert([c.chunk_id for c in batch], vectors)
         return len(new)
 

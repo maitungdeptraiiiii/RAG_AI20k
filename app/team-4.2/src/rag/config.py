@@ -59,11 +59,11 @@ class Settings:
     embed_model: str = "text-embedding-3-small"
     embed_dim: int = 1536
 
-    # LLM (TV4) — key/endpoint riêng nếu GPT 5.6 Lunar không dùng chung OpenAI
-    llm_model: str = "gpt-5.6-lunar"
+    # LLM (TV4) — key/endpoint riêng nếu LLM không dùng chung OpenAI
+    llm_model: str = "gpt-6-luna"
     llm_base_url: str | None = None
     llm_api_key: str | None = None
-    llm_temperature: float | None = 0.0   # None = không gửi tham số (một số model chỉ nhận mặc định)
+    llm_temperature: float | None = None  # None = không gửi tham số (gpt-6-luna chỉ nhận mặc định)
 
     # Chunking (TV1)
     max_syllables: int = 300

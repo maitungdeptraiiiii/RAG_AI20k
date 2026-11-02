@@ -70,7 +70,7 @@ def _openai_retryable() -> tuple[type[BaseException], ...]:
 class OpenAIChatLLM:
     def __init__(
         self,
-        model_id: str = "gpt-5.6-lunar",
+        model_id: str = "gpt-6-luna",
         *,
         temperature: float | None = 0.0,
         base_url: str | None = None,

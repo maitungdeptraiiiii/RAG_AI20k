@@ -12,12 +12,14 @@ app/team-4.2/
 ├── .env.example          # biến môi trường mẫu, chỉ placeholder
 ├── src/rag/
 │   ├── schema.py         # hợp đồng dữ liệu chung (Page, Chunk, Hit, Answer, ...)
-│   ├── ingest/           # loaders, chunker, xref            (chưa có)
-│   ├── index/            # bm25_index, embedder, vector_index (store: chưa có)
+│   ├── config.py         # Settings đọc .env / biến môi trường
+│   ├── ingest/           # loaders (PDF/URL/TXT), chunker
+│   ├── index/            # store (chunks.jsonl), bm25_index, embedder, vector_index
 │   ├── retrieve/         # fusion (RRF), hybrid, rerank (Jev), context (chọn đoạn cho LLM)
-│   ├── generate/         # llm, answer + citation             (chưa có)
-│   └── pipeline.py       # RAGPipeline                        (chưa có)
-├── ui/                   # streamlit_app.py                   (chưa có)
+│   ├── generate/         # llm (GPT 5.6 Lunar + cache), answer (prompt + citation)
+│   ├── eval/             # metrics (Recall@k, MRR@k), runner
+│   └── pipeline.py       # RAGPipeline: ingest(), ask(), ask_debug()
+├── ui/                   # streamlit_app.py
 ├── tests/                # mỗi module một test_<module>.py
 └── docs/
     ├── tech_stack.md     # lựa chọn stack và lý do (nên tách thành ADR)
@@ -37,4 +39,16 @@ cp app/team-4.2/.env.example app/team-4.2/.env   # điền key, KHÔNG commit .e
 pytest app/team-4.2/tests -v
 ```
 
-Chưa có: lệnh ingest, chạy UI và evaluation — bổ sung khi các module tương ứng hoàn thành.
+Các lệnh (tại gốc repo, sau khi điền `.env`):
+
+```bash
+python scripts/team-4.2/ingest.py data/team-4.2/raw/            # ingest PDF/TXT/MD trong thư mục, hoặc URL
+python scripts/team-4.2/ask.py "Câu hỏi ..."                     # trả lời + citation + kết quả từng arm
+streamlit run app/team-4.2/ui/streamlit_app.py                  # UI chat
+python evals/team-4.2/runners/run_eval.py --answers              # Recall@5, MRR@5 (BM25/Dense/Hybrid) + từ chối
+python evals/team-4.2/runners/draft_references.py               # nháp đáp án mẫu, người viết câu hỏi kiểm tra lại
+python evals/team-4.2/runners/export_ragas.py                   # dữ liệu đầu vào cho RAGAS
+```
+
+Chưa có: guardrail (TV5), bước chấm bằng RAGAS (chờ chốt version `ragas`). Toàn bộ test hiện chạy với
+client giả; cần chạy thử một lần với PyMuPDF, trafilatura, pyvi, OpenAI, Qdrant và Jev thật.

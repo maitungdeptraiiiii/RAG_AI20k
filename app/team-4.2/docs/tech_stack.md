@@ -25,10 +25,10 @@
 | LLM | **GPT 5.6 Lunar** qua `openai`, `temperature=0` | Gemini Flash/Pro / LLM bất kỳ | TV4 | Theo quyết định của nhóm. Tên model đọc từ `LLM_MODEL` |
 | Cache API | **SQLite** (thư viện chuẩn `sqlite3`) | — | TV3, TV4 | Cache cả embedding lẫn câu trả lời LLM: chạy lại không tốn tiền, kết quả tất định |
 | UI | **Streamlit** | Streamlit / Gradio / web app | **Chưa giao** (xem mục 6) | Có sẵn chat, upload file, ô nhập URL |
-| Config | **pydantic-settings** + `.env` | — | TV5 | Gom key, đường dẫn, k, ngưỡng guardrail vào một chỗ |
+| Config | **Thư viện chuẩn** (`dataclass` + đọc `.env`) — `src/rag/config.py` | — | TV5 | Gom key, đường dẫn, k, ngưỡng vào một chỗ. Không dùng pydantic-settings để bớt một phụ thuộc |
 | Schema | **dataclasses** (thư viện chuẩn) | — | TV5 | `src/rag/schema.py`, không phụ thuộc thư viện ngoài |
 | Test | **pytest** | — | Chủ module | Mỗi module có một file `tests/test_<module>.py`; dùng embedder và LLM giả để không gọi API |
-| Eval retrieval | **Tự viết** `recall_at_k`, `mrr_at_k` + **pandas** | — | TV3 (+ TV2) | Recall@5, MRR@5 là chỉ số bắt buộc, tính theo gold `source` + `page` |
+| Eval retrieval | **Tự viết** `recall_at_k`, `hit_at_k`, `mrr_at_k` (`src/rag/eval/`), xuất CSV + Markdown | — | TV3 (+ TV2) | Recall@5, MRR@5 là chỉ số bắt buộc, tính theo gold `source` + `page` |
 | Eval generation | **RAGAS** | — | TV4 + TV5 (+ TV3) | Chấm tự động chất lượng câu trả lời và context, xem mục 3 |
 
 ---
@@ -156,7 +156,7 @@ TXT ──open()───────┘                                        
 python3 -m venv .venv
 source .venv/bin/activate
 pip install pymupdf trafilatura pyvi openai qdrant-client \
-            streamlit pydantic-settings pandas ragas pytest
+            streamlit pandas ragas pytest
 ```
 
 Reranker Jev là phần tuỳ chọn: `pip install typesafe-sdk` (chỉ cần khi `RERANK_BACKEND=jev`).

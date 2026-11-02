@@ -218,9 +218,11 @@ class ContextBlock:
 
 
 class LLM(Protocol):
-    """Interface cho LLMClient (TV4). Test dùng LLM giả cài đặt cùng interface."""
+    """Interface cho LLM client (TV4, generate/llm.py). Test dùng LLM giả cài đặt cùng interface."""
 
-    def complete(self, prompt: str) -> str: ...
+    model_id: str
+
+    def complete(self, system: str, user: str) -> str: ...
 
 
 @dataclass(frozen=True)

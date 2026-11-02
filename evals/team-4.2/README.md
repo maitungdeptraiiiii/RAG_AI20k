@@ -4,9 +4,9 @@
 
 | Thư mục | Nội dung |
 |---|---|
-| `datasets/` | `questions.jsonl` — câu hỏi, gold `source` + `page`, `reference`, split |
+| `datasets/` | `questions.jsonl` — câu hỏi, gold `source` + `page`, `reference` (mẫu: `questions.example.jsonl`) |
 | `configs/` | Cấu hình các arm/ablation (BM25, Dense, Hybrid, +rerank) |
-| `runners/` | `metrics.py` (Recall@5, MRR@5), `run_eval.py`, `draft_references.py`, `oracle.py` |
+| `runners/` | `run_eval.py` (Recall@5, Hit@5, MRR@5, Recall@20; từ chối), `draft_references.py`, `export_ragas.py`. Logic nằm ở `app/team-4.2/src/rag/eval/` để có unit test |
 | `results/` | Kết quả nhỏ đã rà soát (per-question CSV, summary) |
 | `REPORT.md` | Evaluation + failure analysis, liên kết từ báo cáo tuần |
 

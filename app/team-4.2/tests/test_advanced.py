@@ -7,7 +7,9 @@ import pytest
 from rag.advanced import REGISTRY, Components, build_enhancements, parse_names
 from rag.advanced.base import add_context
 from rag.advanced.contextual import LLMContextEnricher, SectionHeaderEnricher
+from rag.advanced.colbert import ColbertIndex, maxsim
 from rag.advanced.hyde import HYDE_SYSTEM, HydeRetriever
+from rag.advanced.splade import SpladeIndex
 from rag.config import Settings
 from rag.eval.runner import retrieval_rows
 from rag.index.bm25_index import BM25Index, syllable_tokenize
@@ -46,10 +48,10 @@ def _components(llm=None, dense=None):
 # --- registry ---------------------------------------------------------------------------
 
 def test_registry_has_methods_and_rejects_unknown():
-    assert {"hyde", "contextual", "contextual_header"} <= set(REGISTRY)
+    assert {"hyde", "contextual", "contextual_header", "splade", "colbert"} <= set(REGISTRY)
     assert parse_names(" HyDE, contextual,,hyde ") == ["hyde", "contextual"]
     with pytest.raises(ValueError):
-        build_enhancements("hyde,colbert", _components())
+        build_enhancements("hyde,nonexistent", _components())
     assert build_enhancements("", _components()) == []
 
 
@@ -209,3 +211,68 @@ def test_eval_configs_with_hyde():
     plain = HybridRetriever(BM25Index(tokenizer=syllable_tokenize, tokenizer_name="s"), dense)
     with pytest.raises(ValueError):
         retrieval_rows([q], plain, ("hybrid+hyde",))   # chưa bật hyde
+
+
+# --- SPLADE / ColBERT (encoder giả, không cần torch) ---------------------------------------
+
+class FakeSparse:
+    """Mỗi từ (chữ thường) là một chiều, trọng số 1; 'phép' được mở rộng thành 'nghỉ'."""
+
+    model_id = "fake-sparse"
+
+    def encode(self, texts, *, is_query=False):
+        out = []
+        for t in texts:
+            words = set(t.lower().replace(".", "").split())
+            if "phép" in words:
+                words.add("nghỉ")
+            out.append({hash(w) % 10_000: 1.0 for w in words})
+        return out
+
+
+class FakeMulti:
+    model_id = "fake-multi"
+    AXES = {"nghỉ": (1.0, 0.0), "lương": (0.0, 1.0)}
+
+    def encode(self, texts, *, is_query=False):
+        return [[list(self.AXES[w]) for w in t.lower().split() if w in self.AXES] for t in texts]
+
+
+def test_splade_expansion_and_ranking():
+    idx = SpladeIndex(FakeSparse())
+    idx.build([_c(0, "Người lao động được nghỉ hằng năm."), _c(1, "Tiền lương trả hằng tháng.")])
+    hits = idx.search("phép", 5)                      # "phép" không có trong đoạn nào, chỉ khớp qua mở rộng
+    assert [h.chunk_id for h in hits] == ["d:0000"] and hits[0].rank == 1 and hits[0].arm == "splade"
+    assert idx.search("không-có-từ-này", 5) == []
+    idx.build([_c(0, "Người lao động được nghỉ hằng năm.")])   # build lại không nhân đôi
+    assert len(idx) == 2
+
+
+def test_splade_empty_index_and_bad_k():
+    idx = SpladeIndex(FakeSparse())
+    assert idx.search("q", 3) == []
+    idx.build([_c(0, "nghỉ")])
+    assert idx.search("nghỉ", 0) == []
+
+
+def test_colbert_maxsim_and_ranking():
+    assert maxsim([[1.0, 0.0]], [[0.0, 1.0], [1.0, 0.0]]) == 1.0
+    assert maxsim([[1.0, 0.0]], []) == 0.0
+    idx = ColbertIndex(FakeMulti())
+    idx.build([_c(0, "nghỉ nghỉ"), _c(1, "lương lương")])
+    hits = idx.search("nghỉ", 5)
+    assert hits[0].chunk_id == "d:0000" and hits[0].score > hits[1].score and hits[0].arm == "colbert"
+    assert [h.rank for h in hits] == [1, 2]
+    idx.build([_c(0, "nghỉ nghỉ")])
+    assert len(idx) == 2
+
+
+def test_new_arms_join_hybrid_rrf():
+    dense = VectorIndex(HashEmbedder(dim=256))
+    r = HybridRetriever(
+        BM25Index(tokenizer=syllable_tokenize, tokenizer_name="syllable"), dense,
+        extra_arms={"splade": SpladeIndex(FakeSparse()), "colbert": ColbertIndex(FakeMulti())},
+    )
+    r.build([_c(0, "nghỉ hằng năm"), _c(1, "lương tháng")])
+    assert set(r.retrieve("nghỉ").arms) == {"bm25", "dense", "splade", "colbert"}
+    assert list(r.retrieve("nghỉ", mode="colbert").arms) == ["colbert"]

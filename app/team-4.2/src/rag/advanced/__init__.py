@@ -4,7 +4,7 @@ Mỗi dòng import dưới đây đăng ký một (hoặc vài) phương pháp v
 thêm file + một dòng import. Bật/tắt bằng biến môi trường ADVANCED.
 """
 
-from rag.advanced import contextual, hyde  # noqa: F401  (import để đăng ký)
+from rag.advanced import colbert, contextual, hyde, splade  # noqa: F401  (import để đăng ký)
 from rag.advanced.base import (
     REGISTRY,
     Components,

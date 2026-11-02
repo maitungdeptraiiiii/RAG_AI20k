@@ -82,6 +82,9 @@ class Settings:
 
     # Phương pháp nâng cao (src/rag/advanced/), vd. "hyde,contextual"; rỗng = baseline
     advanced: str = ""
+    # Checkpoint cho ADVANCED=splade / colbert (mặc định là bản tiếng Anh — đổi sang đa ngữ/tiếng Việt)
+    splade_model: str = "naver/splade-cocondenser-ensembledistil"
+    colbert_model: str = "colbert-ir/colbertv2.0"
 
     # --- đường dẫn suy ra ---------------------------------------------------
 

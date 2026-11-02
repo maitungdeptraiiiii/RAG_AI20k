@@ -21,6 +21,7 @@ dependencies = [
 
 [project.optional-dependencies]
 jev = ["typesafe-sdk"]                 # RERANK_BACKEND=jev
+neural = ["torch", "transformers"]    # ADVANCED=splade / colbert
 dev = ["pytest"]
 
 [tool.setuptools.packages.find]

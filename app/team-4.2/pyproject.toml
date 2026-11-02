@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rag-team-4-2"
+version = "0.1.0"
+description = "Team 4.2 — Baseline Hybrid RAG (BM25 + Dense + RRF) cho văn bản luật tiếng Việt"
+requires-python = ">=3.12"
+# Danh sách theo docs/tech_stack.md mục 5.2. Chốt version bằng lockfile khi baseline chạy ổn.
+dependencies = [
+    "pymupdf",
+    "trafilatura",
+    "pyvi",
+    "openai",
+    "qdrant-client",
+    "streamlit",
+    "pandas",
+    "ragas",
+]
+
+[project.optional-dependencies]
+jev = ["typesafe-sdk"]                 # RERANK_BACKEND=jev
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

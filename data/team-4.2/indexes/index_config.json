@@ -1,0 +1,6 @@
+{
+  "embed_model": "text-embedding-3-small",
+  "embed_dim": 1536,
+  "max_syllables": 300,
+  "index_enhancers": []
+}

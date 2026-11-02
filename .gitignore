@@ -1,0 +1,18 @@
+# Chỉ lưu trên máy, không commit (đề bài PDF, bản lưu Reddit, ghi chú cá nhân)
+_local/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+
+# Bí mật
+.env
+
+# Dữ liệu lớn / sinh ra (chỉ commit README, manifest)
+data/team-4.2/raw/
+data/team-4.2/processed/
+data/team-4.2/indexes/
+data/team-4.2/cache/

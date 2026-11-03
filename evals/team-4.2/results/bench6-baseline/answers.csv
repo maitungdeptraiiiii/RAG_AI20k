@@ -1,0 +1,33 @@
+id,type,in_scope,refused,llm_called,n_context,context_has_gold,answer,citations,correct,citation_ok
+q01,lookup,True,False,True,5,True,Thời giờ làm việc bình thường không quá **08 giờ trong một ngày và 48 giờ trong một tuần**. [1],[1] bo_luat_lao_dong_2019.txt,,
+q02,lookup,True,False,True,5,True,"12 ngày làm việc, hưởng nguyên lương theo hợp đồng lao động. [1]",[1] bo_luat_lao_dong_2019.txt,,
+q03,lookup,True,False,True,5,True,Người thành niên là người từ đủ 18 tuổi trở lên. [1],[1] bo_luat_dan_su_2015.txt,,
+q04,lookup,True,False,True,5,True,"Thời hạn tạm giữ tối đa là **09 ngày**, được gia hạn **02 lần**; mỗi lần không quá 03 ngày và phải được Viện kiểm sát phê chuẩn. [1]",[1] bo_luat_to_tung_hinh_su_2015.txt,,
+q05,lookup,True,False,True,5,True,"Thời hạn kháng cáo đối với bản án sơ thẩm trong vụ án dân sự là **15 ngày kể từ ngày tuyên án**. Nếu đương sự vắng mặt tại phiên tòa hoặc khi tuyên án có lý do chính đáng, thời hạn được tính từ ngày nhận được bản án hoặc ngày bản án được niêm yết. [1]",[1] bo_luat_to_tung_dan_su_2015.txt,,
+q06,lookup,True,False,True,5,True,Thời hiệu khởi kiện đối với vụ việc liên quan đến hợp đồng thuê tàu là **02 năm kể từ ngày chấm dứt hợp đồng**. [1],[1] bo_luat_hang_hai_2015.txt,,
+q07,lookup,True,False,True,5,True,"Thời hiệu yêu cầu chia di sản là 30 năm đối với bất động sản và 10 năm đối với động sản, kể từ thời điểm mở thừa kế. [1]",[1] bo_luat_dan_su_2015.txt,,
+q08,lookup,True,False,True,5,True,"Tội phạm được phân thành **bốn loại**: ít nghiêm trọng, nghiêm trọng, rất nghiêm trọng và đặc biệt nghiêm trọng. [1]",[1] bo_luat_hinh_su_2015.txt,,
+q09,paraphrase,True,False,True,5,False,Bạn phải báo trước cho công ty ít nhất **45 ngày** khi đơn phương chấm dứt hợp đồng lao động không xác định thời hạn. [4],[4] bo_luat_lao_dong_2019.txt,,
+q10,paraphrase,True,False,True,5,True,"Lao động nữ sinh con được nghỉ thai sản 06 tháng, trong đó nghỉ trước sinh không quá 02 tháng. [1]
+
+Nếu sinh đôi trở lên, từ người con thứ hai, mỗi con được nghỉ thêm 01 tháng. [1]",[1] bo_luat_lao_dong_2019.txt,,
+q11,paraphrase,True,True,True,5,False,Không có trong tài liệu.,,,
+q12,paraphrase,True,True,True,5,False,Không có trong tài liệu.,,,
+q13,paraphrase,True,False,True,5,True,"Công ty được cho thử việc tối đa **60 ngày** nếu công việc của kỹ sư yêu cầu trình độ chuyên môn, kỹ thuật từ cao đẳng trở lên. [2]",[2] bo_luat_lao_dong_2019.txt,,
+q14,paraphrase,True,False,True,5,True,"Đàn ông làm việc trong điều kiện bình thường được nghỉ hưu theo lộ trình, đến đủ 62 tuổi vào năm 2028; từ năm 2021, tuổi nghỉ hưu bắt đầu là 60 tuổi 3 tháng và mỗi năm tăng thêm 3 tháng. [1]",[1] bo_luat_lao_dong_2019.txt,,
+q15,paraphrase,True,False,True,5,True,"Lái xe vi phạm quy định an toàn giao thông đường bộ làm chết 01 người có thể bị phạt tiền từ 30–100 triệu đồng, cải tạo không giam giữ đến 03 năm hoặc phạt tù từ 01–05 năm. [1]
+
+Nếu có tình tiết như không có giấy phép lái xe, vi phạm nồng độ cồn hoặc ma túy, bỏ chạy, không cứu người bị nạn hoặc không chấp hành hiệu lệnh giao thông, thì bị phạt tù từ 03–10 năm. [1]",[1] bo_luat_hinh_su_2015.txt,,
+q16,paraphrase,True,False,True,5,False,"Muốn kiện vụ việc dân sự, bạn nộp đơn tại Tòa án có thẩm quyền; thông thường là Tòa án nơi bị đơn cư trú, làm việc hoặc có trụ sở. [1]
+
+Đơn có thể nộp trực tiếp tại Tòa án, gửi qua bưu chính hoặc gửi trực tuyến qua Cổng thông tin điện tử của Tòa án nếu có. [3]
+
+Trong một số trường hợp, nguyên đơn được lựa chọn Tòa án khác, chẳng hạn: nơi bị đơn có tài sản; nơi xảy ra thiệt hại; hoặc nơi nguyên đơn cư trú, làm việc nếu bị đơn không có nơi cư trú, làm việc, trụ sở tại Việt Nam. [1]",[1] bo_luat_to_tung_dan_su_2015.txt; [3] bo_luat_to_tung_dan_su_2015.txt,,
+q17,multi,True,True,True,5,True,Không có trong tài liệu.,,,
+q18,multi,True,False,True,5,False,"Không thể kết luận lãi được tính đủ trong 4 năm hay A còn quyền khởi kiện, vì tài liệu không quy định thời hiệu khởi kiện và chưa nêu khoản vay có kỳ hạn hay không.
+
+- Nếu khoản vay có lãi và đã đến hạn nhưng B chưa trả, B phải trả lãi trên nợ gốc theo lãi suất thỏa thuận trong thời hạn vay; khi chậm trả, phải trả thêm lãi theo khoản 2 Điều 468 và lãi trên nợ gốc quá hạn bằng 150% lãi suất vay theo hợp đồng, trừ thỏa thuận khác. [1]
+- Nếu là khoản vay không kỳ hạn có lãi, bên cho vay có quyền đòi lại tài sản bất cứ lúc nào nhưng phải báo trước một thời gian hợp lý; lãi được tính đến thời điểm nhận lại tài sản. [2]
+- Các đoạn tài liệu không quy định thời hiệu khởi kiện đối với khoản vay này, nên không xác định được A còn quyền khởi kiện sau 4 năm hay không.",[1] bo_luat_dan_su_2015.txt; [2] bo_luat_dan_su_2015.txt,,
+q19,multi,True,True,True,5,False,Không có trong tài liệu.,,,
+q20,multi,True,True,True,5,True,Không có trong tài liệu.,,,

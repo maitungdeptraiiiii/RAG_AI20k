@@ -1,0 +1,3 @@
+cache/
+# DATA_DIR riêng cho ablation (vd. data/team-4.2/ablation/ctx)
+ablation/

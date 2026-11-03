@@ -2,4 +2,11 @@
 
 [Trang team](../../teams/team-4.2/README.md) · [Quy chuẩn chung](../README.md)
 
-Chưa triển khai. Đặt scripts của Team 4.2 trong thư mục này; không sửa artifact của team khác nếu chưa thống nhất. Sản phẩm phát triển liên tục qua 5 tuần, không sao chép code theo tuần.
+Chạy tại gốc repo, sau khi `pip install -e "app/team-4.2[dev]"` và điền `app/team-4.2/.env`.
+
+| Script | Việc |
+|---|---|
+| `ingest.py` | Ingest file PDF/TXT/MD, thư mục hoặc URL vào index (`python scripts/team-4.2/ingest.py data/team-4.2/raw/`) |
+| `ask.py` | Hỏi trên dòng lệnh: câu trả lời, citation và kết quả từng arm (`--mode bm25\|dense\|hyde`, `--retrieve-only`) |
+
+Evaluation nằm ở `evals/team-4.2/runners/`.

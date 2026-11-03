@@ -8,11 +8,11 @@ Team gồm **5 thành viên**, tự xây một sản phẩm xuyên suốt 5 tu�
 
 | Ký hiệu trong team | Họ tên |
 |---|---|
-| A | Chưa điền |
-| B | Chưa điền |
-| C | Chưa điền |
-| D | Chưa điền |
-| E | Chưa điền |
+| A | Mai Phan Anh Tùng |
+| B | Nguyễn Gia Khánh |
+| C | Lương Quang Huy |
+| D | Nguyễn Quốc Tuấn |
+| E | Nguyễn Anh Tú |
 
 Mentor: chưa điền. Lĩnh vực: chưa chọn. Lịch: chưa chốt.
 

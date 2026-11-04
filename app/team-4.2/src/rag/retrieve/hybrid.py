@@ -18,10 +18,14 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Iterable, Mapping, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from rag.advanced.decomposition import QueryDecomposer
 
 from rag.retrieve.fusion import DEFAULT_RRF_K, rrf
-from rag.retrieve.merge import merge_by_article, take_articles
+from rag.retrieve.merge import article_key, merge_by_article, take_articles
 from rag.schema import Chunk, Hit, Reranker, Retriever, nfc
 
 log = logging.getLogger(__name__)
@@ -45,6 +49,8 @@ class RetrievalResult:
                                                                # dùng để chọn context theo ngưỡng (retrieve/context.py)
     hits: list[Hit] = field(default_factory=list)              # = ranked[:k]: cố định k để chấm Recall@k, MRR@k
     errors: dict[str, str] = field(default_factory=dict)       # arm -> lỗi (nếu có)
+    queries: list[str] = field(default_factory=list)
+    query_results: dict[str, list[Hit]] = field(default_factory=dict)
 
     @property
     def reranked(self) -> bool:
@@ -81,6 +87,7 @@ class HybridRetriever:
         # khi gộp theo Điều: mỗi arm lấy arm_k * factor chunk, pool rerank cắt ở rerank_n ĐIỀU
         self.article_pool_factor = article_pool_factor if merge_articles else 1
         self._chunks: dict[str, Chunk] = {}
+        self.decomposer: QueryDecomposer | None = None
 
     # --- build ---------------------------------------------------------------
 
@@ -119,6 +126,64 @@ class HybridRetriever:
         return names
 
     def retrieve(
+        self, query: str, k: int = 5, *, mode: Mode = "hybrid",
+        arms: Sequence[str] | None = None, rerank: bool = True,
+    ) -> RetrievalResult:
+        if k < 1:
+            raise ValueError("k phải >= 1")
+        names = self._resolve_arms(mode, arms)
+        if self.decomposer is None or not query.strip():
+            return self._retrieve_single(query, k, mode=mode, arms=arms, rerank=rerank)
+        plan = self.decomposer.plan(query)
+        if len(plan.queries) <= 1:
+            result = self._retrieve_single(query, k, mode=mode, arms=arms, rerank=rerank)
+            result.queries = plan.queries
+            if plan.error:
+                result.errors["decomposition"] = plan.error
+            return result
+        result = RetrievalResult(query=nfc(query).strip(),
+                                 mode="+".join(names) if arms is not None else mode,
+                                 queries=plan.queries)
+        original_candidates: list[Hit] = []
+        for i, subquery in enumerate(plan.queries):
+            try:
+                is_original = self.decomposer.include_original and nfc(subquery).strip() == result.query
+                sub = self._retrieve_single(
+                    subquery, max(self.rerank_n, k) if is_original else self.decomposer.per_query_k,
+                    mode=mode, arms=arms, rerank=False)
+                # Preserve every chunk of each selected article for the final rerank.
+                selected = {cid for h in sub.hits for cid in (h.chunk_id, *h.merged)}
+                result.query_results[str(i)] = [h for h in sub.candidates if h.chunk_id in selected]
+                if is_original:
+                    original_candidates = list(sub.candidates)
+                result.arms.update({f"q{i}_{name}": hits for name, hits in sub.arms.items()})
+                result.errors.update({f"q{i}_{name}": err for name, err in sub.errors.items()})
+            except Exception as exc:
+                result.errors[f"q{i}"] = type(exc).__name__
+        if not result.query_results:
+            raise RetrievalError(f"Every decomposition branch failed: {result.errors}")
+        fused = rrf(result.query_results, k=self.rrf_k)
+        pool = max(k, self.decomposer.pool_size)
+        if original_candidates:
+            def key(hit: Hit) -> tuple[str, ...]:
+                return (article_key(self._chunks[hit.chunk_id]) if self.merge_articles
+                        else ("chunk", hit.chunk_id))
+
+            # Preserve the complete original pool and its order. Subqueries may only
+            # contribute NEW articles, never evict an original article before Jev.
+            original_keys = {key(h) for h in original_candidates}
+            new_limit = min(self.decomposer.max_new_articles, max(0, pool - len(original_keys)))
+            novel = [h for h in fused if key(h) not in original_keys]
+            extra = ((take_articles(novel, self._chunks, new_limit) if self.merge_articles
+                      else novel[:new_limit]) if new_limit else [])
+            result.candidates = [replace(h, rank=i) for i, h in enumerate(
+                [*original_candidates, *extra], start=1)]
+        else:
+            result.candidates = (take_articles(fused, self._chunks, pool)
+                                 if self.merge_articles else fused[:pool])
+        return self._rank_result(result, k, rerank)
+
+    def _retrieve_single(
         self,
         query: str,
         k: int = 5,
@@ -158,9 +223,12 @@ class HybridRetriever:
         else:
             result.candidates = result.candidates[:pool]
 
+        return self._rank_result(result, k, rerank)
+
+    def _rank_result(self, result: RetrievalResult, k: int, rerank: bool) -> RetrievalResult:
         if rerank and self.reranker is not None and result.candidates:
             # chấm TOÀN BỘ candidates (Jev vốn phải chấm hết để sắp xếp), giữ lại để chọn context
-            result.ranked = self.reranker.rerank(q, result.candidates, self._chunks, len(result.candidates))
+            result.ranked = self.reranker.rerank(result.query, result.candidates, self._chunks, len(result.candidates))
         else:
             result.ranked = list(result.candidates)
         if self.merge_articles:

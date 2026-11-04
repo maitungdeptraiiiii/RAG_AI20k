@@ -155,6 +155,14 @@ class RAGPipeline:
             merge_articles=s.merge_articles,
             article_pool_factor=s.article_pool_factor,
         )
+        if s.decomp_enabled:
+            from rag.advanced.decomposition import QueryDecomposer
+
+            retriever.decomposer = QueryDecomposer(
+                llm, s.decomp_max_subqueries, s.decomp_include_original,
+                s.decomp_per_query_k, s.decomp_pool_size,
+                s.decomp_max_new_articles,
+            )
         context = ContextConfig(
             min_p=s.context_min_p,
             max_blocks=s.context_max_blocks,

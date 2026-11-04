@@ -57,6 +57,10 @@ def show_trace(trace: AskTrace) -> None:
     ):
         if res.errors:
             st.warning(f"Arm bị lỗi: {res.errors}")
+        if res.queries:
+            st.markdown("**Truy vấn sau phân rã:**")
+            for i, query in enumerate(res.queries):
+                st.write(f"q{i}: {query}")
         cols = st.columns(len(res.arms) + 1)
         for col, (arm, hits) in zip(cols, res.arms.items()):
             col.markdown(f"**{arm.upper()}**")

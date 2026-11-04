@@ -1,0 +1,51 @@
+{
+  "api_calls": 0,
+  "primary_historical_reference": "historical.csv: dense+rerank",
+  "matched_component_reference": "controlled.csv: hyde+jev",
+  "files": {
+    "historical.csv": {
+      "source": "evals\\team-4.2\\results\\doi-thuong-64q-hyde-nobm25\\retrieval_per_question.csv",
+      "sha256": "9164fa4e4bd44297a64dae1cdc4eef87d48e3d40f29eeb94a766826b024895a2"
+    },
+    "historical_summary.md": {
+      "source": "evals\\team-4.2\\results\\doi-thuong-64q-hyde-nobm25\\summary.md",
+      "sha256": "53714cb2dd63b57d87042611a2c6541c6376c32ee894480410141ea3a2c2d23b"
+    },
+    "controlled.csv": {
+      "source": "evals\\team-4.2\\results\\doi-thuong-64q-decomposition\\retrieval_per_question.csv",
+      "sha256": "b59fed7fd80225076335a39994f91b163f834d44704d9727969a2f24d96c2048"
+    },
+    "controlled_config.json": {
+      "source": "evals\\team-4.2\\results\\doi-thuong-64q-decomposition\\config.json",
+      "sha256": "7bf6a1cc6de32afaec7934feb7f552f57d374f857160937409cedda1aa2cd0fc"
+    },
+    "controlled_traces.json": {
+      "source": "evals\\team-4.2\\results\\doi-thuong-64q-decomposition\\query_traces.json",
+      "sha256": "fdab012aec392973ba213481bac0e14be2b84fa1bfc5f116fa5571637dfdf1f2"
+    },
+    "new.csv": {
+      "source": "evals\\team-4.2\\results\\doi-thuong-64q-decomposition-anchor20-add10\\retrieval_per_question.csv",
+      "sha256": "5cbdd3a3983cdbca5b2ddd60b0b7c2ae225da63741d2bbd7845b4c477b0fb85d"
+    },
+    "new_config.json": {
+      "source": "evals\\team-4.2\\results\\doi-thuong-64q-decomposition-anchor20-add10\\config.json",
+      "sha256": "c345e30a8ae0e5f8d28b2a36255034b36d6a0787f7d19d12bf557c1ab6caf298"
+    },
+    "new_traces.json": {
+      "source": "evals\\team-4.2\\results\\doi-thuong-64q-decomposition-anchor20-add10\\query_traces.json",
+      "sha256": "c57013a8fa282d6c65c30ed7de7f2e429d34bd27ee95ed50f0be0436ea9c1d8e"
+    },
+    "questions.jsonl": {
+      "source": "evals\\team-4.2\\datasets\\benchmark_doi_thuong.jsonl",
+      "sha256": "4794686c462526c722c661ddc45539e391ef7fb8de1eedb9deb854818c0c5a3e"
+    },
+    "chunks.jsonl": {
+      "source": "data\\team-4.2\\ablation\\decomposition-anchor20-add10\\processed\\chunks.jsonl",
+      "sha256": "dee69abf3580d03dc1ae4fcf8c10345bc011f6dec101f33d2f06f5aacc594d0a"
+    },
+    "cached_scores.json": {
+      "source": "D:\\VINAI\\agentic-batch-4\\data\\team-4.2\\ablation\\decomposition-anchor20-add10\\cache\\rerank.sqlite",
+      "sha256": "d79187d3b3d1d7b8b3f63db2fed22f560e94050562c32704d6fbd6c95f8cf936"
+    }
+  }
+}

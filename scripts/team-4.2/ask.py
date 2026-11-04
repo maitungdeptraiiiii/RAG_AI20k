@@ -44,6 +44,10 @@ def main() -> int:
         print(f"\n(context: {len(trace.context.blocks)} đoạn, chế độ {trace.context.mode}; "
               f"gọi LLM: {trace.llm_called})")
 
+    if res.queries:
+        print("\n=== TRUY VẤN (DECOMPOSITION) ===")
+        for i, query in enumerate(res.queries):
+            print(f"  q{i}: {query}")
     for arm, hits in res.arms.items():
         print(f"\n=== {arm.upper()} (top 5/{len(hits)}) ===")
         for h in hits[:5]:

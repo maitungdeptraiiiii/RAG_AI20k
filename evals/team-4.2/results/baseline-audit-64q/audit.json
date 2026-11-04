@@ -1,0 +1,527 @@
+{
+  "api_calls": 0,
+  "metric_mismatches": [],
+  "pre_rerank_top5_changed": [
+    "d01",
+    "d02",
+    "d03",
+    "d04",
+    "d05",
+    "d06",
+    "d07",
+    "d08",
+    "d09",
+    "d10",
+    "d11",
+    "d12",
+    "d13",
+    "d14",
+    "d15",
+    "d16",
+    "d17",
+    "d18",
+    "d19",
+    "d20",
+    "d21",
+    "d22",
+    "d23",
+    "d24",
+    "d26",
+    "d28",
+    "d29",
+    "d30",
+    "d31",
+    "d32",
+    "d33",
+    "d34",
+    "d35",
+    "d36",
+    "d37",
+    "d38",
+    "d39",
+    "d40",
+    "d41",
+    "d42",
+    "d44",
+    "d45",
+    "d46",
+    "d48",
+    "d49",
+    "d50",
+    "d52",
+    "d53",
+    "d54",
+    "d55",
+    "d57",
+    "d58",
+    "d59",
+    "d60",
+    "d61",
+    "d62",
+    "d64"
+  ],
+  "historical_rows_missing_current_scores": [
+    "d01",
+    "d08",
+    "d14",
+    "d17",
+    "d20",
+    "d36",
+    "d37",
+    "d41",
+    "d45",
+    "d49",
+    "d58"
+  ],
+  "historical_order_inconsistent_with_current_scores": [
+    {
+      "id": "d02",
+      "current_scores_in_historical_order": [
+        0.32,
+        0.28,
+        0.18,
+        0.16,
+        0.19
+      ]
+    },
+    {
+      "id": "d03",
+      "current_scores_in_historical_order": [
+        0.28,
+        0.13,
+        0.11,
+        0.08,
+        0.09
+      ]
+    },
+    {
+      "id": "d07",
+      "current_scores_in_historical_order": [
+        0.62,
+        0.33,
+        0.19,
+        0.2,
+        0.12
+      ]
+    },
+    {
+      "id": "d10",
+      "current_scores_in_historical_order": [
+        0.58,
+        0.37,
+        0.38,
+        0.29,
+        0.26
+      ]
+    },
+    {
+      "id": "d12",
+      "current_scores_in_historical_order": [
+        0.87,
+        0.83,
+        0.49,
+        0.42,
+        0.46
+      ]
+    },
+    {
+      "id": "d16",
+      "current_scores_in_historical_order": [
+        0.88,
+        0.89,
+        0.85,
+        0.78,
+        0.57
+      ]
+    },
+    {
+      "id": "d18",
+      "current_scores_in_historical_order": [
+        0.84,
+        0.85,
+        0.81,
+        0.76,
+        0.72
+      ]
+    },
+    {
+      "id": "d19",
+      "current_scores_in_historical_order": [
+        0.77,
+        0.42,
+        0.34,
+        0.3,
+        0.32
+      ]
+    },
+    {
+      "id": "d23",
+      "current_scores_in_historical_order": [
+        0.84,
+        0.68,
+        0.5,
+        0.17,
+        0.22
+      ]
+    },
+    {
+      "id": "d24",
+      "current_scores_in_historical_order": [
+        0.76,
+        0.65,
+        0.32,
+        0.04,
+        0.05
+      ]
+    },
+    {
+      "id": "d28",
+      "current_scores_in_historical_order": [
+        0.64,
+        0.32,
+        0.24,
+        0.25,
+        0.2
+      ]
+    },
+    {
+      "id": "d32",
+      "current_scores_in_historical_order": [
+        0.91,
+        0.77,
+        0.29,
+        0.21,
+        0.22
+      ]
+    },
+    {
+      "id": "d33",
+      "current_scores_in_historical_order": [
+        0.96,
+        0.75,
+        0.62,
+        0.45,
+        0.46
+      ]
+    },
+    {
+      "id": "d35",
+      "current_scores_in_historical_order": [
+        0.92,
+        0.74,
+        0.6,
+        0.61,
+        0.46
+      ]
+    },
+    {
+      "id": "d38",
+      "current_scores_in_historical_order": [
+        0.9,
+        0.31,
+        0.25,
+        0.24,
+        0.25
+      ]
+    },
+    {
+      "id": "d40",
+      "current_scores_in_historical_order": [
+        0.82,
+        0.83,
+        0.8,
+        0.33,
+        0.28
+      ]
+    },
+    {
+      "id": "d44",
+      "current_scores_in_historical_order": [
+        0.25,
+        0.2,
+        0.17,
+        0.18,
+        0.13
+      ]
+    },
+    {
+      "id": "d51",
+      "current_scores_in_historical_order": [
+        0.18,
+        0.09,
+        0.05,
+        0.06,
+        0.05
+      ]
+    },
+    {
+      "id": "d52",
+      "current_scores_in_historical_order": [
+        0.93,
+        0.94,
+        0.79,
+        0.56,
+        0.61
+      ]
+    },
+    {
+      "id": "d53",
+      "current_scores_in_historical_order": [
+        0.9,
+        0.58,
+        0.59,
+        0.49,
+        0.41
+      ]
+    },
+    {
+      "id": "d54",
+      "current_scores_in_historical_order": [
+        0.4,
+        0.15,
+        0.17,
+        0.1,
+        0.09
+      ]
+    },
+    {
+      "id": "d56",
+      "current_scores_in_historical_order": [
+        0.9,
+        0.88,
+        0.82,
+        0.73,
+        0.78
+      ]
+    },
+    {
+      "id": "d57",
+      "current_scores_in_historical_order": [
+        0.92,
+        0.65,
+        0.66,
+        0.37,
+        0.3
+      ]
+    },
+    {
+      "id": "d60",
+      "current_scores_in_historical_order": [
+        0.97,
+        0.98,
+        0.89,
+        0.85,
+        0.73
+      ]
+    }
+  ],
+  "cached_score_sort_matches": {
+    "controlled": 64,
+    "new": 64
+  },
+  "original_pool_preserved": [
+    "d01",
+    "d02",
+    "d03",
+    "d04",
+    "d05",
+    "d06",
+    "d07",
+    "d08",
+    "d09",
+    "d10",
+    "d11",
+    "d12",
+    "d13",
+    "d14",
+    "d15",
+    "d16",
+    "d17",
+    "d18",
+    "d19",
+    "d20",
+    "d21",
+    "d22",
+    "d23",
+    "d24",
+    "d25",
+    "d26",
+    "d27",
+    "d28",
+    "d29",
+    "d30",
+    "d31",
+    "d32",
+    "d33",
+    "d34",
+    "d35",
+    "d36",
+    "d37",
+    "d38",
+    "d39",
+    "d40",
+    "d41",
+    "d42",
+    "d43",
+    "d44",
+    "d45",
+    "d46",
+    "d47",
+    "d48",
+    "d49",
+    "d50",
+    "d51",
+    "d52",
+    "d53",
+    "d54",
+    "d55",
+    "d56",
+    "d57",
+    "d58",
+    "d59",
+    "d60",
+    "d61",
+    "d62",
+    "d63",
+    "d64"
+  ],
+  "comparisons": {
+    "new_vs_historical": {
+      "recall@5": {
+        "old": 0.8489583333333334,
+        "new": 0.8515625,
+        "delta": 0.002604166666666667,
+        "improved": [
+          "d03",
+          "d44"
+        ],
+        "worse": [
+          "d02",
+          "d22"
+        ],
+        "unchanged": 60,
+        "paired_bootstrap_95_percentile": [
+          -0.026041666666666664,
+          0.03125
+        ]
+      },
+      "hit@5": {
+        "old": 0.9375,
+        "new": 0.9375,
+        "delta": 0.0,
+        "improved": [],
+        "worse": [],
+        "unchanged": 64,
+        "paired_bootstrap_95_percentile": [
+          0.0,
+          0.0
+        ]
+      },
+      "mrr@5": {
+        "old": 0.8260416666666667,
+        "new": 0.8026041666666667,
+        "delta": -0.0234375,
+        "improved": [],
+        "worse": [
+          "d22",
+          "d40",
+          "d60"
+        ],
+        "unchanged": 61,
+        "paired_bootstrap_95_percentile": [
+          -0.0546875,
+          0.0
+        ]
+      }
+    },
+    "new_vs_controlled": {
+      "recall@5": {
+        "old": 0.8359375,
+        "new": 0.8515625,
+        "delta": 0.015625,
+        "improved": [
+          "d03",
+          "d44"
+        ],
+        "worse": [],
+        "unchanged": 62,
+        "paired_bootstrap_95_percentile": [
+          0.0,
+          0.0390625
+        ]
+      },
+      "hit@5": {
+        "old": 0.9375,
+        "new": 0.9375,
+        "delta": 0.0,
+        "improved": [],
+        "worse": [],
+        "unchanged": 64,
+        "paired_bootstrap_95_percentile": [
+          0.0,
+          0.0
+        ]
+      },
+      "mrr@5": {
+        "old": 0.8,
+        "new": 0.8026041666666667,
+        "delta": 0.002604166666666667,
+        "improved": [
+          "d22"
+        ],
+        "worse": [],
+        "unchanged": 63,
+        "paired_bootstrap_95_percentile": [
+          0.0,
+          0.0078125
+        ]
+      }
+    },
+    "controlled_vs_historical": {
+      "recall@5": {
+        "old": 0.8489583333333334,
+        "new": 0.8359375,
+        "delta": -0.013020833333333332,
+        "improved": [],
+        "worse": [
+          "d02",
+          "d22"
+        ],
+        "unchanged": 62,
+        "paired_bootstrap_95_percentile": [
+          -0.033854166666666664,
+          0.0
+        ]
+      },
+      "hit@5": {
+        "old": 0.9375,
+        "new": 0.9375,
+        "delta": 0.0,
+        "improved": [],
+        "worse": [],
+        "unchanged": 64,
+        "paired_bootstrap_95_percentile": [
+          0.0,
+          0.0
+        ]
+      },
+      "mrr@5": {
+        "old": 0.8260416666666667,
+        "new": 0.8,
+        "delta": -0.026041666666666668,
+        "improved": [],
+        "worse": [
+          "d22",
+          "d40",
+          "d60"
+        ],
+        "unchanged": 61,
+        "paired_bootstrap_95_percentile": [
+          -0.05729166666666667,
+          0.0
+        ]
+      }
+    }
+  },
+  "unresolved": "Historical run has no per-query trace, score snapshot, or exact input/config fingerprints; cannot determine why retrieval/scoring changed."
+}

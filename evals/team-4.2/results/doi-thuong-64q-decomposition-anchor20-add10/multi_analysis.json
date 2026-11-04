@@ -1,0 +1,307 @@
+[
+  {
+    "id": "d01",
+    "question": "hôm nay tôi lỡ tông phải một ông già lúc sang đường, không biết có bị sao không",
+    "subqueries": 0,
+    "recall@5": 0.3333333333333333,
+    "mrr@5": 0.5,
+    "missing_top5": [
+      "dan_su: Điều 601",
+      "dan_su: Điều 590"
+    ],
+    "missing_pool": [
+      "dan_su: Điều 601",
+      "dan_su: Điều 590"
+    ],
+    "stage": "Pool vẫn thiếu gold"
+  },
+  {
+    "id": "d02",
+    "question": "tôi lỡ tay đẩy người ta xuống vực, có đến nhà bố mẹ họ xin lỗi rồi có sao không",
+    "subqueries": 2,
+    "recall@5": 0.3333333333333333,
+    "mrr@5": 1.0,
+    "missing_top5": [
+      "hinh_su: Điều 128",
+      "hinh_su: Điều 51"
+    ],
+    "missing_pool": [
+      "hinh_su: Điều 128"
+    ],
+    "stage": "Pool vẫn thiếu gold"
+  },
+  {
+    "id": "d03",
+    "question": "thằng em tôi nhậu xong đánh nhau ngoài quán, bên kia phải khâu mấy mũi, giờ công an gọi lên làm việc",
+    "subqueries": 2,
+    "recall@5": 1.0,
+    "mrr@5": 1.0,
+    "missing_top5": [],
+    "missing_pool": [],
+    "stage": "Đủ gold trong top 5"
+  },
+  {
+    "id": "d04",
+    "question": "công ty tự nhiên bảo mai khỏi đi làm nữa, thế có được không",
+    "subqueries": 0,
+    "recall@5": 0.3333333333333333,
+    "mrr@5": 0.3333333333333333,
+    "missing_top5": [
+      "lao_dong: Điều 39",
+      "lao_dong: Điều 41"
+    ],
+    "missing_pool": [],
+    "stage": "Pool đủ gold; rerank/top 5 chưa giữ đủ"
+  },
+  {
+    "id": "d06",
+    "question": "đang bầu mà bị công ty cho nghỉ việc, chị có làm gì được không",
+    "subqueries": 0,
+    "recall@5": 1.0,
+    "mrr@5": 1.0,
+    "missing_top5": [],
+    "missing_pool": [],
+    "stage": "Đủ gold trong top 5"
+  },
+  {
+    "id": "d07",
+    "question": "tháng nào cũng phải ở lại làm tới 9-10h tối mà chẳng thấy thêm đồng nào",
+    "subqueries": 0,
+    "recall@5": 1.0,
+    "mrr@5": 1.0,
+    "missing_top5": [],
+    "missing_pool": [],
+    "stage": "Đủ gold trong top 5"
+  },
+  {
+    "id": "d08",
+    "question": "cho đứa bạn mượn 50 triệu giờ nó chặn hết liên lạc rồi",
+    "subqueries": 0,
+    "recall@5": 1.0,
+    "mrr@5": 1.0,
+    "missing_top5": [],
+    "missing_pool": [],
+    "stage": "Đủ gold trong top 5"
+  },
+  {
+    "id": "d10",
+    "question": "mẹ mất rồi mà sổ đỏ vẫn đứng tên mẹ, mấy anh em đang cãi nhau",
+    "subqueries": 2,
+    "recall@5": 1.0,
+    "mrr@5": 1.0,
+    "missing_top5": [],
+    "missing_pool": [],
+    "stage": "Đủ gold trong top 5"
+  },
+  {
+    "id": "d12",
+    "question": "con tôi mới 13 tuổi, đi lấy trộm xe đạp bị người ta bắt được",
+    "subqueries": 0,
+    "recall@5": 1.0,
+    "mrr@5": 1.0,
+    "missing_top5": [],
+    "missing_pool": [],
+    "stage": "Đủ gold trong top 5"
+  },
+  {
+    "id": "d13",
+    "question": "nhà bên cạnh đang xây, tường nhà tôi nứt hết cả rồi",
+    "subqueries": 0,
+    "recall@5": 0.5,
+    "mrr@5": 0.3333333333333333,
+    "missing_top5": [
+      "dan_su: Điều 584"
+    ],
+    "missing_pool": [
+      "dan_su: Điều 584"
+    ],
+    "stage": "Pool vẫn thiếu gold"
+  },
+  {
+    "id": "d15",
+    "question": "bị đứa kia lên facebook bịa chuyện nói xấu, nhục không chịu được",
+    "subqueries": 0,
+    "recall@5": 1.0,
+    "mrr@5": 1.0,
+    "missing_top5": [],
+    "missing_pool": [],
+    "stage": "Đủ gold trong top 5"
+  },
+  {
+    "id": "d16",
+    "question": "nhặt được cái ví ngoài đường, giữ luôn có sao không",
+    "subqueries": 0,
+    "recall@5": 1.0,
+    "mrr@5": 0.3333333333333333,
+    "missing_top5": [],
+    "missing_pool": [],
+    "stage": "Đủ gold trong top 5"
+  },
+  {
+    "id": "d17",
+    "question": "tối qua say quá đập vỡ đồ của quán, sáng ra họ đòi đền",
+    "subqueries": 0,
+    "recall@5": 0.0,
+    "mrr@5": 0.0,
+    "missing_top5": [
+      "dan_su: Điều 589",
+      "hinh_su: Điều 178"
+    ],
+    "missing_pool": [],
+    "stage": "Pool đủ gold; rerank/top 5 chưa giữ đủ"
+  },
+  {
+    "id": "d19",
+    "question": "vợ ôm con về ngoại cả năm nay rồi, giờ muốn làm đơn ly hôn thì nộp ở đâu",
+    "subqueries": 0,
+    "recall@5": 1.0,
+    "mrr@5": 1.0,
+    "missing_top5": [],
+    "missing_pool": [],
+    "stage": "Đủ gold trong top 5"
+  },
+  {
+    "id": "d22",
+    "question": "ông hàng xóm say rượu cầm dao sang chửi, tôi lấy gậy đánh lại gãy tay ông ấy, giờ ổng đòi kiện",
+    "subqueries": 3,
+    "recall@5": 0.5,
+    "mrr@5": 0.5,
+    "missing_top5": [
+      "hinh_su: Điều 134"
+    ],
+    "missing_pool": [],
+    "stage": "Pool đủ gold; rerank/top 5 chưa giữ đủ"
+  },
+  {
+    "id": "d26",
+    "question": "cháu tôi 17 tuổi đi trộm điện thoại của người ta bị bắt, liệu có phải đi tù không",
+    "subqueries": 0,
+    "recall@5": 0.5,
+    "mrr@5": 0.3333333333333333,
+    "missing_top5": [
+      "hinh_su: Điều 173"
+    ],
+    "missing_pool": [],
+    "stage": "Pool đủ gold; rerank/top 5 chưa giữ đủ"
+  },
+  {
+    "id": "d32",
+    "question": "cho vay lấy lãi 5 nghìn một triệu một ngày thì có bị sao không",
+    "subqueries": 0,
+    "recall@5": 1.0,
+    "mrr@5": 1.0,
+    "missing_top5": [],
+    "missing_pool": [],
+    "stage": "Đủ gold trong top 5"
+  },
+  {
+    "id": "d36",
+    "question": "tòa vừa xử bố tôi 3 năm tù mà gia đình thấy nặng quá, giờ làm sao",
+    "subqueries": 0,
+    "recall@5": 0.5,
+    "mrr@5": 0.2,
+    "missing_top5": [
+      "to_tung_hinh_su: Điều 331"
+    ],
+    "missing_pool": [
+      "to_tung_hinh_su: Điều 331"
+    ],
+    "stage": "Pool vẫn thiếu gold"
+  },
+  {
+    "id": "d39",
+    "question": "ông nội trước khi mất có nói miệng là cho tôi mảnh đất, mấy chú có cãi được không",
+    "subqueries": 2,
+    "recall@5": 1.0,
+    "mrr@5": 1.0,
+    "missing_top5": [],
+    "missing_pool": [],
+    "stage": "Đủ gold trong top 5"
+  },
+  {
+    "id": "d40",
+    "question": "mua điện thoại về được 3 hôm thì hỏng, cửa hàng không chịu đổi cũng không sửa",
+    "subqueries": 0,
+    "recall@5": 1.0,
+    "mrr@5": 0.5,
+    "missing_top5": [],
+    "missing_pool": [],
+    "stage": "Đủ gold trong top 5"
+  },
+  {
+    "id": "d44",
+    "question": "chồng mất không để lại di chúc, nhà hai vợ chồng mua chung thì chia thế nào",
+    "subqueries": 2,
+    "recall@5": 1.0,
+    "mrr@5": 1.0,
+    "missing_top5": [],
+    "missing_pool": [],
+    "stage": "Đủ gold trong top 5"
+  },
+  {
+    "id": "d49",
+    "question": "thử việc 3 tháng mà công ty chỉ trả có 70% lương",
+    "subqueries": 2,
+    "recall@5": 1.0,
+    "mrr@5": 1.0,
+    "missing_top5": [],
+    "missing_pool": [],
+    "stage": "Đủ gold trong top 5"
+  },
+  {
+    "id": "d50",
+    "question": "làm cho công ty 5 năm rồi giờ xin nghỉ, công ty có phải trả khoản gì không",
+    "subqueries": 0,
+    "recall@5": 1.0,
+    "mrr@5": 1.0,
+    "missing_top5": [],
+    "missing_pool": [],
+    "stage": "Đủ gold trong top 5"
+  },
+  {
+    "id": "d52",
+    "question": "em 15 tuổi muốn đi làm phụ quán cà phê dịp hè được không",
+    "subqueries": 0,
+    "recall@5": 0.5,
+    "mrr@5": 0.25,
+    "missing_top5": [
+      "lao_dong: Điều 143"
+    ],
+    "missing_pool": [],
+    "stage": "Pool đủ gold; rerank/top 5 chưa giữ đủ"
+  },
+  {
+    "id": "d53",
+    "question": "sếp hay sờ mó, nói chuyện bậy với em ở công ty, em muốn nghỉ luôn",
+    "subqueries": 0,
+    "recall@5": 1.0,
+    "mrr@5": 1.0,
+    "missing_top5": [],
+    "missing_pool": [],
+    "stage": "Đủ gold trong top 5"
+  },
+  {
+    "id": "d59",
+    "question": "bản án phúc thẩm có hiệu lực rồi nhưng tôi vẫn thấy xử sai, còn cách nào không",
+    "subqueries": 0,
+    "recall@5": 0.5,
+    "mrr@5": 0.3333333333333333,
+    "missing_top5": [
+      "to_tung_dan_su: Điều 326"
+    ],
+    "missing_pool": [],
+    "stage": "Pool đủ gold; rerank/top 5 chưa giữ đủ"
+  },
+  {
+    "id": "d62",
+    "question": "đi tàu ra đảo bị mất vali hành lý, hãng tàu có phải đền không",
+    "subqueries": 0,
+    "recall@5": 0.5,
+    "mrr@5": 0.25,
+    "missing_top5": [
+      "hang_hai: Điều 213"
+    ],
+    "missing_pool": [],
+    "stage": "Pool đủ gold; rerank/top 5 chưa giữ đủ"
+  }
+]

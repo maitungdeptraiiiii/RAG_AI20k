@@ -81,6 +81,14 @@ class Settings:
     # Khi gộp: mỗi arm lấy ARM_K * factor chunk, pool rerank = RERANK_N Điều khác nhau
     article_pool_factor: int = 2
 
+    # Query decomposition: runtime only; independent of HyDE and retrieval mode.
+    decomp_enabled: bool = False
+    decomp_max_subqueries: int = 3
+    decomp_include_original: bool = True
+    decomp_per_query_k: int = 10
+    decomp_pool_size: int = 30
+    decomp_max_new_articles: int = 10
+
     # Context (retrieve/context.py)
     context_min_p: float = 0.7
     context_max_blocks: int = 8
@@ -142,11 +150,14 @@ class Settings:
         if self.rerank_backend not in ("none", "jev"):
             raise ValueError(f"RERANK_BACKEND phải là none | jev, nhận {self.rerank_backend!r}")
         for name in ("embed_dim", "max_syllables", "arm_k", "top_k", "rerank_n", "article_pool_factor",
-                     "context_max_blocks", "context_max_words"):
+                     "context_max_blocks", "context_max_words", "decomp_max_subqueries",
+                     "decomp_per_query_k", "decomp_pool_size"):
             if getattr(self, name) < 1:
                 raise ValueError(f"{name.upper()} phải >= 1")
         if self.rrf_k < 0:
             raise ValueError("RRF_K phải >= 0")
+        if self.decomp_max_new_articles < 0:
+            raise ValueError("DECOMP_MAX_NEW_ARTICLES phải >= 0")
 
 
 def _convert(name: str, raw: str, default: Any) -> Any:

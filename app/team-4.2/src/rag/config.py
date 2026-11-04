@@ -55,9 +55,11 @@ class Settings:
     # Đường dẫn
     data_dir: Path = Path("data/team-4.2")
 
-    # Embedding (TV3)
-    embed_model: str = "text-embedding-3-small"
-    embed_dim: int = 1536
+    # Embedding (TV3): "jina-*" dùng Jina API (cần JINA_API_KEY), còn lại dùng OpenAI.
+    # Đổi model/dim thì phải index lại (DATA_DIR mới hoặc xoá indexes/).
+    embed_model: str = "jina-embeddings-v5-text-small"
+    embed_dim: int = 1024
+    jina_api_key: str | None = None
 
     # LLM (TV4) — key/endpoint riêng nếu LLM không dùng chung OpenAI
     llm_model: str = "gpt-6-luna"
@@ -74,6 +76,10 @@ class Settings:
     top_k: int = 5
     rerank_backend: str = "none"           # none | jev
     rerank_n: int = 20
+    # Gộp nhiều chunk cùng một Điều thành một candidate trong top-k (retrieve/merge.py)
+    merge_articles: bool = True
+    # Khi gộp: mỗi arm lấy ARM_K * factor chunk, pool rerank = RERANK_N Điều khác nhau
+    article_pool_factor: int = 2
 
     # Context (retrieve/context.py)
     context_min_p: float = 0.7
@@ -135,7 +141,7 @@ class Settings:
     def __post_init__(self) -> None:
         if self.rerank_backend not in ("none", "jev"):
             raise ValueError(f"RERANK_BACKEND phải là none | jev, nhận {self.rerank_backend!r}")
-        for name in ("embed_dim", "max_syllables", "arm_k", "top_k", "rerank_n",
+        for name in ("embed_dim", "max_syllables", "arm_k", "top_k", "rerank_n", "article_pool_factor",
                      "context_max_blocks", "context_max_words"):
             if getattr(self, name) < 1:
                 raise ValueError(f"{name.upper()} phải >= 1")

@@ -23,6 +23,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Literal
 
+from rag.retrieve.merge import merged_chunk
 from rag.schema import Chunk, ContextBlock, Hit
 
 ContextMode = Literal["threshold", "fixed", "empty"]
@@ -73,7 +74,7 @@ def select_context(
     if not ranked:
         return ContextSelection()
 
-    missing = [h.chunk_id for h in ranked if h.chunk_id not in chunks]
+    missing = [c for h in ranked for c in (h.chunk_id, *h.merged) if c not in chunks]
     if missing:
         raise KeyError(f"Không tìm thấy chunk cho các hit: {missing[:5]}")
 
@@ -94,12 +95,12 @@ def select_context(
     for h in eligible:
         if h.chunk_id in seen:
             continue
-        chunk = chunks[h.chunk_id]
+        chunk = merged_chunk(h, chunks)  # hit đã gộp nhiều chunk cùng Điều -> MỘT block, bỏ overlap
         n = _words(chunk)
         if len(picked) >= limit or (picked and used + n > cfg.max_words):
             break                        # giữ đúng thứ tự xếp hạng: không nhảy cóc sang đoạn ngắn hơn
         picked.append(chunk)             # đoạn đầu tiên luôn được lấy, kể cả khi dài hơn max_words
-        seen.add(h.chunk_id)
+        seen.update((h.chunk_id, *h.merged))
         used += n
 
     if not picked:

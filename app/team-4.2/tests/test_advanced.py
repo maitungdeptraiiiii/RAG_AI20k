@@ -8,7 +8,7 @@ from rag.advanced import REGISTRY, Components, build_enhancements, parse_names
 from rag.advanced.base import add_context
 from rag.advanced.contextual import LLMContextEnricher, SectionHeaderEnricher
 from rag.advanced.colbert import ColbertIndex, maxsim
-from rag.advanced.hyde import HYDE_SYSTEM, HydeRetriever
+from rag.advanced.hyde import HYDE_SYSTEM, HydeRetriever, make_hyde
 from rag.advanced.splade import SpladeIndex
 from rag.config import Settings
 from rag.eval.runner import retrieval_rows
@@ -57,7 +57,7 @@ def test_registry_has_methods_and_rejects_unknown():
 
 def test_enhancements_expose_the_right_hook():
     hyde, ctx, header = build_enhancements("hyde,contextual,contextual_header", _components())
-    assert set(hyde.arms) == {"hyde"} and hyde.index_enhancer is None
+    assert not hyde.arms and hyde.wrap_dense is not None and hyde.index_enhancer is None
     assert ctx.index_enhancer.name == "contextual" and not ctx.arms
     assert header.index_enhancer.name == "contextual_header"
 
@@ -84,44 +84,44 @@ def test_bm25_and_dense_search_context_words():
 
 # --- HyDE ---------------------------------------------------------------------------------
 
-def test_hyde_searches_dense_with_hypothetical_passage():
-    dense = VectorIndex(HashEmbedder(dim=256))
+def test_hyde_searches_dense_with_query_plus_hypothetical_passage():
+    emb = HashEmbedder(dim=256)
+    dense = VectorIndex(emb)
     dense.build([_c(0, "Người lao động được nghỉ hằng năm 12 ngày làm việc."), _c(1, "Tiền lương trả bằng tiền mặt.")])
     llm = EchoLLM(lambda s, u: "Người lao động được nghỉ hằng năm hưởng nguyên lương.")
     hits = HydeRetriever(llm, dense).search("nghỉ phép mấy ngày", 2)
-    assert hits[0].chunk_id == "d:0000" and all(h.arm == "hyde" for h in hits)
+    assert hits[0].chunk_id == "d:0000" and all(h.arm == "dense" for h in hits)
     assert llm.calls[0] == (HYDE_SYSTEM, "CÂU HỎI: nghỉ phép mấy ngày")
+    assert emb.calls[-1][0] == "nghỉ phép mấy ngày\nNgười lao động được nghỉ hằng năm hưởng nguyên lương."
 
 
-def test_hyde_empty_passage_is_an_error():
-    with pytest.raises(RuntimeError):
-        HydeRetriever(EchoLLM(lambda s, u: "  "), VectorIndex(HashEmbedder())).search("q", 3)
-
-
-def test_hybrid_with_hyde_arm_and_ablation_subsets():
-    dense = VectorIndex(HashEmbedder(dim=256))
-    r = HybridRetriever(
-        BM25Index(tokenizer=syllable_tokenize, tokenizer_name="syllable"), dense,
-        extra_arms={"hyde": HydeRetriever(EchoLLM(lambda s, u: "nghỉ hằng năm"), dense)},
-    )
-    r.build([_c(0, "nghỉ hằng năm 12 ngày"), _c(1, "tiền lương")])
-    assert set(r.retrieve("nghỉ phép").arms) == {"bm25", "dense", "hyde"}
-    assert set(r.retrieve("nghỉ phép", arms=("bm25", "dense")).arms) == {"bm25", "dense"}
-    assert list(r.retrieve("nghỉ phép", mode="hyde").arms) == ["hyde"]
-    with pytest.raises(ValueError):
-        HybridRetriever(BM25Index(), dense, extra_arms={"dense": dense})
-
-
-def test_hyde_failure_keeps_other_arms():
+def test_hyde_falls_back_to_plain_query_when_llm_fails():
     def boom(s, u):
         raise TimeoutError("llm down")
 
-    dense = VectorIndex(HashEmbedder())
-    r = HybridRetriever(BM25Index(tokenizer=syllable_tokenize, tokenizer_name="s"), dense,
-                        extra_arms={"hyde": HydeRetriever(EchoLLM(boom), dense)})
-    r.build([_c(0, "nghỉ hằng năm")])
-    res = r.retrieve("nghỉ hằng năm")
-    assert "hyde" in res.errors and res.hits
+    for llm in (EchoLLM(lambda s, u: "  "), EchoLLM(boom)):
+        emb = HashEmbedder()
+        dense = VectorIndex(emb)
+        dense.build([_c(0, "nghỉ hằng năm")])
+        assert [h.chunk_id for h in HydeRetriever(llm, dense).search("q", 3)] == ["d:0000"]
+        assert emb.calls[-1][0] == "q"
+        with pytest.raises((RuntimeError, TimeoutError)):
+            HydeRetriever(llm, dense, fallback=False).search("q", 3)
+
+
+def test_hyde_replaces_dense_arm_no_separate_plain_query_arm():
+    dense = VectorIndex(HashEmbedder(dim=256))
+    hyde = make_hyde(_components(dense=dense))
+    assert hyde.arms == {} and hyde.wrap_dense is not None
+    r = HybridRetriever(
+        BM25Index(tokenizer=syllable_tokenize, tokenizer_name="syllable"),
+        hyde.wrap_dense(dense),
+    )
+    r.build([_c(0, "nghỉ hằng năm 12 ngày"), _c(1, "tiền lương")])   # build đi qua wrapper vào Dense
+    assert len(dense) == 2
+    res = r.retrieve("nghỉ phép")
+    assert set(res.arms) == {"bm25", "dense"}
+    assert all(h.arm == "dense" for h in res.arms["dense"])
 
 
 # --- Contextual Retrieval -----------------------------------------------------------------
@@ -134,6 +134,17 @@ def test_section_header_enricher():
     out = SectionHeaderEnricher().enrich([_c(0, "t", section="Chương I > Điều 1. Phạm vi"), _c(1, "u")], _pages())
     assert out[0].context == "Tài liệu: luat lao dong. Mục: Chương I > Điều 1. Phạm vi"
     assert out[1].context == "Tài liệu: luat lao dong" and out[0].text == "t"
+
+
+def test_article_header_enricher_keeps_only_last_heading():
+    from rag.advanced.contextual import ArticleHeaderEnricher
+
+    out = ArticleHeaderEnricher().enrich(
+        [_c(0, "t", section="Phần thứ hai > Chương XIV > Điều 134. Tội cố ý gây thương tích"), _c(1, "u")], _pages()
+    )
+    assert out[0].context == "luat lao dong. Điều 134. Tội cố ý gây thương tích"
+    assert out[1].context == "luat lao dong" and out[0].text == "t"
+    assert ArticleHeaderEnricher.name == "article_header"
 
 
 def test_llm_context_enricher_prompt_and_parallel_order():
@@ -200,17 +211,16 @@ def test_settings_advanced_methods():
     assert Settings().advanced_methods == []
 
 
-def test_eval_configs_with_hyde():
+def test_eval_configs_dense_is_hyde_when_enabled():
     dense = VectorIndex(HashEmbedder(dim=256))
-    r = HybridRetriever(BM25Index(tokenizer=syllable_tokenize, tokenizer_name="s"), dense,
-                        extra_arms={"hyde": HydeRetriever(EchoLLM(lambda s, u: "nghỉ hằng năm"), dense)})
+    r = HybridRetriever(BM25Index(tokenizer=syllable_tokenize, tokenizer_name="s"),
+                        HydeRetriever(EchoLLM(lambda s, u: "nghỉ hằng năm"), dense))
     r.build([_c(0, "nghỉ hằng năm 12 ngày")])
     q = Question("q1", "nghỉ phép", "paraphrase", "TV1", (GoldRef("luat_lao_dong.pdf", 1),))
-    rows = retrieval_rows([q], r, ("hybrid", "hybrid+hyde", "hyde"))
-    assert [row["config"] for row in rows] == ["hybrid", "hybrid+hyde", "hyde"]
-    plain = HybridRetriever(BM25Index(tokenizer=syllable_tokenize, tokenizer_name="s"), dense)
+    rows = retrieval_rows([q], r, ("hybrid", "dense"))
+    assert [row["config"] for row in rows] == ["hybrid", "dense"]
     with pytest.raises(ValueError):
-        retrieval_rows([q], plain, ("hybrid+hyde",))   # chưa bật hyde
+        retrieval_rows([q], r, ("hyde",))   # không còn arm/cấu hình "hyde" riêng
 
 
 # --- SPLADE / ColBERT (encoder giả, không cần torch) ---------------------------------------

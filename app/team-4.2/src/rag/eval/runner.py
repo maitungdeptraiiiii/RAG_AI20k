@@ -27,13 +27,13 @@ from rag.index.store import ChunkStore
 from rag.retrieve.hybrid import HybridRetriever
 from rag.schema import LLM, Question
 
-# tên cấu hình -> (các arm, có rerank không); arms=None = mọi arm đang bật (kể cả arm nâng cao)
+# tên cấu hình -> (các arm, có rerank không); arms=None = mọi arm đang bật (kể cả arm nâng cao).
+# Bật ADVANCED=hyde thì arm "dense" đã là HyDE; so có / không HyDE = chạy lại với ADVANCED khác.
 RETRIEVAL_CONFIGS: dict[str, tuple[tuple[str, ...] | None, bool]] = {
     "bm25": (("bm25",), False),
     "dense": (("dense",), False),
-    "hyde": (("hyde",), False),
+    "dense+rerank": (("dense",), True),
     "hybrid": (("bm25", "dense"), False),                  # baseline sprint 1
-    "hybrid+hyde": (("bm25", "dense", "hyde"), False),
     "hybrid+rerank": (("bm25", "dense"), True),
     "all": (None, True),                                   # mọi arm đang bật + rerank (cấu hình chạy thật)
 }

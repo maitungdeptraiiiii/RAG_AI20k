@@ -118,3 +118,68 @@ def test_meta_mismatch_is_rejected():
         VectorIndex(HashEmbedder(dim=16), InMemoryVectorStore(), meta_path=meta)  # cùng model: OK
         with pytest.raises(IndexMismatchError):
             VectorIndex(HashEmbedder(dim=32), InMemoryVectorStore(), meta_path=meta)
+
+
+# --- JinaEmbedder (HTTP giả) -----------------------------------------------------------
+
+from rag.index.embedder import JinaEmbedder, JinaHTTPError, make_embedder  # noqa: E402
+
+
+class FakeJina:
+    def __init__(self, dim=4, fail=()):
+        self.dim, self.fail, self.calls = dim, list(fail), []
+
+    def __call__(self, url, payload, key, timeout):
+        if self.fail:
+            raise JinaHTTPError(self.fail.pop(0), "err")
+        self.calls.append((payload["task"], list(payload["input"]), key))
+        bias = 1.0 if payload["task"] == "retrieval.query" else 0.0
+        data = [{"index": i, "embedding": [float(len(t)) + bias] * self.dim} for i, t in enumerate(payload["input"])]
+        return {"data": list(reversed(data))}
+
+
+def _jina(post, **kw):
+    return JinaEmbedder("jina-x", 4, api_key="k", post=post, sleep=lambda s: None, **kw)
+
+
+def test_jina_uses_passage_for_chunks_and_query_for_questions():
+    post = FakeJina()
+    e = _jina(post, batch_size=2)
+    assert [v[0] for v in e.embed(["a", "bb", "ccc"])] == [1.0, 2.0, 3.0]
+    assert e.embed_query(["a"])[0][0] == 2.0
+    assert [(t, b) for t, b, _ in post.calls] == [
+        ("retrieval.passage", ["a", "bb"]), ("retrieval.passage", ["ccc"]), ("retrieval.query", ["a"])]
+
+
+def test_jina_cache_separates_tasks():
+    post = FakeJina()
+    e = _jina(post, cache=EmbeddingCache())
+    e.embed(["a"]); e.embed(["a"]); e.embed_query(["a"]); e.embed_query(["a"])
+    assert [t for t, _, _ in post.calls] == ["retrieval.passage", "retrieval.query"]
+
+
+def test_jina_retries_on_429_but_not_on_400():
+    assert _jina(FakeJina(fail=[429, 503])).embed(["a"])[0][0] == 1.0
+    with pytest.raises(JinaHTTPError):
+        _jina(FakeJina(fail=[400])).embed(["a"])
+
+
+def test_jina_rejects_wrong_dim_and_missing_key(monkeypatch):
+    with pytest.raises(RuntimeError, match="số chiều"):
+        JinaEmbedder("jina-x", 8, api_key="k", post=FakeJina(4)).embed(["a"])
+    monkeypatch.delenv("JINA_API_KEY", raising=False)
+    with pytest.raises(RuntimeError, match="JINA_API_KEY"):
+        JinaEmbedder("jina-x", 4, post=FakeJina(4)).embed(["a"])
+
+
+def test_make_embedder_picks_backend():
+    assert isinstance(make_embedder("jina-embeddings-v5-text-small", 1024), JinaEmbedder)
+    assert isinstance(make_embedder("text-embedding-3-small", 1536), OpenAIEmbedder)
+
+
+def test_vector_index_embeds_query_with_query_task():
+    post = FakeJina()
+    idx = VectorIndex(_jina(post))
+    idx.build([_c(0, "a")])
+    idx.search("bb", 1)
+    assert [t for t, _, _ in post.calls] == ["retrieval.passage", "retrieval.query"]

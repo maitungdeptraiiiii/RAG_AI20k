@@ -13,7 +13,7 @@ app/team-4.2/
 ├── src/rag/
 │   ├── schema.py         # hợp đồng dữ liệu chung (Page, Chunk, Hit, Answer, ...)
 │   ├── config.py         # Settings đọc .env / biến môi trường
-│   ├── ingest/           # loaders (PDF/URL/TXT), chunker
+│   ├── ingest/           # loaders (PDF/URL/TXT), chunker, vbpl (crawler vbpl.vn)
 │   ├── index/            # store (chunks.jsonl), bm25_index, embedder, vector_index
 │   ├── retrieve/         # fusion (RRF), hybrid, rerank (Jev), context (chọn đoạn cho LLM)
 │   ├── generate/         # llm (gpt-6-luna + cache), answer (prompt + citation)
@@ -43,6 +43,7 @@ pytest app/team-4.2/tests -v
 Các lệnh (tại gốc repo, sau khi điền `.env`):
 
 ```bash
+python scripts/team-4.2/crawl_vbpl.py 36/2005/QH11              # crawl văn bản từ vbpl.vn theo số hiệu -> data/team-4.2/raw/vbpl/
 python scripts/team-4.2/ingest.py data/team-4.2/raw/            # ingest PDF/TXT/MD trong thư mục, hoặc URL
 python scripts/team-4.2/ask.py "Câu hỏi ..."                     # trả lời + citation + kết quả từng arm
 streamlit run app/team-4.2/ui/streamlit_app.py                  # UI chat

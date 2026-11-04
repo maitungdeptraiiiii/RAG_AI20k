@@ -62,6 +62,24 @@ class SectionHeaderEnricher:
         return out
 
 
+class ArticleHeaderEnricher:
+    """article_header: bối cảnh = tên tài liệu + heading CUỐI (thường là "Điều N. Tên điều").
+
+    Gọn hơn contextual_header: bỏ Phần/Chương vì chuỗi đó giống nhau ở hàng chục Điều, dễ gây nhiễu.
+    """
+
+    name = "article_header"
+
+    def enrich(self, chunks: list[Chunk], pages: Sequence[Page]) -> list[Chunk]:
+        out = []
+        for c in chunks:
+            parts = [_doc_title(c.source)]
+            if c.section:
+                parts.append(c.section.split(">")[-1].strip())
+            out.append(add_context(c, ". ".join(parts)))
+        return out
+
+
 class LLMContextEnricher:
     """contextual: LLM viết bối cảnh cho từng chunk, chạy song song."""
 
@@ -131,9 +149,14 @@ def make_contextual_header(c: Components) -> Enhancement:
     return Enhancement("contextual_header", index_enhancer=SectionHeaderEnricher())
 
 
+@register("article_header")
+def make_article_header(c: Components) -> Enhancement:
+    return Enhancement("article_header", index_enhancer=ArticleHeaderEnricher())
+
+
 @register("contextual")
 def make_contextual(c: Components) -> Enhancement:
     return Enhancement("contextual", index_enhancer=LLMContextEnricher(c.llm))
 
 
-__all__ = ["CONTEXT_SYSTEM", "LLMContextEnricher", "SectionHeaderEnricher"]
+__all__ = ["CONTEXT_SYSTEM", "ArticleHeaderEnricher", "LLMContextEnricher", "SectionHeaderEnricher"]

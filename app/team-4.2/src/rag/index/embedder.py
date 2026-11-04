@@ -1,10 +1,18 @@
 """Embedding cho Dense retrieval — TV3.
 
+    JinaEmbedder    jina-embeddings-v5-text-small (1024 chiều) qua Jina API — MẶC ĐỊNH. Embed
+                    query (task retrieval.query) và chunk (retrieval.passage) khác nhau; chia batch,
+                    retry khi 429/5xx, cache SQLite. Key đọc từ JINA_API_KEY.
     OpenAIEmbedder  text-embedding-3-small (1536 chiều) qua SDK `openai`; chia batch,
                     retry khi bị rate limit / timeout / lỗi kết nối, cache SQLite.
     HashEmbedder    embedder giả, tất định, không gọi mạng — dùng cho unit test của mọi module.
+    make_embedder   chọn embedder theo tên model ("jina-*" -> Jina, còn lại -> OpenAI).
 
-Query và chunk dùng CÙNG một embedder, đưa text gốc (NFC), không đưa text đã tách từ bằng pyvi.
+Query và chunk dùng CÙNG một model, đưa text gốc (NFC), không đưa text đã tách từ bằng pyvi.
+Embedder nào có `embed_query` thì VectorIndex dùng nó cho câu hỏi, `embed` cho chunk.
+
+Vì sao Jina: trên 40 câu benchmark_6_bo_luat, dense-only recall@5 0.600 -> 0.871 (paraphrase
+0.375 -> 0.938); trên 20 câu văn nói benchmark_doi_thuong 0.100 -> 0.425.
 """
 
 from __future__ import annotations
@@ -25,15 +33,26 @@ from rag.schema import nfc
 
 log = logging.getLogger(__name__)
 
-DEFAULT_EMBED_MODEL = "text-embedding-3-small"
-DEFAULT_EMBED_DIM = 1536
+DEFAULT_EMBED_MODEL = "jina-embeddings-v5-text-small"
+DEFAULT_EMBED_DIM = 1024
+OPENAI_EMBED_MODEL = "text-embedding-3-small"
+OPENAI_EMBED_DIM = 1536
+JINA_URL = "https://api.jina.ai/v1/embeddings"
 
 
 class Embedder(Protocol):
+    """`embed` dùng cho chunk. Embedder bất đối xứng (Jina) có thêm `embed_query` cho câu hỏi."""
+
     model_id: str
     dim: int
 
     def embed(self, texts: Sequence[str]) -> list[list[float]]: ...
+
+
+def embed_queries(embedder: Embedder, texts: Sequence[str]) -> list[list[float]]:
+    """Embed câu hỏi: dùng `embed_query` nếu embedder có, không thì `embed`."""
+    fn = getattr(embedder, "embed_query", None)
+    return fn(texts) if callable(fn) else embedder.embed(texts)
 
 
 # ---------------------------------------------------------------------------
@@ -106,8 +125,8 @@ class OpenAIEmbedder:
 
     def __init__(
         self,
-        model_id: str = DEFAULT_EMBED_MODEL,
-        dim: int = DEFAULT_EMBED_DIM,
+        model_id: str = OPENAI_EMBED_MODEL,
+        dim: int = OPENAI_EMBED_DIM,
         *,
         cache: EmbeddingCache | None = None,
         batch_size: int = 64,
@@ -179,6 +198,125 @@ class OpenAIEmbedder:
 
 
 # ---------------------------------------------------------------------------
+# Jina
+# ---------------------------------------------------------------------------
+
+
+class JinaHTTPError(RuntimeError):
+    def __init__(self, status: int, body: str) -> None:
+        super().__init__(f"Jina API trả HTTP {status}: {body[:300]}")
+        self.status = status
+
+
+def _jina_post(url: str, payload: dict[str, Any], api_key: str, timeout: float) -> dict[str, Any]:
+    import requests
+
+    resp = requests.post(
+        url, json=payload, timeout=timeout,
+        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+    )
+    if resp.status_code != 200:
+        raise JinaHTTPError(resp.status_code, resp.text)
+    return resp.json()
+
+
+class JinaEmbedder:
+    """Jina Embeddings API. Chunk embed với task `retrieval.passage`, câu hỏi với `retrieval.query`.
+
+    Key: tham số `api_key` hoặc biến môi trường JINA_API_KEY. `post`, `sleep` cho phép thay khi test.
+    Cache key gồm cả task, nên vector query và passage của cùng một text không lẫn nhau.
+    """
+
+    PASSAGE_TASK = "retrieval.passage"
+    QUERY_TASK = "retrieval.query"
+    RETRY_STATUS = frozenset({429, 500, 502, 503, 504})
+
+    def __init__(
+        self,
+        model_id: str = DEFAULT_EMBED_MODEL,
+        dim: int = DEFAULT_EMBED_DIM,
+        *,
+        cache: EmbeddingCache | None = None,
+        api_key: str | None = None,
+        batch_size: int = 32,
+        max_retries: int = 6,
+        timeout: float = 120.0,
+        post: Callable[[str, dict[str, Any], str, float], dict[str, Any]] | None = None,
+        sleep: Callable[[float], None] = time.sleep,
+    ) -> None:
+        if batch_size < 1 or max_retries < 0:
+            raise ValueError("batch_size phải >= 1, max_retries phải >= 0")
+        self.model_id, self.dim = model_id, dim
+        self.cache = cache
+        self._api_key = api_key
+        self.batch_size = batch_size
+        self.max_retries = max_retries
+        self.timeout = timeout
+        self._post = post or _jina_post
+        self._sleep = sleep
+
+    def _key(self) -> str:
+        import os
+
+        key = self._api_key or os.environ.get("JINA_API_KEY")
+        if not key:
+            raise RuntimeError("Thiếu JINA_API_KEY (đặt trong .env) cho embedder Jina")
+        return key
+
+    def embed(self, texts: Sequence[str]) -> list[list[float]]:
+        return self._embed(texts, self.PASSAGE_TASK)
+
+    def embed_query(self, texts: Sequence[str]) -> list[list[float]]:
+        return self._embed(texts, self.QUERY_TASK)
+
+    def _embed(self, texts: Sequence[str], task: str) -> list[list[float]]:
+        texts = [nfc(t) for t in texts]
+        if any(not t.strip() for t in texts):
+            raise ValueError("Không embed được text rỗng")
+        if not texts:
+            return []
+        keys = [EmbeddingCache.key(f"{self.model_id}#{task}", t) for t in texts]
+        found = self.cache.get_many(keys) if self.cache else {}
+        todo = [i for i, k in enumerate(keys) if k not in found]
+        for start in range(0, len(todo), self.batch_size):
+            idxs = todo[start : start + self.batch_size]
+            fresh = dict(zip((keys[i] for i in idxs), self._call([texts[i] for i in idxs], task)))
+            if self.cache:
+                self.cache.put_many(fresh)    # ghi theo từng batch: lỗi giữa chừng không mất phần đã trả tiền
+            found.update(fresh)
+        return [found[k] for k in keys]
+
+    def _call(self, batch: list[str], task: str) -> list[list[float]]:
+        payload = {"model": self.model_id, "task": task, "input": batch, "normalized": True}
+        for attempt in range(self.max_retries + 1):
+            try:
+                data = self._post(JINA_URL, payload, self._key(), self.timeout)
+                break
+            except JinaHTTPError as e:
+                if e.status not in self.RETRY_STATUS or attempt == self.max_retries:
+                    raise
+                wait = min(3 * 2**attempt, 60)
+                log.warning("Jina lỗi (%s), thử lại sau %ss", e.status, wait)
+                self._sleep(wait)
+        items = sorted(data["data"], key=lambda d: d["index"])
+        vectors = [list(d["embedding"]) for d in items]
+        if len(vectors) != len(batch):
+            raise RuntimeError(f"Jina trả {len(vectors)} vector cho {len(batch)} text")
+        bad = {len(v) for v in vectors if len(v) != self.dim}
+        if bad:
+            raise RuntimeError(f"Vector có số chiều {bad}, cấu hình dim={self.dim}")
+        return vectors
+
+
+def make_embedder(model_id: str, dim: int, *, cache: EmbeddingCache | None = None,
+                  jina_api_key: str | None = None) -> Embedder:
+    """`jina-*` -> JinaEmbedder, còn lại -> OpenAIEmbedder (text-embedding-3-*)."""
+    if model_id.startswith("jina-"):
+        return JinaEmbedder(model_id, dim, cache=cache, api_key=jina_api_key)
+    return OpenAIEmbedder(model_id, dim, cache=cache)
+
+
+# ---------------------------------------------------------------------------
 # Embedder giả cho test
 # ---------------------------------------------------------------------------
 
@@ -213,5 +351,11 @@ __all__ = [
     "Embedder",
     "EmbeddingCache",
     "HashEmbedder",
+    "JinaEmbedder",
+    "JinaHTTPError",
+    "OPENAI_EMBED_DIM",
+    "OPENAI_EMBED_MODEL",
     "OpenAIEmbedder",
+    "embed_queries",
+    "make_embedder",
 ]

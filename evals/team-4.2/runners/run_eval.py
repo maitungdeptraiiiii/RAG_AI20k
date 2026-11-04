@@ -1,7 +1,7 @@
 """Chạy evaluation trên index hiện có (chạy tại gốc repo, sau khi đã ingest).
 
     python evals/team-4.2/runners/run_eval.py                               # retrieval: bm25, dense, hybrid
-    python evals/team-4.2/runners/run_eval.py --configs bm25 dense hybrid hybrid+hyde hybrid+rerank all
+    python evals/team-4.2/runners/run_eval.py --configs bm25 dense dense+rerank hybrid hybrid+rerank all
     python evals/team-4.2/runners/run_eval.py --answers                     # thêm: chạy LLM, đo từ chối
 
 Đầu ra trong --out (mặc định evals/team-4.2/results/<thời gian>/):

@@ -38,7 +38,7 @@ REFUSAL = "Không có trong tài liệu."
 
 Arm = Literal["bm25", "dense", "fused", "rerank"]
 ARMS: tuple[str, ...] = get_args(Arm)
-"""Arm lõi. Phương pháp nâng cao (src/rag/advanced/) có thể thêm arm riêng, vd. "hyde"."""
+"""Arm lõi. Phương pháp nâng cao (src/rag/advanced/) có thể thêm arm riêng, vd. "splade"."""
 
 _ARM_NAME_RE = re.compile(r"^[a-z][a-z0-9_]*$")
 
@@ -166,10 +166,12 @@ class Hit:
     chunk_id: str
     score: float         # thang điểm riêng của từng arm, KHÔNG so sánh giữa các arm
     rank: int            # bắt đầu từ 1
-    arm: str             # "bm25" | "dense" | "fused" | "rerank" | arm nâng cao (vd. "hyde")
+    arm: str             # "bm25" | "dense" | "fused" | "rerank" | arm nâng cao (vd. "splade")
+    merged: tuple[str, ...] = ()   # chunk khác cùng Điều đã gộp vào hit này (retrieve/merge.py)
 
     def __post_init__(self) -> None:
         _require(bool(self.chunk_id), "Hit.chunk_id không được rỗng")
+        object.__setattr__(self, "merged", tuple(self.merged))
         _require(self.rank >= 1, f"Hit.rank phải >= 1, nhận {self.rank}")
         _require(
             bool(_ARM_NAME_RE.match(self.arm)),

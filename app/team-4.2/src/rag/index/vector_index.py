@@ -17,7 +17,7 @@ from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import Any, Protocol
 
-from rag.index.embedder import Embedder
+from rag.index.embedder import Embedder, embed_queries
 from rag.schema import Chunk, Hit, nfc
 
 _POINT_NS = uuid.UUID("6f1c2a9e-3b8d-4d6a-9a51-2a7f0d4e8c10")
@@ -201,7 +201,7 @@ class VectorIndex:
         q = nfc(query).strip()
         if not q or self.store.count() == 0:
             return []
-        vector = self.embedder.embed([q])[0]
+        vector = embed_queries(self.embedder, [q])[0]    # Jina: task retrieval.query
         return [
             Hit(cid, score, rank, "dense")
             for rank, (cid, score) in enumerate(self.store.query(vector, k), start=1)

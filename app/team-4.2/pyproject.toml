@@ -11,6 +11,8 @@ requires-python = ">=3.12"
 dependencies = [
     "pymupdf",
     "trafilatura",
+    "requests",          # crawler vbpl.vn
+    "beautifulsoup4",    # crawler vbpl.vn: HTML -> text
     "pyvi",
     "openai",
     "qdrant-client",

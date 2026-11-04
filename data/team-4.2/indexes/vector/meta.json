@@ -1,1 +1,1 @@
-{"embed_model": "text-embedding-3-small", "dim": 1536}
+{"embed_model": "jina-embeddings-v5-text-small", "dim": 1024}

@@ -55,9 +55,17 @@ class Settings:
     # Đường dẫn
     data_dir: Path = Path("data/team-4.2")
 
-    # Embedding (TV3)
-    embed_model: str = "text-embedding-3-small"
-    embed_dim: int = 1536
+    # Embedding (TV3) — chọn qua registry trong rag/index/embedders/registry.py.
+    # Chỉ cần đổi EMBED_MODEL; dim/backend/tiền tố lấy theo registry. Mỗi model có vector index
+    # riêng (indexes/vector/<model>/) nên không phải ingest lại — lần chạy đầu tự embed chunks.jsonl.
+    embed_model: str = "jina-embeddings-v5-text-small"
+    embed_dim: int | None = None             # None = theo registry (local: hỏi từ model)
+    embed_backend: str = ""                  # "" = tự đoán: jina | openai | local | hash
+    embed_query_prefix: str | None = None    # None = theo registry (vd. E5: "query: ")
+    embed_passage_prefix: str | None = None
+    embed_device: str = ""                   # local: "" = tự chọn (cuda nếu có), "cpu", "cuda"
+    embed_batch_size: int = 32               # local
+    jina_api_key: str | None = None
 
     # LLM (TV4) — key/endpoint riêng nếu LLM không dùng chung OpenAI
     llm_model: str = "gpt-6-luna"
@@ -72,8 +80,16 @@ class Settings:
     arm_k: int = 20
     rrf_k: int = 60
     top_k: int = 5
-    rerank_backend: str = "none"           # none | jev
+    rerank_backend: str = "none"           # none | jev | jina
+    rerank_model: str = ""                 # rỗng = mặc định của backend (jev-1.13.0 / jina-reranker-v2-base-multilingual)
     rerank_n: int = 20
+    # Arm của luồng chính (mode "hybrid"), vd. "dense" = bỏ BM25; rỗng = mọi arm đang bật.
+    # Eval chọn arm riêng qua --configs nên không bị ảnh hưởng (trừ cấu hình "all").
+    retrieval_arms: str = ""
+    # Gộp nhiều chunk cùng một Điều thành một candidate trong top-k (retrieve/merge.py)
+    merge_articles: bool = True
+    # Khi gộp: mỗi arm lấy ARM_K * factor chunk, pool rerank = RERANK_N Điều khác nhau
+    article_pool_factor: int = 2
 
     # Context (retrieve/context.py)
     context_min_p: float = 0.7
@@ -93,6 +109,11 @@ class Settings:
         return list(dict.fromkeys(x.strip().lower() for x in self.advanced.split(",") if x.strip()))
 
     @property
+    def retrieval_arm_list(self) -> list[str] | None:
+        arms = list(dict.fromkeys(x.strip().lower() for x in self.retrieval_arms.split(",") if x.strip()))
+        return arms or None
+
+    @property
     def index_config_path(self) -> Path:
         return self.data_dir / "indexes" / "index_config.json"
 
@@ -102,7 +123,21 @@ class Settings:
 
     @property
     def vector_dir(self) -> Path:
-        return self.data_dir / "indexes" / "vector"
+        """indexes/vector/<model>/. Index cũ build trước khi tách theo model (meta.json ngay tại
+        indexes/vector/) vẫn được dùng nếu đúng model đang chọn."""
+        import json
+
+        from rag.index.embedders.registry import model_slug
+
+        root = self.data_dir / "indexes" / "vector"
+        legacy_meta = root / "meta.json"
+        if legacy_meta.is_file():
+            try:
+                if json.loads(legacy_meta.read_text(encoding="utf-8")).get("embed_model") == self.embed_model:
+                    return root
+            except (OSError, ValueError):
+                pass
+        return root / model_slug(self.embed_model)
 
     @property
     def cache_dir(self) -> Path:
@@ -133,9 +168,11 @@ class Settings:
         return cls.from_env()
 
     def __post_init__(self) -> None:
-        if self.rerank_backend not in ("none", "jev"):
-            raise ValueError(f"RERANK_BACKEND phải là none | jev, nhận {self.rerank_backend!r}")
-        for name in ("embed_dim", "max_syllables", "arm_k", "top_k", "rerank_n",
+        if self.rerank_backend not in ("none", "jev", "jina"):
+            raise ValueError(f"RERANK_BACKEND phải là none | jev | jina, nhận {self.rerank_backend!r}")
+        if self.embed_dim is not None and self.embed_dim < 1:
+            raise ValueError("EMBED_DIM phải >= 1")
+        for name in ("embed_batch_size", "max_syllables", "arm_k", "top_k", "rerank_n", "article_pool_factor",
                      "context_max_blocks", "context_max_words"):
             if getattr(self, name) < 1:
                 raise ValueError(f"{name.upper()} phải >= 1")
@@ -146,6 +183,8 @@ class Settings:
 def _convert(name: str, raw: str, default: Any) -> Any:
     if name == "data_dir":
         return Path(raw)
+    if name == "embed_dim":
+        return None if raw.strip().lower() in {"none", "null", "auto"} else int(raw)
     if name == "llm_temperature":
         return None if raw.strip().lower() in {"none", "null", "default"} else float(raw)
     if isinstance(default, bool):

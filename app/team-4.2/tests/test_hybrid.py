@@ -85,6 +85,24 @@ def test_hybrid_fuses_both_arms():
     assert not res.reranked and res.errors == {}
 
 
+def test_default_arms_limit_main_flow_only():
+    r = _retriever(["d:0000", "d:0001"], ["d:0002"], default_arms=("dense",))
+    res = r.retrieve("q", k=5)                                  # luồng chính: chỉ dense, không BM25
+    assert list(res.arms) == ["dense"] and [h.chunk_id for h in res.hits] == ["d:0002"]
+    assert set(r.retrieve("q", arms=("bm25", "dense")).arms) == {"bm25", "dense"}   # eval vẫn chọn được
+    assert list(r.retrieve("q", mode="bm25").arms) == ["bm25"]
+    for bad in (("tfidf",), ()):
+        with pytest.raises(ValueError):
+            _retriever([], [], default_arms=bad)
+
+
+def test_settings_retrieval_arms():
+    from rag.config import Settings
+
+    assert Settings.from_env({"RETRIEVAL_ARMS": " Dense, ,dense"}).retrieval_arm_list == ["dense"]
+    assert Settings().retrieval_arm_list is None
+
+
 def test_single_arm_modes_for_eval():
     r = _retriever(["d:0000", "d:0001"], ["d:0002"])
     assert [h.chunk_id for h in r.retrieve("q", k=5, mode="bm25").hits] == ["d:0000", "d:0001"]

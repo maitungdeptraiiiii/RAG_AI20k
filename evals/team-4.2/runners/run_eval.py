@@ -1,7 +1,7 @@
 """Chạy evaluation trên index hiện có (chạy tại gốc repo, sau khi đã ingest).
 
     python evals/team-4.2/runners/run_eval.py                               # retrieval: bm25, dense, hybrid
-    python evals/team-4.2/runners/run_eval.py --configs bm25 dense hybrid hybrid+hyde hybrid+rerank all
+    python evals/team-4.2/runners/run_eval.py --configs bm25 dense dense+rerank hybrid hybrid+rerank all
     python evals/team-4.2/runners/run_eval.py --answers                     # thêm: chạy LLM, đo từ chối
 
 Đầu ra trong --out (mặc định evals/team-4.2/results/<thời gian>/):
@@ -42,7 +42,7 @@ def main() -> int:
 
     settings = Settings.load()
     if any(RETRIEVAL_CONFIGS[c][1] for c in args.configs) and settings.rerank_backend == "none":
-        print("Cấu hình có rerank cần RERANK_BACKEND=jev trong .env", file=sys.stderr)
+        print("Cấu hình có rerank cần RERANK_BACKEND=jev hoặc jina trong .env", file=sys.stderr)
         return 2
     questions = load_questions(args.questions)
     pipeline = RAGPipeline.from_settings(settings)

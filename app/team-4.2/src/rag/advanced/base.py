@@ -1,13 +1,15 @@
 """Khung plugin cho phương pháp nâng cao (bonus #8).
 
 Một phương pháp nâng cao là một hàm factory đăng ký bằng `@register("tên")`, nhận `Components`
-(những gì pipeline đã dựng sẵn) và trả `Enhancement` gồm hai điểm gắn, dùng một hoặc cả hai:
+(những gì pipeline đã dựng sẵn) và trả `Enhancement` gồm ba điểm gắn, dùng một hoặc nhiều:
 
     index_enhancer   chạy LÚC INGEST, sau chunking, trước khi index: thêm `Chunk.context`
                      (bối cảnh để BM25/Dense index). Text gốc giữ nguyên để hiển thị và trích dẫn.
                      Vd. Contextual Retrieval.
     arms             arm retrieval thêm vào HybridRetriever, gộp cùng BM25 + Dense bằng RRF.
-                     Vd. HyDE.
+                     Vd. SPLADE, ColBERT.
+    wrap_dense       THAY arm Dense bằng một Retriever bọc nó (đổi cách tạo truy vấn, cùng index).
+                     Vd. HyDE. Nhiều wrapper thì bọc lần lượt theo thứ tự ADVANCED.
 
 Bật/tắt bằng biến môi trường `ADVANCED` (danh sách, cách nhau dấu phẩy, giữ đúng thứ tự):
 
@@ -45,7 +47,7 @@ class Components:
     settings: Settings
     llm: LLM
     embedder: Embedder
-    dense: Retriever          # VectorIndex đã mở (HyDE tìm trên chính index này)
+    dense: Retriever          # VectorIndex đã mở (SPLADE/ColBERT... dùng nếu cần; HyDE dùng wrap_dense)
 
 
 @dataclass
@@ -53,6 +55,7 @@ class Enhancement:
     name: str
     index_enhancer: IndexEnhancer | None = None
     arms: dict[str, Retriever] = field(default_factory=dict)
+    wrap_dense: Callable[[Retriever], Retriever] | None = None
 
 
 Factory = Callable[[Components], Enhancement]

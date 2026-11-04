@@ -1,6 +1,6 @@
 {
-  "embed_model": "text-embedding-3-small",
-  "embed_dim": 1536,
+  "embed_model": "jina-embeddings-v5-text-small",
+  "embed_dim": 1024,
   "max_syllables": 300,
   "index_enhancers": []
 }

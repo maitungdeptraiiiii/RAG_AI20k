@@ -165,3 +165,59 @@ def test_make_reranker():
     assert isinstance(make_reranker("jev", fallback=False), JevReranker)
     with pytest.raises(ValueError):
         make_reranker("bge")
+
+
+# --- Jina Reranker ----------------------------------------------------------------------
+
+def _jina_post(scores_by_text, calls):
+    def post(url, payload, key, timeout):
+        calls.append(payload)
+        docs = payload["documents"]
+        res = [{"index": i, "relevance_score": scores_by_text[d]} for i, d in enumerate(docs)]
+        return {"results": sorted(res, key=lambda r: -r["relevance_score"])}   # API trả theo điểm giảm dần
+    return post
+
+
+def test_jina_reranker_maps_scores_by_index_and_caches():
+    from rag.retrieve.rerank import JinaReranker
+
+    chunks = _chunks("a", "b", "c")
+    calls = []
+    r = JinaReranker(cache=ScoreCache(), api_key="k", post=_jina_post({"a": 0.1, "b": 0.9, "c": 0.5}, calls))
+    out = r.rerank("q", _fused(chunks), chunks, 2)
+    assert [h.chunk_id for h in out] == ["d:0001", "d:0002"] and out[0].score == 0.9 and out[0].arm == "rerank"
+    assert len(calls) == 1 and calls[0]["model"] == "jina-reranker-v2-base-multilingual"
+    assert calls[0]["top_n"] == 3 and calls[0]["query"] == "q"
+    r.rerank("q", _fused(chunks), chunks, 3)
+    assert len(calls) == 1                     # lần 2 lấy hết từ cache
+
+
+def test_jina_reranker_retries_429_then_falls_back():
+    from rag.index.embedders.jina_api import JinaHTTPError
+    from rag.retrieve.rerank import JinaReranker
+
+    chunks = _chunks("a", "b")
+    n = {"calls": 0}
+
+    def flaky(url, payload, key, timeout):
+        n["calls"] += 1
+        if n["calls"] == 1:
+            raise JinaHTTPError(429, "rate limit")
+        return {"results": [{"index": 0, "relevance_score": 0.2}, {"index": 1, "relevance_score": 0.7}]}
+
+    r = JinaReranker(api_key="k", post=flaky, sleep=lambda s: None)
+    assert [h.chunk_id for h in r.rerank("q", _fused(chunks), chunks, 2)] == ["d:0001", "d:0000"]
+
+    def down(url, payload, key, timeout):
+        raise JinaHTTPError(401, "bad key")
+
+    fb = FallbackReranker(JinaReranker(api_key="k", post=down, sleep=lambda s: None))
+    assert [h.arm for h in fb.rerank("q", _fused(chunks), chunks, 2)] == ["fused", "fused"]
+
+
+def test_make_reranker_jina():
+    from rag.retrieve.rerank import JinaReranker
+
+    r = make_reranker("jina")
+    assert isinstance(r.primary, JinaReranker) and r.primary.model_id == "jina-reranker-v2-base-multilingual"
+    assert make_reranker("jina", model_id="jina-reranker-m0", fallback=False).model_id == "jina-reranker-m0"

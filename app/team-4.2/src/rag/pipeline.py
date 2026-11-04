@@ -8,7 +8,7 @@
 Luồng ingest:
     load -> chunk_document -> [index_enhancers của phương pháp nâng cao] -> index -> ChunkStore
 Luồng ask:
-    HybridRetriever.retrieve (BM25 + Dense + arm nâng cao) -> select_context
+    HybridRetriever.retrieve (BM25 + Dense [HyDE nếu bật] + arm nâng cao) -> select_context
     -> (context rỗng: từ chối, không gọi LLM) -> generate -> build_citations -> Answer
 
 Phương pháp nâng cao (HyDE, Contextual Retrieval, ...) gắn qua src/rag/advanced/, bật bằng ADVANCED;
@@ -31,7 +31,7 @@ from typing import Any
 from rag.config import Settings
 from rag.generate.answer import answer_question
 from rag.index.bm25_index import BM25Index
-from rag.index.embedder import EmbeddingCache, OpenAIEmbedder
+from rag.index.embedder import EmbeddingCache, make_embedder
 from rag.index.store import ChunkStore
 from rag.index.vector_index import VectorIndex
 from rag.ingest.chunker import chunk_document
@@ -66,11 +66,14 @@ class AskTrace:
     llm_called: bool
 
 
+# Không còn thuộc chữ ký index: mỗi embedding model có vector index riêng (Settings.vector_dir,
+# kiểm tra bằng vector meta.json). File index_config.json cũ còn các khoá này thì bỏ qua.
+_LEGACY_SIGNATURE_KEYS = ("embed_model", "embed_dim")
+
+
 def index_signature(settings: Settings, index_enhancers: Sequence[str]) -> dict[str, Any]:
-    """Những gì quyết định nội dung index. Khác nhau -> phải index lại."""
+    """Những gì quyết định nội dung chunk (chunks.jsonl, BM25). Khác nhau -> phải ingest lại."""
     return {
-        "embed_model": settings.embed_model,
-        "embed_dim": settings.embed_dim,
         "max_syllables": settings.max_syllables,
         "index_enhancers": list(index_enhancers),
     }
@@ -79,6 +82,7 @@ def index_signature(settings: Settings, index_enhancers: Sequence[str]) -> dict[
 def check_index_config(path: Path, signature: dict[str, Any]) -> None:
     if path.exists():
         have = json.loads(path.read_text(encoding="utf-8"))
+        have = {k: v for k, v in have.items() if k not in _LEGACY_SIGNATURE_KEYS}
         if have != signature:
             raise IndexConfigMismatchError(
                 f"Index tại {path.parent} được build với {have}, cấu hình hiện tại là {signature}. "
@@ -127,8 +131,11 @@ class RAGPipeline:
             api_key=s.llm_api_key,
             cache=LLMCache(s.cache_dir / "llm.sqlite"),
         )
-        embedder = OpenAIEmbedder(
-            s.embed_model, s.embed_dim, cache=EmbeddingCache(s.cache_dir / "embeddings.sqlite")
+        embedder = make_embedder(
+            s.embed_model, s.embed_dim, cache=EmbeddingCache(s.cache_dir / "embeddings.sqlite"),
+            backend=s.embed_backend or None,
+            query_prefix=s.embed_query_prefix, passage_prefix=s.embed_passage_prefix,
+            jina_api_key=s.jina_api_key, device=s.embed_device or None, batch_size=s.embed_batch_size,
         )
         dense = VectorIndex.open_qdrant(s.vector_dir, embedder)   # mở index có sẵn không ghi gì
         enhancements = build_enhancements(
@@ -139,14 +146,22 @@ class RAGPipeline:
         check_index_config(s.index_config_path, index_signature(s, [e.name for e in index_enhancers]))
 
         extra_arms = {name: arm for e in enhancements for name, arm in e.arms.items()}
+        dense_arm = dense
+        for e in enhancements:            # vd. HyDE: arm Dense tìm bằng (câu hỏi + đoạn giả)
+            if e.wrap_dense is not None:
+                dense_arm = e.wrap_dense(dense_arm)
         retriever = HybridRetriever(
             BM25Index(),
-            dense,
+            dense_arm,
             extra_arms=extra_arms,
-            reranker=make_reranker(s.rerank_backend, cache_path=s.cache_dir / "rerank.sqlite"),
+            reranker=make_reranker(s.rerank_backend, model_id=s.rerank_model or None,
+                                   cache_path=s.cache_dir / "rerank.sqlite"),
             arm_k=s.arm_k,
             rrf_k=s.rrf_k,
             rerank_n=s.rerank_n,
+            merge_articles=s.merge_articles,
+            article_pool_factor=s.article_pool_factor,
+            default_arms=s.retrieval_arm_list,
         )
         context = ContextConfig(
             min_p=s.context_min_p,

@@ -1,4 +1,9 @@
-"""Rerank bằng TypeSafe Jev — phần thêm ngoài yêu cầu sprint 1.
+"""Rerank bằng TypeSafe Jev hoặc Jina Reranker — phần thêm ngoài yêu cầu sprint 1.
+
+    RERANK_BACKEND=jev    TypeSafe Jev (mỗi cặp câu hỏi-chunk một lần gọi, điểm = xác suất [0, 1])
+    RERANK_BACKEND=jina   Jina Reranker API (cross-encoder, một request cho cả pool; cần JINA_API_KEY),
+                          model mặc định jina-reranker-v2-base-multilingual, đổi bằng RERANK_MODEL.
+                          Điểm là relevance_score của Jina — thang KHÁC Jev, phải chọn lại CONTEXT_MIN_P.
 
     RRF top-20 Hit(fused) -> JevReranker -> top-5 Hit(rerank, score = xác suất liên quan [0, 1])
 
@@ -17,6 +22,8 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import os
+import time
 import sqlite3
 import threading
 from collections.abc import Mapping, Sequence
@@ -31,7 +38,10 @@ log = logging.getLogger(__name__)
 DEFAULT_JEV_MODEL = "jev-1.13.0"            # chốt version, KHÔNG dùng "jev-latest"
 JEV_INSTRUCTIONS = "Đoạn văn chứa thông tin trả lời trực tiếp câu hỏi"
 
-BACKENDS = ("none", "jev")
+DEFAULT_JINA_RERANK_MODEL = "jina-reranker-v2-base-multilingual"
+JINA_RERANK_URL = "https://api.jina.ai/v1/rerank"
+
+BACKENDS = ("none", "jev", "jina")
 
 
 class RerankInputError(ValueError):
@@ -87,35 +97,19 @@ class ScoreCache:
 
 
 # ---------------------------------------------------------------------------
-# Jev
+# Khung chung: chấm điểm từng chunk + cache + sắp xếp
 # ---------------------------------------------------------------------------
 
 
-class JevReranker:
-    """`client` và `question` cho phép truyền đối tượng giả khi test."""
+class ScoringReranker:
+    """Lớp con chỉ cần `model_id`, `cache` và `score_pairs(query, chunks) -> list[float]`."""
 
-    name = "jev"
+    name = "base"
+    model_id: str
+    cache: ScoreCache | None = None
 
-    def __init__(
-        self,
-        model_id: str = DEFAULT_JEV_MODEL,
-        *,
-        cache: ScoreCache | None = None,
-        instructions: str = JEV_INSTRUCTIONS,
-        max_workers: int = 8,
-        client: Any = None,
-        question: Any = None,
-    ) -> None:
-        if max_workers < 1:
-            raise ValueError("max_workers phải >= 1")
-        self.model_id = model_id
-        self.cache = cache
-        self.instructions = instructions
-        self.max_workers = max_workers
-        self._client = client
-        self._question = question
-
-    # --- rerank --------------------------------------------------------------
+    def score_pairs(self, query: str, chunks: Sequence[Chunk]) -> list[float]:
+        raise NotImplementedError
 
     def rerank(
         self, query: str, hits: list[Hit], chunks: Mapping[str, Chunk], k: int
@@ -148,6 +142,36 @@ class JevReranker:
             self.cache.put_many(new_items)
             found.update(new_items)
         return [found[key] for key in keys]
+
+
+# ---------------------------------------------------------------------------
+# Jev
+# ---------------------------------------------------------------------------
+
+
+class JevReranker(ScoringReranker):
+    """`client` và `question` cho phép truyền đối tượng giả khi test."""
+
+    name = "jev"
+
+    def __init__(
+        self,
+        model_id: str = DEFAULT_JEV_MODEL,
+        *,
+        cache: ScoreCache | None = None,
+        instructions: str = JEV_INSTRUCTIONS,
+        max_workers: int = 8,
+        client: Any = None,
+        question: Any = None,
+    ) -> None:
+        if max_workers < 1:
+            raise ValueError("max_workers phải >= 1")
+        self.model_id = model_id
+        self.cache = cache
+        self.instructions = instructions
+        self.max_workers = max_workers
+        self._client = client
+        self._question = question
 
     # --- gọi Jev -------------------------------------------------------------
 
@@ -188,6 +212,76 @@ class JevReranker:
         with ThreadPoolExecutor(max_workers=workers) as pool:
             # map giữ đúng thứ tự đầu vào; lỗi ở bất kỳ cặp nào sẽ được ném ra ở đây
             return list(pool.map(lambda c: self._score_one(client, question, query, c), chunks))
+
+
+# ---------------------------------------------------------------------------
+# Jina Reranker
+# ---------------------------------------------------------------------------
+
+
+class JinaReranker(ScoringReranker):
+    """Gọi https://api.jina.ai/v1/rerank: một request cho cả pool. `post`, `sleep` thay được khi test."""
+
+    name = "jina"
+    RETRY_STATUS = frozenset({429, 500, 502, 503, 504})
+
+    def __init__(
+        self,
+        model_id: str = DEFAULT_JINA_RERANK_MODEL,
+        *,
+        cache: ScoreCache | None = None,
+        api_key: str | None = None,
+        max_retries: int = 6,
+        timeout: float = 60.0,
+        post: Any = None,
+        sleep: Any = time.sleep,
+    ) -> None:
+        self.model_id = model_id
+        self.cache = cache
+        self._api_key = api_key
+        self.max_retries = max_retries
+        self.timeout = timeout
+        self._post = post
+        self._sleep = sleep
+
+    @staticmethod
+    def build_document(chunk: Chunk) -> str:
+        head = f"{chunk.section}\n" if chunk.section else ""
+        return f"{head}{chunk.text}"
+
+    def _key(self) -> str:
+        key = self._api_key or os.environ.get("JINA_API_KEY")
+        if not key:
+            raise RuntimeError("Thiếu JINA_API_KEY (đặt trong .env) cho RERANK_BACKEND=jina")
+        return key
+
+    def score_pairs(self, query: str, chunks: Sequence[Chunk]) -> list[float]:
+        from rag.index.embedders.jina_api import JinaHTTPError, _jina_post
+
+        post = self._post or _jina_post
+        payload = {
+            "model": self.model_id,
+            "query": query,
+            "documents": [self.build_document(c) for c in chunks],
+            "top_n": len(chunks),
+            "return_documents": False,
+        }
+        for attempt in range(self.max_retries + 1):
+            try:
+                data = post(JINA_RERANK_URL, payload, self._key(), self.timeout)
+                break
+            except JinaHTTPError as e:
+                if e.status not in self.RETRY_STATUS or attempt == self.max_retries:
+                    raise
+                wait = min(3 * 2**attempt, 60)
+                log.warning("Jina rerank lỗi (%s), thử lại sau %ss", e.status, wait)
+                self._sleep(wait)
+        scores: list[float | None] = [None] * len(chunks)
+        for r in data["results"]:
+            scores[r["index"]] = float(r["relevance_score"])
+        if any(x is None for x in scores):
+            raise RuntimeError("Jina rerank trả thiếu điểm cho một số đoạn")
+        return scores  # type: ignore[return-value]
 
 
 # ---------------------------------------------------------------------------
@@ -242,23 +336,32 @@ def make_reranker(
     cache_path: Path | str | None = None,
     fallback: bool = True,
 ) -> Reranker:
-    """Tạo reranker theo RERANK_BACKEND = none | jev. Không gọi API ở đây."""
+    """Tạo reranker theo RERANK_BACKEND = none | jev | jina. Không gọi API ở đây.
+
+    Cache dùng chung một file: key gồm model_id nên điểm Jev và Jina không lẫn nhau.
+    """
     if backend not in BACKENDS:
         raise ValueError(f"RERANK_BACKEND phải thuộc {BACKENDS}, nhận {backend!r}")
     if backend == "none":
         return NoopReranker()
     cache = ScoreCache(cache_path) if cache_path is not None else None
-    jev = JevReranker(model_id or DEFAULT_JEV_MODEL, cache=cache)
-    return FallbackReranker(jev) if fallback else jev
+    if backend == "jina":
+        primary: Reranker = JinaReranker(model_id or DEFAULT_JINA_RERANK_MODEL, cache=cache)
+    else:
+        primary = JevReranker(model_id or DEFAULT_JEV_MODEL, cache=cache)
+    return FallbackReranker(primary) if fallback else primary
 
 
 __all__ = [
     "BACKENDS",
     "DEFAULT_JEV_MODEL",
+    "DEFAULT_JINA_RERANK_MODEL",
     "FallbackReranker",
     "JevReranker",
+    "JinaReranker",
     "NoopReranker",
     "RerankInputError",
     "ScoreCache",
+    "ScoringReranker",
     "make_reranker",
 ]

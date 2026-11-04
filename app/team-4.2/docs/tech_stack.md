@@ -18,7 +18,7 @@
 | Parsing URL | **trafilatura** | — | TV1 | Lấy nội dung chính, bỏ menu, quảng cáo, footer |
 | Tách từ tiếng Việt | **pyvi** | — | TV2 | Gộp từ ghép ("tài_sản") để BM25 khớp đúng từ |
 | BM25 | **Tự viết** Okapi BM25 (k1=1.5, b=0.75, idf `ln(1 + …)`), lưu JSON | BM25 | TV2 | Khoảng 60 dòng, đọc được công thức khi Q&A. Không dùng `rank_bm25` vì idf của nó ≤ 0 khi một từ có trong ≥ nửa số chunk, nên tài liệu nhỏ bị mất kết quả (xem mục 9.1) |
-| Embedding | **OpenAI `text-embedding-3-small`** (1536 chiều) qua `openai` | — | TV3 | Gọi API nên không cần GPU và không phải tải model; encode nhanh; giá rẻ |
+| Embedding | **Jina `jina-embeddings-v5-text-small`** (1024 chiều) qua Jina API, mặc định từ 11/2026. Vẫn dùng được OpenAI `text-embedding-3-small` (1536 chiều) bằng `EMBED_MODEL` | — | TV3 | Gọi API nên không cần GPU. Hiểu văn nói tiếng Việt tốt hơn hẳn: dense recall@5 trên 40 câu 0.600 → 0.871, trên 20 câu đời thường 0.100 → 0.425 |
 | Vector DB | **Qdrant (local mode)** qua `qdrant-client`, distance = cosine | Elasticsearch / Qdrant / Milvus | TV3 | Chạy trong tiến trình Python, không cần server |
 | Fusion | **RRF tự viết**, k=60 | RRF | TV2 | Khoảng 15 dòng code, phải tự hiểu vì Q&A bắt buộc hỏi |
 | Reranker | **Jev** (TypeSafe, API), bật bằng `RERANK_BACKEND=jev` | — (không bắt buộc) | TV2 (đề xuất) | Phần duy nhất thêm ngoài yêu cầu sprint. Giữ hay bỏ quyết định bằng ablation. Xem mục 9 |
@@ -167,7 +167,9 @@ Danh sách chính thức nằm trong `pyproject.toml`, Jev để ở nhóm optio
 
 ```bash
 OPENAI_API_KEY=...
-EMBED_MODEL=text-embedding-3-small
+EMBED_MODEL=jina-embeddings-v5-text-small   # hoặc text-embedding-3-small, bqbbao6/vietnamese-legal-embedding, ...
+EMBED_DIM=                                  # để trống = theo registry (src/rag/index/embedders/registry.py)
+JINA_API_KEY=...
 LLM_MODEL=gpt-5.6-lunar
 # Nếu GPT 5.6 Lunar dùng endpoint/key riêng (OpenAI-compatible):
 # LLM_BASE_URL=...
@@ -187,7 +189,7 @@ TYPESAFE_API_KEY=...           # chỉ cần khi RERANK_BACKEND=jev
 | 1 | **UI là deliverable bắt buộc (#1)** nhưng `phan_cong_sprint1.md` ghi "Phần UI không nằm trong danh sách phân công" | Thiếu UI thì không đạt Definition of Done | Giao cho TV5 (nắm `pipeline.ask()`) hoặc TV2 (việc nhẹ). Làm ngày 14/09 theo timeline sprint |
 | 2 | **Demo phụ thuộc mạng và API** (embedding + LLM) | Mất mạng hoặc API lỗi thì app không trả lời được | Ingest sẵn tài liệu demo trước buổi bảo vệ; cache SQLite giúp các câu đã hỏi vẫn chạy; chuẩn bị video demo dự phòng |
 | 3 | Chi phí và rate limit API | Chạy eval nhiều cấu hình × RAGAS tốn nhiều lượt gọi | Cache embedding theo `sha256(model + text)` và câu trả lời theo `sha256(model + prompt)`; test dùng embedder và LLM giả |
-| 4 | **Đổi model embedding phải index lại toàn bộ** | Vector cũ và mới không so được với nhau | `VectorIndex.open_qdrant` ghi tên model và số chiều vào `meta.json` cạnh index; mở bằng model khác thì báo `IndexMismatchError`, không trộn |
+| 4 | **Đổi model embedding phải index lại toàn bộ** | Vector cũ và mới không so được với nhau | Mỗi model một thư mục `indexes/vector/<model>/` (tự build từ `chunks.jsonl` khi chạy lần đầu, không cần ingest lại); `meta.json` ghi tên model + số chiều, mở nhầm thì báo `IndexMismatchError`, không trộn |
 | 5 | RAGAS dùng cùng LLM để chấm | Điểm có thể cao hơn thực tế | Chấm tay khoảng 15 câu để đối chiếu; ghi rõ trong `evals/team-4.2/REPORT.md` |
 | 6 | Lẫn NFC/NFD trong tiếng Việt | BM25 không khớp, gold không khớp | Mọi text đi qua `nfc()` trong `schema.py` |
 | 7 | PDF scan, không có lớp text | Index text rỗng mà không ai biết | Parser cảnh báo khi `Page.is_empty` |
@@ -251,6 +253,7 @@ query ─┬─► BM25Index.search(q, 20)   ─► Hit(bm25)  ─┐
 
 ### 9.2. Dense — `src/rag/index/embedder.py`, `vector_index.py` (TV3)
 
+- `JinaEmbedder` (mặc định): `jina-embeddings-v5-text-small`, embed chunk với task `retrieval.passage` và câu hỏi với `retrieval.query` (`embed_query`); batch 32, retry khi HTTP 429/5xx; cache SQLite theo `sha256(model#task, text)`. `make_embedder` chọn Jina khi tên model bắt đầu bằng `jina-`.
 - `OpenAIEmbedder`: `text-embedding-3-small`, batch 64, retry tối đa 6 lần (chờ 1, 2, 4… tối đa 30 giây) khi gặp rate limit, timeout, lỗi kết nối hoặc lỗi server; kiểm tra số chiều; cache SQLite theo `sha256(model, text)`.
 - `HashEmbedder`: embedder giả, tất định, không gọi mạng. Các module khác dùng nó khi viết unit test.
 - `VectorIndex`: chỉ embed chunk chưa có trong index. `search` trả `Hit(dense)` với score = cosine.
@@ -328,21 +331,23 @@ Mỗi phương pháp là một module riêng, đăng ký vào registry và bật
 | Điểm gắn | Chạy khi nào | Tác dụng | Ví dụ |
 |---|---|---|---|
 | `index_enhancer` | Lúc ingest, sau chunking, trước khi index | Thêm `Chunk.context`. BM25/Dense index `context + text` (`Chunk.index_text`); text gốc giữ nguyên để hiển thị, đưa cho LLM và trích dẫn | Contextual Retrieval |
-| `arms` | Lúc truy vấn | Thêm arm retrieval vào `HybridRetriever`, gộp cùng BM25 + Dense bằng RRF | HyDE |
+| `arms` | Lúc truy vấn | Thêm arm retrieval vào `HybridRetriever`, gộp cùng BM25 + Dense bằng RRF | SPLADE, ColBERT |
+| `wrap_dense` | Lúc truy vấn | **Thay** arm Dense bằng retriever bọc nó (đổi cách tạo truy vấn, cùng index) | HyDE |
 
 ```bash
 ADVANCED=                                  # baseline sprint 1
-ADVANCED=hyde                              # thêm arm HyDE
+ADVANCED=hyde                              # arm Dense tìm bằng HyDE
 ADVANCED=contextual_header,hyde            # nhiều phương pháp, theo đúng thứ tự
 ```
 
-**Thêm phương pháp mới:** tạo file trong `src/rag/advanced/`, viết hàm factory có `@register("tên")` nhận `Components` (settings, llm, embedder, index Dense) và trả `Enhancement(index_enhancer=..., arms=...)`, thêm một dòng import vào `advanced/__init__.py`, rồi bật bằng `ADVANCED`. **Bỏ:** xoá tên khỏi `ADVANCED` (hoặc xoá file và dòng import).
+**Thêm phương pháp mới:** tạo file trong `src/rag/advanced/`, viết hàm factory có `@register("tên")` nhận `Components` (settings, llm, embedder, index Dense) và trả `Enhancement(index_enhancer=..., arms=..., wrap_dense=...)`, thêm một dòng import vào `advanced/__init__.py`, rồi bật bằng `ADVANCED`. **Bỏ:** xoá tên khỏi `ADVANCED` (hoặc xoá file và dòng import).
 
 ### 10.1. HyDE — `advanced/hyde.py` (`ADVANCED=hyde`)
 
-- GPT 5.6 Lunar viết một đoạn trả lời **giả** 3–5 câu theo văn phong văn bản luật. Embed `câu hỏi + đoạn giả`, rồi tìm trên chính index Dense. Kết quả thành arm `hyde`, gộp với BM25 + Dense bằng RRF.
+- GPT 5.6 Lunar viết một đoạn trả lời **giả** 3–5 câu theo văn phong văn bản luật. Embed `câu hỏi + đoạn giả`, rồi tìm trên chính index Dense.
+- HyDE là **luồng chính của arm `dense`**: bật `ADVANCED=hyde` thì arm `dense` tìm bằng `câu hỏi + đoạn giả`, không còn arm Dense riêng tìm bằng câu hỏi gốc để gộp RRF. Lý do (benchmark 6 bộ luật, 11/2026): `hyde+rerank` ≈ `dense+hyde+rerank` (Recall@5 0.950 = 0.950 trên 40 câu; 0.717 vs 0.742 trên 20 câu đời thường), arm câu-gốc chỉ tốn thêm một lần embed. Câu hỏi gốc vẫn nằm trong text embed.
 - Chỉ áp dụng cho Dense. BM25 vẫn tìm bằng câu hỏi gốc, để số Điều hay thuật ngữ LLM bịa ra không làm lệch kết quả keyword.
-- Mỗi câu hỏi tốn thêm 1 lần gọi LLM, có cache. LLM lỗi thì arm `hyde` lỗi, BM25 + Dense vẫn chạy.
+- Mỗi câu hỏi tốn thêm 1 lần gọi LLM, có cache. LLM lỗi hoặc trả rỗng thì arm `dense` tự lùi về tìm bằng câu hỏi gốc (ghi cảnh báo).
 - **Rủi ro:** câu ngoài phạm vi cũng sinh được đoạn giả nghe hợp lý, nên phải đo cả tỉ lệ từ chối nhầm.
 
 ### 10.2. Contextual Retrieval — `advanced/contextual.py`
@@ -359,7 +364,7 @@ ADVANCED=contextual_header,hyde            # nhiều phương pháp, theo đúng
 ### 10.3. Bảo vệ index và cách làm ablation
 
 - `data/team-4.2/indexes/index_config.json` ghi model embedding, `MAX_SYLLABLES` và các phương pháp chạy lúc index. Mở index bằng cấu hình khác thì pipeline báo `IndexConfigMismatchError`, không trộn chunk có và không có bối cảnh.
-- **HyDE** (lúc truy vấn): cùng một index, so bằng `run_eval.py --configs hybrid hybrid+hyde hyde`.
+- **HyDE** (lúc truy vấn): cùng một index, chạy `run_eval.py --configs dense dense+rerank hybrid all` hai lần, với `ADVANCED` có và không có `hyde`.
 - **Contextual** (lúc index): mỗi biến thể một `DATA_DIR` riêng, ingest cùng bộ tài liệu, chạy `run_eval.py` cho từng thư mục rồi so từng câu:
 
   ```bash

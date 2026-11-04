@@ -1,6 +1,7 @@
-"""Parsing PDF / URL / TXT -> list[Page] — TV1.
+"""Parsing PDF / DOCX / URL / TXT -> list[Page] — TV1.
 
     load_pdf(path)   PyMuPDF, mỗi trang một Page (page đánh số từ 1); doc_id = hash bytes file
+    load_docx(path)  python-docx, đoạn văn + bảng theo thứ tự; một Page (page=None); doc_id = hash bytes file
     load_url(url)    trafilatura lấy nội dung chính; một Page (page=None); doc_id = hash text
     load_text(path)  file text UTF-8; một Page (page=None); doc_id = hash text
     load_source(x)   tự chọn loader theo URL / đuôi file
@@ -12,8 +13,10 @@ baseline (Law_RAG dùng OCR cho trường hợp này).
 
 from __future__ import annotations
 
+import io
 import logging
 import re
+import zipfile
 from collections.abc import Callable, Sequence
 from pathlib import Path
 
@@ -25,6 +28,7 @@ _SPACES_RE = re.compile(r"[ \t ​]+")
 _MANY_NEWLINES_RE = re.compile(r"\n{3,}")
 
 PDF_SUFFIXES = {".pdf"}
+DOCX_SUFFIXES = {".docx"}
 TEXT_SUFFIXES = {".txt", ".md", ".text"}
 
 
@@ -59,6 +63,52 @@ def load_pdf(path: Path | str, *, source: str | None = None) -> list[Page]:
     with fitz.open(stream=data, filetype="pdf") as doc:
         texts = [page.get_text("text") for page in doc]
     return pages_from_texts(make_doc_id(data), source or path.name, texts)
+
+
+def _docx_blocks(doc) -> list[str]:
+    """Đoạn văn và bảng theo đúng thứ tự trong thân văn bản. Mỗi hàng bảng thành một dòng
+    "ô | ô | ...", ô gộp (merged) chỉ lấy một lần."""
+    from docx.table import Table
+    from docx.text.paragraph import Paragraph
+
+    blocks: list[str] = []
+    for item in doc.iter_inner_content():
+        if isinstance(item, Paragraph):
+            blocks.append(item.text)
+        elif isinstance(item, Table):
+            for row in item.rows:
+                cells: list[str] = []
+                seen: set[int] = set()
+                for cell in row.cells:
+                    if id(cell._tc) in seen:
+                        continue
+                    seen.add(id(cell._tc))
+                    text = " ".join(cell.text.split())
+                    if text:
+                        cells.append(text)
+                if cells:
+                    blocks.append(" | ".join(cells))
+            blocks.append("")   # dòng trống sau bảng: không gộp với đoạn kế tiếp
+    return blocks
+
+
+def load_docx(path: Path | str, *, source: str | None = None) -> list[Page]:
+    """DOCX không có khái niệm trang cố định -> một Page (page=None); doc_id = hash bytes file.
+    Mỗi paragraph Word là một dòng, nên chunker vẫn nhận ra heading Chương/Điều như với PDF."""
+    import docx  # python-docx
+    from docx.opc.exceptions import PackageNotFoundError
+
+    path = Path(path)
+    data = path.read_bytes()
+    try:
+        doc = docx.Document(io.BytesIO(data))
+    except (PackageNotFoundError, KeyError, ValueError, zipfile.BadZipFile) as e:
+        raise UnsupportedSourceError(f"{path.name}: không đọc được file DOCX ({e})") from e
+    text = clean_text("\n".join(_docx_blocks(doc)))
+    name = source or path.name
+    if not text:
+        log.warning("%s: tài liệu rỗng", name)
+    return [Page(make_doc_id(data), name, None, text)]
 
 
 def load_text(path: Path | str, *, source: str | None = None) -> list[Page]:
@@ -115,15 +165,20 @@ def load_source(value: str | Path, *, source: str | None = None) -> list[Page]:
     suffix = path.suffix.lower()
     if suffix in PDF_SUFFIXES:
         return load_pdf(path, source=source)
+    if suffix in DOCX_SUFFIXES:
+        return load_docx(path, source=source)
     if suffix in TEXT_SUFFIXES:
         return load_text(path, source=source)
-    raise UnsupportedSourceError(f"Không hỗ trợ loại file {suffix!r} (chỉ PDF, TXT/MD hoặc URL)")
+    raise UnsupportedSourceError(
+        f"Không hỗ trợ loại file {suffix!r} (chỉ PDF, DOCX, TXT/MD hoặc URL)"
+    )
 
 
 __all__ = [
     "UnsupportedSourceError",
     "clean_text",
     "is_url",
+    "load_docx",
     "load_pdf",
     "load_source",
     "load_text",

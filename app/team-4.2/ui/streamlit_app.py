@@ -2,7 +2,7 @@
 
     streamlit run app/team-4.2/ui/streamlit_app.py
 
-Sidebar: upload PDF/TXT/MD hoặc nhập URL để ingest. Khung chính: hỏi đáp, mỗi câu trả lời kèm
+Sidebar: upload PDF/DOCX/TXT/MD hoặc nhập URL để ingest. Khung chính: hỏi đáp, mỗi câu trả lời kèm
 citation và bảng kết quả từng arm (BM25 / Dense / kết quả cuối) để chứng minh hybrid search chạy.
 Qdrant local chỉ cho một tiến trình mở index: đừng chạy script eval khi app đang mở.
 """
@@ -69,7 +69,9 @@ def show_trace(trace: AskTrace) -> None:
 
 with st.sidebar:
     st.header("Tài liệu")
-    uploads = st.file_uploader("Upload PDF / TXT / MD", type=["pdf", "txt", "md"], accept_multiple_files=True)
+    uploads = st.file_uploader(
+        "Upload PDF / DOCX / TXT / MD", type=["pdf", "docx", "txt", "md"], accept_multiple_files=True
+    )
     url = st.text_input("Hoặc nhập URL")
     if st.button("Ingest", type="primary", disabled=not (uploads or url)):
         raw_dir = settings.data_dir / "raw"

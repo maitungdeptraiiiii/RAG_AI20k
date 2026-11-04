@@ -10,6 +10,7 @@ from rag.ingest.chunker import chunk_document
 from rag.ingest.loaders import (
     UnsupportedSourceError,
     clean_text,
+    load_docx,
     load_source,
     load_text,
     load_url,
@@ -52,7 +53,53 @@ def test_load_url_with_fake_fetcher():
 
 def test_load_source_rejects_unknown_type():
     with pytest.raises(UnsupportedSourceError):
-        load_source("tai_lieu.docx")
+        load_source("tai_lieu.doc")
+
+
+def _write_docx(path: Path) -> None:
+    import docx
+
+    doc = docx.Document()
+    for line in [
+        "Chương I",
+        "NHỮNG QUY ĐỊNH CHUNG",
+        "Điều 1. Phạm vi điều chỉnh",
+        "Luật này quy định về đất đai.",
+    ]:
+        doc.add_paragraph(line)
+    table = doc.add_table(rows=2, cols=2)
+    table.cell(0, 0).text, table.cell(0, 1).text = "Loại đất", "Thời hạn"
+    table.cell(1, 0).text, table.cell(1, 1).text = "Đất nông nghiệp", "50 năm"
+    doc.add_paragraph("Điều 2. Đối tượng áp dụng")
+    doc.add_paragraph("Cơ quan nhà nước.")
+    doc.save(path)
+
+
+def test_load_docx_paragraphs_tables_and_chunking():
+    with tempfile.TemporaryDirectory() as d:
+        path = Path(d) / "luat.docx"
+        _write_docx(path)
+        pages = load_source(path, source="Luật đất đai.docx")
+        again = load_docx(path)
+    assert len(pages) == 1 and pages[0].page is None and pages[0].source == "Luật đất đai.docx"
+    assert pages[0].doc_id == again[0].doc_id
+    assert "Loại đất | Thời hạn\nĐất nông nghiệp | 50 năm" in pages[0].text
+    # bảng nằm đúng vị trí giữa Điều 1 và Điều 2
+    assert pages[0].text.index("Điều 1.") < pages[0].text.index("Loại đất") < pages[0].text.index("Điều 2.")
+
+    chunks = chunk_document(pages, max_syllables=300)
+    assert len(chunks) == 2
+    assert chunks[0].section == "Chương I NHỮNG QUY ĐỊNH CHUNG > Điều 1. Phạm vi điều chỉnh"
+    assert "Đất nông nghiệp | 50 năm" in chunks[0].text
+    assert chunks[1].text.startswith("Điều 2.") and chunks[1].page_start is None
+
+
+def test_load_docx_rejects_corrupt_file():
+    with tempfile.TemporaryDirectory() as d:
+        path = Path(d) / "hong.docx"
+        path.write_bytes(b"khong phai docx")
+        with pytest.raises(UnsupportedSourceError):
+            load_docx(path)
 
 
 # --- chunker ------------------------------------------------------------------------

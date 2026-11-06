@@ -537,6 +537,15 @@
       'bo_luat_to_tung_hinh_su_2015.txt': 'Bộ luật Tố tụng Hình sự 2015',
     };
 
+    const VBPL_DOC_LINKS = {
+      'bo_luat_dan_su_2015.txt': { url: 'https://vbpl.vn/van-ban/chi-tiet/95942', num: '91/2015/QH13' },
+      'bo_luat_hinh_su_2015.txt': { url: 'https://vbpl.vn/van-ban/chi-tiet/96122', num: '100/2015/QH13' },
+      'bo_luat_to_tung_dan_su_2015.txt': { url: 'https://vbpl.vn/van-ban/chi-tiet/96115', num: '92/2015/QH13' },
+      'bo_luat_to_tung_hinh_su_2015.txt': { url: 'https://vbpl.vn/van-ban/chi-tiet/96172', num: '101/2015/QH13' },
+      'bo_luat_lao_dong_2019.txt': { url: 'https://vbpl.vn/van-ban/chi-tiet/139264', num: '45/2019/QH14' },
+      'bo_luat_hang_hai_2015.txt': { url: 'https://vbpl.vn/van-ban/chi-tiet/96117', num: '95/2015/QH13' },
+    };
+
     const DOC_SHORT_NAMES = {
       'bo_luat_dan_su_2015.txt': 'BLDS',
       'bo_luat_hang_hai_2015.txt': 'BLHH',
@@ -663,17 +672,37 @@
 
       container.innerHTML = docs.map(d => {
         const cleanName = formatDocTitle(d.source);
+        const vbpl = VBPL_DOC_LINKS[d.source];
+        const primaryUrl = vbpl ? vbpl.url : `/doc/${encodeURIComponent(d.source)}`;
+        const tooltip = vbpl ? `Mở văn bản gốc trên vbpl.vn: ${cleanName}` : `Mở tệp: ${cleanName}`;
         return `
-          <a href="/doc/${encodeURIComponent(d.source)}" target="_blank" rel="noopener noreferrer" class="w-full flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-neutral-700 hover:bg-[#ececec] hover:text-neutral-900 transition-colors text-left truncate group" title="${escapeHtml(d.source)} (${d.n_chunks} chunks)">
-            <svg class="w-4 h-4 text-neutral-500 flex-shrink-0 group-hover:text-neutral-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <span class="truncate flex-1 text-[13px] font-normal">${escapeHtml(cleanName)}</span>
-            <span class="text-[10px] text-neutral-400 font-normal ml-1 flex-shrink-0">${d.n_chunks}c</span>
-            <svg class="w-3.5 h-3.5 text-neutral-400 opacity-0 group-hover:opacity-100 flex-shrink-0 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-          </a>
+          <div class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-neutral-700 hover:bg-[#ececec] hover:text-neutral-900 transition-colors group">
+            <a href="${primaryUrl}" target="_blank" rel="noopener noreferrer" class="flex items-center space-x-2 truncate flex-1 min-w-0" title="${tooltip}">
+              <svg class="w-4 h-4 text-neutral-500 flex-shrink-0 group-hover:text-neutral-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span class="truncate text-[13px] font-normal">${escapeHtml(cleanName)}</span>
+            </a>
+            <div class="flex items-center space-x-1 ml-1 flex-shrink-0">
+              ${vbpl ? `
+                <a href="${vbpl.url}" target="_blank" rel="noopener noreferrer" title="Văn bản gốc vbpl.vn (${vbpl.num})" class="px-1.5 py-0.5 text-[10px] font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded border border-emerald-200">
+                  Gốc ↗
+                </a>
+                <a href="/doc/${encodeURIComponent(d.source)}" target="_blank" rel="noopener noreferrer" title="Xem bản đọc lưu trữ nội bộ" class="p-1 text-neutral-400 hover:text-neutral-700 rounded">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </a>
+              ` : `
+                <a href="/doc/${encodeURIComponent(d.source)}" target="_blank" rel="noopener noreferrer" title="Mở tệp gốc" class="p-1 text-neutral-400 hover:text-neutral-700 rounded">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              `}
+            </div>
+          </div>
         `;
       }).join('');
     }
@@ -684,6 +713,7 @@
       const list = filterCode ? docs.filter(d => d.source === filterCode) : docs;
       container.innerHTML = list.map((d, idx) => {
         const cleanName = formatDocTitle(d.source);
+        const vbpl = VBPL_DOC_LINKS[d.source];
         return `
           <div class="p-3.5 rounded-xl border border-neutral-200 bg-neutral-50 flex items-center justify-between">
             <div class="space-y-0.5">
@@ -692,16 +722,21 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <span>${cleanName}</span>
+                ${vbpl ? `<span class="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-medium">Số: ${vbpl.num}</span>` : ''}
               </div>
               <div class="text-[12px] text-neutral-500">Mã tệp: ${d.source}</div>
             </div>
-            <div class="flex items-center space-x-3">
-              <div class="text-right">
-                <div class="text-[13px] font-semibold text-neutral-800">${d.n_chunks} chunks</div>
-                <div class="text-[11px] text-emerald-600">Đã lập chỉ mục</div>
-              </div>
+            <div class="flex items-center space-x-2">
+              ${vbpl ? `
+                <a href="${vbpl.url}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1.5 text-xs font-semibold border border-emerald-300 rounded-lg bg-emerald-50 text-emerald-800 hover:bg-emerald-100 transition-colors flex items-center space-x-1">
+                  <span>Văn bản gốc vbpl.vn</span>
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              ` : ''}
               <a href="/doc/${encodeURIComponent(d.source)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1.5 text-xs font-medium border border-neutral-300 rounded-lg bg-white text-neutral-700 hover:bg-neutral-100 hover:text-black transition-colors flex items-center space-x-1">
-                <span>Mở tab mới</span>
+                <span>Bản đọc / Tải file</span>
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                 </svg>
@@ -1019,7 +1054,10 @@
       };
       const popTab = document.getElementById('popover-tab-btn');
       if (popTab && src.source) {
-        popTab.href = '/doc/' + encodeURIComponent(src.source);
+        const vbpl = VBPL_DOC_LINKS[src.source];
+        popTab.href = vbpl ? vbpl.url : ('/doc/' + encodeURIComponent(src.source));
+        const spanEl = popTab.querySelector('span');
+        if (spanEl) spanEl.textContent = vbpl ? 'Văn bản gốc vbpl.vn' : 'Mở toàn văn';
       }
 
       // Position Popover nicely near the button
@@ -1201,7 +1239,10 @@
 
       const tabBtn = document.getElementById('modal-source-tab-btn');
       if (tabBtn && src.source) {
-        tabBtn.href = '/doc/' + encodeURIComponent(src.source);
+        const vbpl = VBPL_DOC_LINKS[src.source];
+        tabBtn.href = vbpl ? vbpl.url : ('/doc/' + encodeURIComponent(src.source));
+        const spanEl = tabBtn.querySelector('span');
+        if (spanEl) spanEl.textContent = vbpl ? 'Mở văn bản gốc trên vbpl.vn ↗' : 'Mở toàn văn tab mới ↗';
       }
 
       document.getElementById('source-modal').classList.remove('hidden');
@@ -1213,7 +1254,8 @@
 
     function openDocByCode(sourceFile) {
       if (sourceFile) {
-        window.open('/doc/' + encodeURIComponent(sourceFile), '_blank');
+        const vbpl = VBPL_DOC_LINKS[sourceFile];
+        window.open(vbpl ? vbpl.url : ('/doc/' + encodeURIComponent(sourceFile)), '_blank');
       } else {
         renderDocsModal(allLoadedDocs, null);
         toggleDocModal(true);

@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perplexity Legal — RAG Trợ lý Pháp luật</title>
+  <!-- Google Fonts: Inter (weights 400, 500) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Marked.js for markdown rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            paper: '#faf8f5',
+            ink: '#000000',
+            charcoal: '#27251e',
+            ash: '#72706b',
+            stone: '#92918b',
+            pebble: '#d1d1cd',
+            teal: '#016a71',
+            subtle: '#e8e6e1',
+            skeleton: '#f0eeea',
+          },
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          boxShadow: {
+            subtle: 'rgba(0, 0, 0, 0.08) 0px 1px 2px 0px',
+            float: 'rgba(0, 0, 0, 0.06) 0px 4px 12px 0px',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --color-aged-paper: #faf8f5;
+      --color-ink-black: #000000;
+      --color-charcoal: #27251e;
+      --color-ash-gray: #72706b;
+      --color-stone: #92918b;
+      --color-pebble: #d1d1cd;
+      --color-deep-teal: #016a71;
+    }
+    body {
+      background-color: #faf8f5;
+      color: #27251e;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      line-height: 1.43;
+    }
+    /* Shimmer animation for loading skeleton */
+    @keyframes shimmer {
+      0% { opacity: 0.5; }
+      50% { opacity: 1; }
+      100% { opacity: 0.5; }
+    }
+    .animate-shimmer {
+      animation: shimmer 1.5s infinite ease-in-out;
+    }
+    /* Markdown answer typography */
+    .answer-prose p { margin-bottom: 0.75rem; }
+    .answer-prose ul { list-style-type: disc; margin-left: 1.25rem; margin-bottom: 0.75rem; }
+    .answer-prose ol { list-style-type: decimal; margin-left: 1.25rem; margin-bottom: 0.75rem; }
+    .answer-prose li { margin-bottom: 0.25rem; }
+    .answer-prose strong { font-weight: 500; color: #000000; }
+    .answer-prose code { background: #e8e6e1; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+    .answer-prose blockquote { border-left: 3px solid #016a71; padding-left: 0.75rem; color: #72706b; font-style: italic; }
+  </style>
+</head>
+<body class="h-full flex overflow-hidden select-text">
+
+  <!-- ==================== LEFT SIDEBAR (220px) ==================== -->
+  <aside class="w-[220px] flex-shrink-0 bg-paper border-r border-pebble flex flex-col justify-between p-3 select-none">
+    <div class="flex flex-col space-y-4">
+      <!-- Wordmark -->
+      <div class="flex items-center justify-between px-2 pt-1">
+        <div class="flex items-center space-x-2">
+          <svg class="w-5 h-5 text-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+          <span class="font-medium text-[15px] tracking-tight text-charcoal">perplexity <span class="text-teal font-medium">legal</span></span>
+        </div>
+      </div>
+
+      <!-- Action Button: New Query -->
+      <button onclick="resetToHero()" class="w-full flex items-center justify-center space-x-2 bg-charcoal text-white rounded-full py-2 px-3 text-[13px] font-medium hover:bg-black transition-colors shadow-subtle">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        <span>Tra cứu mới</span>
+      </button>
+
+      <!-- Navigation Links -->
+      <nav class="flex flex-col space-y-1 text-[13px]">
+        <button onclick="toggleDocModal(true)" class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-full hover:bg-subtle text-charcoal font-normal text-left transition-colors">
+          <div class="flex items-center space-x-2">
+            <svg class="w-4 h-4 text-ash" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+            <span>Kho văn bản luật</span>
+          </div>
+          <span id="doc-badge-count" class="text-[11px] bg-subtle px-1.5 py-0.5 rounded-full text-ash">6</span>
+        </button>
+
+        <button onclick="toggleIngestModal(true)" class="w-full flex items-center space-x-2 px-2.5 py-1.5 rounded-full hover:bg-subtle text-charcoal font-normal text-left transition-colors">
+          <svg class="w-4 h-4 text-ash" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+          </svg>
+          <span>Nạp tài liệu mới</span>
+        </button>
+      </nav>
+
+      <!-- Document Inventory List -->
+      <div class="pt-2 border-t border-pebble">
+        <div class="text-[11px] font-medium text-stone uppercase tracking-wider px-2.5 pb-2">6 Bộ luật có sẵn</div>
+        <div id="sidebar-doc-list" class="space-y-1 max-h-[220px] overflow-y-auto pr-1 text-[12px]">
+          <!-- Loaded dynamically via JS -->
+          <div class="px-2 py-1 text-stone">Đang đọc kho dữ liệu...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Specs / Config Badge -->
+    <div class="pt-3 border-t border-pebble text-[11px] text-ash space-y-1 px-1">
+      <div class="flex items-center justify-between">
+        <span>Mô hình</span>
+        <span id="cfg-llm" class="font-medium text-charcoal">gpt-6-luna</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <span>Reranker</span>
+        <span id="cfg-rerank" class="font-medium text-teal">Jev v1.13</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <span>Nâng cao</span>
+        <span id="cfg-advanced" class="font-medium text-charcoal">HyDE</span>
+      </div>
+      <div class="flex items-center justify-between pt-1 text-stone">
+        <span>Qdrant Local</span>
+        <span id="cfg-chunks">3.422 chunks</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================== MAIN CONTENT AREA ==================== -->
+  <main class="flex-1 flex flex-col h-full overflow-hidden bg-paper relative">
+
+    <!-- Top Navigation Header -->
+    <header class="h-14 border-b border-pebble px-6 flex items-center justify-between flex-shrink-0 bg-paper/80 backdrop-blur z-10">
+      <div class="flex items-center space-x-3">
+        <span class="text-[13px] text-stone">Phạm vi tra cứu:</span>
+        <div class="flex items-center space-x-1.5" id="category-pills">
+          <button onclick="setDomainFilter('all')" class="domain-pill px-3 py-1 rounded-full text-[12px] font-medium bg-charcoal text-white transition-all">Tất cả luật</button>
+          <button onclick="setDomainFilter('Lao động')" class="domain-pill px-3 py-1 rounded-full text-[12px] font-normal text-ash hover:bg-subtle transition-all">Lao động</button>
+          <button onclick="setDomainFilter('Dân sự')" class="domain-pill px-3 py-1 rounded-full text-[12px] font-normal text-ash hover:bg-subtle transition-all">Dân sự</button>
+          <button onclick="setDomainFilter('Hình sự')" class="domain-pill px-3 py-1 rounded-full text-[12px] font-normal text-ash hover:bg-subtle transition-all">Hình sự</button>
+          <button onclick="setDomainFilter('Tố tụng')" class="domain-pill px-3 py-1 rounded-full text-[12px] font-normal text-ash hover:bg-subtle transition-all">Tố tụng</button>
+          <button onclick="setDomainFilter('Hàng hải')" class="domain-pill px-3 py-1 rounded-full text-[12px] font-normal text-ash hover:bg-subtle transition-all">Hàng hải</button>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2 text-[12px] text-ash">
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span>Hệ thống sẵn sàng</span>
+      </div>
+    </header>
+
+    <!-- Scrollable Chat / Hero Container -->
+    <div id="scroll-container" class="flex-1 overflow-y-auto px-4 py-8">
+      <div class="max-w-[700px] mx-auto min-h-full flex flex-col justify-start">
+
+        <!-- ==================== HERO STATE (Initial view) ==================== -->
+        <div id="hero-view" class="my-auto py-12 flex flex-col items-center text-center space-y-6">
+          <div class="flex items-center justify-center space-x-2.5">
+            <svg class="w-9 h-9 text-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            <h1 class="text-3xl font-medium tracking-tight text-charcoal">perplexity <span class="text-teal">legal</span></h1>
+          </div>
+          <p class="text-[15px] text-ash max-w-[480px]">Tra cứu quy định pháp luật chính xác, viện dẫn điều luật trực tiếp kèm đối chiếu ranking RRF & Jev Reranker.</p>
+
+          <!-- Main Hero Search Bar -->
+          <div class="w-full bg-white rounded-xl border border-pebble shadow-subtle p-3 text-left transition-all focus-within:border-ash focus-within:shadow-float">
+            <textarea id="hero-query-input" rows="2" placeholder="Hỏi điều luật, mức xử phạt hoặc mô tả vụ việc pháp lý..." class="w-full resize-none border-0 focus:ring-0 p-1 text-[15px] text-charcoal placeholder-stone outline-none bg-transparent"></textarea>
+
+            <div class="flex items-center justify-between pt-2 border-t border-subtle mt-1">
+              <!-- Mode selector pill inside search bar -->
+              <div class="flex items-center space-x-2">
+                <span class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-md bg-paper border border-pebble text-[12px] font-medium text-charcoal">
+                  <svg class="w-3.5 h-3.5 text-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  <span>Chế độ: HyDE + Jev Rerank</span>
+                </span>
+                <span class="text-[12px] text-stone">Nhấn Enter để gửi</span>
+              </div>
+
+              <!-- Submit button: Charcoal circle 28px, white up arrow -->
+              <button onclick="submitHeroQuery()" class="w-7 h-7 rounded-full bg-charcoal text-white flex items-center justify-center hover:bg-black transition-colors shadow-subtle">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Suggested Query Chips -->
+          <div class="w-full flex flex-wrap justify-center gap-2 pt-2">
+            <button onclick="fillAndSubmit('Thời hiệu khởi kiện tranh chấp hợp đồng dân sự là bao lâu?')" class="px-3 py-1.5 rounded-full bg-white border border-pebble hover:border-ash hover:bg-subtle text-[12px] text-charcoal transition-all shadow-subtle text-left">
+              ⚖️ Thời hiệu khởi kiện tranh chấp hợp đồng
+            </button>
+            <button onclick="fillAndSubmit('Người lao động làm thêm giờ vào ban đêm được tính tiền lương như thế nào?')" class="px-3 py-1.5 rounded-full bg-white border border-pebble hover:border-ash hover:bg-subtle text-[12px] text-charcoal transition-all shadow-subtle text-left">
+              💼 Tiền lương làm thêm giờ ban đêm
+            </button>
+            <button onclick="fillAndSubmit('Lừa người khác lấy 30 triệu đồng thì bị phạt bao nhiêu năm tù?')" class="px-3 py-1.5 rounded-full bg-white border border-pebble hover:border-ash hover:bg-subtle text-[12px] text-charcoal transition-all shadow-subtle text-left">
+              🚨 Lừa đảo chiếm đoạt 30 triệu đồng
+            </button>
+            <button onclick="fillAndSubmit('Thời hạn tạm giam bị can để điều tra tội phạm ít nghiêm trọng là mấy tháng?')" class="px-3 py-1.5 rounded-full bg-white border border-pebble hover:border-ash hover:bg-subtle text-[12px] text-charcoal transition-all shadow-subtle text-left">
+              🔍 Thời hạn tạm giam để điều tra
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== CHAT THREAD VIEW ==================== -->
+        <div id="chat-thread-view" class="hidden space-y-8 pb-28">
+          <!-- Chat messages dynamically appended here -->
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==================== FLOATING BOTTOM SEARCH INPUT (Chat mode) ==================== -->
+    <div id="bottom-search-bar" class="hidden absolute bottom-4 left-0 right-0 px-4 pointer-events-none">
+      <div class="max-w-[700px] mx-auto pointer-events-auto">
+        <div class="w-full bg-white/95 backdrop-blur-md rounded-xl border border-pebble shadow-float p-2.5 flex items-center space-x-2 transition-all focus-within:border-ash">
+          <input id="bottom-query-input" type="text" placeholder="Hỏi tiếp hoặc làm rõ điều luật..." class="flex-1 text-[14px] text-charcoal placeholder-stone outline-none border-0 focus:ring-0 bg-transparent px-2">
+
+          <button onclick="submitBottomQuery()" class="w-7 h-7 rounded-full bg-charcoal text-white flex items-center justify-center hover:bg-black transition-colors flex-shrink-0 shadow-subtle">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==================== MODAL: SOURCE DRAWER / DETAILS ==================== -->
+  <div id="source-modal" class="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-pebble shadow-float max-w-2xl w-full max-h-[80vh] flex flex-col overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-pebble flex items-center justify-between bg-paper">
+        <div>
+          <div id="modal-source-tag" class="text-[11px] font-medium text-teal uppercase tracking-wider">[1] Căn cứ trích dẫn</div>
+          <h3 id="modal-source-title" class="text-[16px] font-medium text-charcoal">Điều ...</h3>
+        </div>
+        <button onclick="closeSourceModal()" class="text-ash hover:text-charcoal p-1 rounded-full hover:bg-subtle transition-colors">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="p-5 overflow-y-auto space-y-3 text-[14px] leading-relaxed">
+        <div class="flex items-center space-x-4 text-[12px] text-stone pb-2 border-b border-subtle">
+          <div>Văn bản: <span id="modal-source-doc" class="font-medium text-charcoal">Bộ luật...</span></div>
+          <div>Trang: <span id="modal-source-page" class="font-medium text-charcoal">--</span></div>
+          <div>Độ tương đồng: <span id="modal-source-score" class="font-medium text-teal">0.95</span></div>
+        </div>
+        <div class="text-[12px] font-medium text-stone uppercase tracking-wide">Nội dung toàn văn đoạn trích:</div>
+        <div id="modal-source-text" class="p-3.5 bg-paper rounded-xl border border-pebble font-normal text-charcoal whitespace-pre-wrap select-text">
+          Nội dung điều luật...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: INVENTORY OF 6 CODES ==================== -->
+  <div id="doc-modal" class="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-pebble shadow-float max-w-xl w-full max-h-[80vh] flex flex-col overflow-hidden">
+      <div class="px-5 py-4 border-b border-pebble flex items-center justify-between bg-paper">
+        <div>
+          <h3 class="text-[16px] font-medium text-charcoal">Kho văn bản quy phạm pháp luật</h3>
+          <p class="text-[12px] text-ash">Dữ liệu chuẩn từ Cơ sở dữ liệu Quốc gia về Văn bản Pháp luật (vbpl.vn)</p>
+        </div>
+        <button onclick="toggleDocModal(false)" class="text-ash hover:text-charcoal p-1 rounded-full hover:bg-subtle transition-colors">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div id="modal-doc-list" class="p-5 overflow-y-auto space-y-3">
+        <!-- Loaded via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: INGEST NEW DOCUMENTS ==================== -->
+  <div id="ingest-modal" class="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-pebble shadow-float max-w-md w-full overflow-hidden">
+      <div class="px-5 py-4 border-b border-pebble flex items-center justify-between bg-paper">
+        <h3 class="text-[15px] font-medium text-charcoal">Nạp thêm văn bản vào hệ thống</h3>
+        <button onclick="toggleIngestModal(false)" class="text-ash hover:text-charcoal p-1 rounded-full hover:bg-subtle transition-colors">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="p-5 space-y-4">
+        <div>
+          <label class="block text-[12px] font-medium text-charcoal mb-1">Tải file tài liệu (PDF, DOCX, TXT, MD)</label>
+          <input type="file" id="ingest-file-input" multiple accept=".pdf,.docx,.txt,.md" class="w-full text-[13px] text-stone file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-[12px] file:font-medium file:bg-charcoal file:text-white hover:file:bg-black">
+        </div>
+        <div class="text-center text-[12px] text-stone">— hoặc —</div>
+        <div>
+          <label class="block text-[12px] font-medium text-charcoal mb-1">Đường dẫn URL văn bản luật (vbpl.vn / thuvienphapluat)</label>
+          <input type="text" id="ingest-url-input" placeholder="https://vbpl.vn/..." class="w-full px-3 py-2 rounded-xl border border-pebble text-[13px] text-charcoal placeholder-stone outline-none focus:border-ash">
+        </div>
+        <div id="ingest-status-msg" class="text-[12px] hidden"></div>
+        <button onclick="submitIngest()" id="btn-do-ingest" class="w-full bg-charcoal text-white rounded-full py-2 text-[13px] font-medium hover:bg-black transition-colors shadow-subtle">
+          Bắt đầu nạp & Chunking
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== APPLICATION CLIENT SCRIPT ==================== -->
+  <script>
+    // State variables
+    let currentDomain = 'all';
+    let appInfo = null;
+    let isQuerying = false;
+    let storedSourcesMap = {}; // mapping chunk_id to source data for modal preview
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchAppInfo();
+      setupInputListeners();
+    });
+
+    function setupInputListeners() {
+      const heroInput = document.getElementById('hero-query-input');
+      heroInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          submitHeroQuery();
+        }
+      });
+
+      const bottomInput = document.getElementById('bottom-query-input');
+      bottomInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          submitBottomQuery();
+        }
+      });
+    }
+
+    // Fetch /api/info
+    async function fetchAppInfo() {
+      try {
+        const res = await fetch('/api/info');
+        if (!res.ok) throw new Error('Không thể lấy thông tin hệ thống');
+        appInfo = await res.json();
+        renderSidebarDocs(appInfo.docs);
+        updateConfigBadges(appInfo.settings, appInfo.total_chunks);
+      } catch (err) {
+        console.error('Lỗi nạp info:', err);
+      }
+    }
+
+    function renderSidebarDocs(docs) {
+      const sidebarContainer = document.getElementById('sidebar-doc-list');
+      const modalContainer = document.getElementById('modal-doc-list');
+      const badgeCount = document.getElementById('doc-badge-count');
+
+      if (!docs || docs.length === 0) {
+        sidebarContainer.innerHTML = '<div class="px-2 text-stone text-[11px]">Chưa có tài liệu nào</div>';
+        return;
+      }
+
+      badgeCount.textContent = docs.length;
+
+      // Sidebar list
+      sidebarContainer.innerHTML = docs.map(d => {
+        const cleanName = formatDocTitle(d.source);
+        return `
+          <div class="px-2 py-1.5 rounded-lg hover:bg-subtle transition-colors flex items-center justify-between group cursor-default" title="${d.source}">
+            <div class="flex items-center space-x-1.5 truncate">
+              <span class="text-[12px]">📜</span>
+              <span class="truncate text-charcoal font-normal">${cleanName}</span>
+            </div>
+            <span class="text-[10px] text-stone group-hover:text-ash flex-shrink-0 ml-1">${d.n_chunks} ch</span>
+          </div>
+        `;
+      }).join('');
+
+      // Modal detailed list
+      modalContainer.innerHTML = docs.map((d, idx) => {
+        const cleanName = formatDocTitle(d.source);
+        return `
+          <div class="p-3.5 rounded-xl border border-pebble bg-paper flex items-center justify-between">
+            <div class="space-y-0.5">
+              <div class="font-medium text-[14px] text-charcoal flex items-center space-x-2">
+                <span>[${idx + 1}]</span>
+                <span>${cleanName}</span>
+              </div>
+              <div class="text-[12px] text-stone">Mã file: ${d.source}</div>
+            </div>
+            <div class="text-right">
+              <div class="text-[13px] font-medium text-teal">${d.n_chunks} chunks</div>
+              <div class="text-[11px] text-stone">Đã lập chỉ mục</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateConfigBadges(cfg, totalChunks) {
+      if (cfg.llm_model) document.getElementById('cfg-llm').textContent = cfg.llm_model;
+      if (cfg.rerank_backend) document.getElementById('cfg-rerank').textContent = cfg.rerank_backend === 'jev' ? 'Jev v1.13' : 'None';
+      if (cfg.advanced) document.getElementById('cfg-advanced').textContent = cfg.advanced.toUpperCase();
+      if (totalChunks) document.getElementById('cfg-chunks').textContent = totalChunks.toLocaleString() + ' chunks';
+    }
+
+    function formatDocTitle(source) {
+      let s = source.replace(/\.(txt|pdf|docx|md)$/i, '');
+      s = s.replace(/bo_luat_/g, 'Bộ luật ');
+      s = s.replace(/luat_/g, 'Luật ');
+      s = s.replace(/_/g, ' ');
+      // Capitalize proper words
+      return s.charAt(0).toUpperCase() + s.slice(1);
+    }
+
+    function setDomainFilter(domain) {
+      currentDomain = domain;
+      const pills = document.querySelectorAll('.domain-pill');
+      pills.forEach(p => {
+        if ((domain === 'all' && p.textContent.includes('Tất cả')) || p.textContent.includes(domain)) {
+          p.className = 'domain-pill px-3 py-1 rounded-full text-[12px] font-medium bg-charcoal text-white transition-all';
+        } else {
+          p.className = 'domain-pill px-3 py-1 rounded-full text-[12px] font-normal text-ash hover:bg-subtle transition-all';
+        }
+      });
+    }
+
+    function resetToHero() {
+      document.getElementById('hero-view').classList.remove('hidden');
+      document.getElementById('chat-thread-view').classList.add('hidden');
+      document.getElementById('chat-thread-view').innerHTML = '';
+      document.getElementById('bottom-search-bar').classList.add('hidden');
+      document.getElementById('hero-query-input').value = '';
+    }
+
+    function fillAndSubmit(text) {
+      document.getElementById('hero-query-input').value = text;
+      submitHeroQuery();
+    }
+
+    function submitHeroQuery() {
+      const input = document.getElementById('hero-query-input');
+      const query = input.value.trim();
+      if (!query || isQuerying) return;
+      startQuery(query);
+    }
+
+    function submitBottomQuery() {
+      const input = document.getElementById('bottom-query-input');
+      const query = input.value.trim();
+      if (!query || isQuerying) return;
+      input.value = '';
+      startQuery(query);
+    }
+
+    async function startQuery(rawQuery) {
+      isQuerying = true;
+      let finalQuery = rawQuery;
+      if (currentDomain !== 'all') {
+        finalQuery = `[Bộ luật ${currentDomain}] ${rawQuery}`;
+      }
+
+      // Switch view from hero to thread
+      document.getElementById('hero-view').classList.add('hidden');
+      const threadView = document.getElementById('chat-thread-view');
+      threadView.classList.remove('hidden');
+      document.getElementById('bottom-search-bar').classList.remove('hidden');
+
+      const msgId = 'msg-' + Date.now();
+
+      // Append User Message & Status Loading Card
+      const userHtml = `
+        <div class="space-y-4">
+          <!-- User Query Header -->
+          <div class="flex items-start space-x-3">
+            <div class="w-7 h-7 rounded-full bg-charcoal text-white flex items-center justify-center text-[12px] font-medium flex-shrink-0 mt-0.5">
+              T
+            </div>
+            <h2 class="text-[19px] font-medium text-charcoal tracking-tight leading-snug">${escapeHtml(rawQuery)}</h2>
+          </div>
+
+          <!-- Perplexity Status Notification Card -->
+          <div id="${msgId}-status" class="w-full bg-white rounded-2xl border border-pebble p-4 shadow-subtle space-y-3">
+            <div class="flex items-center space-x-2 text-[13px] font-medium text-charcoal">
+              <svg class="w-4 h-4 text-teal animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+              </svg>
+              <span id="${msgId}-status-text">Đang phân tích truy vấn & đối chiếu cơ sở dữ liệu luật...</span>
+            </div>
+            <!-- Skeleton shimmers -->
+            <div class="space-y-2 pt-1">
+              <div class="h-2 bg-skeleton rounded-full w-full animate-shimmer"></div>
+              <div class="h-2 bg-skeleton rounded-full w-4/5 animate-shimmer"></div>
+              <div class="h-2 bg-skeleton rounded-full w-2/3 animate-shimmer"></div>
+            </div>
+          </div>
+
+          <!-- Final Answer Container (hidden initially) -->
+          <div id="${msgId}-content" class="space-y-5 hidden"></div>
+        </div>
+      `;
+
+      threadView.insertAdjacentHTML('beforeend', userHtml);
+      scrollToBottom();
+
+      // Sequential simulated status steps while backend processes
+      const statusText = document.getElementById(`${msgId}-status-text`);
+      const timer1 = setTimeout(() => {
+        if (statusText) statusText.textContent = 'Đang kích hoạt Dense Vector + BM25 Lexical Search...';
+      }, 1200);
+      const timer2 = setTimeout(() => {
+        if (statusText) statusText.textContent = 'LLM HyDE đang mở rộng câu hỏi pháp lý...';
+      }, 2500);
+      const timer3 = setTimeout(() => {
+        if (statusText) statusText.textContent = 'Reranker Jev (Cross-Encoder) đang chấm xác suất liên quan...';
+      }, 4000);
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: finalQuery }),
+        });
+
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        clearTimeout(timer3);
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.error || `Lỗi server (${response.status})`);
+        }
+
+        const data = await response.json();
+        renderAnswerContent(msgId, data);
+      } catch (err) {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        clearTimeout(timer3);
+        renderError(msgId, err.message);
+      } finally {
+        isQuerying = false;
+      }
+    }
+
+    function renderAnswerContent(msgId, data) {
+      const statusCard = document.getElementById(`${msgId}-status`);
+      if (statusCard) statusCard.remove(); // Remove loading card
+
+      const contentBox = document.getElementById(`${msgId}-content`);
+      contentBox.classList.remove('hidden');
+
+      // 1. Build Sources Bar (Hàng thẻ nguồn Perplexity)
+      let sourcesHtml = '';
+      if (data.sources && data.sources.length > 0) {
+        // Register sources in global map for modal preview
+        data.sources.forEach(s => {
+          storedSourcesMap[s.chunk_id] = s;
+        });
+
+        const cards = data.sources.map(s => {
+          const cleanDoc = formatDocTitle(s.source);
+          const previewQuote = s.text ? s.text.slice(0, 90) + '...' : '';
+          return `
+            <div onclick="openSourceModal('${s.chunk_id}')" class="flex-shrink-0 w-52 p-3 bg-white rounded-xl border border-pebble hover:border-ash hover:shadow-subtle cursor-pointer transition-all space-y-1.5 group select-none">
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="font-medium text-teal px-1.5 py-0.5 rounded bg-paper border border-pebble">[${s.n}] ${s.section || 'Điều luật'}</span>
+                <span class="text-[10px] text-stone font-mono">p=${s.score}</span>
+              </div>
+              <div class="text-[12px] font-medium text-charcoal truncate" title="${cleanDoc}">${cleanDoc}</div>
+              <div class="text-[11px] text-ash line-clamp-2 leading-relaxed font-normal">${escapeHtml(previewQuote)}</div>
+            </div>
+          `;
+        }).join('');
+
+        sourcesHtml = `
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-[12px] font-medium text-stone uppercase tracking-wide">
+              <span>Căn cứ pháp lý viện dẫn (${data.sources.length} đoạn luật chọn lọc)</span>
+              <span class="text-[11px] text-teal lowercase">bấm vào thẻ để đọc toàn văn</span>
+            </div>
+            <div class="flex space-x-2 overflow-x-auto pb-1.5 scrollbar-thin">
+              ${cards}
+            </div>
+          </div>
+        `;
+      }
+
+      // 2. Format Answer Text & highlight citation tags [1], [2] with Deep Teal pills
+      let formattedText = marked.parse(data.answer || '');
+      // Replace [1], [2] with clickable teal badge
+      formattedText = formattedText.replace(/\[(\d+)\]/g, (match, p1) => {
+        // Find matching source
+        const src = (data.sources || []).find(s => String(s.n) === String(p1));
+        const chunkId = src ? src.chunk_id : '';
+        return `<button onclick="openSourceModal('${chunkId}')" class="inline-flex items-center justify-center px-1.5 py-0.2 mx-0.5 rounded text-[11px] font-medium bg-paper border border-pebble text-teal hover:bg-subtle transition-colors cursor-pointer select-none align-baseline">[${p1}]</button>`;
+      });
+
+      // 3. Collapsible Retrieval Trace Accordion
+      const trace = data.trace || {};
+      const arms = trace.arms || {};
+      const finalHits = trace.final_hits || [];
+
+      const traceHtml = `
+        <div class="border border-pebble rounded-xl bg-white overflow-hidden shadow-subtle">
+          <details class="group">
+            <summary class="px-4 py-2.5 flex items-center justify-between text-[13px] font-medium text-charcoal cursor-pointer hover:bg-subtle/50 select-none transition-colors">
+              <div class="flex items-center space-x-2">
+                <svg class="w-4 h-4 text-teal transition-transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                <span>Minh bạch xếp hạng & đối chiếu Retrieval</span>
+              </div>
+              <div class="flex items-center space-x-2 text-[11px] text-stone">
+                <span>Chế độ: <b>${trace.context_mode || 'threshold'}</b></span>
+                <span>·</span>
+                <span class="${trace.reranked ? 'text-teal font-medium' : ''}">${trace.reranked ? 'Đã Rerank Jev' : 'RRF thuần'}</span>
+              </div>
+            </summary>
+
+            <div class="p-4 border-t border-pebble space-y-4 bg-paper/50 text-[12px]">
+              <!-- Arm Tabs -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <!-- BM25 Column -->
+                <div class="p-3 bg-white rounded-lg border border-pebble space-y-2">
+                  <div class="font-medium text-[12px] text-charcoal uppercase tracking-wider flex items-center justify-between">
+                    <span>BM25 Lexical</span>
+                    <span class="text-[10px] text-stone">Top 5</span>
+                  </div>
+                  <div class="space-y-1.5">
+                    ${renderHitList(arms.bm25 || [])}
+                  </div>
+                </div>
+
+                <!-- Dense Column -->
+                <div class="p-3 bg-white rounded-lg border border-pebble space-y-2">
+                  <div class="font-medium text-[12px] text-charcoal uppercase tracking-wider flex items-center justify-between">
+                    <span>Dense Vector</span>
+                    <span class="text-[10px] text-stone">Top 5</span>
+                  </div>
+                  <div class="space-y-1.5">
+                    ${renderHitList(arms.dense || [])}
+                  </div>
+                </div>
+
+                <!-- Final Reranked Column -->
+                <div class="p-3 bg-white rounded-lg border border-teal/40 space-y-2">
+                  <div class="font-medium text-[12px] text-teal uppercase tracking-wider flex items-center justify-between">
+                    <span>Kết quả cuối (RRF + Jev)</span>
+                    <span class="text-[10px] text-teal font-medium">Top 5</span>
+                  </div>
+                  <div class="space-y-1.5">
+                    ${renderHitList(finalHits)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
+      `;
+
+      contentBox.innerHTML = `
+        ${sourcesHtml}
+        <div class="answer-prose text-[15px] leading-relaxed text-charcoal font-normal bg-white rounded-2xl border border-pebble p-6 shadow-subtle select-text">
+          ${formattedText}
+        </div>
+        ${traceHtml}
+      `;
+
+      scrollToBottom();
+    }
+
+    function renderHitList(hits) {
+      if (!hits || hits.length === 0) {
+        return '<div class="text-[11px] text-stone italic">Không có ứng viên</div>';
+      }
+      return hits.map(h => `
+        <div class="p-1.5 rounded bg-paper border border-pebble/60 text-[11px] space-y-0.5">
+          <div class="flex justify-between font-mono text-[10px] text-stone">
+            <span>#${h.rank} · ${escapeHtml(h.section || 'Điều luật')}</span>
+            <span class="text-teal font-medium">${h.score}</span>
+          </div>
+          <div class="text-charcoal truncate font-normal">${escapeHtml(h.source)}</div>
+          <div class="text-ash truncate text-[10px]">${escapeHtml(h.text)}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderError(msgId, errText) {
+      const statusCard = document.getElementById(`${msgId}-status`);
+      if (statusCard) statusCard.remove();
+
+      const contentBox = document.getElementById(`${msgId}-content`);
+      contentBox.classList.remove('hidden');
+      contentBox.innerHTML = `
+        <div class="p-4 bg-red-50 border border-red-200 text-red-800 rounded-xl text-[13px] flex items-center space-x-2">
+          <span>⚠️</span>
+          <span><strong>Lỗi:</strong> ${escapeHtml(errText)}</span>
+        </div>
+      `;
+      scrollToBottom();
+    }
+
+    // Modal Helpers
+    function openSourceModal(chunkId) {
+      const src = storedSourcesMap[chunkId];
+      if (!src) return;
+
+      document.getElementById('modal-source-tag').textContent = `[${src.n}] CĂN CỨ TRÍCH DẪN`;
+      document.getElementById('modal-source-title').textContent = src.section || 'Điều khoản trích dẫn';
+      document.getElementById('modal-source-doc').textContent = formatDocTitle(src.source);
+      document.getElementById('modal-source-page').textContent = src.page ? `Trang ${src.page}` : 'Toàn văn';
+      document.getElementById('modal-source-score').textContent = `p = ${src.score}`;
+      document.getElementById('modal-source-text').textContent = src.text;
+
+      document.getElementById('source-modal').classList.remove('hidden');
+    }
+
+    function closeSourceModal() {
+      document.getElementById('source-modal').classList.add('hidden');
+    }
+
+    function toggleDocModal(show) {
+      const modal = document.getElementById('doc-modal');
+      if (show) modal.classList.remove('hidden');
+      else modal.classList.add('hidden');
+    }
+
+    function toggleIngestModal(show) {
+      const modal = document.getElementById('ingest-modal');
+      const statusMsg = document.getElementById('ingest-status-msg');
+      statusMsg.className = 'text-[12px] hidden';
+      if (show) modal.classList.remove('hidden');
+      else modal.classList.add('hidden');
+    }
+
+    async function submitIngest() {
+      const fileInput = document.getElementById('ingest-file-input');
+      const urlInput = document.getElementById('ingest-url-input');
+      const btn = document.getElementById('btn-do-ingest');
+      const statusMsg = document.getElementById('ingest-status-msg');
+
+      const files = fileInput.files;
+      const url = urlInput.value.trim();
+
+      if ((!files || files.length === 0) && !url) {
+        statusMsg.textContent = 'Vui lòng chọn ít nhất 1 file hoặc nhập URL.';
+        statusMsg.className = 'text-[12px] text-red-600 block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Đang phân tích & lập chỉ mục...';
+      statusMsg.className = 'text-[12px] text-teal block';
+      statusMsg.textContent = 'Hệ thống đang trích xuất text, chia chunk và tính vector embedding...';
+
+      const formData = new FormData();
+      if (url) formData.append('url', url);
+      for (let i = 0; i < files.length; i++) {
+        formData.append('files', files[i]);
+      }
+
+      try {
+        const res = await fetch('/api/ingest', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Lỗi nạp tài liệu');
+
+        statusMsg.className = 'text-[12px] text-emerald-700 block';
+        statusMsg.textContent = `Thành công: Nạp ${data.results.length} tài liệu vào kho.`;
+        fileInput.value = '';
+        urlInput.value = '';
+        // Refresh docs
+        await fetchAppInfo();
+        setTimeout(() => toggleIngestModal(false), 2000);
+      } catch (err) {
+        statusMsg.className = 'text-[12px] text-red-600 block';
+        statusMsg.textContent = `Lỗi: ${err.message}`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Bắt đầu nạp & Chunking';
+      }
+    }
+
+    function scrollToBottom() {
+      const container = document.getElementById('scroll-container');
+      setTimeout(() => {
+        container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+      }, 50);
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+</body>
+</html>

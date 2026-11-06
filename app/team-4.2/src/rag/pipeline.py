@@ -119,6 +119,8 @@ class RAGPipeline:
     def from_settings(cls, s: Settings, *, llm: LLM | None = None) -> RAGPipeline:
         from rag.advanced import Components, build_enhancements
         from rag.generate.llm import LLMCache, OpenAIChatLLM
+        from rag.retrieve.coverage import CoverageConfig
+        from rag.retrieve.listwise import ListwiseConfig, ListwiseSelector
 
         llm = llm or OpenAIChatLLM(
             s.llm_model,
@@ -154,7 +156,17 @@ class RAGPipeline:
             rerank_n=s.rerank_n,
             merge_articles=s.merge_articles,
             article_pool_factor=s.article_pool_factor,
+            bm25_rrf_weight=s.bm25_rrf_weight,
+            rewrite_for_rerank=s.rewrite_for_rerank,
+            coverage=(CoverageConfig(s.coverage_anchor_k,s.coverage_min_p,s.coverage_weight,s.coverage_branch_k)
+                      if s.coverage_enabled else None),
+            listwise=(ListwiseSelector(llm,ListwiseConfig(s.listwise_candidate_n,s.listwise_margin,
+                      s.listwise_min_p,s.listwise_excerpt_words)) if s.listwise_enabled else None),
         )
+        if s.query_rewrite_enabled:
+            from rag.advanced.rewrite import QueryRewriter
+
+            retriever.rewriter = QueryRewriter(llm)
         if s.decomp_enabled:
             from rag.advanced.decomposition import QueryDecomposer
 

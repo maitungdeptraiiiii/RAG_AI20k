@@ -1,0 +1,14 @@
+{
+  "questions": 64,
+  "query_count_distribution": {
+    "3": 49,
+    "4": 1,
+    "1": 14
+  },
+  "errors": [],
+  "numeric_warning_review": {
+    "d32": "Equivalent normalization: 5 nghin / mot trieu -> 5.000 dong / 1.000.000 dong; no new amount."
+  },
+  "prompt_sha256": "c3cfddb499f8100cf9aff706259efdbbd3b7488013350225621ae94de9cda715",
+  "review_scope": "JSON contract and input preservation; no gold references supplied to planner. Not an exhaustive semantic review."
+}

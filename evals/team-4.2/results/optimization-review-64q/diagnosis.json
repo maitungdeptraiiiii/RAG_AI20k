@@ -1,0 +1,23 @@
+{
+  "reference_run": "doi-thuong-64q-scenario-decomp-v2",
+  "questions": 64,
+  "gold_references_counted_per_question": 95,
+  "gold_in_top5": 81,
+  "gold_in_final_pool": 89,
+  "gold_in_pool_below_top5": 8,
+  "gold_absent_from_pool": 6,
+  "multi_questions": 27,
+  "multi_full_gold_top5": 16,
+  "multi_full_gold_pool": 23,
+  "multi_incomplete_due_to_ranking_only": 7,
+  "multi_incomplete_with_pool_missing_gold": 4,
+  "paraphrase_full_gold_pool": 36,
+  "paraphrase_questions": 37,
+  "max_macro_recall5_if_perfect_selection_from_same_pool": 0.953125,
+  "observed_macro_recall5": 0.8958333333333334,
+  "dense_branch_pool_replay_exact_questions": 64,
+  "late_gold_with_child_article_rank_at_most5": 5,
+  "no_benchmark_executed": true,
+  "no_model_api_calls": true,
+  "note": "Oracle uses gold only to diagnose available headroom. It is not an achieved or predicted result."
+}

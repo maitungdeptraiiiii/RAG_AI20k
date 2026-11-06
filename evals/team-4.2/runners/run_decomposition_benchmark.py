@@ -19,6 +19,7 @@ from rag.config import Settings
 from rag.eval.metrics import load_questions, recall_at_k, hit_at_k, mrr_at_k, unmatched_gold
 from rag.eval.runner import summary_markdown, write_csv
 from rag.pipeline import RAGPipeline
+from rag.retrieve.rerank import DEFAULT_JEV_MODEL, JEV_INSTRUCTIONS, SCORE_CACHE_SCHEMA
 
 
 def load_saved_baseline(path: str | None, config: str, questions: list) -> list[dict]:
@@ -49,7 +50,7 @@ def main() -> None:
     ap.add_argument("--baseline-csv", help="optional saved baseline CSV; never runs baseline")
     ap.add_argument("--baseline-config", default="hyde+jev", help="config name in the saved CSV")
     args = ap.parse_args()
-    settings = replace(Settings.load(), decomp_enabled=True)
+    settings = replace(Settings.load(), decomp_enabled=True, query_rewrite_enabled=False)
     if "hyde" not in settings.advanced_methods or settings.rerank_backend != "jev":
         raise ValueError("This comparison requires ADVANCED=hyde (optionally contextual_header) and Jev")
     questions = load_questions(args.questions)
@@ -68,11 +69,16 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
     metadata = {"questions_sha256": hashlib.sha256(Path(args.questions).read_bytes()).hexdigest(),
                 "prompt_sha256": hashlib.sha256(DECOMPOSITION_SYSTEM.encode()).hexdigest(),
+                "decomposition_system_prompt": DECOMPOSITION_SYSTEM,
                 "index_signature": json.loads(settings.index_config_path.read_text(encoding="utf-8")),
                 "data_dir": str(settings.data_dir), "advanced": settings.advanced,
+                "query_rewrite_enabled": settings.query_rewrite_enabled,
                 "index_snapshot": (json.loads((settings.data_dir / "snapshot_manifest.json").read_text(encoding="utf-8"))
                                    if (settings.data_dir / "snapshot_manifest.json").exists() else None),
                 "llm": settings.llm_model, "rerank": settings.rerank_backend,
+                "rerank_model": DEFAULT_JEV_MODEL, "rerank_instructions": JEV_INSTRUCTIONS,
+                "rerank_instructions_sha256": hashlib.sha256(JEV_INSTRUCTIONS.encode()).hexdigest(),
+                "score_cache_schema": SCORE_CACHE_SCHEMA,
                 "arm_k": settings.arm_k, "rerank_n": settings.rerank_n,
                 "article_pool_factor": settings.article_pool_factor, "merge_articles": settings.merge_articles,
                 "top_k": settings.top_k, "rrf_k": settings.rrf_k,

@@ -1,0 +1,32 @@
+{
+  "config": "v2+coverage-v1",
+  "coverage": {
+    "anchor_k": 2,
+    "min_p": 0.5,
+    "weight": 0.25,
+    "branch_k": 5
+  },
+  "source": "evals\\team-4.2\\results\\doi-thuong-64q-scenario-decomp-v2",
+  "source_config_sha256": "5294caa19e0ae34496eb64da2617dda0b0665c13ad0716a8acf41f93f3cf39a7",
+  "source_traces_sha256": "dc769d0382204187acafa7de82754561fe923c97bac3f88281fe9f0b91836de3",
+  "branch_source": "evals\\team-4.2\\results\\doi-thuong-64q-rewrite-bm25-v1\\rewrite-bm25-w03",
+  "branch_traces_sha256": "8a9b1060ca08dd978f7d800cba56ec03eb701931ea49f09746982c80690b5daa",
+  "chunks_sha256": "dee69abf3580d03dc1ae4fcf8c10345bc011f6dec101f33d2f06f5aacc594d0a",
+  "questions_sha256": "4794686c462526c722c661ddc45539e391ef7fb8de1eedb9deb854818c0c5a3e",
+  "rerank_model": "jev-1.13.0",
+  "rerank_instructions_sha256": "7813376499af56554c90b2c849ffc8f8324951559e95c5dd2f87e36fb3c7c116",
+  "score_cache_schema": "jev-full-input-v2",
+  "selector_code_sha256": "bb36abaa5e8ed31c875a53e77dde6578cb630efba692563e26d403ba8a99d101",
+  "context_config": {
+    "min_p": 0.5,
+    "max_blocks": 8,
+    "max_words": 2400,
+    "fixed_k": 5
+  },
+  "context_note": "Same current context settings for before/after offline simulation; no answer evaluation.",
+  "network_forbidden": true,
+  "model_api_calls": 0,
+  "baseline_execution": false,
+  "policy_frozen_before_evaluation": true,
+  "parameter_sweep": false
+}

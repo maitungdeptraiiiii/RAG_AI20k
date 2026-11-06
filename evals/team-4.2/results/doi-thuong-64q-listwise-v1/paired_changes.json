@@ -1,0 +1,496 @@
+{
+  "saved-v2": {
+    "changed": [
+      {
+        "id": "d04",
+        "type": "multi",
+        "delta": {
+          "recall@5": 0.3333333333333333,
+          "hit@5": 0.0,
+          "mrr@5": 0.5,
+          "candidate_recall": 0.0
+        },
+        "before": {
+          "recall@5": 0.3333333333333333,
+          "hit@5": 1.0,
+          "mrr@5": 0.5,
+          "candidate_recall": 1.0
+        },
+        "after": {
+          "recall@5": 0.6666666666666666,
+          "hit@5": 1.0,
+          "mrr@5": 1.0,
+          "candidate_recall": 1.0
+        }
+      },
+      {
+        "id": "d10",
+        "type": "multi",
+        "delta": {
+          "recall@5": 0.5,
+          "hit@5": 0.0,
+          "mrr@5": 0.0,
+          "candidate_recall": 0.0
+        },
+        "before": {
+          "recall@5": 0.5,
+          "hit@5": 1.0,
+          "mrr@5": 1.0,
+          "candidate_recall": 1.0
+        },
+        "after": {
+          "recall@5": 1.0,
+          "hit@5": 1.0,
+          "mrr@5": 1.0,
+          "candidate_recall": 1.0
+        }
+      },
+      {
+        "id": "d17",
+        "type": "multi",
+        "delta": {
+          "recall@5": 0.0,
+          "hit@5": 0.0,
+          "mrr@5": 0.1333333333333333,
+          "candidate_recall": 0.0
+        },
+        "before": {
+          "recall@5": 0.5,
+          "hit@5": 1.0,
+          "mrr@5": 0.2,
+          "candidate_recall": 1.0
+        },
+        "after": {
+          "recall@5": 0.5,
+          "hit@5": 1.0,
+          "mrr@5": 0.3333333333333333,
+          "candidate_recall": 1.0
+        }
+      },
+      {
+        "id": "d18",
+        "type": "paraphrase",
+        "delta": {
+          "recall@5": 0.0,
+          "hit@5": 0.0,
+          "mrr@5": 0.75,
+          "candidate_recall": 0.0
+        },
+        "before": {
+          "recall@5": 1.0,
+          "hit@5": 1.0,
+          "mrr@5": 0.25,
+          "candidate_recall": 1.0
+        },
+        "after": {
+          "recall@5": 1.0,
+          "hit@5": 1.0,
+          "mrr@5": 1.0,
+          "candidate_recall": 1.0
+        }
+      },
+      {
+        "id": "d26",
+        "type": "multi",
+        "delta": {
+          "recall@5": 0.5,
+          "hit@5": 0.0,
+          "mrr@5": -0.5,
+          "candidate_recall": 0.0
+        },
+        "before": {
+          "recall@5": 0.5,
+          "hit@5": 1.0,
+          "mrr@5": 1.0,
+          "candidate_recall": 1.0
+        },
+        "after": {
+          "recall@5": 1.0,
+          "hit@5": 1.0,
+          "mrr@5": 0.5,
+          "candidate_recall": 1.0
+        }
+      },
+      {
+        "id": "d31",
+        "type": "paraphrase",
+        "delta": {
+          "recall@5": 0.0,
+          "hit@5": 0.0,
+          "mrr@5": -0.08333333333333331,
+          "candidate_recall": 0.0
+        },
+        "before": {
+          "recall@5": 1.0,
+          "hit@5": 1.0,
+          "mrr@5": 0.3333333333333333,
+          "candidate_recall": 1.0
+        },
+        "after": {
+          "recall@5": 1.0,
+          "hit@5": 1.0,
+          "mrr@5": 0.25,
+          "candidate_recall": 1.0
+        }
+      },
+      {
+        "id": "d36",
+        "type": "multi",
+        "delta": {
+          "recall@5": 0.0,
+          "hit@5": 0.0,
+          "mrr@5": -0.5,
+          "candidate_recall": 0.0
+        },
+        "before": {
+          "recall@5": 0.5,
+          "hit@5": 1.0,
+          "mrr@5": 1.0,
+          "candidate_recall": 0.5
+        },
+        "after": {
+          "recall@5": 0.5,
+          "hit@5": 1.0,
+          "mrr@5": 0.5,
+          "candidate_recall": 0.5
+        }
+      },
+      {
+        "id": "d58",
+        "type": "paraphrase",
+        "delta": {
+          "recall@5": 0.0,
+          "hit@5": 0.0,
+          "mrr@5": 0.75,
+          "candidate_recall": 0.0
+        },
+        "before": {
+          "recall@5": 1.0,
+          "hit@5": 1.0,
+          "mrr@5": 0.25,
+          "candidate_recall": 1.0
+        },
+        "after": {
+          "recall@5": 1.0,
+          "hit@5": 1.0,
+          "mrr@5": 1.0,
+          "candidate_recall": 1.0
+        }
+      },
+      {
+        "id": "d59",
+        "type": "multi",
+        "delta": {
+          "recall@5": 0.5,
+          "hit@5": 0.0,
+          "mrr@5": 0.6666666666666667,
+          "candidate_recall": 0.0
+        },
+        "before": {
+          "recall@5": 0.5,
+          "hit@5": 1.0,
+          "mrr@5": 0.3333333333333333,
+          "candidate_recall": 1.0
+        },
+        "after": {
+          "recall@5": 1.0,
+          "hit@5": 1.0,
+          "mrr@5": 1.0,
+          "candidate_recall": 1.0
+        }
+      },
+      {
+        "id": "d62",
+        "type": "multi",
+        "delta": {
+          "recall@5": 0.5,
+          "hit@5": 0.0,
+          "mrr@5": 0.25,
+          "candidate_recall": 0.0
+        },
+        "before": {
+          "recall@5": 0.5,
+          "hit@5": 1.0,
+          "mrr@5": 0.25,
+          "candidate_recall": 1.0
+        },
+        "after": {
+          "recall@5": 1.0,
+          "hit@5": 1.0,
+          "mrr@5": 0.5,
+          "candidate_recall": 1.0
+        }
+      }
+    ],
+    "counts": {
+      "recall@5": {
+        "wins": 5,
+        "losses": 0,
+        "ties": 59
+      },
+      "mrr@5": {
+        "wins": 6,
+        "losses": 3,
+        "ties": 55
+      }
+    }
+  },
+  "coverage-v1": {
+    "changed": [
+      {
+        "id": "d04",
+        "type": "multi",
+        "delta": {
+          "recall@5": 0.0,
+          "hit@5": 0.0,
+          "mrr@5": 0.5,
+          "candidate_recall": 0.0
+        },
+        "before": {
+          "recall@5": 0.6666666666666666,
+          "hit@5": 1.0,
+          "mrr@5": 0.5,
+          "candidate_recall": 1.0
+        },
+        "after": {
+          "recall@5": 0.6666666666666666,
+          "hit@5": 1.0,
+          "mrr@5": 1.0,
+          "candidate_recall": 1.0
+        }
+      },
+      {
+        "id": "d10",
+        "type": "multi",
+        "delta": {
+          "recall@5": 0.5,
+          "hit@5": 0.0,
+          "mrr@5": 0.0,
+          "candidate_recall": 0.0
+        },
+        "before": {
+          "recall@5": 0.5,
+          "hit@5": 1.0,
+          "mrr@5": 1.0,
+          "candidate_recall": 1.0
+        },
+        "after": {
+          "recall@5": 1.0,
+          "hit@5": 1.0,
+          "mrr@5": 1.0,
+          "candidate_recall": 1.0
+        }
+      },
+      {
+        "id": "d17",
+        "type": "multi",
+        "delta": {
+          "recall@5": 0.0,
+          "hit@5": 0.0,
+          "mrr@5": 0.1333333333333333,
+          "candidate_recall": 0.0
+        },
+        "before": {
+          "recall@5": 0.5,
+          "hit@5": 1.0,
+          "mrr@5": 0.2,
+          "candidate_recall": 1.0
+        },
+        "after": {
+          "recall@5": 0.5,
+          "hit@5": 1.0,
+          "mrr@5": 0.3333333333333333,
+          "candidate_recall": 1.0
+        }
+      },
+      {
+        "id": "d18",
+        "type": "paraphrase",
+        "delta": {
+          "recall@5": 0.0,
+          "hit@5": 0.0,
+          "mrr@5": 0.6666666666666667,
+          "candidate_recall": 0.0
+        },
+        "before": {
+          "recall@5": 1.0,
+          "hit@5": 1.0,
+          "mrr@5": 0.3333333333333333,
+          "candidate_recall": 1.0
+        },
+        "after": {
+          "recall@5": 1.0,
+          "hit@5": 1.0,
+          "mrr@5": 1.0,
+          "candidate_recall": 1.0
+        }
+      },
+      {
+        "id": "d26",
+        "type": "multi",
+        "delta": {
+          "recall@5": 0.5,
+          "hit@5": 0.0,
+          "mrr@5": -0.5,
+          "candidate_recall": 0.0
+        },
+        "before": {
+          "recall@5": 0.5,
+          "hit@5": 1.0,
+          "mrr@5": 1.0,
+          "candidate_recall": 1.0
+        },
+        "after": {
+          "recall@5": 1.0,
+          "hit@5": 1.0,
+          "mrr@5": 0.5,
+          "candidate_recall": 1.0
+        }
+      },
+      {
+        "id": "d31",
+        "type": "paraphrase",
+        "delta": {
+          "recall@5": 0.0,
+          "hit@5": 0.0,
+          "mrr@5": -0.08333333333333331,
+          "candidate_recall": 0.0
+        },
+        "before": {
+          "recall@5": 1.0,
+          "hit@5": 1.0,
+          "mrr@5": 0.3333333333333333,
+          "candidate_recall": 1.0
+        },
+        "after": {
+          "recall@5": 1.0,
+          "hit@5": 1.0,
+          "mrr@5": 0.25,
+          "candidate_recall": 1.0
+        }
+      },
+      {
+        "id": "d36",
+        "type": "multi",
+        "delta": {
+          "recall@5": 0.0,
+          "hit@5": 0.0,
+          "mrr@5": -0.5,
+          "candidate_recall": 0.0
+        },
+        "before": {
+          "recall@5": 0.5,
+          "hit@5": 1.0,
+          "mrr@5": 1.0,
+          "candidate_recall": 0.5
+        },
+        "after": {
+          "recall@5": 0.5,
+          "hit@5": 1.0,
+          "mrr@5": 0.5,
+          "candidate_recall": 0.5
+        }
+      },
+      {
+        "id": "d52",
+        "type": "multi",
+        "delta": {
+          "recall@5": 0.0,
+          "hit@5": 0.0,
+          "mrr@5": -0.1333333333333333,
+          "candidate_recall": 0.0
+        },
+        "before": {
+          "recall@5": 0.5,
+          "hit@5": 1.0,
+          "mrr@5": 0.3333333333333333,
+          "candidate_recall": 1.0
+        },
+        "after": {
+          "recall@5": 0.5,
+          "hit@5": 1.0,
+          "mrr@5": 0.2,
+          "candidate_recall": 1.0
+        }
+      },
+      {
+        "id": "d58",
+        "type": "paraphrase",
+        "delta": {
+          "recall@5": 0.0,
+          "hit@5": 0.0,
+          "mrr@5": 0.6666666666666667,
+          "candidate_recall": 0.0
+        },
+        "before": {
+          "recall@5": 1.0,
+          "hit@5": 1.0,
+          "mrr@5": 0.3333333333333333,
+          "candidate_recall": 1.0
+        },
+        "after": {
+          "recall@5": 1.0,
+          "hit@5": 1.0,
+          "mrr@5": 1.0,
+          "candidate_recall": 1.0
+        }
+      },
+      {
+        "id": "d59",
+        "type": "multi",
+        "delta": {
+          "recall@5": 0.5,
+          "hit@5": 0.0,
+          "mrr@5": 0.6666666666666667,
+          "candidate_recall": 0.0
+        },
+        "before": {
+          "recall@5": 0.5,
+          "hit@5": 1.0,
+          "mrr@5": 0.3333333333333333,
+          "candidate_recall": 1.0
+        },
+        "after": {
+          "recall@5": 1.0,
+          "hit@5": 1.0,
+          "mrr@5": 1.0,
+          "candidate_recall": 1.0
+        }
+      },
+      {
+        "id": "d62",
+        "type": "multi",
+        "delta": {
+          "recall@5": 0.5,
+          "hit@5": 0.0,
+          "mrr@5": 0.25,
+          "candidate_recall": 0.0
+        },
+        "before": {
+          "recall@5": 0.5,
+          "hit@5": 1.0,
+          "mrr@5": 0.25,
+          "candidate_recall": 1.0
+        },
+        "after": {
+          "recall@5": 1.0,
+          "hit@5": 1.0,
+          "mrr@5": 0.5,
+          "candidate_recall": 1.0
+        }
+      }
+    ],
+    "counts": {
+      "recall@5": {
+        "wins": 4,
+        "losses": 0,
+        "ties": 60
+      },
+      "mrr@5": {
+        "wins": 6,
+        "losses": 4,
+        "ties": 54
+      }
+    }
+  }
+}

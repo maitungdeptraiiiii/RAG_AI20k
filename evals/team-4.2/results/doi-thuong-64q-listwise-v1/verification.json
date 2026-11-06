@@ -1,0 +1,11 @@
+{
+  "questions": 64,
+  "all_pools_scores_merged_ids_preserved": true,
+  "all_gates_and_shortlists_match_preflight": true,
+  "all_selections_replayed_from_llm_cache": true,
+  "all_metrics_and_context_recomputed": true,
+  "network_forbidden": true,
+  "new_model_api_calls": 0,
+  "baseline_execution": false,
+  "parameter_sweep": false
+}

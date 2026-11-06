@@ -57,6 +57,24 @@ client giả; cần chạy thử một lần với PyMuPDF, trafilatura, pyvi, O
 
 ## Query decomposition
 
+`QUERY_REWRITE_ENABLED=true` bật một rewrite trung thành với toàn bộ câu hỏi cho Jev.
+Trong mode hybrid, BM25 của nhánh câu gốc cũng dùng rewrite; Dense/HyDE vẫn dùng câu gốc,
+các nhánh câu con vẫn dùng câu con. Câu hỏi trả lời cuối vẫn là câu gốc. Mặc định tắt,
+độc lập với `DECOMP_ENABLED`. Rewrite lỗi thì giữ câu gốc và ghi lỗi trong kết quả.
+`BM25_RRF_WEIGHT=1.0` là fusion ngang trọng số với Dense; ví dụ `0.3` giảm đóng góp BM25
+theo công thức `sum(weight_arm / (RRF_K + rank_arm))`. Không ảnh hưởng mode Dense.
+Đặt `QUERY_REWRITE_ENABLED=true`, `REWRITE_FOR_RERANK=false` để chỉ dùng rewrite cho BM25
+và giữ câu gốc cho Jev. Khi đó mode Dense không gọi rewriter.
+
+`COVERAGE_ENABLED=true` bật bước chọn bằng chứng sau Jev khi có ít nhất hai nhánh câu con
+và bật gộp Điều. Mặc định tắt. Bước này không gọi thêm model và không đổi pool hoặc xác suất Jev:
+giữ `COVERAGE_ANCHOR_K=2` vị trí đầu; chọn các vị trí còn lại theo điểm Jev và độ phủ mới của
+câu con, với `COVERAGE_WEIGHT=0.25`, `COVERAGE_MIN_P=0.5`, `COVERAGE_BRANCH_K=5`.
+Độ phủ dùng thứ hạng retrieval làm tín hiệu thay thế, không phải kiểm chứng ngữ nghĩa.
+Thứ tự mới áp dụng cho cả top-k benchmark và danh sách chọn context; điểm hiển thị vẫn là
+xác suất Jev gốc, nên thứ tự có thể không giảm dần theo điểm. Chạy fallback/non-Jev thì bỏ qua bước này.
+Benchmark offline một cấu hình bằng cache: `python evals/team-4.2/runners/run_coverage_benchmark_offline.py`.
+
 Bật bằng `DECOMP_ENABLED=true`, tắt bằng `false` (mặc định). Không cần ingest/index lại.
 Độc lập với HyDE và mode retrieval: `--mode dense` không tìm BM25; `--mode hybrid` tìm cả hai.
 

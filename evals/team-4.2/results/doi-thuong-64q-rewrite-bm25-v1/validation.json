@@ -1,0 +1,13 @@
+{
+  "unit_tests_passed": 177,
+  "offline_verified_question_config_pairs": 192,
+  "baseline_executed": false,
+  "new_configurations": [
+    "rewrite-only",
+    "rewrite-bm25-w1",
+    "rewrite-bm25-w03"
+  ],
+  "jev_model": "jev-1.13.0",
+  "score_cache_schema": "jev-full-input-v2",
+  "application_env_modified": false
+}

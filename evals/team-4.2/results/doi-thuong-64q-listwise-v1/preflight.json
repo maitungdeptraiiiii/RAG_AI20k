@@ -1,0 +1,16 @@
+{
+  "questions": 64,
+  "triggered": 18,
+  "new_api_requests_at_most": 18,
+  "gate_reasons": {
+    "clear_cutoff": 19,
+    "few_eligible_candidates": 13,
+    "ambiguous_cutoff": 18,
+    "single_intent": 14
+  },
+  "input_characters": 232152,
+  "input_whitespace_units": 45974,
+  "estimated_input_tokens": null,
+  "token_estimate_encoding": "unavailable offline",
+  "model_api_calls": 0
+}

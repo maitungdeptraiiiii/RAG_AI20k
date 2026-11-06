@@ -1,0 +1,1646 @@
+{
+  "api_calls": 0,
+  "network_connections_blocked": true,
+  "benchmark_rerun": false,
+  "queries_read_from_cache": 94,
+  "replay_exact_questions": 64,
+  "gold_ref_count": 95,
+  "stage_counts": {
+    "present_top5": 80,
+    "in_final_pool_but_not_top5": 8,
+    "discarded_at_final_new10_budget": 0,
+    "discarded_at_child_top10": 0,
+    "discarded_at_branch_article20": 1,
+    "outside_raw_top40_all_existing_branches": 6
+  },
+  "method": "Read-only stored vectors/cache; same dtype/order/cosine as local Qdrant; no model calls",
+  "input_metadata_sha256": "f697f777ea35e02ed05f71d8c0ed3dfd321a54c6e92e73ca2f61a3c5a2c03c0d",
+  "gold_audit": [
+    {
+      "id": "d01",
+      "question": "hôm nay tôi lỡ tông phải một ông già lúc sang đường, không biết có bị sao không",
+      "type": "multi",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ hai CÁC TỘI PHẠM > Chương XXI CÁC TỘI XÂM PHẠM AN TOÀN CÔNG CỘNG, TRẬT TỰ CÔNG CỘNG > Mục 1 CÁC TỘI XÂM PHẠM AN TOÀN GIAO THÔNG > Điều 260. Tội vi phạm quy định về tham gia giao thông đường bộ",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        5
+      ],
+      "best_branch_article_positions": [
+        4
+      ]
+    },
+    {
+      "id": "d01",
+      "question": "hôm nay tôi lỡ tông phải một ông già lúc sang đường, không biết có bị sao không",
+      "type": "multi",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ ba NGHĨA VỤ VÀ HỢP ĐỒNG > Chương XX TRÁCH NHIỆM BỒI THƯỜNG THIỆT HẠI NGOÀI HỢP ĐỒNG > Mục 3 BỒI THƯỜNG THIỆT HẠI TRONG MỘT SỐ TRƯỜNG HỢP CỤ THỂ > Điều 601. Bồi thường thiệt hại do nguồn nguy hiểm cao độ gây ra",
+      "stage": "outside_raw_top40_all_existing_branches",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        66
+      ],
+      "best_branch_article_positions": [
+        48
+      ]
+    },
+    {
+      "id": "d01",
+      "question": "hôm nay tôi lỡ tông phải một ông già lúc sang đường, không biết có bị sao không",
+      "type": "multi",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ ba NGHĨA VỤ VÀ HỢP ĐỒNG > Chương XX TRÁCH NHIỆM BỒI THƯỜNG THIỆT HẠI NGOÀI HỢP ĐỒNG > Mục 2 XÁC ĐỊNH THIỆT HẠI > Điều 590. Thiệt hại do sức khoẻ bị xâm phạm",
+      "stage": "outside_raw_top40_all_existing_branches",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        55
+      ],
+      "best_branch_article_positions": [
+        38
+      ]
+    },
+    {
+      "id": "d02",
+      "question": "tôi lỡ tay đẩy người ta xuống vực, có đến nhà bố mẹ họ xin lỗi rồi có sao không",
+      "type": "multi",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ hai CÁC TỘI PHẠM > Chương XIV CÁC TỘI XÂM PHẠM TÍNH MẠNG, > Điều 128. Tội vô ý làm chết người",
+      "stage": "discarded_at_branch_article20",
+      "replay_exact": true,
+      "query_count": 3,
+      "best_branch_positions": [
+        76,
+        25,
+        64
+      ],
+      "best_branch_article_positions": [
+        75,
+        25,
+        63
+      ]
+    },
+    {
+      "id": "d02",
+      "question": "tôi lỡ tay đẩy người ta xuống vực, có đến nhà bố mẹ họ xin lỗi rồi có sao không",
+      "type": "multi",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương VII CÁC BIỆN PHÁP TƯ PHÁP > Mục 1 QUY ĐỊNH CHUNG VỀ QUYẾT ĐỊNH HÌNH PHẠT > Điều 51. Các tình tiết giảm nhẹ trách nhiệm hình sự",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 3,
+      "best_branch_positions": [
+        16,
+        38,
+        6
+      ],
+      "best_branch_article_positions": [
+        16,
+        38,
+        6
+      ]
+    },
+    {
+      "id": "d02",
+      "question": "tôi lỡ tay đẩy người ta xuống vực, có đến nhà bố mẹ họ xin lỗi rồi có sao không",
+      "type": "multi",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương V THỜI HIỆU TRUY CỨU TRÁCH NHIỆM HÌNH SỰ, > Điều 29. Căn cứ miễn trách nhiệm hình sự",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 3,
+      "best_branch_positions": [
+        14,
+        23,
+        11
+      ],
+      "best_branch_article_positions": [
+        14,
+        23,
+        11
+      ]
+    },
+    {
+      "id": "d03",
+      "question": "thằng em tôi nhậu xong đánh nhau ngoài quán, bên kia phải khâu mấy mũi, giờ công an gọi lên làm việc",
+      "type": "multi",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ hai CÁC TỘI PHẠM > Chương XIV CÁC TỘI XÂM PHẠM TÍNH MẠNG, > Điều 134. Tội cố ý gây thương tích hoặc gây tổn hại cho sức khỏe của người khác",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 3,
+      "best_branch_positions": [
+        1,
+        3,
+        568
+      ],
+      "best_branch_article_positions": [
+        1,
+        3,
+        446
+      ]
+    },
+    {
+      "id": "d03",
+      "question": "thằng em tôi nhậu xong đánh nhau ngoài quán, bên kia phải khâu mấy mũi, giờ công an gọi lên làm việc",
+      "type": "multi",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương III TỘI PHẠM > Điều 13. Phạm tội do dùng rượu, bia hoặc chất kích thích mạnh khác",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 3,
+      "best_branch_positions": [
+        32,
+        2,
+        1697
+      ],
+      "best_branch_article_positions": [
+        29,
+        2,
+        1378
+      ]
+    },
+    {
+      "id": "d04",
+      "question": "công ty tự nhiên bảo mai khỏi đi làm nữa, thế có được không",
+      "type": "multi",
+      "source": "bo_luat_lao_dong_2019.txt",
+      "section": "Chương III HỢP ĐỒNG LAO ĐỘNG > Mục 3. CHẤM DỨT HỢP ĐỒNG LAO ĐỘNG > Điều 36. Quyền đơn phương chấm dứt hợp đồng lao động của người sử dụng lao động",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d04",
+      "question": "công ty tự nhiên bảo mai khỏi đi làm nữa, thế có được không",
+      "type": "multi",
+      "source": "bo_luat_lao_dong_2019.txt",
+      "section": "Chương III HỢP ĐỒNG LAO ĐỘNG > Mục 3. CHẤM DỨT HỢP ĐỒNG LAO ĐỘNG > Điều 39. Đơn phương chấm dứt hợp đồng lao động trái pháp luật",
+      "stage": "in_final_pool_but_not_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        21
+      ],
+      "best_branch_article_positions": [
+        18
+      ]
+    },
+    {
+      "id": "d04",
+      "question": "công ty tự nhiên bảo mai khỏi đi làm nữa, thế có được không",
+      "type": "multi",
+      "source": "bo_luat_lao_dong_2019.txt",
+      "section": "Chương III HỢP ĐỒNG LAO ĐỘNG > Mục 3. CHẤM DỨT HỢP ĐỒNG LAO ĐỘNG > Điều 41. Nghĩa vụ của người sử dụng lao động khi đơn phương chấm dứt hợp đồng lao động trái pháp luật",
+      "stage": "in_final_pool_but_not_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        7
+      ],
+      "best_branch_article_positions": [
+        6
+      ]
+    },
+    {
+      "id": "d05",
+      "question": "công ty nợ lương mấy tháng rồi, giờ em nghỉ ngang luôn có bị sao không",
+      "type": "paraphrase",
+      "source": "bo_luat_lao_dong_2019.txt",
+      "section": "Chương III HỢP ĐỒNG LAO ĐỘNG > Mục 3. CHẤM DỨT HỢP ĐỒNG LAO ĐỘNG > Điều 35. Quyền đơn phương chấm dứt hợp đồng lao động của người lao động",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 3,
+      "best_branch_positions": [
+        1,
+        1,
+        4
+      ],
+      "best_branch_article_positions": [
+        1,
+        1,
+        3
+      ]
+    },
+    {
+      "id": "d06",
+      "question": "đang bầu mà bị công ty cho nghỉ việc, chị có làm gì được không",
+      "type": "multi",
+      "source": "bo_luat_lao_dong_2019.txt",
+      "section": "Chương III HỢP ĐỒNG LAO ĐỘNG > Mục 3. CHẤM DỨT HỢP ĐỒNG LAO ĐỘNG > Điều 37. Trường hợp người sử dụng lao động không được thực hiện quyền đơn phương chấm dứt hợp đồng lao động",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        2
+      ],
+      "best_branch_article_positions": [
+        2
+      ]
+    },
+    {
+      "id": "d06",
+      "question": "đang bầu mà bị công ty cho nghỉ việc, chị có làm gì được không",
+      "type": "multi",
+      "source": "bo_luat_lao_dong_2019.txt",
+      "section": "Chương X NHỮNG QUY ĐỊNH RIÊNG ĐỐI VỚI LAO ĐỘNG NỮ VÀ BẢO ĐẢM BÌNH ĐẲNG GIỚI > Điều 137. Bảo vệ thai sản",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        3
+      ],
+      "best_branch_article_positions": [
+        3
+      ]
+    },
+    {
+      "id": "d07",
+      "question": "tháng nào cũng phải ở lại làm tới 9-10h tối mà chẳng thấy thêm đồng nào",
+      "type": "multi",
+      "source": "bo_luat_lao_dong_2019.txt",
+      "section": "Chương VII THỜI GIỜ LÀM VIỆC, THỜI GIỜ NGHỈ NGƠI > Mục 1. THỜI GIỜ LÀM VIỆC > Điều 107. Làm thêm giờ",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d07",
+      "question": "tháng nào cũng phải ở lại làm tới 9-10h tối mà chẳng thấy thêm đồng nào",
+      "type": "multi",
+      "source": "bo_luat_lao_dong_2019.txt",
+      "section": "Chương VI TIỀN LƯƠNG > Điều 98. Tiền lương làm thêm giờ, làm việc vào ban đêm",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        2
+      ],
+      "best_branch_article_positions": [
+        2
+      ]
+    },
+    {
+      "id": "d08",
+      "question": "cho đứa bạn mượn 50 triệu giờ nó chặn hết liên lạc rồi",
+      "type": "multi",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ ba NGHĨA VỤ VÀ HỢP ĐỒNG > Chương XVI MỘT SỐ HỢP ĐỒNG THÔNG DỤNG > Mục 4 HỢP ĐỒNG VAY TÀI SẢN > Điều 466. Nghĩa vụ trả nợ của bên vay",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d08",
+      "question": "cho đứa bạn mượn 50 triệu giờ nó chặn hết liên lạc rồi",
+      "type": "multi",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ hai CÁC TỘI PHẠM > Chương XVI CÁC TỘI XÂM PHẠM SỞ HỮU > Điều 175. Tội lạm dụng tín nhiệm chiếm đoạt tài sản",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        4
+      ],
+      "best_branch_article_positions": [
+        4
+      ]
+    },
+    {
+      "id": "d09",
+      "question": "chuyển khoản cọc mua hàng trên mạng xong bị block luôn",
+      "type": "paraphrase",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ hai CÁC TỘI PHẠM > Chương XVI CÁC TỘI XÂM PHẠM SỞ HỮU > Điều 174. Tội lừa đảo chiếm đoạt tài sản",
+      "stage": "outside_raw_top40_all_existing_branches",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        81
+      ],
+      "best_branch_article_positions": [
+        77
+      ]
+    },
+    {
+      "id": "d10",
+      "question": "mẹ mất rồi mà sổ đỏ vẫn đứng tên mẹ, mấy anh em đang cãi nhau",
+      "type": "multi",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ tư THỪA KẾ > Chương XXIII THỪA KẾ THEO PHÁP LUẬT > Điều 650. Những trường hợp thừa kế theo pháp luật",
+      "stage": "in_final_pool_but_not_top5",
+      "replay_exact": true,
+      "query_count": 3,
+      "best_branch_positions": [
+        9,
+        5,
+        18
+      ],
+      "best_branch_article_positions": [
+        9,
+        5,
+        17
+      ]
+    },
+    {
+      "id": "d10",
+      "question": "mẹ mất rồi mà sổ đỏ vẫn đứng tên mẹ, mấy anh em đang cãi nhau",
+      "type": "multi",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ tư THỪA KẾ > Chương XXIII THỪA KẾ THEO PHÁP LUẬT > Điều 651. Người thừa kế theo pháp luật",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 3,
+      "best_branch_positions": [
+        18,
+        12,
+        32
+      ],
+      "best_branch_article_positions": [
+        18,
+        12,
+        29
+      ]
+    },
+    {
+      "id": "d11",
+      "question": "tối qua chồng tôi bị công an đến nhà bắt đi, giờ chẳng ai báo gì cho gia đình cả",
+      "type": "paraphrase",
+      "source": "bo_luat_to_tung_hinh_su_2015.txt",
+      "section": "Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương VII BIỆN PHÁP NGĂN CHẶN, BIỆN PHÁP CƯỠNG CHẾ > Điều 116. Thông báo về việc giữ người trong trường hợp khẩn cấp, bắt người",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 4,
+      "best_branch_positions": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "best_branch_article_positions": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "d12",
+      "question": "con tôi mới 13 tuổi, đi lấy trộm xe đạp bị người ta bắt được",
+      "type": "multi",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương III TỘI PHẠM > Điều 12. Tuổi chịu trách nhiệm hình sự",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        4
+      ],
+      "best_branch_article_positions": [
+        4
+      ]
+    },
+    {
+      "id": "d12",
+      "question": "con tôi mới 13 tuổi, đi lấy trộm xe đạp bị người ta bắt được",
+      "type": "multi",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ ba NGHĨA VỤ VÀ HỢP ĐỒNG > Chương XX TRÁCH NHIỆM BỒI THƯỜNG THIỆT HẠI NGOÀI HỢP ĐỒNG > Mục 1 QUY ĐỊNH CHUNG > Điều 586. Năng lực chịu trách nhiệm bồi thường thiệt hại của cá nhân",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        16
+      ],
+      "best_branch_article_positions": [
+        14
+      ]
+    },
+    {
+      "id": "d13",
+      "question": "nhà bên cạnh đang xây, tường nhà tôi nứt hết cả rồi",
+      "type": "multi",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ hai QUYỀN SỞ HỮU VÀ QUYỀN KHÁC ĐỐI VỚI TÀI SẢN > Chương XI QUY ĐỊNH CHUNG > Mục 3 GIỚI HẠN QUYỀN SỞ HỮU, QUYỀN KHÁC ĐỐI VỚI TÀI SẢN > Điều 174. Nghĩa vụ tôn trọng quy tắc xây dựng",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        3
+      ],
+      "best_branch_article_positions": [
+        3
+      ]
+    },
+    {
+      "id": "d13",
+      "question": "nhà bên cạnh đang xây, tường nhà tôi nứt hết cả rồi",
+      "type": "multi",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ ba NGHĨA VỤ VÀ HỢP ĐỒNG > Chương XX TRÁCH NHIỆM BỒI THƯỜNG THIỆT HẠI NGOÀI HỢP ĐỒNG > Mục 1 QUY ĐỊNH CHUNG > Điều 584. Căn cứ phát sinh trách nhiệm bồi thường thiệt hại",
+      "stage": "outside_raw_top40_all_existing_branches",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        94
+      ],
+      "best_branch_article_positions": [
+        91
+      ]
+    },
+    {
+      "id": "d14",
+      "question": "con chó nhà tôi sổng ra cắn đứa nhỏ hàng xóm",
+      "type": "paraphrase",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ ba NGHĨA VỤ VÀ HỢP ĐỒNG > Chương XX TRÁCH NHIỆM BỒI THƯỜNG THIỆT HẠI NGOÀI HỢP ĐỒNG > Mục 3 BỒI THƯỜNG THIỆT HẠI TRONG MỘT SỐ TRƯỜNG HỢP CỤ THỂ > Điều 603. Bồi thường thiệt hại do súc vật gây ra",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d15",
+      "question": "bị đứa kia lên facebook bịa chuyện nói xấu, nhục không chịu được",
+      "type": "multi",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ nhất QUY ĐỊNH CHUNG > Chương III CÁ NHÂN > Mục 2 QUYỀN NHÂN THÂN > Điều 34. Quyền được bảo vệ danh dự, nhân phẩm, uy tín",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d15",
+      "question": "bị đứa kia lên facebook bịa chuyện nói xấu, nhục không chịu được",
+      "type": "multi",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ hai CÁC TỘI PHẠM > Chương XIV CÁC TỘI XÂM PHẠM TÍNH MẠNG, > Điều 156. Tội vu khống",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        2
+      ],
+      "best_branch_article_positions": [
+        2
+      ]
+    },
+    {
+      "id": "d15",
+      "question": "bị đứa kia lên facebook bịa chuyện nói xấu, nhục không chịu được",
+      "type": "multi",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ hai CÁC TỘI PHẠM > Chương XIV CÁC TỘI XÂM PHẠM TÍNH MẠNG, > Điều 155. Tội làm nhục người khác",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        3
+      ],
+      "best_branch_article_positions": [
+        3
+      ]
+    },
+    {
+      "id": "d16",
+      "question": "nhặt được cái ví ngoài đường, giữ luôn có sao không",
+      "type": "multi",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ hai QUYỀN SỞ HỮU VÀ QUYỀN KHÁC ĐỐI VỚI TÀI SẢN > Chương XIII QUYỀN SỞ HỮU > Tiểu mục 1 XÁC LẬP QUYỀN SỞ HỮU > Điều 230. Xác lập quyền sở hữu đối với tài sản do người khác đánh rơi, bỏ quên",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d16",
+      "question": "nhặt được cái ví ngoài đường, giữ luôn có sao không",
+      "type": "multi",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ hai CÁC TỘI PHẠM > Chương XVI CÁC TỘI XÂM PHẠM SỞ HỮU > Điều 176. Tội chiếm giữ trái phép tài sản",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        2
+      ],
+      "best_branch_article_positions": [
+        2
+      ]
+    },
+    {
+      "id": "d17",
+      "question": "tối qua say quá đập vỡ đồ của quán, sáng ra họ đòi đền",
+      "type": "multi",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ ba NGHĨA VỤ VÀ HỢP ĐỒNG > Chương XX TRÁCH NHIỆM BỒI THƯỜNG THIỆT HẠI NGOÀI HỢP ĐỒNG > Mục 2 XÁC ĐỊNH THIỆT HẠI > Điều 589. Thiệt hại do tài sản bị xâm phạm",
+      "stage": "in_final_pool_but_not_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        14
+      ],
+      "best_branch_article_positions": [
+        14
+      ]
+    },
+    {
+      "id": "d17",
+      "question": "tối qua say quá đập vỡ đồ của quán, sáng ra họ đòi đền",
+      "type": "multi",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ hai CÁC TỘI PHẠM > Chương XVI CÁC TỘI XÂM PHẠM SỞ HỮU > Điều 178. Tội hủy hoại hoặc cố ý làm hư hỏng tài sản",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        9
+      ],
+      "best_branch_article_positions": [
+        9
+      ]
+    },
+    {
+      "id": "d18",
+      "question": "tòa gửi giấy gọi lên mà tôi bận không đi được thì sao",
+      "type": "paraphrase",
+      "source": "bo_luat_to_tung_dan_su_2015.txt",
+      "section": "Phần thứ hai THỦ TỤC GIẢI QUYẾT VỤ ÁN TẠI TÒA ÁN CẤP SƠ THẨM > Chương XIV PHIÊN TÒA SƠ THẨM > Mục 1 QUY ĐỊNH CHUNG VỀ PHIÊN TÒA SƠ THẨM > Điều 227. Sự có mặt của đương sự, người đại diện, người bảo vệ quyền và lợi ích hợp pháp của đương sự",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        2
+      ],
+      "best_branch_article_positions": [
+        2
+      ]
+    },
+    {
+      "id": "d19",
+      "question": "vợ ôm con về ngoại cả năm nay rồi, giờ muốn làm đơn ly hôn thì nộp ở đâu",
+      "type": "multi",
+      "source": "bo_luat_to_tung_dan_su_2015.txt",
+      "section": "Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương III THẨM QUYỀN CỦA TÒA ÁN > Mục 2 THẨM QUYỀN CỦA TÒA ÁN CÁC CẤP > Điều 35. Thẩm quyền của Tòa án nhân dân cấp huyện",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        4
+      ],
+      "best_branch_article_positions": [
+        3
+      ]
+    },
+    {
+      "id": "d19",
+      "question": "vợ ôm con về ngoại cả năm nay rồi, giờ muốn làm đơn ly hôn thì nộp ở đâu",
+      "type": "multi",
+      "source": "bo_luat_to_tung_dan_su_2015.txt",
+      "section": "Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương III THẨM QUYỀN CỦA TÒA ÁN > Mục 2 THẨM QUYỀN CỦA TÒA ÁN CÁC CẤP > Điều 39. Thẩm quyền của Tòa án theo lãnh thổ",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d20",
+      "question": "chồng tôi đi làm trên tàu, hết hợp đồng mà chủ tàu bỏ ở nước ngoài không lo cho về",
+      "type": "paraphrase",
+      "source": "bo_luat_hang_hai_2015.txt",
+      "section": "Chương III THUYỀN BỘ VÀ THUYỀN VIÊN > Mục 2 THUYỀN VIÊN > Điều 66. Hồi hương thuyền viên",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d21",
+      "question": "thằng con trai tôi 18 tuổi yêu đứa con gái 15 tuổi, hai đứa tự nguyện ngủ với nhau, giờ bố mẹ bé gái đòi báo công an",
+      "type": "paraphrase",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ hai CÁC TỘI PHẠM > Chương XIV CÁC TỘI XÂM PHẠM TÍNH MẠNG, > Điều 145. Tội giao cấu hoặc thực hiện hành vi quan hệ tình dục khác với người từ đủ 13 tuổi đến dưới 16 tuổi",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d22",
+      "question": "ông hàng xóm say rượu cầm dao sang chửi, tôi lấy gậy đánh lại gãy tay ông ấy, giờ ổng đòi kiện",
+      "type": "multi",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương IV NHỮNG TRƯỜNG HỢP LOẠI TRỪ > Điều 22. Phòng vệ chính đáng",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 4,
+      "best_branch_positions": [
+        38,
+        1,
+        193,
+        808
+      ],
+      "best_branch_article_positions": [
+        35,
+        1,
+        161,
+        658
+      ]
+    },
+    {
+      "id": "d22",
+      "question": "ông hàng xóm say rượu cầm dao sang chửi, tôi lấy gậy đánh lại gãy tay ông ấy, giờ ổng đòi kiện",
+      "type": "multi",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ hai CÁC TỘI PHẠM > Chương XIV CÁC TỘI XÂM PHẠM TÍNH MẠNG, > Điều 134. Tội cố ý gây thương tích hoặc gây tổn hại cho sức khỏe của người khác",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 4,
+      "best_branch_positions": [
+        1,
+        5,
+        2,
+        7
+      ],
+      "best_branch_article_positions": [
+        1,
+        5,
+        2,
+        6
+      ]
+    },
+    {
+      "id": "d23",
+      "question": "đi đường thấy người ta bị tai nạn nằm đó mà sợ liên lụy nên đi luôn, có sao không",
+      "type": "paraphrase",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ hai CÁC TỘI PHẠM > Chương XIV CÁC TỘI XÂM PHẠM TÍNH MẠNG, > Điều 132. Tội không cứu giúp người đang ở trong tình trạng nguy hiểm đến tính mạng",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d24",
+      "question": "tối nào mấy ông trong xóm cũng tụ tập đánh bài ăn tiền, công an ập vào thì có bị gì không",
+      "type": "paraphrase",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ hai CÁC TỘI PHẠM > Mục 4 CÁC TỘI PHẠM KHÁC XÂM PHẠM TRẬT TỰ CÔNG CỘNG > Điều 321. Tội đánh bạc",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d25",
+      "question": "đang đi thì bị thằng kia rút dao kề cổ bắt đưa điện thoại",
+      "type": "paraphrase",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ hai CÁC TỘI PHẠM > Chương XVI CÁC TỘI XÂM PHẠM SỞ HỮU > Điều 168. Tội cướp tài sản",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        2
+      ],
+      "best_branch_article_positions": [
+        2
+      ]
+    },
+    {
+      "id": "d26",
+      "question": "cháu tôi 17 tuổi đi trộm điện thoại của người ta bị bắt, liệu có phải đi tù không",
+      "type": "multi",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ hai CÁC TỘI PHẠM > Chương XVI CÁC TỘI XÂM PHẠM SỞ HỮU > Điều 173. Tội trộm cắp tài sản",
+      "stage": "in_final_pool_but_not_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        14
+      ],
+      "best_branch_article_positions": [
+        11
+      ]
+    },
+    {
+      "id": "d26",
+      "question": "cháu tôi 17 tuổi đi trộm điện thoại của người ta bị bắt, liệu có phải đi tù không",
+      "type": "multi",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương XII NHỮNG QUY ĐỊNH ĐỐI VỚI NGƯỜI DƯỚI 18 TUỔI PHẠM TỘI > Mục 1 QUY ĐỊNH CHUNG VỀ XỬ LÝ HÌNH SỰ ĐỐI VỚI NGƯỜI DƯỚI 18 TUỔI PHẠM TỘI > Điều 91. Nguyên tắc xử lý đối với người dưới 18 tuổi phạm tội",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d27",
+      "question": "chồng tôi cứ say là về đánh chửi vợ con, mấy năm nay rồi",
+      "type": "paraphrase",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ hai CÁC TỘI PHẠM > Chương XVII CÁC TỘI XÂM PHẠM CHẾ ĐỘ HÔN NHÂN VÀ GIA ĐÌNH > Điều 185. Tội ngược đãi hoặc hành hạ ông bà, cha mẹ, vợ chồng, con, cháu hoặc người có công nuôi dưỡng mình",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d28",
+      "question": "uống mấy lon bia xong chạy xe va vào người ta, hoảng quá nên bỏ chạy luôn",
+      "type": "paraphrase",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ hai CÁC TỘI PHẠM > Chương XXI CÁC TỘI XÂM PHẠM AN TOÀN CÔNG CỘNG, TRẬT TỰ CÔNG CỘNG > Mục 1 CÁC TỘI XÂM PHẠM AN TOÀN GIAO THÔNG > Điều 260. Tội vi phạm quy định về tham gia giao thông đường bộ",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 3,
+      "best_branch_positions": [
+        3,
+        6,
+        2
+      ],
+      "best_branch_article_positions": [
+        3,
+        5,
+        2
+      ]
+    },
+    {
+      "id": "d29",
+      "question": "bạn rủ chở hộ một bọc hàng lên biên giới trả 5 triệu, đến nơi mới biết là ma túy",
+      "type": "paraphrase",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ hai CÁC TỘI PHẠM > Chương XX CÁC TỘI PHẠM VỀ MA TÚY > Điều 250. Tội vận chuyển trái phép chất ma túy",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d30",
+      "question": "bố tôi gần 80 tuổi, bệnh nặng, vừa bị tòa tuyên án tù, có xin lùi ngày đi tù được không",
+      "type": "paraphrase",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương IX THỜI HIỆU THI HÀNH BẢN ÁN, MIỄN CHẤP HÀNH HÌNH PHẠT, > Điều 67. Hoãn chấp hành hình phạt tù",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d31",
+      "question": "lần đầu vi phạm, tội cũng nhẹ, nhà có con nhỏ, có xin được không phải ngồi tù không",
+      "type": "paraphrase",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương IX THỜI HIỆU THI HÀNH BẢN ÁN, MIỄN CHẤP HÀNH HÌNH PHẠT, > Điều 65. Án treo",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        12
+      ],
+      "best_branch_article_positions": [
+        10
+      ]
+    },
+    {
+      "id": "d32",
+      "question": "cho vay lấy lãi 5 nghìn một triệu một ngày thì có bị sao không",
+      "type": "multi",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ ba NGHĨA VỤ VÀ HỢP ĐỒNG > Chương XVI MỘT SỐ HỢP ĐỒNG THÔNG DỤNG > Mục 4 HỢP ĐỒNG VAY TÀI SẢN > Điều 468. Lãi suất",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        2
+      ],
+      "best_branch_article_positions": [
+        2
+      ]
+    },
+    {
+      "id": "d32",
+      "question": "cho vay lấy lãi 5 nghìn một triệu một ngày thì có bị sao không",
+      "type": "multi",
+      "source": "bo_luat_hinh_su_2015.txt",
+      "section": "Phần thứ hai CÁC TỘI PHẠM > Chương XVIII CÁC TỘI XÂM PHẠM TRẬT TỰ QUẢN LÝ KINH TẾ > Mục 2 CÁC TỘI PHẠM TRONG LĨNH VỰC THUẾ, TÀI CHÍNH, > Điều 201. Tội cho vay lãi nặng trong giao dịch dân sự",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d33",
+      "question": "anh trai bị công an bắt, nhà muốn thuê luật sư thì lúc nào luật sư mới được vào",
+      "type": "paraphrase",
+      "source": "bo_luat_to_tung_hinh_su_2015.txt",
+      "section": "Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương V BÀO CHỮA, BẢO VỆ QUYỀN VÀ LỢI ÍCH HỢP PHÁP CỦA BỊ HẠI, ĐƯƠNG SỰ > Điều 74. Thời điểm người bào chữa tham gia tố tụng",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d34",
+      "question": "em tôi bị tạm giam mấy tháng rồi vẫn chưa thấy đưa ra xử, giam vậy tối đa bao lâu",
+      "type": "paraphrase",
+      "source": "bo_luat_to_tung_hinh_su_2015.txt",
+      "section": "Phần thứ hai KHỞI TỐ, ĐIỀU TRA VỤ ÁN HÌNH SỰ > Chương X NHỮNG QUY ĐỊNH CHUNG VỀ ĐIỀU TRA VỤ ÁN HÌNH SỰ > Điều 173. Thời hạn tạm giam để điều tra",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d35",
+      "question": "đánh nhau bị thương nhẹ, giờ hai bên làm lành rồi, tôi rút đơn thì vụ án có dừng không",
+      "type": "paraphrase",
+      "source": "bo_luat_to_tung_hinh_su_2015.txt",
+      "section": "Phần thứ hai KHỞI TỐ, ĐIỀU TRA VỤ ÁN HÌNH SỰ > Chương IX KHỞI TỐ VỤ ÁN HÌNH SỰ > Điều 155. Khởi tố vụ án hình sự theo yêu cầu của bị hại",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        2
+      ],
+      "best_branch_article_positions": [
+        2
+      ]
+    },
+    {
+      "id": "d36",
+      "question": "tòa vừa xử bố tôi 3 năm tù mà gia đình thấy nặng quá, giờ làm sao",
+      "type": "multi",
+      "source": "bo_luat_to_tung_hinh_su_2015.txt",
+      "section": "Phần thứ tư XÉT XỬ VỤ ÁN HÌNH SỰ > Chương XXII XÉT XỬ PHÚC THẨM > Điều 331. Người có quyền kháng cáo",
+      "stage": "outside_raw_top40_all_existing_branches",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        45
+      ],
+      "best_branch_article_positions": [
+        37
+      ]
+    },
+    {
+      "id": "d36",
+      "question": "tòa vừa xử bố tôi 3 năm tù mà gia đình thấy nặng quá, giờ làm sao",
+      "type": "multi",
+      "source": "bo_luat_to_tung_hinh_su_2015.txt",
+      "section": "Phần thứ tư XÉT XỬ VỤ ÁN HÌNH SỰ > Chương XXII XÉT XỬ PHÚC THẨM > Điều 333. Thời hạn kháng cáo",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        3
+      ],
+      "best_branch_article_positions": [
+        3
+      ]
+    },
+    {
+      "id": "d37",
+      "question": "đặt cọc 100 triệu mua nhà rồi mà bên bán lại đổi ý không bán nữa",
+      "type": "paraphrase",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ ba NGHĨA VỤ VÀ HỢP ĐỒNG > Chương XV QUY ĐỊNH CHUNG > Tiểu mục 4 ĐẶT CỌC, KÝ CƯỢC, KÝ QUỸ > Điều 328. Đặt cọc",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d38",
+      "question": "bố mất để di chúc cho hết người tình, mẹ con tôi không được đồng nào, mà tôi mới 16 tuổi",
+      "type": "paraphrase",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ tư THỪA KẾ > Chương XXII THỪA KẾ THEO DI CHÚC > Điều 644. Người thừa kế không phụ thuộc vào nội dung của di chúc",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 3,
+      "best_branch_positions": [
+        1,
+        1,
+        1
+      ],
+      "best_branch_article_positions": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "d39",
+      "question": "ông nội trước khi mất có nói miệng là cho tôi mảnh đất, mấy chú có cãi được không",
+      "type": "multi",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ tư THỪA KẾ > Chương XXII THỪA KẾ THEO DI CHÚC > Điều 629. Di chúc miệng",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 3,
+      "best_branch_positions": [
+        2,
+        1,
+        84
+      ],
+      "best_branch_article_positions": [
+        2,
+        1,
+        82
+      ]
+    },
+    {
+      "id": "d39",
+      "question": "ông nội trước khi mất có nói miệng là cho tôi mảnh đất, mấy chú có cãi được không",
+      "type": "multi",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ tư THỪA KẾ > Chương XXII THỪA KẾ THEO DI CHÚC > Điều 630. Di chúc hợp pháp",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 3,
+      "best_branch_positions": [
+        1,
+        2,
+        40
+      ],
+      "best_branch_article_positions": [
+        1,
+        2,
+        40
+      ]
+    },
+    {
+      "id": "d40",
+      "question": "mua điện thoại về được 3 hôm thì hỏng, cửa hàng không chịu đổi cũng không sửa",
+      "type": "multi",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ ba NGHĨA VỤ VÀ HỢP ĐỒNG > Chương XVI MỘT SỐ HỢP ĐỒNG THÔNG DỤNG > Mục 1 HỢP ĐỒNG MUA BÁN TÀI SẢN > Điều 445. Bảo đảm chất lượng vật mua bán",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        4
+      ],
+      "best_branch_article_positions": [
+        4
+      ]
+    },
+    {
+      "id": "d40",
+      "question": "mua điện thoại về được 3 hôm thì hỏng, cửa hàng không chịu đổi cũng không sửa",
+      "type": "multi",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ ba NGHĨA VỤ VÀ HỢP ĐỒNG > Chương XVI MỘT SỐ HỢP ĐỒNG THÔNG DỤNG > Mục 1 HỢP ĐỒNG MUA BÁN TÀI SẢN > Điều 446. Nghĩa vụ bảo hành",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        5
+      ],
+      "best_branch_article_positions": [
+        5
+      ]
+    },
+    {
+      "id": "d41",
+      "question": "cây nhà hàng xóm mọc lấn sang nhà tôi, rễ đâm nứt cả sân",
+      "type": "paraphrase",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ hai QUYỀN SỞ HỮU VÀ QUYỀN KHÁC ĐỐI VỚI TÀI SẢN > Chương XI QUY ĐỊNH CHUNG > Mục 3 GIỚI HẠN QUYỀN SỞ HỮU, QUYỀN KHÁC ĐỐI VỚI TÀI SẢN > Điều 175. Ranh giới giữa các bất động sản",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        4
+      ],
+      "best_branch_article_positions": [
+        4
+      ]
+    },
+    {
+      "id": "d42",
+      "question": "nhà tôi ở trong ngõ, nhà phía ngoài xây tường chặn mất lối đi ra đường",
+      "type": "paraphrase",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ hai QUYỀN SỞ HỮU VÀ QUYỀN KHÁC ĐỐI VỚI TÀI SẢN > Chương XIV QUYỀN KHÁC ĐỐI VỚI TÀI SẢN > Mục 1 QUYỀN ĐỐI VỚI BẤT ĐỘNG SẢN LIỀN KỀ > Điều 254. Quyền về lối đi qua",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d43",
+      "question": "con tôi 16 tuổi tự ý đi mua xe máy trả góp, giờ tôi muốn trả lại được không",
+      "type": "paraphrase",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ nhất QUY ĐỊNH CHUNG > Chương III CÁ NHÂN > Mục 1 NĂNG LỰC PHÁP LUẬT DÂN SỰ, NĂNG LỰC HÀNH VI DÂN SỰ CỦA CÁ NHÂN > Điều 21. Người chưa thành niên",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 3,
+      "best_branch_positions": [
+        1,
+        1,
+        1
+      ],
+      "best_branch_article_positions": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "d44",
+      "question": "chồng mất không để lại di chúc, nhà hai vợ chồng mua chung thì chia thế nào",
+      "type": "multi",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ hai QUYỀN SỞ HỮU VÀ QUYỀN KHÁC ĐỐI VỚI TÀI SẢN > Chương XIII QUYỀN SỞ HỮU > Tiểu mục 3 SỞ HỮU CHUNG > Điều 213. Sở hữu chung của vợ chồng",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 3,
+      "best_branch_positions": [
+        2,
+        2,
+        30
+      ],
+      "best_branch_article_positions": [
+        2,
+        2,
+        30
+      ]
+    },
+    {
+      "id": "d44",
+      "question": "chồng mất không để lại di chúc, nhà hai vợ chồng mua chung thì chia thế nào",
+      "type": "multi",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ tư THỪA KẾ > Chương XXIII THỪA KẾ THEO PHÁP LUẬT > Điều 651. Người thừa kế theo pháp luật",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 3,
+      "best_branch_positions": [
+        24,
+        21,
+        2
+      ],
+      "best_branch_article_positions": [
+        23,
+        20,
+        2
+      ]
+    },
+    {
+      "id": "d45",
+      "question": "bị cửa hàng lấy ảnh mình đăng quảng cáo trên facebook mà không xin phép",
+      "type": "paraphrase",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ nhất QUY ĐỊNH CHUNG > Chương III CÁ NHÂN > Mục 2 QUYỀN NHÂN THÂN > Điều 32. Quyền của cá nhân đối với hình ảnh",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d46",
+      "question": "ký hợp đồng thi công mà chậm mấy ngày bị đòi phạt 30% giá trị, vậy có đúng luật không",
+      "type": "paraphrase",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ ba NGHĨA VỤ VÀ HỢP ĐỒNG > Chương XV QUY ĐỊNH CHUNG > Tiểu mục 2 THỰC HIỆN HỢP ĐỒNG > Điều 418. Thoả thuận phạt vi phạm",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        5
+      ],
+      "best_branch_article_positions": [
+        4
+      ]
+    },
+    {
+      "id": "d47",
+      "question": "nhặt được con chó lạc giữ nuôi cả năm, giờ chủ cũ đến đòi",
+      "type": "paraphrase",
+      "source": "bo_luat_dan_su_2015.txt",
+      "section": "Phần thứ hai QUYỀN SỞ HỮU VÀ QUYỀN KHÁC ĐỐI VỚI TÀI SẢN > Chương XIII QUYỀN SỞ HỮU > Tiểu mục 1 XÁC LẬP QUYỀN SỞ HỮU > Điều 231. Xác lập quyền sở hữu đối với gia súc bị thất lạc",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d48",
+      "question": "đi xin việc công ty bắt nộp bằng đại học bản gốc, nghỉ mới trả",
+      "type": "paraphrase",
+      "source": "bo_luat_lao_dong_2019.txt",
+      "section": "Chương III HỢP ĐỒNG LAO ĐỘNG > Mục 1. GIAO KẾT HỢP ĐỒNG LAO ĐỘNG > Điều 17. Hành vi người sử dụng lao động không được làm khi giao kết, thực hiện hợp đồng lao động",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 3,
+      "best_branch_positions": [
+        1,
+        2,
+        3
+      ],
+      "best_branch_article_positions": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "id": "d49",
+      "question": "thử việc 3 tháng mà công ty chỉ trả có 70% lương",
+      "type": "multi",
+      "source": "bo_luat_lao_dong_2019.txt",
+      "section": "Chương III HỢP ĐỒNG LAO ĐỘNG > Mục 1. GIAO KẾT HỢP ĐỒNG LAO ĐỘNG > Điều 25. Thời gian thử việc",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 3,
+      "best_branch_positions": [
+        2,
+        1,
+        10
+      ],
+      "best_branch_article_positions": [
+        2,
+        1,
+        10
+      ]
+    },
+    {
+      "id": "d49",
+      "question": "thử việc 3 tháng mà công ty chỉ trả có 70% lương",
+      "type": "multi",
+      "source": "bo_luat_lao_dong_2019.txt",
+      "section": "Chương III HỢP ĐỒNG LAO ĐỘNG > Mục 1. GIAO KẾT HỢP ĐỒNG LAO ĐỘNG > Điều 26. Tiền lương thử việc",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 3,
+      "best_branch_positions": [
+        1,
+        11,
+        1
+      ],
+      "best_branch_article_positions": [
+        1,
+        10,
+        1
+      ]
+    },
+    {
+      "id": "d50",
+      "question": "làm cho công ty 5 năm rồi giờ xin nghỉ, công ty có phải trả khoản gì không",
+      "type": "multi",
+      "source": "bo_luat_lao_dong_2019.txt",
+      "section": "Chương III HỢP ĐỒNG LAO ĐỘNG > Mục 3. CHẤM DỨT HỢP ĐỒNG LAO ĐỘNG > Điều 46. Trợ cấp thôi việc",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        2
+      ],
+      "best_branch_article_positions": [
+        2
+      ]
+    },
+    {
+      "id": "d50",
+      "question": "làm cho công ty 5 năm rồi giờ xin nghỉ, công ty có phải trả khoản gì không",
+      "type": "multi",
+      "source": "bo_luat_lao_dong_2019.txt",
+      "section": "Chương III HỢP ĐỒNG LAO ĐỘNG > Mục 3. CHẤM DỨT HỢP ĐỒNG LAO ĐỘNG > Điều 48. Trách nhiệm khi chấm dứt hợp đồng lao động",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d51",
+      "question": "đi muộn mấy lần bị công ty trừ thẳng vào lương",
+      "type": "paraphrase",
+      "source": "bo_luat_lao_dong_2019.txt",
+      "section": "Chương VIII KỶ LUẬT LAO ĐỘNG, TRÁCH NHIỆM VẬT CHẤT > Mục 1. KỶ LUẬT LAO ĐỘNG > Điều 127. Các hành vi bị nghiêm cấm khi xử lý kỷ luật lao động",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        14
+      ],
+      "best_branch_article_positions": [
+        13
+      ]
+    },
+    {
+      "id": "d52",
+      "question": "em 15 tuổi muốn đi làm phụ quán cà phê dịp hè được không",
+      "type": "multi",
+      "source": "bo_luat_lao_dong_2019.txt",
+      "section": "Chương XI NHỮNG QUY ĐỊNH RIÊNG ĐỐI VỚI LAO ĐỘNG CHƯA THÀNH NIÊN VÀ MỘT SỐ LAO ĐỘNG KHÁC > Mục 1. LAO ĐỘNG CHƯA THÀNH NIÊN > Điều 143. Lao động chưa thành niên",
+      "stage": "in_final_pool_but_not_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        4
+      ],
+      "best_branch_article_positions": [
+        4
+      ]
+    },
+    {
+      "id": "d52",
+      "question": "em 15 tuổi muốn đi làm phụ quán cà phê dịp hè được không",
+      "type": "multi",
+      "source": "bo_luat_lao_dong_2019.txt",
+      "section": "Chương XI NHỮNG QUY ĐỊNH RIÊNG ĐỐI VỚI LAO ĐỘNG CHƯA THÀNH NIÊN VÀ MỘT SỐ LAO ĐỘNG KHÁC > Mục 1. LAO ĐỘNG CHƯA THÀNH NIÊN > Điều 146. Thời giờ làm việc của người chưa thành niên",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d53",
+      "question": "sếp hay sờ mó, nói chuyện bậy với em ở công ty, em muốn nghỉ luôn",
+      "type": "multi",
+      "source": "bo_luat_lao_dong_2019.txt",
+      "section": "Chương I NHỮNG QUY ĐỊNH CHUNG > Điều 8. Các hành vi bị nghiêm cấm trong lĩnh vực lao động",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        4
+      ],
+      "best_branch_article_positions": [
+        4
+      ]
+    },
+    {
+      "id": "d53",
+      "question": "sếp hay sờ mó, nói chuyện bậy với em ở công ty, em muốn nghỉ luôn",
+      "type": "multi",
+      "source": "bo_luat_lao_dong_2019.txt",
+      "section": "Chương III HỢP ĐỒNG LAO ĐỘNG > Mục 3. CHẤM DỨT HỢP ĐỒNG LAO ĐỘNG > Điều 35. Quyền đơn phương chấm dứt hợp đồng lao động của người lao động",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        5
+      ],
+      "best_branch_article_positions": [
+        5
+      ]
+    },
+    {
+      "id": "d54",
+      "question": "vợ sắp đẻ, công ty cho nghỉ được mấy tháng",
+      "type": "paraphrase",
+      "source": "bo_luat_lao_dong_2019.txt",
+      "section": "Chương X NHỮNG QUY ĐỊNH RIÊNG ĐỐI VỚI LAO ĐỘNG NỮ VÀ BẢO ĐẢM BÌNH ĐẲNG GIỚI > Điều 139. Nghỉ thai sản",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d55",
+      "question": "mẹ mất, xin nghỉ mấy ngày mà công ty bảo phải nghỉ không lương",
+      "type": "paraphrase",
+      "source": "bo_luat_lao_dong_2019.txt",
+      "section": "Chương VII THỜI GIỜ LÀM VIỆC, THỜI GIỜ NGHỈ NGƠI > Mục 2. THỜI GIỜ NGHỈ NGƠI > Điều 115. Nghỉ việc riêng, nghỉ không hưởng lương",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 3,
+      "best_branch_positions": [
+        1,
+        1,
+        1
+      ],
+      "best_branch_article_positions": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "d56",
+      "question": "muốn kiện mà không có tiền, đi kiện có phải đóng tiền trước không",
+      "type": "paraphrase",
+      "source": "bo_luat_to_tung_dan_su_2015.txt",
+      "section": "Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương IX ÁN PHÍ, LỆ PHÍ VÀ CHI PHÍ TỐ TỤNG KHÁC > Mục 1 ÁN PHÍ, LỆ PHÍ > Điều 146. Nghĩa vụ nộp tiền tạm ứng án phí, tiền tạm ứng lệ phí",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        2
+      ],
+      "best_branch_article_positions": [
+        2
+      ]
+    },
+    {
+      "id": "d57",
+      "question": "người nợ tiền tôi đang sống ở nước ngoài, giờ muốn kiện thì nộp đơn ở đâu",
+      "type": "paraphrase",
+      "source": "bo_luat_to_tung_dan_su_2015.txt",
+      "section": "Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương III THẨM QUYỀN CỦA TÒA ÁN > Mục 2 THẨM QUYỀN CỦA TÒA ÁN CÁC CẤP > Điều 37. Thẩm quyền của Tòa án nhân dân cấp tỉnh",
+      "stage": "outside_raw_top40_all_existing_branches",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        129
+      ],
+      "best_branch_article_positions": [
+        95
+      ]
+    },
+    {
+      "id": "d58",
+      "question": "nộp đơn kiện lên tòa rồi mà tòa trả lại đơn",
+      "type": "paraphrase",
+      "source": "bo_luat_to_tung_dan_su_2015.txt",
+      "section": "Phần thứ hai THỦ TỤC GIẢI QUYẾT VỤ ÁN TẠI TÒA ÁN CẤP SƠ THẨM > Chương XII KHỞI KIỆN VÀ THỤ LÝ VỤ ÁN > Điều 192. Trả lại đơn khởi kiện, hậu quả của việc trả lại đơn khởi kiện",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d59",
+      "question": "bản án phúc thẩm có hiệu lực rồi nhưng tôi vẫn thấy xử sai, còn cách nào không",
+      "type": "multi",
+      "source": "bo_luat_to_tung_dan_su_2015.txt",
+      "section": "Phần thứ năm THỦ TỤC XÉT LẠI BẢN ÁN, QUYẾT ĐỊNH ĐÃ CÓ HIỆU LỰC PHÁP LUẬT > Chương XX THỦ TỤC GIÁM ĐỐC THẨM > Điều 326. Căn cứ, điều kiện để kháng nghị theo thủ tục giám đốc thẩm",
+      "stage": "in_final_pool_but_not_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        5
+      ],
+      "best_branch_article_positions": [
+        5
+      ]
+    },
+    {
+      "id": "d59",
+      "question": "bản án phúc thẩm có hiệu lực rồi nhưng tôi vẫn thấy xử sai, còn cách nào không",
+      "type": "multi",
+      "source": "bo_luat_to_tung_dan_su_2015.txt",
+      "section": "Phần thứ năm THỦ TỤC XÉT LẠI BẢN ÁN, QUYẾT ĐỊNH ĐÃ CÓ HIỆU LỰC PHÁP LUẬT > Chương XX THỦ TỤC GIÁM ĐỐC THẨM > Điều 327. Phát hiện bản án, quyết định của Tòa án đã có hiệu lực pháp luật cần xem xét lại theo thủ tục giám đốc thẩm",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d60",
+      "question": "tòa xử sơ thẩm xong tôi không đồng ý thì được kháng cáo trong bao lâu",
+      "type": "paraphrase",
+      "source": "bo_luat_to_tung_dan_su_2015.txt",
+      "section": "Phần thứ ba THỦ TỤC GIẢI QUYẾT VỤ ÁN TẠI TÒA ÁN CẤP PHÚC THẨM > Chương XV > Điều 273. Thời hạn kháng cáo",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        2
+      ],
+      "best_branch_article_positions": [
+        2
+      ]
+    },
+    {
+      "id": "d61",
+      "question": "chồng tôi làm thuyền viên bị tai nạn trên tàu, chủ tàu có phải lo không",
+      "type": "paraphrase",
+      "source": "bo_luat_hang_hai_2015.txt",
+      "section": "Chương III THUYỀN BỘ VÀ THUYỀN VIÊN > Mục 2 THUYỀN VIÊN > Điều 69. Trách nhiệm của chủ tàu đối với thuyền viên bị tai nạn lao động hàng hải, bệnh nghề nghiệp",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    },
+    {
+      "id": "d62",
+      "question": "đi tàu ra đảo bị mất vali hành lý, hãng tàu có phải đền không",
+      "type": "multi",
+      "source": "bo_luat_hang_hai_2015.txt",
+      "section": "Chương VIII HỢP ĐỒNG VẬN CHUYỂN HÀNH KHÁCH VÀ HÀNH LÝ BẰNG ĐƯỜNG BIỂN > Điều 209. Giới hạn trách nhiệm của người vận chuyển hành khách và hành lý",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        15
+      ],
+      "best_branch_article_positions": [
+        12
+      ]
+    },
+    {
+      "id": "d62",
+      "question": "đi tàu ra đảo bị mất vali hành lý, hãng tàu có phải đền không",
+      "type": "multi",
+      "source": "bo_luat_hang_hai_2015.txt",
+      "section": "Chương VIII HỢP ĐỒNG VẬN CHUYỂN HÀNH KHÁCH VÀ HÀNH LÝ BẰNG ĐƯỜNG BIỂN > Điều 213. Thông báo mất mát, hư hỏng hành lý",
+      "stage": "in_final_pool_but_not_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        8
+      ],
+      "best_branch_article_positions": [
+        7
+      ]
+    },
+    {
+      "id": "d63",
+      "question": "tàu cá nhà tôi cứu được một tàu bị nạn ngoài khơi, có được đòi tiền công không",
+      "type": "paraphrase",
+      "source": "bo_luat_hang_hai_2015.txt",
+      "section": "Chương XIII CỨU HỘ HÀNG HẢI > Điều 266. Quyền hưởng tiền công cứu hộ",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        2
+      ],
+      "best_branch_article_positions": [
+        2
+      ]
+    },
+    {
+      "id": "d64",
+      "question": "hai tàu đâm vào nhau ngoài biển thì bên nào phải đền",
+      "type": "paraphrase",
+      "source": "bo_luat_hang_hai_2015.txt",
+      "section": "Chương XV TAI NẠN ĐÂM VA > Điều 287. Nguyên tắc xác định lỗi và bồi thường tổn thất trong tai nạn đâm va",
+      "stage": "present_top5",
+      "replay_exact": true,
+      "query_count": 1,
+      "best_branch_positions": [
+        1
+      ],
+      "best_branch_article_positions": [
+        1
+      ]
+    }
+  ],
+  "new10_budget_binding_questions": [
+    {
+      "id": "d03",
+      "novel_articles_before_limit": 11,
+      "discarded": 1
+    },
+    {
+      "id": "d22",
+      "novel_articles_before_limit": 14,
+      "discarded": 4
+    }
+  ]
+}

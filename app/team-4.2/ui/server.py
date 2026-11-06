@@ -262,89 +262,11 @@ async def handle_ingest(request: Request) -> JSONResponse:
     return JSONResponse({"status": "ok", "results": results})
 
 
-VBPL_OFFICIAL_DOCS = {
-    "bo_luat_dan_su_2015.txt": {
-        "url": "https://vbpl.vn/van-ban/chi-tiet/95942",
-        "doc_number": "91/2015/QH13",
-        "title": "Bộ luật Dân sự 2015",
-        "authority": "Quốc hội khóa XIII",
-    },
-    "bo_luat_hinh_su_2015.txt": {
-        "url": "https://vbpl.vn/van-ban/chi-tiet/96122",
-        "doc_number": "100/2015/QH13",
-        "title": "Bộ luật Hình sự 2015",
-        "authority": "Quốc hội khóa XIII",
-    },
-    "bo_luat_to_tung_dan_su_2015.txt": {
-        "url": "https://vbpl.vn/van-ban/chi-tiet/96115",
-        "doc_number": "92/2015/QH13",
-        "title": "Bộ luật Tố tụng dân sự 2015",
-        "authority": "Quốc hội khóa XIII",
-    },
-    "bo_luat_to_tung_hinh_su_2015.txt": {
-        "url": "https://vbpl.vn/van-ban/chi-tiet/96172",
-        "doc_number": "101/2015/QH13",
-        "title": "Bộ luật Tố tụng hình sự 2015",
-        "authority": "Quốc hội khóa XIII",
-    },
-    "bo_luat_lao_dong_2019.txt": {
-        "url": "https://vbpl.vn/van-ban/chi-tiet/139264",
-        "doc_number": "45/2019/QH14",
-        "title": "Bộ luật Lao động 2019",
-        "authority": "Quốc hội khóa XIV",
-    },
-    "bo_luat_hang_hai_2015.txt": {
-        "url": "https://vbpl.vn/van-ban/chi-tiet/96117",
-        "doc_number": "95/2015/QH13",
-        "title": "Bộ luật Hàng hải Việt Nam 2015",
-        "authority": "Quốc hội khóa XIII",
-    },
-}
-
-
-def _render_doc_html(title: str, filename: str, content: str, vbpl_meta: dict | None = None) -> HTMLResponse:
+def _render_doc_html(title: str, filename: str, content: str, chunks_count: int | None = None) -> HTMLResponse:
     escaped_title = html.escape(title)
     escaped_filename = html.escape(filename)
     escaped_content = html.escape(content)
-    is_markdown = filename.lower().endswith(".md")
-
-    vbpl_button = ""
-    vbpl_badge = ""
-    if vbpl_meta:
-        doc_num = html.escape(vbpl_meta.get("doc_number", ""))
-        vbpl_url = html.escape(vbpl_meta.get("url", "#"))
-        authority = html.escape(vbpl_meta.get("authority", "Quốc hội"))
-        vbpl_badge = f"""
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider">Căn cứ quy phạm pháp luật</span>
-            <span class="text-[11px] font-medium text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-md">Số: {doc_num}</span>
-            <span class="text-[11px] text-neutral-500">Ban hành: {authority}</span>
-          </div>
-        """
-        vbpl_button = f"""
-          <a href="{vbpl_url}" target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow-sm flex items-center space-x-1.5 transition-colors">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-            <span>Mở văn bản gốc trên vbpl.vn ↗</span>
-          </a>
-        """
-    else:
-        vbpl_badge = """
-          <div class="flex items-center space-x-2">
-            <span class="text-[11px] font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider">Tài liệu nạp người dùng</span>
-          </div>
-        """
-
-    content_render = f"""
-      <div id="markdown-container" class="prose max-w-none text-[15px] leading-relaxed text-neutral-800"></div>
-      <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-      <script>
-        document.getElementById('markdown-container').innerHTML = marked.parse({json.dumps(content)});
-      </script>
-    """ if is_markdown else f"""
-      <pre class="text-[14.5px] leading-relaxed text-neutral-800 whitespace-pre-wrap select-text font-sans">{escaped_content}</pre>
-    """
+    badge = f"<span class='text-xs bg-neutral-100 text-neutral-600 px-2 py-0.5 rounded-full font-normal'>{chunks_count} chunks</span>" if chunks_count else ""
 
     doc_page = f"""<!DOCTYPE html>
 <html lang="vi">
@@ -363,6 +285,11 @@ def _render_doc_html(title: str, filename: str, content: str, vbpl_meta: dict | 
       color: #171717;
       line-height: 1.7;
     }}
+    pre {{
+      font-family: 'Inter', -apple-system, sans-serif;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }}
   </style>
 </head>
 <body class="py-8 px-4 sm:px-6">
@@ -370,30 +297,26 @@ def _render_doc_html(title: str, filename: str, content: str, vbpl_meta: dict | 
     <!-- Header -->
     <header class="p-6 sm:p-8 border-b border-neutral-100 bg-white sticky top-0 z-10 backdrop-blur-sm bg-white/95 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        {vbpl_badge}
+        <div class="flex items-center space-x-2">
+          <span class="text-[11px] font-semibold text-teal-700 tracking-wider uppercase">Căn cứ quy phạm pháp luật</span>
+          {badge}
+        </div>
         <h1 class="text-xl sm:text-2xl font-bold text-neutral-900 mt-1">{escaped_title}</h1>
         <p class="text-xs text-neutral-500 mt-0.5">Tệp lưu trữ: {escaped_filename}</p>
       </div>
-      <div class="flex flex-wrap items-center gap-2">
-        {vbpl_button}
-        <a href="/doc/{escaped_filename}?download=1" download="{escaped_filename}" class="px-3 py-2 text-xs font-medium border border-neutral-200 rounded-lg text-neutral-700 hover:bg-neutral-50 hover:text-black transition-colors flex items-center space-x-1.5">
-          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
-          <span>Tải file gốc</span>
-        </a>
-        <button onclick="window.print()" class="px-3 py-2 text-xs font-medium border border-neutral-200 rounded-lg text-neutral-700 hover:bg-neutral-50 hover:text-black transition-colors flex items-center space-x-1.5">
+      <div class="flex items-center space-x-2">
+        <button onclick="window.print()" class="px-3.5 py-1.5 text-xs font-medium border border-neutral-200 rounded-lg text-neutral-700 hover:bg-neutral-50 hover:text-black transition-colors flex items-center space-x-1.5">
           <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
           </svg>
-          <span>In</span>
+          <span>In / Lưu PDF</span>
         </button>
       </div>
     </header>
 
     <!-- Content -->
     <main class="p-6 sm:p-10 text-[14.5px] leading-relaxed text-neutral-800 select-text">
-      {content_render}
+      <pre>{escaped_content}</pre>
     </main>
   </div>
 </body>
@@ -406,12 +329,9 @@ async def handle_view_doc(request: Request) -> Response:
     if not filename:
         return HTMLResponse("<h1>Tên tài liệu không hợp lệ</h1>", status_code=400)
 
-    # Nếu tài liệu là đường link (URL) -> mở trực tiếp đường link
+    # Nếu tài liệu là đường link (URL) -> mở ra đường link luôn
     if filename.startswith("http://") or filename.startswith("https://"):
         return RedirectResponse(filename, status_code=302)
-
-    # Check if download requested
-    download = request.query_params.get("download") == "1"
 
     pipeline, settings = get_pipeline()
     candidates = [
@@ -434,41 +354,25 @@ async def handle_view_doc(request: Request) -> Response:
 
     clean_title = filename.replace(".txt", "").replace(".md", "").replace(".pdf", "").replace(".docx", "")
     clean_title = clean_title.replace("bo_luat_", "Bộ luật ").replace("luat_", "Luật ").replace("_", " ").title()
-    vbpl_meta = VBPL_OFFICIAL_DOCS.get(filename)
-    if vbpl_meta:
-        clean_title = vbpl_meta["title"]
 
     if not target:
         matching_chunks = [c for c in pipeline.store.all() if c.source == filename]
         if not matching_chunks:
             return HTMLResponse(f"<h1>Không tìm thấy tài liệu: {html.escape(filename)}</h1>", status_code=404)
         full_text = "\n\n".join(c.text for c in matching_chunks)
-        if download:
-            return Response(
-                content=full_text.encode("utf-8"),
-                media_type="text/plain; charset=utf-8",
-                headers={"Content-Disposition": f"attachment; filename=\"{filename}\""}
-            )
-        return _render_doc_html(clean_title, filename, full_text, vbpl_meta=vbpl_meta)
+        return _render_doc_html(clean_title, filename, full_text, len(matching_chunks))
 
     suffix = target.suffix.lower()
     if suffix == ".pdf":
-        disposition = "attachment" if download else "inline"
         return Response(
             content=target.read_bytes(),
             media_type="application/pdf",
-            headers={"Content-Disposition": f"{disposition}; filename=\"{filename}\""}
-        )
-
-    if download:
-        return Response(
-            content=target.read_bytes(),
-            media_type="application/octet-stream",
-            headers={"Content-Disposition": f"attachment; filename=\"{filename}\""}
+            headers={"Content-Disposition": f"inline; filename=\"{filename}\""}
         )
 
     content = target.read_text(encoding="utf-8", errors="replace")
-    return _render_doc_html(clean_title, filename, content, vbpl_meta=vbpl_meta)
+    chunks_count = len([c for c in pipeline.store.all() if c.source == filename])
+    return _render_doc_html(clean_title, filename, content, chunks_count=chunks_count or None)
 
 
 routes = [

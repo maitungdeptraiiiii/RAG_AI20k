@@ -1,0 +1,86 @@
+{
+  "saved-v2": {
+    "multi": {
+      "n": 27,
+      "recall@5": 0.7901234567901234,
+      "hit@5": 1.0,
+      "mrr@5": 0.7895061728395062,
+      "recall@20": 0.9135802469135803,
+      "candidate_recall": 0.9259259259259259,
+      "full_gold_top5": 16,
+      "multi_full_gold_top5": 16,
+      "candidate_chunks": 750,
+      "rewrite_fallbacks": 0,
+      "jev_cache_misses": null
+    },
+    "paraphrase": {
+      "n": 37,
+      "recall@5": 0.972972972972973,
+      "hit@5": 0.972972972972973,
+      "mrr@5": 0.8806306306306307,
+      "recall@20": 0.972972972972973,
+      "candidate_recall": 0.972972972972973,
+      "full_gold_top5": 36,
+      "multi_full_gold_top5": 0,
+      "candidate_chunks": 1024,
+      "rewrite_fallbacks": 0,
+      "jev_cache_misses": null
+    }
+  },
+  "bm25-w03-rewrite-rerank": {
+    "multi": {
+      "n": 27,
+      "recall@5": 0.7654320987654322,
+      "hit@5": 0.9259259259259259,
+      "mrr@5": 0.8117283950617284,
+      "recall@20": 0.9074074074074074,
+      "candidate_recall": 0.9074074074074074,
+      "full_gold_top5": 16,
+      "multi_full_gold_top5": 16,
+      "candidate_chunks": 778,
+      "rewrite_fallbacks": 2,
+      "jev_cache_misses": 10
+    },
+    "paraphrase": {
+      "n": 37,
+      "recall@5": 0.972972972972973,
+      "hit@5": 0.972972972972973,
+      "mrr@5": 0.8783783783783784,
+      "recall@20": 0.972972972972973,
+      "candidate_recall": 0.972972972972973,
+      "full_gold_top5": 36,
+      "multi_full_gold_top5": 0,
+      "candidate_chunks": 1043,
+      "rewrite_fallbacks": 0,
+      "jev_cache_misses": 7
+    }
+  },
+  "bm25-w03-original-rerank": {
+    "multi": {
+      "n": 27,
+      "recall@5": 0.7716049382716049,
+      "hit@5": 0.9629629629629629,
+      "mrr@5": 0.754320987654321,
+      "recall@20": 0.9074074074074074,
+      "candidate_recall": 0.9074074074074074,
+      "full_gold_top5": 16,
+      "multi_full_gold_top5": 16,
+      "candidate_chunks": 778,
+      "rewrite_fallbacks": 0,
+      "jev_cache_misses": 124
+    },
+    "paraphrase": {
+      "n": 37,
+      "recall@5": 0.972972972972973,
+      "hit@5": 0.972972972972973,
+      "mrr@5": 0.8873873873873874,
+      "recall@20": 0.972972972972973,
+      "candidate_recall": 0.972972972972973,
+      "full_gold_top5": 36,
+      "multi_full_gold_top5": 0,
+      "candidate_chunks": 1043,
+      "rewrite_fallbacks": 0,
+      "jev_cache_misses": 122
+    }
+  }
+}

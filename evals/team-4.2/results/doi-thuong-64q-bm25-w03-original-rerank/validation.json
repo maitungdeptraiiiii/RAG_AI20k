@@ -1,0 +1,11 @@
+{
+  "unit_tests_passed": 179,
+  "verified_questions": 64,
+  "new_configurations_run": 1,
+  "initial_jev_cache_misses": 246,
+  "baseline_execution": false,
+  "retrieval_execution": false,
+  "llm_execution": false,
+  "embedding_execution": false,
+  "application_env_modified": false
+}

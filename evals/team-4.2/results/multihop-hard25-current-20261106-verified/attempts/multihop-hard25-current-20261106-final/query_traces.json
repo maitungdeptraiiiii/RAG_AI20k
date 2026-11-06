@@ -1,0 +1,2206 @@
+[
+  {
+    "id": "mh25_01",
+    "question": "tôi đi biệt tích lâu quá nên tòa đã tuyên là chết, giờ về mới biết người nhận thừa kế biết tôi còn sống nhưng cố tình giấu tin để hưởng tài sản và tiền cho thuê căn kho; tôi phải xin tòa xử lý quyết định cũ thế nào rồi đòi lại kho và khoản tiền đó ra sao?",
+    "queries": [
+      "tôi đi biệt tích lâu quá nên tòa đã tuyên là chết, giờ về mới biết người nhận thừa kế biết tôi còn sống nhưng cố tình giấu tin để hưởng tài sản và tiền cho thuê căn kho; tôi phải xin tòa xử lý quyết định cũ thế nào rồi đòi lại kho và khoản tiền đó ra sao?",
+      "Người đã bị Tòa án tuyên bố là đã chết nhưng sau đó trở về cần yêu cầu Tòa án xử lý hoặc hủy bỏ quyết định tuyên bố đã chết theo thủ tục nào?",
+      "Sau khi quyết định tuyên bố một người đã chết được hủy bỏ, người đó có thể yêu cầu người thừa kế đang giữ tài sản thừa kế là căn kho trả lại căn kho không?",
+      "Người thừa kế biết người bị Tòa án tuyên bố đã chết vẫn còn sống nhưng cố tình giấu tin để hưởng tài sản phải hoàn trả khoản tiền cho thuê căn kho như thế nào sau khi quyết định tuyên bố đã chết được hủy bỏ?"
+    ],
+    "errors": {},
+    "missing_gold_top5": [],
+    "missing_gold_top20": [],
+    "candidates": [
+      {
+        "chunk_id": "d4825a1af3d31c64:0078",
+        "score": 0.01639344262295082,
+        "rank": 1,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0533",
+        "score": 0.016129032258064516,
+        "rank": 2,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0534",
+        "score": 0.015873015873015872,
+        "rank": 3,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0075",
+        "score": 0.015625,
+        "rank": 4,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0660",
+        "score": 0.015384615384615385,
+        "rank": 5,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0638",
+        "score": 0.015151515151515152,
+        "rank": 6,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0529",
+        "score": 0.014925373134328358,
+        "rank": 7,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0530",
+        "score": 0.014705882352941176,
+        "rank": 8,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0629",
+        "score": 0.014492753623188406,
+        "rank": 9,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0076",
+        "score": 0.014285714285714285,
+        "rank": 10,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0635",
+        "score": 0.014084507042253521,
+        "rank": 11,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0641",
+        "score": 0.013888888888888888,
+        "rank": 12,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0680",
+        "score": 0.0136986301369863,
+        "rank": 13,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0077",
+        "score": 0.013513513513513514,
+        "rank": 14,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0511",
+        "score": 0.013333333333333334,
+        "rank": 15,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0531",
+        "score": 0.013157894736842105,
+        "rank": 16,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0244",
+        "score": 0.012987012987012988,
+        "rank": 17,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0049",
+        "score": 0.01282051282051282,
+        "rank": 18,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0631",
+        "score": 0.012658227848101266,
+        "rank": 19,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0659",
+        "score": 0.0125,
+        "rank": 20,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0500",
+        "score": 0.015873015873015872,
+        "rank": 21,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0633",
+        "score": 0.015384615384615385,
+        "rank": 22,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0532",
+        "score": 0.015151515151515152,
+        "rank": 23,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0639",
+        "score": 0.014925373134328358,
+        "rank": 24,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0599",
+        "score": 0.014492753623188406,
+        "rank": 25,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0640",
+        "score": 0.014492753623188406,
+        "rank": 26,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0677",
+        "score": 0.014285714285714285,
+        "rank": 27,
+        "arm": "fused",
+        "merged": []
+      }
+    ],
+    "ranked": [
+      {
+        "chunk_id": "d4825a1af3d31c64:0078",
+        "score": 0.95,
+        "rank": 1,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0533",
+        "score": 0.89,
+        "rank": 2,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0049",
+        "score": 0.85,
+        "rank": 3,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0534",
+        "score": 0.82,
+        "rank": 4,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0599",
+        "score": 0.81,
+        "rank": 5,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0529",
+        "score": 0.86,
+        "rank": 6,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0075",
+        "score": 0.65,
+        "rank": 7,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0077",
+        "score": 0.59,
+        "rank": 8,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0680",
+        "score": 0.58,
+        "rank": 9,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0641",
+        "score": 0.53,
+        "rank": 10,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0531",
+        "score": 0.49,
+        "rank": 11,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0629",
+        "score": 0.46,
+        "rank": 12,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0076",
+        "score": 0.45,
+        "rank": 13,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0635",
+        "score": 0.44,
+        "rank": 14,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0639",
+        "score": 0.41,
+        "rank": 15,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0532",
+        "score": 0.35,
+        "rank": 16,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0631",
+        "score": 0.32,
+        "rank": 17,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0530",
+        "score": 0.21,
+        "rank": 18,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0677",
+        "score": 0.2,
+        "rank": 19,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0500",
+        "score": 0.13,
+        "rank": 20,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0638",
+        "score": 0.12,
+        "rank": 21,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0640",
+        "score": 0.12,
+        "rank": 22,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0633",
+        "score": 0.11,
+        "rank": 23,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0511",
+        "score": 0.1,
+        "rank": 24,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0660",
+        "score": 0.08,
+        "rank": 25,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0659",
+        "score": 0.07,
+        "rank": 26,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0244",
+        "score": 0.04,
+        "rank": 27,
+        "arm": "rerank",
+        "merged": []
+      }
+    ],
+    "pre_selection_ranked": [
+      {
+        "chunk_id": "d4825a1af3d31c64:0078",
+        "score": 0.95,
+        "rank": 1,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0533",
+        "score": 0.89,
+        "rank": 2,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0529",
+        "score": 0.86,
+        "rank": 3,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0049",
+        "score": 0.85,
+        "rank": 4,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0534",
+        "score": 0.82,
+        "rank": 5,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0599",
+        "score": 0.81,
+        "rank": 6,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0075",
+        "score": 0.65,
+        "rank": 7,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0077",
+        "score": 0.59,
+        "rank": 8,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0680",
+        "score": 0.58,
+        "rank": 9,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0641",
+        "score": 0.53,
+        "rank": 10,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0531",
+        "score": 0.49,
+        "rank": 11,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0629",
+        "score": 0.46,
+        "rank": 12,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0076",
+        "score": 0.45,
+        "rank": 13,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0635",
+        "score": 0.44,
+        "rank": 14,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0639",
+        "score": 0.41,
+        "rank": 15,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0532",
+        "score": 0.35,
+        "rank": 16,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0631",
+        "score": 0.32,
+        "rank": 17,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0530",
+        "score": 0.21,
+        "rank": 18,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0677",
+        "score": 0.2,
+        "rank": 19,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0500",
+        "score": 0.13,
+        "rank": 20,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0638",
+        "score": 0.12,
+        "rank": 21,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0640",
+        "score": 0.12,
+        "rank": 22,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0633",
+        "score": 0.11,
+        "rank": 23,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0511",
+        "score": 0.1,
+        "rank": 24,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0660",
+        "score": 0.08,
+        "rank": 25,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0659",
+        "score": 0.07,
+        "rank": 26,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0244",
+        "score": 0.04,
+        "rank": 27,
+        "arm": "rerank",
+        "merged": []
+      }
+    ],
+    "selection_policy": "listwise",
+    "listwise_metadata": {
+      "triggered": true,
+      "reason": "ambiguous_cutoff",
+      "payload_sha256": "64405c7a1a2a971ff05b87f583623e7bd2f9ffde42c45a3c6c7698d7c79bc995",
+      "candidate_chunk_ids": [
+        "d4825a1af3d31c64:0599",
+        "d4825a1af3d31c64:0077",
+        "d3e7cff20880c16d:0533",
+        "d3e7cff20880c16d:0049",
+        "d3e7cff20880c16d:0534",
+        "d3e7cff20880c16d:0529",
+        "d4825a1af3d31c64:0075",
+        "d4825a1af3d31c64:0680",
+        "d4825a1af3d31c64:0641",
+        "d4825a1af3d31c64:0078"
+      ],
+      "selected_chunk_ids": [
+        "d4825a1af3d31c64:0078",
+        "d3e7cff20880c16d:0533",
+        "d3e7cff20880c16d:0049",
+        "d3e7cff20880c16d:0534",
+        "d4825a1af3d31c64:0599"
+      ],
+      "error": null
+    },
+    "top5_articles": [
+      "Phần thứ nhất QUY ĐỊNH CHUNG > Chương III CÁ NHÂN > Mục 5 THÔNG BÁO TÌM KIẾM NGƯỜI VẮNG MẶT TẠI NƠI CƯ TRÚ, TUYÊN BỐ MẤT TÍCH, TUYÊN BỐ CHẾT > Điều 73. Huỷ bỏ quyết định tuyên bố chết",
+      "Phần thứ sáu THỦ TỤC GIẢI QUYẾT VIỆC DÂN SỰ > Chương XXVII THỦ TỤC GIẢI QUYẾT YÊU CẦU TUYÊN BỐ MỘT NGƯỜI LÀ ĐÃ CHẾT > Điều 394. Đơn yêu cầu hủy bỏ quyết định tuyên bố một người là đã chết",
+      "Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương III THẨM QUYỀN CỦA TÒA ÁN > Mục 2 THẨM QUYỀN CỦA TÒA ÁN CÁC CẤP > Điều 39. Thẩm quyền của Tòa án theo lãnh thổ",
+      "Phần thứ sáu THỦ TỤC GIẢI QUYẾT VIỆC DÂN SỰ > Chương XXVII THỦ TỤC GIẢI QUYẾT YÊU CẦU TUYÊN BỐ MỘT NGƯỜI LÀ ĐÃ CHẾT > Điều 395. Quyết định hủy bỏ quyết định tuyên bố một người là đã chết",
+      "Phần thứ ba NGHĨA VỤ VÀ HỢP ĐỒNG > Chương XIX NGHĨA VỤ HOÀN TRẢ DO CHIẾM HỮU, SỬ DỤNG TÀI SẢN, ĐƯỢC LỢI VỀ TÀI SẢN KHÔNG CÓ CĂN CỨ PHÁP LUẬT > Điều 581. Nghĩa vụ hoàn trả hoa lợi, lợi tức"
+    ]
+  },
+  {
+    "id": "mh25_02",
+    "question": "cậu tôi là người giám hộ của chị bị mất năng lực hành vi, tự ký bán bộ máy làm nghề của chị cho chính mình rồi lại đòi đứng ra đại diện chị khi gia đình kiện; giao dịch ấy có được giữ không, máy và tiền xử lý sao, ai có thể đại diện khi hai bên đang đối đầu?",
+    "queries": [
+      "cậu tôi là người giám hộ của chị bị mất năng lực hành vi, tự ký bán bộ máy làm nghề của chị cho chính mình rồi lại đòi đứng ra đại diện chị khi gia đình kiện; giao dịch ấy có được giữ không, máy và tiền xử lý sao, ai có thể đại diện khi hai bên đang đối đầu?",
+      "Người giám hộ là cậu của người chị bị mất năng lực hành vi dân sự tự ký hợp đồng bán bộ máy làm nghề của người chị cho chính mình thì giao dịch đó có được công nhận không?",
+      "Nếu giao dịch người giám hộ tự mua bộ máy làm nghề của người chị bị mất năng lực hành vi dân sự không được công nhận hoặc bị tuyên vô hiệu, việc hoàn trả bộ máy và tiền được xử lý thế nào?",
+      "Khi gia đình khởi kiện tranh chấp về việc người giám hộ là cậu tự mua bộ máy làm nghề của người chị bị mất năng lực hành vi dân sự, ai có thể đại diện cho người chị nếu người giám hộ có quyền lợi đối lập với người được giám hộ?"
+    ],
+    "errors": {},
+    "missing_gold_top5": [],
+    "missing_gold_top20": [],
+    "candidates": [
+      {
+        "chunk_id": "d4825a1af3d31c64:0063",
+        "score": 0.01639344262295082,
+        "rank": 1,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0055",
+        "score": 0.016129032258064516,
+        "rank": 2,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0062",
+        "score": 0.015873015873015872,
+        "rank": 3,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0152",
+        "score": 0.015625,
+        "rank": 4,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0057",
+        "score": 0.015384615384615385,
+        "rank": 5,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0061",
+        "score": 0.015151515151515152,
+        "rank": 6,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0054",
+        "score": 0.014925373134328358,
+        "rank": 7,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0067",
+        "score": 0.014705882352941176,
+        "rank": 8,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0145",
+        "score": 0.014492753623188406,
+        "rank": 9,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0133",
+        "score": 0.014285714285714285,
+        "rank": 10,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0060",
+        "score": 0.014084507042253521,
+        "rank": 11,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0153",
+        "score": 0.013888888888888888,
+        "rank": 12,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0068",
+        "score": 0.0136986301369863,
+        "rank": 13,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0049",
+        "score": 0.013513513513513514,
+        "rank": 14,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0058",
+        "score": 0.013333333333333334,
+        "rank": 15,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0059",
+        "score": 0.013157894736842105,
+        "rank": 16,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0155",
+        "score": 0.012987012987012988,
+        "rank": 17,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0143",
+        "score": 0.01282051282051282,
+        "rank": 18,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0126",
+        "score": 0.012658227848101266,
+        "rank": 19,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0141",
+        "score": 0.0125,
+        "rank": 20,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0112",
+        "score": 0.012345679012345678,
+        "rank": 21,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0064",
+        "score": 0.012195121951219513,
+        "rank": 22,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0051",
+        "score": 0.012048192771084338,
+        "rank": 23,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0154",
+        "score": 0.011904761904761904,
+        "rank": 24,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0142",
+        "score": 0.011627906976744186,
+        "rank": 25,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0349",
+        "score": 0.01639344262295082,
+        "rank": 26,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0139",
+        "score": 0.016129032258064516,
+        "rank": 27,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0123",
+        "score": 0.014925373134328358,
+        "rank": 28,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0121",
+        "score": 0.014705882352941176,
+        "rank": 29,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0598",
+        "score": 0.014705882352941176,
+        "rank": 30,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0124",
+        "score": 0.014492753623188406,
+        "rank": 31,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0050",
+        "score": 0.014285714285714285,
+        "rank": 32,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0597",
+        "score": 0.014285714285714285,
+        "rank": 33,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0120",
+        "score": 0.01282051282051282,
+        "rank": 34,
+        "arm": "fused",
+        "merged": []
+      }
+    ],
+    "ranked": [
+      {
+        "chunk_id": "d4825a1af3d31c64:0063",
+        "score": 0.92,
+        "rank": 1,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0139",
+        "score": 0.66,
+        "rank": 2,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0123",
+        "score": 0.89,
+        "rank": 3,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0124",
+        "score": 0.76,
+        "rank": 4,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0145",
+        "score": 0.67,
+        "rank": 5,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0152",
+        "score": 0.79,
+        "rank": 6,
+        "arm": "rerank",
+        "merged": [
+          "d4825a1af3d31c64:0153"
+        ]
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0133",
+        "score": 0.75,
+        "rank": 7,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0062",
+        "score": 0.71,
+        "rank": 8,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0155",
+        "score": 0.66,
+        "rank": 9,
+        "arm": "rerank",
+        "merged": [
+          "d4825a1af3d31c64:0154"
+        ]
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0064",
+        "score": 0.62,
+        "rank": 10,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0055",
+        "score": 0.59,
+        "rank": 11,
+        "arm": "rerank",
+        "merged": [
+          "d4825a1af3d31c64:0054"
+        ]
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0061",
+        "score": 0.59,
+        "rank": 12,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0120",
+        "score": 0.59,
+        "rank": 13,
+        "arm": "rerank",
+        "merged": [
+          "d3e7cff20880c16d:0121"
+        ]
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0143",
+        "score": 0.48,
+        "rank": 14,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0058",
+        "score": 0.45,
+        "rank": 15,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0059",
+        "score": 0.43,
+        "rank": 16,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0598",
+        "score": 0.39,
+        "rank": 17,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0060",
+        "score": 0.38,
+        "rank": 18,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0112",
+        "score": 0.38,
+        "rank": 19,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0141",
+        "score": 0.37,
+        "rank": 20,
+        "arm": "rerank",
+        "merged": [
+          "d4825a1af3d31c64:0142"
+        ]
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0597",
+        "score": 0.37,
+        "rank": 21,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0126",
+        "score": 0.27,
+        "rank": 22,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0068",
+        "score": 0.26,
+        "rank": 23,
+        "arm": "rerank",
+        "merged": [
+          "d4825a1af3d31c64:0067"
+        ]
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0049",
+        "score": 0.23,
+        "rank": 24,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0057",
+        "score": 0.21,
+        "rank": 25,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0050",
+        "score": 0.21,
+        "rank": 26,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0051",
+        "score": 0.19,
+        "rank": 27,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0349",
+        "score": 0.06,
+        "rank": 28,
+        "arm": "rerank",
+        "merged": []
+      }
+    ],
+    "pre_selection_ranked": [
+      {
+        "chunk_id": "d4825a1af3d31c64:0063",
+        "score": 0.92,
+        "rank": 1,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0123",
+        "score": 0.89,
+        "rank": 2,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0152",
+        "score": 0.79,
+        "rank": 3,
+        "arm": "rerank",
+        "merged": [
+          "d4825a1af3d31c64:0153"
+        ]
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0124",
+        "score": 0.76,
+        "rank": 4,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0133",
+        "score": 0.75,
+        "rank": 5,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0062",
+        "score": 0.71,
+        "rank": 6,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0145",
+        "score": 0.67,
+        "rank": 7,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0155",
+        "score": 0.66,
+        "rank": 8,
+        "arm": "rerank",
+        "merged": [
+          "d4825a1af3d31c64:0154"
+        ]
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0139",
+        "score": 0.66,
+        "rank": 9,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0064",
+        "score": 0.62,
+        "rank": 10,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0055",
+        "score": 0.59,
+        "rank": 11,
+        "arm": "rerank",
+        "merged": [
+          "d4825a1af3d31c64:0054"
+        ]
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0061",
+        "score": 0.59,
+        "rank": 12,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0120",
+        "score": 0.59,
+        "rank": 13,
+        "arm": "rerank",
+        "merged": [
+          "d3e7cff20880c16d:0121"
+        ]
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0143",
+        "score": 0.48,
+        "rank": 14,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0058",
+        "score": 0.45,
+        "rank": 15,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0059",
+        "score": 0.43,
+        "rank": 16,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0598",
+        "score": 0.39,
+        "rank": 17,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0060",
+        "score": 0.38,
+        "rank": 18,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0112",
+        "score": 0.38,
+        "rank": 19,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0141",
+        "score": 0.37,
+        "rank": 20,
+        "arm": "rerank",
+        "merged": [
+          "d4825a1af3d31c64:0142"
+        ]
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0597",
+        "score": 0.37,
+        "rank": 21,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0126",
+        "score": 0.27,
+        "rank": 22,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0068",
+        "score": 0.26,
+        "rank": 23,
+        "arm": "rerank",
+        "merged": [
+          "d4825a1af3d31c64:0067"
+        ]
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0049",
+        "score": 0.23,
+        "rank": 24,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0057",
+        "score": 0.21,
+        "rank": 25,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0050",
+        "score": 0.21,
+        "rank": 26,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0051",
+        "score": 0.19,
+        "rank": 27,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0349",
+        "score": 0.06,
+        "rank": 28,
+        "arm": "rerank",
+        "merged": []
+      }
+    ],
+    "selection_policy": "listwise",
+    "listwise_metadata": {
+      "triggered": true,
+      "reason": "ambiguous_cutoff",
+      "payload_sha256": "9e40c718db957fad3c124d4e5f669cda5c753141644053dbc39b6030f4bac193",
+      "candidate_chunk_ids": [
+        "d4825a1af3d31c64:0152",
+        "d4825a1af3d31c64:0133",
+        "d3e7cff20880c16d:0123",
+        "d4825a1af3d31c64:0062",
+        "d3e7cff20880c16d:0124",
+        "d4825a1af3d31c64:0063",
+        "d4825a1af3d31c64:0064",
+        "d4825a1af3d31c64:0139",
+        "d4825a1af3d31c64:0145",
+        "d4825a1af3d31c64:0155"
+      ],
+      "selected_chunk_ids": [
+        "d4825a1af3d31c64:0063",
+        "d4825a1af3d31c64:0139",
+        "d3e7cff20880c16d:0123",
+        "d3e7cff20880c16d:0124",
+        "d4825a1af3d31c64:0145"
+      ],
+      "error": null
+    },
+    "top5_articles": [
+      "Phần thứ nhất QUY ĐỊNH CHUNG > Chương III CÁ NHÂN > Mục 4 GIÁM HỘ > Điều 59. Quản lý tài sản của người được giám hộ",
+      "Phần thứ nhất QUY ĐỊNH CHUNG > Chương VIII GIAO DỊCH DÂN SỰ > Điều 131. Hậu quả pháp lý của giao dịch dân sự vô hiệu",
+      "Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương VI NGƯỜI THAM GIA TỐ TỤNG > Mục 2 NHỮNG NGƯỜI THAM GIA TỐ TỤNG KHÁC > Điều 87. Những trường hợp không được làm người đại diện",
+      "Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương VI NGƯỜI THAM GIA TỐ TỤNG > Mục 2 NHỮNG NGƯỜI THAM GIA TỐ TỤNG KHÁC > Điều 88. Chỉ định người đại diện trong tố tụng dân sự",
+      "Phần thứ nhất QUY ĐỊNH CHUNG > Chương IX ĐẠI DIỆN > Điều 136. Đại diện theo pháp luật của cá nhân"
+    ]
+  },
+  {
+    "id": "mh25_03",
+    "question": "tôi chỉ ủy quyền cho quản lý mua máy tối đa 200 triệu, anh ấy ký 350 triệu; tôi biết việc rồi phản đối ngay, bên bán nói tôi đã đồng ý qua điện thoại nhưng chỉ có một đoạn ghi âm không rõ người nói; phần vượt có buộc tôi trả không và ra tòa bên nào phải đưa chứng cứ cho chuyện đồng ý ấy?",
+    "queries": [
+      "tôi chỉ ủy quyền cho quản lý mua máy tối đa 200 triệu, anh ấy ký 350 triệu; tôi biết việc rồi phản đối ngay, bên bán nói tôi đã đồng ý qua điện thoại nhưng chỉ có một đoạn ghi âm không rõ người nói; phần vượt có buộc tôi trả không và ra tòa bên nào phải đưa chứng cứ cho chuyện đồng ý ấy?"
+    ],
+    "errors": {
+      "dense": "ConnectionError(MaxRetryError('HTTPSConnectionPool(host=\\'api.jina.ai\\', port=443): Max retries exceeded with url: /v1/embeddings (Caused by NameResolutionError(\"HTTPSConnection(host=\\'api.jina.ai\\', port=443): Failed to resolve \\'api.jina.ai\\' ([Errno 11001] getaddrinfo failed)\"))'))",
+      "decomposition": "APIConnectionError: decomposition failed; original query used"
+    },
+    "missing_gold_top5": [
+      0,
+      1,
+      2
+    ],
+    "missing_gold_top20": [
+      0,
+      1,
+      2
+    ],
+    "candidates": [],
+    "ranked": [],
+    "pre_selection_ranked": [],
+    "selection_policy": "relevance",
+    "listwise_metadata": {},
+    "top5_articles": []
+  },
+  {
+    "id": "mh25_04",
+    "question": "bên phải trả tiền mua nguyên liệu cho tôi làm giấy tặng toàn bộ máy xưởng cho em ruột nhưng vẫn tự dùng máy, họ còn rao bán tiếp; nếu giấy tặng chỉ để né nghĩa vụ thì tôi xin xử lý giao dịch, lấy lại hiện trạng và ngăn họ tẩu tán máy trong lúc kiện bằng cách nào?",
+    "queries": [
+      "bên phải trả tiền mua nguyên liệu cho tôi làm giấy tặng toàn bộ máy xưởng cho em ruột nhưng vẫn tự dùng máy, họ còn rao bán tiếp; nếu giấy tặng chỉ để né nghĩa vụ thì tôi xin xử lý giao dịch, lấy lại hiện trạng và ngăn họ tẩu tán máy trong lúc kiện bằng cách nào?"
+    ],
+    "errors": {
+      "dense": "ConnectionError(MaxRetryError('HTTPSConnectionPool(host=\\'api.jina.ai\\', port=443): Max retries exceeded with url: /v1/embeddings (Caused by NameResolutionError(\"HTTPSConnection(host=\\'api.jina.ai\\', port=443): Failed to resolve \\'api.jina.ai\\' ([Errno 11001] getaddrinfo failed)\"))'))",
+      "decomposition": "APIConnectionError: decomposition failed; original query used"
+    },
+    "missing_gold_top5": [
+      0,
+      1,
+      2
+    ],
+    "missing_gold_top20": [
+      0,
+      1,
+      2
+    ],
+    "candidates": [],
+    "ranked": [],
+    "pre_selection_ranked": [],
+    "selection_policy": "relevance",
+    "listwise_metadata": {},
+    "top5_articles": []
+  },
+  {
+    "id": "mh25_05",
+    "question": "máy ảnh của tôi bị lấy trộm rồi bán qua hai người, người đang giữ đưa hóa đơn mua đồ cũ và bảo mua ngay tình nên tôi hết quyền đòi; máy không phải loại đăng ký sở hữu, vậy tôi có đòi chính cái máy từ họ được không và khi kiện phải chứng minh những chuyện gì?",
+    "queries": [
+      "máy ảnh của tôi bị lấy trộm rồi bán qua hai người, người đang giữ đưa hóa đơn mua đồ cũ và bảo mua ngay tình nên tôi hết quyền đòi; máy không phải loại đăng ký sở hữu, vậy tôi có đòi chính cái máy từ họ được không và khi kiện phải chứng minh những chuyện gì?"
+    ],
+    "errors": {
+      "dense": "ConnectionError(MaxRetryError('HTTPSConnectionPool(host=\\'api.jina.ai\\', port=443): Max retries exceeded with url: /v1/embeddings (Caused by NameResolutionError(\"HTTPSConnection(host=\\'api.jina.ai\\', port=443): Failed to resolve \\'api.jina.ai\\' ([Errno 11001] getaddrinfo failed)\"))'))",
+      "decomposition": "APIConnectionError: decomposition failed; original query used"
+    },
+    "missing_gold_top5": [
+      0,
+      1,
+      2
+    ],
+    "missing_gold_top20": [
+      0,
+      1,
+      2
+    ],
+    "candidates": [],
+    "ranked": [],
+    "pre_selection_ranked": [],
+    "selection_policy": "relevance",
+    "listwise_metadata": {},
+    "top5_articles": []
+  },
+  {
+    "id": "mh25_06",
+    "question": "xưởng tôi còn nợ tiền vải, chủ hàng âm thầm chuyển quyền thu tiền cho người khác mà không báo; tôi đã thanh toán đủ cho chủ cũ, giờ người mới kiện đòi lần nữa, tôi dùng việc đã trả và chuyện không được báo để chống yêu cầu đó thế nào, phải lưu giấy tờ gì?",
+    "queries": [
+      "xưởng tôi còn nợ tiền vải, chủ hàng âm thầm chuyển quyền thu tiền cho người khác mà không báo; tôi đã thanh toán đủ cho chủ cũ, giờ người mới kiện đòi lần nữa, tôi dùng việc đã trả và chuyện không được báo để chống yêu cầu đó thế nào, phải lưu giấy tờ gì?"
+    ],
+    "errors": {
+      "dense": "ConnectionError(MaxRetryError('HTTPSConnectionPool(host=\\'api.jina.ai\\', port=443): Max retries exceeded with url: /v1/embeddings (Caused by NameResolutionError(\"HTTPSConnection(host=\\'api.jina.ai\\', port=443): Failed to resolve \\'api.jina.ai\\' ([Errno 11001] getaddrinfo failed)\"))'))",
+      "decomposition": "APIConnectionError: decomposition failed; original query used"
+    },
+    "missing_gold_top5": [
+      0,
+      1,
+      2
+    ],
+    "missing_gold_top20": [
+      0,
+      1,
+      2
+    ],
+    "candidates": [],
+    "ranked": [],
+    "pre_selection_ranked": [],
+    "selection_policy": "relevance",
+    "listwise_metadata": {},
+    "top5_articles": []
+  },
+  {
+    "id": "mh25_07",
+    "question": "tôi bảo lãnh khoản tiền mua thiết bị cho bạn, giấy chỉ nói trả thay khi bạn đến hạn không trả; bên bán đòi tôi trước hạn nên tôi chưa trả, sau đó đến hạn bạn không trả thì tôi đã trả thay đủ; giờ tôi đòi bạn khoản nào và nếu kiện thì phải chứng minh hai mốc đó ra sao?",
+    "queries": [
+      "tôi bảo lãnh khoản tiền mua thiết bị cho bạn, giấy chỉ nói trả thay khi bạn đến hạn không trả; bên bán đòi tôi trước hạn nên tôi chưa trả, sau đó đến hạn bạn không trả thì tôi đã trả thay đủ; giờ tôi đòi bạn khoản nào và nếu kiện thì phải chứng minh hai mốc đó ra sao?"
+    ],
+    "errors": {
+      "dense": "ConnectionError(MaxRetryError('HTTPSConnectionPool(host=\\'api.jina.ai\\', port=443): Max retries exceeded with url: /v1/embeddings (Caused by NameResolutionError(\"HTTPSConnection(host=\\'api.jina.ai\\', port=443): Failed to resolve \\'api.jina.ai\\' ([Errno 11001] getaddrinfo failed)\"))'))",
+      "decomposition": "APIConnectionError: decomposition failed; original query used"
+    },
+    "missing_gold_top5": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "missing_gold_top20": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "candidates": [],
+    "ranked": [],
+    "pre_selection_ranked": [],
+    "selection_policy": "relevance",
+    "listwise_metadata": {},
+    "top5_articles": []
+  },
+  {
+    "id": "mh25_08",
+    "question": "tôi đòi tiền thiết kế đã quá ba năm từ ngày khách không thanh toán, nhưng sáu tháng trước họ ký xác nhận còn thiếu và trả một phần; giờ họ yêu cầu tòa áp dụng hết thời hiệu, tòa phải nối ngày xác nhận với hạn kiện và thời điểm họ nêu yêu cầu thế nào?",
+    "queries": [
+      "tôi đòi tiền thiết kế đã quá ba năm từ ngày khách không thanh toán, nhưng sáu tháng trước họ ký xác nhận còn thiếu và trả một phần; giờ họ yêu cầu tòa áp dụng hết thời hiệu, tòa phải nối ngày xác nhận với hạn kiện và thời điểm họ nêu yêu cầu thế nào?"
+    ],
+    "errors": {
+      "dense": "ConnectionError(MaxRetryError('HTTPSConnectionPool(host=\\'api.jina.ai\\', port=443): Max retries exceeded with url: /v1/embeddings (Caused by NameResolutionError(\"HTTPSConnection(host=\\'api.jina.ai\\', port=443): Failed to resolve \\'api.jina.ai\\' ([Errno 11001] getaddrinfo failed)\"))'))",
+      "decomposition": "APIConnectionError: decomposition failed; original query used"
+    },
+    "missing_gold_top5": [
+      0,
+      1,
+      2
+    ],
+    "missing_gold_top20": [
+      0,
+      1,
+      2
+    ],
+    "candidates": [],
+    "ranked": [],
+    "pre_selection_ranked": [],
+    "selection_policy": "relevance",
+    "listwise_metadata": {},
+    "top5_articles": []
+  },
+  {
+    "id": "mh25_09",
+    "question": "tôi với bạn góp tiền mua chung một máy in công nghiệp theo phần, bạn lén bán phần của mình cho người ngoài mà không cho tôi cơ hội mua, tôi mới biết được một tháng và người mua đang rao bán tiếp phần ấy; tôi còn cách yêu cầu thay người mua và giữ phần máy đang tranh chấp đến lúc tòa xử không?",
+    "queries": [
+      "tôi với bạn góp tiền mua chung một máy in công nghiệp theo phần, bạn lén bán phần của mình cho người ngoài mà không cho tôi cơ hội mua, tôi mới biết được một tháng và người mua đang rao bán tiếp phần ấy; tôi còn cách yêu cầu thay người mua và giữ phần máy đang tranh chấp đến lúc tòa xử không?"
+    ],
+    "errors": {
+      "dense": "ConnectionError(MaxRetryError('HTTPSConnectionPool(host=\\'api.jina.ai\\', port=443): Max retries exceeded with url: /v1/embeddings (Caused by NameResolutionError(\"HTTPSConnection(host=\\'api.jina.ai\\', port=443): Failed to resolve \\'api.jina.ai\\' ([Errno 11001] getaddrinfo failed)\"))'))",
+      "decomposition": "APIConnectionError: decomposition failed; original query used"
+    },
+    "missing_gold_top5": [
+      0,
+      1,
+      2
+    ],
+    "missing_gold_top20": [
+      0,
+      1,
+      2
+    ],
+    "candidates": [],
+    "ranked": [],
+    "pre_selection_ranked": [],
+    "selection_policy": "relevance",
+    "listwise_metadata": {},
+    "top5_articles": []
+  },
+  {
+    "id": "mh25_10",
+    "question": "kế toán chuyển nhầm tiền công ty tôi vào tài khoản người lạ, họ biết nhầm nhưng đem gửi lấy lãi và không trả; tôi có thể đòi cả gốc lẫn phần lãi ấy không, nếu không tự lấy được sao kê thì nhờ tòa thu thập thế nào và có chặn tiền trong tài khoản lúc kiện được không?",
+    "queries": [
+      "kế toán chuyển nhầm tiền công ty tôi vào tài khoản người lạ, họ biết nhầm nhưng đem gửi lấy lãi và không trả; tôi có thể đòi cả gốc lẫn phần lãi ấy không, nếu không tự lấy được sao kê thì nhờ tòa thu thập thế nào và có chặn tiền trong tài khoản lúc kiện được không?"
+    ],
+    "errors": {
+      "dense": "ConnectionError(MaxRetryError('HTTPSConnectionPool(host=\\'api.jina.ai\\', port=443): Max retries exceeded with url: /v1/embeddings (Caused by NameResolutionError(\"HTTPSConnection(host=\\'api.jina.ai\\', port=443): Failed to resolve \\'api.jina.ai\\' ([Errno 11001] getaddrinfo failed)\"))'))",
+      "decomposition": "APIConnectionError: decomposition failed; original query used"
+    },
+    "missing_gold_top5": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "missing_gold_top20": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "candidates": [],
+    "ranked": [],
+    "pre_selection_ranked": [],
+    "selection_policy": "relevance",
+    "listwise_metadata": {},
+    "top5_articles": []
+  },
+  {
+    "id": "mh25_11",
+    "question": "tôi gửi mười máy pha cà phê cho kho giữ có trả phí, kho tự đem cho thuê rồi làm mất hai máy, họ đổ do bão nhưng không đưa chứng cứ; tôi ở Huế còn kho đặt trụ sở Đà Nẵng, muốn đòi máy và bồi thường thì dựa vào nghĩa vụ nào, ai phải làm rõ bất khả kháng và thường nộp đơn ở đâu?",
+    "queries": [
+      "tôi gửi mười máy pha cà phê cho kho giữ có trả phí, kho tự đem cho thuê rồi làm mất hai máy, họ đổ do bão nhưng không đưa chứng cứ; tôi ở Huế còn kho đặt trụ sở Đà Nẵng, muốn đòi máy và bồi thường thì dựa vào nghĩa vụ nào, ai phải làm rõ bất khả kháng và thường nộp đơn ở đâu?"
+    ],
+    "errors": {
+      "dense": "ConnectionError(MaxRetryError('HTTPSConnectionPool(host=\\'api.jina.ai\\', port=443): Max retries exceeded with url: /v1/embeddings (Caused by NameResolutionError(\"HTTPSConnection(host=\\'api.jina.ai\\', port=443): Failed to resolve \\'api.jina.ai\\' ([Errno 11001] getaddrinfo failed)\"))'))",
+      "decomposition": "APIConnectionError: decomposition failed; original query used"
+    },
+    "missing_gold_top5": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "missing_gold_top20": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "candidates": [],
+    "ranked": [],
+    "pre_selection_ranked": [],
+    "selection_policy": "relevance",
+    "listwise_metadata": {},
+    "top5_articles": []
+  },
+  {
+    "id": "mh25_12",
+    "question": "tôi sơ suất làm hỏng dụng cụ của xưởng, thiệt hại không nghiêm trọng và dưới mười tháng lương tối thiểu vùng, công ty bắt đền nguyên giá máy mới dù dụng cụ đã cũ; nhà tôi đang khó khăn, biên bản định giá công ty giữ, mức đền phải nối lỗi, thiệt hại thực tế với hoàn cảnh của tôi thế nào và ai phải đưa chứng cứ?",
+    "queries": [
+      "tôi sơ suất làm hỏng dụng cụ của xưởng, thiệt hại không nghiêm trọng và dưới mười tháng lương tối thiểu vùng, công ty bắt đền nguyên giá máy mới dù dụng cụ đã cũ; nhà tôi đang khó khăn, biên bản định giá công ty giữ, mức đền phải nối lỗi, thiệt hại thực tế với hoàn cảnh của tôi thế nào và ai phải đưa chứng cứ?",
+      "Khi người lao động sơ suất làm hỏng dụng cụ của xưởng, thiệt hại không nghiêm trọng và giá trị dưới mười tháng lương tối thiểu vùng, mức bồi thường được xác định dựa trên lỗi, thiệt hại thực tế và hoàn cảnh gia đình khó khăn như thế nào?",
+      "Khi công ty yêu cầu người lao động bồi thường nguyên giá máy mới dù dụng cụ bị hỏng đã cũ, giá trị thiệt hại thực tế được xác định thế nào và biên bản định giá do công ty giữ được sử dụng ra sao làm căn cứ tính bồi thường?",
+      "Trong trường hợp công ty yêu cầu người lao động bồi thường do sơ suất làm hỏng dụng cụ của xưởng, ai có trách nhiệm đưa ra chứng cứ về lỗi, thiệt hại thực tế và giá trị dụng cụ bị hỏng, nhất là khi công ty đang giữ biên bản định giá?"
+    ],
+    "errors": {},
+    "missing_gold_top5": [],
+    "missing_gold_top20": [],
+    "candidates": [
+      {
+        "chunk_id": "56c6bfc5e8c4e7c9:0154",
+        "score": 0.01639344262295082,
+        "rank": 1,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0603",
+        "score": 0.016129032258064516,
+        "rank": 2,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "56c6bfc5e8c4e7c9:0155",
+        "score": 0.015873015873015872,
+        "rank": 3,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0618",
+        "score": 0.015625,
+        "rank": 4,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0595",
+        "score": 0.015384615384615385,
+        "rank": 5,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "56c6bfc5e8c4e7c9:0123",
+        "score": 0.015151515151515152,
+        "rank": 6,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "56c6bfc5e8c4e7c9:0120",
+        "score": 0.014925373134328358,
+        "rank": 7,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0467",
+        "score": 0.014705882352941176,
+        "rank": 8,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0380",
+        "score": 0.014492753623188406,
+        "rank": 9,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0608",
+        "score": 0.014285714285714285,
+        "rank": 10,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0604",
+        "score": 0.014084507042253521,
+        "rank": 11,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0495",
+        "score": 0.013888888888888888,
+        "rank": 12,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "5dc99a513d86dc54:0389",
+        "score": 0.0136986301369863,
+        "rank": 13,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "56c6bfc5e8c4e7c9:0193",
+        "score": 0.013513513513513514,
+        "rank": 14,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0615",
+        "score": 0.013333333333333334,
+        "rank": 15,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0619",
+        "score": 0.013157894736842105,
+        "rank": 16,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0570",
+        "score": 0.012987012987012988,
+        "rank": 17,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "88138f1cdf1b763c:0223",
+        "score": 0.01282051282051282,
+        "rank": 18,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0377",
+        "score": 0.012658227848101266,
+        "rank": 19,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0436",
+        "score": 0.0125,
+        "rank": 20,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0323",
+        "score": 0.02967032967032967,
+        "rank": 21,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "5dc99a513d86dc54:0186",
+        "score": 0.015625,
+        "rank": 22,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d55d891c30d0f714:0320",
+        "score": 0.015151515151515152,
+        "rank": 23,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0127",
+        "score": 0.014925373134328358,
+        "rank": 24,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0444",
+        "score": 0.014705882352941176,
+        "rank": 25,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "56c6bfc5e8c4e7c9:0112",
+        "score": 0.014492753623188406,
+        "rank": 26,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "5dc99a513d86dc54:0308",
+        "score": 0.014492753623188406,
+        "rank": 27,
+        "arm": "fused",
+        "merged": []
+      },
+      {
+        "chunk_id": "5dc99a513d86dc54:0185",
+        "score": 0.0136986301369863,
+        "rank": 28,
+        "arm": "fused",
+        "merged": []
+      }
+    ],
+    "ranked": [
+      {
+        "chunk_id": "56c6bfc5e8c4e7c9:0154",
+        "score": 0.91,
+        "rank": 1,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "56c6bfc5e8c4e7c9:0155",
+        "score": 0.89,
+        "rank": 2,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0127",
+        "score": 0.81,
+        "rank": 3,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0603",
+        "score": 0.83,
+        "rank": 4,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "56c6bfc5e8c4e7c9:0123",
+        "score": 0.72,
+        "rank": 5,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0618",
+        "score": 0.68,
+        "rank": 6,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0380",
+        "score": 0.62,
+        "rank": 7,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0444",
+        "score": 0.59,
+        "rank": 8,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0377",
+        "score": 0.57,
+        "rank": 9,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0595",
+        "score": 0.56,
+        "rank": 10,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0615",
+        "score": 0.44,
+        "rank": 11,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0604",
+        "score": 0.37,
+        "rank": 12,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "88138f1cdf1b763c:0223",
+        "score": 0.35,
+        "rank": 13,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0436",
+        "score": 0.32,
+        "rank": 14,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "56c6bfc5e8c4e7c9:0193",
+        "score": 0.27,
+        "rank": 15,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d55d891c30d0f714:0320",
+        "score": 0.25,
+        "rank": 16,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "5dc99a513d86dc54:0389",
+        "score": 0.15,
+        "rank": 17,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0495",
+        "score": 0.12,
+        "rank": 18,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0467",
+        "score": 0.1,
+        "rank": 19,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0323",
+        "score": 0.1,
+        "rank": 20,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "56c6bfc5e8c4e7c9:0112",
+        "score": 0.1,
+        "rank": 21,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "5dc99a513d86dc54:0185",
+        "score": 0.08,
+        "rank": 22,
+        "arm": "rerank",
+        "merged": [
+          "5dc99a513d86dc54:0186"
+        ]
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0619",
+        "score": 0.07,
+        "rank": 23,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0570",
+        "score": 0.07,
+        "rank": 24,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "56c6bfc5e8c4e7c9:0120",
+        "score": 0.06,
+        "rank": 25,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0608",
+        "score": 0.05,
+        "rank": 26,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "5dc99a513d86dc54:0308",
+        "score": 0.03,
+        "rank": 27,
+        "arm": "rerank",
+        "merged": []
+      }
+    ],
+    "pre_selection_ranked": [
+      {
+        "chunk_id": "56c6bfc5e8c4e7c9:0154",
+        "score": 0.91,
+        "rank": 1,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "56c6bfc5e8c4e7c9:0155",
+        "score": 0.89,
+        "rank": 2,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0603",
+        "score": 0.83,
+        "rank": 3,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d3e7cff20880c16d:0127",
+        "score": 0.81,
+        "rank": 4,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "56c6bfc5e8c4e7c9:0123",
+        "score": 0.72,
+        "rank": 5,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0618",
+        "score": 0.68,
+        "rank": 6,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0380",
+        "score": 0.62,
+        "rank": 7,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0444",
+        "score": 0.59,
+        "rank": 8,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0377",
+        "score": 0.57,
+        "rank": 9,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0595",
+        "score": 0.56,
+        "rank": 10,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0615",
+        "score": 0.44,
+        "rank": 11,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0604",
+        "score": 0.37,
+        "rank": 12,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "88138f1cdf1b763c:0223",
+        "score": 0.35,
+        "rank": 13,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0436",
+        "score": 0.32,
+        "rank": 14,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "56c6bfc5e8c4e7c9:0193",
+        "score": 0.27,
+        "rank": 15,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d55d891c30d0f714:0320",
+        "score": 0.25,
+        "rank": 16,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "5dc99a513d86dc54:0389",
+        "score": 0.15,
+        "rank": 17,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0495",
+        "score": 0.12,
+        "rank": 18,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0467",
+        "score": 0.1,
+        "rank": 19,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0323",
+        "score": 0.1,
+        "rank": 20,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "56c6bfc5e8c4e7c9:0112",
+        "score": 0.1,
+        "rank": 21,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "5dc99a513d86dc54:0185",
+        "score": 0.08,
+        "rank": 22,
+        "arm": "rerank",
+        "merged": [
+          "5dc99a513d86dc54:0186"
+        ]
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0619",
+        "score": 0.07,
+        "rank": 23,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0570",
+        "score": 0.07,
+        "rank": 24,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "56c6bfc5e8c4e7c9:0120",
+        "score": 0.06,
+        "rank": 25,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "d4825a1af3d31c64:0608",
+        "score": 0.05,
+        "rank": 26,
+        "arm": "rerank",
+        "merged": []
+      },
+      {
+        "chunk_id": "5dc99a513d86dc54:0308",
+        "score": 0.03,
+        "rank": 27,
+        "arm": "rerank",
+        "merged": []
+      }
+    ],
+    "selection_policy": "listwise",
+    "listwise_metadata": {
+      "triggered": true,
+      "reason": "ambiguous_cutoff",
+      "payload_sha256": "21fc94f7305d8f2a4ad37ae6a958cb5bc716bf5068cf0e5899a6520b91ca672a",
+      "candidate_chunk_ids": [
+        "56c6bfc5e8c4e7c9:0123",
+        "d4825a1af3d31c64:0595",
+        "d4825a1af3d31c64:0618",
+        "d3e7cff20880c16d:0127",
+        "56c6bfc5e8c4e7c9:0154",
+        "d4825a1af3d31c64:0444",
+        "d4825a1af3d31c64:0603",
+        "d4825a1af3d31c64:0377",
+        "d4825a1af3d31c64:0380",
+        "56c6bfc5e8c4e7c9:0155"
+      ],
+      "selected_chunk_ids": [
+        "56c6bfc5e8c4e7c9:0154",
+        "56c6bfc5e8c4e7c9:0155",
+        "d3e7cff20880c16d:0127",
+        "d4825a1af3d31c64:0603",
+        "56c6bfc5e8c4e7c9:0123"
+      ],
+      "error": null
+    },
+    "top5_articles": [
+      "Chương VIII KỶ LUẬT LAO ĐỘNG, TRÁCH NHIỆM VẬT CHẤT > Mục 2. TRÁCH NHIỆM VẬT CHẤT > Điều 129. Bồi thường thiệt hại",
+      "Chương VIII KỶ LUẬT LAO ĐỘNG, TRÁCH NHIỆM VẬT CHẤT > Mục 2. TRÁCH NHIỆM VẬT CHẤT > Điều 130. Xử lý bồi thường thiệt hại",
+      "Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương VII CHỨNG MINH VÀ CHỨNG CỨ > Điều 91. Nghĩa vụ chứng minh",
+      "Phần thứ ba NGHĨA VỤ VÀ HỢP ĐỒNG > Chương XX TRÁCH NHIỆM BỒI THƯỜNG THIỆT HẠI NGOÀI HỢP ĐỒNG > Mục 1 QUY ĐỊNH CHUNG > Điều 585. Nguyên tắc bồi thường thiệt hại",
+      "Chương VI TIỀN LƯƠNG > Điều 102. Khấu trừ tiền lương"
+    ]
+  }
+]

@@ -1,0 +1,5 @@
+{
+  "retrieval_llm_logical_calls": 34,
+  "retrieval_llm_cache_hits": 0,
+  "retrieval_llm_sdk_requests": 34
+}

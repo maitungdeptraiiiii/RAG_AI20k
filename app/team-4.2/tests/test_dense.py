@@ -177,6 +177,28 @@ def test_make_embedder_picks_backend():
     assert isinstance(make_embedder("text-embedding-3-small", 1536), OpenAIEmbedder)
 
 
+def test_jina_rate_limiting():
+    import time
+    from concurrent.futures import ThreadPoolExecutor
+
+    post = FakeJina()
+    calls = []
+
+    def tracked_post(url, payload, key, timeout):
+        calls.append(time.time())
+        return post(url, payload, key, timeout)
+
+    e = JinaEmbedder("jina-x", 4, api_key="k", post=tracked_post, min_interval=0.05, sleep=time.sleep)
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        list(pool.map(lambda q: e.embed_query([q]), ["q1", "q2", "q3"]))
+
+    assert len(calls) == 3
+    # Check that consecutive calls are spaced by >= 0.04s
+    diffs = [calls[i] - calls[i - 1] for i in range(1, len(calls))]
+    for d in diffs:
+        assert d >= 0.035, f"Interval too small: {d}"
+
+
 def test_vector_index_embeds_query_with_query_task():
     post = FakeJina()
     idx = VectorIndex(_jina(post))

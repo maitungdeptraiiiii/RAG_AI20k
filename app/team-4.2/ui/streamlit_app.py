@@ -57,6 +57,14 @@ def show_trace(trace: AskTrace) -> None:
     ):
         if res.errors:
             st.warning(f"Arm bị lỗi: {res.errors}")
+        if res.queries:
+            st.markdown("**Truy vấn sau phân rã (Decomposition):**")
+            for i, query in enumerate(res.queries):
+                st.write(f"- q{i}: {query}")
+        if getattr(res, 'listwise_metadata', None):
+            m = res.listwise_metadata
+            status = " Kích hoạt Listwise LLM (gpt-6-luna xếp hạng lại)" if m.get("triggered") else f" Giữ nguyên Jev ({m.get('reason')})"
+            st.info(f"**Lớp chọn lọc cuối:** {status}")
         cols = st.columns(len(res.arms) + 1)
         for col, (arm, hits) in zip(cols, res.arms.items()):
             col.markdown(f"**{arm.upper()}**")
@@ -103,6 +111,7 @@ with st.sidebar:
     for d in docs:
         st.caption(f"• {d.source} ({d.n_chunks} chunk)")
     st.caption(f"Rerank: {settings.rerank_backend} · LLM: {settings.llm_model}")
+    st.caption(f"Decomp: {settings.decomp_enabled} · Listwise: {settings.listwise_enabled}")
 
 # --- chat ----------------------------------------------------------------------------------
 

@@ -10,7 +10,7 @@ rồi tìm bằng embedding của đoạn đó: đoạn giả gần các đoạn
   giả), KHÔNG còn arm Dense riêng tìm bằng câu hỏi gốc để gộp RRF. Benchmark 6 bộ luật (11/2026):
   hyde+rerank ≈ dense+hyde+rerank (Recall@5 0.950 / 0.950 trên 40 câu), arm câu-gốc chỉ tốn thêm
   một lần embed mà không giúp. Câu hỏi gốc vẫn nằm trong text embed nên không mất tín hiệu.
-- Chỉ dùng cho Dense. BM25 vẫn tìm bằng câu hỏi gốc, để số Điều / thuật ngữ LLM bịa ra trong đoạn
+- Chỉ dùng cho Dense. BM25 mặc định tìm bằng câu hỏi gốc (hoặc rewrite nếu bật QUERY_REWRITE_ENABLED), để số Điều / thuật ngữ LLM bịa ra trong đoạn
   giả không làm lệch kết quả keyword.
 - Đoạn giả có thể sai sự thật — không sao, nó chỉ dùng để tìm, không bao giờ đưa cho người dùng.
 - Mỗi câu hỏi tốn thêm 1 lần gọi LLM (có cache). LLM lỗi / trả rỗng thì arm Dense tự lùi về tìm

@@ -1,0 +1,27 @@
+{
+  "questions_sha256": "4794686c462526c722c661ddc45539e391ef7fb8de1eedb9deb854818c0c5a3e",
+  "prompt_sha256": "a8ff59621b2e79a08480e933d755ea268cd71af9632bf96c5c7bb46743dcbd70",
+  "index_signature": {
+    "embed_model": "jina-embeddings-v5-text-small",
+    "embed_dim": 1024,
+    "max_syllables": 300,
+    "index_enhancers": []
+  },
+  "data_dir": "data\\team-4.2\\jina",
+  "advanced": "hyde",
+  "llm": "gpt-6-luna",
+  "rerank": "jev",
+  "arm_k": 20,
+  "rerank_n": 20,
+  "article_pool_factor": 2,
+  "merge_articles": true,
+  "top_k": 5,
+  "rrf_k": 60,
+  "decomposition": {
+    "max_subqueries": 3,
+    "include_original": true,
+    "per_query_k": 10,
+    "pool_size": 30
+  },
+  "note": "Retrieval benchmark only; elapsed times include cache effects. No answer generation."
+}

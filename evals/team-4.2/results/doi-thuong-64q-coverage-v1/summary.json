@@ -1,0 +1,28 @@
+{
+  "saved-v2": {
+    "n": 64,
+    "recall@5": 0.8958333333333334,
+    "hit@5": 0.984375,
+    "mrr@5": 0.8421875,
+    "recall@20": 0.9479166666666666,
+    "candidate_recall": 0.953125,
+    "full_gold_top5": 52,
+    "multi_full_gold_top5": 16,
+    "candidate_chunks": 1774,
+    "rewrite_fallbacks": 0,
+    "jev_cache_misses": null
+  },
+  "v2+coverage-v1": {
+    "n": 64,
+    "recall@5": 0.9010416666666666,
+    "hit@5": 0.984375,
+    "mrr@5": 0.846875,
+    "recall@20": 0.9479166666666666,
+    "candidate_recall": 0.953125,
+    "full_gold_top5": 52,
+    "multi_full_gold_top5": 16,
+    "candidate_chunks": 1774,
+    "rewrite_fallbacks": 0,
+    "jev_cache_misses": 0
+  }
+}

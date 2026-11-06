@@ -61,7 +61,8 @@ def main() -> int:
         f"- Số câu: {len(questions)} ({sum(q.in_scope for q in questions)} trong phạm vi)",
         f"- Index: {len(pipeline.store)} chunk, {len(pipeline.store.docs())} tài liệu",
         f"- Embedding: {settings.embed_model} · LLM: {settings.llm_model} · RRF k={settings.rrf_k} · "
-        f"rerank: {settings.rerank_backend} · nâng cao: {settings.advanced or 'không'}", "",
+        f"rerank: {settings.rerank_backend} · nâng cao: {settings.advanced or 'không'} · "
+        f"decomposition: {settings.decomp_enabled}", "",
     ]
     body = summary_markdown(rows)
     if args.answers:

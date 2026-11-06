@@ -15,6 +15,7 @@ import os
 from collections.abc import Mapping
 from dataclasses import dataclass, fields
 from pathlib import Path
+import math
 from typing import Any
 
 DEFAULT_ENV_FILES = (Path("app/team-4.2/.env"), Path(".env"))
@@ -73,6 +74,9 @@ class Settings:
     # Retrieval (TV2)
     arm_k: int = 20
     rrf_k: int = 60
+    bm25_rrf_weight: float = 1.0
+    query_rewrite_enabled: bool = False
+    rewrite_for_rerank: bool = True       # false: rewrite for BM25 only; Jev sees original
     top_k: int = 5
     rerank_backend: str = "none"           # none | jev
     rerank_n: int = 20
@@ -80,6 +84,27 @@ class Settings:
     merge_articles: bool = True
     # Khi gộp: mỗi arm lấy ARM_K * factor chunk, pool rerank = RERANK_N Điều khác nhau
     article_pool_factor: int = 2
+
+    # Query decomposition: runtime only; independent of HyDE and retrieval mode.
+    decomp_enabled: bool = False
+    decomp_max_subqueries: int = 3
+    decomp_include_original: bool = True
+    decomp_per_query_k: int = 10
+    decomp_pool_size: int = 30
+    decomp_max_new_articles: int = 10
+
+    # Optional post-Jev evidence selection; no additional model calls.
+    coverage_enabled: bool = False
+    coverage_anchor_k: int = 2
+    coverage_min_p: float = 0.5
+    coverage_weight: float = 0.25
+    coverage_branch_k: int = 5
+
+    listwise_enabled: bool = False
+    listwise_candidate_n: int = 10
+    listwise_margin: float = 0.05
+    listwise_min_p: float = 0.5
+    listwise_excerpt_words: int = 300
 
     # Context (retrieve/context.py)
     context_min_p: float = 0.7
@@ -142,11 +167,27 @@ class Settings:
         if self.rerank_backend not in ("none", "jev"):
             raise ValueError(f"RERANK_BACKEND phải là none | jev, nhận {self.rerank_backend!r}")
         for name in ("embed_dim", "max_syllables", "arm_k", "top_k", "rerank_n", "article_pool_factor",
-                     "context_max_blocks", "context_max_words"):
+                     "context_max_blocks", "context_max_words", "decomp_max_subqueries",
+                     "decomp_per_query_k", "decomp_pool_size"):
             if getattr(self, name) < 1:
                 raise ValueError(f"{name.upper()} phải >= 1")
         if self.rrf_k < 0:
             raise ValueError("RRF_K phải >= 0")
+        if not math.isfinite(self.bm25_rrf_weight) or self.bm25_rrf_weight < 0:
+            raise ValueError('BM25_RRF_WEIGHT must be finite and nonnegative')
+        if self.decomp_max_new_articles < 0:
+            raise ValueError("DECOMP_MAX_NEW_ARTICLES phải >= 0")
+        if self.coverage_anchor_k < 0 or self.coverage_branch_k < 1:
+            raise ValueError('Invalid coverage anchor/branch limits')
+        if any(not math.isfinite(v) or not 0<=v<=1
+               for v in (self.coverage_min_p,self.coverage_weight)):
+            raise ValueError('Coverage probabilities/weight must be finite and in [0,1]')
+        if self.coverage_enabled and self.listwise_enabled:
+            raise ValueError('Enable coverage or listwise selection separately')
+        if not 8<=self.listwise_candidate_n<=12 or self.listwise_excerpt_words<1:
+            raise ValueError('Invalid listwise shortlist/excerpt limits')
+        if any(not math.isfinite(v) or not 0<=v<=1 for v in (self.listwise_margin,self.listwise_min_p)):
+            raise ValueError('Listwise thresholds must be finite and in [0,1]')
 
 
 def _convert(name: str, raw: str, default: Any) -> Any:

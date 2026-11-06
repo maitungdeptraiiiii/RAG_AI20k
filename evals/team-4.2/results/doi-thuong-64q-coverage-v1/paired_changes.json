@@ -1,0 +1,102 @@
+[
+  {
+    "id": "d04",
+    "question": "công ty tự nhiên bảo mai khỏi đi làm nữa, thế có được không",
+    "before": {
+      "recall@5": 0.3333333333333333,
+      "hit@5": 1.0,
+      "mrr@5": 0.5,
+      "recall@20": 0.6666666666666666,
+      "candidate_recall": 1.0
+    },
+    "after": {
+      "recall@5": 0.6666666666666666,
+      "hit@5": 1.0,
+      "mrr@5": 0.5,
+      "recall@20": 0.6666666666666666,
+      "candidate_recall": 1.0
+    },
+    "delta": {
+      "recall@5": 0.3333333333333333,
+      "hit@5": 0.0,
+      "mrr@5": 0.0,
+      "recall@20": 0.0,
+      "candidate_recall": 0.0
+    }
+  },
+  {
+    "id": "d18",
+    "question": "tòa gửi giấy gọi lên mà tôi bận không đi được thì sao",
+    "before": {
+      "recall@5": 1.0,
+      "hit@5": 1.0,
+      "mrr@5": 0.25,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0
+    },
+    "after": {
+      "recall@5": 1.0,
+      "hit@5": 1.0,
+      "mrr@5": 0.3333333333333333,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0
+    },
+    "delta": {
+      "recall@5": 0.0,
+      "hit@5": 0.0,
+      "mrr@5": 0.08333333333333331,
+      "recall@20": 0.0,
+      "candidate_recall": 0.0
+    }
+  },
+  {
+    "id": "d52",
+    "question": "em 15 tuổi muốn đi làm phụ quán cà phê dịp hè được không",
+    "before": {
+      "recall@5": 0.5,
+      "hit@5": 1.0,
+      "mrr@5": 0.2,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0
+    },
+    "after": {
+      "recall@5": 0.5,
+      "hit@5": 1.0,
+      "mrr@5": 0.3333333333333333,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0
+    },
+    "delta": {
+      "recall@5": 0.0,
+      "hit@5": 0.0,
+      "mrr@5": 0.1333333333333333,
+      "recall@20": 0.0,
+      "candidate_recall": 0.0
+    }
+  },
+  {
+    "id": "d58",
+    "question": "nộp đơn kiện lên tòa rồi mà tòa trả lại đơn",
+    "before": {
+      "recall@5": 1.0,
+      "hit@5": 1.0,
+      "mrr@5": 0.25,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0
+    },
+    "after": {
+      "recall@5": 1.0,
+      "hit@5": 1.0,
+      "mrr@5": 0.3333333333333333,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0
+    },
+    "delta": {
+      "recall@5": 0.0,
+      "hit@5": 0.0,
+      "mrr@5": 0.08333333333333331,
+      "recall@20": 0.0,
+      "candidate_recall": 0.0
+    }
+  }
+]

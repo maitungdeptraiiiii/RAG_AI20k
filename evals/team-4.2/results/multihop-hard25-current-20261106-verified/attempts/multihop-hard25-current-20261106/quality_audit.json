@@ -1,0 +1,269 @@
+{
+  "n": 25,
+  "old_n": 64,
+  "unmatched_gold": {},
+  "gold_count_distribution": {
+    "3": 12,
+    "4": 12,
+    "5": 1
+  },
+  "cross_source_count": 25,
+  "exact_question_duplicates": 0,
+  "identical_old_gold_sets": 0,
+  "nearest_old": [
+    {
+      "id": "mh25_01",
+      "nearest_old_id": "d36",
+      "word_jaccard": 0.1206896551724138,
+      "sequence_ratio": 0.16216216216216217,
+      "new_topic": "nguoi_bi_tuyen_chet_tro_ve",
+      "old_question": "tòa vừa xử bố tôi 3 năm tù mà gia đình thấy nặng quá, giờ làm sao"
+    },
+    {
+      "id": "mh25_02",
+      "nearest_old_id": "d06",
+      "word_jaccard": 0.13114754098360656,
+      "sequence_ratio": 0.25625,
+      "new_topic": "giam_ho_tu_mua_tai_san",
+      "old_question": "đang bầu mà bị công ty cho nghỉ việc, chị có làm gì được không"
+    },
+    {
+      "id": "mh25_03",
+      "nearest_old_id": "d37",
+      "word_jaccard": 0.11290322580645161,
+      "sequence_ratio": 0.26704545454545453,
+      "new_topic": "vuot_uy_quyen_mua_may",
+      "old_question": "đặt cọc 100 triệu mua nhà rồi mà bên bán lại đổi ý không bán nữa"
+    },
+    {
+      "id": "mh25_04",
+      "nearest_old_id": "d59",
+      "word_jaccard": 0.109375,
+      "sequence_ratio": 0.25806451612903225,
+      "new_topic": "tang_cho_gia_tao_tron_nghia_vu",
+      "old_question": "bản án phúc thẩm có hiệu lực rồi nhưng tôi vẫn thấy xử sai, còn cách nào không"
+    },
+    {
+      "id": "mh25_05",
+      "nearest_old_id": "d26",
+      "word_jaccard": 0.13559322033898305,
+      "sequence_ratio": 0.21238938053097345,
+      "new_topic": "nguoi_mua_ngay_tinh_do_bi_mat_cap",
+      "old_question": "cháu tôi 17 tuổi đi trộm điện thoại của người ta bị bắt, liệu có phải đi tù không"
+    },
+    {
+      "id": "mh25_06",
+      "nearest_old_id": "d38",
+      "word_jaccard": 0.15254237288135594,
+      "sequence_ratio": 0.3032069970845481,
+      "new_topic": "chuyen_quyen_yeu_cau_khong_thong_bao",
+      "old_question": "bố mất để di chúc cho hết người tình, mẹ con tôi không được đồng nào, mà tôi mới 16 tuổi"
+    },
+    {
+      "id": "mh25_07",
+      "nearest_old_id": "d35",
+      "word_jaccard": 0.12727272727272726,
+      "sequence_ratio": 0.10734463276836158,
+      "new_topic": "bao_lanh_tra_thay_truoc_han",
+      "old_question": "đánh nhau bị thương nhẹ, giờ hai bên làm lành rồi, tôi rút đơn thì vụ án có dừng không"
+    },
+    {
+      "id": "mh25_08",
+      "nearest_old_id": "d59",
+      "word_jaccard": 0.1016949152542373,
+      "sequence_ratio": 0.22560975609756098,
+      "new_topic": "thoi_hieu_dich_vu_thua_nhan_lai",
+      "old_question": "bản án phúc thẩm có hiệu lực rồi nhưng tôi vẫn thấy xử sai, còn cách nào không"
+    },
+    {
+      "id": "mh25_09",
+      "nearest_old_id": "d63",
+      "word_jaccard": 0.12727272727272726,
+      "sequence_ratio": 0.2695417789757412,
+      "new_topic": "ban_phan_so_huu_chung_khong_bao",
+      "old_question": "tàu cá nhà tôi cứu được một tàu bị nạn ngoài khơi, có được đòi tiền công không"
+    },
+    {
+      "id": "mh25_10",
+      "nearest_old_id": "d18",
+      "word_jaccard": 0.1320754716981132,
+      "sequence_ratio": 0.18867924528301888,
+      "new_topic": "chuyen_nham_tien_sinh_loi_ngan_hang",
+      "old_question": "tòa gửi giấy gọi lên mà tôi bận không đi được thì sao"
+    },
+    {
+      "id": "mh25_11",
+      "nearest_old_id": "d35",
+      "word_jaccard": 0.1323529411764706,
+      "sequence_ratio": 0.19337016574585636,
+      "new_topic": "gui_giu_hang_dung_sai_muc_dich",
+      "old_question": "đánh nhau bị thương nhẹ, giờ hai bên làm lành rồi, tôi rút đơn thì vụ án có dừng không"
+    },
+    {
+      "id": "mh25_12",
+      "nearest_old_id": "d11",
+      "word_jaccard": 0.08571428571428572,
+      "sequence_ratio": 0.18925831202046037,
+      "new_topic": "so_suat_lam_hong_dung_cu",
+      "old_question": "tối qua chồng tôi bị công an đến nhà bắt đi, giờ chẳng ai báo gì cho gia đình cả"
+    },
+    {
+      "id": "mh25_13",
+      "nearest_old_id": "d35",
+      "word_jaccard": 0.15254237288135594,
+      "sequence_ratio": 0.19444444444444445,
+      "new_topic": "hop_dong_het_han_lam_tiep",
+      "old_question": "đánh nhau bị thương nhẹ, giờ hai bên làm lành rồi, tôi rút đơn thì vụ án có dừng không"
+    },
+    {
+      "id": "mh25_14",
+      "nearest_old_id": "d60",
+      "word_jaccard": 0.13114754098360656,
+      "sequence_ratio": 0.2,
+      "new_topic": "dieu_chuyen_vuot_60_ngay",
+      "old_question": "tòa xử sơ thẩm xong tôi không đồng ý thì được kháng cáo trong bao lâu"
+    },
+    {
+      "id": "mh25_15",
+      "nearest_old_id": "d63",
+      "word_jaccard": 0.13333333333333333,
+      "sequence_ratio": 0.18867924528301888,
+      "new_topic": "tam_dinh_chi_khong_ky_luat",
+      "old_question": "tàu cá nhà tôi cứu được một tàu bị nạn ngoài khơi, có được đòi tiền công không"
+    },
+    {
+      "id": "mh25_16",
+      "nearest_old_id": "d04",
+      "word_jaccard": 0.16326530612244897,
+      "sequence_ratio": 0.11003236245954692,
+      "new_topic": "hop_dong_nguoi_ky_khong_du_quyen",
+      "old_question": "công ty tự nhiên bảo mai khỏi đi làm nữa, thế có được không"
+    },
+    {
+      "id": "mh25_17",
+      "nearest_old_id": "d50",
+      "word_jaccard": 0.11428571428571428,
+      "sequence_ratio": 0.23376623376623376,
+      "new_topic": "co_cau_cat_giam_hang_loat",
+      "old_question": "làm cho công ty 5 năm rồi giờ xin nghỉ, công ty có phải trả khoản gì không"
+    },
+    {
+      "id": "mh25_18",
+      "nearest_old_id": "d38",
+      "word_jaccard": 0.13043478260869565,
+      "sequence_ratio": 0.24736842105263157,
+      "new_topic": "dong_pham_hanh_vi_vuot_qua",
+      "old_question": "bố mất để di chúc cho hết người tình, mẹ con tôi không được đồng nào, mà tôi mới 16 tuổi"
+    },
+    {
+      "id": "mh25_19",
+      "nearest_old_id": "d43",
+      "word_jaccard": 0.09090909090909091,
+      "sequence_ratio": 0.1411764705882353,
+      "new_topic": "tu_y_dung_hay_chua_dat",
+      "old_question": "con tôi 16 tuổi tự ý đi mua xe máy trả góp, giờ tôi muốn trả lại được không"
+    },
+    {
+      "id": "mh25_20",
+      "nearest_old_id": "d01",
+      "word_jaccard": 0.109375,
+      "sequence_ratio": 0.23229461756373937,
+      "new_topic": "benh_tam_than_hai_thoi_diem",
+      "old_question": "hôm nay tôi lỡ tông phải một ông già lúc sang đường, không biết có bị sao không"
+    },
+    {
+      "id": "mh25_21",
+      "nearest_old_id": "d33",
+      "word_jaccard": 0.11428571428571428,
+      "sequence_ratio": 0.25806451612903225,
+      "new_topic": "ho_so_gia_giao_dich_vo_hieu",
+      "old_question": "anh trai bị công an bắt, nhà muốn thuê luật sư thì lúc nào luật sư mới được vào"
+    },
+    {
+      "id": "mh25_22",
+      "nearest_old_id": "d62",
+      "word_jaccard": 0.13333333333333333,
+      "sequence_ratio": 0.14501510574018128,
+      "new_topic": "hang_lanh_gioi_han_boi_thuong",
+      "old_question": "đi tàu ra đảo bị mất vali hành lý, hãng tàu có phải đền không"
+    },
+    {
+      "id": "mh25_23",
+      "nearest_old_id": "d59",
+      "word_jaccard": 0.11594202898550725,
+      "sequence_ratio": 0.19672131147540983,
+      "new_topic": "van_don_theo_lenh_chuyen_tiep",
+      "old_question": "bản án phúc thẩm có hiệu lực rồi nhưng tôi vẫn thấy xử sai, còn cách nào không"
+    },
+    {
+      "id": "mh25_24",
+      "nearest_old_id": "d50",
+      "word_jaccard": 0.13114754098360656,
+      "sequence_ratio": 0.19553072625698323,
+      "new_topic": "cam_giu_hang_hai_va_the_chap",
+      "old_question": "làm cho công ty 5 năm rồi giờ xin nghỉ, công ty có phải trả khoản gì không"
+    },
+    {
+      "id": "mh25_25",
+      "nearest_old_id": "d63",
+      "word_jaccard": 0.13333333333333333,
+      "sequence_ratio": 0.2618384401114206,
+      "new_topic": "ton_that_chung_do_loi_hang_tau",
+      "old_question": "tàu cá nhà tôi cứu được một tàu bị nạn ngoài khơi, có được đòi tiền công không"
+    }
+  ],
+  "top_internal_pairs": [
+    {
+      "a": "mh25_08",
+      "b": "mh25_15",
+      "word_jaccard": 0.2692307692307692
+    },
+    {
+      "a": "mh25_10",
+      "b": "mh25_15",
+      "word_jaccard": 0.25316455696202533
+    },
+    {
+      "a": "mh25_08",
+      "b": "mh25_13",
+      "word_jaccard": 0.25
+    },
+    {
+      "a": "mh25_02",
+      "b": "mh25_05",
+      "word_jaccard": 0.2261904761904762
+    },
+    {
+      "a": "mh25_06",
+      "b": "mh25_08",
+      "word_jaccard": 0.21794871794871795
+    },
+    {
+      "a": "mh25_07",
+      "b": "mh25_24",
+      "word_jaccard": 0.21794871794871795
+    },
+    {
+      "a": "mh25_22",
+      "b": "mh25_23",
+      "word_jaccard": 0.21505376344086022
+    },
+    {
+      "a": "mh25_16",
+      "b": "mh25_21",
+      "word_jaccard": 0.20930232558139536
+    },
+    {
+      "a": "mh25_15",
+      "b": "mh25_24",
+      "word_jaccard": 0.20689655172413793
+    },
+    {
+      "a": "mh25_07",
+      "b": "mh25_15",
+      "word_jaccard": 0.20512820512820512
+    }
+  ],
+  "method": "Exact text/gold-set checks + lexical screens + authored topic/fact-pattern review. Similarity is not proof of semantic independence.",
+  "review_status": "Corpus-grounded author review; no independent legal expert sign-off."
+}

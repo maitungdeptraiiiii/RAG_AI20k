@@ -1,0 +1,14 @@
+{
+  "before": {
+    "empty": 0,
+    "full_gold": 54,
+    "mean_blocks": 5.390625,
+    "mean_whitespace_units": 1307.1875
+  },
+  "after": {
+    "empty": 0,
+    "full_gold": 55,
+    "mean_blocks": 5.359375,
+    "mean_whitespace_units": 1311.375
+  }
+}

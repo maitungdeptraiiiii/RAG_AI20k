@@ -1,0 +1,514 @@
+[
+  {
+    "id": "d01",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 31,
+    "final_chunk_count": 31,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d02",
+    "original_articles": 20,
+    "new_articles": 4,
+    "original_chunk_count": 20,
+    "final_chunk_count": 24,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d03",
+    "original_articles": 20,
+    "new_articles": 10,
+    "original_chunk_count": 23,
+    "final_chunk_count": 35,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d04",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 26,
+    "final_chunk_count": 26,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d05",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 25,
+    "final_chunk_count": 25,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d06",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 29,
+    "final_chunk_count": 29,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d07",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 25,
+    "final_chunk_count": 25,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d08",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 22,
+    "final_chunk_count": 22,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d09",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 22,
+    "final_chunk_count": 22,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d10",
+    "original_articles": 20,
+    "new_articles": 4,
+    "original_chunk_count": 20,
+    "final_chunk_count": 27,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d11",
+    "original_articles": 20,
+    "new_articles": 2,
+    "original_chunk_count": 28,
+    "final_chunk_count": 32,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d12",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 23,
+    "final_chunk_count": 23,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d13",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 22,
+    "final_chunk_count": 22,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d14",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 23,
+    "final_chunk_count": 23,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d15",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 20,
+    "final_chunk_count": 20,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d16",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 25,
+    "final_chunk_count": 25,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d17",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 20,
+    "final_chunk_count": 20,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d18",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 30,
+    "final_chunk_count": 30,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d19",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 34,
+    "final_chunk_count": 34,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d20",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 22,
+    "final_chunk_count": 22,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d21",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 24,
+    "final_chunk_count": 24,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d22",
+    "original_articles": 20,
+    "new_articles": 10,
+    "original_chunk_count": 23,
+    "final_chunk_count": 34,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d23",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 25,
+    "final_chunk_count": 25,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d24",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 22,
+    "final_chunk_count": 22,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d25",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 27,
+    "final_chunk_count": 27,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d26",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 25,
+    "final_chunk_count": 25,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d27",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 20,
+    "final_chunk_count": 20,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d28",
+    "original_articles": 20,
+    "new_articles": 2,
+    "original_chunk_count": 37,
+    "final_chunk_count": 40,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d29",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 34,
+    "final_chunk_count": 34,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d30",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 32,
+    "final_chunk_count": 32,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d31",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 25,
+    "final_chunk_count": 25,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d32",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 23,
+    "final_chunk_count": 23,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d33",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 31,
+    "final_chunk_count": 31,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d34",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 33,
+    "final_chunk_count": 33,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d35",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 24,
+    "final_chunk_count": 24,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d36",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 28,
+    "final_chunk_count": 28,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d37",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 20,
+    "final_chunk_count": 20,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d38",
+    "original_articles": 20,
+    "new_articles": 2,
+    "original_chunk_count": 20,
+    "final_chunk_count": 22,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d39",
+    "original_articles": 20,
+    "new_articles": 5,
+    "original_chunk_count": 20,
+    "final_chunk_count": 25,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d40",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 21,
+    "final_chunk_count": 21,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d41",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 20,
+    "final_chunk_count": 20,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d42",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 20,
+    "final_chunk_count": 20,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d43",
+    "original_articles": 20,
+    "new_articles": 2,
+    "original_chunk_count": 22,
+    "final_chunk_count": 25,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d44",
+    "original_articles": 20,
+    "new_articles": 2,
+    "original_chunk_count": 21,
+    "final_chunk_count": 23,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d45",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 21,
+    "final_chunk_count": 21,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d46",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 22,
+    "final_chunk_count": 22,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d47",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 22,
+    "final_chunk_count": 22,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d48",
+    "original_articles": 20,
+    "new_articles": 6,
+    "original_chunk_count": 23,
+    "final_chunk_count": 31,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d49",
+    "original_articles": 20,
+    "new_articles": 3,
+    "original_chunk_count": 21,
+    "final_chunk_count": 25,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d50",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 25,
+    "final_chunk_count": 25,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d51",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 22,
+    "final_chunk_count": 22,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d52",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 23,
+    "final_chunk_count": 23,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d53",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 24,
+    "final_chunk_count": 24,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d54",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 28,
+    "final_chunk_count": 28,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d55",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 25,
+    "final_chunk_count": 25,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d56",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 24,
+    "final_chunk_count": 24,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d57",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 28,
+    "final_chunk_count": 28,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d58",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 29,
+    "final_chunk_count": 29,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d59",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 20,
+    "final_chunk_count": 20,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d60",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 21,
+    "final_chunk_count": 21,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d61",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 25,
+    "final_chunk_count": 25,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d62",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 26,
+    "final_chunk_count": 26,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d63",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 24,
+    "final_chunk_count": 24,
+    "original_pool_and_order_preserved": true
+  },
+  {
+    "id": "d64",
+    "original_articles": 20,
+    "new_articles": 0,
+    "original_chunk_count": 24,
+    "final_chunk_count": 24,
+    "original_pool_and_order_preserved": true
+  }
+]

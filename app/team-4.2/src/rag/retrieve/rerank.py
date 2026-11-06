@@ -2,9 +2,10 @@
 
     RRF top-20 Hit(fused) -> JevReranker -> top-5 Hit(rerank, score = xác suất liên quan [0, 1])
 
-- Mỗi cặp (câu hỏi, chunk) là một câu hỏi Noul "Đoạn văn chứa thông tin trả lời trực tiếp câu hỏi";
+- Mỗi cặp (câu hỏi, chunk) được Noul chấm mức hỗ trợ ít nhất một phần quan trọng của câu hỏi;
   các cặp gọi song song bằng thread.
-- Cache điểm trong SQLite theo (model, câu hỏi, chunk_id, text chunk).
+- Cache điểm trong SQLite theo phiên bản schema, model, toàn bộ instructions/state và chunk_id.
+  Khoá legacy được giữ cho audit offline; live scoring không dùng lại điểm legacy.
 - Hoà điểm thì xếp theo rank RRF cũ, để kết quả tất định.
 - Được bọc trong FallbackReranker: lỗi API / mạng -> giữ nguyên thứ tự RRF (Hit vẫn arm="fused"),
   demo không bị crash và guardrail tự dùng ngưỡng RRF.
@@ -16,6 +17,7 @@ trên máy chưa cài SDK. Key đọc từ biến môi trường TYPESAFE_API_KE
 from __future__ import annotations
 
 import hashlib
+import json
 import logging
 import sqlite3
 import threading
@@ -29,7 +31,16 @@ from rag.schema import Chunk, Hit, Reranker
 log = logging.getLogger(__name__)
 
 DEFAULT_JEV_MODEL = "jev-1.13.0"            # chốt version, KHÔNG dùng "jev-latest"
-JEV_INSTRUCTIONS = "Đoạn văn chứa thông tin trả lời trực tiếp câu hỏi"
+JEV_INSTRUCTIONS = (
+    "Đoạn văn cung cấp bằng chứng cụ thể để trả lời ít nhất một phần quan trọng của câu hỏi. "
+    "Bằng chứng phải phù hợp với chủ thể, hành vi, đối tượng và các điều kiện đã nêu trong câu hỏi. "
+    "Đoạn văn có thể làm rõ một điều kiện áp dụng, quyền hoặc nghĩa vụ, hậu quả hoặc biện pháp "
+    "giải quyết thuộc vấn đề thực sự được hỏi; không cần trả lời toàn bộ các ý của câu hỏi. "
+    "Một đoạn chỉ trùng chủ đề hoặc từ khóa, nhưng không cung cấp căn cứ cho bất kỳ phần quan "
+    "trọng nào, không được xem là có bằng chứng. Không tự thêm dữ kiện hoặc giả định điều kiện "
+    "chưa được nêu để làm cho đoạn văn trở nên phù hợp."
+)
+SCORE_CACHE_SCHEMA = "jev-full-input-v2"
 
 BACKENDS = ("none", "jev")
 
@@ -62,8 +73,17 @@ class ScoreCache:
             self._conn.close()
 
     @staticmethod
-    def key(model_id: str, query: str, chunk: Chunk) -> str:
-        raw = "\x00".join((model_id, query, chunk.chunk_id, chunk.text))
+    def key(
+        model_id: str, query: str, chunk: Chunk, *,
+        instructions: str | None = None, state: str | None = None,
+    ) -> str:
+        # The three-argument legacy form is retained for offline historical audits.
+        # Live scoring MUST supply the exact instructions and state sent to Jev.
+        if instructions is None and state is None:
+            raw = "\x00".join((model_id, query, chunk.chunk_id, chunk.text))
+        else:
+            raw = json.dumps([SCORE_CACHE_SCHEMA, model_id, instructions, state, chunk.chunk_id],
+                             ensure_ascii=False, separators=(",", ":"))
         return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
     def get_many(self, keys: Sequence[str]) -> dict[str, float]:
@@ -139,7 +159,8 @@ class JevReranker:
     def _scores_with_cache(self, query: str, cands: list[Chunk]) -> list[float]:
         if self.cache is None:
             return self.score_pairs(query, cands)
-        keys = [ScoreCache.key(self.model_id, query, c) for c in cands]
+        keys = [ScoreCache.key(self.model_id, query, c, instructions=self.instructions,
+                               state=self.build_state(query, c)) for c in cands]
         found = self.cache.get_many(keys)
         todo = [i for i, key in enumerate(keys) if key not in found]
         if todo:

@@ -1,0 +1,53 @@
+{
+  "checkpoint_commit": "27b361c",
+  "question_count": 64,
+  "pool_and_queries_unchanged": 64,
+  "new_cache_pairs_verified": 1629,
+  "baseline_execution": false,
+  "errors": 0,
+  "fallbacks": 0,
+  "changes_vs_checkpoint": {
+    "recall@5": {
+      "improved": [
+        "d02",
+        "d17",
+        "d18",
+        "d22"
+      ],
+      "worse": [
+        "d10"
+      ],
+      "delta": 0.028645833333333332
+    },
+    "hit@5": {
+      "improved": [
+        "d17",
+        "d18"
+      ],
+      "worse": [],
+      "delta": 0.03125
+    },
+    "mrr@5": {
+      "improved": [
+        "d01",
+        "d04",
+        "d16",
+        "d17",
+        "d18",
+        "d22",
+        "d26",
+        "d36",
+        "d40",
+        "d60"
+      ],
+      "worse": [
+        "d02",
+        "d50",
+        "d52",
+        "d58"
+      ],
+      "delta": 0.04609375
+    }
+  },
+  "rerank_source_sha256": "9e6fae36fb458057d177802cf5a58ab20f51b48d1e19c81db438bbbee5ed7a6c"
+}

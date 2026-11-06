@@ -1,0 +1,386 @@
+[
+  {
+    "id": "d01",
+    "original": "hôm nay tôi lỡ tông phải một ông già lúc sang đường, không biết có bị sao không",
+    "rewrite": "Hôm nay tôi lỡ tông phải một người đàn ông lớn tuổi khi ông ấy sang đường, chưa biết ông ấy có bị thương hay không; tôi có thể phải chịu trách nhiệm pháp lý gì tùy theo hậu quả thực tế?",
+    "error": null
+  },
+  {
+    "id": "d02",
+    "original": "tôi lỡ tay đẩy người ta xuống vực, có đến nhà bố mẹ họ xin lỗi rồi có sao không",
+    "rewrite": "Nếu tôi lỡ tay đẩy một người xuống vực, tôi có thể phải chịu trách nhiệm gì tùy hậu quả thực tế, và việc đến nhà bố mẹ người đó xin lỗi có ảnh hưởng gì đến trách nhiệm pháp lý của tôi không?",
+    "error": null
+  },
+  {
+    "id": "d03",
+    "original": "thằng em tôi nhậu xong đánh nhau ngoài quán, bên kia phải khâu mấy mũi, giờ công an gọi lên làm việc",
+    "rewrite": "Em trai tôi nhậu xong đánh nhau bên ngoài quán, người bên kia phải khâu mấy mũi và công an gọi em tôi lên làm việc; em tôi có thể phải chịu trách nhiệm pháp lý nào và cần lưu ý gì khi làm việc với công an?",
+    "error": null
+  },
+  {
+    "id": "d04",
+    "original": "công ty tự nhiên bảo mai khỏi đi làm nữa, thế có được không",
+    "rewrite": "Công ty đột ngột bảo tôi từ ngày mai không cần đi làm nữa thì việc đó có đúng quy định pháp luật không?",
+    "error": null
+  },
+  {
+    "id": "d05",
+    "original": "công ty nợ lương mấy tháng rồi, giờ em nghỉ ngang luôn có bị sao không",
+    "rewrite": "Khi công ty nợ lương mấy tháng, nếu người lao động nghỉ việc ngay không báo trước thì có thể phát sinh hậu quả pháp lý hoặc ảnh hưởng quyền lợi gì?",
+    "error": null
+  },
+  {
+    "id": "d06",
+    "original": "đang bầu mà bị công ty cho nghỉ việc, chị có làm gì được không",
+    "rewrite": "Người lao động đang mang thai bị công ty cho nghỉ việc có thể làm gì để bảo vệ quyền lợi?",
+    "error": null
+  },
+  {
+    "id": "d07",
+    "original": "tháng nào cũng phải ở lại làm tới 9-10h tối mà chẳng thấy thêm đồng nào",
+    "rewrite": "Người lao động tháng nào cũng phải ở lại làm việc đến 9-10 giờ tối nhưng không được trả thêm tiền thì có quyền được trả lương làm thêm giờ không?",
+    "error": null
+  },
+  {
+    "id": "d08",
+    "original": "cho đứa bạn mượn 50 triệu giờ nó chặn hết liên lạc rồi",
+    "rewrite": "Tôi cho bạn mượn 50 triệu nhưng hiện người đó đã chặn mọi liên lạc; tôi có thể làm gì để yêu cầu trả khoản tiền này và xử lý theo quy định pháp luật?",
+    "error": null
+  },
+  {
+    "id": "d09",
+    "original": "chuyển khoản cọc mua hàng trên mạng xong bị block luôn",
+    "rewrite": "Sau khi chuyển khoản tiền đặt cọc mua hàng trên mạng, bên nhận tiền chặn liên lạc; tôi có thể làm gì để yêu cầu hoàn tiền và xác định trách nhiệm pháp lý?",
+    "error": null
+  },
+  {
+    "id": "d10",
+    "original": "mẹ mất rồi mà sổ đỏ vẫn đứng tên mẹ, mấy anh em đang cãi nhau",
+    "rewrite": "Mẹ đã mất, giấy chứng nhận quyền sử dụng đất vẫn đứng tên mẹ và các anh chị em đang tranh chấp; việc xác định quyền thừa kế, phân chia quyền sử dụng đất và làm thủ tục sang tên được giải quyết như thế nào?",
+    "error": null
+  },
+  {
+    "id": "d11",
+    "original": "tối qua chồng tôi bị công an đến nhà bắt đi, giờ chẳng ai báo gì cho gia đình cả",
+    "rewrite": "Tối qua, công an đến nhà đưa chồng tôi đi nhưng đến nay gia đình chưa nhận được thông báo; gia đình có quyền yêu cầu cung cấp thông tin về nơi chồng tôi đang ở và lý do đưa đi không, và cần làm gì?",
+    "error": null
+  },
+  {
+    "id": "d12",
+    "original": "con tôi mới 13 tuổi, đi lấy trộm xe đạp bị người ta bắt được",
+    "rewrite": "Con tôi mới 13 tuổi, bị người ta bắt khi đi lấy trộm xe đạp; ở độ tuổi này, hành vi đó có thể bị xử lý như thế nào theo pháp luật?",
+    "error": null
+  },
+  {
+    "id": "d13",
+    "original": "nhà bên cạnh đang xây, tường nhà tôi nứt hết cả rồi",
+    "rewrite": "Khi nhà bên cạnh đang xây dựng và tường nhà tôi bị nứt hết, việc xác định trách nhiệm và yêu cầu khắc phục, bồi thường được thực hiện như thế nào?",
+    "error": null
+  },
+  {
+    "id": "d14",
+    "original": "con chó nhà tôi sổng ra cắn đứa nhỏ hàng xóm",
+    "rewrite": "Khi con chó nhà tôi sổng ra cắn đứa nhỏ hàng xóm, trách nhiệm và việc bồi thường được xác định như thế nào tùy theo hậu quả thực tế?",
+    "error": null
+  },
+  {
+    "id": "d15",
+    "original": "bị đứa kia lên facebook bịa chuyện nói xấu, nhục không chịu được",
+    "rewrite": "Khi một người đăng trên Facebook chuyện bịa đặt, nói xấu tôi khiến tôi cảm thấy nhục nhã, người đó có thể phải chịu trách nhiệm pháp lý nào và tôi có thể yêu cầu biện pháp khắc phục gì?",
+    "error": null
+  },
+  {
+    "id": "d16",
+    "original": "nhặt được cái ví ngoài đường, giữ luôn có sao không",
+    "rewrite": "Người nhặt được ví ngoài đường rồi giữ luôn có thể phải chịu trách nhiệm pháp lý gì?",
+    "error": null
+  },
+  {
+    "id": "d17",
+    "original": "tối qua say quá đập vỡ đồ của quán, sáng ra họ đòi đền",
+    "rewrite": "Tối qua, khi say, tôi đập vỡ đồ của quán; sáng ra quán yêu cầu tôi bồi thường. Tôi có trách nhiệm bồi thường như thế nào?",
+    "error": null
+  },
+  {
+    "id": "d18",
+    "original": "tòa gửi giấy gọi lên mà tôi bận không đi được thì sao",
+    "rewrite": "Khi nhận được giấy của Tòa án yêu cầu có mặt nhưng bận không thể đến, tôi cần làm gì và có thể phát sinh hậu quả pháp lý nào?",
+    "error": null
+  },
+  {
+    "id": "d19",
+    "original": "vợ ôm con về ngoại cả năm nay rồi, giờ muốn làm đơn ly hôn thì nộp ở đâu",
+    "rewrite": "vợ ôm con về ngoại cả năm nay rồi, giờ muốn làm đơn ly hôn thì nộp ở đâu",
+    "error": "ValueError: rewrite failed; original query used"
+  },
+  {
+    "id": "d20",
+    "original": "chồng tôi đi làm trên tàu, hết hợp đồng mà chủ tàu bỏ ở nước ngoài không lo cho về",
+    "rewrite": "Chồng tôi đi làm trên tàu, khi hết hợp đồng thì chủ tàu bỏ chồng tôi ở nước ngoài và không lo cho về; chủ tàu có trách nhiệm gì và chồng tôi có thể yêu cầu hỗ trợ, giải quyết như thế nào?",
+    "error": null
+  },
+  {
+    "id": "d21",
+    "original": "thằng con trai tôi 18 tuổi yêu đứa con gái 15 tuổi, hai đứa tự nguyện ngủ với nhau, giờ bố mẹ bé gái đòi báo công an",
+    "rewrite": "Con trai tôi 18 tuổi có quan hệ tình dục tự nguyện với bé gái 15 tuổi; nay bố mẹ bé gái đòi báo công an. Trường hợp này có thể phát sinh trách nhiệm pháp lý nào?",
+    "error": null
+  },
+  {
+    "id": "d22",
+    "original": "ông hàng xóm say rượu cầm dao sang chửi, tôi lấy gậy đánh lại gãy tay ông ấy, giờ ổng đòi kiện",
+    "rewrite": "Khi ông hàng xóm say rượu, cầm dao sang chửi và tôi dùng gậy đánh lại khiến ông ấy gãy tay, tôi có thể phải chịu trách nhiệm pháp lý gì và cần xử lý thế nào khi ông ấy đòi kiện?",
+    "error": null
+  },
+  {
+    "id": "d23",
+    "original": "đi đường thấy người ta bị tai nạn nằm đó mà sợ liên lụy nên đi luôn, có sao không",
+    "rewrite": "Người đi đường thấy người khác bị tai nạn nằm đó nhưng vì sợ liên lụy nên bỏ đi, có thể phải chịu trách nhiệm pháp lý gì không?",
+    "error": null
+  },
+  {
+    "id": "d24",
+    "original": "tối nào mấy ông trong xóm cũng tụ tập đánh bài ăn tiền, công an ập vào thì có bị gì không",
+    "rewrite": "Nếu tối nào một số người trong xóm cũng tụ tập đánh bài ăn tiền và bị công an phát hiện, họ có thể phải chịu trách nhiệm gì tùy theo tình tiết vụ việc?",
+    "error": null
+  },
+  {
+    "id": "d25",
+    "original": "đang đi thì bị thằng kia rút dao kề cổ bắt đưa điện thoại",
+    "rewrite": "Khi đang đi, một người rút dao kề cổ và bắt đưa điện thoại, hành vi này có dấu hiệu vi phạm pháp luật gì và có thể bị xử lý như thế nào?",
+    "error": null
+  },
+  {
+    "id": "d26",
+    "original": "cháu tôi 17 tuổi đi trộm điện thoại của người ta bị bắt, liệu có phải đi tù không",
+    "rewrite": "Cháu tôi 17 tuổi bị bắt vì bị nghi trộm điện thoại của người khác thì có thể phải chấp hành hình phạt tù không?",
+    "error": null
+  },
+  {
+    "id": "d27",
+    "original": "chồng tôi cứ say là về đánh chửi vợ con, mấy năm nay rồi",
+    "rewrite": "Chồng tôi cứ say là về nhà đánh, chửi vợ con suốt mấy năm nay; hành vi này có thể được xác định là bạo lực gia đình và bị xử lý như thế nào, gia đình có thể yêu cầu cơ quan nào can thiệp?",
+    "error": null
+  },
+  {
+    "id": "d28",
+    "original": "uống mấy lon bia xong chạy xe va vào người ta, hoảng quá nên bỏ chạy luôn",
+    "rewrite": "Sau khi uống mấy lon bia, chạy xe va vào người khác rồi hoảng sợ bỏ chạy, người điều khiển có thể phải chịu trách nhiệm pháp lý và khắc phục thế nào, tùy hậu quả thực tế?",
+    "error": null
+  },
+  {
+    "id": "d29",
+    "original": "bạn rủ chở hộ một bọc hàng lên biên giới trả 5 triệu, đến nơi mới biết là ma túy",
+    "rewrite": "Nếu bạn được một người bạn rủ chở hộ một bọc hàng lên biên giới, được trả 5 triệu và đến nơi mới biết đó là ma túy, thì có thể phải chịu trách nhiệm pháp lý như thế nào?",
+    "error": null
+  },
+  {
+    "id": "d30",
+    "original": "bố tôi gần 80 tuổi, bệnh nặng, vừa bị tòa tuyên án tù, có xin lùi ngày đi tù được không",
+    "rewrite": "Bố tôi gần 80 tuổi, mắc bệnh nặng và vừa bị Tòa án tuyên phạt tù; có thể xin hoãn chấp hành hình phạt tù không?",
+    "error": null
+  },
+  {
+    "id": "d31",
+    "original": "lần đầu vi phạm, tội cũng nhẹ, nhà có con nhỏ, có xin được không phải ngồi tù không",
+    "rewrite": "Nếu phạm tội lần đầu, hành vi được cho là nhẹ và gia đình có con nhỏ, có thể được xem xét để không phải chấp hành hình phạt tù hay không?",
+    "error": null
+  },
+  {
+    "id": "d32",
+    "original": "cho vay lấy lãi 5 nghìn một triệu một ngày thì có bị sao không",
+    "rewrite": "cho vay lấy lãi 5 nghìn một triệu một ngày thì có bị sao không",
+    "error": "ValueError: rewrite failed; original query used"
+  },
+  {
+    "id": "d33",
+    "original": "anh trai bị công an bắt, nhà muốn thuê luật sư thì lúc nào luật sư mới được vào",
+    "rewrite": "Anh trai tôi bị công an bắt, gia đình muốn thuê luật sư thì từ thời điểm nào luật sư được vào gặp anh ấy?",
+    "error": null
+  },
+  {
+    "id": "d34",
+    "original": "em tôi bị tạm giam mấy tháng rồi vẫn chưa thấy đưa ra xử, giam vậy tối đa bao lâu",
+    "rewrite": "Em tôi đã bị tạm giam mấy tháng nhưng chưa được đưa ra xét xử; thời hạn tạm giam tối đa trong trường hợp này là bao lâu?",
+    "error": null
+  },
+  {
+    "id": "d35",
+    "original": "đánh nhau bị thương nhẹ, giờ hai bên làm lành rồi, tôi rút đơn thì vụ án có dừng không",
+    "rewrite": "Khi hai bên đánh nhau và có người bị thương nhẹ, nay đã làm lành, nếu tôi rút đơn thì vụ án có được đình chỉ không?",
+    "error": null
+  },
+  {
+    "id": "d36",
+    "original": "tòa vừa xử bố tôi 3 năm tù mà gia đình thấy nặng quá, giờ làm sao",
+    "rewrite": "Tòa vừa tuyên bố bố tôi bị phạt 3 năm tù, gia đình cho rằng mức án quá nặng thì có thể làm gì để đề nghị xem xét lại bản án?",
+    "error": null
+  },
+  {
+    "id": "d37",
+    "original": "đặt cọc 100 triệu mua nhà rồi mà bên bán lại đổi ý không bán nữa",
+    "rewrite": "Trong trường hợp đã đặt cọc 100 triệu đồng để mua nhà nhưng bên bán đổi ý không bán nữa, bên mua có quyền yêu cầu xử lý tiền đặt cọc như thế nào?",
+    "error": null
+  },
+  {
+    "id": "d38",
+    "original": "bố mất để di chúc cho hết người tình, mẹ con tôi không được đồng nào, mà tôi mới 16 tuổi",
+    "rewrite": "Bố tôi mất, di chúc để lại toàn bộ tài sản cho người tình và không để lại phần nào cho mẹ con tôi; tôi mới 16 tuổi thì mẹ con tôi có quyền được hưởng di sản không?",
+    "error": null
+  },
+  {
+    "id": "d39",
+    "original": "ông nội trước khi mất có nói miệng là cho tôi mảnh đất, mấy chú có cãi được không",
+    "rewrite": "Ông nội trước khi mất nói miệng rằng cho tôi mảnh đất; lời nói này có làm phát sinh quyền nhận đất của tôi không và các chú tôi có thể tranh chấp việc đó không?",
+    "error": null
+  },
+  {
+    "id": "d40",
+    "original": "mua điện thoại về được 3 hôm thì hỏng, cửa hàng không chịu đổi cũng không sửa",
+    "rewrite": "Sau khi mua điện thoại được 3 hôm thì điện thoại bị hỏng, cửa hàng không chịu đổi hoặc sửa; người mua có quyền yêu cầu gì và giải quyết như thế nào?",
+    "error": null
+  },
+  {
+    "id": "d41",
+    "original": "cây nhà hàng xóm mọc lấn sang nhà tôi, rễ đâm nứt cả sân",
+    "rewrite": "Khi cây của hàng xóm mọc lấn sang nhà tôi và rễ cây làm nứt sân, tôi có thể yêu cầu chủ cây xử lý, khắc phục thiệt hại và bồi thường như thế nào?",
+    "error": null
+  },
+  {
+    "id": "d42",
+    "original": "nhà tôi ở trong ngõ, nhà phía ngoài xây tường chặn mất lối đi ra đường",
+    "rewrite": "Nhà tôi ở phía trong ngõ, nhà phía ngoài xây tường chặn lối đi ra đường; quyền về lối đi qua trong trường hợp này được xác định thế nào và tôi có thể yêu cầu giải quyết ra sao?",
+    "error": null
+  },
+  {
+    "id": "d43",
+    "original": "con tôi 16 tuổi tự ý đi mua xe máy trả góp, giờ tôi muốn trả lại được không",
+    "rewrite": "Con tôi 16 tuổi tự ý mua xe máy trả góp, tôi có thể yêu cầu trả lại xe hay không?",
+    "error": null
+  },
+  {
+    "id": "d44",
+    "original": "chồng mất không để lại di chúc, nhà hai vợ chồng mua chung thì chia thế nào",
+    "rewrite": "Chồng mất không để lại di chúc, nhà do hai vợ chồng mua chung thì phần nhà được phân chia như thế nào?",
+    "error": null
+  },
+  {
+    "id": "d45",
+    "original": "bị cửa hàng lấy ảnh mình đăng quảng cáo trên facebook mà không xin phép",
+    "rewrite": "Cửa hàng sử dụng hình ảnh của tôi để đăng quảng cáo trên Facebook khi chưa xin phép thì có được phép không và tôi có thể yêu cầu xử lý, khắc phục như thế nào?",
+    "error": null
+  },
+  {
+    "id": "d46",
+    "original": "ký hợp đồng thi công mà chậm mấy ngày bị đòi phạt 30% giá trị, vậy có đúng luật không",
+    "rewrite": "Khi ký hợp đồng thi công, nếu chậm mấy ngày và bị yêu cầu phạt 30% giá trị hợp đồng thì yêu cầu này có phù hợp pháp luật không?",
+    "error": null
+  },
+  {
+    "id": "d47",
+    "original": "nhặt được con chó lạc giữ nuôi cả năm, giờ chủ cũ đến đòi",
+    "rewrite": "Nhặt được con chó đi lạc và giữ nuôi cả năm, nay chủ cũ đến đòi lại thì quyền và nghĩa vụ của người nhặt được được xác định như thế nào?",
+    "error": null
+  },
+  {
+    "id": "d48",
+    "original": "đi xin việc công ty bắt nộp bằng đại học bản gốc, nghỉ mới trả",
+    "rewrite": "Công ty yêu cầu người xin việc nộp bằng đại học bản gốc và chỉ trả lại khi nghỉ việc thì việc yêu cầu, giữ bằng như vậy có đúng quy định pháp luật không?",
+    "error": null
+  },
+  {
+    "id": "d49",
+    "original": "thử việc 3 tháng mà công ty chỉ trả có 70% lương",
+    "rewrite": "Công ty chỉ trả 70% tiền lương trong thời gian thử việc 3 tháng có đúng quy định không?",
+    "error": null
+  },
+  {
+    "id": "d50",
+    "original": "làm cho công ty 5 năm rồi giờ xin nghỉ, công ty có phải trả khoản gì không",
+    "rewrite": "Người lao động làm việc cho công ty 5 năm, nay xin nghỉ việc thì công ty có phải thanh toán khoản tiền nào không?",
+    "error": null
+  },
+  {
+    "id": "d51",
+    "original": "đi muộn mấy lần bị công ty trừ thẳng vào lương",
+    "rewrite": "Công ty có được trừ trực tiếp vào tiền lương của người lao động do đi muộn không, và việc này có phụ thuộc vào số lần đi muộn hay không?",
+    "error": null
+  },
+  {
+    "id": "d52",
+    "original": "em 15 tuổi muốn đi làm phụ quán cà phê dịp hè được không",
+    "rewrite": "Người 15 tuổi có được làm phụ quán cà phê trong dịp hè không?",
+    "error": null
+  },
+  {
+    "id": "d53",
+    "original": "sếp hay sờ mó, nói chuyện bậy với em ở công ty, em muốn nghỉ luôn",
+    "rewrite": "Sếp thường xuyên sờ mó và nói chuyện tục tĩu với tôi tại công ty; hành vi này có được xem là quấy rối tình dục tại nơi làm việc không, và tôi có được nghỉ việc ngay mà không cần báo trước không?",
+    "error": null
+  },
+  {
+    "id": "d54",
+    "original": "vợ sắp đẻ, công ty cho nghỉ được mấy tháng",
+    "rewrite": "Vợ sắp sinh, người chồng được nghỉ việc bao lâu theo quy định?",
+    "error": null
+  },
+  {
+    "id": "d55",
+    "original": "mẹ mất, xin nghỉ mấy ngày mà công ty bảo phải nghỉ không lương",
+    "rewrite": "Khi mẹ mất, người lao động được nghỉ bao nhiêu ngày và có được hưởng lương không nếu công ty yêu cầu nghỉ không hưởng lương?",
+    "error": null
+  },
+  {
+    "id": "d56",
+    "original": "muốn kiện mà không có tiền, đi kiện có phải đóng tiền trước không",
+    "rewrite": "Người muốn khởi kiện nhưng không có tiền có phải nộp tiền tạm ứng án phí trước khi Tòa án giải quyết vụ án không?",
+    "error": null
+  },
+  {
+    "id": "d57",
+    "original": "người nợ tiền tôi đang sống ở nước ngoài, giờ muốn kiện thì nộp đơn ở đâu",
+    "rewrite": "Người nợ tiền tôi đang sống ở nước ngoài, nếu muốn khởi kiện đòi nợ thì nộp đơn tại Tòa án nào?",
+    "error": null
+  },
+  {
+    "id": "d58",
+    "original": "nộp đơn kiện lên tòa rồi mà tòa trả lại đơn",
+    "rewrite": "Sau khi nộp đơn khởi kiện, Tòa án trả lại đơn thì người khởi kiện có thể làm gì?",
+    "error": null
+  },
+  {
+    "id": "d59",
+    "original": "bản án phúc thẩm có hiệu lực rồi nhưng tôi vẫn thấy xử sai, còn cách nào không",
+    "rewrite": "Sau khi bản án phúc thẩm đã có hiệu lực pháp luật, nếu tôi cho rằng việc xét xử có sai sót thì còn thủ tục hoặc biện pháp pháp lý nào để đề nghị xem xét lại không?",
+    "error": null
+  },
+  {
+    "id": "d60",
+    "original": "tòa xử sơ thẩm xong tôi không đồng ý thì được kháng cáo trong bao lâu",
+    "rewrite": "Sau khi Tòa án xét xử sơ thẩm, nếu không đồng ý với kết quả xét xử thì thời hạn kháng cáo là bao lâu?",
+    "error": null
+  },
+  {
+    "id": "d61",
+    "original": "chồng tôi làm thuyền viên bị tai nạn trên tàu, chủ tàu có phải lo không",
+    "rewrite": "Khi chồng tôi là thuyền viên bị tai nạn trên tàu, chủ tàu có trách nhiệm gì trong việc hỗ trợ và xử lý vụ việc?",
+    "error": null
+  },
+  {
+    "id": "d62",
+    "original": "đi tàu ra đảo bị mất vali hành lý, hãng tàu có phải đền không",
+    "rewrite": "Khi hành khách đi tàu ra đảo bị mất vali hành lý, hãng tàu có trách nhiệm bồi thường không?",
+    "error": null
+  },
+  {
+    "id": "d63",
+    "original": "tàu cá nhà tôi cứu được một tàu bị nạn ngoài khơi, có được đòi tiền công không",
+    "rewrite": "Khi tàu cá của gia đình tôi cứu được một tàu bị nạn ngoài khơi, tàu cá có được yêu cầu trả tiền công cứu hộ hay không?",
+    "error": null
+  },
+  {
+    "id": "d64",
+    "original": "hai tàu đâm vào nhau ngoài biển thì bên nào phải đền",
+    "rewrite": "Khi hai tàu va chạm ngoài biển, bên nào phải chịu trách nhiệm bồi thường thiệt hại?",
+    "error": null
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "questions": 64,
+  "source_pool_replayed_exactly": 64,
+  "saved_reference_metrics_recomputed_exactly": 64,
+  "same_jev_scores_and_merged_ids": true,
+  "anchors_preserved": true,
+  "candidate_recall_preserved": true,
+  "promoted_hits_pass_min_p": true,
+  "cached_dense_branch_searches": 165,
+  "full_input_cache_pairs_found": 1774,
+  "score_cache_snapshot_sha256": "d325381990d829204314af431c68380e326213a538832484bbdbddf64786f164",
+  "network_forbidden": true,
+  "model_api_calls": 0,
+  "baseline_execution": false,
+  "parameter_sweep": false
+}

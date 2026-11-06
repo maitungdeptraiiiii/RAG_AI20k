@@ -375,11 +375,62 @@ async def handle_view_doc(request: Request) -> Response:
     return _render_doc_html(clean_title, filename, content, chunks_count=chunks_count or None)
 
 
+async def handle_doc_content(request: Request) -> JSONResponse:
+    """Trả về nội dung văn bản dưới dạng JSON để Canvas frontend highlight trích dẫn."""
+    filename = request.path_params.get("filename", "").strip()
+    if not filename:
+        return JSONResponse({"error": "Tên tài liệu không hợp lệ"}, status_code=400)
+
+    is_link = filename.startswith("http://") or filename.startswith("https://")
+    pipeline, settings = get_pipeline()
+
+    clean_title = filename.replace(".txt", "").replace(".md", "").replace(".pdf", "").replace(".docx", "")
+    clean_title = clean_title.replace("bo_luat_", "Bộ luật ").replace("luat_", "Luật ").replace("_", " ").title()
+
+    matching_chunks = [c for c in pipeline.store.all() if c.source == filename]
+
+    content = ""
+    if not is_link:
+        candidates = [
+            settings.data_dir / "raw" / filename,
+            Path("data/team-4.2/raw") / filename,
+            settings.data_dir / filename,
+            Path("data/team-4.2") / filename,
+        ]
+        target: Path | None = None
+        for c in candidates:
+            if c.exists() and c.is_file():
+                target = c
+                break
+        if not target:
+            for f in Path("data/team-4.2").rglob(filename):
+                if f.is_file():
+                    target = f
+                    break
+        if target and target.suffix.lower() != ".pdf":
+            try:
+                content = target.read_text(encoding="utf-8", errors="replace")
+            except Exception:
+                pass
+
+    if not content and matching_chunks:
+        content = "\n\n".join(c.text for c in matching_chunks)
+
+    return JSONResponse({
+        "source": filename,
+        "title": clean_title,
+        "content": content,
+        "is_url": is_link,
+        "n_chunks": len(matching_chunks),
+    })
+
+
 routes = [
     Route("/", handle_index, methods=["GET"]),
     Route("/api/info", handle_info, methods=["GET"]),
     Route("/api/chat", handle_chat, methods=["POST"]),
     Route("/api/ingest", handle_ingest, methods=["POST"]),
+    Route("/api/doc_content/{filename:path}", handle_doc_content, methods=["GET"]),
     Route("/doc/{filename:path}", handle_view_doc, methods=["GET"]),
 ]
 

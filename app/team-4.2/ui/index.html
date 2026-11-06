@@ -141,6 +141,26 @@
       font-size: 10.5px;
     }
 
+    /* Active Citation Pill when Canvas is open */
+    .chatgpt-cite-pill.active-canvas-pill {
+      background-color: #18181b !important;
+      color: #ffffff !important;
+      border-color: #18181b !important;
+      box-shadow: 0 0 0 2px rgba(24, 24, 27, 0.25);
+    }
+    .chatgpt-cite-pill.active-canvas-pill .pill-dot {
+      background-color: #34d399 !important;
+    }
+    .chatgpt-cite-pill.active-canvas-pill .pill-more {
+      color: #d4d4d8 !important;
+    }
+
+    /* Active Citation in Canvas */
+    #active-citation-highlight {
+      scroll-margin-top: 120px;
+      scroll-margin-bottom: 120px;
+    }
+
     /* Pulsing dots loading animation */
     @keyframes pulse-dot {
       0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
@@ -415,6 +435,63 @@
     </div>
 
   </main>
+
+  <!-- ==================== CHATGPT CANVAS DRAWER (Right Sliding Side Panel) ==================== -->
+  <aside id="chatgpt-canvas" class="fixed top-0 right-0 h-full w-[540px] max-w-[94vw] bg-white border-l border-neutral-200/90 shadow-[-16px_0_48px_rgba(0,0,0,0.12)] z-50 flex flex-col transform translate-x-full transition-transform duration-300 ease-in-out select-text">
+    <!-- Canvas Header -->
+    <div class="px-5 py-3.5 border-b border-neutral-200/80 bg-white/95 backdrop-blur-sm flex items-center justify-between flex-shrink-0">
+      <div class="flex items-center space-x-2.5 min-w-0 pr-2">
+        <span id="canvas-badge" class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-teal-50 text-teal-800 border border-teal-200 flex-shrink-0">
+          [1]
+        </span>
+        <div class="min-w-0">
+          <h3 id="canvas-doc-title" class="text-[14px] font-semibold text-neutral-900 truncate leading-snug">
+            Bộ luật Dân sự 2015
+          </h3>
+          <p id="canvas-doc-subtitle" class="text-[11.5px] text-neutral-500 truncate leading-tight">
+            Điều 429 · Thời hiệu khởi kiện
+          </p>
+        </div>
+      </div>
+      
+      <!-- Top Action Controls -->
+      <div class="flex items-center space-x-1 flex-shrink-0">
+        <button id="canvas-jump-btn" onclick="jumpToCitationHighlight()" class="p-1.5 text-neutral-500 hover:text-amber-700 hover:bg-neutral-100 rounded-lg transition-colors flex items-center space-x-1 text-[11.5px] font-medium" title="Cuộn đến đoạn trích dẫn được tô sáng">
+          <svg class="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+          </svg>
+          <span class="hidden sm:inline">Trích dẫn</span>
+        </button>
+
+        <a id="canvas-tab-btn" href="#" target="_blank" rel="noopener noreferrer" class="p-1.5 text-neutral-500 hover:text-blue-600 hover:bg-neutral-100 rounded-lg transition-colors flex items-center space-x-1 text-[11.5px] font-medium" title="Mở toàn văn tài liệu trong tab mới">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+          <span class="hidden sm:inline" id="canvas-tab-text">Toàn văn</span>
+        </a>
+
+        <button onclick="closeCanvas()" class="p-1.5 text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors" title="Đóng Canvas (Esc)">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Subheader Indicator banner -->
+    <div class="px-5 py-2 bg-[#f8f9fa] border-b border-neutral-200/60 flex items-center justify-between text-[11.5px] text-neutral-500 flex-shrink-0">
+      <div class="flex items-center space-x-1.5 min-w-0 pr-2">
+        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse flex-shrink-0"></span>
+        <span id="canvas-indicator-text" class="truncate">Đoạn căn cứ trích dẫn đã được tô sáng màu vàng bên dưới</span>
+      </div>
+      <span id="canvas-score-badge" class="text-teal-700 font-medium flex-shrink-0">Độ khớp cao</span>
+    </div>
+
+    <!-- Canvas Body Content (Scrollable) -->
+    <div id="canvas-body" class="flex-1 overflow-y-auto p-6 text-[13.5px] leading-relaxed text-neutral-800 space-y-4 font-sans select-text">
+      <!-- Loading or content inserted here -->
+    </div>
+  </aside>
 
   <!-- ==================== CHATGPT HOVER / CLICK CITATION POPOVER ==================== -->
   <div id="chatgpt-popover" class="fixed z-50 hidden bg-white rounded-2xl shadow-float border border-neutral-200/90 p-4 w-[360px] text-left space-y-3 transition-opacity duration-150 select-text">
@@ -986,8 +1063,8 @@
 
         return `
           <button type="button" 
-            onclick="triggerCitePopover(event, '${chunkId}', '${firstNum}')" 
-            onmouseenter="triggerCitePopover(event, '${chunkId}', '${firstNum}')" 
+            onclick="handleCitationClick(event, '${chunkId}', '${firstNum}')" 
+            onmouseenter="handleCitationHover(event, '${chunkId}', '${firstNum}')" 
             onmouseleave="scheduleHideCitePopover()" 
             class="chatgpt-cite-pill" 
             data-chunk-id="${chunkId}">
@@ -1105,6 +1182,248 @@
       scrollToBottom();
     }
 
+    // ==================== CHATGPT CANVAS DRAWER LOGIC ====================
+    let activeCanvasChunkId = null;
+    let activeCanvasPillEl = null;
+    const docContentCache = {};
+
+    function handleCitationClick(event, chunkId, citationNum) {
+      event.stopPropagation();
+      hideCitePopover();
+
+      const canvas = document.getElementById('chatgpt-canvas');
+      const isCurrentlyOpen = canvas && !canvas.classList.contains('translate-x-full');
+
+      if (isCurrentlyOpen && activeCanvasChunkId === chunkId) {
+        closeCanvas();
+        return;
+      }
+
+      // Update active pill highlight
+      if (activeCanvasPillEl) {
+        activeCanvasPillEl.classList.remove('active-canvas-pill');
+      }
+      const pill = event.target.closest('.chatgpt-cite-pill');
+      if (pill) {
+        pill.classList.add('active-canvas-pill');
+        activeCanvasPillEl = pill;
+      }
+
+      openCanvas(chunkId, citationNum);
+    }
+
+    function handleCitationHover(event, chunkId, citationNum) {
+      const canvas = document.getElementById('chatgpt-canvas');
+      const isCurrentlyOpen = canvas && !canvas.classList.contains('translate-x-full');
+      // If Canvas is already open for this exact citation, skip popover
+      if (isCurrentlyOpen && activeCanvasChunkId === chunkId) {
+        return;
+      }
+      triggerCitePopover(event, chunkId, citationNum);
+    }
+
+    async function openCanvas(chunkId, citationNum) {
+      const src = storedSourcesMap[chunkId];
+      if (!src) return;
+
+      hideCitePopover();
+      activeCanvasChunkId = chunkId;
+
+      const canvas = document.getElementById('chatgpt-canvas');
+      const badgeEl = document.getElementById('canvas-badge');
+      const titleEl = document.getElementById('canvas-doc-title');
+      const subtitleEl = document.getElementById('canvas-doc-subtitle');
+      const tabBtn = document.getElementById('canvas-tab-btn');
+      const tabText = document.getElementById('canvas-tab-text');
+      const scoreBadge = document.getElementById('canvas-score-badge');
+
+      const secInfo = parseSectionInfo(src.section);
+      const docTitle = formatDocTitle(src.source);
+      const isLink = isUrl(src.source);
+
+      badgeEl.textContent = `[${citationNum || src.n || 1}]`;
+      titleEl.textContent = docTitle;
+      subtitleEl.textContent = secInfo.article || src.section || 'Toàn văn';
+      scoreBadge.textContent = src.score ? `Độ khớp: p = ${src.score}` : 'Độ khớp cao';
+
+      if (tabBtn) {
+        tabBtn.href = isLink ? src.source : ('/doc/' + encodeURIComponent(src.source));
+        if (tabText) {
+          tabText.textContent = isLink ? 'Mở link' : 'Toàn văn';
+        }
+      }
+
+      // Slide drawer into view (pop from right)
+      canvas.classList.remove('translate-x-full');
+
+      // 1. Immediately render chunk text (0ms response)
+      const quoteOrText = src.quote || src.text || '';
+      renderCanvasContent(quoteOrText, quoteOrText, secInfo.article, true);
+
+      // 2. If it's a URL, no raw local file to fetch
+      if (isLink) {
+        return;
+      }
+
+      // 3. Fetch full doc content from cache or API
+      const filename = src.source;
+      if (!filename) return;
+
+      if (docContentCache[filename]) {
+        renderCanvasContent(docContentCache[filename], quoteOrText, secInfo.article, false);
+      } else {
+        try {
+          const resp = await fetch(`/api/doc_content/${encodeURIComponent(filename)}`);
+          if (resp.ok) {
+            const data = await resp.json();
+            const fullContent = data.content || '';
+            if (fullContent) {
+              docContentCache[filename] = fullContent;
+              if (activeCanvasChunkId === chunkId) {
+                renderCanvasContent(fullContent, quoteOrText, secInfo.article, false);
+              }
+            }
+          }
+        } catch (e) {
+          console.error('Lỗi tải nội dung tài liệu:', e);
+        }
+      }
+    }
+
+    function renderCanvasContent(fullText, highlightQuery, article, isSnippet) {
+      const bodyEl = document.getElementById('canvas-body');
+      if (!bodyEl) return;
+
+      if (!fullText) {
+        bodyEl.innerHTML = `
+          <div class="text-neutral-400 italic text-center py-8">
+            Không có nội dung văn bản.
+          </div>
+        `;
+        return;
+      }
+
+      const highlightedHtml = highlightCitationInContent(fullText, highlightQuery, article);
+
+      bodyEl.innerHTML = `
+        ${isSnippet ? `
+          <div class="p-3 bg-amber-50/80 border border-amber-200/90 rounded-xl text-[12px] text-amber-900 flex items-center justify-between mb-4">
+            <span>Đang nạp toàn văn tài liệu... Dưới đây là đoạn trích dẫn tức thời:</span>
+            <span class="w-3.5 h-3.5 border-2 border-amber-600 border-t-transparent rounded-full animate-spin flex-shrink-0"></span>
+          </div>
+        ` : ''}
+        <div class="whitespace-pre-wrap font-sans text-[13.5px] leading-relaxed text-neutral-800 select-text">
+          ${highlightedHtml}
+        </div>
+      `;
+
+      setTimeout(jumpToCitationHighlight, 120);
+    }
+
+    function highlightCitationInContent(content, query, article) {
+      if (!content) return '';
+      const cleanQuery = (query || '').trim().replace(/^["'“”«»]+|["'“”«»]+$/g, '').trim();
+      let idx = -1;
+      let matchLen = 0;
+
+      // Strategy 1: Substring match
+      if (cleanQuery) {
+        idx = content.indexOf(cleanQuery);
+        if (idx !== -1) {
+          matchLen = cleanQuery.length;
+        }
+      }
+
+      // Strategy 2: First 6-8 words anchor
+      if (idx === -1 && cleanQuery) {
+        const words = cleanQuery.split(/\s+/).filter(Boolean);
+        if (words.length >= 4) {
+          const anchor = words.slice(0, 6).join(' ');
+          const pattern = anchor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+          try {
+            const re = new RegExp(pattern, 'i');
+            const m = content.match(re);
+            if (m) {
+              idx = m.index;
+              matchLen = Math.min(cleanQuery.length, 500);
+            }
+          } catch (e) {}
+        }
+      }
+
+      // Strategy 3: Article headline match
+      if (idx === -1 && article) {
+        const m = article.match(/Điều\s+\d+/i);
+        if (m) {
+          idx = content.indexOf(m[0]);
+          if (idx !== -1) {
+            matchLen = Math.min(cleanQuery ? cleanQuery.length : 200, 350);
+          }
+        }
+      }
+
+      if (idx !== -1) {
+        const before = escapeHtml(content.slice(0, idx));
+        const matched = escapeHtml(content.slice(idx, idx + matchLen));
+        const after = escapeHtml(content.slice(idx + matchLen));
+        return `${before}<mark id="active-citation-highlight" class="bg-amber-100 text-amber-950 font-medium px-1.5 py-0.5 rounded border-b-2 border-amber-500 shadow-sm transition-all duration-300 ring-2 ring-amber-400/40">${matched}</mark>${after}`;
+      }
+
+      return `<mark id="active-citation-highlight" class="bg-amber-100 text-amber-950 font-medium px-1.5 py-0.5 rounded border-b-2 border-amber-500 shadow-sm transition-all duration-300 ring-2 ring-amber-400/40">${escapeHtml(content)}</mark>`;
+    }
+
+    function jumpToCitationHighlight() {
+      const hl = document.getElementById('active-citation-highlight');
+      if (hl) {
+        hl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        hl.classList.add('ring-4', 'ring-amber-500/70');
+        setTimeout(() => {
+          hl.classList.remove('ring-4');
+        }, 1200);
+      }
+    }
+
+    function closeCanvas() {
+      const canvas = document.getElementById('chatgpt-canvas');
+      if (canvas) {
+        canvas.classList.add('translate-x-full');
+      }
+      if (activeCanvasPillEl) {
+        activeCanvasPillEl.classList.remove('active-canvas-pill');
+        activeCanvasPillEl = null;
+      }
+      activeCanvasChunkId = null;
+    }
+
+    // Dismiss Canvas / Popover on outside click or Escape
+    document.addEventListener('pointerdown', (e) => {
+      const canvas = document.getElementById('chatgpt-canvas');
+      if (canvas && !canvas.classList.contains('translate-x-full')) {
+        const insideCanvas = e.target.closest('#chatgpt-canvas');
+        const insidePill = e.target.closest('.chatgpt-cite-pill');
+        if (!insideCanvas && !insidePill) {
+          closeCanvas();
+        }
+      }
+
+      const popover = document.getElementById('chatgpt-popover');
+      if (popover && !popover.classList.contains('hidden')) {
+        const insidePill = e.target.closest('.chatgpt-cite-pill');
+        const insidePopover = e.target.closest('#chatgpt-popover');
+        if (!insidePill && !insidePopover) {
+          hideCitePopover();
+        }
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeCanvas();
+        closeSourceModal();
+        hideCitePopover();
+      }
+    });
+
     // ==================== CHATGPT CITATION POPOVER LOGIC ====================
     function triggerCitePopover(event, chunkId, n) {
       event.stopPropagation();
@@ -1125,7 +1444,7 @@
       document.getElementById('popover-page').textContent = src.page ? `Trang ${src.page}` : '';
       document.getElementById('popover-view-btn').onclick = () => {
         hideCitePopover();
-        openSourceModal(chunkId);
+        openCanvas(chunkId, n);
       };
       const popTab = document.getElementById('popover-tab-btn');
       if (popTab && src.source) {

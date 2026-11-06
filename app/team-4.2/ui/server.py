@@ -78,6 +78,15 @@ async def handle_info(request: Request) -> JSONResponse:
     """Trả về thông tin kho tài liệu và cấu hình đang chạy."""
     pipeline, settings = get_pipeline()
     docs = pipeline.store.docs()
+    adv_parts = []
+    if settings.decomp_enabled:
+        adv_parts.append("Decomposition")
+    if settings.listwise_enabled:
+        adv_parts.append("Gated Listwise")
+    if settings.advanced:
+        adv_parts.append(settings.advanced.upper())
+    advanced_str = " + ".join(adv_parts) if adv_parts else "None"
+
     return JSONResponse({
         "status": "ready",
         "total_chunks": len(pipeline.store),
@@ -94,7 +103,9 @@ async def handle_info(request: Request) -> JSONResponse:
             "embed_model": settings.embed_model,
             "embed_dim": settings.embed_dim,
             "rerank_backend": settings.rerank_backend,
-            "advanced": settings.advanced,
+            "advanced": advanced_str,
+            "decomp_enabled": settings.decomp_enabled,
+            "listwise_enabled": settings.listwise_enabled,
             "context_min_p": settings.context_min_p,
             "top_k": settings.top_k,
         },
@@ -137,16 +148,19 @@ def _sync_ask(query: str, pipeline: RAGPipeline) -> dict[str, Any]:
         })
 
     # Citations thực tế trong câu trả lời
-    citations = [
-        {
+    citations = []
+    for c in trace.answer.citations:
+        chunk_obj = chunks.get(c.chunk_id)
+        citations.append({
             "n": c.n,
             "chunk_id": c.chunk_id,
             "source": c.source,
+            "section": chunk_obj.section if chunk_obj else "Căn cứ pháp lý",
             "page": c.page,
             "quote": c.quote,
-        }
-        for c in trace.answer.citations
-    ]
+            "score": scores_map.get(c.chunk_id, 0.0),
+            "text": chunk_obj.text if chunk_obj else "",
+        })
 
     # Chi tiết từng arm retrieval để minh bạch quá trình tra cứu
     res = trace.retrieval

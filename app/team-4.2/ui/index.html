@@ -141,7 +141,7 @@
       </div>
       <div class="flex items-center justify-between">
         <span>Nâng cao</span>
-        <span id="cfg-advanced" class="font-medium text-charcoal">HyDE</span>
+        <span id="cfg-advanced" class="font-medium text-charcoal text-right text-[10px]">Decomposition + Listwise</span>
       </div>
       <div class="flex items-center justify-between pt-1 text-stone">
         <span>Qdrant Local</span>
@@ -197,7 +197,7 @@
                   <svg class="w-3.5 h-3.5 text-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                   </svg>
-                  <span>Chế độ: HyDE + Jev Rerank</span>
+                  <span id="mode-pill-text">Chế độ: Decomposition + Jev + Listwise</span>
                 </span>
                 <span class="text-[12px] text-stone">Nhấn Enter để gửi</span>
               </div>
@@ -271,7 +271,7 @@
         <div class="flex items-center space-x-4 text-[12px] text-stone pb-2 border-b border-subtle">
           <div>Văn bản: <span id="modal-source-doc" class="font-medium text-charcoal">Bộ luật...</span></div>
           <div>Trang: <span id="modal-source-page" class="font-medium text-charcoal">--</span></div>
-          <div>Độ tương đồng: <span id="modal-source-score" class="font-medium text-teal">0.95</span></div>
+          <div><span id="modal-source-score" class="font-medium text-teal">Độ khớp cao</span></div>
         </div>
         <div class="text-[12px] font-medium text-stone uppercase tracking-wide">Nội dung toàn văn đoạn trích:</div>
         <div id="modal-source-text" class="p-3.5 bg-paper rounded-xl border border-pebble font-normal text-charcoal whitespace-pre-wrap select-text">
@@ -422,20 +422,58 @@
       }).join('');
     }
 
+    const DOC_TITLES = {
+      'bo_luat_dan_su_2015.txt': 'Bộ luật Dân sự 2015',
+      'bo_luat_hang_hai_2015.txt': 'Bộ luật Hàng hải Việt Nam 2015',
+      'bo_luat_hinh_su_2015.txt': 'Bộ luật Hình sự 2015',
+      'bo_luat_lao_dong_2019.txt': 'Bộ luật Lao động 2019',
+      'bo_luat_to_tung_dan_su_2015.txt': 'Bộ luật Tố tụng Dân sự 2015',
+      'bo_luat_to_tung_hinh_su_2015.txt': 'Bộ luật Tố tụng Hình sự 2015',
+    };
+
     function updateConfigBadges(cfg, totalChunks) {
       if (cfg.llm_model) document.getElementById('cfg-llm').textContent = cfg.llm_model;
       if (cfg.rerank_backend) document.getElementById('cfg-rerank').textContent = cfg.rerank_backend === 'jev' ? 'Jev v1.13' : 'None';
-      if (cfg.advanced) document.getElementById('cfg-advanced').textContent = cfg.advanced.toUpperCase();
+      if (cfg.advanced) {
+        document.getElementById('cfg-advanced').textContent = cfg.advanced;
+        const modePill = document.getElementById('mode-pill-text');
+        if (modePill) {
+          modePill.textContent = 'Chế độ: Decomposition + Jev + Listwise';
+        }
+      }
       if (totalChunks) document.getElementById('cfg-chunks').textContent = totalChunks.toLocaleString() + ' chunks';
     }
 
     function formatDocTitle(source) {
+      if (!source) return 'Văn bản quy phạm';
+      if (DOC_TITLES[source]) return DOC_TITLES[source];
       let s = source.replace(/\.(txt|pdf|docx|md)$/i, '');
       s = s.replace(/bo_luat_/g, 'Bộ luật ');
       s = s.replace(/luat_/g, 'Luật ');
       s = s.replace(/_/g, ' ');
-      // Capitalize proper words
       return s.charAt(0).toUpperCase() + s.slice(1);
+    }
+
+    function parseSectionInfo(sectionStr) {
+      if (!sectionStr) return { article: 'Căn cứ pháp lý', breadcrumb: '' };
+      const parts = sectionStr.split('>').map(p => p.trim()).filter(Boolean);
+      if (parts.length === 0) return { article: 'Căn cứ pháp lý', breadcrumb: '' };
+      const article = parts[parts.length - 1];
+      const breadcrumb = parts.slice(0, -1).join(' > ');
+      return { article, breadcrumb };
+    }
+
+    function scrollToOrOpenCitation(num, chunkId) {
+      const card = document.getElementById(`cite-card-${num}`);
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.classList.add('ring-2', 'ring-teal', 'bg-teal/5');
+        setTimeout(() => {
+          card.classList.remove('ring-2', 'ring-teal', 'bg-teal/5');
+        }, 2200);
+      } else if (chunkId) {
+        openSourceModal(chunkId);
+      }
     }
 
     function setDomainFilter(domain) {
@@ -535,7 +573,7 @@
         if (statusText) statusText.textContent = 'Đang kích hoạt Dense Vector + BM25 Lexical Search...';
       }, 1200);
       const timer2 = setTimeout(() => {
-        if (statusText) statusText.textContent = 'LLM HyDE đang mở rộng câu hỏi pháp lý...';
+        if (statusText) statusText.textContent = 'GPT-6 đang phân rã đa ý định & bối cảnh câu hỏi...';
       }, 2500);
       const timer3 = setTimeout(() => {
         if (statusText) statusText.textContent = 'Reranker Jev (Cross-Encoder) đang chấm xác suất liên quan...';
@@ -576,7 +614,7 @@
       const contentBox = document.getElementById(`${msgId}-content`);
       contentBox.classList.remove('hidden');
 
-      // 1. Build Sources Bar (Hàng thẻ nguồn Perplexity)
+      // 1. Build Sources Bar (Compact Perplexity chips)
       let sourcesHtml = '';
       if (data.sources && data.sources.length > 0) {
         // Register sources in global map for modal preview
@@ -584,45 +622,126 @@
           storedSourcesMap[s.chunk_id] = s;
         });
 
-        const cards = data.sources.map(s => {
+        const chips = data.sources.map(s => {
           const cleanDoc = formatDocTitle(s.source);
-          const previewQuote = s.text ? s.text.slice(0, 90) + '...' : '';
+          const secInfo = parseSectionInfo(s.section);
           return `
-            <div onclick="openSourceModal('${s.chunk_id}')" class="flex-shrink-0 w-52 p-3 bg-white rounded-xl border border-pebble hover:border-ash hover:shadow-subtle cursor-pointer transition-all space-y-1.5 group select-none">
-              <div class="flex items-center justify-between text-[11px]">
-                <span class="font-medium text-teal px-1.5 py-0.5 rounded bg-paper border border-pebble">[${s.n}] ${s.section || 'Điều luật'}</span>
-                <span class="text-[10px] text-stone font-mono">p=${s.score}</span>
+            <button onclick="openSourceModal('${s.chunk_id}')" class="inline-flex items-center space-x-2 px-3 py-1.5 bg-white rounded-lg border border-pebble hover:border-teal/60 hover:shadow-subtle transition-all cursor-pointer text-left group select-none">
+              <span class="w-5 h-5 rounded-full bg-paper border border-pebble group-hover:bg-teal group-hover:text-white group-hover:border-teal text-teal flex items-center justify-center text-[10.5px] font-bold transition-colors">[${s.n}]</span>
+              <div class="leading-tight">
+                <div class="text-[12px] font-medium text-charcoal group-hover:text-teal transition-colors truncate max-w-[210px]" title="${escapeHtml(secInfo.article)}">${escapeHtml(secInfo.article)}</div>
+                <div class="text-[10px] text-stone truncate max-w-[210px]">${escapeHtml(cleanDoc)}</div>
               </div>
-              <div class="text-[12px] font-medium text-charcoal truncate" title="${cleanDoc}">${cleanDoc}</div>
-              <div class="text-[11px] text-ash line-clamp-2 leading-relaxed font-normal">${escapeHtml(previewQuote)}</div>
-            </div>
+            </button>
           `;
         }).join('');
 
         sourcesHtml = `
           <div class="space-y-2">
-            <div class="flex items-center justify-between text-[12px] font-medium text-stone uppercase tracking-wide">
-              <span>Căn cứ pháp lý viện dẫn (${data.sources.length} đoạn luật chọn lọc)</span>
-              <span class="text-[11px] text-teal lowercase">bấm vào thẻ để đọc toàn văn</span>
+            <div class="flex items-center justify-between text-[12px] font-medium text-stone">
+              <div class="flex items-center space-x-1.5 uppercase tracking-wide">
+                <svg class="w-3.5 h-3.5 text-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <span>Nguồn tham chiếu (${data.sources.length} văn bản / điều luật)</span>
+              </div>
+              <span class="text-[11px] text-teal lowercase hover:underline cursor-pointer" onclick="toggleDocModal(true)">bấm để xem toàn văn</span>
             </div>
-            <div class="flex space-x-2 overflow-x-auto pb-1.5 scrollbar-thin">
-              ${cards}
+            <div class="flex flex-wrap gap-2">
+              ${chips}
             </div>
           </div>
         `;
       }
 
-      // 2. Format Answer Text & highlight citation tags [1], [2] with Deep Teal pills
+      // 2. Format Answer Text & highlight citation tags [1], [2]
       let formattedText = marked.parse(data.answer || '');
-      // Replace [1], [2] with clickable teal badge
-      formattedText = formattedText.replace(/\[(\d+)\]/g, (match, p1) => {
-        // Find matching source
-        const src = (data.sources || []).find(s => String(s.n) === String(p1));
-        const chunkId = src ? src.chunk_id : '';
-        return `<button onclick="openSourceModal('${chunkId}')" class="inline-flex items-center justify-center px-1.5 py-0.2 mx-0.5 rounded text-[11px] font-medium bg-paper border border-pebble text-teal hover:bg-subtle transition-colors cursor-pointer select-none align-baseline">[${p1}]</button>`;
+      formattedText = formattedText.replace(/\[(\d+(?:\s*[,;]\s*\d+)*)\]/g, (match, group) => {
+        const nums = group.split(/\s*[,;]\s*/).filter(Boolean);
+        return nums.map(p1 => {
+          const src = (data.sources || []).find(s => String(s.n) === String(p1));
+          const chunkId = src ? src.chunk_id : '';
+          const secInfo = src ? parseSectionInfo(src.section) : null;
+          const tooltip = secInfo ? `${secInfo.article} (${formatDocTitle(src.source)})` : `Căn cứ pháp lý [${p1}]`;
+          return `<button onclick="scrollToOrOpenCitation('${p1}', '${chunkId}')" class="inline-cite-btn inline-flex items-center justify-center px-1.5 py-0.2 mx-0.5 rounded text-[11px] font-semibold bg-teal/10 text-teal hover:bg-teal hover:text-white border border-teal/20 transition-all cursor-pointer select-none align-baseline" title="${escapeHtml(tooltip)}">[${p1}]</button>`;
+        }).join('');
       });
 
-      // 3. Collapsible Retrieval Trace Accordion
+      // 3. Structured Legal Grounds & Evidence Section (Căn cứ pháp lý viện dẫn trong câu trả lời)
+      let legalGroundsHtml = '';
+      const citedList = (data.citations && data.citations.length > 0)
+        ? data.citations
+        : (!data.refused && data.sources ? data.sources : []);
+
+      if (citedList.length > 0) {
+        const groundCards = citedList.map(c => {
+          if (!storedSourcesMap[c.chunk_id]) {
+            storedSourcesMap[c.chunk_id] = {
+              n: c.n,
+              chunk_id: c.chunk_id,
+              source: c.source,
+              section: c.section,
+              page: c.page,
+              score: c.score || 0.9,
+              text: c.text || c.quote || '',
+            };
+          }
+          const secInfo = parseSectionInfo(c.section);
+          const docName = formatDocTitle(c.source);
+          const quoteText = c.quote || (c.text ? c.text.slice(0, 300) + '...' : '');
+
+          return `
+            <div id="cite-card-${c.n}" class="cite-ground-card p-4 rounded-xl border border-pebble bg-white shadow-subtle hover:border-teal/50 transition-all space-y-2.5">
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-start space-x-2.5">
+                  <span class="w-6 h-6 rounded-md bg-teal text-white flex items-center justify-center text-[12px] font-bold flex-shrink-0 mt-0.5 shadow-subtle">[${c.n}]</span>
+                  <div>
+                    <div class="text-[14px] font-semibold text-charcoal leading-snug">${escapeHtml(secInfo.article)}</div>
+                    <div class="flex items-center space-x-2 text-[12px] text-stone mt-0.5">
+                      <span class="font-medium text-charcoal">${escapeHtml(docName)}</span>
+                      ${c.page ? `<span>·</span><span>Trang ${c.page}</span>` : ''}
+                      ${secInfo.breadcrumb ? `<span>·</span><span class="text-ash truncate max-w-[280px]" title="${escapeHtml(secInfo.breadcrumb)}">${escapeHtml(secInfo.breadcrumb)}</span>` : ''}
+                    </div>
+                  </div>
+                </div>
+                <button onclick="openSourceModal('${c.chunk_id}')" class="flex-shrink-0 text-[12px] font-medium text-teal hover:text-white hover:bg-teal px-2.5 py-1 rounded-lg border border-teal/30 hover:border-teal transition-all flex items-center space-x-1 cursor-pointer">
+                  <span>Xem toàn văn</span>
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+
+              <div class="relative pl-3.5 border-l-2 border-teal bg-paper/70 rounded-r-lg p-3 text-[13px] text-charcoal leading-relaxed font-normal">
+                <div class="text-[11px] font-medium text-teal uppercase tracking-wider mb-1 flex items-center space-x-1.5 select-none">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                  </svg>
+                  <span>Dẫn chứng trích dẫn điều luật:</span>
+                </div>
+                <p class="italic text-charcoal/90 select-text">"${escapeHtml(quoteText)}"</p>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        legalGroundsHtml = `
+          <div class="space-y-3 pt-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <span class="text-base">📌</span>
+                <h3 class="text-[13px] font-semibold text-charcoal uppercase tracking-wider">Căn cứ pháp lý viện dẫn trong câu trả lời</h3>
+              </div>
+              <span class="text-[11px] text-stone">${citedList.length} điều luật áp dụng</span>
+            </div>
+            <div class="space-y-2.5">
+              ${groundCards}
+            </div>
+          </div>
+        `;
+      }
+
+      // 4. Collapsible Retrieval Trace Accordion
       const trace = data.trace || {};
       const arms = trace.arms || {};
       const finalHits = trace.final_hits || [];
@@ -645,9 +764,7 @@
             </summary>
 
             <div class="p-4 border-t border-pebble space-y-4 bg-paper/50 text-[12px]">
-              <!-- Arm Tabs -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <!-- BM25 Column -->
                 <div class="p-3 bg-white rounded-lg border border-pebble space-y-2">
                   <div class="font-medium text-[12px] text-charcoal uppercase tracking-wider flex items-center justify-between">
                     <span>BM25 Lexical</span>
@@ -658,7 +775,6 @@
                   </div>
                 </div>
 
-                <!-- Dense Column -->
                 <div class="p-3 bg-white rounded-lg border border-pebble space-y-2">
                   <div class="font-medium text-[12px] text-charcoal uppercase tracking-wider flex items-center justify-between">
                     <span>Dense Vector</span>
@@ -669,7 +785,6 @@
                   </div>
                 </div>
 
-                <!-- Final Reranked Column -->
                 <div class="p-3 bg-white rounded-lg border border-teal/40 space-y-2">
                   <div class="font-medium text-[12px] text-teal uppercase tracking-wider flex items-center justify-between">
                     <span>Kết quả cuối (RRF + Jev)</span>
@@ -690,6 +805,7 @@
         <div class="answer-prose text-[15px] leading-relaxed text-charcoal font-normal bg-white rounded-2xl border border-pebble p-6 shadow-subtle select-text">
           ${formattedText}
         </div>
+        ${legalGroundsHtml}
         ${traceHtml}
       `;
 
@@ -732,12 +848,13 @@
       const src = storedSourcesMap[chunkId];
       if (!src) return;
 
-      document.getElementById('modal-source-tag').textContent = `[${src.n}] CĂN CỨ TRÍCH DẪN`;
-      document.getElementById('modal-source-title').textContent = src.section || 'Điều khoản trích dẫn';
+      const secInfo = parseSectionInfo(src.section);
+      document.getElementById('modal-source-tag').textContent = `[${src.n || 1}] CĂN CỨ TRÍCH DẪN`;
+      document.getElementById('modal-source-title').textContent = secInfo.article;
       document.getElementById('modal-source-doc').textContent = formatDocTitle(src.source);
       document.getElementById('modal-source-page').textContent = src.page ? `Trang ${src.page}` : 'Toàn văn';
-      document.getElementById('modal-source-score').textContent = `p = ${src.score}`;
-      document.getElementById('modal-source-text').textContent = src.text;
+      document.getElementById('modal-source-score').textContent = src.score ? `Độ khớp: p = ${src.score}` : 'Độ khớp cao';
+      document.getElementById('modal-source-text').textContent = src.text || src.quote || '';
 
       document.getElementById('source-modal').classList.remove('hidden');
     }

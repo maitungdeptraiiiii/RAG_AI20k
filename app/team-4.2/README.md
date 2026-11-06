@@ -20,7 +20,7 @@ app/team-4.2/
 │   ├── advanced/         # phương pháp nâng cao dạng plugin: hyde, contextual (bật bằng ADVANCED)
 │   ├── eval/             # metrics (Recall@k, MRR@k), runner
 │   └── pipeline.py       # RAGPipeline: ingest(), ask(), ask_debug()
-├── ui/                   # streamlit_app.py
+├── ui/                   # server.py + index.html (Just-ice ChatGPT-style UI)
 ├── tests/                # mỗi module một test_<module>.py
 └── docs/
     ├── tech_stack.md     # lựa chọn stack và lý do (nên tách thành ADR)
@@ -46,7 +46,7 @@ Các lệnh (tại gốc repo, sau khi điền `.env`):
 python scripts/team-4.2/crawl_vbpl.py 36/2005/QH11              # crawl văn bản từ vbpl.vn theo số hiệu -> data/team-4.2/raw/vbpl/
 python scripts/team-4.2/ingest.py data/team-4.2/raw/            # ingest PDF/TXT/MD trong thư mục, hoặc URL
 python scripts/team-4.2/ask.py "Câu hỏi ..."                     # trả lời + citation + kết quả từng arm
-streamlit run app/team-4.2/ui/streamlit_app.py                  # UI chat
+python app/team-4.2/ui/server.py                                  # UI chat Just-ice (Starlette + Canvas)
 python evals/team-4.2/runners/run_eval.py --answers              # Recall@5, MRR@5 (BM25/Dense/Hybrid) + từ chối
 python evals/team-4.2/runners/draft_references.py               # nháp đáp án mẫu, người viết câu hỏi kiểm tra lại
 python evals/team-4.2/runners/export_ragas.py                   # dữ liệu đầu vào cho RAGAS

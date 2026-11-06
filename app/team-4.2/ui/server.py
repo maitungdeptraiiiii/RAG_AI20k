@@ -30,11 +30,13 @@ for _p in (_SRC_DIR, _REPO_ROOT):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
+import html
+import json
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-from starlette.responses import HTMLResponse, JSONResponse
+from starlette.responses import HTMLResponse, JSONResponse, Response, PlainTextResponse, RedirectResponse
 from starlette.routing import Route
 
 from rag.config import Settings
@@ -78,6 +80,15 @@ async def handle_info(request: Request) -> JSONResponse:
     """Trả về thông tin kho tài liệu và cấu hình đang chạy."""
     pipeline, settings = get_pipeline()
     docs = pipeline.store.docs()
+    adv_parts = []
+    if settings.decomp_enabled:
+        adv_parts.append("Decomposition")
+    if settings.listwise_enabled:
+        adv_parts.append("Gated Listwise")
+    if settings.advanced:
+        adv_parts.append(settings.advanced.upper())
+    advanced_str = " + ".join(adv_parts) if adv_parts else "None"
+
     return JSONResponse({
         "status": "ready",
         "total_chunks": len(pipeline.store),
@@ -94,7 +105,9 @@ async def handle_info(request: Request) -> JSONResponse:
             "embed_model": settings.embed_model,
             "embed_dim": settings.embed_dim,
             "rerank_backend": settings.rerank_backend,
-            "advanced": settings.advanced,
+            "advanced": advanced_str,
+            "decomp_enabled": settings.decomp_enabled,
+            "listwise_enabled": settings.listwise_enabled,
             "context_min_p": settings.context_min_p,
             "top_k": settings.top_k,
         },
@@ -137,16 +150,19 @@ def _sync_ask(query: str, pipeline: RAGPipeline) -> dict[str, Any]:
         })
 
     # Citations thực tế trong câu trả lời
-    citations = [
-        {
+    citations = []
+    for c in trace.answer.citations:
+        chunk_obj = chunks.get(c.chunk_id)
+        citations.append({
             "n": c.n,
             "chunk_id": c.chunk_id,
             "source": c.source,
+            "section": chunk_obj.section if chunk_obj else "Căn cứ pháp lý",
             "page": c.page,
             "quote": c.quote,
-        }
-        for c in trace.answer.citations
-    ]
+            "score": scores_map.get(c.chunk_id, 0.0),
+            "text": chunk_obj.text if chunk_obj else "",
+        })
 
     # Chi tiết từng arm retrieval để minh bạch quá trình tra cứu
     res = trace.retrieval
@@ -246,11 +262,176 @@ async def handle_ingest(request: Request) -> JSONResponse:
     return JSONResponse({"status": "ok", "results": results})
 
 
+def _render_doc_html(title: str, filename: str, content: str, chunks_count: int | None = None) -> HTMLResponse:
+    escaped_title = html.escape(title)
+    escaped_filename = html.escape(filename)
+    escaped_content = html.escape(content)
+    badge = f"<span class='text-xs bg-neutral-100 text-neutral-600 px-2 py-0.5 rounded-full font-normal'>{chunks_count} chunks</span>" if chunks_count else ""
+
+    doc_page = f"""<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{escaped_title} — Just-ice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {{
+      font-family: 'Inter', -apple-system, sans-serif;
+      background-color: #f7f7f8;
+      color: #171717;
+      line-height: 1.7;
+    }}
+    pre {{
+      font-family: 'Inter', -apple-system, sans-serif;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }}
+  </style>
+</head>
+<body class="py-8 px-4 sm:px-6">
+  <div class="max-w-4xl mx-auto bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
+    <!-- Header -->
+    <header class="p-6 sm:p-8 border-b border-neutral-100 bg-white sticky top-0 z-10 backdrop-blur-sm bg-white/95 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center space-x-2">
+          <span class="text-[11px] font-semibold text-teal-700 tracking-wider uppercase">Căn cứ quy phạm pháp luật</span>
+          {badge}
+        </div>
+        <h1 class="text-xl sm:text-2xl font-bold text-neutral-900 mt-1">{escaped_title}</h1>
+        <p class="text-xs text-neutral-500 mt-0.5">Tệp lưu trữ: {escaped_filename}</p>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button onclick="window.print()" class="px-3.5 py-1.5 text-xs font-medium border border-neutral-200 rounded-lg text-neutral-700 hover:bg-neutral-50 hover:text-black transition-colors flex items-center space-x-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+          </svg>
+          <span>In / Lưu PDF</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="p-6 sm:p-10 text-[14.5px] leading-relaxed text-neutral-800 select-text">
+      <pre>{escaped_content}</pre>
+    </main>
+  </div>
+</body>
+</html>"""
+    return HTMLResponse(doc_page)
+
+
+async def handle_view_doc(request: Request) -> Response:
+    filename = request.path_params.get("filename", "").strip()
+    if not filename:
+        return HTMLResponse("<h1>Tên tài liệu không hợp lệ</h1>", status_code=400)
+
+    # Nếu tài liệu là đường link (URL) -> mở ra đường link luôn
+    if filename.startswith("http://") or filename.startswith("https://"):
+        return RedirectResponse(filename, status_code=302)
+
+    pipeline, settings = get_pipeline()
+    candidates = [
+        settings.data_dir / "raw" / filename,
+        Path("data/team-4.2/raw") / filename,
+        settings.data_dir / filename,
+        Path("data/team-4.2") / filename,
+    ]
+    target: Path | None = None
+    for c in candidates:
+        if c.exists() and c.is_file():
+            target = c
+            break
+
+    if not target:
+        for f in Path("data/team-4.2").rglob(filename):
+            if f.is_file():
+                target = f
+                break
+
+    clean_title = filename.replace(".txt", "").replace(".md", "").replace(".pdf", "").replace(".docx", "")
+    clean_title = clean_title.replace("bo_luat_", "Bộ luật ").replace("luat_", "Luật ").replace("_", " ").title()
+
+    if not target:
+        matching_chunks = [c for c in pipeline.store.all() if c.source == filename]
+        if not matching_chunks:
+            return HTMLResponse(f"<h1>Không tìm thấy tài liệu: {html.escape(filename)}</h1>", status_code=404)
+        full_text = "\n\n".join(c.text for c in matching_chunks)
+        return _render_doc_html(clean_title, filename, full_text, len(matching_chunks))
+
+    suffix = target.suffix.lower()
+    if suffix == ".pdf":
+        return Response(
+            content=target.read_bytes(),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"inline; filename=\"{filename}\""}
+        )
+
+    content = target.read_text(encoding="utf-8", errors="replace")
+    chunks_count = len([c for c in pipeline.store.all() if c.source == filename])
+    return _render_doc_html(clean_title, filename, content, chunks_count=chunks_count or None)
+
+
+async def handle_doc_content(request: Request) -> JSONResponse:
+    """Trả về nội dung văn bản dưới dạng JSON để Canvas frontend highlight trích dẫn."""
+    filename = request.path_params.get("filename", "").strip()
+    if not filename:
+        return JSONResponse({"error": "Tên tài liệu không hợp lệ"}, status_code=400)
+
+    is_link = filename.startswith("http://") or filename.startswith("https://")
+    pipeline, settings = get_pipeline()
+
+    clean_title = filename.replace(".txt", "").replace(".md", "").replace(".pdf", "").replace(".docx", "")
+    clean_title = clean_title.replace("bo_luat_", "Bộ luật ").replace("luat_", "Luật ").replace("_", " ").title()
+
+    matching_chunks = [c for c in pipeline.store.all() if c.source == filename]
+
+    content = ""
+    if not is_link:
+        candidates = [
+            settings.data_dir / "raw" / filename,
+            Path("data/team-4.2/raw") / filename,
+            settings.data_dir / filename,
+            Path("data/team-4.2") / filename,
+        ]
+        target: Path | None = None
+        for c in candidates:
+            if c.exists() and c.is_file():
+                target = c
+                break
+        if not target:
+            for f in Path("data/team-4.2").rglob(filename):
+                if f.is_file():
+                    target = f
+                    break
+        if target and target.suffix.lower() != ".pdf":
+            try:
+                content = target.read_text(encoding="utf-8", errors="replace")
+            except Exception:
+                pass
+
+    if not content and matching_chunks:
+        content = "\n\n".join(c.text for c in matching_chunks)
+
+    return JSONResponse({
+        "source": filename,
+        "title": clean_title,
+        "content": content,
+        "is_url": is_link,
+        "n_chunks": len(matching_chunks),
+    })
+
+
 routes = [
     Route("/", handle_index, methods=["GET"]),
     Route("/api/info", handle_info, methods=["GET"]),
     Route("/api/chat", handle_chat, methods=["POST"]),
     Route("/api/ingest", handle_ingest, methods=["POST"]),
+    Route("/api/doc_content/{filename:path}", handle_doc_content, methods=["GET"]),
+    Route("/doc/{filename:path}", handle_view_doc, methods=["GET"]),
 ]
 
 middleware = [

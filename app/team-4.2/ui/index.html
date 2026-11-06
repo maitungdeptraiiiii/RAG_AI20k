@@ -418,12 +418,18 @@
     </div>
 
     <div class="flex items-center justify-between pt-1 border-t border-neutral-100">
-      <button id="popover-view-btn" onclick="" class="text-[12px] font-medium text-neutral-800 hover:text-black flex items-center space-x-1 hover:underline cursor-pointer">
-        <span>Đọc toàn văn điều luật</span>
-        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
+      <div class="flex items-center space-x-3">
+        <button id="popover-view-btn" onclick="" class="text-[12px] font-medium text-neutral-800 hover:text-black flex items-center space-x-1 hover:underline cursor-pointer">
+          <span>Xem trích dẫn</span>
+        </button>
+        <span class="text-neutral-300">·</span>
+        <a id="popover-tab-btn" href="#" target="_blank" rel="noopener noreferrer" class="text-[12px] font-medium text-blue-600 hover:text-blue-800 flex items-center space-x-0.5 hover:underline cursor-pointer">
+          <span>Mở toàn văn</span>
+          <svg class="w-3 h-3 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
+      </div>
       <span id="popover-page" class="text-[11px] text-neutral-400"></span>
     </div>
   </div>
@@ -443,10 +449,18 @@
         </button>
       </div>
       <div class="p-6 overflow-y-auto space-y-4 text-[14px] leading-relaxed">
-        <div class="flex items-center space-x-4 text-[12px] text-neutral-500 pb-2 border-b border-neutral-100">
-          <div>Văn bản: <span id="modal-source-doc" class="font-medium text-neutral-800">Bộ luật...</span></div>
-          <div>Trang: <span id="modal-source-page" class="font-medium text-neutral-800">--</span></div>
-          <div><span id="modal-source-score" class="font-medium text-teal-700">Độ khớp cao</span></div>
+        <div class="flex items-center justify-between text-[12px] text-neutral-500 pb-2 border-b border-neutral-100">
+          <div class="flex items-center space-x-4">
+            <div>Văn bản: <span id="modal-source-doc" class="font-medium text-neutral-800">Bộ luật...</span></div>
+            <div>Trang: <span id="modal-source-page" class="font-medium text-neutral-800">--</span></div>
+            <div><span id="modal-source-score" class="font-medium text-teal-700">Độ khớp cao</span></div>
+          </div>
+          <a id="modal-source-tab-btn" href="#" target="_blank" rel="noopener noreferrer" class="text-xs font-medium text-blue-600 hover:text-blue-800 flex items-center space-x-1 hover:underline">
+            <span>Mở toàn văn tab mới</span>
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
         </div>
         <div class="text-[12px] font-semibold text-neutral-400 uppercase tracking-wide">Toàn văn điều khoản:</div>
         <div id="modal-source-text" class="p-4 bg-neutral-50 rounded-xl border border-neutral-100 font-normal text-neutral-800 whitespace-pre-wrap select-text leading-relaxed">
@@ -650,13 +664,16 @@
       container.innerHTML = docs.map(d => {
         const cleanName = formatDocTitle(d.source);
         return `
-          <button onclick="openDocByCode('${escapeHtml(d.source)}')" class="w-full flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-neutral-700 hover:bg-[#ececec] hover:text-neutral-900 transition-colors text-left truncate group" title="${escapeHtml(d.source)} (${d.n_chunks} chunks)">
+          <a href="/doc/${encodeURIComponent(d.source)}" target="_blank" rel="noopener noreferrer" class="w-full flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-neutral-700 hover:bg-[#ececec] hover:text-neutral-900 transition-colors text-left truncate group" title="${escapeHtml(d.source)} (${d.n_chunks} chunks)">
             <svg class="w-4 h-4 text-neutral-500 flex-shrink-0 group-hover:text-neutral-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             <span class="truncate flex-1 text-[13px] font-normal">${escapeHtml(cleanName)}</span>
             <span class="text-[10px] text-neutral-400 font-normal ml-1 flex-shrink-0">${d.n_chunks}c</span>
-          </button>
+            <svg class="w-3.5 h-3.5 text-neutral-400 opacity-0 group-hover:opacity-100 flex-shrink-0 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
         `;
       }).join('');
     }
@@ -678,9 +695,17 @@
               </div>
               <div class="text-[12px] text-neutral-500">Mã tệp: ${d.source}</div>
             </div>
-            <div class="text-right">
-              <div class="text-[13px] font-semibold text-neutral-800">${d.n_chunks} chunks</div>
-              <div class="text-[11px] text-emerald-600">Đã lập chỉ mục</div>
+            <div class="flex items-center space-x-3">
+              <div class="text-right">
+                <div class="text-[13px] font-semibold text-neutral-800">${d.n_chunks} chunks</div>
+                <div class="text-[11px] text-emerald-600">Đã lập chỉ mục</div>
+              </div>
+              <a href="/doc/${encodeURIComponent(d.source)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1.5 text-xs font-medium border border-neutral-300 rounded-lg bg-white text-neutral-700 hover:bg-neutral-100 hover:text-black transition-colors flex items-center space-x-1">
+                <span>Mở tab mới</span>
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
             </div>
           </div>
         `;
@@ -992,6 +1017,10 @@
         hideCitePopover();
         openSourceModal(chunkId);
       };
+      const popTab = document.getElementById('popover-tab-btn');
+      if (popTab && src.source) {
+        popTab.href = '/doc/' + encodeURIComponent(src.source);
+      }
 
       // Position Popover nicely near the button
       const rect = event.target.closest('.chatgpt-cite-pill').getBoundingClientRect();
@@ -1170,6 +1199,11 @@
       document.getElementById('modal-source-score').textContent = src.score ? `Độ khớp: p = ${src.score}` : 'Độ khớp cao';
       document.getElementById('modal-source-text').textContent = src.text || src.quote || '';
 
+      const tabBtn = document.getElementById('modal-source-tab-btn');
+      if (tabBtn && src.source) {
+        tabBtn.href = '/doc/' + encodeURIComponent(src.source);
+      }
+
       document.getElementById('source-modal').classList.remove('hidden');
     }
 
@@ -1178,8 +1212,12 @@
     }
 
     function openDocByCode(sourceFile) {
-      renderDocsModal(allLoadedDocs, sourceFile);
-      toggleDocModal(true);
+      if (sourceFile) {
+        window.open('/doc/' + encodeURIComponent(sourceFile), '_blank');
+      } else {
+        renderDocsModal(allLoadedDocs, null);
+        toggleDocModal(true);
+      }
     }
 
     function toggleDocModal(show) {

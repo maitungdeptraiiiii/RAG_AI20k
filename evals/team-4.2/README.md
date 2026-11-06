@@ -2,4 +2,12 @@
 
 [Trang team](../../teams/team-4.2/README.md) · [Quy chuẩn chung](../README.md)
 
-Chưa triển khai. Đặt evals của Team 4.2 trong thư mục này; không sửa artifact của team khác nếu chưa thống nhất. Sản phẩm phát triển liên tục qua 5 tuần, không sao chép code theo tuần.
+| Thư mục | Nội dung |
+|---|---|
+| `datasets/` | `questions.jsonl` — câu hỏi, gold `source` + `page`, `reference` (mẫu: `questions.example.jsonl`) |
+| `configs/` | Cấu hình các arm/ablation (BM25, Dense, Hybrid, +rerank) |
+| `runners/` | `run_eval.py` (Recall@5, Hit@5, MRR@5, Recall@20; từ chối), `draft_references.py`, `export_ragas.py`. Logic nằm ở `app/team-4.2/src/rag/eval/` để có unit test |
+| `results/` | Kết quả nhỏ đã rà soát (per-question CSV, summary) |
+| `REPORT.md` | Evaluation + failure analysis, liên kết từ báo cáo tuần |
+
+Chưa có kết quả. Mỗi run ghi commit, snapshot dữ liệu, model/version, config và số câu.

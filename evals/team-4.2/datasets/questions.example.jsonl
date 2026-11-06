@@ -1,0 +1,3 @@
+{"id": "q01", "question": "Thời giờ làm việc bình thường của người lao động là bao nhiêu giờ một ngày?", "type": "lookup", "author": "TV1", "gold": [{"source": "luat_lao_dong.pdf", "page": 12}], "reference": "Không quá 8 giờ trong một ngày và không quá 48 giờ trong một tuần."}
+{"id": "q02", "question": "Người lao động làm đủ 12 tháng được nghỉ phép năm mấy ngày?", "type": "paraphrase", "author": "TV2", "gold": [{"source": "luat_lao_dong.pdf", "page": 15}]}
+{"id": "q03", "question": "Giá vàng SJC hôm nay là bao nhiêu?", "type": "out_of_scope", "author": "TV3"}

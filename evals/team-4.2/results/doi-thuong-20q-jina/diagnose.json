@@ -1,0 +1,2306 @@
+[
+ {
+  "id": "d01",
+  "type": "multi",
+  "question": "hôm nay tôi lỡ tông phải một ông già lúc sang đường, không biết có bị sao không",
+  "reference": "Nếu vi phạm quy định giao thông mà làm chết người hoặc gây tổn thương cơ thể từ 61% trở lên có thể bị truy cứu TNHS theo Điều 260 BLHS (phạt tiền 30-100 triệu, cải tạo không giam giữ đến 3 năm hoặc tù 1-5 năm). Về dân sự, xe cơ giới là nguồn nguy hiểm cao độ nên chủ xe/người sử dụng phải bồi thường kể cả khi không có lỗi (Điều 601), thiệt hại về sức khỏe tính theo Điều 590 BLDS.",
+  "gold": [
+   "bo_luat_hinh_su_2015 Điều 260",
+   "bo_luat_dan_su_2015 Điều 601",
+   "bo_luat_dan_su_2015 Điều 590"
+  ],
+  "hyde": "Người điều khiển phương tiện có trách nhiệm dừng xe an toàn, kiểm tra tình trạng người bị va chạm và kịp thời gọi cấp cứu, cơ quan công an nếu có dấu hiệu thương tích hoặc nguy hiểm. Trường hợp người bị nạn cần được sơ cứu, phải hỗ trợ trong khả năng và không tự ý rời khỏi hiện trường; chỉ di chuyển phương tiện, người bị nạn khi cần thiết để bảo đảm an toàn hoặc cấp cứu. Vụ việc cần được thông báo và phối hợp giải quyết với cơ quan chức năng, đồng thời cung cấp thông tin và bảo toàn dấu vết liên quan. Trách nhiệm pháp lý, nếu có, được xem xét căn cứ vào hậu quả, lỗi của các bên và tình tiết cụ thể của vụ việc.",
+  "ranks": {
+   "dense": [
+    1,
+    null,
+    null
+   ],
+   "hyde": [
+    4,
+    null,
+    null
+   ],
+   "rrf": [
+    1,
+    null,
+    null
+   ],
+   "rerank": [
+    2,
+    null,
+    null
+   ],
+   "all_bm25": [
+    1,
+    null,
+    null
+   ],
+   "bm25_arm": [
+    null,
+    null,
+    null
+   ],
+   "jina": [
+    1,
+    49,
+    55
+   ]
+  },
+  "top5_best": [
+   {
+    "id": "d4825a1af3d31c64:0602",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 584. Căn cứ phát sinh trách nhiệm bồi thường thiệt hại",
+    "text": "Điều 584. Căn cứ phát sinh trách nhiệm bồi thường thiệt hại\n1. Người nào có hành vi xâm phạm tính mạng, sức khoẻ, danh dự, nhân phẩm, uy tín, tài sản, quyền, lợi ích hợp pháp khác của người khác mà gây thiệt hại thì phải",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0392",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 260. Tội vi phạm quy định về tham gia giao thông đường bộ",
+    "text": "4. Người tham gia giao thông đường bộ mà vi phạm quy định về an toàn giao thông đường bộ gây thương tích hoặc gây tổn hại cho sức khỏe của 01 người với tỷ lệ tổn thương cơ thể từ 31% đến 60% hoặc gây thương tích hoặc gây",
+    "gold": true
+   },
+   {
+    "id": "88138f1cdf1b763c:0391",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 260. Tội vi phạm quy định về tham gia giao thông đường bộ",
+    "text": "đ) Làm chết 02 người;\ne) Gây thương tích hoặc gây tổn hại cho sức khỏe của 02 người với tỷ lệ tổn thương cơ thể của mỗi người 61% trở lên;\ng) Gây thương tích hoặc gây tổn hại cho sức khỏe của 03 người trở lên mà tổng tỷ ",
+    "gold": true
+   },
+   {
+    "id": "88138f1cdf1b763c:0390",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 260. Tội vi phạm quy định về tham gia giao thông đường bộ",
+    "text": "Điều 260. Tội vi phạm quy định về tham gia giao thông đường bộ\n1. Người nào tham gia giao thông đường bộ mà vi phạm quy định về an toàn giao thông đường bộ thuộc một trong các trường hợp sau đây, thì bị phạt tiền từ 30.0",
+    "gold": true
+   },
+   {
+    "id": "d4825a1af3d31c64:0035",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 33. Quyền sống, quyền được bảo đảm an toàn về tính mạng, sức khỏe, thân thể",
+    "text": "Điều 33. Quyền sống, quyền được bảo đảm an toàn về tính mạng, sức khỏe, thân thể\n1. Cá nhân có quyền sống, quyền bất khả xâm phạm về tính mạng, thân thể, quyền được pháp luật bảo hộ về sức khỏe. Không ai bị tước đoạt tín",
+    "gold": false
+   }
+  ],
+  "top5_jina": [
+   {
+    "id": "88138f1cdf1b763c:0392",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 260. Tội vi phạm quy định về tham gia giao thông đường bộ",
+    "text": "4. Người tham gia giao thông đường bộ mà vi phạm quy định về an toàn giao thông đường bộ gây thương tích hoặc gây tổn hại cho sức khỏe của 01 người với tỷ lệ tổn thương cơ thể từ 31% đến 60% hoặc gây thương tích hoặc gây",
+    "gold": true
+   },
+   {
+    "id": "88138f1cdf1b763c:0404",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 264. Tội giao cho người không đủ điều kiện điều khiển các phương tiện tham gia giao thông đường bộ",
+    "text": "d) Gây thiệt hại về tài sản 1.500.000.000 đồng trở lên.\n4. Người chủ sở hữu, quản lý phương tiện tham gia giao thông đường bộ mà giao cho người không có giấy phép lái xe hoặc người đang trong tình trạng có sử dụng rượu, ",
+    "gold": false
+   },
+   {
+    "id": "5dc99a513d86dc54:0334",
+    "src": "bo_luat_hang_hai_2015",
+    "sec": "Điều 288. Đâm va do bất khả kháng, ngẫu nhiên, không xác định được lỗi",
+    "text": "Điều 288. Đâm va do bất khả kháng, ngẫu nhiên, không xác định được lỗi\nTrường hợp tai nạn đâm va xảy ra do các nguyên nhân bất khả kháng, ngẫu nhiên hoặc khi không xác định được tàu có lỗi thì thiệt hại của tàu nào tàu đ",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0398",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 262. Tội đưa vào sử dụng các phương tiện giao thông cơ giới đường bộ, xe máy chuyên dùng không bảo đảm tiêu chuẩn an toàn kỹ thuật tham gia giao thông",
+    "text": "4. Người chịu trách nhiệm trực tiếp về việc điều động hoặc về tình trạng kỹ thuật mà cho phép đưa vào sử dụng phương tiện giao thông cơ giới đường bộ, xe máy chuyên dùng không bảo đảm tiêu chuẩn an toàn kỹ thuật tham gia",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0401",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 263. Tội điều động người không đủ điều kiện điều khiển các phương tiện tham gia giao thông đường bộ",
+    "text": "d) Gây thiệt hại về tài sản 1.500.000.000 đồng trở lên.\n4. Người có thẩm quyền mà biết rõ người không có giấy phép lái xe, không đủ sức khỏe, độ tuổi để điều khiển phương tiện, người đang trong tình trạng có sử dụng rượu",
+    "gold": false
+   }
+  ],
+  "errors": {}
+ },
+ {
+  "id": "d02",
+  "type": "multi",
+  "question": "tôi lỡ tay đẩy người ta xuống vực, có đến nhà bố mẹ họ xin lỗi rồi có sao không",
+  "reference": "Vô ý làm chết người bị xử lý theo Điều 128 BLHS (cải tạo không giam giữ đến 3 năm hoặc tù 1-5 năm). Xin lỗi, bồi thường, được gia đình bị hại xin giảm nhẹ là tình tiết giảm nhẹ (Điều 51), không làm mất trách nhiệm; có thể được miễn TNHS nếu tội ít nghiêm trọng do vô ý và người đại diện bị hại tự nguyện hòa giải, đề nghị miễn (Điều 29 khoản 3).",
+  "gold": [
+   "bo_luat_hinh_su_2015 Điều 128",
+   "bo_luat_hinh_su_2015 Điều 51",
+   "bo_luat_hinh_su_2015 Điều 29"
+  ],
+  "hyde": "Việc tự nhận là “lỡ tay” không đương nhiên loại trừ trách nhiệm pháp lý; cơ quan có thẩm quyền sẽ căn cứ vào diễn biến sự việc, lỗi, hậu quả và chứng cứ để xác định tính chất hành vi. Việc đến nhà người bị hại xin lỗi có thể được xem xét như tình tiết liên quan đến việc khắc phục hậu quả, nhưng không tự động làm chấm dứt trách nhiệm hình sự hoặc nghĩa vụ bồi thường. Nếu người đó bị thương hoặc tử vong, cần khẩn trương bảo đảm việc cấp cứu, thông báo cho cơ quan công an và phối hợp giải quyết vụ việc.",
+  "ranks": {
+   "dense": [
+    null,
+    4,
+    null
+   ],
+   "hyde": [
+    null,
+    9,
+    11
+   ],
+   "rrf": [
+    null,
+    7,
+    18
+   ],
+   "rerank": [
+    null,
+    4,
+    1
+   ],
+   "all_bm25": [
+    null,
+    3,
+    null
+   ],
+   "bm25_arm": [
+    null,
+    null,
+    null
+   ],
+   "jina": [
+    47,
+    4,
+    21
+   ]
+  },
+  "top5_best": [
+   {
+    "id": "88138f1cdf1b763c:0034",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 29. Căn cứ miễn trách nhiệm hình sự",
+    "text": "Điều 29. Căn cứ miễn trách nhiệm hình sự\n1. Người phạm tội được miễn trách nhiệm hình sự khi có một trong những căn cứ sau đây:\na) Khi tiến hành điều tra, truy tố hoặc xét xử, do có sự thay đổi chính sách, pháp luật làm ",
+    "gold": true
+   },
+   {
+    "id": "d4825a1af3d31c64:0602",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 584. Căn cứ phát sinh trách nhiệm bồi thường thiệt hại",
+    "text": "Điều 584. Căn cứ phát sinh trách nhiệm bồi thường thiệt hại\n1. Người nào có hành vi xâm phạm tính mạng, sức khoẻ, danh dự, nhân phẩm, uy tín, tài sản, quyền, lợi ích hợp pháp khác của người khác mà gây thiệt hại thì phải",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0054",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 48. Trả lại tài sản, sửa chữa hoặc bồi thường thiệt hại; buộc công khai xin lỗi",
+    "text": "Điều 48. Trả lại tài sản, sửa chữa hoặc bồi thường thiệt hại; buộc công khai xin lỗi\n1. Người phạm tội phải trả lại tài sản đã chiếm đoạt cho chủ sở hữu hoặc người quản lý hợp pháp, phải sửa chữa hoặc bồi thường thiệt hạ",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0057",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 51. Các tình tiết giảm nhẹ trách nhiệm hình sự",
+    "text": "Điều 51. Các tình tiết giảm nhẹ trách nhiệm hình sự\n1. Các tình tiết sau đây là tình tiết giảm nhẹ trách nhiệm hình sự:\na) Người phạm tội đã ngăn chặn hoặc làm giảm bớt tác hại của tội phạm;\nb) Người phạm tội tự nguyện s",
+    "gold": true
+   },
+   {
+    "id": "88138f1cdf1b763c:0024",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 20. Sự kiện bất ngờ",
+    "text": "Điều 20. Sự kiện bất ngờ\nNgười thực hiện hành vi gây hậu quả nguy hại cho xã hội trong trường hợp không thể thấy trước hoặc không buộc phải thấy trước hậu quả của hành vi đó, thì không phải chịu trách nhiệm hình sự.",
+    "gold": false
+   }
+  ],
+  "top5_jina": [
+   {
+    "id": "88138f1cdf1b763c:0054",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 48. Trả lại tài sản, sửa chữa hoặc bồi thường thiệt hại; buộc công khai xin lỗi",
+    "text": "Điều 48. Trả lại tài sản, sửa chữa hoặc bồi thường thiệt hại; buộc công khai xin lỗi\n1. Người phạm tội phải trả lại tài sản đã chiếm đoạt cho chủ sở hữu hoặc người quản lý hợp pháp, phải sửa chữa hoặc bồi thường thiệt hạ",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0604",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 586. Năng lực chịu trách nhiệm bồi thường thiệt hại của cá nhân",
+    "text": "Điều 586. Năng lực chịu trách nhiệm bồi thường thiệt hại của cá nhân\n1. Người từ đủ mười tám tuổi trở lên gây thiệt hại thì phải tự bồi thường.\n2. Người chưa đủ mười lăm tuổi gây thiệt hại mà còn cha, mẹ thì cha, mẹ phải",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0380",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 363. Bồi thường thiệt hại trong trường hợp bên bị vi phạm có lỗi",
+    "text": "Điều 363. Bồi thường thiệt hại trong trường hợp bên bị vi phạm có lỗi\nTrường hợp vi phạm nghĩa vụ và có thiệt hại là do một phần lỗi của bên bị vi phạm thì bên vi phạm chỉ phải bồi thường thiệt hại tương ứng với mức độ l",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0057",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 51. Các tình tiết giảm nhẹ trách nhiệm hình sự",
+    "text": "Điều 51. Các tình tiết giảm nhẹ trách nhiệm hình sự\n1. Các tình tiết sau đây là tình tiết giảm nhẹ trách nhiệm hình sự:\na) Người phạm tội đã ngăn chặn hoặc làm giảm bớt tác hại của tội phạm;\nb) Người phạm tội tự nguyện s",
+    "gold": true
+   },
+   {
+    "id": "d4825a1af3d31c64:0595",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 577. Nghĩa vụ bồi thường thiệt hại",
+    "text": "Điều 577. Nghĩa vụ bồi thường thiệt hại\n1. Khi người thực hiện công việc không có ủy quyền cố ý gây thiệt hại trong khi thực hiện công việc thì phải bồi thường thiệt hại cho người có công việc được thực hiện.\n2. Nếu ngườ",
+    "gold": false
+   }
+  ],
+  "errors": {}
+ },
+ {
+  "id": "d03",
+  "type": "multi",
+  "question": "thằng em tôi nhậu xong đánh nhau ngoài quán, bên kia phải khâu mấy mũi, giờ công an gọi lên làm việc",
+  "reference": "Có thể bị xử lý về tội cố ý gây thương tích (Điều 134 BLHS) tùy tỷ lệ tổn thương cơ thể và tình tiết (hung khí...). Say rượu không phải lý do được miễn trách nhiệm hình sự (Điều 13).",
+  "gold": [
+   "bo_luat_hinh_su_2015 Điều 134",
+   "bo_luat_hinh_su_2015 Điều 13"
+  ],
+  "hyde": "Hành vi cố ý gây thương tích trong lúc xảy ra xô xát tại quán có thể bị xem xét trách nhiệm hình sự hoặc xử phạt vi phạm hành chính, tùy thuộc vào kết luận giám định tỷ lệ tổn thương cơ thể, tính chất hành vi và các tình tiết liên quan. Việc người bị thương phải khâu nhiều mũi không tự xác định mức độ trách nhiệm; cơ quan có thẩm quyền sẽ thu thập lời khai, tài liệu y tế và chứng cứ để làm rõ vụ việc. Khi được mời hoặc triệu tập làm việc, người liên quan cần có mặt đúng thời gian, trình bày trung thực và có thể đề nghị luật sư bảo vệ quyền, lợi ích hợp pháp. Việc bồi thường chi phí điều trị và thỏa thuận với người bị hại có thể được xem xét trong quá trình giải quyết, nhưng không đương nhiên làm chấm dứt việc xử lý vụ việc.",
+  "ranks": {
+   "dense": [
+    6,
+    null
+   ],
+   "hyde": [
+    1,
+    null
+   ],
+   "rrf": [
+    4,
+    null
+   ],
+   "rerank": [
+    1,
+    null
+   ],
+   "all_bm25": [
+    1,
+    null
+   ],
+   "bm25_arm": [
+    null,
+    null
+   ],
+   "jina": [
+    6,
+    167
+   ]
+  },
+  "top5_best": [
+   {
+    "id": "88138f1cdf1b763c:0160",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 134. Tội cố ý gây thương tích hoặc gây tổn hại cho sức khỏe của người khác",
+    "text": "Điều 134. Tội cố ý gây thương tích hoặc gây tổn hại cho sức khỏe của người khác\n1. Người nào cố ý gây thương tích hoặc gây tổn hại cho sức khỏe của người khác mà tỷ lệ tổn thương cơ thể từ 11% đến 30% hoặc dưới 11% nhưng",
+    "gold": true
+   },
+   {
+    "id": "88138f1cdf1b763c:0162",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 134. Tội cố ý gây thương tích hoặc gây tổn hại cho sức khỏe của người khác",
+    "text": "a) Làm chết 02 người trở lên;\nb) Gây thương tích hoặc gây tổn hại sức khỏe cho 02 người trở lên mà tỷ lệ tổn thương cơ thể của mỗi người 61% trở lên;\nc) Gây thương tích vào vùng mặt của người khác mà tỷ lệ tổn thương cơ ",
+    "gold": true
+   },
+   {
+    "id": "88138f1cdf1b763c:0166",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 138. Tội vô ý gây thương tích hoặc gây tổn hại cho sức khỏe của người khác",
+    "text": "Điều 138. Tội vô ý gây thương tích hoặc gây tổn hại cho sức khỏe của người khác\n1. Người nào vô ý gây thương tích hoặc gây tổn hại cho sức khỏe của người khác mà tỷ lệ tổn thương cơ thể từ 31% đến 60%, thì bị phạt cảnh c",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0161",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 134. Tội cố ý gây thương tích hoặc gây tổn hại cho sức khỏe của người khác",
+    "text": "o) Đối với người đang thi hành công vụ hoặc vì lý do công vụ của nạn nhân.\n2. Phạm tội gây thương tích hoặc gây tổn hại cho sức khỏe của người khác mà tỷ lệ tổn thương cơ thể từ 11% đến 30% nhưng thuộc một trong các trườ",
+    "gold": true
+   },
+   {
+    "id": "88138f1cdf1b763c:0163",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 135. Tội cố ý gây thương tích hoặc gây tổn hại cho sức khỏe của người khác trong trạng thái tinh thần bị kích động mạnh",
+    "text": "Điều 135. Tội cố ý gây thương tích hoặc gây tổn hại cho sức khỏe của người khác trong trạng thái tinh thần bị kích động mạnh\n1. Người nào cố ý gây thương tích hoặc gây tổn hại cho sức khỏe của người khác mà tỷ lệ tổn thư",
+    "gold": false
+   }
+  ],
+  "top5_jina": [
+   {
+    "id": "88138f1cdf1b763c:0630",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 398. Tội hành hung đồng đội",
+    "text": "Điều 398. Tội hành hung đồng đội\n1. Người nào trong quan hệ công tác mà cố ý gây thương tích hoặc gây tổn hại cho sức khỏe của đồng đội mà không thuộc trường hợp quy định tại Điều 135 của Bộ luật này, thì bị phạt cải tạo",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0165",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 137. Tội gây thương tích hoặc gây tổn hại cho sức khỏe của người khác trong khi thi hành công vụ",
+    "text": "Điều 137. Tội gây thương tích hoặc gây tổn hại cho sức khỏe của người khác trong khi thi hành công vụ\n1. Người nào trong khi thi hành công vụ dùng vũ lực ngoài những trường hợp pháp luật cho phép gây thương tích hoặc gây",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0167",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 139. Tội vô ý gây thương tích hoặc gây tổn hại cho sức khỏe của người khác do vi phạm quy tắc nghề nghiệp hoặc quy tắc hành chính",
+    "text": "Điều 139. Tội vô ý gây thương tích hoặc gây tổn hại cho sức khỏe của người khác do vi phạm quy tắc nghề nghiệp hoặc quy tắc hành chính\n1. Người nào vô ý gây thương tích hoặc gây tổn hại cho sức khỏe của người khác do vi ",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0506",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 306. Tội chế tạo, tàng trữ, vận chuyển, sử dụng, mua bán trái phép hoặc chiếm đoạt súng săn, vũ khí thô sơ, vũ khí thể thao, công cụ hỗ trợ và các vũ khí khác có tính năng tác dụng tương tự",
+    "text": "đ) Gây thương tích hoặc gây tổn hại cho sức khỏe của 02 người trở lên với tỷ lệ tổn thương cơ thể của mỗi người từ 31% đến 60%;\ne) Gây thương tích hoặc gây tổn hại cho sức khỏe của 03 người trở lên mà tổng tỷ lệ tổn thươ",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0166",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 138. Tội vô ý gây thương tích hoặc gây tổn hại cho sức khỏe của người khác",
+    "text": "Điều 138. Tội vô ý gây thương tích hoặc gây tổn hại cho sức khỏe của người khác\n1. Người nào vô ý gây thương tích hoặc gây tổn hại cho sức khỏe của người khác mà tỷ lệ tổn thương cơ thể từ 31% đến 60%, thì bị phạt cảnh c",
+    "gold": false
+   }
+  ],
+  "errors": {}
+ },
+ {
+  "id": "d04",
+  "type": "multi",
+  "question": "công ty tự nhiên bảo mai khỏi đi làm nữa, thế có được không",
+  "reference": "Công ty chỉ được đơn phương chấm dứt HĐLĐ trong các trường hợp ở Điều 36 và phải báo trước; làm sai là chấm dứt trái pháp luật (Điều 39), phải nhận lại người lao động, trả lương, đóng bảo hiểm những ngày không được làm và trả thêm ít nhất 02 tháng lương (Điều 41).",
+  "gold": [
+   "bo_luat_lao_dong_2019 Điều 36",
+   "bo_luat_lao_dong_2019 Điều 39",
+   "bo_luat_lao_dong_2019 Điều 41"
+  ],
+  "hyde": "Việc người sử dụng lao động thông báo người lao động từ ngày mai không cần đến làm không đương nhiên làm chấm dứt hợp đồng lao động hợp pháp. Việc đơn phương chấm dứt hợp đồng phải có căn cứ và tuân thủ thời hạn báo trước, trình tự, thủ tục theo quy định; trường hợp không đáp ứng các điều kiện này có thể bị xác định là đơn phương chấm dứt hợp đồng lao động trái pháp luật. Người lao động có quyền yêu cầu thông báo bằng văn bản, làm rõ tình trạng hợp đồng và tiền lương, quyền lợi trong thời gian không được bố trí làm việc. Nếu quyền lợi bị xâm phạm, người lao động có thể yêu cầu giải quyết tranh chấp lao động theo trình tự pháp luật.",
+  "ranks": {
+   "dense": [
+    1,
+    null,
+    14
+   ],
+   "hyde": [
+    2,
+    11,
+    8
+   ],
+   "rrf": [
+    1,
+    null,
+    5
+   ],
+   "rerank": [
+    3,
+    null,
+    7
+   ],
+   "all_bm25": [
+    3,
+    null,
+    6
+   ],
+   "bm25_arm": [
+    null,
+    null,
+    null
+   ],
+   "jina": [
+    1,
+    126,
+    14
+   ]
+  },
+  "top5_best": [
+   {
+    "id": "56c6bfc5e8c4e7c9:0043",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 34. Các trường hợp chấm dứt hợp đồng lao động",
+    "text": "Điều 34. Các trường hợp chấm dứt hợp đồng lao động\n1. Hết hạn hợp đồng lao động, trừ trường hợp quy định tại khoản 4 Điều 177 của Bộ luật này.\n2. Đã hoàn thành công việc theo hợp đồng lao động.\n3. Hai bên thỏa thuận chấm",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0050",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 37. Trường hợp người sử dụng lao động không được thực hiện quyền đơn phương chấm dứt hợp đồng lao động",
+    "text": "Điều 37. Trường hợp người sử dụng lao động không được thực hiện quyền đơn phương chấm dứt hợp đồng lao động\n1. Người lao động ốm đau hoặc bị tai nạn, bệnh nghề nghiệp đang điều trị, điều dưỡng theo chỉ định của cơ sở khá",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0047",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 36. Quyền đơn phương chấm dứt hợp đồng lao động của người sử dụng lao động",
+    "text": "Điều 36. Quyền đơn phương chấm dứt hợp đồng lao động của người sử dụng lao động\n1. Người sử dụng lao động có quyền đơn phương chấm dứt hợp đồng lao động trong trường hợp sau đây:\na) Người lao động thường xuyên không hoàn",
+    "gold": true
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0051",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 38. Hủy bỏ việc đơn phương chấm dứt hợp đồng lao động",
+    "text": "Điều 38. Hủy bỏ việc đơn phương chấm dứt hợp đồng lao động\nMỗi bên đều có quyền hủy bỏ việc đơn phương chấm dứt hợp đồng lao động trước khi hết thời hạn báo trước nhưng phải thông báo bằng văn bản và phải được bên kia đồ",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0165",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 138. Quyền đơn phương chấm dứt, tạm hoãn hợp đồng lao động của lao động nữ mang thai",
+    "text": "Điều 138. Quyền đơn phương chấm dứt, tạm hoãn hợp đồng lao động của lao động nữ mang thai\n1. Lao động nữ mang thai nếu có xác nhận của cơ sở khám bệnh, chữa bệnh có thẩm quyền về việc tiếp tục làm việc sẽ ảnh hưởng xấu t",
+    "gold": false
+   }
+  ],
+  "top5_jina": [
+   {
+    "id": "56c6bfc5e8c4e7c9:0048",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 36. Quyền đơn phương chấm dứt hợp đồng lao động của người sử dụng lao động",
+    "text": "Khi sức khỏe của người lao động bình phục thì người sử dụng lao động xem xét để tiếp tục giao kết hợp đồng lao động với người lao động;\nc) Do thiên tai, hỏa hoạn, dịch bệnh nguy hiểm, địch họa hoặc di dời, thu hẹp sản xu",
+    "gold": true
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0050",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 37. Trường hợp người sử dụng lao động không được thực hiện quyền đơn phương chấm dứt hợp đồng lao động",
+    "text": "Điều 37. Trường hợp người sử dụng lao động không được thực hiện quyền đơn phương chấm dứt hợp đồng lao động\n1. Người lao động ốm đau hoặc bị tai nạn, bệnh nghề nghiệp đang điều trị, điều dưỡng theo chỉ định của cơ sở khá",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0150",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 125. Áp dụng hình thức xử lý kỷ luật sa thải",
+    "text": "Điều 125. Áp dụng hình thức xử lý kỷ luật sa thải\nHình thức xử lý kỷ luật sa thải được người sử dụng lao động áp dụng trong trường hợp sau đây:\n1. Người lao động có hành vi trộm cắp, tham ô, đánh bạc, cố ý gây thương tíc",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0168",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 140. Bảo đảm việc làm cho lao động nghỉ thai sản",
+    "text": "Điều 140. Bảo đảm việc làm cho lao động nghỉ thai sản\nLao động được bảo đảm việc làm cũ khi trở lại làm việc sau khi nghỉ hết thời gian theo quy định tại các khoản 1, 3 và 5 Điều 139 của Bộ luật này mà không bị cắt giảm ",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0596",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 578. Chấm dứt thực hiện công việc không có ủy quyền",
+    "text": "Điều 578. Chấm dứt thực hiện công việc không có ủy quyền\nViệc thực hiện công việc không có ủy quyền chấm dứt trong trường hợp sau đây:\n1. Theo yêu cầu của người có công việc được thực hiện;\n2. Người có công việc được thự",
+    "gold": false
+   }
+  ],
+  "errors": {}
+ },
+ {
+  "id": "d05",
+  "type": "paraphrase",
+  "question": "công ty nợ lương mấy tháng rồi, giờ em nghỉ ngang luôn có bị sao không",
+  "reference": "Không được trả đủ lương hoặc trả không đúng thời hạn thì người lao động được đơn phương chấm dứt HĐLĐ không cần báo trước (Điều 35 khoản 2 điểm b BLLĐ).",
+  "gold": [
+   "bo_luat_lao_dong_2019 Điều 35"
+  ],
+  "hyde": "Trường hợp người sử dụng lao động không trả đủ hoặc trả lương không đúng hạn, người lao động có quyền đơn phương chấm dứt hợp đồng lao động mà không cần báo trước, trừ trường hợp việc chậm trả thuộc trường hợp bất khả kháng theo quy định. Việc nghỉ việc không làm chấm dứt nghĩa vụ của công ty trong việc thanh toán tiền lương còn nợ và các khoản liên quan theo hợp đồng lao động. Người lao động nên lưu giữ hợp đồng, bảng công, tin nhắn và chứng từ thể hiện việc chậm trả lương để làm căn cứ yêu cầu giải quyết tranh chấp lao động.",
+  "ranks": {
+   "dense": [
+    17
+   ],
+   "hyde": [
+    1
+   ],
+   "rrf": [
+    6
+   ],
+   "rerank": [
+    1
+   ],
+   "all_bm25": [
+    1
+   ],
+   "bm25_arm": [
+    null
+   ],
+   "jina": [
+    17
+   ]
+  },
+  "top5_best": [
+   {
+    "id": "56c6bfc5e8c4e7c9:0045",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 35. Quyền đơn phương chấm dứt hợp đồng lao động của người lao động",
+    "text": "Điều 35. Quyền đơn phương chấm dứt hợp đồng lao động của người lao động\n1. Người lao động có quyền đơn phương chấm dứt hợp đồng lao động nhưng phải báo trước cho người sử dụng lao động như sau:\na) Ít nhất 45 ngày nếu làm",
+    "gold": true
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0053",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 40. Nghĩa vụ của người lao động khi đơn phương chấm dứt hợp đồng lao động trái pháp luật",
+    "text": "Điều 40. Nghĩa vụ của người lao động khi đơn phương chấm dứt hợp đồng lao động trái pháp luật\n1. Không được trợ cấp thôi việc.\n2. Phải bồi thường cho người sử dụng lao động nửa tháng tiền lương theo hợp đồng lao động và ",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0118",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 97. Kỳ hạn trả lương",
+    "text": "Điều 97. Kỳ hạn trả lương\n1. Người lao động hưởng lương theo giờ, ngày, tuần thì được trả lương sau giờ, ngày, tuần làm việc hoặc được trả gộp do hai bên thỏa thuận nhưng không quá 15 ngày phải được trả gộp một lần.\n2. N",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0063",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 48. Trách nhiệm khi chấm dứt hợp đồng lao động",
+    "text": "Điều 48. Trách nhiệm khi chấm dứt hợp đồng lao động\n1. Trong thời hạn 14 ngày làm việc kể từ ngày chấm dứt hợp đồng lao động, hai bên có trách nhiệm thanh toán đầy đủ các khoản tiền có liên quan đến quyền lợi của mỗi bên",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0055",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 41. Nghĩa vụ của người sử dụng lao động khi đơn phương chấm dứt hợp đồng lao động trái pháp luật",
+    "text": "2. Trường hợp người lao động không muốn tiếp tục làm việc thì ngoài khoản tiền phải trả quy định tại khoản 1 Điều này người sử dụng lao động phải trả trợ cấp thôi việc theo quy định tại Điều 46 của Bộ luật này để chấm dứ",
+    "gold": false
+   }
+  ],
+  "top5_jina": [
+   {
+    "id": "56c6bfc5e8c4e7c9:0120",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 99. Tiền lương ngừng việc",
+    "text": "Điều 99. Tiền lương ngừng việc\nTrường hợp phải ngừng việc, người lao động được trả lương như sau:\n1. Nếu do lỗi của người sử dụng lao động thì người lao động được trả đủ tiền lương theo hợp đồng lao động;\n2. Nếu do lỗi c",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0118",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 97. Kỳ hạn trả lương",
+    "text": "Điều 97. Kỳ hạn trả lương\n1. Người lao động hưởng lương theo giờ, ngày, tuần thì được trả lương sau giờ, ngày, tuần làm việc hoặc được trả gộp do hai bên thỏa thuận nhưng không quá 15 ngày phải được trả gộp một lần.\n2. N",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0135",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 113. Nghỉ hằng năm",
+    "text": "Điều 113. Nghỉ hằng năm\n1. Người lao động làm việc đủ 12 tháng cho một người sử dụng lao động thì được nghỉ hằng năm, hưởng nguyên lương theo hợp đồng lao động như sau:\na) 12 ngày làm việc đối với người làm công việc tro",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0138",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 115. Nghỉ việc riêng, nghỉ không hưởng lương",
+    "text": "Điều 115. Nghỉ việc riêng, nghỉ không hưởng lương\n1. Người lao động được nghỉ việc riêng mà vẫn hưởng nguyên lương và phải thông báo với người sử dụng lao động trong trường hợp sau đây:\na) Kết hôn: nghỉ 03 ngày;\nb) Con đ",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0153",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 128. Tạm đình chỉ công việc",
+    "text": "Điều 128. Tạm đình chỉ công việc\n1. Người sử dụng lao động có quyền tạm đình chỉ công việc của người lao động khi vụ việc vi phạm có những tình tiết phức tạp nếu xét thấy để người lao động tiếp tục làm việc sẽ gây khó kh",
+    "gold": false
+   }
+  ],
+  "errors": {}
+ },
+ {
+  "id": "d06",
+  "type": "multi",
+  "question": "đang bầu mà bị công ty cho nghỉ việc, chị có làm gì được không",
+  "reference": "Người sử dụng lao động không được đơn phương chấm dứt HĐLĐ với lao động nữ mang thai, đang nghỉ thai sản hoặc nuôi con dưới 12 tháng tuổi (Điều 37), và không được sa thải/chấm dứt HĐLĐ vì lý do mang thai (Điều 137).",
+  "gold": [
+   "bo_luat_lao_dong_2019 Điều 37",
+   "bo_luat_lao_dong_2019 Điều 137"
+  ],
+  "hyde": "Trường hợp người lao động nữ đang mang thai bị công ty đơn phương chấm dứt hợp đồng lao động vì lý do mang thai, việc chấm dứt đó có thể trái quy định về bảo vệ lao động nữ. Chị nên yêu cầu công ty thông báo bằng văn bản về căn cứ và lý do chấm dứt hợp đồng, đồng thời lưu giữ hợp đồng lao động, quyết định nghỉ việc và các tài liệu liên quan. Chị có thể gửi khiếu nại đến người sử dụng lao động hoặc cơ quan có thẩm quyền về lao động, yêu cầu hòa giải tranh chấp lao động hoặc khởi kiện để bảo vệ quyền và lợi ích hợp pháp của mình.",
+  "ranks": {
+   "dense": [
+    2,
+    15
+   ],
+   "hyde": [
+    3,
+    2
+   ],
+   "rrf": [
+    1,
+    5
+   ],
+   "rerank": [
+    1,
+    2
+   ],
+   "all_bm25": [
+    1,
+    2
+   ],
+   "bm25_arm": [
+    7,
+    18
+   ],
+   "jina": [
+    2,
+    15
+   ]
+  },
+  "top5_best": [
+   {
+    "id": "56c6bfc5e8c4e7c9:0050",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 37. Trường hợp người sử dụng lao động không được thực hiện quyền đơn phương chấm dứt hợp đồng lao động",
+    "text": "Điều 37. Trường hợp người sử dụng lao động không được thực hiện quyền đơn phương chấm dứt hợp đồng lao động\n1. Người lao động ốm đau hoặc bị tai nạn, bệnh nghề nghiệp đang điều trị, điều dưỡng theo chỉ định của cơ sở khá",
+    "gold": true
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0163",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 137. Bảo vệ thai sản",
+    "text": "2. Lao động nữ làm nghề, công việc nặng nhọc, độc hại, nguy hiểm hoặc đặc biệt nặng nhọc, độc hại, nguy hiểm hoặc làm nghề, công việc có ảnh hưởng xấu tới chức năng sinh sản và nuôi con khi mang thai và có thông báo cho ",
+    "gold": true
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0054",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 41. Nghĩa vụ của người sử dụng lao động khi đơn phương chấm dứt hợp đồng lao động trái pháp luật",
+    "text": "Điều 41. Nghĩa vụ của người sử dụng lao động khi đơn phương chấm dứt hợp đồng lao động trái pháp luật\n1. Phải nhận người lao động trở lại làm việc theo hợp đồng lao động đã giao kết; phải trả tiền lương, đóng bảo hiểm xã",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0055",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 41. Nghĩa vụ của người sử dụng lao động khi đơn phương chấm dứt hợp đồng lao động trái pháp luật",
+    "text": "2. Trường hợp người lao động không muốn tiếp tục làm việc thì ngoài khoản tiền phải trả quy định tại khoản 1 Điều này người sử dụng lao động phải trả trợ cấp thôi việc theo quy định tại Điều 46 của Bộ luật này để chấm dứ",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0168",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 140. Bảo đảm việc làm cho lao động nghỉ thai sản",
+    "text": "Điều 140. Bảo đảm việc làm cho lao động nghỉ thai sản\nLao động được bảo đảm việc làm cũ khi trở lại làm việc sau khi nghỉ hết thời gian theo quy định tại các khoản 1, 3 và 5 Điều 139 của Bộ luật này mà không bị cắt giảm ",
+    "gold": false
+   }
+  ],
+  "top5_jina": [
+   {
+    "id": "56c6bfc5e8c4e7c9:0168",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 140. Bảo đảm việc làm cho lao động nghỉ thai sản",
+    "text": "Điều 140. Bảo đảm việc làm cho lao động nghỉ thai sản\nLao động được bảo đảm việc làm cũ khi trở lại làm việc sau khi nghỉ hết thời gian theo quy định tại các khoản 1, 3 và 5 Điều 139 của Bộ luật này mà không bị cắt giảm ",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0050",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 37. Trường hợp người sử dụng lao động không được thực hiện quyền đơn phương chấm dứt hợp đồng lao động",
+    "text": "Điều 37. Trường hợp người sử dụng lao động không được thực hiện quyền đơn phương chấm dứt hợp đồng lao động\n1. Người lao động ốm đau hoặc bị tai nạn, bệnh nghề nghiệp đang điều trị, điều dưỡng theo chỉ định của cơ sở khá",
+    "gold": true
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0057",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 42. Nghĩa vụ của người sử dụng lao động trong trường hợp thay đổi cơ cấu, công nghệ hoặc vì lý do kinh tế",
+    "text": "5. Trong trường hợp người sử dụng lao động không thể giải quyết được việc làm mà phải cho người lao động thôi việc thì phải trả trợ cấp mất việc làm theo quy định tại Điều 47 của Bộ luật này.\n6. Việc cho thôi việc đối vớ",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0054",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 41. Nghĩa vụ của người sử dụng lao động khi đơn phương chấm dứt hợp đồng lao động trái pháp luật",
+    "text": "Điều 41. Nghĩa vụ của người sử dụng lao động khi đơn phương chấm dứt hợp đồng lao động trái pháp luật\n1. Phải nhận người lao động trở lại làm việc theo hợp đồng lao động đã giao kết; phải trả tiền lương, đóng bảo hiểm xã",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0120",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 99. Tiền lương ngừng việc",
+    "text": "Điều 99. Tiền lương ngừng việc\nTrường hợp phải ngừng việc, người lao động được trả lương như sau:\n1. Nếu do lỗi của người sử dụng lao động thì người lao động được trả đủ tiền lương theo hợp đồng lao động;\n2. Nếu do lỗi c",
+    "gold": false
+   }
+  ],
+  "errors": {}
+ },
+ {
+  "id": "d07",
+  "type": "multi",
+  "question": "tháng nào cũng phải ở lại làm tới 9-10h tối mà chẳng thấy thêm đồng nào",
+  "reference": "Làm thêm giờ phải được người lao động đồng ý và không vượt giới hạn (50% giờ làm bình thường/ngày, 40 giờ/tháng) (Điều 107); phải trả ít nhất 150% lương ngày thường, cộng thêm phụ cấp làm việc ban đêm nếu có (Điều 98).",
+  "gold": [
+   "bo_luat_lao_dong_2019 Điều 107",
+   "bo_luat_lao_dong_2019 Điều 98"
+  ],
+  "hyde": "Việc người lao động thường xuyên làm việc đến 21–22 giờ ngoài thời giờ làm việc bình thường được xác định là làm thêm giờ và phải được người sử dụng lao động thanh toán tiền lương làm thêm giờ theo quy định. Tiền lương làm thêm được tính theo thời điểm làm việc, ngày làm việc và tiền lương thực trả của công việc đang làm; việc không chi trả khoản này có thể là hành vi vi phạm nghĩa vụ về tiền lương. Người lao động có quyền yêu cầu đối chiếu bảng chấm công, bảng lương và đề nghị thanh toán đầy đủ khoản tiền còn thiếu. Trường hợp không được giải quyết, người lao động có thể gửi yêu cầu đến cơ quan có thẩm quyền để được hướng dẫn hoặc xử lý.",
+  "ranks": {
+   "dense": [
+    8,
+    2
+   ],
+   "hyde": [
+    2,
+    1
+   ],
+   "rrf": [
+    4,
+    1
+   ],
+   "rerank": [
+    4,
+    1
+   ],
+   "all_bm25": [
+    3,
+    1
+   ],
+   "bm25_arm": [
+    null,
+    null
+   ],
+   "jina": [
+    8,
+    2
+   ]
+  },
+  "top5_best": [
+   {
+    "id": "56c6bfc5e8c4e7c9:0119",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 98. Tiền lương làm thêm giờ, làm việc vào ban đêm",
+    "text": "Điều 98. Tiền lương làm thêm giờ, làm việc vào ban đêm\n1. Người lao động làm thêm giờ được trả lương tính theo đơn giá tiền lương hoặc tiền lương thực trả theo công việc đang làm như sau:\na) Vào ngày thường, ít nhất bằng",
+    "gold": true
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0126",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 105. Thời giờ làm việc bình thường",
+    "text": "Điều 105. Thời giờ làm việc bình thường\n1. Thời giờ làm việc bình thường không quá 08 giờ trong 01 ngày và không quá 48 giờ trong 01 tuần.\n2. Người sử dụng lao động có quyền quy định thời giờ làm việc theo ngày hoặc tuần",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0116",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 95. Trả lương",
+    "text": "Điều 95. Trả lương\n1. Người sử dụng lao động trả lương cho người lao động căn cứ vào tiền lương đã thỏa thuận, năng suất lao động và chất lượng thực hiện công việc.\n2. Tiền lương ghi trong hợp đồng lao động và tiền lương",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0128",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 107. Làm thêm giờ",
+    "text": "Điều 107. Làm thêm giờ\n1. Thời gian làm thêm giờ là khoảng thời gian làm việc ngoài thời giờ làm việc bình thường theo quy định của pháp luật, thỏa ước lao động tập thể hoặc nội quy lao động.\n2. Người sử dụng lao động đư",
+    "gold": true
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0174",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 146. Thời giờ làm việc của người chưa thành niên",
+    "text": "Điều 146. Thời giờ làm việc của người chưa thành niên\n1. Thời giờ làm việc của người chưa đủ 15 tuổi không được quá 04 giờ trong 01 ngày và 20 giờ trong 01 tuần; không được làm thêm giờ, làm việc vào ban đêm.\n2. Thời giờ",
+    "gold": false
+   }
+  ],
+  "top5_jina": [
+   {
+    "id": "d55d891c30d0f714:0199",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 134. Tính thời hạn",
+    "text": "Điều 134. Tính thời hạn\n1. Thời hạn mà Bộ luật này quy định được tính theo giờ, ngày, tháng, năm. Đêm được tính từ 22 giờ đến 06 giờ sáng ngày hôm sau.\nKhi tính thời hạn theo ngày thì thời hạn sẽ hết vào lúc 24 giờ ngày ",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0119",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 98. Tiền lương làm thêm giờ, làm việc vào ban đêm",
+    "text": "Điều 98. Tiền lương làm thêm giờ, làm việc vào ban đêm\n1. Người lao động làm thêm giờ được trả lương tính theo đơn giá tiền lương hoặc tiền lương thực trả theo công việc đang làm như sau:\na) Vào ngày thường, ít nhất bằng",
+    "gold": true
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0127",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 106. Giờ làm việc ban đêm",
+    "text": "Điều 106. Giờ làm việc ban đêm\nGiờ làm việc ban đêm được tính từ 22 giờ đến 06 giờ sáng ngày hôm sau.",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0118",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 97. Kỳ hạn trả lương",
+    "text": "Điều 97. Kỳ hạn trả lương\n1. Người lao động hưởng lương theo giờ, ngày, tuần thì được trả lương sau giờ, ngày, tuần làm việc hoặc được trả gộp do hai bên thỏa thuận nhưng không quá 15 ngày phải được trả gộp một lần.\n2. N",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0130",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 108. Làm thêm giờ trong trường hợp đặc biệt",
+    "text": "Điều 108. Làm thêm giờ trong trường hợp đặc biệt\nNgười sử dụng lao động có quyền yêu cầu người lao động làm thêm giờ vào bất kỳ ngày nào mà không bị giới hạn về số giờ làm thêm theo quy định tại Điều 107 của Bộ luật này ",
+    "gold": false
+   }
+  ],
+  "errors": {}
+ },
+ {
+  "id": "d08",
+  "type": "multi",
+  "question": "cho đứa bạn mượn 50 triệu giờ nó chặn hết liên lạc rồi",
+  "reference": "Bên vay phải trả đủ khi đến hạn, có thể khởi kiện đòi nợ (Điều 466 BLDS). Nếu vay rồi bỏ trốn, dùng thủ đoạn gian dối hoặc cố tình không trả để chiếm đoạt từ 4 triệu đồng trở lên có thể bị xử lý tội lạm dụng tín nhiệm chiếm đoạt tài sản (Điều 175 BLHS).",
+  "gold": [
+   "bo_luat_dan_su_2015 Điều 466",
+   "bo_luat_hinh_su_2015 Điều 175"
+  ],
+  "hyde": "Trường hợp đã giao cho người khác vay 50 triệu đồng nhưng người vay chặn mọi phương thức liên lạc và không thực hiện nghĩa vụ trả nợ, bên cho vay cần tập hợp chứng cứ về việc giao nhận tiền, thỏa thuận vay và các lần yêu cầu thanh toán. Có thể gửi văn bản yêu cầu trả nợ đến nơi cư trú hoặc làm việc của người vay, đồng thời khởi kiện tại Tòa án có thẩm quyền để yêu cầu thực hiện nghĩa vụ trả nợ và lãi (nếu có căn cứ). Việc chậm trả hoặc cắt đứt liên lạc chưa đương nhiên cấu thành tội phạm; cần xem xét ý định chiếm đoạt và các tình tiết cụ thể để xác định có dấu hiệu lừa đảo chiếm đoạt tài sản hoặc lạm dụng tín nhiệm chiếm đoạt tài sản hay không.",
+  "ranks": {
+   "dense": [
+    null,
+    null
+   ],
+   "hyde": [
+    2,
+    1
+   ],
+   "rrf": [
+    4,
+    1
+   ],
+   "rerank": [
+    4,
+    1
+   ],
+   "all_bm25": [
+    4,
+    1
+   ],
+   "bm25_arm": [
+    null,
+    6
+   ],
+   "jina": [
+    764,
+    79
+   ]
+  },
+  "top5_best": [
+   {
+    "id": "88138f1cdf1b763c:0216",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 175. Tội lạm dụng tín nhiệm chiếm đoạt tài sản",
+    "text": "Điều 175. Tội lạm dụng tín nhiệm chiếm đoạt tài sản\n1. Người nào thực hiện một trong những hành vi sau đây chiếm đoạt tài sản của người khác trị giá từ 4.000.000 đồng đến dưới 50.000.000 đồng hoặc dưới 4.000.000 đồng như",
+    "gold": true
+   },
+   {
+    "id": "88138f1cdf1b763c:0214",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 174. Tội lừa đảo chiếm đoạt tài sản",
+    "text": "Điều 174. Tội lừa đảo chiếm đoạt tài sản\n1. Người nào bằng thủ đoạn gian dối chiếm đoạt tài sản của người khác trị giá từ 2.000.000 đồng đến dưới 50.000.000 đồng hoặc dưới 2.000.000 đồng nhưng thuộc một trong các trường ",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0487",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 469. Thực hiện hợp đồng vay không kỳ hạn",
+    "text": "Điều 469. Thực hiện hợp đồng vay không kỳ hạn\n1. Đối với hợp đồng vay không kỳ hạn và không có lãi thì bên cho vay có quyền đòi lại tài sản và bên vay cũng có quyền trả nợ vào bất cứ lúc nào, nhưng phải báo cho nhau biết",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0484",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 466. Nghĩa vụ trả nợ của bên vay",
+    "text": "Điều 466. Nghĩa vụ trả nợ của bên vay\n1. Bên vay tài sản là tiền thì phải trả đủ tiền khi đến hạn; nếu tài sản là vật thì phải trả vật cùng loại đúng số lượng, chất lượng, trừ trường hợp có thoả thuận khác.\n2. Trường hợp",
+    "gold": true
+   },
+   {
+    "id": "88138f1cdf1b763c:0207",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 170. Tội cưỡng đoạt tài sản",
+    "text": "Điều 170. Tội cưỡng đoạt tài sản\n1. Người nào đe dọa sẽ dùng vũ lực hoặc có thủ đoạn khác uy hiếp tinh thần người khác nhằm chiếm đoạt tài sản, thì bị phạt tù từ 01 năm đến 05 năm.\n2. Phạm tội thuộc một trong các trường ",
+    "gold": false
+   }
+  ],
+  "top5_jina": [
+   {
+    "id": "d3e7cff20880c16d:0680",
+    "src": "bo_luat_to_tung_dan_su_2015",
+    "sec": "Điều 502. Thời hiệu khiếu nại",
+    "text": "Điều 502. Thời hiệu khiếu nại\nThời hiệu khiếu nại là 15 ngày, kể từ ngày người khiếu nại nhận được hoặc biết được quyết định, hành vi tố tụng mà người đó cho rằng có vi phạm pháp luật.\nTrường hợp có sự kiện bất khả kháng",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0466",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 287. Tội cản trở hoặc gây rối loạn hoạt động của mạng máy tính, mạng viễn thông, phương tiện điện tử",
+    "text": "Điều 287. Tội cản trở hoặc gây rối loạn hoạt động của mạng máy tính, mạng viễn thông, phương tiện điện tử\n1. Người nào tự ý xóa, làm tổn hại hoặc thay đổi phần mềm, dữ liệu điện tử hoặc ngăn chặn trái phép việc truyền tả",
+    "gold": false
+   },
+   {
+    "id": "d55d891c30d0f714:0685",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 506. Hủy bỏ hoặc thay thế biện pháp ngăn chặn",
+    "text": "Điều 506. Hủy bỏ hoặc thay thế biện pháp ngăn chặn\n1. Khi Tòa án có thẩm quyền quyết định từ chối dẫn độ hoặc hết thời hạn 15 ngày kể từ ngày quyết định thi hành quyết định dẫn độ có hiệu lực mà nước yêu cầu dẫn độ không",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0158",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 146. Quy định về thời hạn, thời điểm tính thời hạn",
+    "text": "Điều 146. Quy định về thời hạn, thời điểm tính thời hạn\n1. Trường hợp các bên có thoả thuận về thời hạn là một năm, nửa năm, một tháng, nửa tháng, một tuần, một ngày, một giờ, một phút mà khoảng thời gian diễn ra không l",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0096",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 78. Đình chỉ hoạt động có thời hạn",
+    "text": "Điều 78. Đình chỉ hoạt động có thời hạn\n1. Đình chỉ hoạt động có thời hạn là tạm dừng hoạt động của pháp nhân thương mại trong một hoặc một số lĩnh vực mà pháp nhân thương mại phạm tội gây thiệt hại đến tính mạng, sức kh",
+    "gold": false
+   }
+  ],
+  "errors": {}
+ },
+ {
+  "id": "d09",
+  "type": "paraphrase",
+  "question": "chuyển khoản cọc mua hàng trên mạng xong bị block luôn",
+  "reference": "Dùng thủ đoạn gian dối chiếm đoạt tài sản từ 2 triệu đồng trở lên là tội lừa đảo chiếm đoạt tài sản (Điều 174 BLHS); khoản 1: cải tạo không giam giữ đến 3 năm hoặc tù 6 tháng-3 năm.",
+  "gold": [
+   "bo_luat_hinh_su_2015 Điều 174"
+  ],
+  "hyde": "Trường hợp người mua đã chuyển tiền đặt cọc để mua hàng qua mạng nhưng sau đó bị người bán chặn liên lạc, cần lưu giữ chứng từ chuyển khoản, nội dung trao đổi, thông tin tài khoản nhận tiền và đường dẫn trang bán hàng để làm tài liệu chứng minh. Người bị hại nên liên hệ ngay ngân hàng để đề nghị tra soát giao dịch, đồng thời trình báo cơ quan công an nơi cư trú hoặc nơi xảy ra vụ việc và cung cấp các tài liệu liên quan. Hành vi nhận tiền đặt cọc rồi cố tình chiếm đoạt có thể bị xem xét xử lý theo quy định về hành vi lừa đảo chiếm đoạt tài sản, tùy thuộc vào kết quả xác minh và chứng cứ thu thập được.",
+  "ranks": {
+   "dense": [
+    null
+   ],
+   "hyde": [
+    null
+   ],
+   "rrf": [
+    null
+   ],
+   "rerank": [
+    null
+   ],
+   "all_bm25": [
+    null
+   ],
+   "bm25_arm": [
+    null
+   ],
+   "jina": [
+    575
+   ]
+  },
+  "top5_best": [
+   {
+    "id": "d3e7cff20880c16d:0174",
+    "src": "bo_luat_to_tung_dan_su_2015",
+    "sec": "Điều 124. Phong tỏa tài khoản tại ngân hàng, tổ chức tín dụng khác, kho bạc nhà nước",
+    "text": "Điều 124. Phong tỏa tài khoản tại ngân hàng, tổ chức tín dụng khác, kho bạc nhà nước\nPhong tỏa tài khoản tại ngân hàng, tổ chức tín dụng khác, kho bạc nhà nước được áp dụng nếu trong quá trình giải quyết vụ án có căn cứ ",
+    "gold": false
+   },
+   {
+    "id": "d55d891c30d0f714:0193",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 129. Phong tỏa tài khoản",
+    "text": "3. Chỉ phong tỏa số tiền trong tài khoản tương ứng với mức có thể bị phạt tiền, bị tịch thu tài sản hoặc bồi thường thiệt hại. Người được giao thực hiện lệnh phong tỏa, quản lý tài khoản bị phong tỏa mà giải tỏa việc pho",
+    "gold": false
+   },
+   {
+    "id": "d55d891c30d0f714:0592",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 438. Phong tỏa tài khoản",
+    "text": "Điều 438. Phong tỏa tài khoản\n1. Phong tỏa tài khoản áp dụng đối với pháp nhân bị khởi tố, điều tra, truy tố, xét xử về tội mà Bộ luật hình sự quy định hình phạt tiền hoặc để bảo đảm bồi thường thiệt hại và có căn cứ xác",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0345",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 328. Đặt cọc",
+    "text": "Điều 328. Đặt cọc\n1. Đặt cọc là việc một bên (sau đây gọi là bên đặt cọc) giao cho bên kia (sau đây gọi là bên nhận đặt cọc) một khoản tiền hoặc kim khí quý, đá quý hoặc vật có giá trị khác (sau đây gọi chung là tài sản ",
+    "gold": false
+   },
+   {
+    "id": "d55d891c30d0f714:0192",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 129. Phong tỏa tài khoản",
+    "text": "Điều 129. Phong tỏa tài khoản\n1. Phong tỏa tài khoản chỉ áp dụng đối với người bị buộc tội về tội mà Bộ luật hình sự quy định hình phạt tiền, bị tịch thu tài sản hoặc để bảo đảm bồi thường thiệt hại khi có căn cứ xác địn",
+    "gold": false
+   }
+  ],
+  "top5_jina": [
+   {
+    "id": "d3e7cff20880c16d:0174",
+    "src": "bo_luat_to_tung_dan_su_2015",
+    "sec": "Điều 124. Phong tỏa tài khoản tại ngân hàng, tổ chức tín dụng khác, kho bạc nhà nước",
+    "text": "Điều 124. Phong tỏa tài khoản tại ngân hàng, tổ chức tín dụng khác, kho bạc nhà nước\nPhong tỏa tài khoản tại ngân hàng, tổ chức tín dụng khác, kho bạc nhà nước được áp dụng nếu trong quá trình giải quyết vụ án có căn cứ ",
+    "gold": false
+   },
+   {
+    "id": "d55d891c30d0f714:0192",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 129. Phong tỏa tài khoản",
+    "text": "Điều 129. Phong tỏa tài khoản\n1. Phong tỏa tài khoản chỉ áp dụng đối với người bị buộc tội về tội mà Bộ luật hình sự quy định hình phạt tiền, bị tịch thu tài sản hoặc để bảo đảm bồi thường thiệt hại khi có căn cứ xác địn",
+    "gold": false
+   },
+   {
+    "id": "5dc99a513d86dc54:0205",
+    "src": "bo_luat_hang_hai_2015",
+    "sec": "Điều 168. Tiền bán đấu giá hàng hoá",
+    "text": "Điều 168. Tiền bán đấu giá hàng hoá\n1. Sau khi khấu trừ các khoản nợ của người nhận hàng, chi phí liên quan đến việc gửi và bán đấu giá hàng hóa quy định tại Điều 167 của Bộ luật này, số tiền còn thừa phải được gửi vào n",
+    "gold": false
+   },
+   {
+    "id": "d3e7cff20880c16d:0192",
+    "src": "bo_luat_to_tung_dan_su_2015",
+    "sec": "Điều 136. Buộc thực hiện biện pháp bảo đảm",
+    "text": "2. Khoản tiền, kim khí quý, đá quý hoặc giấy tờ có giá phải được gửi vào tài khoản phong tỏa tại ngân hàng nơi có trụ sở của Tòa án quyết định áp dụng biện pháp khẩn cấp tạm thời trong thời hạn do Tòa án ấn định.\nTrong t",
+    "gold": false
+   },
+   {
+    "id": "d55d891c30d0f714:0592",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 438. Phong tỏa tài khoản",
+    "text": "Điều 438. Phong tỏa tài khoản\n1. Phong tỏa tài khoản áp dụng đối với pháp nhân bị khởi tố, điều tra, truy tố, xét xử về tội mà Bộ luật hình sự quy định hình phạt tiền hoặc để bảo đảm bồi thường thiệt hại và có căn cứ xác",
+    "gold": false
+   }
+  ],
+  "errors": {}
+ },
+ {
+  "id": "d10",
+  "type": "multi",
+  "question": "mẹ mất rồi mà sổ đỏ vẫn đứng tên mẹ, mấy anh em đang cãi nhau",
+  "reference": "Không có di chúc thì chia thừa kế theo pháp luật (Điều 650); hàng thừa kế thứ nhất gồm vợ/chồng, cha mẹ đẻ/nuôi, con đẻ/nuôi của người chết, được hưởng phần bằng nhau (Điều 651).",
+  "gold": [
+   "bo_luat_dan_su_2015 Điều 650",
+   "bo_luat_dan_su_2015 Điều 651"
+  ],
+  "hyde": "Quyền sử dụng đất vẫn đứng tên người mẹ đã chết được xác định là di sản thừa kế và được phân chia theo di chúc hợp pháp; nếu không có di chúc hoặc di chúc không hợp pháp thì việc thừa kế được giải quyết theo pháp luật. Những người thuộc hàng thừa kế có quyền thỏa thuận phân chia di sản, lập văn bản khai nhận hoặc thỏa thuận phân chia di sản và thực hiện thủ tục đăng ký biến động tại cơ quan đăng ký đất đai. Trường hợp các đồng thừa kế không thống nhất về phần quyền, việc quản lý hoặc phân chia thửa đất, có thể yêu cầu Tòa án giải quyết tranh chấp thừa kế quyền sử dụng đất. Thời hiệu khởi kiện và hồ sơ cần thiết được xác định căn cứ vào thời điểm mở thừa kế, giấy tờ về quyền sử dụng đất và quan hệ thừa kế.",
+  "ranks": {
+   "dense": [
+    null,
+    null
+   ],
+   "hyde": [
+    3,
+    16
+   ],
+   "rrf": [
+    8,
+    null
+   ],
+   "rerank": [
+    3,
+    null
+   ],
+   "all_bm25": [
+    3,
+    null
+   ],
+   "bm25_arm": [
+    null,
+    null
+   ],
+   "jina": [
+    79,
+    37
+   ]
+  },
+  "top5_best": [
+   {
+    "id": "d4825a1af3d31c64:0641",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 623. Thời hiệu thừa kế",
+    "text": "Điều 623. Thời hiệu thừa kế\n1. Thời hiệu để người thừa kế yêu cầu chia di sản là 30 năm đối với bất động sản, 10 năm đối với động sản, kể từ thời điểm mở thừa kế. Hết thời hạn này thì di sản thuộc về người thừa kế đang q",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0678",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 660. Phân chia di sản theo pháp luật",
+    "text": "Điều 660. Phân chia di sản theo pháp luật\n1. Khi phân chia di sản, nếu có người thừa kế cùng hàng đã thành thai nhưng chưa sinh ra thì phải dành lại một phần di sản bằng phần mà người thừa kế khác được hưởng để nếu người",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0668",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 650. Những trường hợp thừa kế theo pháp luật",
+    "text": "Điều 650. Những trường hợp thừa kế theo pháp luật\n1. Thừa kế theo pháp luật được áp dụng trong trường hợp sau đây:\na) Không có di chúc;\nb) Di chúc không hợp pháp;\nc) Những người thừa kế theo di chúc chết trước hoặc chết ",
+    "gold": true
+   },
+   {
+    "id": "d4825a1af3d31c64:0255",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 238. Chủ sở hữu chuyển giao quyền sở hữu của mình cho người khác",
+    "text": "Điều 238. Chủ sở hữu chuyển giao quyền sở hữu của mình cho người khác\nKhi chủ sở hữu chuyển giao quyền sở hữu của mình cho người khác thông qua hợp đồng mua bán, trao đổi, tặng cho, cho vay, hợp đồng chuyển quyền sở hữu ",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0674",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 656. Họp mặt những người thừa kế",
+    "text": "Điều 656. Họp mặt những người thừa kế\n1. Sau khi có thông báo về việc mở thừa kế hoặc di chúc được công bố, những người thừa kế có thể họp mặt để thoả thuận những việc sau đây:\na) Cử người quản lý di sản, người phân chia",
+    "gold": false
+   }
+  ],
+  "top5_jina": [
+   {
+    "id": "d4825a1af3d31c64:0232",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 218. Định đoạt tài sản chung",
+    "text": "Trường hợp bán phần quyền sở hữu mà có sự vi phạm về quyền ưu tiên mua thì trong thời hạn 03 tháng, kể từ ngày phát hiện có sự vi phạm về quyền ưu tiên mua, chủ sở hữu chung theo phần trong số các chủ sở hữu chung có quy",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0070",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 65. Quản lý tài sản của người vắng mặt tại nơi cư trú",
+    "text": "Điều 65. Quản lý tài sản của người vắng mặt tại nơi cư trú\n1. Theo yêu cầu của người có quyền, lợi ích liên quan, Tòa án giao tài sản của người vắng mặt tại nơi cư trú cho người sau đây quản lý:\na) Đối với tài sản đã đượ",
+    "gold": false
+   },
+   {
+    "id": "d3e7cff20880c16d:0032",
+    "src": "bo_luat_to_tung_dan_su_2015",
+    "sec": "Điều 28. Những tranh chấp về hôn nhân và gia đình thuộc thẩm quyền giải quyết của Tòa án",
+    "text": "Điều 28. Những tranh chấp về hôn nhân và gia đình thuộc thẩm quyền giải quyết của Tòa án\n1. Ly hôn, tranh chấp về nuôi con, chia tài sản khi ly hôn; chia tài sản sau khi ly hôn.\n2. Tranh chấp về chia tài sản chung của vợ",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0142",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 133. Bảo vệ quyền lợi của người thứ ba ngay tình khi giao dịch dân sự vô hiệu",
+    "text": "Trường hợp tài sản phải đăng ký mà chưa được đăng ký tại cơ quan nhà nước có thẩm quyền thì giao dịch dân sự với người thứ ba bị vô hiệu, trừ trường hợp người thứ ba ngay tình nhận được tài sản này thông qua bán đấu giá ",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0233",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 219. Chia tài sản thuộc sở hữu chung",
+    "text": "Điều 219. Chia tài sản thuộc sở hữu chung\n1. Trường hợp sở hữu chung có thể phân chia thì mỗi chủ sở hữu chung đều có quyền yêu cầu chia tài sản chung; nếu tình trạng sở hữu chung phải được duy trì trong một thời hạn the",
+    "gold": false
+   }
+  ],
+  "errors": {}
+ },
+ {
+  "id": "d11",
+  "type": "paraphrase",
+  "question": "tối qua chồng tôi bị công an đến nhà bắt đi, giờ chẳng ai báo gì cho gia đình cả",
+  "reference": "Người ra lệnh bắt phải thông báo ngay cho gia đình; Cơ quan điều tra nhận người phải thông báo cho gia đình trong 24 giờ (Điều 116 BLTTHS).",
+  "gold": [
+   "bo_luat_to_tung_hinh_su_2015 Điều 116"
+  ],
+  "hyde": "Trường hợp người thân bị cơ quan công an đưa đi làm việc hoặc bị bắt, gia đình có quyền liên hệ cơ quan thực hiện việc bắt giữ để xác minh nơi người đó đang bị quản lý và căn cứ của việc áp dụng biện pháp tố tụng. Nếu có quyết định tạm giữ hoặc tạm giam, việc lập hồ sơ, thông báo cho gia đình và bảo đảm quyền nhờ người bào chữa phải được thực hiện theo quy định pháp luật. Gia đình nên ghi nhận thời điểm, đơn vị và người đã tiến hành việc đưa đi, đồng thời gửi văn bản đề nghị cung cấp thông tin đến cơ quan có thẩm quyền. Trường hợp không được xác nhận thông tin hoặc có dấu hiệu bắt giữ trái pháp luật, gia đình có thể đề nghị luật sư hỗ trợ và gửi kiến nghị đến cơ quan kiểm sát có thẩm quyền.",
+  "ranks": {
+   "dense": [
+    1
+   ],
+   "hyde": [
+    1
+   ],
+   "rrf": [
+    1
+   ],
+   "rerank": [
+    1
+   ],
+   "all_bm25": [
+    1
+   ],
+   "bm25_arm": [
+    3
+   ],
+   "jina": [
+    1
+   ]
+  },
+  "top5_best": [
+   {
+    "id": "d55d891c30d0f714:0171",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 116. Thông báo về việc giữ người trong trường hợp khẩn cấp, bắt người",
+    "text": "Điều 116. Thông báo về việc giữ người trong trường hợp khẩn cấp, bắt người\nSau khi giữ người, bắt người, người ra lệnh giữ người, lệnh hoặc quyết định bắt người phải thông báo ngay cho gia đình người bị giữ, bị bắt, chín",
+    "gold": true
+   },
+   {
+    "id": "d55d891c30d0f714:0167",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 113. Bắt bị can, bị cáo để tạm giam",
+    "text": "Điều 113. Bắt bị can, bị cáo để tạm giam\n1. Những người sau đây có quyền ra lệnh, quyết định bắt bị can, bị cáo để tạm giam:\na) Thủ trưởng, Phó Thủ trưởng Cơ quan điều tra các cấp. Trường hợp này, lệnh bắt phải được Viện",
+    "gold": false
+   },
+   {
+    "id": "d55d891c30d0f714:0165",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 111. Bắt người phạm tội quả tang",
+    "text": "Điều 111. Bắt người phạm tội quả tang\n1. Đối với người đang thực hiện tội phạm hoặc ngay sau khi thực hiện tội phạm mà bị phát hiện hoặc bị đuổi bắt thì bất kỳ người nào cũng có quyền bắt và giải ngay người bị bắt đến cơ",
+    "gold": false
+   },
+   {
+    "id": "d55d891c30d0f714:0168",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 114. Những việc cần làm ngay sau khi giữ người trong trường hợp khẩn cấp, bắt người hoặc nhận người bị giữ, bị bắt",
+    "text": "Điều 114. Những việc cần làm ngay sau khi giữ người trong trường hợp khẩn cấp, bắt người hoặc nhận người bị giữ, bị bắt\n1. Sau khi giữ người trong trường hợp khẩn cấp, bắt người hoặc nhận người bị giữ, bị bắt, Cơ quan đi",
+    "gold": false
+   },
+   {
+    "id": "d55d891c30d0f714:0162",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 110. Giữ người trong trường hợp khẩn cấp",
+    "text": "4. Trong thời hạn 12 giờ kể từ khi giữ người trong trường hợp khẩn cấp hoặc nhận người bị giữ trong trường hợp khẩn cấp thì Cơ quan điều tra, cơ quan được giao nhiệm vụ tiến hành một số hoạt động điều tra phải lấy lời kh",
+    "gold": false
+   }
+  ],
+  "top5_jina": [
+   {
+    "id": "d55d891c30d0f714:0171",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 116. Thông báo về việc giữ người trong trường hợp khẩn cấp, bắt người",
+    "text": "Điều 116. Thông báo về việc giữ người trong trường hợp khẩn cấp, bắt người\nSau khi giữ người, bắt người, người ra lệnh giữ người, lệnh hoặc quyết định bắt người phải thông báo ngay cho gia đình người bị giữ, bị bắt, chín",
+    "gold": true
+   },
+   {
+    "id": "d55d891c30d0f714:0169",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 114. Những việc cần làm ngay sau khi giữ người trong trường hợp khẩn cấp, bắt người hoặc nhận người bị giữ, bị bắt",
+    "text": "Trường hợp cơ quan đã ra quyết định truy nã không thể đến nhận ngay người bị bắt thì sau khi lấy lời khai, Cơ quan điều tra nhận người bị bắt phải ra ngay quyết định tạm giữ và thông báo ngay cho cơ quan đã ra quyết định",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0225",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 182. Tội vi phạm chế độ một vợ, một chồng",
+    "text": "Điều 182. Tội vi phạm chế độ một vợ, một chồng\n1. Người nào đang có vợ, có chồng mà kết hôn hoặc chung sống như vợ chồng với người khác hoặc người chưa có vợ, chưa có chồng mà kết hôn hoặc chung sống như vợ chồng với ngư",
+    "gold": false
+   },
+   {
+    "id": "d55d891c30d0f714:0165",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 111. Bắt người phạm tội quả tang",
+    "text": "Điều 111. Bắt người phạm tội quả tang\n1. Đối với người đang thực hiện tội phạm hoặc ngay sau khi thực hiện tội phạm mà bị phát hiện hoặc bị đuổi bắt thì bất kỳ người nào cũng có quyền bắt và giải ngay người bị bắt đến cơ",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0191",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 157. Tội bắt, giữ hoặc giam người trái pháp luật",
+    "text": "Điều 157. Tội bắt, giữ hoặc giam người trái pháp luật\n1. Người nào bắt, giữ hoặc giam người trái pháp luật, nếu không thuộc trường hợp quy định tại Điều 377 của Bộ luật này, thì bị phạt cải tạo không giam giữ đến 03 năm ",
+    "gold": false
+   }
+  ],
+  "errors": {}
+ },
+ {
+  "id": "d12",
+  "type": "multi",
+  "question": "con tôi mới 13 tuổi, đi lấy trộm xe đạp bị người ta bắt được",
+  "reference": "Chưa đủ 14 tuổi thì không phải chịu trách nhiệm hình sự (Điều 12 BLHS). Người chưa đủ 15 tuổi gây thiệt hại thì cha mẹ phải bồi thường (Điều 586 khoản 2 BLDS).",
+  "gold": [
+   "bo_luat_hinh_su_2015 Điều 12",
+   "bo_luat_dan_su_2015 Điều 586"
+  ],
+  "hyde": "Trẻ em 13 tuổi chưa đến tuổi chịu trách nhiệm hình sự về hành vi trộm cắp tài sản và không bị xử phạt vi phạm hành chính. Vụ việc được giải quyết theo hướng giáo dục, quản lý và bảo đảm quyền, lợi ích hợp pháp của trẻ; gia đình cần phối hợp với cơ quan chức năng và chủ sở hữu tài sản. Xe đạp cần được hoàn trả, đồng thời việc khắc phục thiệt hại (nếu có) được xem xét theo quy định về trách nhiệm bồi thường dân sự.",
+  "ranks": {
+   "dense": [
+    12,
+    null
+   ],
+   "hyde": [
+    3,
+    7
+   ],
+   "rrf": [
+    6,
+    12
+   ],
+   "rerank": [
+    1,
+    2
+   ],
+   "all_bm25": [
+    1,
+    2
+   ],
+   "bm25_arm": [
+    null,
+    null
+   ],
+   "jina": [
+    12,
+    91
+   ]
+  },
+  "top5_best": [
+   {
+    "id": "88138f1cdf1b763c:0013",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 12. Tuổi chịu trách nhiệm hình sự",
+    "text": "Điều 12. Tuổi chịu trách nhiệm hình sự\n1. Người từ đủ 16 tuổi trở lên phải chịu trách nhiệm hình sự về mọi tội phạm, trừ những tội phạm mà Bộ luật này có quy định khác.\n2. Người từ đủ 14 tuổi trở lên, nhưng chưa đủ 16 tu",
+    "gold": true
+   },
+   {
+    "id": "d4825a1af3d31c64:0604",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 586. Năng lực chịu trách nhiệm bồi thường thiệt hại của cá nhân",
+    "text": "Điều 586. Năng lực chịu trách nhiệm bồi thường thiệt hại của cá nhân\n1. Người từ đủ mười tám tuổi trở lên gây thiệt hại thì phải tự bồi thường.\n2. Người chưa đủ mười lăm tuổi gây thiệt hại mà còn cha, mẹ thì cha, mẹ phải",
+    "gold": true
+   },
+   {
+    "id": "d55d891c30d0f714:0567",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 419. Áp dụng biện pháp ngăn chặn, biện pháp cưỡng chế",
+    "text": "Điều 419. Áp dụng biện pháp ngăn chặn, biện pháp cưỡng chế\n1. Chỉ áp dụng biện pháp ngăn chặn, biện pháp áp giải đối với người bị buộc tội là người dưới 18 tuổi trong trường hợp thật cần thiết. Chỉ áp dụng biện pháp tạm ",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0017",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 14. Chuẩn bị phạm tội",
+    "text": "c) Điều 168 (tội cướp tài sản); Điều 169 (tội bắt cóc nhằm chiếm đoạt tài sản);\nd) Điều 299 (tội khủng bố); Điều 300 (tội tài trợ khủng bố); Điều 301 (tội bắt cóc con tin); Điều 302 (tội cướp biển); Điều 303 (tội phá hủy",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0116",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 94. Hòa giải tại cộng đồng",
+    "text": "Điều 94. Hòa giải tại cộng đồng\n1. Hòa giải tại cộng đồng được áp dụng đối với người dưới 18 tuổi phạm tội trong những trường hợp sau đây:\na) Người từ đủ 16 tuổi đến dưới 18 tuổi phạm tội ít nghiêm trọng hoặc phạm tội ng",
+    "gold": false
+   }
+  ],
+  "top5_jina": [
+   {
+    "id": "88138f1cdf1b763c:0186",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 153. Tội chiếm đoạt người dưới 16 tuổi",
+    "text": "Điều 153. Tội chiếm đoạt người dưới 16 tuổi\n1. Người nào dùng vũ lực, đe dọa dùng vũ lực hoặc thủ đoạn khác chiếm giữ hoặc giao cho người khác chiếm giữ người dưới 16 tuổi, thì bị phạt tù từ 03 năm đến 07 năm.\n2. Phạm tộ",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0111",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 91. Nguyên tắc xử lý đối với người dưới 18 tuổi phạm tội",
+    "text": "a) Người từ đủ 16 tuổi đến dưới 18 tuổi phạm tội ít nghiêm trọng, phạm tội nghiêm trọng, trừ trường hợp quy định tại Điều 134 (tội cố ý gây thương tích hoặc gây tổn hại cho sức khỏe của người khác); Điều 141 (tội hiếp dâ",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0110",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 91. Nguyên tắc xử lý đối với người dưới 18 tuổi phạm tội",
+    "text": "Điều 91. Nguyên tắc xử lý đối với người dưới 18 tuổi phạm tội\n1. Việc xử lý người dưới 18 tuổi phạm tội phải bảo đảm lợi ích tốt nhất của người dưới 18 tuổi và chủ yếu nhằm mục đích giáo dục, giúp đỡ họ sửa chữa sai lầm,",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0017",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 14. Chuẩn bị phạm tội",
+    "text": "c) Điều 168 (tội cướp tài sản); Điều 169 (tội bắt cóc nhằm chiếm đoạt tài sản);\nd) Điều 299 (tội khủng bố); Điều 300 (tội tài trợ khủng bố); Điều 301 (tội bắt cóc con tin); Điều 302 (tội cướp biển); Điều 303 (tội phá hủy",
+    "gold": false
+   },
+   {
+    "id": "d55d891c30d0f714:0568",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 419. Áp dụng biện pháp ngăn chặn, biện pháp cưỡng chế",
+    "text": "3. Người từ đủ 16 tuổi đến dưới 18 tuổi có thể bị giữ trong trường hợp khẩn cấp, bị bắt, tạm giữ, tạm giam về tội nghiêm trọng do cố ý, tội rất nghiêm trọng, tội đặc biệt nghiêm trọng nếu có căn cứ quy định tại các điều ",
+    "gold": false
+   }
+  ],
+  "errors": {}
+ },
+ {
+  "id": "d13",
+  "type": "multi",
+  "question": "nhà bên cạnh đang xây, tường nhà tôi nứt hết cả rồi",
+  "reference": "Khi xây dựng phải bảo đảm an toàn, không xâm phạm bất động sản liền kề (Điều 174 BLDS); gây thiệt hại thì phải bồi thường (Điều 584).",
+  "gold": [
+   "bo_luat_dan_su_2015 Điều 174",
+   "bo_luat_dan_su_2015 Điều 584"
+  ],
+  "hyde": "Trường hợp công trình liền kề đang thi công làm phát sinh vết nứt, hư hỏng tường hoặc ảnh hưởng đến kết cấu nhà ở, chủ sở hữu có quyền yêu cầu chủ đầu tư và đơn vị thi công kiểm tra hiện trạng, áp dụng biện pháp bảo đảm an toàn và khắc phục thiệt hại. Cần lập biên bản hiện trạng, chụp ảnh, lưu giữ tài liệu chứng minh mức độ hư hỏng và thông báo bằng văn bản cho chủ đầu tư, nhà thầu thi công. Nếu các bên không thống nhất về nguyên nhân hoặc trách nhiệm bồi thường, có thể đề nghị cơ quan có thẩm quyền kiểm tra công trình, giám định thiệt hại và giải quyết tranh chấp theo quy định.",
+  "ranks": {
+   "dense": [
+    5,
+    null
+   ],
+   "hyde": [
+    3,
+    null
+   ],
+   "rrf": [
+    4,
+    null
+   ],
+   "rerank": [
+    3,
+    null
+   ],
+   "all_bm25": [
+    3,
+    null
+   ],
+   "bm25_arm": [
+    null,
+    null
+   ],
+   "jina": [
+    5,
+    349
+   ]
+  },
+  "top5_best": [
+   {
+    "id": "d4825a1af3d31c64:0190",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 177. Bảo đảm an toàn trong trường hợp cây cối, công trình có nguy cơ gây thiệt hại",
+    "text": "Điều 177. Bảo đảm an toàn trong trường hợp cây cối, công trình có nguy cơ gây thiệt hại\n1. Trường hợp cây cối, công trình xây dựng có nguy cơ sập đổ xuống bất động sản liền kề và xung quanh thì chủ sở hữu tài sản thực hi",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0623",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 605. Bồi thường thiệt hại do nhà cửa, công trình xây dựng khác gây ra",
+    "text": "Điều 605. Bồi thường thiệt hại do nhà cửa, công trình xây dựng khác gây ra\nChủ sở hữu, người chiếm hữu, người được giao quản lý, sử dụng nhà cửa, công trình xây dựng khác phải bồi thường thiệt hại do nhà cửa, công trình ",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0187",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 174. Nghĩa vụ tôn trọng quy tắc xây dựng",
+    "text": "Điều 174. Nghĩa vụ tôn trọng quy tắc xây dựng\nKhi xây dựng công trình, chủ sở hữu, chủ thể có quyền khác đối với tài sản phải tuân theo pháp luật về xây dựng, bảo đảm an toàn, không được xây vượt quá độ cao, khoảng cách ",
+    "gold": true
+   },
+   {
+    "id": "d4825a1af3d31c64:0265",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 248. Nguyên tắc thực hiện quyền đối với bất động sản liền kề",
+    "text": "Điều 248. Nguyên tắc thực hiện quyền đối với bất động sản liền kề\nViệc thực hiện quyền đối với bất động sản liền kề theo thỏa thuận của các bên. Trường hợp các bên không có thỏa thuận thì thực hiện theo các nguyên tắc sa",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0487",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 298. Tội vi phạm quy định về xây dựng gây hậu quả nghiêm trọng",
+    "text": "Điều 298. Tội vi phạm quy định về xây dựng gây hậu quả nghiêm trọng\n1. Người nào vi phạm quy định về xây dựng trong các lĩnh vực khảo sát, thiết kế, thi công, sử dụng nguyên liệu, vật liệu, máy móc, giám sát, nghiệm thu ",
+    "gold": false
+   }
+  ],
+  "top5_jina": [
+   {
+    "id": "d4825a1af3d31c64:0189",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 176. Mốc giới ngăn cách các bất động sản",
+    "text": "Điều 176. Mốc giới ngăn cách các bất động sản\n1. Chủ sở hữu bất động sản chỉ được dựng cột mốc, hàng rào, trồng cây, xây tường ngăn trên phần đất thuộc quyền sử dụng của mình.\n2. Các chủ sở hữu bất động sản liền kề có th",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0623",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 605. Bồi thường thiệt hại do nhà cửa, công trình xây dựng khác gây ra",
+    "text": "Điều 605. Bồi thường thiệt hại do nhà cửa, công trình xây dựng khác gây ra\nChủ sở hữu, người chiếm hữu, người được giao quản lý, sử dụng nhà cửa, công trình xây dựng khác phải bồi thường thiệt hại do nhà cửa, công trình ",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0191",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 178. Trổ cửa nhìn sang bất động sản liền kề",
+    "text": "Điều 178. Trổ cửa nhìn sang bất động sản liền kề\n1. Chủ sở hữu nhà chỉ được trổ cửa ra vào, cửa sổ quay sang nhà bên cạnh, nhà đối diện và đường đi chung theo quy định của pháp luật về xây dựng.\n2. Mặt dưới mái che trên ",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0190",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 177. Bảo đảm an toàn trong trường hợp cây cối, công trình có nguy cơ gây thiệt hại",
+    "text": "Điều 177. Bảo đảm an toàn trong trường hợp cây cối, công trình có nguy cơ gây thiệt hại\n1. Trường hợp cây cối, công trình xây dựng có nguy cơ sập đổ xuống bất động sản liền kề và xung quanh thì chủ sở hữu tài sản thực hi",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0187",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 174. Nghĩa vụ tôn trọng quy tắc xây dựng",
+    "text": "Điều 174. Nghĩa vụ tôn trọng quy tắc xây dựng\nKhi xây dựng công trình, chủ sở hữu, chủ thể có quyền khác đối với tài sản phải tuân theo pháp luật về xây dựng, bảo đảm an toàn, không được xây vượt quá độ cao, khoảng cách ",
+    "gold": true
+   }
+  ],
+  "errors": {}
+ },
+ {
+  "id": "d14",
+  "type": "paraphrase",
+  "question": "con chó nhà tôi sổng ra cắn đứa nhỏ hàng xóm",
+  "reference": "Chủ sở hữu phải bồi thường thiệt hại do súc vật gây ra (Điều 603 BLDS), trừ khi người bị hại hoàn toàn có lỗi.",
+  "gold": [
+   "bo_luat_dan_su_2015 Điều 603"
+  ],
+  "hyde": "Chủ sở hữu hoặc người đang quản lý chó có trách nhiệm áp dụng biện pháp an toàn, không để vật nuôi gây thiệt hại cho người khác. Trường hợp chó sổng ra cắn trẻ em hàng xóm, người có trách nhiệm quản lý chó có thể phải bồi thường thiệt hại, gồm chi phí cứu chữa, phục hồi sức khỏe và các khoản thiệt hại hợp lý khác; mức bồi thường được xem xét theo mức độ tổn thương và lỗi của các bên. Cần đưa trẻ đi khám, xử lý vết thương, đồng thời thông báo cho cơ quan thú y hoặc chính quyền địa phương để theo dõi chó và thực hiện biện pháp phòng, chống bệnh dại. Việc xác định trách nhiệm có thể căn cứ vào nguyên nhân chó sổng, việc tuân thủ nghĩa vụ quản lý vật nuôi và lỗi của người bị thiệt hại hoặc người thứ ba.",
+  "ranks": {
+   "dense": [
+    1
+   ],
+   "hyde": [
+    1
+   ],
+   "rrf": [
+    1
+   ],
+   "rerank": [
+    1
+   ],
+   "all_bm25": [
+    1
+   ],
+   "bm25_arm": [
+    null
+   ],
+   "jina": [
+    1
+   ]
+  },
+  "top5_best": [
+   {
+    "id": "d4825a1af3d31c64:0621",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 603. Bồi thường thiệt hại do súc vật gây ra",
+    "text": "Điều 603. Bồi thường thiệt hại do súc vật gây ra\n1. Chủ sở hữu súc vật phải bồi thường thiệt hại do súc vật gây ra cho người khác. Người chiếm hữu, sử dụng súc vật phải bồi thường thiệt hại trong thời gian chiếm hữu, sử ",
+    "gold": true
+   },
+   {
+    "id": "d4825a1af3d31c64:0602",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 584. Căn cứ phát sinh trách nhiệm bồi thường thiệt hại",
+    "text": "Điều 584. Căn cứ phát sinh trách nhiệm bồi thường thiệt hại\n1. Người nào có hành vi xâm phạm tính mạng, sức khoẻ, danh dự, nhân phẩm, uy tín, tài sản, quyền, lợi ích hợp pháp khác của người khác mà gây thiệt hại thì phải",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0604",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 586. Năng lực chịu trách nhiệm bồi thường thiệt hại của cá nhân",
+    "text": "Điều 586. Năng lực chịu trách nhiệm bồi thường thiệt hại của cá nhân\n1. Người từ đủ mười tám tuổi trở lên gây thiệt hại thì phải tự bồi thường.\n2. Người chưa đủ mười lăm tuổi gây thiệt hại mà còn cha, mẹ thì cha, mẹ phải",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0377",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 360. Trách nhiệm bồi thường thiệt hại do vi phạm nghĩa vụ",
+    "text": "Điều 360. Trách nhiệm bồi thường thiệt hại do vi phạm nghĩa vụ\nTrường hợp có thiệt hại do vi phạm nghĩa vụ gây ra thì bên có nghĩa vụ phải bồi thường toàn bộ thiệt hại, trừ trường hợp có thỏa thuận khác hoặc luật có quy ",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0623",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 605. Bồi thường thiệt hại do nhà cửa, công trình xây dựng khác gây ra",
+    "text": "Điều 605. Bồi thường thiệt hại do nhà cửa, công trình xây dựng khác gây ra\nChủ sở hữu, người chiếm hữu, người được giao quản lý, sử dụng nhà cửa, công trình xây dựng khác phải bồi thường thiệt hại do nhà cửa, công trình ",
+    "gold": false
+   }
+  ],
+  "top5_jina": [
+   {
+    "id": "d4825a1af3d31c64:0621",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 603. Bồi thường thiệt hại do súc vật gây ra",
+    "text": "Điều 603. Bồi thường thiệt hại do súc vật gây ra\n1. Chủ sở hữu súc vật phải bồi thường thiệt hại do súc vật gây ra cho người khác. Người chiếm hữu, sử dụng súc vật phải bồi thường thiệt hại trong thời gian chiếm hữu, sử ",
+    "gold": true
+   },
+   {
+    "id": "d4825a1af3d31c64:0250",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 233. Xác lập quyền sở hữu đối với vật nuôi dưới nước",
+    "text": "Điều 233. Xác lập quyền sở hữu đối với vật nuôi dưới nước\nKhi vật nuôi dưới nước của một người di chuyển tự nhiên vào ruộng, ao, hồ của người khác thì thuộc sở hữu của người có ruộng, ao, hồ đó. Trường hợp vật nuôi dưới ",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0248",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 231. Xác lập quyền sở hữu đối với gia súc bị thất lạc",
+    "text": "Điều 231. Xác lập quyền sở hữu đối với gia súc bị thất lạc\n1. Người bắt được gia súc bị thất lạc phải nuôi giữ và báo ngay cho Uỷ ban nhân dân cấp xã nơi người đó cư trú để thông báo công khai cho chủ sở hữu biết mà nhận",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0249",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 232. Xác lập quyền sở hữu đối với gia cầm bị thất lạc",
+    "text": "Điều 232. Xác lập quyền sở hữu đối với gia cầm bị thất lạc\n1. Trường hợp gia cầm của một người bị thất lạc mà người khác bắt được thì người bắt được phải thông báo công khai để chủ sở hữu gia cầm biết mà nhận lại. Sau 01",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0198",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 185. Bảo vệ việc chiếm hữu",
+    "text": "Điều 185. Bảo vệ việc chiếm hữu\nTrường hợp việc chiếm hữu bị người khác xâm phạm thì người chiếm hữu có quyền yêu cầu người có hành vi xâm phạm phải chấm dứt hành vi, khôi phục tình trạng ban đầu, trả lại tài sản và bồi ",
+    "gold": false
+   }
+  ],
+  "errors": {}
+ },
+ {
+  "id": "d15",
+  "type": "multi",
+  "question": "bị đứa kia lên facebook bịa chuyện nói xấu, nhục không chịu được",
+  "reference": "Có quyền yêu cầu gỡ bỏ, cải chính và bồi thường (Điều 34 BLDS). Bịa đặt, loan truyền điều sai sự thật xúc phạm danh dự có thể bị xử lý tội vu khống (Điều 156), xúc phạm nghiêm trọng nhân phẩm là tội làm nhục người khác (Điều 155).",
+  "gold": [
+   "bo_luat_dan_su_2015 Điều 34",
+   "bo_luat_hinh_su_2015 Điều 156",
+   "bo_luat_hinh_su_2015 Điều 155"
+  ],
+  "hyde": "Hành vi đăng tải thông tin bịa đặt, xúc phạm danh dự, nhân phẩm của người khác trên mạng xã hội có thể bị xem xét xử lý tùy theo tính chất, mức độ và hậu quả của vụ việc. Người bị ảnh hưởng nên lưu giữ đường dẫn, ảnh chụp màn hình và các tài liệu liên quan, đồng thời đề nghị người đăng gỡ bỏ nội dung, cải chính và xin lỗi công khai. Trường hợp không được khắc phục, có thể gửi phản ánh đến cơ quan có thẩm quyền hoặc yêu cầu bồi thường thiệt hại theo quy định pháp luật.",
+  "ranks": {
+   "dense": [
+    3,
+    1,
+    2
+   ],
+   "hyde": [
+    1,
+    2,
+    3
+   ],
+   "rrf": [
+    2,
+    1,
+    3
+   ],
+   "rerank": [
+    1,
+    2,
+    3
+   ],
+   "all_bm25": [
+    1,
+    2,
+    3
+   ],
+   "bm25_arm": [
+    null,
+    null,
+    null
+   ],
+   "jina": [
+    3,
+    1,
+    2
+   ]
+  },
+  "top5_best": [
+   {
+    "id": "d4825a1af3d31c64:0037",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 34. Quyền được bảo vệ danh dự, nhân phẩm, uy tín",
+    "text": "Điều 34. Quyền được bảo vệ danh dự, nhân phẩm, uy tín\n1. Danh dự, nhân phẩm, uy tín của cá nhân là bất khả xâm phạm và được pháp luật bảo vệ.\n2. Cá nhân có quyền yêu cầu Tòa án bác bỏ thông tin làm ảnh hưởng xấu đến danh",
+    "gold": true
+   },
+   {
+    "id": "88138f1cdf1b763c:0189",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 156. Tội vu khống",
+    "text": "Điều 156. Tội vu khống\n1. Người nào thực hiện một trong các hành vi sau đây, thì bị phạt tiền từ 10.000.000 đồng đến 50.000.000 đồng, phạt cải tạo không giam giữ đến 02 năm hoặc phạt tù từ 03 tháng đến 01 năm:\na) Bịa đặt",
+    "gold": true
+   },
+   {
+    "id": "88138f1cdf1b763c:0188",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 155. Tội làm nhục người khác",
+    "text": "Điều 155. Tội làm nhục người khác\n1. Người nào xúc phạm nghiêm trọng nhân phẩm, danh dự của người khác, thì bị phạt cảnh cáo, phạt tiền từ 10.000.000 đồng đến 30.000.000 đồng hoặc phạt cải tạo không giam giữ đến 03 năm.\n",
+    "gold": true
+   },
+   {
+    "id": "d3e7cff20880c16d:0689",
+    "src": "bo_luat_to_tung_dan_su_2015",
+    "sec": "Điều 511. Quyền, nghĩa vụ của người bị tố cáo",
+    "text": "Điều 511. Quyền, nghĩa vụ của người bị tố cáo\n1. Người bị tố cáo có các quyền sau đây:\na) Được thông báo về nội dung tố cáo;\nb) Đưa ra bằng chứng để chứng minh nội dung tố cáo là không đúng sự thật;\nc) Được khôi phục quy",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0610",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 592. Thiệt hại do danh dự, nhân phẩm, uy tín bị xâm phạm",
+    "text": "Điều 592. Thiệt hại do danh dự, nhân phẩm, uy tín bị xâm phạm\n1. Thiệt hại do danh dự, nhân phẩm, uy tín bị xâm phạm bao gồm:\na) Chi phí hợp lý để hạn chế, khắc phục thiệt hại;\nb) Thu nhập thực tế bị mất hoặc bị giảm sút",
+    "gold": false
+   }
+  ],
+  "top5_jina": [
+   {
+    "id": "88138f1cdf1b763c:0189",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 156. Tội vu khống",
+    "text": "Điều 156. Tội vu khống\n1. Người nào thực hiện một trong các hành vi sau đây, thì bị phạt tiền từ 10.000.000 đồng đến 50.000.000 đồng, phạt cải tạo không giam giữ đến 02 năm hoặc phạt tù từ 03 tháng đến 01 năm:\na) Bịa đặt",
+    "gold": true
+   },
+   {
+    "id": "88138f1cdf1b763c:0188",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 155. Tội làm nhục người khác",
+    "text": "Điều 155. Tội làm nhục người khác\n1. Người nào xúc phạm nghiêm trọng nhân phẩm, danh dự của người khác, thì bị phạt cảnh cáo, phạt tiền từ 10.000.000 đồng đến 30.000.000 đồng hoặc phạt cải tạo không giam giữ đến 03 năm.\n",
+    "gold": true
+   },
+   {
+    "id": "d4825a1af3d31c64:0037",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 34. Quyền được bảo vệ danh dự, nhân phẩm, uy tín",
+    "text": "Điều 34. Quyền được bảo vệ danh dự, nhân phẩm, uy tín\n1. Danh dự, nhân phẩm, uy tín của cá nhân là bất khả xâm phạm và được pháp luật bảo vệ.\n2. Cá nhân có quyền yêu cầu Tòa án bác bỏ thông tin làm ảnh hưởng xấu đến danh",
+    "gold": true
+   },
+   {
+    "id": "88138f1cdf1b763c:0468",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 288. Tội đưa hoặc sử dụng trái phép thông tin mạng máy tính, mạng viễn thông",
+    "text": "Điều 288. Tội đưa hoặc sử dụng trái phép thông tin mạng máy tính, mạng viễn thông\n1. Người nào thực hiện một trong các hành vi sau đây, thu lợi bất chính từ 50.000.000 đồng đến dưới 200.000.000 đồng hoặc gây thiệt hại từ",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0168",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 140. Tội hành hạ người khác",
+    "text": "Điều 140. Tội hành hạ người khác\n1. Người nào đối xử tàn ác hoặc làm nhục người lệ thuộc mình nếu không thuộc các trường hợp quy định tại Điều 185 của Bộ luật này, thì bị phạt cải tạo không giam giữ đến 03 năm hoặc phạt ",
+    "gold": false
+   }
+  ],
+  "errors": {}
+ },
+ {
+  "id": "d16",
+  "type": "multi",
+  "question": "nhặt được cái ví ngoài đường, giữ luôn có sao không",
+  "reference": "Phải trả lại cho người đánh rơi nếu biết địa chỉ, không thì giao nộp UBND hoặc công an cấp xã (Điều 230 BLDS). Cố tình không trả lại tài sản trị giá từ 10 triệu đồng có thể bị xử lý tội chiếm giữ trái phép tài sản (Điều 176 BLHS).",
+  "gold": [
+   "bo_luat_dan_su_2015 Điều 230",
+   "bo_luat_hinh_su_2015 Điều 176"
+  ],
+  "hyde": "Người phát hiện tài sản do người khác đánh rơi có trách nhiệm bảo quản và thông báo, giao nộp cho cơ quan công an hoặc Ủy ban nhân dân cấp xã nơi gần nhất để xác minh, trao trả cho chủ sở hữu. Việc tự ý giữ lại, sử dụng hoặc định đoạt chiếc ví khi biết hoặc có căn cứ xác định tài sản thuộc về người khác có thể bị xem xét trách nhiệm pháp lý theo tính chất, giá trị tài sản và hành vi cụ thể. Trường hợp đã nhặt được ví, cần giữ nguyên tài sản và chủ động trình báo, giao nộp để được hướng dẫn xử lý.",
+  "ranks": {
+   "dense": [
+    1,
+    4
+   ],
+   "hyde": [
+    1,
+    3
+   ],
+   "rrf": [
+    1,
+    3
+   ],
+   "rerank": [
+    3,
+    4
+   ],
+   "all_bm25": [
+    1,
+    2
+   ],
+   "bm25_arm": [
+    2,
+    null
+   ],
+   "jina": [
+    1,
+    4
+   ]
+  },
+  "top5_best": [
+   {
+    "id": "d4825a1af3d31c64:0243",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 228. Xác lập quyền sở hữu đối với tài sản vô chủ, tài sản không xác định được chủ sở hữu",
+    "text": "Điều 228. Xác lập quyền sở hữu đối với tài sản vô chủ, tài sản không xác định được chủ sở hữu\n1. Tài sản vô chủ là tài sản mà chủ sở hữu đã từ bỏ quyền sở hữu đối với tài sản đó.\nNgười đã phát hiện, người đang quản lý tà",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0597",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 579. Nghĩa vụ hoàn trả",
+    "text": "Điều 579. Nghĩa vụ hoàn trả\n1. Người chiếm hữu, người sử dụng tài sản của người khác mà không có căn cứ pháp luật thì phải hoàn trả cho chủ sở hữu, chủ thể có quyền khác đối với tài sản đó; nếu không tìm được chủ sở hữu,",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0247",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 230. Xác lập quyền sở hữu đối với tài sản do người khác đánh rơi, bỏ quên",
+    "text": "2. Sau 01 năm, kể từ ngày thông báo công khai về tài sản do người khác đánh rơi, bỏ quên mà không xác định được chủ sở hữu hoặc chủ sở hữu không đến nhận thì quyền sở hữu đối với tài sản này được xác định như sau:\na) Trư",
+    "gold": true
+   },
+   {
+    "id": "88138f1cdf1b763c:0218",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 176. Tội chiếm giữ trái phép tài sản",
+    "text": "Điều 176. Tội chiếm giữ trái phép tài sản\n1. Người nào cố tình không trả lại cho chủ sở hữu, người quản lý hợp pháp hoặc không giao nộp cho cơ quan có trách nhiệm tài sản trị giá từ 10.000.000 đồng đến dưới 200.000.000 đ",
+    "gold": true
+   },
+   {
+    "id": "d4825a1af3d31c64:0246",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 230. Xác lập quyền sở hữu đối với tài sản do người khác đánh rơi, bỏ quên",
+    "text": "Điều 230. Xác lập quyền sở hữu đối với tài sản do người khác đánh rơi, bỏ quên\n1. Người phát hiện tài sản do người khác đánh rơi, bỏ quên mà biết được địa chỉ của người đánh rơi hoặc bỏ quên thì phải thông báo hoặc trả l",
+    "gold": true
+   }
+  ],
+  "top5_jina": [
+   {
+    "id": "d4825a1af3d31c64:0247",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 230. Xác lập quyền sở hữu đối với tài sản do người khác đánh rơi, bỏ quên",
+    "text": "2. Sau 01 năm, kể từ ngày thông báo công khai về tài sản do người khác đánh rơi, bỏ quên mà không xác định được chủ sở hữu hoặc chủ sở hữu không đến nhận thì quyền sở hữu đối với tài sản này được xác định như sau:\na) Trư",
+    "gold": true
+   },
+   {
+    "id": "d4825a1af3d31c64:0246",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 230. Xác lập quyền sở hữu đối với tài sản do người khác đánh rơi, bỏ quên",
+    "text": "Điều 230. Xác lập quyền sở hữu đối với tài sản do người khác đánh rơi, bỏ quên\n1. Người phát hiện tài sản do người khác đánh rơi, bỏ quên mà biết được địa chỉ của người đánh rơi hoặc bỏ quên thì phải thông báo hoặc trả l",
+    "gold": true
+   },
+   {
+    "id": "d55d891c30d0f714:0134",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 90. Bảo quản vật chứng",
+    "text": "Điều 90. Bảo quản vật chứng\n1. Vật chứng phải được bảo quản nguyên vẹn, không để mất mát, lẫn lộn, hư hỏng. Việc bảo quản vật chứng được thực hiện như sau:\na) Vật chứng cần được niêm phong thì phải niêm phong ngay sau kh",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0218",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 176. Tội chiếm giữ trái phép tài sản",
+    "text": "Điều 176. Tội chiếm giữ trái phép tài sản\n1. Người nào cố tình không trả lại cho chủ sở hữu, người quản lý hợp pháp hoặc không giao nộp cho cơ quan có trách nhiệm tài sản trị giá từ 10.000.000 đồng đến dưới 200.000.000 đ",
+    "gold": true
+   },
+   {
+    "id": "d55d891c30d0f714:0300",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 199. Trách nhiệm bảo quản phương tiện, tài liệu, đồ vật, dữ liệu điện tử, thư tín, điện tín, bưu kiện, bưu phẩm bị thu giữ, tạm giữ hoặc bị niêm phong",
+    "text": "Điều 199. Trách nhiệm bảo quản phương tiện, tài liệu, đồ vật, dữ liệu điện tử, thư tín, điện tín, bưu kiện, bưu phẩm bị thu giữ, tạm giữ hoặc bị niêm phong\n1. Phương tiện, tài liệu, đồ vật, dữ liệu điện tử, thư tín, điện",
+    "gold": false
+   }
+  ],
+  "errors": {}
+ },
+ {
+  "id": "d17",
+  "type": "multi",
+  "question": "tối qua say quá đập vỡ đồ của quán, sáng ra họ đòi đền",
+  "reference": "Phải bồi thường thiệt hại tài sản bị hư hỏng (Điều 589 BLDS). Cố ý làm hư hỏng tài sản từ 2 triệu đồng trở lên có thể bị xử lý theo Điều 178 BLHS.",
+  "gold": [
+   "bo_luat_dan_su_2015 Điều 589",
+   "bo_luat_hinh_su_2015 Điều 178"
+  ],
+  "hyde": "Người có hành vi làm hư hỏng tài sản của cơ sở kinh doanh có thể phải bồi thường thiệt hại thực tế phát sinh, kể cả trường hợp thực hiện hành vi trong tình trạng say do tự sử dụng rượu, bia. Mức bồi thường cần được xác định căn cứ vào mức độ hư hỏng, chi phí sửa chữa hoặc giá trị thay thế hợp lý, có tài liệu chứng minh. Các bên có thể thỏa thuận phương thức và thời hạn bồi thường; nếu không thống nhất, tranh chấp có thể được yêu cầu giải quyết theo trình tự pháp luật.",
+  "ranks": {
+   "dense": [
+    null,
+    1
+   ],
+   "hyde": [
+    10,
+    3
+   ],
+   "rrf": [
+    14,
+    1
+   ],
+   "rerank": [
+    8,
+    9
+   ],
+   "all_bm25": [
+    null,
+    8
+   ],
+   "bm25_arm": [
+    null,
+    null
+   ],
+   "jina": [
+    44,
+    1
+   ]
+  },
+  "top5_best": [
+   {
+    "id": "d4825a1af3d31c64:0614",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 596. Bồi thường thiệt hại do người dùng chất kích thích gây ra",
+    "text": "Điều 596. Bồi thường thiệt hại do người dùng chất kích thích gây ra\n1. Người do uống rượu hoặc do dùng chất kích thích khác mà lâm vào tình trạng mất khả năng nhận thức và làm chủ hành vi, gây thiệt hại cho người khác th",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0602",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 584. Căn cứ phát sinh trách nhiệm bồi thường thiệt hại",
+    "text": "Điều 584. Căn cứ phát sinh trách nhiệm bồi thường thiệt hại\n1. Người nào có hành vi xâm phạm tính mạng, sức khoẻ, danh dự, nhân phẩm, uy tín, tài sản, quyền, lợi ích hợp pháp khác của người khác mà gây thiệt hại thì phải",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0604",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 586. Năng lực chịu trách nhiệm bồi thường thiệt hại của cá nhân",
+    "text": "Điều 586. Năng lực chịu trách nhiệm bồi thường thiệt hại của cá nhân\n1. Người từ đủ mười tám tuổi trở lên gây thiệt hại thì phải tự bồi thường.\n2. Người chưa đủ mười lăm tuổi gây thiệt hại mà còn cha, mẹ thì cha, mẹ phải",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0054",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 48. Trả lại tài sản, sửa chữa hoặc bồi thường thiệt hại; buộc công khai xin lỗi",
+    "text": "Điều 48. Trả lại tài sản, sửa chữa hoặc bồi thường thiệt hại; buộc công khai xin lỗi\n1. Người phạm tội phải trả lại tài sản đã chiếm đoạt cho chủ sở hữu hoặc người quản lý hợp pháp, phải sửa chữa hoặc bồi thường thiệt hạ",
+    "gold": false
+   },
+   {
+    "id": "56c6bfc5e8c4e7c9:0154",
+    "src": "bo_luat_lao_dong_2019",
+    "sec": "Điều 129. Bồi thường thiệt hại",
+    "text": "Điều 129. Bồi thường thiệt hại\n1. Người lao động làm hư hỏng dụng cụ, thiết bị hoặc có hành vi khác gây thiệt hại tài sản của người sử dụng lao động thì phải bồi thường theo quy định của pháp luật hoặc nội quy lao động c",
+    "gold": false
+   }
+  ],
+  "top5_jina": [
+   {
+    "id": "88138f1cdf1b763c:0220",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 178. Tội hủy hoại hoặc cố ý làm hư hỏng tài sản",
+    "text": "Điều 178. Tội hủy hoại hoặc cố ý làm hư hỏng tài sản\n1. Người nào hủy hoại hoặc cố ý làm hư hỏng tài sản của người khác trị giá từ 2.000.000 đồng đến dưới 50.000.000 đồng, tài sản là di vật, cổ hoặc vật có giá trị lịch s",
+    "gold": true
+   },
+   {
+    "id": "88138f1cdf1b763c:0054",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 48. Trả lại tài sản, sửa chữa hoặc bồi thường thiệt hại; buộc công khai xin lỗi",
+    "text": "Điều 48. Trả lại tài sản, sửa chữa hoặc bồi thường thiệt hại; buộc công khai xin lỗi\n1. Người phạm tội phải trả lại tài sản đã chiếm đoạt cho chủ sở hữu hoặc người quản lý hợp pháp, phải sửa chữa hoặc bồi thường thiệt hạ",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0614",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 596. Bồi thường thiệt hại do người dùng chất kích thích gây ra",
+    "text": "Điều 596. Bồi thường thiệt hại do người dùng chất kích thích gây ra\n1. Người do uống rượu hoặc do dùng chất kích thích khác mà lâm vào tình trạng mất khả năng nhận thức và làm chủ hành vi, gây thiệt hại cho người khác th",
+    "gold": false
+   },
+   {
+    "id": "88138f1cdf1b763c:0223",
+    "src": "bo_luat_hinh_su_2015",
+    "sec": "Điều 180. Tội vô ý gây thiệt hại nghiêm trọng đến tài sản",
+    "text": "Điều 180. Tội vô ý gây thiệt hại nghiêm trọng đến tài sản\n1. Người nào vô ý gây thiệt hại cho tài sản của người khác trị giá từ 100.000.000 đồng đến dưới 500.000.000 đồng, thì bị phạt cảnh cáo hoặc phạt cải tạo không gia",
+    "gold": false
+   },
+   {
+    "id": "d4825a1af3d31c64:0613",
+    "src": "bo_luat_dan_su_2015",
+    "sec": "Điều 595. Bồi thường thiệt hại trong trường hợp vượt quá yêu cầu của tình thế cấp thiết",
+    "text": "Điều 595. Bồi thường thiệt hại trong trường hợp vượt quá yêu cầu của tình thế cấp thiết\n1. Trường hợp thiệt hại xảy ra do vượt quá yêu cầu của tình thế cấp thiết thì người gây thiệt hại phải bồi thường phần thiệt hại xảy",
+    "gold": false
+   }
+  ],
+  "errors": {}
+ },
+ {
+  "id": "d18",
+  "type": "paraphrase",
+  "question": "tòa gửi giấy gọi lên mà tôi bận không đi được thì sao",
+  "reference": "Triệu tập lần 1 vắng mặt thì hoãn phiên tòa; lần 2 vắng không lý do chính đáng: nguyên đơn bị coi là từ bỏ khởi kiện, bị đơn bị xét xử vắng mặt (Điều 227 BLTTDS).",
+  "gold": [
+   "bo_luat_to_tung_dan_su_2015 Điều 227"
+  ],
+  "hyde": "Trường hợp nhận được giấy triệu tập của Tòa án nhưng không thể có mặt đúng thời gian, người được triệu tập cần thông báo ngay cho Tòa án, nêu rõ lý do và gửi tài liệu chứng minh nếu có, đồng thời đề nghị thay đổi thời gian làm việc. Việc vắng mặt không có lý do chính đáng hoặc không được Tòa án chấp thuận có thể dẫn đến hậu quả tố tụng tùy tư cách tham gia và tính chất vụ việc, bao gồm việc Tòa án tiếp tục giải quyết hoặc áp dụng biện pháp theo quy định. Người được triệu tập nên kiểm tra giấy triệu tập và liên hệ bộ phận thụ lý để xác nhận thủ tục cần thực hiện.",
+  "ranks": {
+   "dense": [
+    19
+   ],
+   "hyde": [
+    3
+   ],
+   "rrf": [
+    8
+   ],
+   "rerank": [
+    5
+   ],
+   "all_bm25": [
+    4
+   ],
+   "bm25_arm": [
+    null
+   ],
+   "jina": [
+    18
+   ]
+  },
+  "top5_best": [
+   {
+    "id": "d55d891c30d0f714:0275",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 182. Triệu tập bị can",
+    "text": "Điều 182. Triệu tập bị can\n1. Khi triệu tập bị can, Điều tra viên phải gửi giấy triệu tập. Giấy triệu tập bị can ghi rõ họ tên, chỗ ở của bị can; giờ, ngày, tháng, năm, địa điểm có mặt, thời gian làm việc, gặp ai và trác",
+    "gold": false
+   },
+   {
+    "id": "d55d891c30d0f714:0411",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 290. Sự có mặt của bị cáo tại phiên tòa",
+    "text": "Điều 290. Sự có mặt của bị cáo tại phiên tòa\n1. Bị cáo phải có mặt tại phiên tòa theo giấy triệu tập của Tòa án trong suốt thời gian xét xử vụ án; nếu vắng mặt không vì lý do bất khả kháng hoặc không do trở ngại khách qu",
+    "gold": false
+   },
+   {
+    "id": "d55d891c30d0f714:0596",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 440. Triệu tập người đại diện theo pháp luật của pháp nhân",
+    "text": "2. Giấy triệu tập được gửi cho người đại diện theo pháp luật của pháp nhân hoặc pháp nhân nơi người đó làm việc hoặc chính quyền xã, phường, thị trấn nơi người đại diện theo pháp luật của pháp nhân cư trú. Cơ quan, tổ ch",
+    "gold": false
+   },
+   {
+    "id": "d55d891c30d0f714:0095",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 66. Người làm chứng",
+    "text": "a) Có mặt theo giấy triệu tập của cơ quan có thẩm quyền tiến hành tố tụng. Trường hợp cố ý vắng mặt mà không vì lý do bất khả kháng hoặc không do trở ngại khách quan và việc vắng mặt của họ gây trở ngại cho việc giải quy",
+    "gold": false
+   },
+   {
+    "id": "d3e7cff20880c16d:0312",
+    "src": "bo_luat_to_tung_dan_su_2015",
+    "sec": "Điều 227. Sự có mặt của đương sự, người đại diện, người bảo vệ quyền và lợi ích hợp pháp của đương sự",
+    "text": "Điều 227. Sự có mặt của đương sự, người đại diện, người bảo vệ quyền và lợi ích hợp pháp của đương sự\n1. Tòa án triệu tập hợp lệ lần thứ nhất, đương sự hoặc người đại diện của họ, người bảo vệ quyền và lợi ích hợp pháp c",
+    "gold": true
+   }
+  ],
+  "top5_jina": [
+   {
+    "id": "d3e7cff20880c16d:0239",
+    "src": "bo_luat_to_tung_dan_su_2015",
+    "sec": "Điều 177. Thủ tục cấp, tống đạt, thông báo trực tiếp cho cá nhân",
+    "text": "4. Trường hợp người được cấp, tống đạt, thông báo từ chối nhận văn bản tố tụng thì người thực hiện việc cấp, tống đạt, thông báo phải lập biên bản trong đó nêu rõ lý do của việc từ chối, có xác nhận của đại diện tổ dân p",
+    "gold": false
+   },
+   {
+    "id": "d55d891c30d0f714:0596",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 440. Triệu tập người đại diện theo pháp luật của pháp nhân",
+    "text": "2. Giấy triệu tập được gửi cho người đại diện theo pháp luật của pháp nhân hoặc pháp nhân nơi người đó làm việc hoặc chính quyền xã, phường, thị trấn nơi người đại diện theo pháp luật của pháp nhân cư trú. Cơ quan, tổ ch",
+    "gold": false
+   },
+   {
+    "id": "d55d891c30d0f714:0204",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 138. Thủ tục cấp, giao, chuyển trực tiếp văn bản tố tụng",
+    "text": "3. Trường hợp người được nhận văn bản tố tụng vắng mặt hoặc không rõ địa chỉ thì người thực hiện việc cấp, giao phải lập biên bản về việc không thực hiện được việc cấp, giao, có xác nhận của đại diện cơ quan, tổ chức nơi",
+    "gold": false
+   },
+   {
+    "id": "d55d891c30d0f714:0275",
+    "src": "bo_luat_to_tung_hinh_su_2015",
+    "sec": "Điều 182. Triệu tập bị can",
+    "text": "Điều 182. Triệu tập bị can\n1. Khi triệu tập bị can, Điều tra viên phải gửi giấy triệu tập. Giấy triệu tập bị can ghi rõ họ tên, chỗ ở của bị can; giờ, ngày, tháng, năm, địa điểm có mặt, thời gian làm việc, gặp ai và trác",
+    "gold": false
+   },
+   {
+    "id": "d3e7cff20880c16d:0238",
+    "src": "bo_luat_to_tung_dan_su_2015",
+    "sec": "Điều 177. Thủ tục cấp, tống đạt, thông báo trực tiếp cho cá nhân",
+    "text": "Điều 177. Thủ tục cấp, tống đạt, thông báo trực tiếp cho cá nhân\n1. Văn bản tố tụng được cấp, tống đạt, thông báo đến địa chỉ mà các đương sự đã gửi cho Tòa án theo phương thức đương sự yêu cầu hoặc tới địa chỉ mà các đư",
+    "gold": false
+   }
+  ],
+  "errors": {}
+ },
+ {
+  "id": "d19",
+  "type": "multi",
+  "question": "vợ ôm con về ngoại cả năm nay rồi, giờ muốn làm đơn ly hôn thì nộp ở đâu",
+  "reference": "Ly hôn thuộc thẩm quyền Tòa án nhân dân cấp huyện (Điều 35); nộp tại Tòa nơi bị đơn (vợ) cư trú, làm việc, hoặc thỏa thuận nộp nơi nguyên đơn (Điều 39 BLTTDS).",
+  "gold": [
+   "bo_luat_to_tung_dan_su_2015 Điều 35",
+   "bo_luat_to_tung_dan_su_2015 Điều 39"
+  ],
+  "hyde": "Trường hợp đơn phương ly hôn, hồ sơ được nộp tại Tòa án nhân dân cấp huyện nơi người chồng cư trú hoặc làm việc; việc người vợ đưa con về nhà ngoại sinh sống không làm thay đổi thẩm quyền này. Nếu hai bên thuận tình ly hôn, có thể nộp hồ sơ tại Tòa án có thẩm quyền nơi một trong hai bên cư trú hoặc làm việc. Trường hợp có yếu tố nước ngoài hoặc đương sự cư trú ở nước ngoài, thẩm quyền giải quyết có thể thuộc Tòa án cấp tỉnh.",
+  "ranks": {
+   "dense": [
+    6,
+    1
+   ],
+   "hyde": [
+    3,
+    1
+   ],
+   "rrf": [
+    4,
+    1
+   ],
+   "rerank": [
+    3,
+    4
+   ],
+   "all_bm25": [
+    3,
+    4
+   ],
+   "bm25_arm": [
+    null,
+    7
+   ],
+   "jina": [
+    6,
+    1
+   ]
+  },
+  "top5_best": [
+   {
+    "id": "d3e7cff20880c16d:0057",
+    "src": "bo_luat_to_tung_dan_su_2015",
+    "sec": "Điều 40. Thẩm quyền của Tòa án theo sự lựa chọn của nguyên đơn, người yêu cầu",
+    "text": "2. Người yêu cầu có quyền lựa chọn Tòa án giải quyết yêu cầu về dân sự, hôn nhân và gia đình trong các trường hợp sau đây:\na) Đối với các yêu cầu về dân sự quy định tại các khoản 1, 2, 3, 4, 6, 7, 8, 9 và 10 Điều 27 của ",
+    "gold": false
+   },
+   {
+    "id": "d3e7cff20880c16d:0055",
+    "src": "bo_luat_to_tung_dan_su_2015",
+    "sec": "Điều 40. Thẩm quyền của Tòa án theo sự lựa chọn của nguyên đơn, người yêu cầu",
+    "text": "Điều 40. Thẩm quyền của Tòa án theo sự lựa chọn của nguyên đơn, người yêu cầu\n1. Nguyên đơn có quyền lựa chọn Tòa án giải quyết tranh chấp về dân sự, hôn nhân và gia đình, kinh doanh, thương mại, lao động trong các trườn",
+    "gold": false
+   },
+   {
+    "id": "d3e7cff20880c16d:0042",
+    "src": "bo_luat_to_tung_dan_su_2015",
+    "sec": "Điều 35. Thẩm quyền của Tòa án nhân dân cấp huyện",
+    "text": "d) Yêu cầu về lao động quy định tại khoản 1 và khoản 5 Điều 33 của Bộ luật này.\n3. Những tranh chấp, yêu cầu quy định tại khoản 1 và khoản 2 Điều này mà có đương sự hoặc tài sản ở nước ngoài hoặc cần phải ủy thác tư pháp",
+    "gold": true
+   },
+   {
+    "id": "d3e7cff20880c16d:0051",
+    "src": "bo_luat_to_tung_dan_su_2015",
+    "sec": "Điều 39. Thẩm quyền của Tòa án theo lãnh thổ",
+    "text": "h) Tòa án nơi một trong các bên thuận tình ly hôn, thỏa thuận nuôi con, chia tài sản khi ly hôn cư trú, làm việc có thẩm quyền giải quyết yêu cầu công nhận thuận tình ly hôn, thỏa thuận nuôi con, chia tài sản khi ly hôn;",
+    "gold": true
+   },
+   {
+    "id": "d3e7cff20880c16d:0056",
+    "src": "bo_luat_to_tung_dan_su_2015",
+    "sec": "Điều 40. Thẩm quyền của Tòa án theo sự lựa chọn của nguyên đơn, người yêu cầu",
+    "text": "đ) Nếu tranh chấp về bồi thường thiệt hại, trợ cấp khi chấm dứt hợp đồng lao động, bảo hiểm xã hội, bảo hiểm y tế, bảo hiểm thất nghiệp, quyền và lợi ích liên quan đến việc làm, tiền lương, thu nhập và các điều kiện lao ",
+    "gold": false
+   }
+  ],
+  "top5_jina": [
+   {
+    "id": "d3e7cff20880c16d:0051",
+    "src": "bo_luat_to_tung_dan_su_2015",
+    "sec": "Điều 39. Thẩm quyền của Tòa án theo lãnh thổ",
+    "text": "h) Tòa án nơi một trong các bên thuận tình ly hôn, thỏa thuận nuôi con, chia tài sản khi ly hôn cư trú, làm việc có thẩm quyền giải quyết yêu cầu công nhận thuận tình ly hôn, thỏa thuận nuôi con, chia tài sản khi ly hôn;",
+    "gold": true
+   },
+   {
+    "id": "d3e7cff20880c16d:0050",
+    "src": "bo_luat_to_tung_dan_su_2015",
+    "sec": "Điều 39. Thẩm quyền của Tòa án theo lãnh thổ",
+    "text": "đ) Tòa án nơi người gửi đơn cư trú, làm việc, nếu người gửi đơn là cá nhân hoặc nơi người gửi đơn có trụ sở, nếu người gửi đơn là cơ quan, tổ chức có thẩm quyền giải quyết yêu cầu không công nhận bản án, quyết định dân s",
+    "gold": true
+   },
+   {
+    "id": "d3e7cff20880c16d:0652",
+    "src": "bo_luat_to_tung_dan_su_2015",
+    "sec": "Điều 477. Xử lý kết quả tống đạt văn bản tố tụng của Tòa án cho đương sự ở nước ngoài và kết quả yêu cầu cơ quan có thẩm quyền của nước ngoài thu thập chứng cứ",
+    "text": "c) Trường hợp nguyên đơn là công dân Việt Nam yêu cầu ly hôn với người nước ngoài đang cư trú ở nước ngoài mà không thể thực hiện việc cung cấp đúng họ, tên, địa chỉ hoặc địa chỉ mới của người nước ngoài theo yêu cầu của",
+    "gold": false
+   },
+   {
+    "id": "d3e7cff20880c16d:0057",
+    "src": "bo_luat_to_tung_dan_su_2015",
+    "sec": "Điều 40. Thẩm quyền của Tòa án theo sự lựa chọn của nguyên đơn, người yêu cầu",
+    "text": "2. Người yêu cầu có quyền lựa chọn Tòa án giải quyết yêu cầu về dân sự, hôn nhân và gia đình trong các trường hợp sau đây:\na) Đối với các yêu cầu về dân sự quy định tại các khoản 1, 2, 3, 4, 6, 7, 8, 9 và 10 Điều 27 của ",
+    "gold": false
+   },
+   {
+    "id": "d3e7cff20880c16d:0536",
+    "src": "bo_luat_to_tung_dan_su_2015",
+    "sec": "Điều 396. Đơn yêu cầu công nhận thuận tình ly hôn, thỏa thuận nuôi con, chia tài sản khi ly hôn",
+    "text": "Điều 396. Đơn yêu cầu công nhận thuận tình ly hôn, thỏa thuận nuôi con, chia tài sản khi ly hôn\n1. Vợ, chồng yêu cầu Tòa án công nhận thuận tình ly hôn, thỏa thuận nuôi con, chia tài sản khi ly hôn phải có đơn yêu cầu. Đ",
+    "gold": false
+   }
+  ],
+  "errors": {}
+ },
+ {
+  "id": "d20",
+  "type": "paraphrase",
+  "question": "chồng tôi đi làm trên tàu, hết hợp đồng mà chủ tàu bỏ ở nước ngoài không lo cho về",
+  "reference": "Chủ tàu phải bố trí cho thuyền viên hồi hương và thanh toán chi phí khi hợp đồng lao động hết hạn (Điều 66 Bộ luật Hàng hải).",
+  "gold": [
+   "bo_luat_hang_hai_2015 Điều 66"
+  ],
+  "hyde": "Khi hợp đồng lao động thuyền viên hết hạn, chủ tàu có trách nhiệm bố trí và thanh toán chi phí hồi hương cho người lao động theo hợp đồng và quy định áp dụng. Việc để thuyền viên ở lại nước ngoài mà không tổ chức đưa về có thể bị xem xét là vi phạm nghĩa vụ của người sử dụng lao động hoặc đơn vị đưa người lao động đi làm việc ở nước ngoài. Gia đình cần liên hệ cơ quan đại diện Việt Nam tại nước sở tại, cơ quan quản lý lao động hàng hải và doanh nghiệp đưa thuyền viên đi làm việc ở nước ngoài để đề nghị hỗ trợ, xác minh nơi ở và phương án hồi hương. Cần lưu giữ hợp đồng, giấy tờ đi tàu, thông tin liên lạc với chủ tàu và chứng từ về các khoản chi phí phát sinh để làm căn cứ yêu cầu giải quyết quyền lợi.",
+  "ranks": {
+   "dense": [
+    3
+   ],
+   "hyde": [
+    1
+   ],
+   "rrf": [
+    1
+   ],
+   "rerank": [
+    1
+   ],
+   "all_bm25": [
+    1
+   ],
+   "bm25_arm": [
+    1
+   ],
+   "jina": [
+    3
+   ]
+  },
+  "top5_best": [
+   {
+    "id": "5dc99a513d86dc54:0083",
+    "src": "bo_luat_hang_hai_2015",
+    "sec": "Điều 66. Hồi hương thuyền viên",
+    "text": "Điều 66. Hồi hương thuyền viên\n1. Chủ tàu có trách nhiệm bố trí cho thuyền viên hồi hương và thanh toán chi phí trong trường hợp sau đây:\na) Hợp đồng lao động của thuyền viên hết hạn;\nb) Thuyền viên bị ốm đau, tai nạn la",
+    "gold": true
+   },
+   {
+    "id": "5dc99a513d86dc54:0084",
+    "src": "bo_luat_hang_hai_2015",
+    "sec": "Điều 66. Hồi hương thuyền viên",
+    "text": "d) Chi phí vận chuyển tối đa 30 kilôgam (kg) hành lý cá nhân của thuyền viên đến địa điểm hồi hương;\nđ) Chi phí chăm sóc y tế cần thiết cho tới khi thuyền viên đủ điều kiện sức khỏe để đi đến địa điểm hồi hương.\n4. Chủ t",
+    "gold": true
+   },
+   {
+    "id": "5dc99a513d86dc54:0076",
+    "src": "bo_luat_hang_hai_2015",
+    "sec": "Điều 61. Chế độ lao động và quyền lợi của thuyền viên",
+    "text": "Điều 61. Chế độ lao động và quyền lợi của thuyền viên\n1. Chế độ lao động và quyền lợi của thuyền viên làm việc trên tàu biển Việt Nam được thực hiện theo quy định của pháp luật Việt Nam và điều ước quốc tế liên quan mà C",
+    "gold": false
+   },
+   {
+    "id": "5dc99a513d86dc54:0077",
+    "src": "bo_luat_hang_hai_2015",
+    "sec": "Điều 62. Hợp đồng lao động của thuyền viên",
+    "text": "Điều 62. Hợp đồng lao động của thuyền viên\n1. Trước khi làm việc trên tàu biển, thuyền viên và chủ tàu phải ký kết hợp đồng lao động.\n2. Hợp đồng lao động của thuyền viên phải bao gồm nội dung cơ bản theo quy định của ph",
+    "gold": false
+   },
+   {
+    "id": "5dc99a513d86dc54:0262",
+    "src": "bo_luat_hang_hai_2015",
+    "sec": "Điều 221. Nghĩa vụ của chủ tàu trong thuê tàu định hạn",
+    "text": "Điều 221. Nghĩa vụ của chủ tàu trong thuê tàu định hạn\n1. Chủ tàu có nghĩa vụ giao tàu biển cho người thuê tàu đúng địa điểm, thời điểm với trạng thái an toàn kỹ thuật cần thiết, có đủ dự trữ phù hợp với mục đích sử dụng",
+    "gold": false
+   }
+  ],
+  "top5_jina": [
+   {
+    "id": "5dc99a513d86dc54:0269",
+    "src": "bo_luat_hang_hai_2015",
+    "sec": "Điều 228. Chấm dứt hợp đồng thuê tàu định hạn",
+    "text": "Điều 228. Chấm dứt hợp đồng thuê tàu định hạn\n1. Người thuê tàu có quyền chấm dứt hợp đồng và được đòi bồi thường thiệt hại liên quan, nếu chủ tàu có lỗi trong khi thực hiện nghĩa vụ quy định tại Điều 221 của Bộ luật này",
+    "gold": false
+   },
+   {
+    "id": "5dc99a513d86dc54:0077",
+    "src": "bo_luat_hang_hai_2015",
+    "sec": "Điều 62. Hợp đồng lao động của thuyền viên",
+    "text": "Điều 62. Hợp đồng lao động của thuyền viên\n1. Trước khi làm việc trên tàu biển, thuyền viên và chủ tàu phải ký kết hợp đồng lao động.\n2. Hợp đồng lao động của thuyền viên phải bao gồm nội dung cơ bản theo quy định của ph",
+    "gold": false
+   },
+   {
+    "id": "5dc99a513d86dc54:0083",
+    "src": "bo_luat_hang_hai_2015",
+    "sec": "Điều 66. Hồi hương thuyền viên",
+    "text": "Điều 66. Hồi hương thuyền viên\n1. Chủ tàu có trách nhiệm bố trí cho thuyền viên hồi hương và thanh toán chi phí trong trường hợp sau đây:\na) Hợp đồng lao động của thuyền viên hết hạn;\nb) Thuyền viên bị ốm đau, tai nạn la",
+    "gold": true
+   },
+   {
+    "id": "5dc99a513d86dc54:0231",
+    "src": "bo_luat_hang_hai_2015",
+    "sec": "Điều 192. Chấm dứt hợp đồng không phải bồi thường",
+    "text": "Điều 192. Chấm dứt hợp đồng không phải bồi thường\n1. Các bên tham gia hợp đồng có quyền chấm dứt hợp đồng mà không phải bồi thường, nếu trước khi tàu biển bắt đầu rời khỏi nơi bốc hàng đã xảy ra một trong các sự kiện sau",
+    "gold": false
+   },
+   {
+    "id": "5dc99a513d86dc54:0076",
+    "src": "bo_luat_hang_hai_2015",
+    "sec": "Điều 61. Chế độ lao động và quyền lợi của thuyền viên",
+    "text": "Điều 61. Chế độ lao động và quyền lợi của thuyền viên\n1. Chế độ lao động và quyền lợi của thuyền viên làm việc trên tàu biển Việt Nam được thực hiện theo quy định của pháp luật Việt Nam và điều ước quốc tế liên quan mà C",
+    "gold": false
+   }
+  ],
+  "errors": {}
+ }
+]

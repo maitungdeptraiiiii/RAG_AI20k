@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Perplexity Legal — RAG Trợ lý Pháp luật</title>
-  <!-- Google Fonts: Inter (weights 400, 500) -->
+  <title>VinAI Legal — Trợ lý Pháp luật Việt Nam</title>
+  <!-- Google Fonts: Inter (weights 400, 500, 600) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Marked.js for markdown rendering -->
@@ -17,23 +17,12 @@
     tailwind.config = {
       theme: {
         extend: {
-          colors: {
-            paper: '#faf8f5',
-            ink: '#000000',
-            charcoal: '#27251e',
-            ash: '#72706b',
-            stone: '#92918b',
-            pebble: '#d1d1cd',
-            teal: '#016a71',
-            subtle: '#e8e6e1',
-            skeleton: '#f0eeea',
-          },
           fontFamily: {
             sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'],
           },
           boxShadow: {
-            subtle: 'rgba(0, 0, 0, 0.08) 0px 1px 2px 0px',
-            float: 'rgba(0, 0, 0, 0.06) 0px 4px 12px 0px',
+            subtle: 'rgba(0, 0, 0, 0.05) 0px 1px 2px 0px',
+            float: 'rgba(0, 0, 0, 0.1) 0px 6px 20px -4px, rgba(0, 0, 0, 0.06) 0px 4px 6px -2px',
           }
         }
       }
@@ -41,386 +30,487 @@
   </script>
 
   <style>
-    :root {
-      --color-aged-paper: #faf8f5;
-      --color-ink-black: #000000;
-      --color-charcoal: #27251e;
-      --color-ash-gray: #72706b;
-      --color-stone: #92918b;
-      --color-pebble: #d1d1cd;
-      --color-deep-teal: #016a71;
-    }
     body {
-      background-color: #faf8f5;
-      color: #27251e;
+      background-color: #ffffff;
+      color: #0d0d0d;
       font-family: 'Inter', sans-serif;
-      font-size: 14px;
-      line-height: 1.43;
+      font-size: 15px;
+      line-height: 1.6;
     }
-    /* Shimmer animation for loading skeleton */
-    @keyframes shimmer {
-      0% { opacity: 0.5; }
-      50% { opacity: 1; }
-      100% { opacity: 0.5; }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
     }
-    .animate-shimmer {
-      animation: shimmer 1.5s infinite ease-in-out;
+    ::-webkit-scrollbar-track {
+      background: transparent;
     }
-    /* Markdown answer typography */
-    .answer-prose p { margin-bottom: 0.75rem; }
-    .answer-prose ul { list-style-type: disc; margin-left: 1.25rem; margin-bottom: 0.75rem; }
-    .answer-prose ol { list-style-type: decimal; margin-left: 1.25rem; margin-bottom: 0.75rem; }
-    .answer-prose li { margin-bottom: 0.25rem; }
-    .answer-prose strong { font-weight: 500; color: #000000; }
-    .answer-prose code { background: #e8e6e1; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
-    .answer-prose blockquote { border-left: 3px solid #016a71; padding-left: 0.75rem; color: #72706b; font-style: italic; }
+    ::-webkit-scrollbar-thumb {
+      background: #e5e5e5;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #d4d4d8;
+    }
+
+    /* ChatGPT Markdown Prose Styling */
+    .chatgpt-prose {
+      font-size: 15.5px;
+      line-height: 1.7;
+      color: #171717;
+    }
+    .chatgpt-prose h1, .chatgpt-prose h2, .chatgpt-prose h3 {
+      font-weight: 600;
+      color: #0d0d0d;
+      margin-top: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+    .chatgpt-prose h1 { font-size: 1.35rem; }
+    .chatgpt-prose h2 { font-size: 1.2rem; }
+    .chatgpt-prose h3 { font-size: 1.05rem; }
+    .chatgpt-prose p {
+      margin-bottom: 0.85rem;
+    }
+    .chatgpt-prose ul {
+      list-style-type: disc;
+      padding-left: 1.35rem;
+      margin-bottom: 0.85rem;
+    }
+    .chatgpt-prose ol {
+      list-style-type: decimal;
+      padding-left: 1.35rem;
+      margin-bottom: 0.85rem;
+    }
+    .chatgpt-prose li {
+      margin-bottom: 0.35rem;
+    }
+    .chatgpt-prose strong {
+      font-weight: 600;
+      color: #0d0d0d;
+    }
+    .chatgpt-prose code {
+      background: #f4f4f4;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 13.5px;
+      font-family: monospace;
+      color: #1f2937;
+    }
+    .chatgpt-prose blockquote {
+      border-left: 3px solid #d4d4d8;
+      padding-left: 0.85rem;
+      color: #52525b;
+      font-style: italic;
+      margin: 0.75rem 0;
+    }
+
+    /* ChatGPT Citation Pill (matching PubMed +1 style) */
+    .chatgpt-cite-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      margin: 1px 3px;
+      background-color: #f4f4f5;
+      border: 1px solid #e4e4e7;
+      border-radius: 9999px;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: #3f3f46;
+      cursor: pointer;
+      user-select: none;
+      vertical-align: baseline;
+      transition: all 0.15s ease;
+      line-height: normal;
+    }
+    .chatgpt-cite-pill:hover {
+      background-color: #e4e4e7;
+      border-color: #d4d4d8;
+      color: #18181b;
+    }
+    .chatgpt-cite-pill .pill-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background-color: #0f766e;
+    }
+    .chatgpt-cite-pill .pill-more {
+      color: #71717a;
+      font-weight: 400;
+      font-size: 10.5px;
+    }
+
+    /* Pulsing dots loading animation */
+    @keyframes pulse-dot {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+    .dot-1 { animation: pulse-dot 1.2s infinite ease-in-out; }
+    .dot-2 { animation: pulse-dot 1.2s infinite ease-in-out 0.2s; }
+    .dot-3 { animation: pulse-dot 1.2s infinite ease-in-out 0.4s; }
   </style>
 </head>
-<body class="h-full flex overflow-hidden select-text">
+<body class="h-full flex overflow-hidden select-text bg-white">
 
-  <!-- ==================== LEFT SIDEBAR (220px) ==================== -->
-  <aside class="w-[220px] flex-shrink-0 bg-paper border-r border-pebble flex flex-col justify-between p-3 select-none">
-    <div class="flex flex-col space-y-4">
-      <!-- Wordmark -->
-      <div class="flex items-center justify-between px-2 pt-1">
-        <div class="flex items-center space-x-2">
-          <svg class="w-5 h-5 text-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-          </svg>
-          <span class="font-medium text-[15px] tracking-tight text-charcoal">perplexity <span class="text-teal font-medium">legal</span></span>
-        </div>
-      </div>
+  <!-- ==================== LEFT SIDEBAR (VinAI Legal, 260px) ==================== -->
+  <aside id="sidebar" class="w-[260px] flex-shrink-0 bg-[#f9f9f9] border-r border-[#e5e5e5] flex flex-col justify-between p-3 select-none transition-all duration-200">
+    <div class="flex flex-col h-full overflow-hidden">
 
-      <!-- Action Button: New Query -->
-      <button onclick="resetToHero()" class="w-full flex items-center justify-center space-x-2 bg-charcoal text-white rounded-full py-2 px-3 text-[13px] font-medium hover:bg-black transition-colors shadow-subtle">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-        </svg>
-        <span>Tra cứu mới</span>
-      </button>
-
-      <!-- Navigation Links -->
-      <nav class="flex flex-col space-y-1 text-[13px]">
-        <button onclick="toggleDocModal(true)" class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-full hover:bg-subtle text-charcoal font-normal text-left transition-colors">
-          <div class="flex items-center space-x-2">
-            <svg class="w-4 h-4 text-ash" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-            </svg>
-            <span>Kho văn bản luật</span>
+      <!-- Sidebar Top: Brand Logo + Action Icons -->
+      <div class="flex items-center justify-between px-2 pt-1 pb-2 flex-shrink-0">
+        <div class="flex items-center space-x-2 cursor-pointer" onclick="resetToHero()">
+          <div class="w-7 h-7 rounded-full bg-neutral-900 text-white flex items-center justify-center font-bold text-[13px] shadow-sm">
+            ⚖️
           </div>
-          <span id="doc-badge-count" class="text-[11px] bg-subtle px-1.5 py-0.5 rounded-full text-ash">6</span>
-        </button>
-
-        <button onclick="toggleIngestModal(true)" class="w-full flex items-center space-x-2 px-2.5 py-1.5 rounded-full hover:bg-subtle text-charcoal font-normal text-left transition-colors">
-          <svg class="w-4 h-4 text-ash" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-          </svg>
-          <span>Nạp tài liệu mới</span>
-        </button>
-      </nav>
-
-      <!-- Document Inventory List -->
-      <div class="pt-2 border-t border-pebble">
-        <div class="text-[11px] font-medium text-stone uppercase tracking-wider px-2.5 pb-2">6 Bộ luật có sẵn</div>
-        <div id="sidebar-doc-list" class="space-y-1 max-h-[220px] overflow-y-auto pr-1 text-[12px]">
-          <!-- Loaded dynamically via JS -->
-          <div class="px-2 py-1 text-stone">Đang đọc kho dữ liệu...</div>
+          <span class="font-bold text-[16px] text-neutral-900 tracking-tight">VinAI Legal</span>
         </div>
-      </div>
-    </div>
-
-    <!-- Bottom Specs / Config Badge -->
-    <div class="pt-3 border-t border-pebble text-[11px] text-ash space-y-1 px-1">
-      <div class="flex items-center justify-between">
-        <span>Mô hình</span>
-        <span id="cfg-llm" class="font-medium text-charcoal">gpt-6-luna</span>
-      </div>
-      <div class="flex items-center justify-between">
-        <span>Reranker</span>
-        <span id="cfg-rerank" class="font-medium text-teal">Jev v1.13</span>
-      </div>
-      <div class="flex items-center justify-between">
-        <span>Nâng cao</span>
-        <span id="cfg-advanced" class="font-medium text-charcoal text-right text-[10px]">Decomposition + Listwise</span>
-      </div>
-      <div class="flex items-center justify-between pt-1 text-stone">
-        <span>Qdrant Local</span>
-        <span id="cfg-chunks">3.422 chunks</span>
-      </div>
-    </div>
-  </aside>
-
-  <!-- ==================== MAIN CONTENT AREA ==================== -->
-  <main class="flex-1 flex flex-col h-full overflow-hidden bg-paper relative">
-
-    <!-- Top Navigation Header -->
-    <header class="h-14 border-b border-pebble px-6 flex items-center justify-between flex-shrink-0 bg-paper/80 backdrop-blur z-10">
-      <div class="flex items-center space-x-3">
-        <span class="text-[13px] text-stone">Phạm vi tra cứu:</span>
-        <div class="flex items-center space-x-1.5" id="category-pills">
-          <button onclick="setDomainFilter('all')" class="domain-pill px-3 py-1 rounded-full text-[12px] font-medium bg-charcoal text-white transition-all">Tất cả luật</button>
-          <button onclick="setDomainFilter('Lao động')" class="domain-pill px-3 py-1 rounded-full text-[12px] font-normal text-ash hover:bg-subtle transition-all">Lao động</button>
-          <button onclick="setDomainFilter('Dân sự')" class="domain-pill px-3 py-1 rounded-full text-[12px] font-normal text-ash hover:bg-subtle transition-all">Dân sự</button>
-          <button onclick="setDomainFilter('Hình sự')" class="domain-pill px-3 py-1 rounded-full text-[12px] font-normal text-ash hover:bg-subtle transition-all">Hình sự</button>
-          <button onclick="setDomainFilter('Tố tụng')" class="domain-pill px-3 py-1 rounded-full text-[12px] font-normal text-ash hover:bg-subtle transition-all">Tố tụng</button>
-          <button onclick="setDomainFilter('Hàng hải')" class="domain-pill px-3 py-1 rounded-full text-[12px] font-normal text-ash hover:bg-subtle transition-all">Hàng hải</button>
-        </div>
-      </div>
-      <div class="flex items-center space-x-2 text-[12px] text-ash">
-        <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
-        <span>Hệ thống sẵn sàng</span>
-      </div>
-    </header>
-
-    <!-- Scrollable Chat / Hero Container -->
-    <div id="scroll-container" class="flex-1 overflow-y-auto px-4 py-8">
-      <div class="max-w-[700px] mx-auto min-h-full flex flex-col justify-start">
-
-        <!-- ==================== HERO STATE (Initial view) ==================== -->
-        <div id="hero-view" class="my-auto py-12 flex flex-col items-center text-center space-y-6">
-          <div class="flex items-center justify-center space-x-2.5">
-            <svg class="w-9 h-9 text-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        <div class="flex items-center space-x-0.5 text-neutral-500">
+          <button class="p-1 hover:text-neutral-900 hover:bg-[#ececec] rounded-lg transition-colors" title="Tìm kiếm">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <h1 class="text-3xl font-medium tracking-tight text-charcoal">perplexity <span class="text-teal">legal</span></h1>
+          </button>
+          <button onclick="toggleSidebar()" class="p-1 hover:text-neutral-900 hover:bg-[#ececec] rounded-lg transition-colors" title="Đóng thanh bên">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Top Nav Actions: New Chat, Library, Ingest -->
+      <div class="space-y-0.5 mb-2 flex-shrink-0">
+        <button onclick="resetToHero()" class="w-full flex items-center space-x-3 px-2.5 py-2 text-[13.5px] text-neutral-800 hover:bg-[#ececec] rounded-lg transition-colors font-medium">
+          <svg class="w-4 h-4 text-neutral-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          <span>New chat</span>
+        </button>
+        <button onclick="toggleDocModal(true)" class="w-full flex items-center space-x-3 px-2.5 py-1.5 text-[13.5px] text-neutral-800 hover:bg-[#ececec] rounded-lg transition-colors font-normal">
+          <svg class="w-4 h-4 text-neutral-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+          <span>Library</span>
+        </button>
+        <button onclick="toggleIngestModal(true)" class="w-full flex items-center space-x-3 px-2.5 py-1.5 text-[13.5px] text-neutral-800 hover:bg-[#ececec] rounded-lg transition-colors font-normal">
+          <svg class="w-4 h-4 text-neutral-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4v16m8-8H4" />
+          </svg>
+          <span>Nạp tài liệu</span>
+        </button>
+      </div>
+
+      <!-- Scrollable Area: Projects (6 Codes) + Recents (History) -->
+      <div class="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-thin">
+
+        <!-- ==================== PROJECTS: BỘ LUẬT QUY PHẠM ==================== -->
+        <div>
+          <button onclick="toggleProjects()" class="w-full flex items-center justify-between px-2.5 py-1 text-[12.5px] font-medium text-neutral-500 hover:text-neutral-900 transition-colors">
+            <div class="flex items-center space-x-1">
+              <span>Projects</span>
+              <svg id="projects-chevron" class="w-3.5 h-3.5 text-neutral-400 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+            <span class="text-[10.5px] text-neutral-400 font-normal">6 văn bản</span>
+          </button>
+          <div id="projects-doc-list" class="space-y-0.5 mt-0.5 text-[13px]">
+            <!-- 6 Legal Codes listed as projects with monochrome uncolored outline SVG icons -->
+            <button onclick="openDocByCode('bo_luat_dan_su_2015.txt')" class="w-full flex items-center space-x-2.5 px-2.5 py-1.5 rounded-lg text-neutral-700 hover:bg-[#ececec] hover:text-neutral-900 transition-colors text-left truncate">
+              <svg class="w-4 h-4 text-neutral-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span class="truncate">Bộ luật Dân sự 2015</span>
+            </button>
+            <button onclick="openDocByCode('bo_luat_lao_dong_2019.txt')" class="w-full flex items-center space-x-2.5 px-2.5 py-1.5 rounded-lg text-neutral-700 hover:bg-[#ececec] hover:text-neutral-900 transition-colors text-left truncate">
+              <svg class="w-4 h-4 text-neutral-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span class="truncate">Bộ luật Lao động 2019</span>
+            </button>
+            <button onclick="openDocByCode('bo_luat_hinh_su_2015.txt')" class="w-full flex items-center space-x-2.5 px-2.5 py-1.5 rounded-lg text-neutral-700 hover:bg-[#ececec] hover:text-neutral-900 transition-colors text-left truncate">
+              <svg class="w-4 h-4 text-neutral-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span class="truncate">Bộ luật Hình sự 2015</span>
+            </button>
+            <button onclick="openDocByCode('bo_luat_hang_hai_2015.txt')" class="w-full flex items-center space-x-2.5 px-2.5 py-1.5 rounded-lg text-neutral-700 hover:bg-[#ececec] hover:text-neutral-900 transition-colors text-left truncate">
+              <svg class="w-4 h-4 text-neutral-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span class="truncate">Bộ luật Hàng hải VN 2015</span>
+            </button>
+            <button onclick="openDocByCode('bo_luat_to_tung_dan_su_2015.txt')" class="w-full flex items-center space-x-2.5 px-2.5 py-1.5 rounded-lg text-neutral-700 hover:bg-[#ececec] hover:text-neutral-900 transition-colors text-left truncate">
+              <svg class="w-4 h-4 text-neutral-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span class="truncate">BL Tố tụng Dân sự 2015</span>
+            </button>
+            <button onclick="openDocByCode('bo_luat_to_tung_hinh_su_2015.txt')" class="w-full flex items-center space-x-2.5 px-2.5 py-1.5 rounded-lg text-neutral-700 hover:bg-[#ececec] hover:text-neutral-900 transition-colors text-left truncate">
+              <svg class="w-4 h-4 text-neutral-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span class="truncate">BL Tố tụng Hình sự 2015</span>
+            </button>
           </div>
-          <p class="text-[15px] text-ash max-w-[480px]">Tra cứu quy định pháp luật chính xác, viện dẫn điều luật trực tiếp kèm đối chiếu ranking RRF & Jev Reranker.</p>
+        </div>
 
-          <!-- Main Hero Search Bar -->
-          <div class="w-full bg-white rounded-xl border border-pebble shadow-subtle p-3 text-left transition-all focus-within:border-ash focus-within:shadow-float">
-            <textarea id="hero-query-input" rows="2" placeholder="Hỏi điều luật, mức xử phạt hoặc mô tả vụ việc pháp lý..." class="w-full resize-none border-0 focus:ring-0 p-1 text-[15px] text-charcoal placeholder-stone outline-none bg-transparent"></textarea>
-
-            <div class="flex items-center justify-between pt-2 border-t border-subtle mt-1">
-              <!-- Mode selector pill inside search bar -->
-              <div class="flex items-center space-x-2">
-                <span class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-md bg-paper border border-pebble text-[12px] font-medium text-charcoal">
-                  <svg class="w-3.5 h-3.5 text-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
-                  <span id="mode-pill-text">Chế độ: Decomposition + Jev + Listwise</span>
-                </span>
-                <span class="text-[12px] text-stone">Nhấn Enter để gửi</span>
-              </div>
-
-              <!-- Submit button: Charcoal circle 28px, white up arrow -->
-              <button onclick="submitHeroQuery()" class="w-7 h-7 rounded-full bg-charcoal text-white flex items-center justify-center hover:bg-black transition-colors shadow-subtle">
+        <!-- ==================== RECENTS: LỊCH SỬ TRA CỨU ==================== -->
+        <div>
+          <div class="flex items-center justify-between px-2.5 pt-2 pb-1 text-[12.5px] font-medium text-neutral-500">
+            <span>Recents</span>
+            <div class="flex items-center space-x-1.5 text-neutral-400">
+              <button class="hover:text-neutral-700 p-0.5" title="Tùy chọn">
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
+              </button>
+              <button class="hover:text-neutral-700 p-0.5" title="Sắp xếp">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 6h16M4 12h10M4 18h6" />
+                </svg>
+              </button>
+              <button onclick="clearRecents()" class="hover:text-neutral-700 p-0.5" title="Xóa lịch sử">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                 </svg>
               </button>
             </div>
           </div>
+          <div id="recents-list" class="space-y-0.5 mt-0.5 text-[13.5px]">
+            <!-- Dynamically populated from recentChats -->
+            <div class="px-2.5 py-1.5 text-neutral-400 text-[12px] italic">Chưa có lịch sử gần đây</div>
+          </div>
+        </div>
 
-          <!-- Suggested Query Chips -->
-          <div class="w-full flex flex-wrap justify-center gap-2 pt-2">
-            <button onclick="fillAndSubmit('Thời hiệu khởi kiện tranh chấp hợp đồng dân sự là bao lâu?')" class="px-3 py-1.5 rounded-full bg-white border border-pebble hover:border-ash hover:bg-subtle text-[12px] text-charcoal transition-all shadow-subtle text-left">
-              ⚖️ Thời hiệu khởi kiện tranh chấp hợp đồng
+      </div>
+
+      <!-- Sidebar Bottom: User Profile -->
+      <div class="pt-2 border-t border-[#e5e5e5] flex-shrink-0">
+        <div class="flex items-center space-x-2.5 px-2 py-2 rounded-lg hover:bg-[#ececec] transition-colors cursor-pointer">
+          <div class="w-8 h-8 rounded-full bg-amber-700 text-white flex items-center justify-center font-semibold text-[12px] flex-shrink-0">
+            HQ
+          </div>
+          <div class="text-left leading-tight truncate">
+            <div class="text-[13.5px] font-medium text-neutral-900 truncate">Huy Lương Quang</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- ==================== MAIN CHAT AREA ==================== -->
+  <main class="flex-1 flex flex-col h-full overflow-hidden bg-white relative">
+
+    <!-- Top Navigation Header -->
+    <header class="h-13 border-b border-neutral-100 px-5 flex items-center justify-between flex-shrink-0 bg-white/90 backdrop-blur z-20">
+      <div class="flex items-center space-x-3 truncate">
+        <button onclick="toggleSidebar()" class="p-1 text-neutral-500 hover:text-neutral-800 rounded-lg hover:bg-neutral-100 transition-colors md:hidden">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <h1 id="conversation-title" class="text-[15px] font-medium text-neutral-800 truncate">Đoạn chat mới</h1>
+      </div>
+
+      <div class="flex items-center space-x-1 flex-shrink-0">
+        <button class="p-1.5 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 rounded-lg transition-colors" title="Chia sẻ">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Scrollable Chat / Conversation Container -->
+    <div id="scroll-container" class="flex-1 overflow-y-auto px-4 py-6">
+      <div class="max-w-[760px] mx-auto min-h-full flex flex-col justify-start">
+
+        <!-- ==================== HERO STATE (Empty View) ==================== -->
+        <div id="hero-view" class="my-auto py-16 flex flex-col items-center text-center space-y-7">
+          <div class="w-12 h-12 rounded-full bg-neutral-900 text-white flex items-center justify-center text-2xl shadow-subtle">
+            ⚖️
+          </div>
+          <h2 class="text-2xl font-semibold tracking-tight text-neutral-900">Tôi có thể giúp gì cho bạn về pháp luật hôm nay?</h2>
+
+          <!-- Suggested Prompt Cards (2x2 grid) -->
+          <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-2 max-w-[680px]">
+            <button onclick="fillAndSubmit('Thời hiệu khởi kiện tranh chấp hợp đồng dân sự là bao lâu?')" class="p-3.5 rounded-2xl border border-neutral-200 hover:bg-neutral-50 transition-all text-left text-neutral-800 text-[13.5px] leading-snug group shadow-subtle">
+              <div class="font-medium text-neutral-900 group-hover:text-black mb-1">⚖️ Thời hiệu khởi kiện hợp đồng</div>
+              <div class="text-[12px] text-neutral-500">Quy định về thời hạn khởi kiện giải quyết tranh chấp hợp đồng dân sự</div>
             </button>
-            <button onclick="fillAndSubmit('Người lao động làm thêm giờ vào ban đêm được tính tiền lương như thế nào?')" class="px-3 py-1.5 rounded-full bg-white border border-pebble hover:border-ash hover:bg-subtle text-[12px] text-charcoal transition-all shadow-subtle text-left">
-              💼 Tiền lương làm thêm giờ ban đêm
+            <button onclick="fillAndSubmit('Người lao động làm thêm giờ vào ban đêm được tính tiền lương như thế nào?')" class="p-3.5 rounded-2xl border border-neutral-200 hover:bg-neutral-50 transition-all text-left text-neutral-800 text-[13.5px] leading-snug group shadow-subtle">
+              <div class="font-medium text-neutral-900 group-hover:text-black mb-1">💼 Tiền lương làm thêm giờ ban đêm</div>
+              <div class="text-[12px] text-neutral-500">Cách tính lương làm thêm ban đêm theo Bộ luật Lao động 2019</div>
             </button>
-            <button onclick="fillAndSubmit('Lừa người khác lấy 30 triệu đồng thì bị phạt bao nhiêu năm tù?')" class="px-3 py-1.5 rounded-full bg-white border border-pebble hover:border-ash hover:bg-subtle text-[12px] text-charcoal transition-all shadow-subtle text-left">
-              🚨 Lừa đảo chiếm đoạt 30 triệu đồng
+            <button onclick="fillAndSubmit('Lừa người khác lấy 30 triệu đồng thì bị phạt bao nhiêu năm tù?')" class="p-3.5 rounded-2xl border border-neutral-200 hover:bg-neutral-50 transition-all text-left text-neutral-800 text-[13.5px] leading-snug group shadow-subtle">
+              <div class="font-medium text-neutral-900 group-hover:text-black mb-1">🚨 Lừa đảo chiếm đoạt 30 triệu</div>
+              <div class="text-[12px] text-neutral-500">Khung hình phạt tội lừa đảo chiếm đoạt tài sản theo Điều 174 BLHS</div>
             </button>
-            <button onclick="fillAndSubmit('Thời hạn tạm giam bị can để điều tra tội phạm ít nghiêm trọng là mấy tháng?')" class="px-3 py-1.5 rounded-full bg-white border border-pebble hover:border-ash hover:bg-subtle text-[12px] text-charcoal transition-all shadow-subtle text-left">
-              🔍 Thời hạn tạm giam để điều tra
+            <button onclick="fillAndSubmit('Thời hạn tạm giam bị can để điều tra tội phạm ít nghiêm trọng là mấy tháng?')" class="p-3.5 rounded-2xl border border-neutral-200 hover:bg-neutral-50 transition-all text-left text-neutral-800 text-[13.5px] leading-snug group shadow-subtle">
+              <div class="font-medium text-neutral-900 group-hover:text-black mb-1">🔍 Thời hạn tạm giam điều tra</div>
+              <div class="text-[12px] text-neutral-500">Thời hạn áp dụng biện pháp tạm giam theo BL Tố tụng Hình sự</div>
             </button>
           </div>
         </div>
 
         <!-- ==================== CHAT THREAD VIEW ==================== -->
-        <div id="chat-thread-view" class="hidden space-y-8 pb-28">
-          <!-- Chat messages dynamically appended here -->
+        <div id="chat-thread-view" class="hidden space-y-8 pb-36 pt-2">
+          <!-- Dynamic conversation turns appended here -->
         </div>
 
       </div>
     </div>
 
-    <!-- ==================== FLOATING BOTTOM SEARCH INPUT (Chat mode) ==================== -->
-    <div id="bottom-search-bar" class="hidden absolute bottom-4 left-0 right-0 px-4 pointer-events-none">
-      <div class="max-w-[700px] mx-auto pointer-events-auto">
-        <div class="w-full bg-white/95 backdrop-blur-md rounded-xl border border-pebble shadow-float p-2.5 flex items-center space-x-2 transition-all focus-within:border-ash">
-          <input id="bottom-query-input" type="text" placeholder="Hỏi tiếp hoặc làm rõ điều luật..." class="flex-1 text-[14px] text-charcoal placeholder-stone outline-none border-0 focus:ring-0 bg-transparent px-2">
+    <!-- ==================== FLOATING BOTTOM INPUT (ChatGPT Capsule) ==================== -->
+    <div class="absolute bottom-0 left-0 right-0 px-4 bg-gradient-to-t from-white via-white/95 to-transparent pt-6 pb-4 pointer-events-none z-30">
+      <div class="max-w-[760px] mx-auto pointer-events-auto">
+        <div class="w-full bg-white rounded-[26px] border border-neutral-300 shadow-sm focus-within:border-neutral-500 focus-within:shadow-md p-2 pl-3 flex items-end space-x-2 transition-all">
+          <!-- Attach / Upload button (+) -->
+          <button onclick="toggleIngestModal(true)" class="p-1.5 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 rounded-full transition-colors flex-shrink-0 mb-0.5" title="Nạp tài liệu mới">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
 
-          <button onclick="submitBottomQuery()" class="w-7 h-7 rounded-full bg-charcoal text-white flex items-center justify-center hover:bg-black transition-colors flex-shrink-0 shadow-subtle">
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <!-- Auto-expanding Textarea -->
+          <textarea id="main-query-input" rows="1" placeholder="Hỏi về điều luật, mức xử phạt, quy định pháp lý..." class="flex-1 max-h-[160px] resize-none border-0 focus:ring-0 p-1.5 text-[15px] text-neutral-900 placeholder-neutral-400 outline-none bg-transparent leading-relaxed"></textarea>
+
+          <!-- Send Button: Circle with up-arrow -->
+          <button id="main-send-btn" onclick="submitQuery()" class="w-8 h-8 rounded-full bg-neutral-900 text-white flex items-center justify-center hover:bg-neutral-800 disabled:opacity-30 disabled:hover:bg-neutral-900 transition-all flex-shrink-0 mb-0.5" title="Gửi câu hỏi">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18" />
             </svg>
           </button>
+        </div>
+
+        <div class="text-center text-[11px] text-neutral-400 mt-2 select-none">
+          Trợ lý Luật VinAI có thể mắc lỗi. Vui lòng đối chiếu điều luật gốc khi áp dụng pháp lý.
         </div>
       </div>
     </div>
 
   </main>
 
-  <!-- ==================== MODAL: SOURCE DRAWER / DETAILS ==================== -->
-  <div id="source-modal" class="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl border border-pebble shadow-float max-w-2xl w-full max-h-[80vh] flex flex-col overflow-hidden">
-      <div class="px-5 py-3.5 border-b border-pebble flex items-center justify-between bg-paper">
-        <div>
-          <div id="modal-source-tag" class="text-[11px] font-medium text-teal uppercase tracking-wider">[1] Căn cứ trích dẫn</div>
-          <h3 id="modal-source-title" class="text-[16px] font-medium text-charcoal">Điều ...</h3>
+  <!-- ==================== CHATGPT HOVER / CLICK CITATION POPOVER ==================== -->
+  <div id="chatgpt-popover" class="fixed z-50 hidden bg-white rounded-2xl shadow-float border border-neutral-200/90 p-4 w-[360px] text-left space-y-3 transition-opacity duration-150 select-text">
+    <div class="flex items-start justify-between">
+      <div class="flex items-center space-x-2">
+        <div class="w-6 h-6 rounded-full bg-neutral-100 flex items-center justify-center text-[12px] flex-shrink-0">⚖️</div>
+        <div class="leading-tight truncate">
+          <div id="popover-doc" class="text-[12.5px] font-semibold text-neutral-900 truncate">Bộ luật Dân sự 2015</div>
+          <div id="popover-domain" class="text-[10.5px] text-neutral-400">vbpl.vn · CSDL Quốc gia</div>
         </div>
-        <button onclick="closeSourceModal()" class="text-ash hover:text-charcoal p-1 rounded-full hover:bg-subtle transition-colors">
+      </div>
+      <span id="popover-score" class="text-[10px] font-medium text-teal-800 px-2 py-0.5 rounded-full bg-teal-50 border border-teal-200 flex-shrink-0">Độ khớp cao</span>
+    </div>
+
+    <div id="popover-article" class="text-[13.5px] font-semibold text-neutral-900 leading-snug">
+      Điều 429. Thời hiệu khởi kiện về hợp đồng
+    </div>
+
+    <div class="p-2.5 rounded-xl bg-neutral-50 border border-neutral-100 text-[12px] text-neutral-700 italic leading-relaxed max-h-[130px] overflow-y-auto">
+      <span id="popover-quote">"Thời hiệu khởi kiện để yêu cầu Tòa án giải quyết tranh chấp hợp đồng là 03 năm..."</span>
+    </div>
+
+    <div class="flex items-center justify-between pt-1 border-t border-neutral-100">
+      <button id="popover-view-btn" onclick="" class="text-[12px] font-medium text-neutral-800 hover:text-black flex items-center space-x-1 hover:underline cursor-pointer">
+        <span>Đọc toàn văn điều luật</span>
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+      <span id="popover-page" class="text-[11px] text-neutral-400"></span>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: TOÀN VĂN ĐIỀU LUẬT (Source Drawer) ==================== -->
+  <div id="source-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-neutral-200 shadow-float max-w-2xl w-full max-h-[82vh] flex flex-col overflow-hidden animate-fadeIn">
+      <div class="px-6 py-4 border-b border-neutral-100 flex items-center justify-between bg-white">
+        <div>
+          <div id="modal-source-tag" class="text-[11px] font-semibold text-teal-700 uppercase tracking-wider">[1] CĂN CỨ TRÍCH DẪN</div>
+          <h3 id="modal-source-title" class="text-[16px] font-semibold text-neutral-900">Điều ...</h3>
+        </div>
+        <button onclick="closeSourceModal()" class="text-neutral-400 hover:text-neutral-900 p-1.5 rounded-full hover:bg-neutral-100 transition-colors">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
-      <div class="p-5 overflow-y-auto space-y-3 text-[14px] leading-relaxed">
-        <div class="flex items-center space-x-4 text-[12px] text-stone pb-2 border-b border-subtle">
-          <div>Văn bản: <span id="modal-source-doc" class="font-medium text-charcoal">Bộ luật...</span></div>
-          <div>Trang: <span id="modal-source-page" class="font-medium text-charcoal">--</span></div>
-          <div><span id="modal-source-score" class="font-medium text-teal">Độ khớp cao</span></div>
+      <div class="p-6 overflow-y-auto space-y-4 text-[14px] leading-relaxed">
+        <div class="flex items-center space-x-4 text-[12px] text-neutral-500 pb-2 border-b border-neutral-100">
+          <div>Văn bản: <span id="modal-source-doc" class="font-medium text-neutral-800">Bộ luật...</span></div>
+          <div>Trang: <span id="modal-source-page" class="font-medium text-neutral-800">--</span></div>
+          <div><span id="modal-source-score" class="font-medium text-teal-700">Độ khớp cao</span></div>
         </div>
-        <div class="text-[12px] font-medium text-stone uppercase tracking-wide">Nội dung toàn văn đoạn trích:</div>
-        <div id="modal-source-text" class="p-3.5 bg-paper rounded-xl border border-pebble font-normal text-charcoal whitespace-pre-wrap select-text">
+        <div class="text-[12px] font-semibold text-neutral-400 uppercase tracking-wide">Toàn văn điều khoản:</div>
+        <div id="modal-source-text" class="p-4 bg-neutral-50 rounded-xl border border-neutral-100 font-normal text-neutral-800 whitespace-pre-wrap select-text leading-relaxed">
           Nội dung điều luật...
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ==================== MODAL: INVENTORY OF 6 CODES ==================== -->
-  <div id="doc-modal" class="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl border border-pebble shadow-float max-w-xl w-full max-h-[80vh] flex flex-col overflow-hidden">
-      <div class="px-5 py-4 border-b border-pebble flex items-center justify-between bg-paper">
+  <!-- ==================== MODAL: KHO 6 BỘ LUẬT ==================== -->
+  <div id="doc-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-neutral-200 shadow-float max-w-xl w-full max-h-[80vh] flex flex-col overflow-hidden">
+      <div class="px-6 py-4 border-b border-neutral-100 flex items-center justify-between">
         <div>
-          <h3 class="text-[16px] font-medium text-charcoal">Kho văn bản quy phạm pháp luật</h3>
-          <p class="text-[12px] text-ash">Dữ liệu chuẩn từ Cơ sở dữ liệu Quốc gia về Văn bản Pháp luật (vbpl.vn)</p>
+          <h3 class="text-[16px] font-semibold text-neutral-900">Kho văn bản quy phạm pháp luật</h3>
+          <p class="text-[12px] text-neutral-500">Cơ sở dữ liệu Quốc gia về Văn bản Pháp luật (vbpl.vn)</p>
         </div>
-        <button onclick="toggleDocModal(false)" class="text-ash hover:text-charcoal p-1 rounded-full hover:bg-subtle transition-colors">
+        <button onclick="toggleDocModal(false)" class="text-neutral-400 hover:text-neutral-900 p-1.5 rounded-full hover:bg-neutral-100 transition-colors">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
-      <div id="modal-doc-list" class="p-5 overflow-y-auto space-y-3">
-        <!-- Loaded via JS -->
+      <div id="modal-doc-list" class="p-6 overflow-y-auto space-y-3">
+        <!-- Dynamically loaded -->
       </div>
     </div>
   </div>
 
-  <!-- ==================== MODAL: INGEST NEW DOCUMENTS ==================== -->
-  <div id="ingest-modal" class="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl border border-pebble shadow-float max-w-md w-full overflow-hidden">
-      <div class="px-5 py-4 border-b border-pebble flex items-center justify-between bg-paper">
-        <h3 class="text-[15px] font-medium text-charcoal">Nạp thêm văn bản vào hệ thống</h3>
-        <button onclick="toggleIngestModal(false)" class="text-ash hover:text-charcoal p-1 rounded-full hover:bg-subtle transition-colors">
+  <!-- ==================== MODAL: NẠP TÀI LIỆU MỚI (Ingest) ==================== -->
+  <div id="ingest-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-neutral-200 shadow-float max-w-lg w-full overflow-hidden">
+      <div class="px-6 py-4 border-b border-neutral-100 flex items-center justify-between">
+        <h3 class="text-[16px] font-semibold text-neutral-900">Nạp thêm văn bản vào kho tri thức</h3>
+        <button onclick="toggleIngestModal(false)" class="text-neutral-400 hover:text-neutral-900 p-1.5 rounded-full hover:bg-neutral-100 transition-colors">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
-      <div class="p-5 space-y-4">
+      <div class="p-6 space-y-4">
         <div>
-          <label class="block text-[12px] font-medium text-charcoal mb-1">Tải file tài liệu (PDF, DOCX, TXT, MD)</label>
-          <input type="file" id="ingest-file-input" multiple accept=".pdf,.docx,.txt,.md" class="w-full text-[13px] text-stone file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-[12px] file:font-medium file:bg-charcoal file:text-white hover:file:bg-black">
+          <label class="block text-[12px] font-medium text-neutral-700 mb-1">Chọn file văn bản (.txt, .pdf, .docx, .md)</label>
+          <input type="file" id="ingest-file-input" multiple class="w-full text-[13px] text-neutral-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[12px] file:font-medium file:bg-neutral-900 file:text-white hover:file:bg-black cursor-pointer">
         </div>
-        <div class="text-center text-[12px] text-stone">— hoặc —</div>
         <div>
-          <label class="block text-[12px] font-medium text-charcoal mb-1">Đường dẫn URL văn bản luật (vbpl.vn / thuvienphapluat)</label>
-          <input type="text" id="ingest-url-input" placeholder="https://vbpl.vn/..." class="w-full px-3 py-2 rounded-xl border border-pebble text-[13px] text-charcoal placeholder-stone outline-none focus:border-ash">
+          <label class="block text-[12px] font-medium text-neutral-700 mb-1">Hoặc nhập URL văn bản pháp luật</label>
+          <input type="url" id="ingest-url-input" placeholder="https://vbpl.vn/..." class="w-full p-2.5 text-[13px] border border-neutral-300 rounded-xl outline-none focus:border-neutral-500">
         </div>
         <div id="ingest-status-msg" class="text-[12px] hidden"></div>
-        <button onclick="submitIngest()" id="btn-do-ingest" class="w-full bg-charcoal text-white rounded-full py-2 text-[13px] font-medium hover:bg-black transition-colors shadow-subtle">
-          Bắt đầu nạp & Chunking
-        </button>
+        <div class="pt-2 flex justify-end space-x-2">
+          <button onclick="toggleIngestModal(false)" class="px-4 py-2 rounded-xl border border-neutral-200 text-[13px] text-neutral-600 hover:bg-neutral-50 transition-colors">Hủy</button>
+          <button id="btn-do-ingest" onclick="submitIngest()" class="px-4 py-2 rounded-xl bg-neutral-900 text-white text-[13px] font-medium hover:bg-black transition-colors">Lập chỉ mục</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- ==================== APPLICATION CLIENT SCRIPT ==================== -->
+  <!-- ==================== JAVASCRIPT LOGIC ==================== -->
   <script>
-    // State variables
-    let currentDomain = 'all';
-    let appInfo = null;
+    // State
     let isQuerying = false;
-    let storedSourcesMap = {}; // mapping chunk_id to source data for modal preview
-
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', () => {
-      fetchAppInfo();
-      setupInputListeners();
-    });
-
-    function setupInputListeners() {
-      const heroInput = document.getElementById('hero-query-input');
-      heroInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          submitHeroQuery();
-        }
-      });
-
-      const bottomInput = document.getElementById('bottom-query-input');
-      bottomInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          submitBottomQuery();
-        }
-      });
-    }
-
-    // Fetch /api/info
-    async function fetchAppInfo() {
-      try {
-        const res = await fetch('/api/info');
-        if (!res.ok) throw new Error('Không thể lấy thông tin hệ thống');
-        appInfo = await res.json();
-        renderSidebarDocs(appInfo.docs);
-        updateConfigBadges(appInfo.settings, appInfo.total_chunks);
-      } catch (err) {
-        console.error('Lỗi nạp info:', err);
-      }
-    }
-
-    function renderSidebarDocs(docs) {
-      const sidebarContainer = document.getElementById('sidebar-doc-list');
-      const modalContainer = document.getElementById('modal-doc-list');
-      const badgeCount = document.getElementById('doc-badge-count');
-
-      if (!docs || docs.length === 0) {
-        sidebarContainer.innerHTML = '<div class="px-2 text-stone text-[11px]">Chưa có tài liệu nào</div>';
-        return;
-      }
-
-      badgeCount.textContent = docs.length;
-
-      // Sidebar list
-      sidebarContainer.innerHTML = docs.map(d => {
-        const cleanName = formatDocTitle(d.source);
-        return `
-          <div class="px-2 py-1.5 rounded-lg hover:bg-subtle transition-colors flex items-center justify-between group cursor-default" title="${d.source}">
-            <div class="flex items-center space-x-1.5 truncate">
-              <span class="text-[12px]">📜</span>
-              <span class="truncate text-charcoal font-normal">${cleanName}</span>
-            </div>
-            <span class="text-[10px] text-stone group-hover:text-ash flex-shrink-0 ml-1">${d.n_chunks} ch</span>
-          </div>
-        `;
-      }).join('');
-
-      // Modal detailed list
-      modalContainer.innerHTML = docs.map((d, idx) => {
-        const cleanName = formatDocTitle(d.source);
-        return `
-          <div class="p-3.5 rounded-xl border border-pebble bg-paper flex items-center justify-between">
-            <div class="space-y-0.5">
-              <div class="font-medium text-[14px] text-charcoal flex items-center space-x-2">
-                <span>[${idx + 1}]</span>
-                <span>${cleanName}</span>
-              </div>
-              <div class="text-[12px] text-stone">Mã file: ${d.source}</div>
-            </div>
-            <div class="text-right">
-              <div class="text-[13px] font-medium text-teal">${d.n_chunks} chunks</div>
-              <div class="text-[11px] text-stone">Đã lập chỉ mục</div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
+    let storedSourcesMap = {};
+    let recentChats = [];
+    let appConfig = {};
+    let popoverHideTimer = null;
 
     const DOC_TITLES = {
       'bo_luat_dan_su_2015.txt': 'Bộ luật Dân sự 2015',
@@ -431,17 +521,88 @@
       'bo_luat_to_tung_hinh_su_2015.txt': 'Bộ luật Tố tụng Hình sự 2015',
     };
 
-    function updateConfigBadges(cfg, totalChunks) {
-      if (cfg.llm_model) document.getElementById('cfg-llm').textContent = cfg.llm_model;
-      if (cfg.rerank_backend) document.getElementById('cfg-rerank').textContent = cfg.rerank_backend === 'jev' ? 'Jev v1.13' : 'None';
-      if (cfg.advanced) {
-        document.getElementById('cfg-advanced').textContent = cfg.advanced;
-        const modePill = document.getElementById('mode-pill-text');
-        if (modePill) {
-          modePill.textContent = 'Chế độ: Decomposition + Jev + Listwise';
-        }
+    const DOC_SHORT_NAMES = {
+      'bo_luat_dan_su_2015.txt': 'BLDS',
+      'bo_luat_hang_hai_2015.txt': 'BLHH',
+      'bo_luat_hinh_su_2015.txt': 'BLHS',
+      'bo_luat_lao_dong_2019.txt': 'BLLĐ',
+      'bo_luat_to_tung_dan_su_2015.txt': 'TTDS',
+      'bo_luat_to_tung_hinh_su_2015.txt': 'TTHS',
+    };
+
+    // Auto-expand Textarea on typing
+    const chatInput = document.getElementById('main-query-input');
+    chatInput.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = (this.scrollHeight) + 'px';
+      document.getElementById('main-send-btn').disabled = !this.value.trim();
+    });
+
+    chatInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        submitQuery();
       }
-      if (totalChunks) document.getElementById('cfg-chunks').textContent = totalChunks.toLocaleString() + ' chunks';
+    });
+
+    // Initialize App
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchAppInfo();
+      loadRecentsFromStorage();
+
+      // Dismiss popover when clicking outside
+      document.addEventListener('click', (e) => {
+        const popover = document.getElementById('chatgpt-popover');
+        if (!popover.contains(e.target) && !e.target.closest('.chatgpt-cite-pill')) {
+          hideCitePopover();
+        }
+      });
+    });
+
+    let allLoadedDocs = [];
+
+    async function fetchAppInfo() {
+      try {
+        const res = await fetch('/api/info');
+        if (!res.ok) return;
+        const data = await res.json();
+        appConfig = data.settings || {};
+        allLoadedDocs = data.docs || [];
+        const totalChunks = data.total_chunks || 0;
+        const chunksEl = document.getElementById('cfg-chunks');
+        if (chunksEl) chunksEl.textContent = totalChunks.toLocaleString() + ' chunks';
+
+        // Render docs modal
+        renderDocsModal(allLoadedDocs);
+      } catch (e) {
+        console.warn('Fetch info error:', e);
+      }
+    }
+
+    function renderDocsModal(docs, filterCode = null) {
+      const container = document.getElementById('modal-doc-list');
+      if (!container) return;
+      const list = filterCode ? docs.filter(d => d.source === filterCode) : docs;
+      container.innerHTML = list.map((d, idx) => {
+        const cleanName = formatDocTitle(d.source);
+        return `
+          <div class="p-3.5 rounded-xl border border-neutral-200 bg-neutral-50 flex items-center justify-between">
+            <div class="space-y-0.5">
+              <div class="font-medium text-[14px] text-neutral-900 flex items-center space-x-2">
+                <svg class="w-4 h-4 text-neutral-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>${cleanName}</span>
+              </div>
+              <div class="text-[12px] text-neutral-500">Mã tệp: ${d.source}</div>
+            </div>
+            <div class="text-right">
+              <div class="text-[13px] font-semibold text-neutral-800">${d.n_chunks} chunks</div>
+              <div class="text-[11px] text-emerald-600">Đã lập chỉ mục</div>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     function formatDocTitle(source) {
@@ -463,132 +624,82 @@
       return { article, breadcrumb };
     }
 
-    function scrollToOrOpenCitation(num, chunkId) {
-      const card = document.getElementById(`cite-card-${num}`);
-      if (card) {
-        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        card.classList.add('ring-2', 'ring-teal', 'bg-teal/5');
-        setTimeout(() => {
-          card.classList.remove('ring-2', 'ring-teal', 'bg-teal/5');
-        }, 2200);
-      } else if (chunkId) {
-        openSourceModal(chunkId);
-      }
-    }
-
-    function setDomainFilter(domain) {
-      currentDomain = domain;
-      const pills = document.querySelectorAll('.domain-pill');
-      pills.forEach(p => {
-        if ((domain === 'all' && p.textContent.includes('Tất cả')) || p.textContent.includes(domain)) {
-          p.className = 'domain-pill px-3 py-1 rounded-full text-[12px] font-medium bg-charcoal text-white transition-all';
-        } else {
-          p.className = 'domain-pill px-3 py-1 rounded-full text-[12px] font-normal text-ash hover:bg-subtle transition-all';
-        }
-      });
-    }
-
     function resetToHero() {
       document.getElementById('hero-view').classList.remove('hidden');
       document.getElementById('chat-thread-view').classList.add('hidden');
       document.getElementById('chat-thread-view').innerHTML = '';
-      document.getElementById('bottom-search-bar').classList.add('hidden');
-      document.getElementById('hero-query-input').value = '';
+      document.getElementById('conversation-title').textContent = 'Đoạn chat mới';
+      chatInput.value = '';
+      chatInput.style.height = 'auto';
+      chatInput.focus();
     }
 
     function fillAndSubmit(text) {
-      document.getElementById('hero-query-input').value = text;
-      submitHeroQuery();
+      chatInput.value = text;
+      chatInput.style.height = 'auto';
+      submitQuery();
     }
 
-    function submitHeroQuery() {
-      const input = document.getElementById('hero-query-input');
-      const query = input.value.trim();
+    function submitQuery() {
+      const query = chatInput.value.trim();
       if (!query || isQuerying) return;
-      startQuery(query);
-    }
-
-    function submitBottomQuery() {
-      const input = document.getElementById('bottom-query-input');
-      const query = input.value.trim();
-      if (!query || isQuerying) return;
-      input.value = '';
+      chatInput.value = '';
+      chatInput.style.height = 'auto';
+      document.getElementById('main-send-btn').disabled = true;
       startQuery(query);
     }
 
     async function startQuery(rawQuery) {
       isQuerying = true;
-      let finalQuery = rawQuery;
-      if (currentDomain !== 'all') {
-        finalQuery = `[Bộ luật ${currentDomain}] ${rawQuery}`;
-      }
 
-      // Switch view from hero to thread
+      // Switch to Chat Thread view
       document.getElementById('hero-view').classList.add('hidden');
       const threadView = document.getElementById('chat-thread-view');
       threadView.classList.remove('hidden');
-      document.getElementById('bottom-search-bar').classList.remove('hidden');
+      document.getElementById('conversation-title').textContent = rawQuery;
 
       const msgId = 'msg-' + Date.now();
 
-      // Append User Message & Status Loading Card
-      const userHtml = `
-        <div class="space-y-4">
-          <!-- User Query Header -->
-          <div class="flex items-start space-x-3">
-            <div class="w-7 h-7 rounded-full bg-charcoal text-white flex items-center justify-center text-[12px] font-medium flex-shrink-0 mt-0.5">
-              T
-            </div>
-            <h2 class="text-[19px] font-medium text-charcoal tracking-tight leading-snug">${escapeHtml(rawQuery)}</h2>
-          </div>
-
-          <!-- Perplexity Status Notification Card -->
-          <div id="${msgId}-status" class="w-full bg-white rounded-2xl border border-pebble p-4 shadow-subtle space-y-3">
-            <div class="flex items-center space-x-2 text-[13px] font-medium text-charcoal">
-              <svg class="w-4 h-4 text-teal animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-              </svg>
-              <span id="${msgId}-status-text">Đang phân tích truy vấn & đối chiếu cơ sở dữ liệu luật...</span>
-            </div>
-            <!-- Skeleton shimmers -->
-            <div class="space-y-2 pt-1">
-              <div class="h-2 bg-skeleton rounded-full w-full animate-shimmer"></div>
-              <div class="h-2 bg-skeleton rounded-full w-4/5 animate-shimmer"></div>
-              <div class="h-2 bg-skeleton rounded-full w-2/3 animate-shimmer"></div>
+      // Append User message & AI loading placeholder (ChatGPT 3-dots pulsing)
+      const turnHtml = `
+        <div id="${msgId}-turn" class="space-y-6">
+          <!-- User Query Bubble -->
+          <div class="flex justify-end w-full">
+            <div class="bg-[#f4f4f4] text-[#0d0d0d] px-5 py-2.5 rounded-3xl max-w-[85%] text-[15px] leading-relaxed select-text shadow-subtle">
+              ${escapeHtml(rawQuery)}
             </div>
           </div>
 
-          <!-- Final Answer Container (hidden initially) -->
-          <div id="${msgId}-content" class="space-y-5 hidden"></div>
+          <!-- Assistant Response Container -->
+          <div class="flex items-start space-x-3 w-full">
+            <div class="w-7 h-7 rounded-full bg-neutral-900 text-white flex items-center justify-center text-[12px] flex-shrink-0 mt-0.5 shadow-sm">
+              ⚖️
+            </div>
+            <div class="flex-1 min-w-0">
+              <!-- Animated Loading 3 Dots -->
+              <div id="${msgId}-loading" class="flex items-center space-x-1.5 py-2 text-neutral-400">
+                <div class="w-2 h-2 rounded-full bg-neutral-400 dot-1"></div>
+                <div class="w-2 h-2 rounded-full bg-neutral-400 dot-2"></div>
+                <div class="w-2 h-2 rounded-full bg-neutral-400 dot-3"></div>
+                <span class="text-[12px] text-neutral-400 ml-2 font-normal">Đang phân rã câu hỏi & đối chiếu 6 bộ luật...</span>
+              </div>
+
+              <!-- Assistant Content Box -->
+              <div id="${msgId}-content" class="hidden"></div>
+            </div>
+          </div>
         </div>
       `;
 
-      threadView.insertAdjacentHTML('beforeend', userHtml);
+      threadView.insertAdjacentHTML('beforeend', turnHtml);
       scrollToBottom();
-
-      // Sequential simulated status steps while backend processes
-      const statusText = document.getElementById(`${msgId}-status-text`);
-      const timer1 = setTimeout(() => {
-        if (statusText) statusText.textContent = 'Đang kích hoạt Dense Vector + BM25 Lexical Search...';
-      }, 1200);
-      const timer2 = setTimeout(() => {
-        if (statusText) statusText.textContent = 'GPT-6 đang phân rã đa ý định & bối cảnh câu hỏi...';
-      }, 2500);
-      const timer3 = setTimeout(() => {
-        if (statusText) statusText.textContent = 'Reranker Jev (Cross-Encoder) đang chấm xác suất liên quan...';
-      }, 4000);
 
       try {
         const response = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: finalQuery }),
+          body: JSON.stringify({ query: rawQuery }),
         });
-
-        clearTimeout(timer1);
-        clearTimeout(timer2);
-        clearTimeout(timer3);
 
         if (!response.ok) {
           const errData = await response.json().catch(() => ({}));
@@ -596,216 +707,146 @@
         }
 
         const data = await response.json();
-        renderAnswerContent(msgId, data);
+        renderAssistantAnswer(msgId, rawQuery, data);
+        saveToRecents(rawQuery, data);
       } catch (err) {
-        clearTimeout(timer1);
-        clearTimeout(timer2);
-        clearTimeout(timer3);
         renderError(msgId, err.message);
       } finally {
         isQuerying = false;
+        document.getElementById('main-send-btn').disabled = false;
+        chatInput.focus();
       }
     }
 
-    function renderAnswerContent(msgId, data) {
-      const statusCard = document.getElementById(`${msgId}-status`);
-      if (statusCard) statusCard.remove(); // Remove loading card
+    function renderAssistantAnswer(msgId, rawQuery, data) {
+      const loadingEl = document.getElementById(`${msgId}-loading`);
+      if (loadingEl) loadingEl.remove();
 
       const contentBox = document.getElementById(`${msgId}-content`);
       contentBox.classList.remove('hidden');
 
-      // 1. Build Sources Bar (Compact Perplexity chips)
-      let sourcesHtml = '';
-      if (data.sources && data.sources.length > 0) {
-        // Register sources in global map for modal preview
-        data.sources.forEach(s => {
-          storedSourcesMap[s.chunk_id] = s;
-        });
+      // 1. Register sources into global map
+      (data.sources || []).forEach(s => {
+        storedSourcesMap[s.chunk_id] = s;
+      });
+      (data.citations || []).forEach(c => {
+        if (!storedSourcesMap[c.chunk_id]) {
+          storedSourcesMap[c.chunk_id] = {
+            n: c.n,
+            chunk_id: c.chunk_id,
+            source: c.source,
+            section: c.section,
+            page: c.page,
+            score: c.score || 0.95,
+            text: c.text || c.quote || '',
+          };
+        }
+      });
 
-        const chips = data.sources.map(s => {
-          const cleanDoc = formatDocTitle(s.source);
-          const secInfo = parseSectionInfo(s.section);
-          return `
-            <button onclick="openSourceModal('${s.chunk_id}')" class="inline-flex items-center space-x-2 px-3 py-1.5 bg-white rounded-lg border border-pebble hover:border-teal/60 hover:shadow-subtle transition-all cursor-pointer text-left group select-none">
-              <span class="w-5 h-5 rounded-full bg-paper border border-pebble group-hover:bg-teal group-hover:text-white group-hover:border-teal text-teal flex items-center justify-center text-[10.5px] font-bold transition-colors">[${s.n}]</span>
-              <div class="leading-tight">
-                <div class="text-[12px] font-medium text-charcoal group-hover:text-teal transition-colors truncate max-w-[210px]" title="${escapeHtml(secInfo.article)}">${escapeHtml(secInfo.article)}</div>
-                <div class="text-[10px] text-stone truncate max-w-[210px]">${escapeHtml(cleanDoc)}</div>
-              </div>
-            </button>
-          `;
-        }).join('');
-
-        sourcesHtml = `
-          <div class="space-y-2">
-            <div class="flex items-center justify-between text-[12px] font-medium text-stone">
-              <div class="flex items-center space-x-1.5 uppercase tracking-wide">
-                <svg class="w-3.5 h-3.5 text-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-                <span>Nguồn tham chiếu (${data.sources.length} văn bản / điều luật)</span>
-              </div>
-              <span class="text-[11px] text-teal lowercase hover:underline cursor-pointer" onclick="toggleDocModal(true)">bấm để xem toàn văn</span>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              ${chips}
-            </div>
-          </div>
-        `;
-      }
-
-      // 2. Format Answer Text & highlight citation tags [1], [2]
+      // 2. Format Answer Text with ChatGPT Citation Pills (PubMed +1 style)
       let formattedText = marked.parse(data.answer || '');
       formattedText = formattedText.replace(/\[(\d+(?:\s*[,;]\s*\d+)*)\]/g, (match, group) => {
         const nums = group.split(/\s*[,;]\s*/).filter(Boolean);
-        return nums.map(p1 => {
-          const src = (data.sources || []).find(s => String(s.n) === String(p1));
-          const chunkId = src ? src.chunk_id : '';
-          const secInfo = src ? parseSectionInfo(src.section) : null;
-          const tooltip = secInfo ? `${secInfo.article} (${formatDocTitle(src.source)})` : `Căn cứ pháp lý [${p1}]`;
-          return `<button onclick="scrollToOrOpenCitation('${p1}', '${chunkId}')" class="inline-cite-btn inline-flex items-center justify-center px-1.5 py-0.2 mx-0.5 rounded text-[11px] font-semibold bg-teal/10 text-teal hover:bg-teal hover:text-white border border-teal/20 transition-all cursor-pointer select-none align-baseline" title="${escapeHtml(tooltip)}">[${p1}]</button>`;
-        }).join('');
+        if (nums.length === 0) return '';
+
+        const firstNum = nums[0];
+        const moreCount = nums.length - 1;
+        const src = (data.sources || []).find(s => String(s.n) === String(firstNum));
+        const chunkId = src ? src.chunk_id : '';
+        const secInfo = src ? parseSectionInfo(src.section) : null;
+        const shortDoc = src ? (DOC_SHORT_NAMES[src.source] || 'Luật') : 'Luật';
+        
+        let label = shortDoc;
+        if (secInfo && secInfo.article) {
+          // Extract "Điều xxx"
+          const m = secInfo.article.match(/Điều\s+\d+/i);
+          if (m) label = `${m[0]} · ${shortDoc}`;
+        }
+
+        return `
+          <button type="button" 
+            onclick="triggerCitePopover(event, '${chunkId}', '${firstNum}')" 
+            onmouseenter="triggerCitePopover(event, '${chunkId}', '${firstNum}')" 
+            onmouseleave="scheduleHideCitePopover()" 
+            class="chatgpt-cite-pill" 
+            data-chunk-id="${chunkId}">
+            <span class="pill-dot"></span>
+            <span>${escapeHtml(label)}</span>
+            ${moreCount > 0 ? `<span class="pill-more">+${moreCount}</span>` : ''}
+          </button>
+        `;
       });
 
-      // 3. Structured Legal Grounds & Evidence Section (Căn cứ pháp lý viện dẫn trong câu trả lời)
-      let legalGroundsHtml = '';
-      const citedList = (data.citations && data.citations.length > 0)
-        ? data.citations
-        : (!data.refused && data.sources ? data.sources : []);
-
-      if (citedList.length > 0) {
-        const groundCards = citedList.map(c => {
-          if (!storedSourcesMap[c.chunk_id]) {
-            storedSourcesMap[c.chunk_id] = {
-              n: c.n,
-              chunk_id: c.chunk_id,
-              source: c.source,
-              section: c.section,
-              page: c.page,
-              score: c.score || 0.9,
-              text: c.text || c.quote || '',
-            };
-          }
-          const secInfo = parseSectionInfo(c.section);
-          const docName = formatDocTitle(c.source);
-          const quoteText = c.quote || (c.text ? c.text.slice(0, 300) + '...' : '');
-
-          return `
-            <div id="cite-card-${c.n}" class="cite-ground-card p-4 rounded-xl border border-pebble bg-white shadow-subtle hover:border-teal/50 transition-all space-y-2.5">
-              <div class="flex items-start justify-between gap-3">
-                <div class="flex items-start space-x-2.5">
-                  <span class="w-6 h-6 rounded-md bg-teal text-white flex items-center justify-center text-[12px] font-bold flex-shrink-0 mt-0.5 shadow-subtle">[${c.n}]</span>
-                  <div>
-                    <div class="text-[14px] font-semibold text-charcoal leading-snug">${escapeHtml(secInfo.article)}</div>
-                    <div class="flex items-center space-x-2 text-[12px] text-stone mt-0.5">
-                      <span class="font-medium text-charcoal">${escapeHtml(docName)}</span>
-                      ${c.page ? `<span>·</span><span>Trang ${c.page}</span>` : ''}
-                      ${secInfo.breadcrumb ? `<span>·</span><span class="text-ash truncate max-w-[280px]" title="${escapeHtml(secInfo.breadcrumb)}">${escapeHtml(secInfo.breadcrumb)}</span>` : ''}
-                    </div>
-                  </div>
-                </div>
-                <button onclick="openSourceModal('${c.chunk_id}')" class="flex-shrink-0 text-[12px] font-medium text-teal hover:text-white hover:bg-teal px-2.5 py-1 rounded-lg border border-teal/30 hover:border-teal transition-all flex items-center space-x-1 cursor-pointer">
-                  <span>Xem toàn văn</span>
-                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </div>
-
-              <div class="relative pl-3.5 border-l-2 border-teal bg-paper/70 rounded-r-lg p-3 text-[13px] text-charcoal leading-relaxed font-normal">
-                <div class="text-[11px] font-medium text-teal uppercase tracking-wider mb-1 flex items-center space-x-1.5 select-none">
-                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                  </svg>
-                  <span>Dẫn chứng trích dẫn điều luật:</span>
-                </div>
-                <p class="italic text-charcoal/90 select-text">"${escapeHtml(quoteText)}"</p>
-              </div>
-            </div>
-          `;
-        }).join('');
-
-        legalGroundsHtml = `
-          <div class="space-y-3 pt-2">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-2">
-                <span class="text-base">📌</span>
-                <h3 class="text-[13px] font-semibold text-charcoal uppercase tracking-wider">Căn cứ pháp lý viện dẫn trong câu trả lời</h3>
-              </div>
-              <span class="text-[11px] text-stone">${citedList.length} điều luật áp dụng</span>
-            </div>
-            <div class="space-y-2.5">
-              ${groundCards}
-            </div>
-          </div>
-        `;
-      }
-
-      // 4. Collapsible Retrieval Trace Accordion
+      // 3. Retrieval Trace Accordion
       const trace = data.trace || {};
       const arms = trace.arms || {};
       const finalHits = trace.final_hits || [];
 
       const traceHtml = `
-        <div class="border border-pebble rounded-xl bg-white overflow-hidden shadow-subtle">
-          <details class="group">
-            <summary class="px-4 py-2.5 flex items-center justify-between text-[13px] font-medium text-charcoal cursor-pointer hover:bg-subtle/50 select-none transition-colors">
-              <div class="flex items-center space-x-2">
-                <svg class="w-4 h-4 text-teal transition-transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-                <span>Minh bạch xếp hạng & đối chiếu Retrieval</span>
-              </div>
-              <div class="flex items-center space-x-2 text-[11px] text-stone">
-                <span>Chế độ: <b>${trace.context_mode || 'threshold'}</b></span>
-                <span>·</span>
-                <span class="${trace.reranked ? 'text-teal font-medium' : ''}">${trace.reranked ? 'Đã Rerank Jev' : 'RRF thuần'}</span>
-              </div>
-            </summary>
-
-            <div class="p-4 border-t border-pebble space-y-4 bg-paper/50 text-[12px]">
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div class="p-3 bg-white rounded-lg border border-pebble space-y-2">
-                  <div class="font-medium text-[12px] text-charcoal uppercase tracking-wider flex items-center justify-between">
-                    <span>BM25 Lexical</span>
-                    <span class="text-[10px] text-stone">Top 5</span>
-                  </div>
-                  <div class="space-y-1.5">
-                    ${renderHitList(arms.bm25 || [])}
-                  </div>
-                </div>
-
-                <div class="p-3 bg-white rounded-lg border border-pebble space-y-2">
-                  <div class="font-medium text-[12px] text-charcoal uppercase tracking-wider flex items-center justify-between">
-                    <span>Dense Vector</span>
-                    <span class="text-[10px] text-stone">Top 5</span>
-                  </div>
-                  <div class="space-y-1.5">
-                    ${renderHitList(arms.dense || [])}
-                  </div>
-                </div>
-
-                <div class="p-3 bg-white rounded-lg border border-teal/40 space-y-2">
-                  <div class="font-medium text-[12px] text-teal uppercase tracking-wider flex items-center justify-between">
-                    <span>Kết quả cuối (RRF + Jev)</span>
-                    <span class="text-[10px] text-teal font-medium">Top 5</span>
-                  </div>
-                  <div class="space-y-1.5">
-                    ${renderHitList(finalHits)}
-                  </div>
-                </div>
-              </div>
+        <div id="${msgId}-trace" class="hidden mt-4 pt-3 border-t border-neutral-100 text-[12px] bg-neutral-50 rounded-xl p-4">
+          <div class="flex items-center justify-between font-semibold text-neutral-700 pb-2 border-b border-neutral-200">
+            <span>Minh bạch đối chiếu Retrieval (Dense Vector + BM25 + Jev Reranker)</span>
+            <span class="text-[11px] font-normal text-teal-700">Chế độ: ${trace.context_mode || 'threshold'} · Jev Cross-Encoder</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+            <div class="p-2.5 bg-white rounded-lg border border-neutral-200 space-y-1.5">
+              <div class="font-semibold text-neutral-800 text-[11px] uppercase tracking-wide">BM25 Lexical (Top 5)</div>
+              ${renderHitList(arms.bm25 || [])}
             </div>
-          </details>
+            <div class="p-2.5 bg-white rounded-lg border border-neutral-200 space-y-1.5">
+              <div class="font-semibold text-neutral-800 text-[11px] uppercase tracking-wide">Dense Vector (Top 5)</div>
+              ${renderHitList(arms.dense || [])}
+            </div>
+            <div class="p-2.5 bg-white rounded-lg border border-teal-200 bg-teal-50/30 space-y-1.5">
+              <div class="font-semibold text-teal-800 text-[11px] uppercase tracking-wide">Kết quả cuối (RRF + Jev)</div>
+              ${renderHitList(finalHits)}
+            </div>
+          </div>
+        </div>
+      `;
+
+      // 4. Action Bar (Copy, Thumbs Up, Thumbs Down, Speak, Re-ask, Trace Toggle)
+      const actionBarHtml = `
+        <div class="flex items-center space-x-1 pt-3 text-neutral-400 select-none">
+          <button onclick="copyAnswerText('${msgId}')" class="p-1.5 hover:text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors" title="Sao chép câu trả lời">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </button>
+          <button onclick="rateAnswer(this, true)" class="p-1.5 hover:text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors" title="Câu trả lời tốt">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+            </svg>
+          </button>
+          <button onclick="rateAnswer(this, false)" class="p-1.5 hover:text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors" title="Câu trả lời chưa tốt">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.763.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.905 0-.714.211-1.412.608-2.006L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
+            </svg>
+          </button>
+          <button onclick="speakAnswer('${msgId}')" class="p-1.5 hover:text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors" title="Đọc câu trả lời">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+            </svg>
+          </button>
+          <button onclick="fillAndSubmit('${escapeHtml(rawQuery)}')" class="p-1.5 hover:text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors" title="Hỏi lại">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+          <button onclick="toggleTrace('${msgId}')" class="p-1.5 text-[11.5px] font-medium hover:text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors flex items-center space-x-1" title="Xem chi tiết đối chiếu Retrieval">
+            <span>Minh bạch đối chiếu</span>
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
         </div>
       `;
 
       contentBox.innerHTML = `
-        ${sourcesHtml}
-        <div class="answer-prose text-[15px] leading-relaxed text-charcoal font-normal bg-white rounded-2xl border border-pebble p-6 shadow-subtle select-text">
+        <div id="${msgId}-text" class="chatgpt-prose select-text">
           ${formattedText}
         </div>
-        ${legalGroundsHtml}
+        ${actionBarHtml}
         ${traceHtml}
       `;
 
@@ -814,36 +855,220 @@
 
     function renderHitList(hits) {
       if (!hits || hits.length === 0) {
-        return '<div class="text-[11px] text-stone italic">Không có ứng viên</div>';
+        return '<div class="text-[11px] text-neutral-400 italic">Không có ứng viên</div>';
       }
       return hits.map(h => `
-        <div class="p-1.5 rounded bg-paper border border-pebble/60 text-[11px] space-y-0.5">
-          <div class="flex justify-between font-mono text-[10px] text-stone">
+        <div class="p-1.5 rounded bg-neutral-50 text-[11px] space-y-0.5 border border-neutral-100">
+          <div class="flex justify-between font-mono text-[10px] text-neutral-400">
             <span>#${h.rank} · ${escapeHtml(h.section || 'Điều luật')}</span>
-            <span class="text-teal font-medium">${h.score}</span>
+            <span class="text-teal-700 font-medium">${h.score}</span>
           </div>
-          <div class="text-charcoal truncate font-normal">${escapeHtml(h.source)}</div>
-          <div class="text-ash truncate text-[10px]">${escapeHtml(h.text)}</div>
+          <div class="text-neutral-800 truncate font-medium">${escapeHtml(formatDocTitle(h.source))}</div>
+          <div class="text-neutral-500 truncate text-[10px]">${escapeHtml(h.text)}</div>
         </div>
       `).join('');
     }
 
     function renderError(msgId, errText) {
-      const statusCard = document.getElementById(`${msgId}-status`);
-      if (statusCard) statusCard.remove();
+      const loadingEl = document.getElementById(`${msgId}-loading`);
+      if (loadingEl) loadingEl.remove();
 
       const contentBox = document.getElementById(`${msgId}-content`);
       contentBox.classList.remove('hidden');
       contentBox.innerHTML = `
-        <div class="p-4 bg-red-50 border border-red-200 text-red-800 rounded-xl text-[13px] flex items-center space-x-2">
+        <div class="p-3.5 bg-red-50 border border-red-200 text-red-700 rounded-2xl text-[13.5px] flex items-center space-x-2">
           <span>⚠️</span>
-          <span><strong>Lỗi:</strong> ${escapeHtml(errText)}</span>
+          <span><strong>Lỗi xử lý:</strong> ${escapeHtml(errText)}</span>
         </div>
       `;
       scrollToBottom();
     }
 
-    // Modal Helpers
+    // ==================== CHATGPT CITATION POPOVER LOGIC ====================
+    function triggerCitePopover(event, chunkId, n) {
+      event.stopPropagation();
+      clearTimeout(popoverHideTimer);
+
+      const src = storedSourcesMap[chunkId];
+      if (!src) return;
+
+      const popover = document.getElementById('chatgpt-popover');
+      const secInfo = parseSectionInfo(src.section);
+      const docName = formatDocTitle(src.source);
+      const quoteText = src.quote || (src.text ? src.text.slice(0, 220) + '...' : '');
+
+      document.getElementById('popover-doc').textContent = docName;
+      document.getElementById('popover-article').textContent = secInfo.article;
+      document.getElementById('popover-quote').textContent = `"${quoteText}"`;
+      document.getElementById('popover-score').textContent = src.score ? `Độ khớp: p = ${src.score}` : 'Độ khớp cao';
+      document.getElementById('popover-page').textContent = src.page ? `Trang ${src.page}` : '';
+      document.getElementById('popover-view-btn').onclick = () => {
+        hideCitePopover();
+        openSourceModal(chunkId);
+      };
+
+      // Position Popover nicely near the button
+      const rect = event.target.closest('.chatgpt-cite-pill').getBoundingClientRect();
+      const popoverWidth = 360;
+      let left = rect.left;
+      if (left + popoverWidth > window.innerWidth - 16) {
+        left = window.innerWidth - popoverWidth - 16;
+      }
+      if (left < 16) left = 16;
+
+      let top = rect.bottom + 8;
+      // If bottom overflows window, show above
+      if (top + 240 > window.innerHeight) {
+        top = rect.top - 240;
+      }
+
+      popover.style.left = `${left}px`;
+      popover.style.top = `${top}px`;
+      popover.classList.remove('hidden');
+
+      popover.onmouseenter = () => clearTimeout(popoverHideTimer);
+      popover.onmouseleave = () => scheduleHideCitePopover();
+    }
+
+    function scheduleHideCitePopover() {
+      clearTimeout(popoverHideTimer);
+      popoverHideTimer = setTimeout(hideCitePopover, 320);
+    }
+
+    function hideCitePopover() {
+      const popover = document.getElementById('chatgpt-popover');
+      if (popover) popover.classList.add('hidden');
+    }
+
+    // ==================== ASSISTANT ACTION BUTTONS ====================
+    function copyAnswerText(msgId) {
+      const textEl = document.getElementById(`${msgId}-text`);
+      if (!textEl) return;
+      navigator.clipboard.writeText(textEl.innerText).then(() => {
+        alert('Đã sao chép câu trả lời vào clipboard!');
+      });
+    }
+
+    function rateAnswer(btn, isPositive) {
+      btn.classList.add('text-neutral-900', 'bg-neutral-200');
+      setTimeout(() => {
+        btn.classList.remove('bg-neutral-200');
+      }, 1500);
+    }
+
+    function speakAnswer(msgId) {
+      const textEl = document.getElementById(`${msgId}-text`);
+      if (!textEl || !window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(textEl.innerText);
+      utterance.lang = 'vi-VN';
+      utterance.rate = 1.0;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function toggleTrace(msgId) {
+      const traceEl = document.getElementById(`${msgId}-trace`);
+      if (traceEl) {
+        traceEl.classList.toggle('hidden');
+      }
+    }
+
+    // ==================== RECENTS (HISTORY) LOGIC ====================
+    function saveToRecents(query, data) {
+      const title = query.length > 36 ? query.slice(0, 36) + '...' : query;
+      const item = {
+        id: Date.now(),
+        title: title,
+        query: query,
+        data: data,
+      };
+      recentChats.unshift(item);
+      if (recentChats.length > 20) recentChats.pop();
+      try {
+        localStorage.setItem('legal_chatgpt_recents', JSON.stringify(recentChats.slice(0, 10)));
+      } catch (e) {}
+      renderRecentsList();
+    }
+
+    function loadRecentsFromStorage() {
+      try {
+        const raw = localStorage.getItem('legal_chatgpt_recents');
+        if (raw) {
+          recentChats = JSON.parse(raw);
+          renderRecentsList();
+        }
+      } catch (e) {}
+    }
+
+    function renderRecentsList() {
+      const container = document.getElementById('recents-list');
+      if (!container) return;
+      if (recentChats.length === 0) {
+        container.innerHTML = `
+          <button onclick="fillAndSubmit('Thời hiệu khởi kiện tranh chấp hợp đồng dân sự là bao lâu?')" class="w-full px-2.5 py-1.5 rounded-lg text-neutral-700 hover:bg-[#ececec] hover:text-neutral-900 transition-colors text-left text-[13.5px] truncate block">
+            Thời hiệu khởi kiện hợp đồng
+          </button>
+          <button onclick="fillAndSubmit('Người lao động làm thêm giờ vào ban đêm được tính tiền lương như thế nào?')" class="w-full px-2.5 py-1.5 rounded-lg text-neutral-700 hover:bg-[#ececec] hover:text-neutral-900 transition-colors text-left text-[13.5px] truncate block">
+            Tiền lương làm thêm ban đêm
+          </button>
+          <button onclick="fillAndSubmit('Lừa người khác lấy 30 triệu đồng thì bị phạt bao nhiêu năm tù?')" class="w-full px-2.5 py-1.5 rounded-lg text-neutral-700 hover:bg-[#ececec] hover:text-neutral-900 transition-colors text-left text-[13.5px] truncate block">
+            Lừa đảo chiếm đoạt 30 triệu
+          </button>
+        `;
+        return;
+      }
+      container.innerHTML = recentChats.map((c, idx) => `
+        <button onclick="loadRecentChat(${idx})" class="w-full px-2.5 py-1.5 rounded-lg text-neutral-800 hover:bg-[#ececec] transition-colors text-left text-[13.5px] truncate block">
+          ${escapeHtml(c.title)}
+        </button>
+      `).join('');
+    }
+
+    function loadRecentChat(idx) {
+      const c = recentChats[idx];
+      if (!c) return;
+      document.getElementById('hero-view').classList.add('hidden');
+      const threadView = document.getElementById('chat-thread-view');
+      threadView.classList.remove('hidden');
+      threadView.innerHTML = '';
+      document.getElementById('conversation-title').textContent = c.query;
+
+      const msgId = 'msg-' + c.id;
+      const turnHtml = `
+        <div id="${msgId}-turn" class="space-y-6">
+          <div class="flex justify-end w-full">
+            <div class="bg-[#f4f4f4] text-[#0d0d0d] px-5 py-2.5 rounded-3xl max-w-[85%] text-[15px] leading-relaxed select-text shadow-subtle">
+              ${escapeHtml(c.query)}
+            </div>
+          </div>
+          <div class="flex items-start space-x-3 w-full">
+            <div class="w-7 h-7 rounded-full bg-neutral-900 text-white flex items-center justify-center text-[12px] flex-shrink-0 mt-0.5 shadow-sm">
+              ⚖️
+            </div>
+            <div class="flex-1 min-w-0">
+              <div id="${msgId}-content"></div>
+            </div>
+          </div>
+        </div>
+      `;
+      threadView.innerHTML = turnHtml;
+      renderAssistantAnswer(msgId, c.query, c.data);
+    }
+
+    function clearRecents() {
+      recentChats = [];
+      try { localStorage.removeItem('legal_chatgpt_recents'); } catch (e) {}
+      renderRecentsList();
+    }
+
+    function toggleProjects() {
+      const list = document.getElementById('projects-doc-list');
+      const chevron = document.getElementById('projects-chevron');
+      if (list) list.classList.toggle('hidden');
+      if (chevron) chevron.classList.toggle('rotate-90');
+    }
+
+    // ==================== MODAL HELPERS ====================
     function openSourceModal(chunkId) {
       const src = storedSourcesMap[chunkId];
       if (!src) return;
@@ -863,10 +1088,19 @@
       document.getElementById('source-modal').classList.add('hidden');
     }
 
+    function openDocByCode(sourceFile) {
+      renderDocsModal(allLoadedDocs, sourceFile);
+      toggleDocModal(true);
+    }
+
     function toggleDocModal(show) {
       const modal = document.getElementById('doc-modal');
-      if (show) modal.classList.remove('hidden');
-      else modal.classList.add('hidden');
+      if (show) {
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+        renderDocsModal(allLoadedDocs, null);
+      }
     }
 
     function toggleIngestModal(show) {
@@ -894,7 +1128,7 @@
 
       btn.disabled = true;
       btn.textContent = 'Đang phân tích & lập chỉ mục...';
-      statusMsg.className = 'text-[12px] text-teal block';
+      statusMsg.className = 'text-[12px] text-neutral-600 block';
       statusMsg.textContent = 'Hệ thống đang trích xuất text, chia chunk và tính vector embedding...';
 
       const formData = new FormData();
@@ -915,7 +1149,6 @@
         statusMsg.textContent = `Thành công: Nạp ${data.results.length} tài liệu vào kho.`;
         fileInput.value = '';
         urlInput.value = '';
-        // Refresh docs
         await fetchAppInfo();
         setTimeout(() => toggleIngestModal(false), 2000);
       } catch (err) {
@@ -923,8 +1156,13 @@
         statusMsg.textContent = `Lỗi: ${err.message}`;
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Bắt đầu nạp & Chunking';
+        btn.textContent = 'Lập chỉ mục';
       }
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('hidden');
     }
 
     function scrollToBottom() {

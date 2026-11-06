@@ -49,10 +49,16 @@ def main() -> None:
     ap.add_argument("--out", default=None)
     ap.add_argument("--baseline-csv", help="optional saved baseline CSV; never runs baseline")
     ap.add_argument("--baseline-config", default="hyde+jev", help="config name in the saved CSV")
+    ap.add_argument("--no-hyde", action="store_true", help="disable HyDE for dense retrieval")
     args = ap.parse_args()
     settings = replace(Settings.load(), decomp_enabled=True, query_rewrite_enabled=False)
-    if "hyde" not in settings.advanced_methods or settings.rerank_backend != "jev":
-        raise ValueError("This comparison requires ADVANCED=hyde (optionally contextual_header) and Jev")
+    if args.no_hyde:
+        adv = [m for m in settings.advanced_methods if m != "hyde"]
+        settings = replace(settings, advanced=",".join(adv) if adv else "")
+    if not args.no_hyde and "hyde" not in settings.advanced_methods:
+        raise ValueError("This comparison requires ADVANCED=hyde (or pass --no-hyde) and Jev")
+    if settings.rerank_backend != "jev":
+        raise ValueError("This comparison requires Jev reranker")
     questions = load_questions(args.questions)
     if len(questions) != 64:
         raise ValueError(f"Expected the main 64-question benchmark; got {len(questions)}")
@@ -62,7 +68,8 @@ def main() -> None:
     if any((out / name).exists() for name in ("config.json", "retrieval_per_question.csv", "query_traces.json")):
         raise ValueError("Output already contains a benchmark; choose a new --out directory")
     p = RAGPipeline.from_settings(settings)
-    p.retriever.arms["dense"].fallback = False  # HyDE errors must not masquerade as this configuration.
+    if hasattr(p.retriever.arms["dense"], "fallback"):
+        p.retriever.arms["dense"].fallback = False  # HyDE errors must not masquerade as this configuration.
     if unmatched_gold(questions, p.store.all()):
         raise ValueError("Some gold references do not match the current index")
     decomposer = p.retriever.decomposer
@@ -93,7 +100,7 @@ def main() -> None:
     (out / "config.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
     rows, traces = [], []
     for index, question in enumerate(questions, 1):
-        name = "decomposition+hyde+jev"
+        name = "decomposition+jev" if args.no_hyde else "decomposition+hyde+jev"
         start = time.perf_counter()
         res = p.retriever.retrieve(question.question, settings.top_k, mode="dense")
         elapsed = time.perf_counter() - start

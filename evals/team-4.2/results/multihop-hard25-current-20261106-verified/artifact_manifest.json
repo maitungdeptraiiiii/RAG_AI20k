@@ -1,0 +1,22 @@
+{
+  "call_counts.json": "de4a4c05fd4462baf81987fb3905213c1819c94c4bb7975fbbad38f4e0730905",
+  "config.json": "0aed87a67396d238ecec37f1ff03fe270d2e5357310f87f55ac5b33b2e3e95be",
+  "failure_analysis.json": "640ed72219f872fd8db1d43727c88c4243a93cbf0b05e7ee9a0234053632cd2d",
+  "metrics.json": "aa0030ade330a7501cc48df263d953f7d70de0b4ca54d34ae18fd36d9826532a",
+  "quality_audit.json": "6d5873f9545a0b722122c47435fd6d7297fa1b667b8f760445e2ac3b5521c005",
+  "query_traces.json": "dbc4efc6c3ff46a9bb4530812e0ab1ec369a14da2e27982f0596959e2655e2bd",
+  "REPORT.md": "a3d487b4df0ceb91facbad2cf8fe3d93614810b164122bc25ddbb9b6883c9f2e",
+  "retrieval_llm_outputs.json": "768ed978e23df6425ea7b8ca5ff51e0ca8f0ffd32bc37d641475180c53e67c69",
+  "retrieval_per_question.csv": "cac725b30ced9d8cf883dc4123be150d4c9758994251ab7b660dd02d76b01b5c",
+  "retrieval_provenance.json": "2300fcf6193987d0d6c7ccfcd216c0f466a5e282e23252112b3af1147057ad5f",
+  "summary.md": "2efc73debaac32c0b674c0b98ff474348c13d5383195a61d3eed5c354c46c544",
+  "validation.txt": "4e303d6a0a67db3a310bb71cd2a3e7a7daddd7ca5897ba9496ff9aa33cdf12e9",
+  "attempts\\multihop-hard25-current-20261106\\config.json": "5d530b107ea8d8837930e0e1014d5207c51fa3416b03a9e5b4bd5492f665e553",
+  "attempts\\multihop-hard25-current-20261106\\quality_audit.json": "7c76318374a9da86c057594a35e979664fc9d2c28065f8cad3afa25f58cca2fd",
+  "attempts\\multihop-hard25-current-20261106\\STATUS.md": "c03e5585ddb05747ebd8a6d7cd3609baec0f1d291b0eddbfe8a4141ffb3c9db6",
+  "attempts\\multihop-hard25-current-20261106-final\\config.json": "ed791854a9fc2fa1cec379626d66ad1f660ea018ffd159d71a5e944e3e8a85af",
+  "attempts\\multihop-hard25-current-20261106-final\\quality_audit.json": "6d5873f9545a0b722122c47435fd6d7297fa1b667b8f760445e2ac3b5521c005",
+  "attempts\\multihop-hard25-current-20261106-final\\query_traces.json": "5d47093f66d2cbcac76864d266355294c0fdc149cb658d0a3099319e9682c9b0",
+  "attempts\\multihop-hard25-current-20261106-final\\retrieval_per_question.csv": "6b4703a343c28c1fa6c31846af8ebdee98cca6ddf2a369ec67fcf78c31235da0",
+  "attempts\\multihop-hard25-current-20261106-final\\STATUS.md": "1c57da561f77fe90d3a10582622ad630bf218822d4e433b214ef1e98b203cb85"
+}

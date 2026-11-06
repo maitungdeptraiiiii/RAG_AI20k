@@ -1,0 +1,38 @@
+# Multi-hop hard25 — retrieval only
+
+## Toàn bộ
+
+| config | n | recall@5 | hit@5 | mrr@5 | recall@20 |
+|---|---|---|---|---|---|
+| current-retrieval | 25 | 0.795 | 0.960 | 0.960 | 0.870 |
+
+## Theo loại câu hỏi
+
+| config | type | n | recall@5 | hit@5 | mrr@5 | recall@20 |
+|---|---|---|---|---|---|---|
+| current-retrieval | multi | 25 | 0.795 | 0.960 | 0.960 | 0.870 |
+
+```json
+{
+  "status": "complete",
+  "n": 25,
+  "metrics": {
+    "recall@5": 0.7953333333333333,
+    "hit@5": 0.96,
+    "mrr@5": 0.96,
+    "recall@20": 0.87,
+    "all_gold@5": 0.48,
+    "all_gold@20": 0.68,
+    "merged_recall@5": 0.7953333333333333,
+    "merged_recall@20": 0.87
+  },
+  "questions_with_errors": 0,
+  "error_types": {},
+  "retrieval_llm_logical_calls": 34,
+  "retrieval_llm_cache_hits": 0,
+  "retrieval_llm_sdk_requests": 34,
+  "answer_generation_calls": 0,
+  "old_dataset_unchanged": true,
+  "elapsed_s_sum": 423.653
+}
+```

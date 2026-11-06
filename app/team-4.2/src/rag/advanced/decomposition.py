@@ -13,8 +13,9 @@ Nhiệm vụ: xác định các bằng chứng cần tìm để trả lời câu
 tự đủ nghĩa. Bạn không trả lời, không kết luận pháp lý, không viết đoạn trả lời giả.
 
 CHUẨN HÓA TIẾNG LÓNG VÀ KHẨU NGỮ:
-1. Phát hiện tiếng lóng, từ viết tắt, lỗi chính tả, khẩu ngữ hoặc cách nói ẩn dụ trong câu hỏi (ví dụ: "nhậu", "bùng tiền", "úp sọt", "chan/chặn", "va quẹt").
-2. Xác định các ý nghĩa hành vi có thể có và chuẩn hóa câu hỏi sang ngôn ngữ pháp lý rõ ràng, trung tính, dễ khớp văn bản luật khi viết câu con.
+1. Phát hiện tiếng lóng, từ viết tắt, lỗi chính tả, khẩu ngữ hoặc cách nói ẩn dụ trong câu hỏi (ví dụ: "nhậu", "bùng tiền", "úp sọt", "chan/chặn", "va quẹt", "block tiền cọc").
+2. Xác định các ý nghĩa hành vi có thể có và chuẩn hóa câu hỏi sang ngôn ngữ pháp lý rõ ràng, trung tính, dễ khớp văn bản luật khi viết câu con:
+   - Khi hành vi có dấu hiệu xâm phạm tài sản hoặc gian dối (ví dụ: nhận cọc xong chặn liên lạc/bùng tiền), cần bao quát cả khía cạnh nghĩa vụ dân sự và dấu hiệu lừa đảo chiếm đoạt tài sản nếu có thủ đoạn gian dối.
 3. Giữ nguyên các tình tiết thực tế do người dùng cung cấp (tuổi, tiền, thời điểm, quan hệ).
 4. Tuyệt đối không tự thêm sự kiện, động cơ, hậu quả hoặc kết luận pháp lý mà câu gốc chưa xác nhận.
 5. Nếu câu hỏi có nhiều cách hiểu hợp lý do từ ngữ mơ hồ, hãy tạo các câu con tương ứng với từng cách hiểu đó để bao quát đầy đủ.
@@ -34,7 +35,8 @@ CÁCH QUYẾT ĐỊNH CÓ TÁCH HAY KHÔNG:
 - Nếu câu hỏi đơn ý nhưng chứa tiếng lóng hoặc lỗi chính tả mơ hồ: tạo câu con đã được chuẩn hóa
   sang ngôn ngữ pháp lý rõ ràng để hỗ trợ tìm kiếm.
 - Không thêm câu về kiện tụng, hồ sơ, hình phạt hoặc thủ tục chỉ vì chúng có thể liên quan;
-  chỉ thêm khi cần giải đáp điều người dùng thực sự muốn biết.
+  chỉ thêm khi câu hỏi thực sự hỏi hoặc đề cập trực tiếp đến chúng.
+- Đặc biệt, khi câu hỏi có hỏi hoặc đề cập cụ thể đến việc chứng minh, nghĩa vụ chứng minh, nguồn chứng cứ, thời hiệu hoặc biện pháp tố tụng (ví dụ: 'ai phải chứng minh', 'chứng minh thế nào', 'nguồn chứng cứ nào', 'biện pháp ngăn chặn/khẩn cấp nào'): BẮT BUỘC tạo câu con tra cứu trực tiếp về quy định tố tụng, nghĩa vụ chứng minh hoặc nguồn chứng cứ đó.
 
 CÁCH VIẾT CÂU CON:
 1. Mỗi câu tập trung vào một nhóm bằng chứng và tự tìm được khi đứng riêng: lặp lại chủ thể,

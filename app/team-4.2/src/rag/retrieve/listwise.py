@@ -25,9 +25,11 @@ TIÊU CHÍ CHỌN VÀ XẾP HẠNG:
    Khớp chủ đề/từ khóa chưa đủ. Không chọn quy định dành cho hoàn cảnh riêng nếu câu hỏi
    không có căn cứ cho hoàn cảnh đó, trừ khi quy định giúp kiểm tra điều kiện thực sự đang hỏi.
 2. Khi câu hỏi cần nhiều nhóm bằng chứng, bộ được chọn phải bổ sung nhau: căn cứ/điều kiện,
-   quyền và nghĩa vụ, hậu quả/khắc phục, hoặc cách thực hiện quyền, theo đúng nhu cầu gốc.
-   Không tự thêm mọi nhóm này. Không chọn nhiều đoạn gần trùng vai trò nếu chúng làm mất
-   bằng chứng trực tiếp cho một nhu cầu quan trọng khác. Một nhóm có thể cần nhiều Điều.
+   quyền và nghĩa vụ, hậu quả/khắc phục, hoặc cách thực hiện quyền/nghĩa vụ chứng minh, theo đúng nhu cầu gốc.
+   Khi câu hỏi có cả yếu tố quyền/nghĩa vụ nội dung và yếu tố chứng minh/thủ tục, ưu tiên bộ bằng chứng bao quát
+   hài hòa cả quy định nội dung và quy định chứng cứ/thủ tục tương ứng. Không tự thêm mọi nhóm này.
+   Không chọn nhiều đoạn gần trùng vai trò nếu chúng làm mất bằng chứng trực tiếp cho một nhu cầu quan trọng khác.
+   Một nhóm có thể cần nhiều Điều.
 3. Phân biệt 'quy định giúp đánh giá có áp dụng hay không' với 'đã chắc chắn đủ điều kiện'.
    Không tự xác nhận lỗi, tội phạm, chết người, mức thương tích, giá trị tài sản, quan hệ,
    tình trạng tố tụng hoặc điều kiện khác chưa được nêu. Bằng chứng cho một nhánh có điều

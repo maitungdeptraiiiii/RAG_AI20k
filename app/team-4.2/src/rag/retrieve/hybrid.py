@@ -16,6 +16,7 @@ lại và ghi lỗi vào `RetrievalResult.errors`; mọi arm đều lỗi thì n
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 import logging
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field, replace
@@ -179,22 +180,55 @@ class HybridRetriever:
                                  mode="+".join(names) if arms is not None else mode,
                                  queries=plan.queries)
         original_candidates: list[Hit] = []
-        for i, subquery in enumerate(plan.queries):
+
+        def _fetch_subquery(idx: int, subquery: str) -> tuple[int, list[Hit], list[Hit] | None, dict[str, list[Hit]], dict[str, str]]:
+            is_original = self.decomposer.include_original and nfc(subquery).strip() == result.query
+            sub = self._retrieve_single(
+                subquery, max(self.rerank_n, k) if is_original else self.decomposer.per_query_k,
+                mode=mode, arms=arms, rerank=False,
+                bm25_query=bm25_query if is_original else None)
+            selected = {cid for h in sub.hits for cid in (h.chunk_id, *h.merged)}
+            q_res = [h for h in sub.candidates if h.chunk_id in selected]
+            orig = list(sub.candidates) if is_original else None
+            return idx, q_res, orig, sub.arms, sub.errors
+
+        # Batch pre-embed subqueries: gom các subquery thành 1 request embedding duy nhất,
+        # tận dụng cache và tránh rate limit 429 khi n subquery gọi đồng thời.
+        dense_arm = self.arms.get("dense")
+        target_embedder = getattr(dense_arm, "embedder", None)
+        if target_embedder is None and hasattr(dense_arm, "dense"):
+            target_embedder = getattr(dense_arm.dense, "embedder", None)
+        if target_embedder is not None and hasattr(target_embedder, "embed_query"):
             try:
-                is_original = self.decomposer.include_original and nfc(subquery).strip() == result.query
-                sub = self._retrieve_single(
-                    subquery, max(self.rerank_n, k) if is_original else self.decomposer.per_query_k,
-                    mode=mode, arms=arms, rerank=False,
-                    bm25_query=bm25_query if is_original else None)
-                # Preserve every chunk of each selected article for the final rerank.
-                selected = {cid for h in sub.hits for cid in (h.chunk_id, *h.merged)}
-                result.query_results[str(i)] = [h for h in sub.candidates if h.chunk_id in selected]
-                if is_original:
-                    original_candidates = list(sub.candidates)
-                result.arms.update({f"q{i}_{name}": hits for name, hits in sub.arms.items()})
-                result.errors.update({f"q{i}_{name}": err for name, err in sub.errors.items()})
-            except Exception as exc:
-                result.errors[f"q{i}"] = type(exc).__name__
+                target_embedder.embed_query(plan.queries)
+            except Exception:
+                pass
+
+        workers = min(len(plan.queries), 4)
+        if workers > 1:
+            with ThreadPoolExecutor(max_workers=workers) as pool:
+                futures = [pool.submit(_fetch_subquery, i, sq) for i, sq in enumerate(plan.queries)]
+                sub_results = []
+                for fut, i in zip(futures, range(len(plan.queries))):
+                    try:
+                        sub_results.append(fut.result())
+                    except Exception as exc:
+                        result.errors[f"q{i}"] = type(exc).__name__
+        else:
+            sub_results = []
+            for i, sq in enumerate(plan.queries):
+                try:
+                    sub_results.append(_fetch_subquery(i, sq))
+                except Exception as exc:
+                    result.errors[f"q{i}"] = type(exc).__name__
+
+        sub_results.sort(key=lambda item: item[0])
+        for idx, q_res, orig, arms_map, errors_map in sub_results:
+            result.query_results[str(idx)] = q_res
+            if orig is not None:
+                original_candidates = orig
+            result.arms.update({f"q{idx}_{name}": hits for name, hits in arms_map.items()})
+            result.errors.update({f"q{idx}_{name}": err for name, err in errors_map.items()})
         if not result.query_results:
             raise RetrievalError(f"Every decomposition branch failed: {result.errors}")
         fused = rrf(result.query_results, k=self.rrf_k)

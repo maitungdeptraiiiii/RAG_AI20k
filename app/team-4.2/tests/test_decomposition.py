@@ -155,3 +155,24 @@ def test_anchor_entire_original_pool_and_cap_only_novel_articles(original_count,
     assert len(ids) == len(set(ids)) == (original_count + new_limit) * 2
     assert len({r.chunks[cid].section for cid in ids}) == original_count + new_limit
     assert len(ranker.calls) == 1 and ranker.calls[0][0] == "q"
+
+
+def test_decomposition_batches_embed_query_before_parallel_dispatch():
+    class MockEmbedder:
+        def __init__(self):
+            self.calls = []
+        def embed_query(self, texts):
+            self.calls.append(list(texts))
+            return [[0.1] * 4 for _ in texts]
+
+    mock_emb = MockEmbedder()
+    class DenseWithEmbedder(Arm):
+        embedder = mock_emb
+        def search(self, query, k):
+            return [Hit("d:0000", 1.0, 1, "dense")]
+
+    r, bm25, _, _, _ = make_retriever()
+    bm25.fail = False
+    r.arms["dense"] = DenseWithEmbedder()
+    r.retrieve("q", mode="hybrid")
+    assert mock_emb.calls == [["q", "a", "b"]]

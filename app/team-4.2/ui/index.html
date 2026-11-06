@@ -176,8 +176,10 @@
       <!-- Sidebar Top: Brand Logo + Action Icons -->
       <div class="flex items-center justify-between px-2 pt-1 pb-2 flex-shrink-0">
         <div class="flex items-center space-x-2 cursor-pointer" onclick="resetToHero()">
-          <div class="w-7 h-7 rounded-full bg-neutral-900 text-white flex items-center justify-center font-bold text-[13px] shadow-sm">
-            ⚖️
+          <div class="w-7 h-7 rounded-full bg-neutral-900 text-white flex items-center justify-center p-1.5 shadow-sm flex-shrink-0">
+            <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
+            </svg>
           </div>
           <span class="font-bold text-[16px] text-neutral-900 tracking-tight">VinAI Legal</span>
         </div>
@@ -329,29 +331,78 @@
       <div class="max-w-[760px] mx-auto min-h-full flex flex-col justify-start">
 
         <!-- ==================== HERO STATE (Empty View) ==================== -->
-        <div id="hero-view" class="my-auto py-16 flex flex-col items-center text-center space-y-7">
-          <div class="w-12 h-12 rounded-full bg-neutral-900 text-white flex items-center justify-center text-2xl shadow-subtle">
-            ⚖️
-          </div>
-          <h2 class="text-2xl font-semibold tracking-tight text-neutral-900">Tôi có thể giúp gì cho bạn về pháp luật hôm nay?</h2>
+        <div id="hero-view" class="my-auto py-12 flex flex-col items-center max-w-[680px] mx-auto w-full">
+          <h2 class="text-[32px] font-medium tracking-tight text-neutral-800 text-center mb-6 select-none">What’s on the agenda today?</h2>
 
-          <!-- Suggested Prompt Cards (2x2 grid) -->
-          <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-2 max-w-[680px]">
-            <button onclick="fillAndSubmit('Thời hiệu khởi kiện tranh chấp hợp đồng dân sự là bao lâu?')" class="p-3.5 rounded-2xl border border-neutral-200 hover:bg-neutral-50 transition-all text-left text-neutral-800 text-[13.5px] leading-snug group shadow-subtle">
-              <div class="font-medium text-neutral-900 group-hover:text-black mb-1">⚖️ Thời hiệu khởi kiện hợp đồng</div>
-              <div class="text-[12px] text-neutral-500">Quy định về thời hạn khởi kiện giải quyết tranh chấp hợp đồng dân sự</div>
+          <!-- Hero input slot: Capsule is placed here on initial load / new chat -->
+          <div id="hero-input-slot" class="w-full mb-6">
+            <!-- ==================== CHAT INPUT CAPSULE ==================== -->
+            <div id="chat-input-capsule" class="w-full bg-white rounded-[28px] border border-neutral-300 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06)] focus-within:border-neutral-500 focus-within:shadow-md p-2 pl-3 flex items-center space-x-2 transition-all">
+              <!-- Attach / Upload button (+) -->
+              <button onclick="toggleIngestModal(true)" class="p-1.5 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-full transition-colors flex-shrink-0" title="Nạp tài liệu mới">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+
+              <!-- Auto-expanding Textarea -->
+              <textarea id="main-query-input" rows="1" placeholder="Hỏi về điều luật, mức xử phạt, quy định pháp lý..." class="flex-1 max-h-[160px] resize-none border-0 focus:ring-0 p-1.5 text-[15px] text-neutral-900 placeholder-neutral-400 outline-none bg-transparent leading-relaxed"></textarea>
+
+              <!-- Think Button -->
+              <button type="button" class="hidden sm:flex items-center space-x-1 px-2.5 py-1 text-[13px] text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 rounded-full transition-colors flex-shrink-0" title="Chế độ suy luận pháp lý chuyên sâu">
+                <svg class="w-4 h-4 text-neutral-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m0-15C9.5 4.5 7.5 6 7.5 8.5c0 1.5.8 2.8 2 3.5-1.5.5-2.5 1.8-2.5 3.5 0 2.5 2 4 5 4m0-15c2.5 0 4.5 1.5 4.5 4 0 1.5-.8 2.8-2 3.5 1.5.5 2.5 1.8 2.5 3.5 0 2.5-2 4-5 4" />
+                </svg>
+                <span>Think</span>
+              </button>
+
+              <!-- Voice Input Button (Mic) -->
+              <button type="button" onclick="startVoiceInput()" class="p-1.5 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 rounded-full transition-colors flex-shrink-0" title="Nhập bằng giọng nói">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 2a3 3 0 00-3 3v6a3 3 0 006 0V5a3 3 0 00-3-3z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 10v1a7 7 0 01-14 0v-1M12 18v4M8 22h8"/>
+                </svg>
+              </button>
+
+              <!-- Send Button: Blue Circle like in the image -->
+              <button id="main-send-btn" onclick="submitQuery()" class="w-8 h-8 rounded-full bg-[#1e40af] hover:bg-[#1d4ed8] text-white flex items-center justify-center transition-all flex-shrink-0 shadow-sm disabled:opacity-40" title="Gửi câu hỏi">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Suggested prompts with uncolored black outline icons -->
+          <div class="w-full flex flex-col space-y-2 px-1">
+            <button onclick="fillAndSubmit('Thời hiệu khởi kiện tranh chấp hợp đồng dân sự là bao lâu?')" class="flex items-center space-x-3 text-neutral-600 hover:text-neutral-900 py-1.5 px-2 rounded-lg hover:bg-neutral-50 transition-colors text-left text-[14.5px] group">
+              <svg class="w-4 h-4 text-neutral-800 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <rect x="3" y="3" width="18" height="18" rx="3"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 9h18M9 21V9"/>
+              </svg>
+              <span class="group-hover:text-black">Thời hiệu khởi kiện tranh chấp hợp đồng dân sự là bao lâu?</span>
             </button>
-            <button onclick="fillAndSubmit('Người lao động làm thêm giờ vào ban đêm được tính tiền lương như thế nào?')" class="p-3.5 rounded-2xl border border-neutral-200 hover:bg-neutral-50 transition-all text-left text-neutral-800 text-[13.5px] leading-snug group shadow-subtle">
-              <div class="font-medium text-neutral-900 group-hover:text-black mb-1">💼 Tiền lương làm thêm giờ ban đêm</div>
-              <div class="text-[12px] text-neutral-500">Cách tính lương làm thêm ban đêm theo Bộ luật Lao động 2019</div>
+
+            <button onclick="fillAndSubmit('Người lao động làm thêm giờ vào ban đêm được tính tiền lương như thế nào?')" class="flex items-center space-x-3 text-neutral-600 hover:text-neutral-900 py-1.5 px-2 rounded-lg hover:bg-neutral-50 transition-colors text-left text-[14.5px] group">
+              <svg class="w-4 h-4 text-neutral-800 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"/>
+              </svg>
+              <span class="group-hover:text-black">Người lao động làm thêm giờ vào ban đêm tính tiền lương như thế nào?</span>
             </button>
-            <button onclick="fillAndSubmit('Lừa người khác lấy 30 triệu đồng thì bị phạt bao nhiêu năm tù?')" class="p-3.5 rounded-2xl border border-neutral-200 hover:bg-neutral-50 transition-all text-left text-neutral-800 text-[13.5px] leading-snug group shadow-subtle">
-              <div class="font-medium text-neutral-900 group-hover:text-black mb-1">🚨 Lừa đảo chiếm đoạt 30 triệu</div>
-              <div class="text-[12px] text-neutral-500">Khung hình phạt tội lừa đảo chiếm đoạt tài sản theo Điều 174 BLHS</div>
+
+            <button onclick="fillAndSubmit('Lừa người khác lấy 30 triệu đồng thì bị phạt bao nhiêu năm tù?')" class="flex items-center space-x-3 text-neutral-600 hover:text-neutral-900 py-1.5 px-2 rounded-lg hover:bg-neutral-50 transition-colors text-left text-[14.5px] group">
+              <svg class="w-4 h-4 text-neutral-800 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="9"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.6 9h16.8M3.6 15h16.8M12 3a14.5 14.5 0 000 18 14.5 14.5 0 000-18z"/>
+              </svg>
+              <span class="group-hover:text-black">Lừa người khác lấy 30 triệu đồng thì bị phạt bao nhiêu năm tù?</span>
             </button>
-            <button onclick="fillAndSubmit('Thời hạn tạm giam bị can để điều tra tội phạm ít nghiêm trọng là mấy tháng?')" class="p-3.5 rounded-2xl border border-neutral-200 hover:bg-neutral-50 transition-all text-left text-neutral-800 text-[13.5px] leading-snug group shadow-subtle">
-              <div class="font-medium text-neutral-900 group-hover:text-black mb-1">🔍 Thời hạn tạm giam điều tra</div>
-              <div class="text-[12px] text-neutral-500">Thời hạn áp dụng biện pháp tạm giam theo BL Tố tụng Hình sự</div>
+
+            <button onclick="fillAndSubmit('Thời hạn tạm giam bị can để điều tra tội phạm ít nghiêm trọng là mấy tháng?')" class="flex items-center space-x-3 text-neutral-600 hover:text-neutral-900 py-1.5 px-2 rounded-lg hover:bg-neutral-50 transition-colors text-left text-[14.5px] group">
+              <svg class="w-4 h-4 text-neutral-800 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>
+              </svg>
+              <span class="group-hover:text-black">Thời hạn tạm giam bị can để điều tra tội phạm ít nghiêm trọng là mấy tháng?</span>
             </button>
           </div>
         </div>
@@ -364,31 +415,14 @@
       </div>
     </div>
 
-    <!-- ==================== FLOATING BOTTOM INPUT (ChatGPT Capsule) ==================== -->
-    <div class="absolute bottom-0 left-0 right-0 px-4 bg-gradient-to-t from-white via-white/95 to-transparent pt-6 pb-4 pointer-events-none z-30">
-      <div class="max-w-[760px] mx-auto pointer-events-auto">
-        <div class="w-full bg-white rounded-[26px] border border-neutral-300 shadow-sm focus-within:border-neutral-500 focus-within:shadow-md p-2 pl-3 flex items-end space-x-2 transition-all">
-          <!-- Attach / Upload button (+) -->
-          <button onclick="toggleIngestModal(true)" class="p-1.5 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 rounded-full transition-colors flex-shrink-0 mb-0.5" title="Nạp tài liệu mới">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-          </button>
+    <!-- ==================== FLOATING BOTTOM BAR (ChatGPT Capsule) ==================== -->
+    <div id="floating-bottom-bar" class="absolute bottom-0 left-0 right-0 px-4 bg-gradient-to-t from-white via-white/95 to-transparent pt-6 pb-4 pointer-events-none z-30 hidden">
+      <div id="bottom-input-slot" class="max-w-[760px] mx-auto pointer-events-auto">
+        <!-- Capsule is dynamically appended here when chatting -->
+      </div>
 
-          <!-- Auto-expanding Textarea -->
-          <textarea id="main-query-input" rows="1" placeholder="Hỏi về điều luật, mức xử phạt, quy định pháp lý..." class="flex-1 max-h-[160px] resize-none border-0 focus:ring-0 p-1.5 text-[15px] text-neutral-900 placeholder-neutral-400 outline-none bg-transparent leading-relaxed"></textarea>
-
-          <!-- Send Button: Circle with up-arrow -->
-          <button id="main-send-btn" onclick="submitQuery()" class="w-8 h-8 rounded-full bg-neutral-900 text-white flex items-center justify-center hover:bg-neutral-800 disabled:opacity-30 disabled:hover:bg-neutral-900 transition-all flex-shrink-0 mb-0.5" title="Gửi câu hỏi">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-            </svg>
-          </button>
-        </div>
-
-        <div class="text-center text-[11px] text-neutral-400 mt-2 select-none">
-          Trợ lý Luật VinAI có thể mắc lỗi. Vui lòng đối chiếu điều luật gốc khi áp dụng pháp lý.
-        </div>
+      <div class="text-center text-[11px] text-neutral-400 mt-2 select-none pointer-events-auto">
+        Trợ lý Luật VinAI có thể mắc lỗi. Vui lòng đối chiếu điều luật gốc khi áp dụng pháp lý.
       </div>
     </div>
 
@@ -398,7 +432,11 @@
   <div id="chatgpt-popover" class="fixed z-50 hidden bg-white rounded-2xl shadow-float border border-neutral-200/90 p-4 w-[360px] text-left space-y-3 transition-opacity duration-150 select-text">
     <div class="flex items-start justify-between">
       <div class="flex items-center space-x-2">
-        <div class="w-6 h-6 rounded-full bg-neutral-100 flex items-center justify-center text-[12px] flex-shrink-0">⚖️</div>
+        <div class="w-6 h-6 rounded-full bg-neutral-900 text-white flex items-center justify-center p-1 flex-shrink-0">
+          <svg class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
+          </svg>
+        </div>
         <div class="leading-tight truncate">
           <div id="popover-doc" class="text-[12.5px] font-semibold text-neutral-900 truncate">Bộ luật Dân sự 2015</div>
           <div id="popover-domain" class="text-[10.5px] text-neutral-400">vbpl.vn · CSDL Quốc gia</div>
@@ -545,8 +583,54 @@
       }
     });
 
+    function setChatInputPosition(mode) {
+      const capsule = document.getElementById('chat-input-capsule');
+      const heroSlot = document.getElementById('hero-input-slot');
+      const bottomSlot = document.getElementById('bottom-input-slot');
+      const bottomBar = document.getElementById('floating-bottom-bar');
+
+      if (!capsule) return;
+
+      if (mode === 'hero') {
+        if (heroSlot && !heroSlot.contains(capsule)) {
+          heroSlot.appendChild(capsule);
+        }
+        if (bottomBar) bottomBar.classList.add('hidden');
+      } else if (mode === 'bottom') {
+        if (bottomSlot && !bottomSlot.contains(capsule)) {
+          bottomSlot.appendChild(capsule);
+        }
+        if (bottomBar) bottomBar.classList.remove('hidden');
+      }
+    }
+
+    function startVoiceInput() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert('Trình duyệt hiện tại chưa hỗ trợ Web Speech API nhận diện giọng nói.');
+        return;
+      }
+      try {
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'vi-VN';
+        recognition.interimResults = false;
+        recognition.onresult = (event) => {
+          const text = event.results[0][0].transcript;
+          if (text) {
+            chatInput.value = text;
+            chatInput.dispatchEvent(new Event('input'));
+            chatInput.focus();
+          }
+        };
+        recognition.start();
+      } catch (err) {
+        console.warn('Voice input error:', err);
+      }
+    }
+
     // Initialize App
     window.addEventListener('DOMContentLoaded', () => {
+      setChatInputPosition('hero');
       fetchAppInfo();
       loadRecentsFromStorage();
 
@@ -633,6 +717,7 @@
     }
 
     function resetToHero() {
+      setChatInputPosition('hero');
       document.getElementById('hero-view').classList.remove('hidden');
       document.getElementById('chat-thread-view').classList.add('hidden');
       document.getElementById('chat-thread-view').innerHTML = '';
@@ -660,7 +745,8 @@
     async function startQuery(rawQuery) {
       isQuerying = true;
 
-      // Switch to Chat Thread view
+      // Push chat input to bottom floating bar and show Chat Thread view
+      setChatInputPosition('bottom');
       document.getElementById('hero-view').classList.add('hidden');
       const threadView = document.getElementById('chat-thread-view');
       threadView.classList.remove('hidden');
@@ -680,8 +766,10 @@
 
           <!-- Assistant Response Container -->
           <div class="flex items-start space-x-3 w-full">
-            <div class="w-7 h-7 rounded-full bg-neutral-900 text-white flex items-center justify-center text-[12px] flex-shrink-0 mt-0.5 shadow-sm">
-              ⚖️
+            <div class="w-7 h-7 rounded-full bg-neutral-900 text-white flex items-center justify-center p-1.5 flex-shrink-0 mt-0.5 shadow-sm">
+              <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
+              </svg>
             </div>
             <div class="flex-1 min-w-0">
               <!-- Animated Loading 3 Dots -->
@@ -1035,6 +1123,7 @@
     function loadRecentChat(idx) {
       const c = recentChats[idx];
       if (!c) return;
+      setChatInputPosition('bottom');
       document.getElementById('hero-view').classList.add('hidden');
       const threadView = document.getElementById('chat-thread-view');
       threadView.classList.remove('hidden');
@@ -1050,8 +1139,10 @@
             </div>
           </div>
           <div class="flex items-start space-x-3 w-full">
-            <div class="w-7 h-7 rounded-full bg-neutral-900 text-white flex items-center justify-center text-[12px] flex-shrink-0 mt-0.5 shadow-sm">
-              ⚖️
+            <div class="w-7 h-7 rounded-full bg-neutral-900 text-white flex items-center justify-center p-1.5 flex-shrink-0 mt-0.5 shadow-sm">
+              <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
+              </svg>
             </div>
             <div class="flex-1 min-w-0">
               <div id="${msgId}-content"></div>

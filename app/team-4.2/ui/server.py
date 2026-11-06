@@ -36,7 +36,7 @@ from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-from starlette.responses import HTMLResponse, JSONResponse, Response, PlainTextResponse
+from starlette.responses import HTMLResponse, JSONResponse, Response, PlainTextResponse, RedirectResponse
 from starlette.routing import Route
 
 from rag.config import Settings
@@ -405,6 +405,10 @@ async def handle_view_doc(request: Request) -> Response:
     filename = request.path_params.get("filename", "").strip()
     if not filename:
         return HTMLResponse("<h1>Tên tài liệu không hợp lệ</h1>", status_code=400)
+
+    # Nếu tài liệu là đường link (URL) -> mở trực tiếp đường link
+    if filename.startswith("http://") or filename.startswith("https://"):
+        return RedirectResponse(filename, status_code=302)
 
     # Check if download requested
     download = request.query_params.get("download") == "1"

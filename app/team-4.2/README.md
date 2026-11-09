@@ -4,6 +4,8 @@
 
 Baseline Hybrid RAG (BM25 + Dense + RRF) cho văn bản luật tiếng Việt. Sản phẩm phát triển liên tục qua 5 tuần trong thư mục này, không sao chép code theo tuần.
 
+Tài liệu ingestion/data quality: [schema và interface](docs/SCHEMA_AND_INTERFACES.md) · [luồng xử lý](docs/workflow.md).
+
 ## Cấu trúc
 
 ```text
@@ -12,6 +14,9 @@ app/team-4.2/
 ├── .env.example          # biến môi trường mẫu, chỉ placeholder
 ├── src/rag/
 │   ├── schema.py         # hợp đồng dữ liệu chung (Page, Chunk, Hit, Answer, ...)
+│   ├── models/           # Source/Version/Block/ChunkV2 và quality records
+│   ├── versioning/       # lập kế hoạch, SQLite catalog và phạm vi hiệu lực
+│   ├── quality/          # validation contracts và review queue
 │   ├── config.py         # Settings đọc .env / biến môi trường
 │   ├── ingest/           # loaders (PDF/URL/TXT), chunker, vbpl (crawler vbpl.vn)
 │   ├── index/            # store (chunks.jsonl), bm25_index, embedder, vector_index

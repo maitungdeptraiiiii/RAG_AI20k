@@ -272,7 +272,7 @@
             <span>Recents</span>
           </div>
           <div id="recents-list" class="space-y-0.5 mt-0.5 text-[13.5px]">
-            <!-- Dynamically populated from recentChats -->
+            <!-- Dynamically populated from chatSessions -->
             <div class="px-2.5 py-1.5 text-neutral-400 text-[12px] italic">Chưa có lịch sử gần đây</div>
           </div>
         </div>
@@ -624,12 +624,31 @@
     </div>
   </div>
 
+  <!-- ==================== SESSION RIGHT-CLICK CONTEXT MENU ==================== -->
+  <div id="session-context-menu" class="fixed z-50 hidden bg-white rounded-xl shadow-float border border-neutral-200/90 py-1 min-w-[160px] text-left select-none text-[13px] text-neutral-800 transition-opacity duration-100">
+    <button type="button" onclick="handleRenameSessionFromMenu()" class="w-full px-3.5 py-2 flex items-center space-x-2.5 hover:bg-neutral-100 text-left transition-colors cursor-pointer">
+      <svg class="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+      </svg>
+      <span>Đổi tên</span>
+    </button>
+    <div class="h-px bg-neutral-100 my-1"></div>
+    <button type="button" onclick="handleDeleteSessionFromMenu()" class="w-full px-3.5 py-2 flex items-center space-x-2.5 hover:bg-red-50 text-red-600 text-left transition-colors cursor-pointer">
+      <svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+      </svg>
+      <span>Xóa đoạn chat</span>
+    </button>
+  </div>
+
   <!-- ==================== JAVASCRIPT LOGIC ==================== -->
   <script>
     // State
-    let isQuerying = false;
     let storedSourcesMap = {};
-    let recentChats = [];
+    let currentSessionId = null;
+    let chatSessions = [];
+    const activeQuerySessionIds = new Set();
+    let contextMenuSessionId = null;
     let appConfig = {};
     let popoverHideTimer = null;
 
@@ -733,7 +752,7 @@
     window.addEventListener('DOMContentLoaded', () => {
       setChatInputPosition('hero');
       fetchAppInfo();
-      loadRecentsFromStorage();
+      loadSessionsFromStorage();
 
       // Restore sidebar state & width
       try {
@@ -890,7 +909,16 @@
       return { article, breadcrumb };
     }
 
+    function updateSendButtonState() {
+      const isCurrentBusy = currentSessionId && activeQuerySessionIds.has(currentSessionId);
+      const sendBtn = document.getElementById('main-send-btn');
+      if (sendBtn) {
+        sendBtn.disabled = Boolean(isCurrentBusy);
+      }
+    }
+
     function resetToHero() {
+      currentSessionId = null;
       setChatInputPosition('hero');
       document.getElementById('hero-view').classList.remove('hidden');
       document.getElementById('chat-thread-view').classList.add('hidden');
@@ -907,6 +935,10 @@
       const sendIcon = document.getElementById('btn-send-icon');
       if (waveIcon) waveIcon.classList.remove('hidden');
       if (sendIcon) sendIcon.classList.add('hidden');
+      closeCanvas();
+      closeContextMenu();
+      renderRecentsList();
+      updateSendButtonState();
       chatInput.focus();
     }
 
@@ -922,75 +954,121 @@
 
     function submitQuery() {
       const query = chatInput.value.trim();
-      if (!query || isQuerying) return;
+      if (!query) return;
+      if (currentSessionId && activeQuerySessionIds.has(currentSessionId)) return;
+
       chatInput.value = '';
       chatInput.style.height = 'auto';
       const waveIcon = document.getElementById('btn-soundwave-icon');
       const sendIcon = document.getElementById('btn-send-icon');
       if (waveIcon) waveIcon.classList.remove('hidden');
       if (sendIcon) sendIcon.classList.add('hidden');
-      document.getElementById('main-send-btn').disabled = true;
       startQuery(query);
     }
 
     async function startQuery(rawQuery) {
-      isQuerying = true;
-
-      // Push chat input to bottom floating bar and show Chat Thread view
-      setChatInputPosition('bottom');
-      document.getElementById('hero-view').classList.add('hidden');
-      const wrapper = document.getElementById('main-content-wrapper');
-      if (wrapper) {
-        wrapper.classList.remove('justify-center');
-        wrapper.classList.add('justify-start');
+      // 1. Determine target session
+      if (!currentSessionId) {
+        const cleanTitle = rawQuery.length > 36 ? rawQuery.slice(0, 36) + '...' : rawQuery;
+        currentSessionId = 'session_' + Date.now();
+        const newSession = {
+          id: currentSessionId,
+          title: cleanTitle,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          turns: [],
+        };
+        chatSessions.unshift(newSession);
+        document.getElementById('conversation-title').textContent = cleanTitle;
+      } else {
+        const sess = chatSessions.find(s => s.id === currentSessionId);
+        if (sess) {
+          sess.updatedAt = Date.now();
+          document.getElementById('conversation-title').textContent = sess.title || rawQuery;
+        }
       }
-      const threadView = document.getElementById('chat-thread-view');
-      threadView.classList.remove('hidden');
-      document.getElementById('conversation-title').textContent = rawQuery;
 
+      const targetSessionId = currentSessionId;
       const msgId = 'msg-' + Date.now();
 
-      // Append User message & AI loading placeholder (ChatGPT 3-dots pulsing)
-      const turnHtml = `
-        <div id="${msgId}-turn" class="space-y-6">
-          <!-- User Query Bubble -->
-          <div class="flex justify-end w-full">
-            <div class="bg-[#f4f4f4] text-[#0d0d0d] px-5 py-2.5 rounded-3xl max-w-[85%] text-[15px] leading-relaxed select-text shadow-subtle">
-              ${escapeHtml(rawQuery)}
-            </div>
-          </div>
+      // 2. Mark targetSessionId as actively querying
+      activeQuerySessionIds.add(targetSessionId);
+      updateSendButtonState();
 
-          <!-- Assistant Response Container -->
-          <div class="flex items-start space-x-3 w-full">
-            <div class="w-7 h-7 rounded-lg bg-neutral-900 text-white flex items-center justify-center p-1.5 flex-shrink-0 mt-0.5 shadow-sm">
-              <!-- 3D Ice Cube Logo (Just-ice) -->
-              <svg class="w-4 h-4 text-sky-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2.5L20 7V17L12 21.5L4 17V7L12 2.5Z" />
-                <path d="M12 12V21.5" />
-                <path d="M12 12L20 7" />
-                <path d="M12 12L4 7" />
-                <path d="M10 5L14 7.2" stroke-width="1.4" opacity="0.85" />
-                <path d="M7 11.5V15" stroke-width="1.4" opacity="0.85" />
-              </svg>
-            </div>
-            <div class="flex-1 min-w-0">
-              <!-- Animated Loading 3 Dots -->
-              <div id="${msgId}-loading" class="flex items-center space-x-1.5 py-2 text-neutral-400">
-                <div class="w-2 h-2 rounded-full bg-neutral-400 dot-1"></div>
-                <div class="w-2 h-2 rounded-full bg-neutral-400 dot-2"></div>
-                <div class="w-2 h-2 rounded-full bg-neutral-400 dot-3"></div>
-                <span class="text-[12px] text-neutral-400 ml-2 font-normal">Just-ice đang phân rã câu hỏi & đối chiếu 6 bộ luật...</span>
+      // 3. IMMEDIATELY save pending turn to targetSession so it's NEVER lost
+      const targetSession = chatSessions.find(s => s.id === targetSessionId);
+      if (targetSession) {
+        if (!targetSession.turns) targetSession.turns = [];
+        targetSession.turns.push({
+          turnId: msgId,
+          query: rawQuery,
+          data: null, // null means pending
+          timestamp: Date.now(),
+        });
+        targetSession.updatedAt = Date.now();
+
+        // Move to top of chatSessions
+        const sIdx = chatSessions.findIndex(s => s.id === targetSessionId);
+        if (sIdx > 0) {
+          const [moved] = chatSessions.splice(sIdx, 1);
+          chatSessions.unshift(moved);
+        }
+        saveSessionsToStorage();
+        renderRecentsList();
+      }
+
+      // 4. Update UI view if user is currently looking at targetSessionId
+      if (currentSessionId === targetSessionId) {
+        setChatInputPosition('bottom');
+        document.getElementById('hero-view').classList.add('hidden');
+        const wrapper = document.getElementById('main-content-wrapper');
+        if (wrapper) {
+          wrapper.classList.remove('justify-center');
+          wrapper.classList.add('justify-start');
+        }
+        const threadView = document.getElementById('chat-thread-view');
+        threadView.classList.remove('hidden');
+
+        const turnHtml = `
+          <div id="${msgId}-turn" class="space-y-6">
+            <!-- User Query Bubble -->
+            <div class="flex justify-end w-full">
+              <div class="bg-[#f4f4f4] text-[#0d0d0d] px-5 py-2.5 rounded-3xl max-w-[85%] text-[15px] leading-relaxed select-text shadow-subtle">
+                ${escapeHtml(rawQuery)}
               </div>
+            </div>
 
-              <!-- Assistant Content Box -->
-              <div id="${msgId}-content" class="hidden"></div>
+            <!-- Assistant Response Container -->
+            <div class="flex items-start space-x-3 w-full">
+              <div class="w-7 h-7 rounded-lg bg-neutral-900 text-white flex items-center justify-center p-1.5 flex-shrink-0 mt-0.5 shadow-sm">
+                <!-- 3D Ice Cube Logo (Just-ice) -->
+                <svg class="w-4 h-4 text-sky-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2.5L20 7V17L12 21.5L4 17V7L12 2.5Z" />
+                  <path d="M12 12V21.5" />
+                  <path d="M12 12L20 7" />
+                  <path d="M12 12L4 7" />
+                  <path d="M10 5L14 7.2" stroke-width="1.4" opacity="0.85" />
+                  <path d="M7 11.5V15" stroke-width="1.4" opacity="0.85" />
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <!-- Animated Loading 3 Dots -->
+                <div id="${msgId}-loading" class="flex items-center space-x-1.5 py-2 text-neutral-400">
+                  <div class="w-2 h-2 rounded-full bg-neutral-400 dot-1"></div>
+                  <div class="w-2 h-2 rounded-full bg-neutral-400 dot-2"></div>
+                  <div class="w-2 h-2 rounded-full bg-neutral-400 dot-3"></div>
+                  <span class="text-[12px] text-neutral-400 ml-2 font-normal">Just-ice đang phân rã câu hỏi & đối chiếu 6 bộ luật...</span>
+                </div>
+
+                <!-- Assistant Content Box -->
+                <div id="${msgId}-content" class="hidden"></div>
+              </div>
             </div>
           </div>
-        </div>
-      `;
-
-      threadView.insertAdjacentHTML('beforeend', turnHtml);
-      scrollToBottom();
+        `;
+        threadView.insertAdjacentHTML('beforeend', turnHtml);
+        scrollToBottom();
+      }
 
       try {
         const response = await fetch('/api/chat', {
@@ -1005,14 +1083,44 @@
         }
 
         const data = await response.json();
-        renderAssistantAnswer(msgId, rawQuery, data);
-        saveToRecents(rawQuery, data);
+
+        // 5. Always persist response data into targetSession (never lost!)
+        const s = chatSessions.find(item => item.id === targetSessionId);
+        if (s) {
+          const t = (s.turns || []).find(item => item.turnId === msgId);
+          if (t) {
+            t.data = data;
+          } else {
+            s.turns.push({ turnId: msgId, query: rawQuery, data: data, timestamp: Date.now() });
+          }
+          s.updatedAt = Date.now();
+          saveSessionsToStorage();
+        }
+
+        // 6. Only update the visible DOM if the user is STILL viewing targetSessionId!
+        if (currentSessionId === targetSessionId) {
+          renderAssistantAnswer(msgId, rawQuery, data);
+        }
       } catch (err) {
-        renderError(msgId, err.message);
+        console.error('Lỗi khi xử lý chat:', err);
+        const s = chatSessions.find(item => item.id === targetSessionId);
+        if (s) {
+          const t = (s.turns || []).find(item => item.turnId === msgId);
+          if (t) {
+            t.data = { error: err.message, answer: '⚠️ Lỗi: ' + err.message };
+            saveSessionsToStorage();
+          }
+        }
+        if (currentSessionId === targetSessionId) {
+          renderError(msgId, err.message);
+        }
       } finally {
-        isQuerying = false;
-        document.getElementById('main-send-btn').disabled = false;
-        chatInput.focus();
+        activeQuerySessionIds.delete(targetSessionId);
+        updateSendButtonState();
+        renderRecentsList();
+        if (currentSessionId === targetSessionId) {
+          chatInput.focus();
+        }
       }
     }
 
@@ -1395,8 +1503,16 @@
       activeCanvasChunkId = null;
     }
 
-    // Dismiss Canvas / Popover on outside click or Escape
+    // Dismiss Canvas / Popover / Context Menu on outside click or Escape
     document.addEventListener('pointerdown', (e) => {
+      // Context menu outside click
+      const menu = document.getElementById('session-context-menu');
+      if (menu && !menu.classList.contains('hidden')) {
+        if (!e.target.closest('#session-context-menu')) {
+          closeContextMenu();
+        }
+      }
+
       const canvas = document.getElementById('chatgpt-canvas');
       if (canvas && !canvas.classList.contains('translate-x-full')) {
         const insideCanvas = e.target.closest('#chatgpt-canvas');
@@ -1418,6 +1534,7 @@
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
+        closeContextMenu();
         closeCanvas();
         closeSourceModal();
         hideCitePopover();
@@ -1522,101 +1639,255 @@
       }
     }
 
-    // ==================== RECENTS (HISTORY) LOGIC ====================
-    function saveToRecents(query, data) {
-      const title = query.length > 36 ? query.slice(0, 36) + '...' : query;
-      const item = {
-        id: Date.now(),
-        title: title,
-        query: query,
+    // ==================== RECENTS (SESSION / CONVERSATION) LOGIC ====================
+    function addTurnToCurrentSession(msgId, rawQuery, data) {
+      if (!currentSessionId) return;
+      const sess = chatSessions.find(s => s.id === currentSessionId);
+      if (!sess) return;
+
+      if (!sess.turns) sess.turns = [];
+      sess.turns.push({
+        turnId: msgId,
+        query: rawQuery,
         data: data,
-      };
-      recentChats.unshift(item);
-      if (recentChats.length > 20) recentChats.pop();
-      try {
-        localStorage.setItem('legal_chatgpt_recents', JSON.stringify(recentChats.slice(0, 10)));
-      } catch (e) {}
+        timestamp: Date.now(),
+      });
+      sess.updatedAt = Date.now();
+
+      // Ensure active session is at the front of the list
+      const idx = chatSessions.findIndex(s => s.id === currentSessionId);
+      if (idx > 0) {
+        const [moved] = chatSessions.splice(idx, 1);
+        chatSessions.unshift(moved);
+      }
+
+      saveSessionsToStorage();
       renderRecentsList();
     }
 
-    function loadRecentsFromStorage() {
+    function saveSessionsToStorage() {
       try {
-        const raw = localStorage.getItem('legal_chatgpt_recents');
+        localStorage.setItem('justice_chat_sessions_v1', JSON.stringify(chatSessions.slice(0, 30)));
+      } catch (e) {
+        console.warn('Lỗi lưu session vào localStorage:', e);
+      }
+    }
+
+    function loadSessionsFromStorage() {
+      try {
+        const raw = localStorage.getItem('justice_chat_sessions_v1');
         if (raw) {
-          recentChats = JSON.parse(raw);
+          chatSessions = JSON.parse(raw);
           renderRecentsList();
+          return;
         }
-      } catch (e) {}
+
+        // Backward compatibility migration from legacy 'legal_chatgpt_recents'
+        const legacyRaw = localStorage.getItem('legal_chatgpt_recents');
+        if (legacyRaw) {
+          const oldList = JSON.parse(legacyRaw);
+          if (Array.isArray(oldList) && oldList.length > 0) {
+            chatSessions = oldList.map(item => ({
+              id: 'session_' + (item.id || Date.now() + Math.random()),
+              title: item.title || (item.query ? (item.query.slice(0, 36) + '...') : 'Đoạn chat'),
+              createdAt: item.id || Date.now(),
+              updatedAt: item.id || Date.now(),
+              turns: [{
+                turnId: 'msg-' + (item.id || Date.now()),
+                query: item.query,
+                data: item.data,
+                timestamp: item.id || Date.now(),
+              }],
+            }));
+            saveSessionsToStorage();
+          }
+        }
+      } catch (e) {
+        console.warn('Lỗi nạp sessions:', e);
+      }
+      renderRecentsList();
     }
 
     function renderRecentsList() {
       const container = document.getElementById('recents-list');
       if (!container) return;
-      if (recentChats.length === 0) {
+
+      if (!chatSessions || chatSessions.length === 0) {
         container.innerHTML = `
-          <button onclick="fillAndSubmit('Thời hiệu khởi kiện tranh chấp hợp đồng dân sự là bao lâu?')" class="w-full px-2.5 py-1.5 rounded-lg text-neutral-700 hover:bg-[#ececec] hover:text-neutral-900 transition-colors text-left text-[13.5px] truncate block">
+          <button onclick="fillAndSubmit('Thời hiệu khởi kiện tranh chấp hợp đồng dân sự là bao lâu?')" class="w-full px-2.5 py-1.5 rounded-lg text-neutral-700 hover:bg-[#ececec] hover:text-neutral-900 transition-colors text-left text-[13.5px] truncate block" title="Thời hiệu khởi kiện tranh chấp hợp đồng dân sự">
             Thời hiệu khởi kiện hợp đồng
           </button>
-          <button onclick="fillAndSubmit('Người lao động làm thêm giờ vào ban đêm được tính tiền lương như thế nào?')" class="w-full px-2.5 py-1.5 rounded-lg text-neutral-700 hover:bg-[#ececec] hover:text-neutral-900 transition-colors text-left text-[13.5px] truncate block">
+          <button onclick="fillAndSubmit('Người lao động làm thêm giờ vào ban đêm được tính tiền lương như thế nào?')" class="w-full px-2.5 py-1.5 rounded-lg text-neutral-700 hover:bg-[#ececec] hover:text-neutral-900 transition-colors text-left text-[13.5px] truncate block" title="Tiền lương làm thêm giờ ban đêm">
             Tiền lương làm thêm ban đêm
           </button>
-          <button onclick="fillAndSubmit('Lừa người khác lấy 30 triệu đồng thì bị phạt bao nhiêu năm tù?')" class="w-full px-2.5 py-1.5 rounded-lg text-neutral-700 hover:bg-[#ececec] hover:text-neutral-900 transition-colors text-left text-[13.5px] truncate block">
+          <button onclick="fillAndSubmit('Lừa người khác lấy 30 triệu đồng thì bị phạt bao nhiêu năm tù?')" class="w-full px-2.5 py-1.5 rounded-lg text-neutral-700 hover:bg-[#ececec] hover:text-neutral-900 transition-colors text-left text-[13.5px] truncate block" title="Tội lừa đảo chiếm đoạt 30 triệu">
             Lừa đảo chiếm đoạt 30 triệu
           </button>
         `;
         return;
       }
-      container.innerHTML = recentChats.map((c, idx) => `
-        <button onclick="loadRecentChat(${idx})" class="w-full px-2.5 py-1.5 rounded-lg text-neutral-800 hover:bg-[#ececec] transition-colors text-left text-[13.5px] truncate block">
-          ${escapeHtml(c.title)}
-        </button>
-      `).join('');
+
+      container.innerHTML = chatSessions.map(s => {
+        const isActive = s.id === currentSessionId;
+        const isQueryingThis = activeQuerySessionIds.has(s.id);
+        const activeClass = isActive 
+          ? 'bg-[#ececec] text-neutral-900 font-medium' 
+          : 'text-neutral-700 hover:bg-[#ececec] hover:text-neutral-900 font-normal';
+
+        return `
+          <button 
+            type="button"
+            onclick="loadSession('${s.id}')" 
+            oncontextmenu="handleSessionContextMenu(event, '${s.id}')"
+            class="w-full px-2.5 py-1.5 rounded-lg transition-colors text-left text-[13.5px] truncate flex items-center justify-between ${activeClass}" 
+            title="${escapeHtml(s.title || 'Đoạn chat')} (Chuột phải để đổi tên / xóa)">
+            <span class="truncate">${escapeHtml(s.title || 'Đoạn chat')}</span>
+            ${isQueryingThis ? `<span class="w-2 h-2 rounded-full bg-teal-600 animate-pulse ml-2 flex-shrink-0" title="Đang phản hồi..."></span>` : ''}
+          </button>
+        `;
+      }).join('');
     }
 
-    function loadRecentChat(idx) {
-      const c = recentChats[idx];
-      if (!c) return;
+    function loadSession(sessionId) {
+      const sess = chatSessions.find(s => s.id === sessionId);
+      if (!sess) return;
+
+      currentSessionId = sess.id;
       setChatInputPosition('bottom');
       document.getElementById('hero-view').classList.add('hidden');
+      const wrapper = document.getElementById('main-content-wrapper');
+      if (wrapper) {
+        wrapper.classList.remove('justify-center');
+        wrapper.classList.add('justify-start');
+      }
       const threadView = document.getElementById('chat-thread-view');
       threadView.classList.remove('hidden');
       threadView.innerHTML = '';
-      document.getElementById('conversation-title').textContent = c.query;
+      document.getElementById('conversation-title').textContent = sess.title || 'Đoạn chat';
 
-      const msgId = 'msg-' + c.id;
-      const turnHtml = `
-        <div id="${msgId}-turn" class="space-y-6">
-          <div class="flex justify-end w-full">
-            <div class="bg-[#f4f4f4] text-[#0d0d0d] px-5 py-2.5 rounded-3xl max-w-[85%] text-[15px] leading-relaxed select-text shadow-subtle">
-              ${escapeHtml(c.query)}
+      // Render each turn in this session sequentially
+      (sess.turns || []).forEach(turn => {
+        const msgId = turn.turnId || ('msg-' + (turn.timestamp || Date.now()));
+        const isPending = (turn.data === null || turn.data === undefined);
+        const turnHtml = `
+          <div id="${msgId}-turn" class="space-y-6">
+            <div class="flex justify-end w-full">
+              <div class="bg-[#f4f4f4] text-[#0d0d0d] px-5 py-2.5 rounded-3xl max-w-[85%] text-[15px] leading-relaxed select-text shadow-subtle">
+                ${escapeHtml(turn.query)}
+              </div>
+            </div>
+            <div class="flex items-start space-x-3 w-full">
+              <div class="w-7 h-7 rounded-lg bg-neutral-900 text-white flex items-center justify-center p-1.5 flex-shrink-0 mt-0.5 shadow-sm">
+                <!-- 3D Ice Cube Logo (Just-ice) -->
+                <svg class="w-4 h-4 text-sky-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2.5L20 7V17L12 21.5L4 17V7L12 2.5Z" />
+                  <path d="M12 12V21.5" />
+                  <path d="M12 12L20 7" />
+                  <path d="M12 12L4 7" />
+                  <path d="M10 5L14 7.2" stroke-width="1.4" opacity="0.85" />
+                  <path d="M7 11.5V15" stroke-width="1.4" opacity="0.85" />
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                ${isPending ? `
+                  <div id="${msgId}-loading" class="flex items-center space-x-1.5 py-2 text-neutral-400">
+                    <div class="w-2 h-2 rounded-full bg-neutral-400 dot-1"></div>
+                    <div class="w-2 h-2 rounded-full bg-neutral-400 dot-2"></div>
+                    <div class="w-2 h-2 rounded-full bg-neutral-400 dot-3"></div>
+                    <span class="text-[12px] text-neutral-400 ml-2 font-normal">Just-ice đang phân rã câu hỏi & đối chiếu 6 bộ luật...</span>
+                  </div>
+                ` : ''}
+                <div id="${msgId}-content" class="${isPending ? 'hidden' : ''}"></div>
+              </div>
             </div>
           </div>
-          <div class="flex items-start space-x-3 w-full">
-            <div class="w-7 h-7 rounded-lg bg-neutral-900 text-white flex items-center justify-center p-1.5 flex-shrink-0 mt-0.5 shadow-sm">
-              <!-- 3D Ice Cube Logo (Just-ice) -->
-              <svg class="w-4 h-4 text-sky-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2.5L20 7V17L12 21.5L4 17V7L12 2.5Z" />
-                <path d="M12 12V21.5" />
-                <path d="M12 12L20 7" />
-                <path d="M12 12L4 7" />
-                <path d="M10 5L14 7.2" stroke-width="1.4" opacity="0.85" />
-                <path d="M7 11.5V15" stroke-width="1.4" opacity="0.85" />
-              </svg>
-            </div>
-            <div class="flex-1 min-w-0">
-              <div id="${msgId}-content"></div>
-            </div>
-          </div>
-        </div>
-      `;
-      threadView.innerHTML = turnHtml;
-      renderAssistantAnswer(msgId, c.query, c.data);
+        `;
+        threadView.insertAdjacentHTML('beforeend', turnHtml);
+        if (!isPending) {
+          renderAssistantAnswer(msgId, turn.query, turn.data);
+        }
+      });
+
+      renderRecentsList();
+      updateSendButtonState();
+      scrollToBottom();
+      closeContextMenu();
+    }
+
+    // ==================== CONTEXT MENU (CHUỘT PHẢI) LOGIC ====================
+    function handleSessionContextMenu(event, sessionId) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      contextMenuSessionId = sessionId;
+      const menu = document.getElementById('session-context-menu');
+      if (!menu) return;
+
+      menu.classList.remove('hidden');
+
+      const menuWidth = 165;
+      const menuHeight = 90;
+      let left = event.clientX;
+      let top = event.clientY;
+
+      if (left + menuWidth > window.innerWidth - 12) {
+        left = window.innerWidth - menuWidth - 12;
+      }
+      if (top + menuHeight > window.innerHeight - 12) {
+        top = window.innerHeight - menuHeight - 12;
+      }
+
+      menu.style.left = `${left}px`;
+      menu.style.top = `${top}px`;
+    }
+
+    function closeContextMenu() {
+      const menu = document.getElementById('session-context-menu');
+      if (menu) menu.classList.add('hidden');
+      contextMenuSessionId = null;
+    }
+
+    function handleDeleteSessionFromMenu() {
+      if (!contextMenuSessionId) return;
+      const targetId = contextMenuSessionId;
+      closeContextMenu();
+
+      activeQuerySessionIds.delete(targetId);
+      chatSessions = chatSessions.filter(s => s.id !== targetId);
+      saveSessionsToStorage();
+
+      if (currentSessionId === targetId) {
+        resetToHero();
+      } else {
+        renderRecentsList();
+        updateSendButtonState();
+      }
+    }
+
+    function handleRenameSessionFromMenu() {
+      if (!contextMenuSessionId) return;
+      const sess = chatSessions.find(s => s.id === contextMenuSessionId);
+      closeContextMenu();
+      if (!sess) return;
+
+      const newTitle = prompt('Nhập tên mới cho đoạn chat:', sess.title);
+      if (newTitle && newTitle.trim()) {
+        sess.title = newTitle.trim();
+        saveSessionsToStorage();
+        if (currentSessionId === sess.id) {
+          document.getElementById('conversation-title').textContent = sess.title;
+        }
+        renderRecentsList();
+      }
     }
 
     function clearRecents() {
-      recentChats = [];
-      try { localStorage.removeItem('legal_chatgpt_recents'); } catch (e) {}
-      renderRecentsList();
+      chatSessions = [];
+      try { 
+        localStorage.removeItem('justice_chat_sessions_v1'); 
+        localStorage.removeItem('legal_chatgpt_recents');
+      } catch (e) {}
+      resetToHero();
     }
 
     function toggleProjects() {

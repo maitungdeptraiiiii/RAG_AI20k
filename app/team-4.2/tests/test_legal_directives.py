@@ -216,6 +216,81 @@ def test_unknown_phrase_wording_is_partial():
     assert ds and all(d.parse_status != "exact" for d in ds)
 
 
+def _doc(text: str):
+    return parse_directives(parse_structure(text, "luat:61/2020/QH14"))
+
+
+def test_clause_level_target_law_in_omnibus_article():
+    # Luật Đầu tư 61/2020/QH14, Điều 75: luật đích nằm ở từng khoản, kèm đuôi "đã được sửa đổi ... theo Luật số ..."
+    ds = _doc("Điều 75. Sửa đổi, bổ sung một số điều của các luật có liên quan đến đầu tư kinh doanh\n"
+              "1. Sửa đổi, bổ sung một số điều của Luật Nhà ở số 65/2014/QH13 đã được sửa đổi, bổ sung một số điều "
+              "theo Luật số 40/2019/QH14 như sau:\n"
+              "a) Sửa đổi, bổ sung khoản 2 Điều 21 như sau:\n\"2. Có vốn ký quỹ.\";\n"
+              "b) Bãi bỏ khoản 3 Điều 22 và Điều 171.\n"
+              "2. Sửa đổi, bổ sung một số điều của Luật Kinh doanh bất động sản số 66/2014/QH13 như sau:\n"
+              "a) Sửa đổi, bổ sung khoản 1 Điều 10 như sau:\n\"1. Tổ chức kinh doanh.\".\n"
+              "Điều 76. Điều khoản thi hành\nLuật này có hiệu lực thi hành từ ngày 01 tháng 01 năm 2021.")
+    housing = [d for d in ds if d.target_law_number == "65/2014/QH13"]
+    assert [d.target_law_name for d in housing] == ["Luật Nhà ở"] * 3
+    assert ops(housing) == [("REPLACE_CLAUSE", Address("21", "2"), None), ("DELETE_CLAUSE", Address("22", "3"), None),
+                            ("DELETE_ARTICLE", Address("171"), None)]
+    biz = [d for d in ds if d.target_law_number == "66/2014/QH13"]
+    assert ops(biz) == [("REPLACE_CLAUSE", Address("10", "1"), None)] and biz[0].target_law_name == "Luật Kinh doanh bất động sản"
+
+
+def test_article_title_law_with_amended_by_suffix():
+    # Luật 62/2020/QH14 Điều 2
+    (d,) = _doc("Điều 2. Sửa đổi, bổ sung Điều 17 của Luật Nhà ở số 65/2014/QH13 đã được sửa đổi, bổ sung một số điều "
+                "theo Luật số 40/2019/QH14\nSửa đổi, bổ sung Điều 17 như sau:\n"
+                "\"Điều 17. Hình thức phát triển nhà ở\n1. Hình thức gồm:\na) Theo dự án.\".")
+    assert (d.target_law_name, d.target_law_number) == ("Luật Nhà ở", "65/2014/QH13")
+    assert (d.operation_type, d.target, d.parse_status) == ("REPLACE_ARTICLE", Address("17"), "exact")
+
+
+def test_passive_voice_directive():
+    # Luật 34/2009/QH12: "Điều 126 của Luật nhà ở được sửa đổi, bổ sung như sau:"
+    ds = _doc("Điều 1. Điều 126 của Luật nhà ở được sửa đổi, bổ sung như sau:\n"
+              "\"Điều 126. Quyền sở hữu nhà ở\n1. Người Việt Nam định cư ở nước ngoài.\".\n"
+              "Điều 2. Điều 121 của Luật đất đai được sửa đổi, bổ sung như sau:\n"
+              "\"Điều 121. Quyền sử dụng đất ở\n1. Nội dung.\".")
+    assert [(d.target_law_name, d.operation_type, d.target) for d in ds] == [
+        ("Luật nhà ở", "REPLACE_ARTICLE", Address("126")), ("Luật đất đai", "REPLACE_ARTICLE", Address("121"))]
+    assert ds[0].new_text.startswith("Điều 126.") and ds[0].parse_status == "exact"
+
+
+def test_point_level_target_law_in_phrase_scope():
+    # Luật Kiến trúc 40/2019/QH14 Điều 39
+    ds = _doc("Điều 39. Sửa đổi, bổ sung một số điều của các luật có liên quan đến hoạt động kiến trúc\n"
+              "1. Sửa đổi, bổ sung một số điều như sau:\n"
+              "b) Thay thế cụm từ “quy chế quản lý quy hoạch kiến trúc đô thị” bằng cụm từ “quy chế quản lý kiến trúc” "
+              "tại khoản 2 Điều 20 của Luật Nhà ở số 65/2014/QH13.")
+    (d,) = ds
+    assert (d.target_law_name, d.target_law_number, d.operation_type, d.target) == (
+        "Luật Nhà ở", "65/2014/QH13", "REPLACE_TEXT", Address("20", "2"))
+
+
+def test_insert_lead_in_before_clause_is_not_a_clause_edit():
+    # Luật 61/2020 Điều 75 khoản 2 điểm c: "Bổ sung đoạn mở đầu vào trước khoản 1 Điều 51"
+    ds = _doc("Điều 75. Sửa đổi, bổ sung một số điều của Luật Kinh doanh bất động sản\n"
+              "1. Bổ sung đoạn mở đầu vào trước khoản 1 Điều 51 như sau:\n\"Thủ tục chuyển nhượng dự án.\".")
+    assert ds and all(d.parse_status != "exact" for d in ds)
+
+
+def test_chapter_replacement_becomes_per_article_pending_ops():
+    # Luật 35/2018/QH14 Điều 6 khoản 1: "Sửa đổi, bổ sung Chương IV như sau:" (Luật Đất đai 2013)
+    ds = _doc("Điều 6. Sửa đổi, bổ sung một số điều của Luật Đất đai số 45/2013/QH13\n"
+              "1. Sửa đổi, bổ sung Chương IV như sau:\n"
+              "“CHƯƠNG IV\nQUY HOẠCH, KẾ HOẠCH SỬ DỤNG ĐẤT\n"
+              "Điều 35. Nguyên tắc lập quy hoạch\n1. Nội dung.\n"
+              "Điều 36. Hệ thống quy hoạch\nNội dung.”.\n"
+              "2. Bãi bỏ khoản 3 Điều 50.")
+    chapter = [d for d in ds if d.source_address.clause == "1"]
+    assert ops(chapter) == [("REPLACE_ARTICLE", Address("35"), None), ("REPLACE_ARTICLE", Address("36"), None)]
+    assert all(d.parse_status == "partial" and "operation.chapter_replacement" in d.reasons for d in chapter)
+    assert chapter[0].new_text.startswith("Điều 35.") and "Điều 36" not in chapter[0].new_text
+    assert ops([d for d in ds if d.source_address.clause == "2"]) == [("DELETE_CLAUSE", Address("50", "3"), None)]
+
+
 def test_inner_closing_quote_does_not_end_block():
     ds = _ds('1. Sửa đổi, bổ sung Điều 10 như sau:\n'
              '"Điều 10. Doanh nghiệp xã hội\n'

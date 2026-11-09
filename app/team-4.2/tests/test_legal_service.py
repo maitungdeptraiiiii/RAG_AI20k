@@ -53,9 +53,11 @@ def test_build_all_real_enterprise(service):
     assert new.valid_from == date(2022, 3, 1) and new.text != k3(service, date(2022, 2, 28)).text
     d60 = [v for v in service.store.versions(BASE) if v.provision_id.startswith(f"{BASE}#d60")]
     assert d60 and {v.verification_status for v in d60} == {"verified"}
+    # thao tác vào luật ngoài kho (Luật Đầu tư công...) không ảnh hưởng phiên bản nào -> không làm ngập hàng đợi
     open_items = service.store.review_items("open")
-    assert any(i.payload.get("target_law_name") == "Luật Đầu tư công" for i in open_items)
-    assert all(i.payload.get("source_excerpt") for i in open_items)
+    assert not any(i.payload.get("target_law_name") == "Luật Đầu tư công" for i in open_items)
+    pending_out_of_corpus = [o for o in service.store.operations() if o.target_law_name == "Luật Đầu tư công"]
+    assert pending_out_of_corpus and all(o.review_status == "pending" for o in pending_out_of_corpus)
 
 
 def test_build_idempotent(service):

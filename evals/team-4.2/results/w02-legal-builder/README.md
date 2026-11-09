@@ -71,10 +71,28 @@ tác không áp dụng được; luật sửa đổi đã biết nhưng thiếu 
 tác cũ không bị loại khi lập lại; mục duyệt không mở lại được / chấp nhận lệch VBHN / hạ cấp; bản sửa không được kiểm
 tra; câu "Kể từ ngày Luật này có hiệu lực, Luật X hết hiệu lực"; effTo của vbpl không được đối chiếu.
 
+## Tăng độ phủ sửa đổi
+
+Crawler giờ tự tải các luật được nêu trong câu "<luật cũ> đã được sửa đổi, bổ sung theo Luật số …" và xác nhận bằng
+nội dung, kể cả khi sửa đổi nằm trong luật khác (Luật Đầu tư 61/2020 Điều 75, Luật PPP 64/2020, Luật Kiến trúc
+40/2019). Parser hỗ trợ thêm: luật đích ở cấp khoản/điểm, đuôi "đã được sửa đổi … theo Luật số …", câu bị động
+("Điều 126 của Luật nhà ở được sửa đổi, bổ sung như sau"), thay cả chương ("Sửa đổi, bổ sung Chương IV") thành từng
+thao tác thay Điều chờ duyệt, số hiệu trùng giữa Luật và Nghị quyết.
+
+| Luật | `needs_review` trước | sau |
+|---|---|---|
+| Nhà ở 65/2014 | 2.763 | 42 |
+| KDBĐS 66/2014 | 673 | 13 |
+| Đất đai 45/2013 | 1.969 | 235 (chỉ các Điều thuộc Chương IV do 35/2018 thay, chờ duyệt) |
+| Nhà ở 56/2005 | 1.686 | 850 (Nghị quyết 19/2008 thí điểm — không có chỉ dẫn sửa đổi, giữ cờ) |
+
+Luật sửa đổi được thêm: 40/2019, 61/2020, 62/2020, 64/2020, 35/2018, 34/2009, 38/2009. Hàng đợi duyệt: 31 mục mở
+(thao tác vào luật ngoài kho không tạo mục duyệt; mục của thao tác bị thay khi lập lại được hệ thống đóng).
+
 ## Giới hạn đã biết
 
-- Sửa đổi nằm trong luật khác không mang tên luật đích ở tiêu đề (vd. Luật Đầu tư 61/2020 sửa Luật Nhà ở ở các
-  Điều cuối) không được tìm thấy qua tiêu đề → Luật Nhà ở 2014 thiếu các sửa đổi 40/2019, 61/2020, 62/2020, 64/2020.
+- Sửa đổi nằm trong luật khác chỉ được tìm khi có gợi ý (câu "đã được sửa đổi theo Luật số …" hoặc tiêu đề); sửa đổi
+  không được nhắc ở đâu vẫn có thể sót. Các luật sửa đổi được thêm (vd. Luật Đầu tư 2020) cũng trở thành văn bản trong kho.
 - VBHN-VPQH của các luật BĐS không có nội dung trên API công khai → chưa đối chiếu được.
 - Bãi bỏ một phần ("khoản 3 Điều X của Luật Y hết hiệu lực") trong Điều hiệu lực của luật khác chưa thành thao tác DELETE.
 - Văn bản sửa đổi nhiều luật cho thao tác `pending` với luật đích ngoài kho (đúng thiết kế, nhưng làm hàng đợi dài).

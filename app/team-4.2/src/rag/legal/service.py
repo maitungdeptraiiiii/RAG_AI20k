@@ -97,7 +97,12 @@ class LegalService:
                  and (o.source_issued_on or date.min) < (doc.issued_on or date.max)]
         ops = build_operations(doc, directives, effectivity, documents=documents, indexes=indexes,
                                prior_operations=prior) + repeal_operations(doc, effectivity, documents=documents)
-        _, human_missing = self.store.refresh_machine_operations(ops, source_key=source_key, now=self.now())
+        retired, human_missing = self.store.refresh_machine_operations(ops, source_key=source_key, now=self.now())
+        for op_id in retired:                      # thao tác máy bị loại khi lập lại: mục duyệt của nó cũng đóng
+            old_item = self.store.review_item(f"op:{op_id}")
+            if old_item is not None and old_item.status == "open":
+                self.store.resolve_review(ReviewDecision(old_item.review_id, "approve", "system",
+                                                         "thao tác bị thay khi lập lại", {}, self.now()))
         text = self.text_for(source_key)
         for op_id in human_missing:
             stored = self.store.operation(op_id)
@@ -115,6 +120,12 @@ class LegalService:
                 if item is not None and item.status == "open" and stored.reviewer is None:
                     self.store.resolve_review(ReviewDecision(item.review_id, "approve", "system",
                                                              f"đánh giá lại: {stored.review_status}", {}, self.now()))
+                continue
+            if stored.target_document_key is None and "operation.target_law_not_found" in stored.status_reasons:
+                # luật đích ngoài kho: không ảnh hưởng phiên bản nào; mục cũ do hệ thống đóng (mở lại khi luật được thêm)
+                if item is not None and item.status == "open":
+                    self.store.resolve_review(ReviewDecision(item.review_id, "approve", "system",
+                                                             "luật đích ngoài phạm vi kho", {}, self.now()))
                 continue
             payload = encode(stored)
             payload["source_excerpt"] = text[stored.source_span[0]:stored.source_span[1]][:_EXCERPT]

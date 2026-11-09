@@ -17,6 +17,12 @@ import server  # noqa: E402
 def client(tmp_path, monkeypatch):
     svc = make_service(tmp_path)
     svc.build_all()
+    # một mục duyệt thật: thao tác vào Luật Doanh nghiệp (trong kho) được đưa ra duyệt
+    from rag.legal.models import Address, ReviewItem
+    op = next(o for o in svc.store.operations() if o.target == Address("148", "1"))
+    svc.store.add_review_item(ReviewItem(f"op:{op.operation_id}", "operation", op.target_document_key, op.operation_id,
+                                         None, ("operation.manual_check",), "open", svc.now(),
+                                         {"source_excerpt": "5. Sửa đổi, bổ sung khoản 1 và khoản 2 Điều 148 như sau:"}))
     monkeypatch.setattr(server, "get_legal_service", lambda: svc)
     return TestClient(server.app), svc
 

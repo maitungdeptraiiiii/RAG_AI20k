@@ -98,10 +98,12 @@ def test_correct_validates_fields_before_writing(service):
 def test_replan_retires_vanished_machine_ops(service):
     ghost = replace(op_k3(service), operation_id="ghost", sequence=777, target=Address("61", "1"), new_text="1. Ma.")
     service.store.add_operations([ghost])
+    service.store.add_review_item(ReviewItem("op:ghost", "operation", BASE, "ghost", None, ("x",), "open", NOW, {}))
     service.plan_operations("luat:03/2022/QH15")
     g = service.store.operation("ghost")
     assert g.review_status == "rejected" and g.reviewer == "system"
     assert "operation.superseded_by_replan" in (g.review_note or "")
+    assert service.store.review_item("op:ghost").status == "resolved"       # mục duyệt của thao tác bị loại cũng đóng
 
 
 def test_replan_keeps_vanished_human_op_but_opens_review(service):
@@ -205,3 +207,37 @@ def test_vbpl_partial_status_without_amendments_and_effto_without_repeal(tmp_pat
     LegalService(store, now=lambda: NOW).build_all()
     reasons = {r for v in store.versions(base.document_key) for r in v.status_reasons}
     assert "effectivity.vbpl_effective_to_without_repeal" in reasons
+
+
+def test_stale_out_of_corpus_review_items_are_closed_by_system(service):
+    o = next(o for o in service.store.operations() if o.target_law_name == "Luật Đầu tư công")
+    rid = f"op:{o.operation_id}"
+    service.store.add_review_item(ReviewItem(rid, "operation", "luat:03/2022/QH15", o.operation_id, None,
+                                             ("operation.target_law_not_found",), "open", NOW, {}))
+    service.plan_operations("luat:03/2022/QH15")
+    assert service.store.review_item(rid).status == "resolved"
+    assert service.store.decisions(rid)[-1].reviewer == "system"
+
+
+def test_missing_amender_flag_clears_once_amender_is_in_corpus(tmp_path):
+    files = {
+        "old": "Điều 1. Phạm vi\n1. Khoản một cũ.\nĐiều 9. Hiệu lực thi hành\nLuật này có hiệu lực thi hành từ ngày 01 tháng 7 năm 2015.",
+        "new": ("Điều 1. Phạm vi\nLuật mới.\nĐiều 198. Hiệu lực thi hành\n1. Luật này có hiệu lực thi hành từ ngày 01 tháng 8 năm 2024.\n"
+                "2. Luật Nhà ở số 65/2014/QH13 đã được sửa đổi, bổ sung một số điều theo Luật số 61/2020/QH14 hết hiệu lực "
+                "kể từ ngày Luật này có hiệu lực thi hành."),
+        "inv": ("Điều 1. Phạm vi\nNội dung.\nĐiều 75. Sửa đổi, bổ sung một số điều của Luật Nhà ở\n"
+                "1. Sửa đổi, bổ sung khoản 1 Điều 1 như sau:\n\"1. Khoản một mới.\".\n"
+                "Điều 77. Hiệu lực thi hành\nLuật này có hiệu lực thi hành từ ngày 01 tháng 01 năm 2021."),
+    }
+    for name, text in files.items():
+        (tmp_path / f"{name}.txt").write_text(text, encoding="utf-8")
+    store = LegalStore(tmp_path / "c.sqlite")
+    store.upsert_document(replace(doc("65/2014/QH13", "Luật Nhà ở số 65/2014/QH13", date(2014, 11, 25), tmp_path / "old.txt",
+                                      date(2015, 7, 1)), eff_status="Hết hiệu lực toàn bộ"))
+    store.upsert_document(doc("27/2023/QH15", "Luật Nhà ở số 27/2023/QH15", date(2023, 11, 27), tmp_path / "new.txt", date(2024, 8, 1)))
+    store.upsert_document(replace(doc("61/2020/QH14", "Luật Đầu tư số 61/2020/QH14", date(2020, 6, 17), tmp_path / "inv.txt",
+                                      date(2021, 1, 1)), eff_status="Còn hiệu lực"))
+    LegalService(store, now=lambda: NOW).build_all()
+    h = store.provision_history("luat:65/2014/QH13#d1.k1")
+    assert [(v.valid_from, v.text, v.verification_status) for v in h] == [
+        (date(2015, 7, 1), "1. Khoản một cũ.", "verified"), (date(2021, 1, 1), "1. Khoản một mới.", "verified")]

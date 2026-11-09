@@ -136,3 +136,62 @@ def test_subordinate_documents_cannot_amend_a_law(tmp_path):
     assert store.document("nghi-dinh:10/2023/NĐ-CP") is None and store.document("vbhn:21/VBHN-BXD") is None
     reasons = {t: r for t, r in report.rejected}
     assert reasons[decree["title"]] == "discovery.subordinate_document"
+
+
+NEW_HOUSING = vb("40", "Luật", "27/2023/QH15", "Luật Nhà ở số 27/2023/QH15", "2023-11-27",
+                 "Điều 1. Phạm vi\nNội dung.\nĐiều 198. Hiệu lực thi hành\n"
+                 "1. Luật này có hiệu lực thi hành từ ngày 01 tháng 8 năm 2024.\n"
+                 "2. Luật Nhà ở số 65/2014/QH13 đã được sửa đổi, bổ sung một số điều theo Luật số 61/2020/QH14 và "
+                 "Luật số 62/2020/QH14 hết hiệu lực kể từ ngày Luật này có hiệu lực thi hành.")
+OLD_HOUSING = vb("41", "Luật", "65/2014/QH13", "Luật Nhà ở số 65/2014/QH13", "2014-11-25",
+                 "Điều 23. Điều kiện\n1. Khoản một.", "Hết hiệu lực toàn bộ")
+# Luật Đầu tư 2020: sửa Luật Nhà ở ở một Điều cuối, tiêu đề cả văn bản không nhắc Luật Nhà ở
+INVESTMENT = vb("42", "Luật", "61/2020/QH14", "Luật Đầu tư số 61/2020/QH14", "2020-06-17",
+                "Điều 1. Phạm vi\nNội dung.\nĐiều 75. Sửa đổi, bổ sung một số điều của Luật Nhà ở\n"
+                "1. Sửa đổi, bổ sung khoản 1 Điều 23 như sau:\n\"1. Khoản một mới.\".\n"
+                "Điều 77. Hiệu lực thi hành\nLuật này có hiệu lực thi hành từ ngày 01 tháng 01 năm 2021.")
+CONSTRUCTION = vb("43", "Luật", "62/2020/QH14", "Luật sửa đổi, bổ sung một số điều của Luật Xây dựng số 62/2020/QH14",
+                  "2020-06-17", "Điều 1. Sửa đổi, bổ sung một số điều của Luật Xây dựng\n1. Sửa đổi khoản 1 Điều 3 như sau:\n"
+                  "\"1. X.\".\nĐiều 3. Hiệu lực thi hành\nLuật này có hiệu lực thi hành từ ngày 01 tháng 01 năm 2021.")
+
+
+def test_known_amenders_are_fetched_and_confirmed_by_content(tmp_path):
+    store = LegalStore(tmp_path / "c.sqlite")
+    report = discover(FakeClient([NEW_HOUSING, OLD_HOUSING, INVESTMENT, CONSTRUCTION]), store,
+                      [Seed("Luật", "27/2023/QH15")], tmp_path / "raw", now=NOW)
+    added = [(k, r) for k, r, _ in report.added]
+    assert ("luat:61/2020/QH14", "SUA_DOI_BO_SUNG") in added       # sửa đổi nằm trong luật khác
+    rel = next(r for r in store.relations("luat:65/2014/QH13") if r.source_key == "luat:61/2020/QH14")
+    assert (rel.relation, rel.status) == ("SUA_DOI_BO_SUNG", "confirmed") and "Điều 75" in rel.evidence
+    # 62/2020 được nêu là đã sửa Luật Nhà ở nhưng nội dung không có chỉ dẫn nào cho Luật Nhà ở
+    assert store.document("luat:62/2020/QH14") is None
+    assert any(r == "discovery.amender_without_directives" for _, r in report.rejected)
+
+
+def test_amender_number_shared_by_law_and_resolution_tries_every_type(tmp_path):
+    # "đã được sửa đổi ... theo Nghị quyết số 19/2008/QH12": Luật Sĩ quan cũng mang số 19/2008/QH12
+    new = vb("60", "Luật", "27/2023/QH15", "Luật Nhà ở số 27/2023/QH15", "2023-11-27",
+             "Điều 1. Phạm vi\nNội dung.\nĐiều 198. Hiệu lực thi hành\n1. Luật này có hiệu lực thi hành từ ngày 01 tháng 8 năm 2024.\n"
+             "2. Luật Nhà ở số 65/2014/QH13 đã được sửa đổi, bổ sung một số điều theo Nghị quyết số 19/2008/QH12 "
+             "hết hiệu lực kể từ ngày Luật này có hiệu lực thi hành.")
+    officers = vb("61", "Luật", "19/2008/QH12", "Luật Sửa đổi, bổ sung một số điều của Luật Sĩ quan số 19/2008/QH12",
+                  "2008-06-03", "Điều 1. Sửa đổi, bổ sung một số điều của Luật Sĩ quan\n1. Sửa đổi khoản 1 Điều 2 như sau:\n\"1. X.\".")
+    resolution = vb("62", "Nghị quyết", "19/2008/QH12", "Nghị quyết số 19/2008/QH12 sửa đổi Luật Nhà ở", "2008-06-03",
+                    "Điều 1. Sửa đổi, bổ sung một số điều của Luật Nhà ở\n1. Sửa đổi, bổ sung khoản 1 Điều 23 như sau:\n"
+                    "\"1. Khoản thí điểm.\".\nĐiều 2. Hiệu lực thi hành\nNghị quyết này có hiệu lực thi hành từ ngày 01 tháng 01 năm 2009.")
+    store = LegalStore(tmp_path / "c.sqlite")
+    report = discover(FakeClient([new, OLD_HOUSING, officers, resolution]), store, [Seed("Luật", "27/2023/QH15")],
+                      tmp_path / "raw", now=NOW)
+    assert ("nghi-quyet:19/2008/QH12", "SUA_DOI_BO_SUNG") in [(k, r) for k, r, _ in report.added]
+    assert store.document("luat:19/2008/QH12") is None
+
+
+def test_partial_repeal_is_not_recorded_as_replacement(tmp_path):
+    new = vb("50", "Luật", "9/2026/QH16", "Luật Khác số 9/2026/QH16", "2026-01-01",
+             "Điều 1. A\nNội dung.\nĐiều 9. Hiệu lực thi hành\n1. Luật này có hiệu lực thi hành từ ngày 01 tháng 7 năm 2026.\n"
+             "2. Khoản 1 Điều 23 của Luật Nhà ở số 65/2014/QH13 hết hiệu lực kể từ ngày Luật này có hiệu lực thi hành.")
+    store = LegalStore(tmp_path / "c.sqlite")
+    report = discover(FakeClient([new, OLD_HOUSING]), store, [Seed("Luật", "9/2026/QH16")], tmp_path / "raw", now=NOW)
+    rels = [(r.source_key, r.target_key, r.relation) for r in store.relations("luat:65/2014/QH13")]
+    assert rels == [("luat:9/2026/QH16", "luat:65/2014/QH13", "BAI_BO")]
+    assert ("luat:65/2014/QH13", "THAY_THE") not in [(k, r) for k, r, _ in report.added]

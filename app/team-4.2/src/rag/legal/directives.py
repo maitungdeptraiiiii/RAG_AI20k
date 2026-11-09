@@ -13,6 +13,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 
 from rag.legal.models import Address, OperationType, ParseStatus, Provision
+from rag.legal.structure import parse_structure
 
 _ACTION = re.compile(r"sửa\s+đổi\s*,\s*bổ\s+sung|sửa\s+đổi|bổ\s+sung|bãi\s+bỏ|thay\s+thế", re.IGNORECASE)
 _ACTION_START = re.compile(r"^(?:sửa\s+đổi|bổ\s+sung|bãi\s+bỏ|thay\s+thế|thay\s+(?:cụm\s+)?từ)", re.IGNORECASE)
@@ -28,6 +29,7 @@ _REPLACE_TEXT = re.compile(
     r"thay(?:\s+thế)?\s+(?:cụm\s+)?(?:từ\s+ngữ|từ)\s+" + _PHRASE + r"\s+bằng\s+(?:cụm\s+)?(?:từ\s+ngữ\s+|từ\s+)?"
     r"[\"“](?P<new>.+?)[\"”](?P<scope>.*)$", re.IGNORECASE)
 _DELETE_TEXT = re.compile(r"(?:bãi\s+bỏ|bỏ)\s+(?:cụm\s+)?(?:từ\s+ngữ|từ)\s+" + _PHRASE + r"(?P<scope>.*)$", re.IGNORECASE)
+_CHAPTER = re.compile(r"(?:sửa\s+đổi(?:\s*,\s*bổ\s+sung)?|thay\s+thế)\s+chương\s+(?:[IVXLCDM]+|\d+)\b", re.IGNORECASE)
 _MENTIONS_PHRASE = re.compile(r"cụm\s+từ|từ\s+ngữ", re.IGNORECASE)
 _BULK = re.compile(r"một\s+số|toàn\s+bộ|các\s+điều|các\s+khoản|trong\s+(?:Bộ\s+)?luật", re.IGNORECASE)
 _LABEL = re.compile(r"^\s*(?:\d+[a-zđ]?\.|[a-zđ]\d*\))\s+")
@@ -170,6 +172,11 @@ def _op_for(action: str, tok: _Tok, insert: bool) -> OperationType:
 
 def _parse_header(header: str, inherited: Address | None) -> tuple[list[_Target], str | None, str | None, ParseStatus | None]:
     """-> (đích, old_phrase, new_phrase, trạng thái ép buộc nếu có)."""
+    if re.search(r"\bvào\s+trước\b", header, re.IGNORECASE):
+        # "Bổ sung đoạn mở đầu vào trước khoản 1 Điều 51": thêm phần dẫn cho cả Điều — chưa mô hình hoá
+        arts = [t for t in _tokens(header) if t.kind == "article"]
+        target = Address(arts[-1].value) if arts else (Address(inherited.article) if inherited else None)
+        return [_Target("UNSUPPORTED", target, None, ("operation.insert_before_unsupported",))], None, None, "partial"
     if _UNSUPPORTED.search(header):
         arts = [t for t in _tokens(header) if t.kind == "article"]
         target = Address(arts[-1].value) if arts else (Address(inherited.article) if inherited else None)
@@ -290,16 +297,32 @@ def _assign_content(targets: list[_Target], content: str) -> list[tuple[str | No
     return result
 
 
+_LAW_SUFFIX = re.compile(r"\s+(?:đã\s+được\s+sửa\s+đổi|được\s+(?:sửa\s+đổi|bổ\s+sung|bãi\s+bỏ)|như\s+sau|\(sau\s+đây)",
+                         re.IGNORECASE)
+_PASSIVE = re.compile(
+    r"^(?P<addr>(?:(?:điểm|khoản|điều)\s+\S+\s*)+?)(?:của\s+(?:Bộ\s+luật|Luật)\s+.+?\s+)?được\s+"
+    r"(?P<act>sửa\s+đổi(?:\s*,\s*bổ\s+sung)?|bổ\s+sung|bãi\s+bỏ)(?:\s+như\s+sau)?\s*:?\s*$", re.IGNORECASE)
+
+
 def _target_law(title: str) -> tuple[str | None, str | None]:
-    idx = max(title.rfind("của Luật"), title.rfind("của Bộ luật"))
-    if idx < 0:
-        return None, None
-    name = title[idx + 4:].strip().rstrip(".;")
-    m = re.match(r"^(.*?)\s+số\s+(\d+/\d{4}/[A-Z0-9Đ]+)\s*$", name)
-    if not m:
-        return name, None
-    bare = m.group(1).strip()
-    return (None if bare.casefold() in ("luật", "bộ luật") else bare), m.group(2)
+    """Luật đích nêu trong câu: "... của Luật Nhà ở số 65/2014/QH13 [đã được sửa đổi ... theo Luật số ...] như sau:"."""
+    hits = [m for m in re.finditer(r"của\s+(?:Bộ\s+luật|Luật)\s+", title)]
+    for m in reversed(hits):
+        name = _LAW_SUFFIX.split(title[m.start() + 4:], maxsplit=1)[0].strip().rstrip(".;:,")
+        if re.match(r"^(?:Bộ\s+luật|Luật)\s+này\b", name, re.IGNORECASE):
+            continue
+        num = re.match(r"^(.*?)\s+số\s+(\d+/\d{4}/[A-Z0-9Đ]+)\b", name)
+        if not num:
+            return name, None
+        bare = num.group(1).strip()
+        return (None if bare.casefold() in ("luật", "bộ luật") else bare), num.group(2)
+    return None, None
+
+
+def _activate(header: str) -> str:
+    """Câu bị động "Điều 126 của Luật nhà ở được sửa đổi, bổ sung như sau:" -> "sửa đổi, bổ sung Điều 126 như sau:"."""
+    m = _PASSIVE.match(header.strip())
+    return f"{m.group('act')} {m.group('addr').strip()} như sau:" if m else header
 
 
 def _header_and_content(text: str) -> tuple[str, str]:
@@ -315,6 +338,18 @@ def parse_directives(provisions: Sequence[Provision], *,
 
     def emit(unit: Provision, locator: str, header: str, content: str, inherited: Address | None,
              law: tuple[str | None, str | None]) -> None:
+        if _CHAPTER.search(header) and not [t for t in _tokens(header) if t.kind in ("article", "clause", "point")]:
+            # "Sửa đổi, bổ sung Chương IV như sau:" -> mỗi Điều trong chương mới là một thao tác thay Điều, chờ duyệt
+            # (Điều cũ của chương không còn trong bản mới không tự bị bãi bỏ — người duyệt xác nhận phạm vi)
+            arts = [p for p in parse_structure(strip_quotes(content), "chapter") if p.kind == "article"] if content else []
+            if not arts:
+                out.append(ParsedDirective(locator, unit.address, unit.span, len(out), law[0], law[1], "UNSUPPORTED",
+                                           None, None, None, None, "failed", ("operation.chapter_replacement",)))
+            for a in arts:
+                out.append(ParsedDirective(locator, unit.address, unit.span, len(out), law[0], law[1], "REPLACE_ARTICLE",
+                                           Address(a.address.article), None, a.text, None, "partial",
+                                           ("operation.chapter_replacement",)))
+            return
         targets, old, new_phrase, forced = _parse_header(header, inherited)
         if forced == "failed":
             out.append(ParsedDirective(locator, unit.address, unit.span, len(out), law[0], law[1], "UNSUPPORTED",
@@ -333,39 +368,45 @@ def parse_directives(provisions: Sequence[Provision], *,
                                        t.anchor, new_phrase if t.op == "REPLACE_TEXT" else text, old, status,
                                        tuple(reasons)))
 
+    def law_for(header: str, parent: tuple[str | None, str | None]) -> tuple[str | None, str | None]:
+        own = _target_law(header)
+        return own if own != (None, None) else parent
+
     for art in articles:
         title = titles.get(art.address.article, "")
-        if not _ACTION_START.match(title):
+        if not (_ACTION_START.match(title) or _PASSIVE.match(title)):
             continue
-        law = _target_law(title)
-        if law == (None, None):
-            law = default_target
-        if law == (None, None):
-            continue
+        art_law = law_for(title, default_target)
         clauses = [p for p in provisions if p.kind == "clause" and p.parent_id == art.provision_id]
         a_no = art.address.article
         if not clauses:
             body = art.text.split("\n")[1:]
-            if body and _ACTION.search(body[0]):
+            if body and (_ACTION.search(body[0]) or _PASSIVE.match(body[0].strip())):
                 header, content = body[0].strip(), "\n".join(body[1:])
             else:
                 header, content = title, "\n".join(body)
-            emit(art, f"Điều {a_no}", header, content, None, law)
+            law = law_for(header, art_law)
+            if law != (None, None):
+                emit(art, f"Điều {a_no}", _activate(header), content, None, law)
             continue
         for cl in clauses:
             header, content = _header_and_content(cl.text)
+            cl_law = law_for(header, art_law)
             points = [p for p in provisions if p.kind == "point" and p.parent_id == cl.provision_id]
             locator = f"Điều {a_no} > {cl.address.clause}"
             if not points:
-                if _ACTION.search(header) or _REPLACE_TEXT.search(header):
-                    emit(cl, locator, header, content, None, law)
+                active = _activate(header)
+                if cl_law != (None, None) and (_ACTION.search(active) or _REPLACE_TEXT.search(active)):
+                    emit(cl, locator, active, content, None, cl_law)
                 continue
             _, quals = _split(_tokens(header))
             ctx = _ctx(quals) or _ctx(_tokens(header))
             inherited = Address(ctx["article"], ctx.get("clause")) if "article" in ctx else None
             for pt in points:
                 p_header, p_content = _header_and_content(pt.text)
-                emit(pt, f"{locator} > {pt.address.point}", p_header, p_content, inherited, law)
+                pt_law = law_for(p_header, cl_law)
+                if pt_law != (None, None):
+                    emit(pt, f"{locator} > {pt.address.point}", _activate(p_header), p_content, inherited, pt_law)
     return out
 
 

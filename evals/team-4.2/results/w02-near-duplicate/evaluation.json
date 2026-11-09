@@ -1,0 +1,843 @@
+{
+  "synthetic": true,
+  "dataset_sha256": "9436ba1a202fc9698373a1b28c2b4c2d7255ca5572f94d58939f57ac0b8dc280",
+  "detector_source_sha256": "8b404670b910c4919e96887c4ed8753793a51836302621bf5463ccaff77fa54d",
+  "evaluator_source_sha256": "0caacc13851de612018eca58e07a44641f552d2941c334862a70ab75fbeeb248",
+  "label_definition": "Needs duplicate-review triage, not truth of a legal conflict",
+  "limitations": [
+    "Synthetic examples, shared template families across dev/test",
+    "Source IDs are split-disjoint; labels are handcrafted, not independently adjudicated",
+    "Do not infer real-corpus precision/recall from this fixture"
+  ],
+  "selection": "Same fixed threshold, no automated threshold search. Synthetic fixture was visible during implementation; test is not a blind independent benchmark.",
+  "policies": {
+    "baseline": {
+      "config": {
+        "algorithm": "token-sequence",
+        "algorithm_version": "1",
+        "threshold": 0.85,
+        "fingerprint_config_id": "nfc-casefold-whitespace-v1"
+      },
+      "config_sha256": "c55acf00ece771aba62ae311f94cddcd475efcbaa8fcbc977401521d68303c8d",
+      "metrics": {
+        "dev": {
+          "pairs": 12,
+          "tp": 6,
+          "fp": 4,
+          "fn": 1,
+          "tn": 1,
+          "precision": 0.6,
+          "recall": 0.8571428571428571,
+          "review_count": 10,
+          "false_positive_ids": [
+            "dev-independent-provinces",
+            "dev-independent-same-body",
+            "dev-boilerplate-only",
+            "dev-unknown-independent"
+          ],
+          "false_negative_ids": [
+            "dev-short-number"
+          ]
+        },
+        "test": {
+          "pairs": 12,
+          "tp": 6,
+          "fp": 4,
+          "fn": 1,
+          "tn": 1,
+          "precision": 0.6,
+          "recall": 0.8571428571428571,
+          "review_count": 10,
+          "false_positive_ids": [
+            "test-independent-provinces",
+            "test-independent-same-body",
+            "test-boilerplate-only",
+            "test-unknown-independent"
+          ],
+          "false_negative_ids": [
+            "test-short-number"
+          ]
+        }
+      },
+      "pairs": [
+        {
+          "id": "dev-independent-provinces",
+          "split": "dev",
+          "label_review": false,
+          "predicted_review": true,
+          "similarity": 0.9964664310954063,
+          "body_similarity": 0.9761904761904762,
+          "classification": "near_duplicate",
+          "priority": "normal",
+          "routing": "lexical",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": []
+        },
+        {
+          "id": "dev-independent-same-body",
+          "split": "dev",
+          "label_review": false,
+          "predicted_review": true,
+          "similarity": 1.0,
+          "body_similarity": 1.0,
+          "classification": "same_content_candidate",
+          "priority": "normal",
+          "routing": "lexical",
+          "differences": [],
+          "reasons": []
+        },
+        {
+          "id": "dev-boilerplate-only",
+          "split": "dev",
+          "label_review": false,
+          "predicted_review": true,
+          "similarity": 0.9551656920077972,
+          "body_similarity": 0.25806451612903225,
+          "classification": "near_duplicate",
+          "priority": "normal",
+          "routing": "lexical",
+          "differences": [],
+          "reasons": []
+        },
+        {
+          "id": "dev-same-identity-number",
+          "split": "dev",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 0.9964664310954063,
+          "body_similarity": 0.9761904761904762,
+          "classification": "near_duplicate",
+          "priority": "normal",
+          "routing": "lexical",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": []
+        },
+        {
+          "id": "dev-negation",
+          "split": "dev",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 0.9761904761904762,
+          "body_similarity": 0.9761904761904762,
+          "classification": "near_duplicate",
+          "priority": "normal",
+          "routing": "lexical",
+          "differences": [
+            "negation_or_obligation"
+          ],
+          "reasons": []
+        },
+        {
+          "id": "dev-short-number",
+          "split": "dev",
+          "label_review": true,
+          "predicted_review": false,
+          "similarity": 0.6666666666666666,
+          "body_similarity": 0.6666666666666666,
+          "classification": "different",
+          "priority": null,
+          "routing": "lexical",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": []
+        },
+        {
+          "id": "dev-ocr-candidate",
+          "split": "dev",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 0.9523809523809523,
+          "body_similarity": 0.9523809523809523,
+          "classification": "near_duplicate",
+          "priority": "normal",
+          "routing": "lexical",
+          "differences": [],
+          "reasons": []
+        },
+        {
+          "id": "dev-unknown-identity-copy",
+          "split": "dev",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 0.9761904761904762,
+          "body_similarity": 0.9761904761904762,
+          "classification": "near_duplicate",
+          "priority": "normal",
+          "routing": "lexical",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": []
+        },
+        {
+          "id": "dev-unrelated",
+          "split": "dev",
+          "label_review": false,
+          "predicted_review": false,
+          "similarity": 0.037037037037037035,
+          "body_similarity": 0.037037037037037035,
+          "classification": "different",
+          "priority": null,
+          "routing": "lexical",
+          "differences": [
+            "numeric",
+            "unit_or_time"
+          ],
+          "reasons": []
+        },
+        {
+          "id": "dev-masked-identical",
+          "split": "dev",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 1.0,
+          "body_similarity": 1.0,
+          "classification": "same_content_candidate",
+          "priority": "normal",
+          "routing": "lexical",
+          "differences": [],
+          "reasons": []
+        },
+        {
+          "id": "dev-unknown-independent",
+          "split": "dev",
+          "label_review": false,
+          "predicted_review": true,
+          "similarity": 0.9964664310954063,
+          "body_similarity": 0.9761904761904762,
+          "classification": "near_duplicate",
+          "priority": "normal",
+          "routing": "lexical",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": []
+        },
+        {
+          "id": "dev-identity-contradiction",
+          "split": "dev",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 0.9964664310954063,
+          "body_similarity": 0.9761904761904762,
+          "classification": "near_duplicate",
+          "priority": "normal",
+          "routing": "lexical",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": []
+        },
+        {
+          "id": "test-independent-provinces",
+          "split": "test",
+          "label_review": false,
+          "predicted_review": true,
+          "similarity": 0.9964664310954063,
+          "body_similarity": 0.9761904761904762,
+          "classification": "near_duplicate",
+          "priority": "normal",
+          "routing": "lexical",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": []
+        },
+        {
+          "id": "test-independent-same-body",
+          "split": "test",
+          "label_review": false,
+          "predicted_review": true,
+          "similarity": 1.0,
+          "body_similarity": 1.0,
+          "classification": "same_content_candidate",
+          "priority": "normal",
+          "routing": "lexical",
+          "differences": [],
+          "reasons": []
+        },
+        {
+          "id": "test-boilerplate-only",
+          "split": "test",
+          "label_review": false,
+          "predicted_review": true,
+          "similarity": 0.9551656920077972,
+          "body_similarity": 0.25806451612903225,
+          "classification": "near_duplicate",
+          "priority": "normal",
+          "routing": "lexical",
+          "differences": [],
+          "reasons": []
+        },
+        {
+          "id": "test-same-identity-number",
+          "split": "test",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 0.9964664310954063,
+          "body_similarity": 0.9761904761904762,
+          "classification": "near_duplicate",
+          "priority": "normal",
+          "routing": "lexical",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": []
+        },
+        {
+          "id": "test-negation",
+          "split": "test",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 0.9761904761904762,
+          "body_similarity": 0.9761904761904762,
+          "classification": "near_duplicate",
+          "priority": "normal",
+          "routing": "lexical",
+          "differences": [
+            "negation_or_obligation"
+          ],
+          "reasons": []
+        },
+        {
+          "id": "test-short-number",
+          "split": "test",
+          "label_review": true,
+          "predicted_review": false,
+          "similarity": 0.6666666666666666,
+          "body_similarity": 0.6666666666666666,
+          "classification": "different",
+          "priority": null,
+          "routing": "lexical",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": []
+        },
+        {
+          "id": "test-ocr-candidate",
+          "split": "test",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 0.9523809523809523,
+          "body_similarity": 0.9523809523809523,
+          "classification": "near_duplicate",
+          "priority": "normal",
+          "routing": "lexical",
+          "differences": [],
+          "reasons": []
+        },
+        {
+          "id": "test-unknown-identity-copy",
+          "split": "test",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 0.9761904761904762,
+          "body_similarity": 0.9761904761904762,
+          "classification": "near_duplicate",
+          "priority": "normal",
+          "routing": "lexical",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": []
+        },
+        {
+          "id": "test-unrelated",
+          "split": "test",
+          "label_review": false,
+          "predicted_review": false,
+          "similarity": 0.037037037037037035,
+          "body_similarity": 0.037037037037037035,
+          "classification": "different",
+          "priority": null,
+          "routing": "lexical",
+          "differences": [
+            "numeric",
+            "unit_or_time"
+          ],
+          "reasons": []
+        },
+        {
+          "id": "test-masked-identical",
+          "split": "test",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 1.0,
+          "body_similarity": 1.0,
+          "classification": "same_content_candidate",
+          "priority": "normal",
+          "routing": "lexical",
+          "differences": [],
+          "reasons": []
+        },
+        {
+          "id": "test-unknown-independent",
+          "split": "test",
+          "label_review": false,
+          "predicted_review": true,
+          "similarity": 0.9964664310954063,
+          "body_similarity": 0.9761904761904762,
+          "classification": "near_duplicate",
+          "priority": "normal",
+          "routing": "lexical",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": []
+        },
+        {
+          "id": "test-identity-contradiction",
+          "split": "test",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 0.9964664310954063,
+          "body_similarity": 0.9761904761904762,
+          "classification": "near_duplicate",
+          "priority": "normal",
+          "routing": "lexical",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": []
+        }
+      ]
+    },
+    "improved": {
+      "config": {
+        "algorithm": "token-sequence",
+        "algorithm_version": "2",
+        "threshold": 0.85,
+        "fingerprint_config_id": "nfc-casefold-whitespace-v1"
+      },
+      "config_sha256": "ac3447cc27f593d54766ea6d86bdc8789e22b93c3cbba7503bbfac42076da827",
+      "metrics": {
+        "dev": {
+          "pairs": 12,
+          "tp": 7,
+          "fp": 2,
+          "fn": 0,
+          "tn": 3,
+          "precision": 0.7777777777777778,
+          "recall": 1.0,
+          "review_count": 9,
+          "false_positive_ids": [
+            "dev-boilerplate-only",
+            "dev-unknown-independent"
+          ],
+          "false_negative_ids": []
+        },
+        "test": {
+          "pairs": 12,
+          "tp": 7,
+          "fp": 2,
+          "fn": 0,
+          "tn": 3,
+          "precision": 0.7777777777777778,
+          "recall": 1.0,
+          "review_count": 9,
+          "false_positive_ids": [
+            "test-boilerplate-only",
+            "test-unknown-independent"
+          ],
+          "false_negative_ids": []
+        }
+      },
+      "pairs": [
+        {
+          "id": "dev-independent-provinces",
+          "split": "dev",
+          "label_review": false,
+          "predicted_review": false,
+          "similarity": 0.9964664310954063,
+          "body_similarity": 0.9761904761904762,
+          "classification": "independent_template",
+          "priority": null,
+          "routing": "independent_scope",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": [
+            "Confirmed distinct identifiers and scope; retain both independent sources"
+          ]
+        },
+        {
+          "id": "dev-independent-same-body",
+          "split": "dev",
+          "label_review": false,
+          "predicted_review": false,
+          "similarity": 1.0,
+          "body_similarity": 1.0,
+          "classification": "independent_template",
+          "priority": null,
+          "routing": "independent_scope",
+          "differences": [],
+          "reasons": [
+            "Confirmed distinct identifiers and scope; retain both independent sources"
+          ]
+        },
+        {
+          "id": "dev-boilerplate-only",
+          "split": "dev",
+          "label_review": false,
+          "predicted_review": true,
+          "similarity": 0.9551656920077972,
+          "body_similarity": 0.25806451612903225,
+          "classification": "near_duplicate",
+          "priority": "low",
+          "routing": "boilerplate_similarity",
+          "differences": [],
+          "reasons": [
+            "Full-text similarity is dominated by preamble/footer; insufficient identity evidence to dismiss review"
+          ]
+        },
+        {
+          "id": "dev-same-identity-number",
+          "split": "dev",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 0.9964664310954063,
+          "body_similarity": 0.9761904761904762,
+          "classification": "near_duplicate",
+          "priority": "high",
+          "routing": "important_difference",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": [
+            "Numbers, units, time or negation/obligation differ in substantive text"
+          ]
+        },
+        {
+          "id": "dev-negation",
+          "split": "dev",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 0.9761904761904762,
+          "body_similarity": 0.9761904761904762,
+          "classification": "near_duplicate",
+          "priority": "high",
+          "routing": "important_difference",
+          "differences": [
+            "negation_or_obligation"
+          ],
+          "reasons": [
+            "Numbers, units, time or negation/obligation differ in substantive text"
+          ]
+        },
+        {
+          "id": "dev-short-number",
+          "split": "dev",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 0.6666666666666666,
+          "body_similarity": 0.6666666666666666,
+          "classification": "near_duplicate",
+          "priority": "high",
+          "routing": "important_difference",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": [
+            "Numbers, units, time or negation/obligation differ in substantive text",
+            "Important change for the same identity is reviewed even below the lexical threshold"
+          ]
+        },
+        {
+          "id": "dev-ocr-candidate",
+          "split": "dev",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 0.9523809523809523,
+          "body_similarity": 0.9523809523809523,
+          "classification": "near_duplicate",
+          "priority": "low",
+          "routing": "possible_ocr_difference",
+          "differences": [],
+          "reasons": [
+            "Low OCR confidence; OCR error is only a hypothesis, not confirmed"
+          ]
+        },
+        {
+          "id": "dev-unknown-identity-copy",
+          "split": "dev",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 0.9761904761904762,
+          "body_similarity": 0.9761904761904762,
+          "classification": "near_duplicate",
+          "priority": "high",
+          "routing": "important_difference",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": [
+            "Numbers, units, time or negation/obligation differ in substantive text"
+          ]
+        },
+        {
+          "id": "dev-unrelated",
+          "split": "dev",
+          "label_review": false,
+          "predicted_review": false,
+          "similarity": 0.037037037037037035,
+          "body_similarity": 0.037037037037037035,
+          "classification": "different",
+          "priority": null,
+          "routing": "lexical",
+          "differences": [
+            "numeric",
+            "unit_or_time"
+          ],
+          "reasons": []
+        },
+        {
+          "id": "dev-masked-identical",
+          "split": "dev",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 1.0,
+          "body_similarity": 1.0,
+          "classification": "same_content_candidate",
+          "priority": "normal",
+          "routing": "lexical",
+          "differences": [],
+          "reasons": []
+        },
+        {
+          "id": "dev-unknown-independent",
+          "split": "dev",
+          "label_review": false,
+          "predicted_review": true,
+          "similarity": 0.9964664310954063,
+          "body_similarity": 0.9761904761904762,
+          "classification": "near_duplicate",
+          "priority": "high",
+          "routing": "important_difference",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": [
+            "Numbers, units, time or negation/obligation differ in substantive text"
+          ]
+        },
+        {
+          "id": "dev-identity-contradiction",
+          "split": "dev",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 0.9964664310954063,
+          "body_similarity": 0.9761904761904762,
+          "classification": "near_duplicate",
+          "priority": "high",
+          "routing": "important_difference",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": [
+            "Numbers, units, time or negation/obligation differ in substantive text"
+          ]
+        },
+        {
+          "id": "test-independent-provinces",
+          "split": "test",
+          "label_review": false,
+          "predicted_review": false,
+          "similarity": 0.9964664310954063,
+          "body_similarity": 0.9761904761904762,
+          "classification": "independent_template",
+          "priority": null,
+          "routing": "independent_scope",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": [
+            "Confirmed distinct identifiers and scope; retain both independent sources"
+          ]
+        },
+        {
+          "id": "test-independent-same-body",
+          "split": "test",
+          "label_review": false,
+          "predicted_review": false,
+          "similarity": 1.0,
+          "body_similarity": 1.0,
+          "classification": "independent_template",
+          "priority": null,
+          "routing": "independent_scope",
+          "differences": [],
+          "reasons": [
+            "Confirmed distinct identifiers and scope; retain both independent sources"
+          ]
+        },
+        {
+          "id": "test-boilerplate-only",
+          "split": "test",
+          "label_review": false,
+          "predicted_review": true,
+          "similarity": 0.9551656920077972,
+          "body_similarity": 0.25806451612903225,
+          "classification": "near_duplicate",
+          "priority": "low",
+          "routing": "boilerplate_similarity",
+          "differences": [],
+          "reasons": [
+            "Full-text similarity is dominated by preamble/footer; insufficient identity evidence to dismiss review"
+          ]
+        },
+        {
+          "id": "test-same-identity-number",
+          "split": "test",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 0.9964664310954063,
+          "body_similarity": 0.9761904761904762,
+          "classification": "near_duplicate",
+          "priority": "high",
+          "routing": "important_difference",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": [
+            "Numbers, units, time or negation/obligation differ in substantive text"
+          ]
+        },
+        {
+          "id": "test-negation",
+          "split": "test",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 0.9761904761904762,
+          "body_similarity": 0.9761904761904762,
+          "classification": "near_duplicate",
+          "priority": "high",
+          "routing": "important_difference",
+          "differences": [
+            "negation_or_obligation"
+          ],
+          "reasons": [
+            "Numbers, units, time or negation/obligation differ in substantive text"
+          ]
+        },
+        {
+          "id": "test-short-number",
+          "split": "test",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 0.6666666666666666,
+          "body_similarity": 0.6666666666666666,
+          "classification": "near_duplicate",
+          "priority": "high",
+          "routing": "important_difference",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": [
+            "Numbers, units, time or negation/obligation differ in substantive text",
+            "Important change for the same identity is reviewed even below the lexical threshold"
+          ]
+        },
+        {
+          "id": "test-ocr-candidate",
+          "split": "test",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 0.9523809523809523,
+          "body_similarity": 0.9523809523809523,
+          "classification": "near_duplicate",
+          "priority": "low",
+          "routing": "possible_ocr_difference",
+          "differences": [],
+          "reasons": [
+            "Low OCR confidence; OCR error is only a hypothesis, not confirmed"
+          ]
+        },
+        {
+          "id": "test-unknown-identity-copy",
+          "split": "test",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 0.9761904761904762,
+          "body_similarity": 0.9761904761904762,
+          "classification": "near_duplicate",
+          "priority": "high",
+          "routing": "important_difference",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": [
+            "Numbers, units, time or negation/obligation differ in substantive text"
+          ]
+        },
+        {
+          "id": "test-unrelated",
+          "split": "test",
+          "label_review": false,
+          "predicted_review": false,
+          "similarity": 0.037037037037037035,
+          "body_similarity": 0.037037037037037035,
+          "classification": "different",
+          "priority": null,
+          "routing": "lexical",
+          "differences": [
+            "numeric",
+            "unit_or_time"
+          ],
+          "reasons": []
+        },
+        {
+          "id": "test-masked-identical",
+          "split": "test",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 1.0,
+          "body_similarity": 1.0,
+          "classification": "same_content_candidate",
+          "priority": "normal",
+          "routing": "lexical",
+          "differences": [],
+          "reasons": []
+        },
+        {
+          "id": "test-unknown-independent",
+          "split": "test",
+          "label_review": false,
+          "predicted_review": true,
+          "similarity": 0.9964664310954063,
+          "body_similarity": 0.9761904761904762,
+          "classification": "near_duplicate",
+          "priority": "high",
+          "routing": "important_difference",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": [
+            "Numbers, units, time or negation/obligation differ in substantive text"
+          ]
+        },
+        {
+          "id": "test-identity-contradiction",
+          "split": "test",
+          "label_review": true,
+          "predicted_review": true,
+          "similarity": 0.9964664310954063,
+          "body_similarity": 0.9761904761904762,
+          "classification": "near_duplicate",
+          "priority": "high",
+          "routing": "important_difference",
+          "differences": [
+            "numeric"
+          ],
+          "reasons": [
+            "Numbers, units, time or negation/obligation differ in substantive text"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,640 @@
+{
+  "schema_version": "near-duplicate-eval.v1",
+  "synthetic": true,
+  "label_definition": "Needs duplicate-review triage, not truth of a legal conflict",
+  "limitations": [
+    "Synthetic examples, shared template families across dev/test",
+    "Source IDs are split-disjoint; labels are handcrafted, not independently adjudicated",
+    "Do not infer real-corpus precision/recall from this fixture"
+  ],
+  "pairs": [
+    {
+      "id": "dev-independent-provinces",
+      "split": "dev",
+      "label_review": false,
+      "label_reason": "Cùng mẫu, khác cơ quan/số hiệu và địa phương đã xác nhận",
+      "left": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Mức phí dịch vụ là 100.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "A"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "dev-independent-provinces-a"
+      },
+      "right": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Mức phí dịch vụ là 250.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {
+          "external_key": "09/2026/QĐ",
+          "issuer": "Cơ quan B",
+          "scope": {
+            "province": "B"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "dev-independent-provinces-b"
+      }
+    },
+    {
+      "id": "dev-independent-same-body",
+      "split": "dev",
+      "label_review": false,
+      "label_reason": "Cùng nội dung mẫu nhưng áp dụng độc lập cho địa phương khác",
+      "left": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Mức phí dịch vụ là 100.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "A"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "dev-independent-same-body-a"
+      },
+      "right": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Mức phí dịch vụ là 100.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {
+          "external_key": "09/2026/QĐ",
+          "issuer": "Cơ quan B",
+          "scope": {
+            "province": "B"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "dev-independent-same-body-b"
+      }
+    },
+    {
+      "id": "dev-boilerplate-only",
+      "split": "dev",
+      "label_review": false,
+      "label_reason": "Chỉ phần căn cứ/nơi nhận giống; nội dung nghiệp vụ khác nhau",
+      "left": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Trồng cây xanh tạo bóng mát cho công viên đô thị.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {},
+        "ocr_confidence": null,
+        "document_id": "dev-boilerplate-only-a"
+      },
+      "right": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Chăm sóc trẻ em tại trường học bằng bữa ăn dinh dưỡng.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {},
+        "ocr_confidence": null,
+        "document_id": "dev-boilerplate-only-b"
+      }
+    },
+    {
+      "id": "dev-same-identity-number",
+      "split": "dev",
+      "label_review": true,
+      "label_reason": "Cùng identity nhưng thay mức phí cần xem xét",
+      "left": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Mức phí dịch vụ là 100.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "A"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "dev-same-identity-number-a"
+      },
+      "right": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Mức phí dịch vụ là 250.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "A"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "dev-same-identity-number-b"
+      }
+    },
+    {
+      "id": "dev-negation",
+      "split": "dev",
+      "label_review": true,
+      "label_reason": "Thêm từ “không” làm thay đổi nội dung áp dụng",
+      "left": {
+        "text": "Điều 3. Mức phí dịch vụ là 100.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "A"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "dev-negation-a"
+      },
+      "right": {
+        "text": "Điều 3. Mức phí dịch vụ là 100.000 đồng mỗi tháng. Mức phí không bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "A"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "dev-negation-b"
+      }
+    },
+    {
+      "id": "dev-short-number",
+      "split": "dev",
+      "label_review": true,
+      "label_reason": "Cùng identity, thay số trong đoạn ngắn dưới ngưỡng lexical cũ",
+      "left": {
+        "text": "Phí 100.000 đồng",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "A"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "dev-short-number-a"
+      },
+      "right": {
+        "text": "Phí 250.000 đồng",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "A"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "dev-short-number-b"
+      }
+    },
+    {
+      "id": "dev-ocr-candidate",
+      "split": "dev",
+      "label_review": true,
+      "label_reason": "Nghi khác biệt OCR vẫn cần kiểm tra, không tự sửa/xóa",
+      "left": {
+        "text": "Điều 3. Mức phí dịch vụ là 100.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "A"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": 0.6,
+        "document_id": "dev-ocr-candidate-a"
+      },
+      "right": {
+        "text": "Điều 3. Mức phí dịch vụ là 100.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khach hang cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "A"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": 0.6,
+        "document_id": "dev-ocr-candidate-b"
+      }
+    },
+    {
+      "id": "dev-unknown-identity-copy",
+      "split": "dev",
+      "label_review": true,
+      "label_reason": "Thiếu metadata nhưng nội dung gần giống vẫn cần review",
+      "left": {
+        "text": "Điều 3. Mức phí dịch vụ là 100.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.",
+        "metadata": {},
+        "ocr_confidence": null,
+        "document_id": "dev-unknown-identity-copy-a"
+      },
+      "right": {
+        "text": "Điều 3. Mức phí dịch vụ là 250.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.",
+        "metadata": {},
+        "ocr_confidence": null,
+        "document_id": "dev-unknown-identity-copy-b"
+      }
+    },
+    {
+      "id": "dev-unrelated",
+      "split": "dev",
+      "label_review": false,
+      "label_reason": "Nội dung không liên quan",
+      "left": {
+        "text": "Điều 3. Mức phí dịch vụ là 100.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.",
+        "metadata": {},
+        "ocr_confidence": null,
+        "document_id": "dev-unrelated-a"
+      },
+      "right": {
+        "text": "Cá voi sống ở đại dương và di cư theo mùa.",
+        "metadata": {},
+        "ocr_confidence": null,
+        "document_id": "dev-unrelated-b"
+      }
+    },
+    {
+      "id": "dev-masked-identical",
+      "split": "dev",
+      "label_review": true,
+      "label_reason": "Giống sau masking chưa đủ để gộp nguồn",
+      "left": {
+        "text": "Điều 3. Mức phí dịch vụ là 100.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo. Liên hệ [EMAIL].",
+        "metadata": {},
+        "ocr_confidence": null,
+        "document_id": "dev-masked-identical-a"
+      },
+      "right": {
+        "text": "Điều 3. Mức phí dịch vụ là 100.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo. Liên hệ [EMAIL].",
+        "metadata": {},
+        "ocr_confidence": null,
+        "document_id": "dev-masked-identical-b"
+      }
+    },
+    {
+      "id": "dev-unknown-independent",
+      "split": "dev",
+      "label_review": false,
+      "label_reason": "Hai nguồn thực tế độc lập nhưng metadata thiếu: bài kiểm tra giới hạn bảo thủ",
+      "left": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Mức phí dịch vụ là 100.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {},
+        "ocr_confidence": null,
+        "document_id": "dev-unknown-independent-a"
+      },
+      "right": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Mức phí dịch vụ là 250.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {},
+        "ocr_confidence": null,
+        "document_id": "dev-unknown-independent-b"
+      }
+    },
+    {
+      "id": "dev-identity-contradiction",
+      "split": "dev",
+      "label_review": true,
+      "label_reason": "Số hiệu/cơ quan giống nhau nhưng scope khác: metadata cần review",
+      "left": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Mức phí dịch vụ là 100.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "A"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "dev-identity-contradiction-a"
+      },
+      "right": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Mức phí dịch vụ là 250.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "B"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "dev-identity-contradiction-b"
+      }
+    },
+    {
+      "id": "test-independent-provinces",
+      "split": "test",
+      "label_review": false,
+      "label_reason": "Cùng mẫu, khác cơ quan/số hiệu và địa phương đã xác nhận",
+      "left": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Mức phí dịch vụ là 180.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "A"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "test-independent-provinces-a"
+      },
+      "right": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Mức phí dịch vụ là 250.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {
+          "external_key": "09/2026/QĐ",
+          "issuer": "Cơ quan B",
+          "scope": {
+            "province": "B"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "test-independent-provinces-b"
+      }
+    },
+    {
+      "id": "test-independent-same-body",
+      "split": "test",
+      "label_review": false,
+      "label_reason": "Cùng nội dung mẫu nhưng áp dụng độc lập cho địa phương khác",
+      "left": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Mức phí dịch vụ là 180.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "A"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "test-independent-same-body-a"
+      },
+      "right": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Mức phí dịch vụ là 180.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {
+          "external_key": "09/2026/QĐ",
+          "issuer": "Cơ quan B",
+          "scope": {
+            "province": "B"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "test-independent-same-body-b"
+      }
+    },
+    {
+      "id": "test-boilerplate-only",
+      "split": "test",
+      "label_review": false,
+      "label_reason": "Chỉ phần căn cứ/nơi nhận giống; nội dung nghiệp vụ khác nhau",
+      "left": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Trồng cây xanh tạo bóng mát cho công viên đô thị.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {},
+        "ocr_confidence": null,
+        "document_id": "test-boilerplate-only-a"
+      },
+      "right": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Chăm sóc trẻ em tại trường học bằng bữa ăn dinh dưỡng.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {},
+        "ocr_confidence": null,
+        "document_id": "test-boilerplate-only-b"
+      }
+    },
+    {
+      "id": "test-same-identity-number",
+      "split": "test",
+      "label_review": true,
+      "label_reason": "Cùng identity nhưng thay mức phí cần xem xét",
+      "left": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Mức phí dịch vụ là 180.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "A"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "test-same-identity-number-a"
+      },
+      "right": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Mức phí dịch vụ là 250.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "A"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "test-same-identity-number-b"
+      }
+    },
+    {
+      "id": "test-negation",
+      "split": "test",
+      "label_review": true,
+      "label_reason": "Thêm từ “không” làm thay đổi nội dung áp dụng",
+      "left": {
+        "text": "Điều 3. Mức phí dịch vụ là 180.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "A"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "test-negation-a"
+      },
+      "right": {
+        "text": "Điều 3. Mức phí dịch vụ là 180.000 đồng mỗi tháng. Mức phí không bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "A"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "test-negation-b"
+      }
+    },
+    {
+      "id": "test-short-number",
+      "split": "test",
+      "label_review": true,
+      "label_reason": "Cùng identity, thay số trong đoạn ngắn dưới ngưỡng lexical cũ",
+      "left": {
+        "text": "Phí 100.000 đồng",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "A"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "test-short-number-a"
+      },
+      "right": {
+        "text": "Phí 250.000 đồng",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "A"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "test-short-number-b"
+      }
+    },
+    {
+      "id": "test-ocr-candidate",
+      "split": "test",
+      "label_review": true,
+      "label_reason": "Nghi khác biệt OCR vẫn cần kiểm tra, không tự sửa/xóa",
+      "left": {
+        "text": "Điều 3. Mức phí dịch vụ là 180.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "A"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": 0.6,
+        "document_id": "test-ocr-candidate-a"
+      },
+      "right": {
+        "text": "Điều 3. Mức phí dịch vụ là 180.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khach hang cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "A"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": 0.6,
+        "document_id": "test-ocr-candidate-b"
+      }
+    },
+    {
+      "id": "test-unknown-identity-copy",
+      "split": "test",
+      "label_review": true,
+      "label_reason": "Thiếu metadata nhưng nội dung gần giống vẫn cần review",
+      "left": {
+        "text": "Điều 3. Mức phí dịch vụ là 180.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.",
+        "metadata": {},
+        "ocr_confidence": null,
+        "document_id": "test-unknown-identity-copy-a"
+      },
+      "right": {
+        "text": "Điều 3. Mức phí dịch vụ là 250.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.",
+        "metadata": {},
+        "ocr_confidence": null,
+        "document_id": "test-unknown-identity-copy-b"
+      }
+    },
+    {
+      "id": "test-unrelated",
+      "split": "test",
+      "label_review": false,
+      "label_reason": "Nội dung không liên quan",
+      "left": {
+        "text": "Điều 3. Mức phí dịch vụ là 180.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.",
+        "metadata": {},
+        "ocr_confidence": null,
+        "document_id": "test-unrelated-a"
+      },
+      "right": {
+        "text": "Cá voi sống ở đại dương và di cư theo mùa.",
+        "metadata": {},
+        "ocr_confidence": null,
+        "document_id": "test-unrelated-b"
+      }
+    },
+    {
+      "id": "test-masked-identical",
+      "split": "test",
+      "label_review": true,
+      "label_reason": "Giống sau masking chưa đủ để gộp nguồn",
+      "left": {
+        "text": "Điều 3. Mức phí dịch vụ là 180.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo. Liên hệ [EMAIL].",
+        "metadata": {},
+        "ocr_confidence": null,
+        "document_id": "test-masked-identical-a"
+      },
+      "right": {
+        "text": "Điều 3. Mức phí dịch vụ là 180.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo. Liên hệ [EMAIL].",
+        "metadata": {},
+        "ocr_confidence": null,
+        "document_id": "test-masked-identical-b"
+      }
+    },
+    {
+      "id": "test-unknown-independent",
+      "split": "test",
+      "label_review": false,
+      "label_reason": "Hai nguồn thực tế độc lập nhưng metadata thiếu: bài kiểm tra giới hạn bảo thủ",
+      "left": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Mức phí dịch vụ là 180.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {},
+        "ocr_confidence": null,
+        "document_id": "test-unknown-independent-a"
+      },
+      "right": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Mức phí dịch vụ là 250.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {},
+        "ocr_confidence": null,
+        "document_id": "test-unknown-independent-b"
+      }
+    },
+    {
+      "id": "test-identity-contradiction",
+      "split": "test",
+      "label_review": true,
+      "label_reason": "Số hiệu/cơ quan giống nhau nhưng scope khác: metadata cần review",
+      "left": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Mức phí dịch vụ là 180.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "A"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "test-identity-contradiction-a"
+      },
+      "right": {
+        "text": "Căn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nCăn cứ quy định về tổ chức và hoạt động của cơ quan quản lý nhà nước;\nCăn cứ quy định về trình tự ban hành văn bản và thẩm quyền quyết định;\nCăn cứ quy định về trách nhiệm tổ chức thực hiện và phối hợp giữa các đơn vị;\nCăn cứ đề nghị của cơ quan chuyên môn về việc ban hành quy định dịch vụ;\nĐiều 3. Mức phí dịch vụ là 250.000 đồng mỗi tháng. Mức phí đã bao gồm thuế và áp dụng cho khách hàng cá nhân. Thanh toán qua ngân hàng vào ngày đầu tiên của tháng tiếp theo.\nNơi nhận:\nCác cơ quan liên quan;\nCác đơn vị thực hiện;\nLưu văn thư và hồ sơ theo quy định.",
+        "metadata": {
+          "external_key": "01/2026/QĐ",
+          "issuer": "Cơ quan A",
+          "scope": {
+            "province": "B"
+          },
+          "confirmed": true
+        },
+        "ocr_confidence": null,
+        "document_id": "test-identity-contradiction-b"
+      }
+    }
+  ]
+}

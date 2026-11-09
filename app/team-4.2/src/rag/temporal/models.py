@@ -28,6 +28,7 @@ class TimeAnchor:
     evidence: str | None
     relative_expression: str | None
     confidence: float
+    matched_text: str | None = None      # đoạn ngày tháng gốc trong câu hỏi (quy tắc), dùng để ghép với LLM
 
 
 @dataclass(frozen=True)

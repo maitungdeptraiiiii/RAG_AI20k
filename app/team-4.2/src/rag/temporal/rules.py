@@ -77,17 +77,22 @@ def resolve_relative(expr: str, asked_at: datetime) -> tuple[date | None, date |
 def _role(text: str, start: int, end: int, fallback: Role = "unspecified") -> tuple[Role, int, int]:
     """Từ khoá vai trò gần nhất phía trước (ưu tiên), không có thì phía sau. Trả (role, ev_start, ev_end)."""
     low = text.casefold()
-    before = low[max(0, start - _BEFORE):start]
+    lo = max(0, start - _BEFORE)
+    cut = max(low.rfind(c, lo, start) for c in ",;.")       # không vượt qua dấu câu
+    lo = cut + 1 if cut >= 0 else lo
+    before = low[lo:start]
     best: tuple[int, str, str] | None = None
     for role, words in ROLE_KEYWORDS.items():
         for w in words:
             for m in re.finditer(rf"(?<!\w){re.escape(w)}(?!\w)", before):
-                pos = max(0, start - _BEFORE) + m.start()
+                pos = lo + m.start()
                 if best is None or pos > best[0]:
                     best = (pos, role, w)
     if best is not None:
         return best[1], best[0], end  # type: ignore[return-value]
     after = low[end:end + _AFTER]
+    stop = min((i for i in (after.find(c) for c in ",;.") if i >= 0), default=len(after))
+    after = after[:stop]
     nearest: tuple[int, str, str] | None = None
     for role, words in ROLE_KEYWORDS.items():
         for w in words:
@@ -138,7 +143,7 @@ def extract_rule_anchors(question: str, *, asked_at: datetime) -> list[TimeAncho
         if rel and rel.casefold() in _INTRINSIC_EVALUATION:
             role, ev_s, ev_e = "evaluation", s, e
         anchors.append(TimeAnchor(role, start, end, precision, "question", text[ev_s:ev_e].strip(), rel,
-                                  0.9 if role != "unspecified" else 0.6))
+                                  0.9 if role != "unspecified" else 0.6, text[s:e]))
     return anchors
 
 

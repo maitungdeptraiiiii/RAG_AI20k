@@ -1,5 +1,6 @@
 import tempfile
 import threading
+from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -125,6 +126,26 @@ def test_cache_persists_on_disk():
         again.rerank("q", _fused(chunks), chunks, k=1)
         cache2.close()
         assert client.states == []
+
+
+def test_cache_isolated_by_instructions_full_state_and_legacy_entries():
+    chunks = _chunks("a")
+    cache = ScoreCache()
+    chunk = chunks["d:0000"]
+    # A previous-version score must never satisfy a new live request.
+    cache.put_many({ScoreCache.key("jev-1.13.0", "q", chunk): 0.99})
+    first, client1 = _jev({"a": 0.7}, cache=cache, instructions="prompt one")
+    assert first.rerank("q", _fused(chunks), chunks, 1)[0].score == 0.7
+    assert len(client1.states) == 1
+    changed, client2 = _jev({"a": 0.2}, cache=cache, instructions="prompt two")
+    assert changed.rerank("q", _fused(chunks), chunks, 1)[0].score == 0.2
+    assert len(client2.states) == 1
+    changed.rerank("q", _fused(chunks), chunks, 1)
+    assert len(client2.states) == 1
+    revised_chunks = {"d:0000": replace(chunk, section="Điều 2. Different heading")}
+    changed.rerank("q", _fused(revised_chunks), revised_chunks, 1)
+    assert len(client2.states) == 2
+    assert "Different heading" in client2.states[-1]
 
 
 # --- Noop / Fallback --------------------------------------------------------------

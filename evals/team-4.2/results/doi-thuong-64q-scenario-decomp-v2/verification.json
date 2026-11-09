@@ -1,0 +1,617 @@
+{
+  "verification": {
+    "rows": 64,
+    "all_reranked": true,
+    "no_errors": true,
+    "all_original_candidates_preserved_in_order": true,
+    "extra_articles_at_most_10": true,
+    "all_metrics_recomputed_from_full_input_v2_score_cache": true,
+    "all_query_plans_reused_exactly": true,
+    "unchanged_config_fields": [
+      "questions_sha256",
+      "index_signature",
+      "index_snapshot",
+      "advanced",
+      "llm",
+      "rerank",
+      "rerank_model",
+      "rerank_instructions_sha256",
+      "score_cache_schema",
+      "arm_k",
+      "rerank_n",
+      "article_pool_factor",
+      "merge_articles",
+      "top_k",
+      "rrf_k",
+      "pool_strategy",
+      "decomposition"
+    ],
+    "baseline_execution": false,
+    "network_disabled_for_analysis": true
+  },
+  "previous": {
+    "all": {
+      "questions": 64,
+      "recall@5": 0.8802083333333334,
+      "hit@5": 0.96875,
+      "mrr@5": 0.8486979166666667,
+      "recall@20": 0.9375,
+      "candidate_recall": 0.9375,
+      "full_gold_top5": 51,
+      "decomposed": 14,
+      "total_queries": 94,
+      "candidate_chunks": 1629
+    },
+    "multi": {
+      "questions": 27,
+      "recall@5": 0.7901234567901234,
+      "hit@5": 1.0,
+      "mrr@5": 0.8080246913580247,
+      "recall@20": 0.9259259259259259,
+      "candidate_recall": 0.9259259259259259,
+      "full_gold_top5": 16,
+      "decomposed": 7,
+      "total_queries": 42,
+      "candidate_chunks": 685
+    },
+    "paraphrase": {
+      "questions": 37,
+      "recall@5": 0.9459459459459459,
+      "hit@5": 0.9459459459459459,
+      "mrr@5": 0.8783783783783784,
+      "recall@20": 0.9459459459459459,
+      "candidate_recall": 0.9459459459459459,
+      "full_gold_top5": 35,
+      "decomposed": 7,
+      "total_queries": 52,
+      "candidate_chunks": 944
+    }
+  },
+  "new": {
+    "all": {
+      "questions": 64,
+      "recall@5": 0.8958333333333334,
+      "hit@5": 0.984375,
+      "mrr@5": 0.8421875,
+      "recall@20": 0.9479166666666666,
+      "candidate_recall": 0.953125,
+      "full_gold_top5": 52,
+      "decomposed": 50,
+      "total_queries": 165,
+      "candidate_chunks": 1774
+    },
+    "multi": {
+      "questions": 27,
+      "recall@5": 0.7901234567901234,
+      "hit@5": 1.0,
+      "mrr@5": 0.7895061728395062,
+      "recall@20": 0.9135802469135803,
+      "candidate_recall": 0.9259259259259259,
+      "full_gold_top5": 16,
+      "decomposed": 26,
+      "total_queries": 80,
+      "candidate_chunks": 750
+    },
+    "paraphrase": {
+      "questions": 37,
+      "recall@5": 0.972972972972973,
+      "hit@5": 0.972972972972973,
+      "mrr@5": 0.8806306306306307,
+      "recall@20": 0.972972972972973,
+      "candidate_recall": 0.972972972972973,
+      "full_gold_top5": 36,
+      "decomposed": 24,
+      "total_queries": 85,
+      "candidate_chunks": 1024
+    }
+  },
+  "changes": [
+    {
+      "id": "d09",
+      "question": "chuyển khoản cọc mua hàng trên mạng xong bị block luôn",
+      "delta": {
+        "recall@5": 1.0,
+        "mrr@5": 0.25,
+        "candidate_recall": 1.0
+      },
+      "before": {
+        "recall@5": 0.0,
+        "mrr@5": 0.0,
+        "candidate_recall": 0.0
+      },
+      "after": {
+        "recall@5": 1.0,
+        "mrr@5": 0.25,
+        "candidate_recall": 1.0
+      }
+    },
+    {
+      "id": "d22",
+      "question": "ông hàng xóm say rượu cầm dao sang chửi, tôi lấy gậy đánh lại gãy tay ông ấy, giờ ổng đòi kiện",
+      "delta": {
+        "recall@5": 0.0,
+        "mrr@5": -0.5,
+        "candidate_recall": 0.0
+      },
+      "before": {
+        "recall@5": 1.0,
+        "mrr@5": 1.0,
+        "candidate_recall": 1.0
+      },
+      "after": {
+        "recall@5": 1.0,
+        "mrr@5": 0.5,
+        "candidate_recall": 1.0
+      }
+    },
+    {
+      "id": "d31",
+      "question": "lần đầu vi phạm, tội cũng nhẹ, nhà có con nhỏ, có xin được không phải ngồi tù không",
+      "delta": {
+        "recall@5": 0.0,
+        "mrr@5": -0.16666666666666669,
+        "candidate_recall": 0.0
+      },
+      "before": {
+        "recall@5": 1.0,
+        "mrr@5": 0.5,
+        "candidate_recall": 1.0
+      },
+      "after": {
+        "recall@5": 1.0,
+        "mrr@5": 0.3333333333333333,
+        "candidate_recall": 1.0
+      }
+    }
+  ],
+  "pool_checks": [
+    {
+      "id": "d01",
+      "original_articles": 20,
+      "extra_articles": 4,
+      "candidate_chunks": 36,
+      "full_gold_top5": false
+    },
+    {
+      "id": "d02",
+      "original_articles": 20,
+      "extra_articles": 4,
+      "candidate_chunks": 24,
+      "full_gold_top5": false
+    },
+    {
+      "id": "d03",
+      "original_articles": 20,
+      "extra_articles": 10,
+      "candidate_chunks": 37,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d04",
+      "original_articles": 20,
+      "extra_articles": 2,
+      "candidate_chunks": 29,
+      "full_gold_top5": false
+    },
+    {
+      "id": "d05",
+      "original_articles": 20,
+      "extra_articles": 2,
+      "candidate_chunks": 27,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d06",
+      "original_articles": 20,
+      "extra_articles": 2,
+      "candidate_chunks": 32,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d07",
+      "original_articles": 20,
+      "extra_articles": 1,
+      "candidate_chunks": 26,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d08",
+      "original_articles": 20,
+      "extra_articles": 10,
+      "candidate_chunks": 35,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d09",
+      "original_articles": 20,
+      "extra_articles": 10,
+      "candidate_chunks": 34,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d10",
+      "original_articles": 20,
+      "extra_articles": 3,
+      "candidate_chunks": 25,
+      "full_gold_top5": false
+    },
+    {
+      "id": "d11",
+      "original_articles": 20,
+      "extra_articles": 1,
+      "candidate_chunks": 30,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d12",
+      "original_articles": 20,
+      "extra_articles": 4,
+      "candidate_chunks": 27,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d13",
+      "original_articles": 20,
+      "extra_articles": 2,
+      "candidate_chunks": 24,
+      "full_gold_top5": false
+    },
+    {
+      "id": "d14",
+      "original_articles": 20,
+      "extra_articles": 8,
+      "candidate_chunks": 31,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d15",
+      "original_articles": 20,
+      "extra_articles": 2,
+      "candidate_chunks": 23,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d16",
+      "original_articles": 20,
+      "extra_articles": 6,
+      "candidate_chunks": 34,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d17",
+      "original_articles": 20,
+      "extra_articles": 1,
+      "candidate_chunks": 21,
+      "full_gold_top5": false
+    },
+    {
+      "id": "d18",
+      "original_articles": 20,
+      "extra_articles": 2,
+      "candidate_chunks": 32,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d19",
+      "original_articles": 20,
+      "extra_articles": 0,
+      "candidate_chunks": 34,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d20",
+      "original_articles": 20,
+      "extra_articles": 5,
+      "candidate_chunks": 29,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d21",
+      "original_articles": 20,
+      "extra_articles": 1,
+      "candidate_chunks": 25,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d22",
+      "original_articles": 20,
+      "extra_articles": 6,
+      "candidate_chunks": 29,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d23",
+      "original_articles": 20,
+      "extra_articles": 3,
+      "candidate_chunks": 29,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d24",
+      "original_articles": 20,
+      "extra_articles": 0,
+      "candidate_chunks": 22,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d25",
+      "original_articles": 20,
+      "extra_articles": 0,
+      "candidate_chunks": 27,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d26",
+      "original_articles": 20,
+      "extra_articles": 0,
+      "candidate_chunks": 25,
+      "full_gold_top5": false
+    },
+    {
+      "id": "d27",
+      "original_articles": 20,
+      "extra_articles": 8,
+      "candidate_chunks": 31,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d28",
+      "original_articles": 20,
+      "extra_articles": 6,
+      "candidate_chunks": 45,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d29",
+      "original_articles": 20,
+      "extra_articles": 0,
+      "candidate_chunks": 34,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d30",
+      "original_articles": 20,
+      "extra_articles": 0,
+      "candidate_chunks": 32,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d31",
+      "original_articles": 20,
+      "extra_articles": 1,
+      "candidate_chunks": 26,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d32",
+      "original_articles": 20,
+      "extra_articles": 2,
+      "candidate_chunks": 26,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d33",
+      "original_articles": 20,
+      "extra_articles": 0,
+      "candidate_chunks": 31,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d34",
+      "original_articles": 20,
+      "extra_articles": 0,
+      "candidate_chunks": 33,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d35",
+      "original_articles": 20,
+      "extra_articles": 0,
+      "candidate_chunks": 24,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d36",
+      "original_articles": 20,
+      "extra_articles": 7,
+      "candidate_chunks": 36,
+      "full_gold_top5": false
+    },
+    {
+      "id": "d37",
+      "original_articles": 20,
+      "extra_articles": 2,
+      "candidate_chunks": 22,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d38",
+      "original_articles": 20,
+      "extra_articles": 3,
+      "candidate_chunks": 23,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d39",
+      "original_articles": 20,
+      "extra_articles": 4,
+      "candidate_chunks": 24,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d40",
+      "original_articles": 20,
+      "extra_articles": 6,
+      "candidate_chunks": 27,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d41",
+      "original_articles": 20,
+      "extra_articles": 2,
+      "candidate_chunks": 22,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d42",
+      "original_articles": 20,
+      "extra_articles": 1,
+      "candidate_chunks": 23,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d43",
+      "original_articles": 20,
+      "extra_articles": 2,
+      "candidate_chunks": 24,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d44",
+      "original_articles": 20,
+      "extra_articles": 2,
+      "candidate_chunks": 23,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d45",
+      "original_articles": 20,
+      "extra_articles": 7,
+      "candidate_chunks": 28,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d46",
+      "original_articles": 20,
+      "extra_articles": 2,
+      "candidate_chunks": 24,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d47",
+      "original_articles": 20,
+      "extra_articles": 3,
+      "candidate_chunks": 25,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d48",
+      "original_articles": 20,
+      "extra_articles": 0,
+      "candidate_chunks": 23,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d49",
+      "original_articles": 20,
+      "extra_articles": 4,
+      "candidate_chunks": 25,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d50",
+      "original_articles": 20,
+      "extra_articles": 0,
+      "candidate_chunks": 25,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d51",
+      "original_articles": 20,
+      "extra_articles": 2,
+      "candidate_chunks": 25,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d52",
+      "original_articles": 20,
+      "extra_articles": 1,
+      "candidate_chunks": 24,
+      "full_gold_top5": false
+    },
+    {
+      "id": "d53",
+      "original_articles": 20,
+      "extra_articles": 2,
+      "candidate_chunks": 26,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d54",
+      "original_articles": 20,
+      "extra_articles": 0,
+      "candidate_chunks": 28,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d55",
+      "original_articles": 20,
+      "extra_articles": 2,
+      "candidate_chunks": 28,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d56",
+      "original_articles": 20,
+      "extra_articles": 3,
+      "candidate_chunks": 27,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d57",
+      "original_articles": 20,
+      "extra_articles": 0,
+      "candidate_chunks": 28,
+      "full_gold_top5": false
+    },
+    {
+      "id": "d58",
+      "original_articles": 20,
+      "extra_articles": 4,
+      "candidate_chunks": 37,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d59",
+      "original_articles": 20,
+      "extra_articles": 6,
+      "candidate_chunks": 27,
+      "full_gold_top5": false
+    },
+    {
+      "id": "d60",
+      "original_articles": 20,
+      "extra_articles": 0,
+      "candidate_chunks": 21,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d61",
+      "original_articles": 20,
+      "extra_articles": 1,
+      "candidate_chunks": 26,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d62",
+      "original_articles": 20,
+      "extra_articles": 0,
+      "candidate_chunks": 26,
+      "full_gold_top5": false
+    },
+    {
+      "id": "d63",
+      "original_articles": 20,
+      "extra_articles": 0,
+      "candidate_chunks": 24,
+      "full_gold_top5": true
+    },
+    {
+      "id": "d64",
+      "original_articles": 20,
+      "extra_articles": 0,
+      "candidate_chunks": 24,
+      "full_gold_top5": true
+    }
+  ]
+}

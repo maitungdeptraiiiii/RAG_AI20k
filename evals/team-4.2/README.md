@@ -24,3 +24,9 @@ tra consistency fixtures/câu hỏi; runner này không phải detector chất l
 `python evals/team-4.2/runners/score_w02_quality.py --observed <findings.jsonl> --out <result.json>`
 tính TP/FN/FP offline từ labels đã đóng băng. Findings phải mang `fixture_id`
 qua eval adapter; labels tuyệt đối không được đưa vào detector.
+
+## Bộ multi-hop khó bổ sung — 06/11/2026
+
+- [Dataset 25 câu mới và schema](datasets/benchmark_multihop_hard25.README.md), độc lập với bộ 64 câu `benchmark_doi_thuong.jsonl` được giữ nguyên.
+- [Báo cáo retrieval-only theo cấu hình hiện tại](results/multihop-hard25-current-20261106-verified/REPORT.md): giữ HyDE, decomposition, Jev và listwise; không chạy generation trả lời cuối.
+- Runner: `runners/run_multihop_hard25.py`; kiểm chứng metrics và phân tích lỗi offline: `runners/analyze_multihop_hard25.py`.

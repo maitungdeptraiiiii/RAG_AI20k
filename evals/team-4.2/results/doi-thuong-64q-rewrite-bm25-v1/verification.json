@@ -1,0 +1,30 @@
+{
+  "network_disabled": true,
+  "baseline_execution": false,
+  "stages": {
+    "rewrite-only": {
+      "questions": 64,
+      "all_ranks_and_metrics_recomputed": true,
+      "same_decomposition_queries": true,
+      "pool_verified_from_saved_weighted_arms": false,
+      "exact_frozen_source_pool": true,
+      "all_jev_full_input_v2_scores_found": true
+    },
+    "rewrite-bm25-w1": {
+      "questions": 64,
+      "all_ranks_and_metrics_recomputed": true,
+      "same_decomposition_queries": true,
+      "pool_verified_from_saved_weighted_arms": true,
+      "exact_frozen_source_pool": false,
+      "all_jev_full_input_v2_scores_found": true
+    },
+    "rewrite-bm25-w03": {
+      "questions": 64,
+      "all_ranks_and_metrics_recomputed": true,
+      "same_decomposition_queries": true,
+      "pool_verified_from_saved_weighted_arms": true,
+      "exact_frozen_source_pool": false,
+      "all_jev_full_input_v2_scores_found": true
+    }
+  }
+}

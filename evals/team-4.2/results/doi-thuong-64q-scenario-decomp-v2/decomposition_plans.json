@@ -1,0 +1,815 @@
+{
+  "prompt_sha256": "c3cfddb499f8100cf9aff706259efdbbd3b7488013350225621ae94de9cda715",
+  "llm": "gpt-6-luna",
+  "max_subqueries": 3,
+  "records": [
+    {
+      "id": "d01",
+      "question": "hôm nay tôi lỡ tông phải một ông già lúc sang đường, không biết có bị sao không",
+      "queries": [
+        "hôm nay tôi lỡ tông phải một ông già lúc sang đường, không biết có bị sao không",
+        "Người điều khiển phương tiện va chạm với một người đàn ông lớn tuổi đang sang đường phải chịu trách nhiệm pháp lý thế nào, tùy nguyên nhân tai nạn và hậu quả thực tế?",
+        "Người điều khiển phương tiện sau khi va chạm với một người đàn ông lớn tuổi đang sang đường hôm nay có những nghĩa vụ gì tại hiện trường?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d02",
+      "question": "tôi lỡ tay đẩy người ta xuống vực, có đến nhà bố mẹ họ xin lỗi rồi có sao không",
+      "queries": [
+        "tôi lỡ tay đẩy người ta xuống vực, có đến nhà bố mẹ họ xin lỗi rồi có sao không",
+        "Trách nhiệm pháp lý được xác định thế nào khi một người lỡ tay đẩy người khác xuống vực, tùy theo hậu quả thực tế xảy ra?",
+        "Việc người lỡ tay đẩy người khác xuống vực đến nhà bố mẹ người đó xin lỗi có ảnh hưởng thế nào đến việc xem xét trách nhiệm pháp lý hoặc khắc phục hậu quả, nếu có thiệt hại?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d03",
+      "question": "thằng em tôi nhậu xong đánh nhau ngoài quán, bên kia phải khâu mấy mũi, giờ công an gọi lên làm việc",
+      "queries": [
+        "thằng em tôi nhậu xong đánh nhau ngoài quán, bên kia phải khâu mấy mũi, giờ công an gọi lên làm việc",
+        "Người em trai uống rượu rồi đánh nhau với người khác bên ngoài quán, khiến người kia phải khâu vết thương, có thể phải chịu trách nhiệm hình sự thế nào; việc đánh giá phụ thuộc vào kết quả xác định mức độ thương tích và các tình tiết liên quan ra sao?",
+        "Nếu người bị đánh bị thương trong vụ đánh nhau bên ngoài quán và có thiệt hại, người gây thương tích có thể phải bồi thường những khoản nào và trách nhiệm bồi thường được xác định ra sao?",
+        "Khi công an gọi người em trai đã tham gia đánh nhau bên ngoài quán lên làm việc, quyền và nghĩa vụ của người được gọi phụ thuộc thế nào vào tư cách tố tụng và hình thức yêu cầu làm việc?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d04",
+      "question": "công ty tự nhiên bảo mai khỏi đi làm nữa, thế có được không",
+      "queries": [
+        "công ty tự nhiên bảo mai khỏi đi làm nữa, thế có được không",
+        "Khi công ty thông báo người lao động từ ngày mai không cần đi làm nữa, công ty có được đơn phương chấm dứt hợp đồng lao động không và phải đáp ứng căn cứ, thời hạn báo trước nào?",
+        "Nếu công ty yêu cầu người lao động từ ngày mai không đi làm và việc chấm dứt hợp đồng lao động không đúng quy định, người lao động có những quyền lợi và yêu cầu khắc phục nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d05",
+      "question": "công ty nợ lương mấy tháng rồi, giờ em nghỉ ngang luôn có bị sao không",
+      "queries": [
+        "công ty nợ lương mấy tháng rồi, giờ em nghỉ ngang luôn có bị sao không",
+        "Người lao động có được đơn phương chấm dứt hợp đồng lao động không cần báo trước khi công ty nợ hoặc chậm trả tiền lương nhiều tháng không, và điều kiện áp dụng là gì?",
+        "Nếu người lao động nghỉ ngang khi công ty nợ tiền lương nhiều tháng mà việc nghỉ không đáp ứng điều kiện chấm dứt hợp đồng lao động không cần báo trước, trách nhiệm của người lao động và nghĩa vụ thanh toán tiền lương còn nợ của công ty được xác định thế nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d06",
+      "question": "đang bầu mà bị công ty cho nghỉ việc, chị có làm gì được không",
+      "queries": [
+        "đang bầu mà bị công ty cho nghỉ việc, chị có làm gì được không",
+        "Công ty có được chấm dứt hợp đồng lao động với người lao động đang mang thai không, và việc này phụ thuộc vào những điều kiện nào?",
+        "Nếu công ty đã cho người lao động đang mang thai nghỉ việc, người lao động có thể yêu cầu những quyền lợi hoặc biện pháp bảo vệ nào để phản đối việc chấm dứt đó?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d07",
+      "question": "tháng nào cũng phải ở lại làm tới 9-10h tối mà chẳng thấy thêm đồng nào",
+      "queries": [
+        "tháng nào cũng phải ở lại làm tới 9-10h tối mà chẳng thấy thêm đồng nào",
+        "Người sử dụng lao động có được yêu cầu người lao động hằng tháng ở lại làm đến 9–10 giờ tối không, và việc yêu cầu làm thêm giờ phải đáp ứng điều kiện, giới hạn nào?",
+        "Người lao động hằng tháng ở lại làm đến 9–10 giờ tối ngoài giờ làm việc bình thường được trả tiền làm thêm giờ và tiền lương làm việc ban đêm như thế nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d08",
+      "question": "cho đứa bạn mượn 50 triệu giờ nó chặn hết liên lạc rồi",
+      "queries": [
+        "cho đứa bạn mượn 50 triệu giờ nó chặn hết liên lạc rồi",
+        "Khi một người cho bạn mượn 50 triệu đồng nhưng người mượn chặn mọi liên lạc, quyền yêu cầu trả khoản vay và cách khởi kiện đòi nợ được quy định thế nào?",
+        "Nếu người mượn 50 triệu đồng có dấu hiệu gian dối ngay từ khi vay hoặc có điều kiện trả nhưng cố tình chiếm đoạt khoản tiền, hành vi đó được xem xét trách nhiệm pháp lý thế nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d09",
+      "question": "chuyển khoản cọc mua hàng trên mạng xong bị block luôn",
+      "queries": [
+        "chuyển khoản cọc mua hàng trên mạng xong bị block luôn",
+        "Người mua chuyển khoản tiền đặt cọc mua hàng qua mạng nhưng bên nhận tiền chặn liên lạc ngay sau đó có quyền yêu cầu hoàn trả tiền và trách nhiệm của bên nhận tiền được xác định thế nào?",
+        "Nếu người nhận tiền đặt cọc mua hàng qua mạng cố ý dùng thông tin gian dối để nhận tiền rồi chặn liên lạc, hành vi đó được xem xét theo quy định nào về trách nhiệm hình sự?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d10",
+      "question": "mẹ mất rồi mà sổ đỏ vẫn đứng tên mẹ, mấy anh em đang cãi nhau",
+      "queries": [
+        "mẹ mất rồi mà sổ đỏ vẫn đứng tên mẹ, mấy anh em đang cãi nhau",
+        "Khi mẹ mất và giấy chứng nhận quyền sử dụng đất vẫn đứng tên mẹ, quyền thừa kế quyền sử dụng đất của các con được xác định thế nào, tùy việc có di chúc hay không?",
+        "Khi các con tranh chấp quyền thừa kế quyền sử dụng đất do mẹ để lại và giấy chứng nhận vẫn đứng tên mẹ, cách giải quyết tranh chấp và đăng ký quyền sử dụng đất được thực hiện thế nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d11",
+      "question": "tối qua chồng tôi bị công an đến nhà bắt đi, giờ chẳng ai báo gì cho gia đình cả",
+      "queries": [
+        "tối qua chồng tôi bị công an đến nhà bắt đi, giờ chẳng ai báo gì cho gia đình cả",
+        "Khi công an đến nhà bắt chồng tôi vào tối qua mà gia đình chưa được thông báo, căn cứ và thủ tục bắt, cùng nghĩa vụ thông báo cho gia đình, được quy định thế nào?",
+        "Nếu công an đã đưa chồng tôi đi vào tối qua mà gia đình chưa nhận được thông tin, gia đình có thể liên hệ cơ quan nào và yêu cầu biết nơi đang bị giữ cùng tình trạng pháp lý của chồng tôi bằng cách nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d12",
+      "question": "con tôi mới 13 tuổi, đi lấy trộm xe đạp bị người ta bắt được",
+      "queries": [
+        "con tôi mới 13 tuổi, đi lấy trộm xe đạp bị người ta bắt được",
+        "Trẻ 13 tuổi bị bắt khi lấy trộm xe đạp thì bị xử lý như thế nào theo quy định về trách nhiệm và biện pháp áp dụng đối với người chưa thành niên?",
+        "Nếu việc trẻ 13 tuổi lấy trộm xe đạp gây mất mát hoặc hư hỏng tài sản, nghĩa vụ hoàn trả hoặc bồi thường được xác định thế nào và cha mẹ có phải chịu trách nhiệm không?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d13",
+      "question": "nhà bên cạnh đang xây, tường nhà tôi nứt hết cả rồi",
+      "queries": [
+        "nhà bên cạnh đang xây, tường nhà tôi nứt hết cả rồi",
+        "Khi việc xây dựng nhà bên cạnh gây nứt tường nhà liền kề, trách nhiệm của chủ nhà và người thi công trong việc bảo đảm an toàn, hạn chế thiệt hại được quy định thế nào?",
+        "Nếu việc xây dựng nhà bên cạnh gây nứt tường nhà liền kề, chủ nhà bị ảnh hưởng có thể yêu cầu khắc phục thiệt hại và ngăn ngừa thiệt hại tiếp diễn bằng những cách nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d14",
+      "question": "con chó nhà tôi sổng ra cắn đứa nhỏ hàng xóm",
+      "queries": [
+        "con chó nhà tôi sổng ra cắn đứa nhỏ hàng xóm",
+        "Chủ sở hữu chó phải chịu trách nhiệm bồi thường thế nào khi chó sổng ra cắn đứa trẻ hàng xóm, nếu việc này gây thiệt hại?",
+        "Nếu đứa trẻ hàng xóm bị thương do chó nhà người khác sổng ra cắn, những khoản thiệt hại nào có thể được yêu cầu bồi thường và được xác định ra sao?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d15",
+      "question": "bị đứa kia lên facebook bịa chuyện nói xấu, nhục không chịu được",
+      "queries": [
+        "bị đứa kia lên facebook bịa chuyện nói xấu, nhục không chịu được",
+        "Một người đăng thông tin bịa đặt, nói xấu và xúc phạm người khác trên Facebook có thể phải chịu trách nhiệm pháp lý nào, tùy nội dung đăng tải và hậu quả thực tế?",
+        "Người bị đăng thông tin bịa đặt, nói xấu và xúc phạm trên Facebook có thể yêu cầu gỡ bỏ thông tin, cải chính, xin lỗi hoặc bồi thường nếu có thiệt hại như thế nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d16",
+      "question": "nhặt được cái ví ngoài đường, giữ luôn có sao không",
+      "queries": [
+        "nhặt được cái ví ngoài đường, giữ luôn có sao không",
+        "Người nhặt được ví ngoài đường có nghĩa vụ thông báo, giao nộp hoặc trả lại ví cho chủ sở hữu như thế nào?",
+        "Nếu người nhặt được ví ngoài đường cố ý giữ lại thay vì trả lại hoặc giao nộp, trách nhiệm pháp lý được xác định thế nào tùy giá trị tài sản và các tình tiết liên quan?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d17",
+      "question": "tối qua say quá đập vỡ đồ của quán, sáng ra họ đòi đền",
+      "queries": [
+        "tối qua say quá đập vỡ đồ của quán, sáng ra họ đòi đền",
+        "Người đang say rượu đập vỡ đồ của quán có phải chịu trách nhiệm bồi thường thiệt hại cho quán không?",
+        "Nếu người đang say rượu đập vỡ đồ của quán phải bồi thường, giá trị thiệt hại và mức bồi thường được xác định như thế nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d18",
+      "question": "tòa gửi giấy gọi lên mà tôi bận không đi được thì sao",
+      "queries": [
+        "tòa gửi giấy gọi lên mà tôi bận không đi được thì sao",
+        "Khi Tòa án gửi giấy triệu tập nhưng người được triệu tập bận và không thể đến theo giấy triệu tập, hậu quả của việc vắng mặt được xác định thế nào?",
+        "Người được Tòa án triệu tập nhưng bận, không thể đến theo giấy triệu tập cần thông báo và đề nghị hoãn hoặc đổi lịch như thế nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d19",
+      "question": "vợ ôm con về ngoại cả năm nay rồi, giờ muốn làm đơn ly hôn thì nộp ở đâu",
+      "queries": [
+        "vợ ôm con về ngoại cả năm nay rồi, giờ muốn làm đơn ly hôn thì nộp ở đâu"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d20",
+      "question": "chồng tôi đi làm trên tàu, hết hợp đồng mà chủ tàu bỏ ở nước ngoài không lo cho về",
+      "queries": [
+        "chồng tôi đi làm trên tàu, hết hợp đồng mà chủ tàu bỏ ở nước ngoài không lo cho về",
+        "Khi hợp đồng làm việc trên tàu của thuyền viên hết hạn, chủ tàu có trách nhiệm đưa thuyền viên về nước và chi trả chi phí hồi hương như thế nào?",
+        "Nếu chủ tàu không lo cho thuyền viên về nước sau khi hợp đồng làm việc trên tàu hết hạn và thuyền viên bị bỏ ở nước ngoài, thuyền viên có thể yêu cầu cơ quan nào hỗ trợ và thực hiện quyền yêu cầu ra sao?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d21",
+      "question": "thằng con trai tôi 18 tuổi yêu đứa con gái 15 tuổi, hai đứa tự nguyện ngủ với nhau, giờ bố mẹ bé gái đòi báo công an",
+      "queries": [
+        "thằng con trai tôi 18 tuổi yêu đứa con gái 15 tuổi, hai đứa tự nguyện ngủ với nhau, giờ bố mẹ bé gái đòi báo công an",
+        "Người 18 tuổi quan hệ tình dục tự nguyện với người 15 tuổi có thể phải chịu trách nhiệm hình sự không, và sự tự nguyện của người 15 tuổi có ảnh hưởng thế nào đến việc xác định trách nhiệm?",
+        "Khi cha mẹ của người 15 tuổi trình báo công an về việc người 18 tuổi quan hệ tình dục tự nguyện với con mình, việc xử lý có phụ thuộc vào yêu cầu của cha mẹ hoặc người 15 tuổi không?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d22",
+      "question": "ông hàng xóm say rượu cầm dao sang chửi, tôi lấy gậy đánh lại gãy tay ông ấy, giờ ổng đòi kiện",
+      "queries": [
+        "ông hàng xóm say rượu cầm dao sang chửi, tôi lấy gậy đánh lại gãy tay ông ấy, giờ ổng đòi kiện",
+        "Khi ông hàng xóm say rượu cầm dao sang chửi, người bị chửi dùng gậy đánh lại làm ông ấy gãy tay, hành vi đó được xem xét theo điều kiện và giới hạn phòng vệ chính đáng như thế nào?",
+        "Nếu việc người bị chửi dùng gậy đánh ông hàng xóm gãy tay không được xem là phòng vệ chính đáng hoặc vượt quá giới hạn phòng vệ, trách nhiệm pháp lý và nghĩa vụ bồi thường được xác định thế nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d23",
+      "question": "đi đường thấy người ta bị tai nạn nằm đó mà sợ liên lụy nên đi luôn, có sao không",
+      "queries": [
+        "đi đường thấy người ta bị tai nạn nằm đó mà sợ liên lụy nên đi luôn, có sao không",
+        "Người đi đường chứng kiến một người gặp tai nạn giao thông nằm bên đường có nghĩa vụ gì về việc dừng lại, hỗ trợ và thông báo cho cơ quan chức năng?",
+        "Người đi đường chứng kiến một người gặp tai nạn giao thông nằm bên đường nhưng vì sợ liên lụy mà bỏ đi có thể phải chịu trách nhiệm pháp lý nào, tùy hoàn cảnh thực tế?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d24",
+      "question": "tối nào mấy ông trong xóm cũng tụ tập đánh bài ăn tiền, công an ập vào thì có bị gì không",
+      "queries": [
+        "tối nào mấy ông trong xóm cũng tụ tập đánh bài ăn tiền, công an ập vào thì có bị gì không"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d25",
+      "question": "đang đi thì bị thằng kia rút dao kề cổ bắt đưa điện thoại",
+      "queries": [
+        "đang đi thì bị thằng kia rút dao kề cổ bắt đưa điện thoại"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d26",
+      "question": "cháu tôi 17 tuổi đi trộm điện thoại của người ta bị bắt, liệu có phải đi tù không",
+      "queries": [
+        "cháu tôi 17 tuổi đi trộm điện thoại của người ta bị bắt, liệu có phải đi tù không",
+        "Người 17 tuổi bị bắt vì lấy trộm điện thoại của người khác có phải chịu trách nhiệm hình sự không, và việc xác định trách nhiệm phụ thuộc vào những điều kiện nào?",
+        "Nếu người 17 tuổi bị xác định có hành vi trộm cắp điện thoại của người khác, quy định về hình phạt đối với người chưa thành niên xác định khi nào có thể bị phạt tù và khi nào có thể áp dụng biện pháp khác như thế nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d27",
+      "question": "chồng tôi cứ say là về đánh chửi vợ con, mấy năm nay rồi",
+      "queries": [
+        "chồng tôi cứ say là về đánh chửi vợ con, mấy năm nay rồi",
+        "Người vợ và các con có thể yêu cầu cơ quan nào áp dụng biện pháp bảo vệ, ngăn chặn khi người chồng nhiều lần say rượu về nhà đánh và chửi bới họ?",
+        "Người chồng nhiều lần say rượu về nhà đánh và chửi bới vợ con có thể phải chịu trách nhiệm pháp lý nào, tùy tính chất và hậu quả thực tế của hành vi?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d28",
+      "question": "uống mấy lon bia xong chạy xe va vào người ta, hoảng quá nên bỏ chạy luôn",
+      "queries": [
+        "uống mấy lon bia xong chạy xe va vào người ta, hoảng quá nên bỏ chạy luôn",
+        "Người uống vài lon bia rồi lái xe va chạm với người khác và bỏ chạy phải thực hiện những nghĩa vụ gì sau tai nạn, và có thể bị xử lý thế nào về việc lái xe sau khi uống rượu bia, rời khỏi hiện trường hoặc không thực hiện nghĩa vụ sau tai nạn?",
+        "Nếu vụ va chạm do người uống vài lon bia rồi lái xe gây thiệt hại về sức khỏe hoặc tài sản, trách nhiệm bồi thường được xác định thế nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d29",
+      "question": "bạn rủ chở hộ một bọc hàng lên biên giới trả 5 triệu, đến nơi mới biết là ma túy",
+      "queries": [
+        "bạn rủ chở hộ một bọc hàng lên biên giới trả 5 triệu, đến nơi mới biết là ma túy"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d30",
+      "question": "bố tôi gần 80 tuổi, bệnh nặng, vừa bị tòa tuyên án tù, có xin lùi ngày đi tù được không",
+      "queries": [
+        "bố tôi gần 80 tuổi, bệnh nặng, vừa bị tòa tuyên án tù, có xin lùi ngày đi tù được không"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d31",
+      "question": "lần đầu vi phạm, tội cũng nhẹ, nhà có con nhỏ, có xin được không phải ngồi tù không",
+      "queries": [
+        "lần đầu vi phạm, tội cũng nhẹ, nhà có con nhỏ, có xin được không phải ngồi tù không",
+        "Người phạm tội lần đầu, với hành vi được xác định là ít nghiêm trọng, có thể được áp dụng án treo hoặc hình phạt không phải tù giam khi nào?",
+        "Việc gia đình người phạm tội lần đầu, với hành vi được xác định là ít nghiêm trọng, có con nhỏ có được xem xét khi quyết định hình phạt hoặc áp dụng án treo không, và cần đáp ứng điều kiện gì?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d32",
+      "question": "cho vay lấy lãi 5 nghìn một triệu một ngày thì có bị sao không",
+      "queries": [
+        "cho vay lấy lãi 5 nghìn một triệu một ngày thì có bị sao không",
+        "Mức lãi 5.000 đồng trên mỗi 1.000.000 đồng tiền vay mỗi ngày có vượt giới hạn lãi suất cho vay theo pháp luật không?",
+        "Người cho vay lấy lãi 5.000 đồng trên mỗi 1.000.000 đồng tiền vay mỗi ngày có thể chịu hậu quả pháp lý gì nếu mức lãi hoặc các điều kiện cho vay thuộc trường hợp bị xử lý?"
+      ],
+      "error": null,
+      "new_numeric_literals": [
+        "000",
+        "1"
+      ],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d33",
+      "question": "anh trai bị công an bắt, nhà muốn thuê luật sư thì lúc nào luật sư mới được vào",
+      "queries": [
+        "anh trai bị công an bắt, nhà muốn thuê luật sư thì lúc nào luật sư mới được vào"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d34",
+      "question": "em tôi bị tạm giam mấy tháng rồi vẫn chưa thấy đưa ra xử, giam vậy tối đa bao lâu",
+      "queries": [
+        "em tôi bị tạm giam mấy tháng rồi vẫn chưa thấy đưa ra xử, giam vậy tối đa bao lâu"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d35",
+      "question": "đánh nhau bị thương nhẹ, giờ hai bên làm lành rồi, tôi rút đơn thì vụ án có dừng không",
+      "queries": [
+        "đánh nhau bị thương nhẹ, giờ hai bên làm lành rồi, tôi rút đơn thì vụ án có dừng không"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d36",
+      "question": "tòa vừa xử bố tôi 3 năm tù mà gia đình thấy nặng quá, giờ làm sao",
+      "queries": [
+        "tòa vừa xử bố tôi 3 năm tù mà gia đình thấy nặng quá, giờ làm sao",
+        "Nếu tòa vừa tuyên bố bố tôi 3 năm tù trong vụ án hình sự sơ thẩm, bố tôi hoặc người thân trong gia đình có quyền kháng cáo không, và thời hạn, cách thực hiện quyền kháng cáo được quy định thế nào?",
+        "Khi bị cáo kháng cáo vì cho rằng mức án 3 năm tù là quá nặng, căn cứ nào được xem xét và tòa án cấp phúc thẩm có thể quyết định giảm hình phạt trong những trường hợp nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d37",
+      "question": "đặt cọc 100 triệu mua nhà rồi mà bên bán lại đổi ý không bán nữa",
+      "queries": [
+        "đặt cọc 100 triệu mua nhà rồi mà bên bán lại đổi ý không bán nữa",
+        "Khi bên mua đã đặt cọc 100 triệu đồng để mua nhà nhưng bên bán đổi ý không bán, hậu quả đối với khoản đặt cọc và nghĩa vụ hoàn trả hoặc phạt cọc được xác định thế nào?",
+        "Khi bên bán đã nhận 100 triệu đồng tiền đặt cọc mua nhà nhưng đổi ý không bán, bên mua có quyền yêu cầu tiếp tục giao kết hoặc thực hiện việc mua bán nhà không?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d38",
+      "question": "bố mất để di chúc cho hết người tình, mẹ con tôi không được đồng nào, mà tôi mới 16 tuổi",
+      "queries": [
+        "bố mất để di chúc cho hết người tình, mẹ con tôi không được đồng nào, mà tôi mới 16 tuổi",
+        "Người con 16 tuổi và người mẹ, nếu là vợ hợp pháp của người cha khi ông mất, có được hưởng phần di sản bắt buộc dù di chúc để lại toàn bộ tài sản cho người tình không?",
+        "Người cha có thể định đoạt toàn bộ tài sản cho người tình bằng di chúc đến mức nào, nếu tài sản để lại có phần là tài sản chung của vợ chồng?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d39",
+      "question": "ông nội trước khi mất có nói miệng là cho tôi mảnh đất, mấy chú có cãi được không",
+      "queries": [
+        "ông nội trước khi mất có nói miệng là cho tôi mảnh đất, mấy chú có cãi được không",
+        "Ông nội trước khi mất nói miệng để lại mảnh đất cho cháu thì lời nói đó có đáp ứng điều kiện của di chúc miệng và có thể bị các chú yêu cầu tuyên không hợp pháp không?",
+        "Ông nội trước khi mất nói miệng là cho cháu mảnh đất thì việc tặng cho quyền sử dụng đất có cần lập thành văn bản hoặc đăng ký không, và các chú có thể tranh chấp việc tặng cho đó không?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d40",
+      "question": "mua điện thoại về được 3 hôm thì hỏng, cửa hàng không chịu đổi cũng không sửa",
+      "queries": [
+        "mua điện thoại về được 3 hôm thì hỏng, cửa hàng không chịu đổi cũng không sửa",
+        "Người mua điện thoại bị hỏng sau 3 ngày có quyền yêu cầu cửa hàng đổi, sửa chữa hoặc hoàn tiền trong những điều kiện nào?",
+        "Khi cửa hàng từ chối đổi hoặc sửa điện thoại bị hỏng sau 3 ngày, người tiêu dùng có thể khiếu nại hoặc yêu cầu cơ quan nào hỗ trợ giải quyết?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d41",
+      "question": "cây nhà hàng xóm mọc lấn sang nhà tôi, rễ đâm nứt cả sân",
+      "queries": [
+        "cây nhà hàng xóm mọc lấn sang nhà tôi, rễ đâm nứt cả sân",
+        "Khi rễ cây của nhà hàng xóm mọc lấn sang nhà bên cạnh, chủ nhà bị ảnh hưởng có quyền yêu cầu xử lý phần rễ lấn sang như thế nào?",
+        "Nếu rễ cây của nhà hàng xóm mọc lấn sang làm nứt sân nhà bên cạnh, trách nhiệm khắc phục thiệt hại và bồi thường được xác định thế nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d42",
+      "question": "nhà tôi ở trong ngõ, nhà phía ngoài xây tường chặn mất lối đi ra đường",
+      "queries": [
+        "nhà tôi ở trong ngõ, nhà phía ngoài xây tường chặn mất lối đi ra đường",
+        "Khi nhà ở phía trong bị nhà phía ngoài xây tường chặn mất lối đi ra đường, quyền yêu cầu lối đi qua bất động sản liền kề được xác định thế nào, gồm căn cứ xác lập, vị trí, chiều rộng và nghĩa vụ bồi thường nếu có?",
+        "Nếu nhà phía ngoài xây tường chặn mất lối đi ra đường của nhà phía trong và các bên không tự giải quyết được, người bị chặn lối đi có thể yêu cầu khôi phục lối đi và giải quyết tranh chấp bằng cách nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d43",
+      "question": "con tôi 16 tuổi tự ý đi mua xe máy trả góp, giờ tôi muốn trả lại được không",
+      "queries": [
+        "con tôi 16 tuổi tự ý đi mua xe máy trả góp, giờ tôi muốn trả lại được không",
+        "Người 16 tuổi tự ý mua xe máy trả góp có đủ năng lực xác lập giao dịch mua bán và nghĩa vụ trả góp không, và sự đồng ý của cha mẹ hoặc người đại diện có ý nghĩa thế nào?",
+        "Cha mẹ có thể yêu cầu trả lại xe máy mà con 16 tuổi tự ý mua trả góp không; việc chấm dứt giao dịch và xử lý tiền đã trả hoặc khoản trả góp còn lại được xác định thế nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d44",
+      "question": "chồng mất không để lại di chúc, nhà hai vợ chồng mua chung thì chia thế nào",
+      "queries": [
+        "chồng mất không để lại di chúc, nhà hai vợ chồng mua chung thì chia thế nào",
+        "Khi chồng mất không để lại di chúc, căn nhà hai vợ chồng mua chung được xác định là tài sản chung và phần quyền sở hữu của người vợ được xác định thế nào?",
+        "Khi chồng mất không để lại di chúc, phần quyền sở hữu của chồng trong căn nhà hai vợ chồng mua chung được chia thừa kế theo pháp luật cho những người thừa kế như thế nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d45",
+      "question": "bị cửa hàng lấy ảnh mình đăng quảng cáo trên facebook mà không xin phép",
+      "queries": [
+        "bị cửa hàng lấy ảnh mình đăng quảng cáo trên facebook mà không xin phép",
+        "Cửa hàng có được sử dụng hình ảnh cá nhân của người khác để đăng quảng cáo trên Facebook khi chưa được người đó đồng ý không, và trường hợp nào pháp luật cho phép sử dụng hình ảnh mà không cần sự đồng ý?",
+        "Người có hình ảnh bị cửa hàng sử dụng để quảng cáo trên Facebook khi chưa đồng ý có thể yêu cầu chấm dứt việc sử dụng, gỡ bỏ hình ảnh và bồi thường nếu có thiệt hại như thế nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d46",
+      "question": "ký hợp đồng thi công mà chậm mấy ngày bị đòi phạt 30% giá trị, vậy có đúng luật không",
+      "queries": [
+        "ký hợp đồng thi công mà chậm mấy ngày bị đòi phạt 30% giá trị, vậy có đúng luật không",
+        "Trong hợp đồng thi công, điều kiện nào để bên giao thầu được phạt vi phạm do chậm tiến độ, và thỏa thuận phạt vi phạm phải đáp ứng yêu cầu gì?",
+        "Đối với hợp đồng thi công bị chậm tiến độ, mức phạt vi phạm tối đa được xác định theo căn cứ nào và tính trên giá trị phần nghĩa vụ bị vi phạm hay toàn bộ giá trị hợp đồng?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d47",
+      "question": "nhặt được con chó lạc giữ nuôi cả năm, giờ chủ cũ đến đòi",
+      "queries": [
+        "nhặt được con chó lạc giữ nuôi cả năm, giờ chủ cũ đến đòi",
+        "Người nhặt được chó đi lạc, giữ nuôi một năm rồi chủ cũ đến đòi, quyền sở hữu và nghĩa vụ giao trả được xác định thế nào, tùy việc thông báo tìm chủ và thời điểm thông báo?",
+        "Nếu người nhặt được chó đi lạc phải giao trả cho chủ cũ sau một năm giữ nuôi, chi phí hợp lý cho việc chăm sóc, nuôi dưỡng được giải quyết thế nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d48",
+      "question": "đi xin việc công ty bắt nộp bằng đại học bản gốc, nghỉ mới trả",
+      "queries": [
+        "đi xin việc công ty bắt nộp bằng đại học bản gốc, nghỉ mới trả"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d49",
+      "question": "thử việc 3 tháng mà công ty chỉ trả có 70% lương",
+      "queries": [
+        "thử việc 3 tháng mà công ty chỉ trả có 70% lương",
+        "Thời gian thử việc 3 tháng do công ty áp dụng có phù hợp với quy định về thời hạn thử việc tối đa tương ứng với từng công việc và chức danh không?",
+        "Công ty trả 70% mức lương của công việc cho người lao động trong thời gian thử việc được không, và tiền lương thử việc tối thiểu được xác định thế nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d50",
+      "question": "làm cho công ty 5 năm rồi giờ xin nghỉ, công ty có phải trả khoản gì không",
+      "queries": [
+        "làm cho công ty 5 năm rồi giờ xin nghỉ, công ty có phải trả khoản gì không",
+        "Khi người lao động làm việc cho công ty 5 năm rồi xin nghỉ việc, công ty có phải thanh toán tiền lương còn thiếu và tiền nghỉ hằng năm chưa nghỉ hay không?",
+        "Người lao động làm việc cho công ty 5 năm rồi xin nghỉ việc có được hưởng trợ cấp thôi việc không, và công ty có trách nhiệm chi trả khoản trợ cấp đó trong những điều kiện nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d51",
+      "question": "đi muộn mấy lần bị công ty trừ thẳng vào lương",
+      "queries": [
+        "đi muộn mấy lần bị công ty trừ thẳng vào lương",
+        "Pháp luật lao động quy định thế nào về việc công ty trừ lương người lao động để xử lý kỷ luật vì đi muộn, và có quy định số lần đi muộn làm phát sinh việc trừ lương không?",
+        "Khi người lao động đi muộn, tiền lương được tính thế nào đối với thời gian không làm việc, và công ty được khấu trừ tiền lương trong trường hợp nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d52",
+      "question": "em 15 tuổi muốn đi làm phụ quán cà phê dịp hè được không",
+      "queries": [
+        "em 15 tuổi muốn đi làm phụ quán cà phê dịp hè được không",
+        "Người 15 tuổi có được làm phụ quán cà phê trong dịp hè không, và người sử dụng lao động phải đáp ứng những điều kiện gì khi tuyển người ở độ tuổi này?",
+        "Người 15 tuổi làm phụ quán cà phê trong dịp hè được làm việc tối đa bao nhiêu giờ và có những hạn chế nào về thời gian hoặc công việc được giao?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d53",
+      "question": "sếp hay sờ mó, nói chuyện bậy với em ở công ty, em muốn nghỉ luôn",
+      "queries": [
+        "sếp hay sờ mó, nói chuyện bậy với em ở công ty, em muốn nghỉ luôn",
+        "Theo quy định về phòng, chống quấy rối tình dục tại nơi làm việc, hành vi sếp sờ mó và nói chuyện bậy với nhân viên ở công ty được xác định như thế nào?",
+        "Người lao động có quyền đơn phương chấm dứt hợp đồng lao động ngay, không báo trước, nếu bị sếp sờ mó hoặc nói chuyện bậy tại nơi làm việc không?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d54",
+      "question": "vợ sắp đẻ, công ty cho nghỉ được mấy tháng",
+      "queries": [
+        "vợ sắp đẻ, công ty cho nghỉ được mấy tháng"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d55",
+      "question": "mẹ mất, xin nghỉ mấy ngày mà công ty bảo phải nghỉ không lương",
+      "queries": [
+        "mẹ mất, xin nghỉ mấy ngày mà công ty bảo phải nghỉ không lương",
+        "Khi mẹ của người lao động qua đời, người lao động được nghỉ việc riêng hưởng nguyên lương trong thời gian nào và cần thực hiện việc thông báo ra sao?",
+        "Nếu người lao động xin nghỉ khi mẹ qua đời nhiều hơn thời gian nghỉ việc riêng hưởng nguyên lương theo quy định, việc nghỉ thêm không hưởng lương có cần thỏa thuận với người sử dụng lao động không?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d56",
+      "question": "muốn kiện mà không có tiền, đi kiện có phải đóng tiền trước không",
+      "queries": [
+        "muốn kiện mà không có tiền, đi kiện có phải đóng tiền trước không",
+        "Người khởi kiện vụ án tại Việt Nam có phải nộp tạm ứng án phí trước khi Tòa án thụ lý vụ án không?",
+        "Người không có tiền khi khởi kiện có thể được miễn hoặc giảm tạm ứng án phí không, và cần đáp ứng điều kiện nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d57",
+      "question": "người nợ tiền tôi đang sống ở nước ngoài, giờ muốn kiện thì nộp đơn ở đâu",
+      "queries": [
+        "người nợ tiền tôi đang sống ở nước ngoài, giờ muốn kiện thì nộp đơn ở đâu"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d58",
+      "question": "nộp đơn kiện lên tòa rồi mà tòa trả lại đơn",
+      "queries": [
+        "nộp đơn kiện lên tòa rồi mà tòa trả lại đơn",
+        "Trong tố tụng tại Việt Nam, những căn cứ nào để tòa án trả lại đơn khởi kiện?",
+        "Người khởi kiện có thể làm gì khi tòa án trả lại đơn khởi kiện, tùy theo lý do trả đơn?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d59",
+      "question": "bản án phúc thẩm có hiệu lực rồi nhưng tôi vẫn thấy xử sai, còn cách nào không",
+      "queries": [
+        "bản án phúc thẩm có hiệu lực rồi nhưng tôi vẫn thấy xử sai, còn cách nào không",
+        "Bản án phúc thẩm đã có hiệu lực pháp luật có thể được xem xét lại theo thủ tục giám đốc thẩm hoặc tái thẩm trong những căn cứ nào?",
+        "Người cho rằng bản án phúc thẩm đã có hiệu lực pháp luật xử sai có thể đề nghị xem xét lại bằng cách nào, gửi đến ai và cần thực hiện theo thủ tục nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d60",
+      "question": "tòa xử sơ thẩm xong tôi không đồng ý thì được kháng cáo trong bao lâu",
+      "queries": [
+        "tòa xử sơ thẩm xong tôi không đồng ý thì được kháng cáo trong bao lâu"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d61",
+      "question": "chồng tôi làm thuyền viên bị tai nạn trên tàu, chủ tàu có phải lo không",
+      "queries": [
+        "chồng tôi làm thuyền viên bị tai nạn trên tàu, chủ tàu có phải lo không",
+        "Chủ tàu có trách nhiệm gì trong việc sơ cứu, đưa đi điều trị và thanh toán chi phí y tế khi thuyền viên bị tai nạn trên tàu?",
+        "Nếu thuyền viên bị tai nạn trên tàu và bị tổn hại sức khỏe, trách nhiệm bồi thường hoặc trợ cấp của chủ tàu được xác định thế nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d62",
+      "question": "đi tàu ra đảo bị mất vali hành lý, hãng tàu có phải đền không",
+      "queries": [
+        "đi tàu ra đảo bị mất vali hành lý, hãng tàu có phải đền không",
+        "Khi hành lý của hành khách bị mất trong chuyến tàu ra đảo, trách nhiệm bồi thường của hãng tàu được xác định theo những điều kiện và trường hợp miễn trách nhiệm nào?",
+        "Nếu hãng tàu phải chịu trách nhiệm về việc mất vali hành lý của hành khách trên chuyến tàu ra đảo, mức bồi thường được xác định như thế nào?"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d63",
+      "question": "tàu cá nhà tôi cứu được một tàu bị nạn ngoài khơi, có được đòi tiền công không",
+      "queries": [
+        "tàu cá nhà tôi cứu được một tàu bị nạn ngoài khơi, có được đòi tiền công không"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    },
+    {
+      "id": "d64",
+      "question": "hai tàu đâm vào nhau ngoài biển thì bên nào phải đền",
+      "queries": [
+        "hai tàu đâm vào nhau ngoài biển thì bên nào phải đền"
+      ],
+      "error": null,
+      "new_numeric_literals": [],
+      "new_article_references": [],
+      "dependent_phrases": []
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "questions": 64,
+  "changed": 62,
+  "fallbacks": [
+    "d19",
+    "d32"
+  ],
+  "fallback_review": {
+    "d19": "Rewrite changed written duration ca nam to digit 1 nam; conservative digit guard rejected it. The rewrite also changed the implied party seeking divorce; using original avoids that ambiguity.",
+    "d32": "Rewrite changed mot trieu to digit 1 trieu; equivalent amount but strict digit-preservation contract rejected it."
+  },
+  "policy": "No retries or gold-conditioned edits. All three configurations share identical accepted rewrites and original-query fallbacks."
+}

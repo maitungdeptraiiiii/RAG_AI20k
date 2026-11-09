@@ -1,0 +1,8 @@
+{
+  "gated_questions": 18,
+  "api_requests": 18,
+  "fallbacks": 0,
+  "usage_reported_requests": 18,
+  "reported_prompt_tokens": 70106,
+  "reported_completion_tokens": 8743
+}

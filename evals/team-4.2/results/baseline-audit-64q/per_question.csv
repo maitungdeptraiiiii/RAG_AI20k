@@ -1,0 +1,65 @@
+id,question,type,pre_rerank_changed,historical_recall@5,historical_hit@5,historical_mrr@5,controlled_recall@5,controlled_hit@5,controlled_mrr@5,new_recall@5,new_hit@5,new_mrr@5
+d01,"hôm nay tôi lỡ tông phải một ông già lúc sang đường, không biết có bị sao không",multi,True,0.3333333333333333,1.0,0.5,0.3333333333333333,1.0,0.5,0.3333333333333333,1.0,0.5
+d02,"tôi lỡ tay đẩy người ta xuống vực, có đến nhà bố mẹ họ xin lỗi rồi có sao không",multi,True,0.6666666666666666,1.0,1.0,0.3333333333333333,1.0,1.0,0.3333333333333333,1.0,1.0
+d03,"thằng em tôi nhậu xong đánh nhau ngoài quán, bên kia phải khâu mấy mũi, giờ công an gọi lên làm việc",multi,True,0.5,1.0,1.0,0.5,1.0,1.0,1.0,1.0,1.0
+d04,"công ty tự nhiên bảo mai khỏi đi làm nữa, thế có được không",multi,True,0.3333333333333333,1.0,0.3333333333333333,0.3333333333333333,1.0,0.3333333333333333,0.3333333333333333,1.0,0.3333333333333333
+d05,"công ty nợ lương mấy tháng rồi, giờ em nghỉ ngang luôn có bị sao không",paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d06,"đang bầu mà bị công ty cho nghỉ việc, chị có làm gì được không",multi,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d07,tháng nào cũng phải ở lại làm tới 9-10h tối mà chẳng thấy thêm đồng nào,multi,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d08,cho đứa bạn mượn 50 triệu giờ nó chặn hết liên lạc rồi,multi,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d09,chuyển khoản cọc mua hàng trên mạng xong bị block luôn,paraphrase,True,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+d10,"mẹ mất rồi mà sổ đỏ vẫn đứng tên mẹ, mấy anh em đang cãi nhau",multi,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d11,"tối qua chồng tôi bị công an đến nhà bắt đi, giờ chẳng ai báo gì cho gia đình cả",paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d12,"con tôi mới 13 tuổi, đi lấy trộm xe đạp bị người ta bắt được",multi,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d13,"nhà bên cạnh đang xây, tường nhà tôi nứt hết cả rồi",multi,True,0.5,1.0,0.3333333333333333,0.5,1.0,0.3333333333333333,0.5,1.0,0.3333333333333333
+d14,con chó nhà tôi sổng ra cắn đứa nhỏ hàng xóm,paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d15,"bị đứa kia lên facebook bịa chuyện nói xấu, nhục không chịu được",multi,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d16,"nhặt được cái ví ngoài đường, giữ luôn có sao không",multi,True,1.0,1.0,0.3333333333333333,1.0,1.0,0.3333333333333333,1.0,1.0,0.3333333333333333
+d17,"tối qua say quá đập vỡ đồ của quán, sáng ra họ đòi đền",multi,True,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+d18,tòa gửi giấy gọi lên mà tôi bận không đi được thì sao,paraphrase,True,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+d19,"vợ ôm con về ngoại cả năm nay rồi, giờ muốn làm đơn ly hôn thì nộp ở đâu",multi,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d20,"chồng tôi đi làm trên tàu, hết hợp đồng mà chủ tàu bỏ ở nước ngoài không lo cho về",paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d21,"thằng con trai tôi 18 tuổi yêu đứa con gái 15 tuổi, hai đứa tự nguyện ngủ với nhau, giờ bố mẹ bé gái đòi báo công an",paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d22,"ông hàng xóm say rượu cầm dao sang chửi, tôi lấy gậy đánh lại gãy tay ông ấy, giờ ổng đòi kiện",multi,True,1.0,1.0,1.0,0.5,1.0,0.3333333333333333,0.5,1.0,0.5
+d23,"đi đường thấy người ta bị tai nạn nằm đó mà sợ liên lụy nên đi luôn, có sao không",paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d24,"tối nào mấy ông trong xóm cũng tụ tập đánh bài ăn tiền, công an ập vào thì có bị gì không",paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d25,đang đi thì bị thằng kia rút dao kề cổ bắt đưa điện thoại,paraphrase,False,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d26,"cháu tôi 17 tuổi đi trộm điện thoại của người ta bị bắt, liệu có phải đi tù không",multi,True,0.5,1.0,0.3333333333333333,0.5,1.0,0.3333333333333333,0.5,1.0,0.3333333333333333
+d27,"chồng tôi cứ say là về đánh chửi vợ con, mấy năm nay rồi",paraphrase,False,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d28,"uống mấy lon bia xong chạy xe va vào người ta, hoảng quá nên bỏ chạy luôn",paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d29,"bạn rủ chở hộ một bọc hàng lên biên giới trả 5 triệu, đến nơi mới biết là ma túy",paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d30,"bố tôi gần 80 tuổi, bệnh nặng, vừa bị tòa tuyên án tù, có xin lùi ngày đi tù được không",paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d31,"lần đầu vi phạm, tội cũng nhẹ, nhà có con nhỏ, có xin được không phải ngồi tù không",paraphrase,True,1.0,1.0,0.5,1.0,1.0,0.5,1.0,1.0,0.5
+d32,cho vay lấy lãi 5 nghìn một triệu một ngày thì có bị sao không,multi,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d33,"anh trai bị công an bắt, nhà muốn thuê luật sư thì lúc nào luật sư mới được vào",paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d34,"em tôi bị tạm giam mấy tháng rồi vẫn chưa thấy đưa ra xử, giam vậy tối đa bao lâu",paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d35,"đánh nhau bị thương nhẹ, giờ hai bên làm lành rồi, tôi rút đơn thì vụ án có dừng không",paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d36,"tòa vừa xử bố tôi 3 năm tù mà gia đình thấy nặng quá, giờ làm sao",multi,True,0.5,1.0,0.2,0.5,1.0,0.2,0.5,1.0,0.2
+d37,đặt cọc 100 triệu mua nhà rồi mà bên bán lại đổi ý không bán nữa,paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d38,"bố mất để di chúc cho hết người tình, mẹ con tôi không được đồng nào, mà tôi mới 16 tuổi",paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d39,"ông nội trước khi mất có nói miệng là cho tôi mảnh đất, mấy chú có cãi được không",multi,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d40,"mua điện thoại về được 3 hôm thì hỏng, cửa hàng không chịu đổi cũng không sửa",multi,True,1.0,1.0,1.0,1.0,1.0,0.5,1.0,1.0,0.5
+d41,"cây nhà hàng xóm mọc lấn sang nhà tôi, rễ đâm nứt cả sân",paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d42,"nhà tôi ở trong ngõ, nhà phía ngoài xây tường chặn mất lối đi ra đường",paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d43,"con tôi 16 tuổi tự ý đi mua xe máy trả góp, giờ tôi muốn trả lại được không",paraphrase,False,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d44,"chồng mất không để lại di chúc, nhà hai vợ chồng mua chung thì chia thế nào",multi,True,0.5,1.0,1.0,0.5,1.0,1.0,1.0,1.0,1.0
+d45,bị cửa hàng lấy ảnh mình đăng quảng cáo trên facebook mà không xin phép,paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d46,"ký hợp đồng thi công mà chậm mấy ngày bị đòi phạt 30% giá trị, vậy có đúng luật không",paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d47,"nhặt được con chó lạc giữ nuôi cả năm, giờ chủ cũ đến đòi",paraphrase,False,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d48,"đi xin việc công ty bắt nộp bằng đại học bản gốc, nghỉ mới trả",paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d49,thử việc 3 tháng mà công ty chỉ trả có 70% lương,multi,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d50,"làm cho công ty 5 năm rồi giờ xin nghỉ, công ty có phải trả khoản gì không",multi,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d51,đi muộn mấy lần bị công ty trừ thẳng vào lương,paraphrase,False,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d52,em 15 tuổi muốn đi làm phụ quán cà phê dịp hè được không,multi,True,0.5,1.0,0.25,0.5,1.0,0.25,0.5,1.0,0.25
+d53,"sếp hay sờ mó, nói chuyện bậy với em ở công ty, em muốn nghỉ luôn",multi,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d54,"vợ sắp đẻ, công ty cho nghỉ được mấy tháng",paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d55,"mẹ mất, xin nghỉ mấy ngày mà công ty bảo phải nghỉ không lương",paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d56,"muốn kiện mà không có tiền, đi kiện có phải đóng tiền trước không",paraphrase,False,1.0,1.0,0.5,1.0,1.0,0.5,1.0,1.0,0.5
+d57,"người nợ tiền tôi đang sống ở nước ngoài, giờ muốn kiện thì nộp đơn ở đâu",paraphrase,True,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+d58,nộp đơn kiện lên tòa rồi mà tòa trả lại đơn,paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d59,"bản án phúc thẩm có hiệu lực rồi nhưng tôi vẫn thấy xử sai, còn cách nào không",multi,True,0.5,1.0,0.3333333333333333,0.5,1.0,0.3333333333333333,0.5,1.0,0.3333333333333333
+d60,tòa xử sơ thẩm xong tôi không đồng ý thì được kháng cáo trong bao lâu,paraphrase,True,1.0,1.0,1.0,1.0,1.0,0.5,1.0,1.0,0.5
+d61,"chồng tôi làm thuyền viên bị tai nạn trên tàu, chủ tàu có phải lo không",paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d62,"đi tàu ra đảo bị mất vali hành lý, hãng tàu có phải đền không",multi,True,0.5,1.0,0.25,0.5,1.0,0.25,0.5,1.0,0.25
+d63,"tàu cá nhà tôi cứu được một tàu bị nạn ngoài khơi, có được đòi tiền công không",paraphrase,False,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+d64,hai tàu đâm vào nhau ngoài biển thì bên nào phải đền,paraphrase,True,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0

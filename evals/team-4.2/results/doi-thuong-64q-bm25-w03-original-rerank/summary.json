@@ -1,0 +1,41 @@
+{
+  "saved-v2": {
+    "n": 64,
+    "recall@5": 0.8958333333333334,
+    "hit@5": 0.984375,
+    "mrr@5": 0.8421875,
+    "recall@20": 0.9479166666666666,
+    "candidate_recall": 0.953125,
+    "full_gold_top5": 52,
+    "multi_full_gold_top5": 16,
+    "candidate_chunks": 1774,
+    "rewrite_fallbacks": 0,
+    "jev_cache_misses": null
+  },
+  "bm25-w03-rewrite-rerank": {
+    "n": 64,
+    "recall@5": 0.8854166666666666,
+    "hit@5": 0.953125,
+    "mrr@5": 0.8502604166666666,
+    "recall@20": 0.9453125,
+    "candidate_recall": 0.9453125,
+    "full_gold_top5": 52,
+    "multi_full_gold_top5": 16,
+    "candidate_chunks": 1821,
+    "rewrite_fallbacks": 2,
+    "jev_cache_misses": 17
+  },
+  "bm25-w03-original-rerank": {
+    "n": 64,
+    "recall@5": 0.8880208333333334,
+    "hit@5": 0.96875,
+    "mrr@5": 0.83125,
+    "recall@20": 0.9453125,
+    "candidate_recall": 0.9453125,
+    "full_gold_top5": 52,
+    "multi_full_gold_top5": 16,
+    "candidate_chunks": 1821,
+    "rewrite_fallbacks": 0,
+    "jev_cache_misses": 246
+  }
+}

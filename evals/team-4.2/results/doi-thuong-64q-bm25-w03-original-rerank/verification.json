@@ -1,0 +1,10 @@
+{
+  "questions": 64,
+  "network_disabled": true,
+  "all_metrics_and_ranks_recomputed": true,
+  "all_full_input_v2_cache_scores_found": true,
+  "exact_source_pool_and_order": true,
+  "same_bm25_rewrites_and_decomposition_queries": true,
+  "baseline_execution": false,
+  "retrieval_execution": false
+}

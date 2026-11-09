@@ -1,0 +1,11 @@
+id,type,author,config,recall@5,hit@5,mrr@5,recall@20,candidate_recall,reranked,elapsed_s,query_count,candidate_chunks,top5,errors
+d01,multi,claude,decomposition+hyde+jev,0.6666666666666666,1.0,1.0,1.0,1.0,True,29.775,4,40,d4825a1af3d31c64:0619 88138f1cdf1b763c:0392 d4825a1af3d31c64:0602 d4825a1af3d31c64:0035 88138f1cdf1b763c:0158,{}
+d02,multi,claude,decomposition+hyde+jev,0.6666666666666666,1.0,0.3333333333333333,1.0,1.0,True,20.986,4,29,d4825a1af3d31c64:0602 d4825a1af3d31c64:0609 88138f1cdf1b763c:0034 88138f1cdf1b763c:0154 d4825a1af3d31c64:0624,{}
+d03,multi,claude,decomposition+hyde+jev,1.0,1.0,1.0,1.0,1.0,True,24.048,4,36,88138f1cdf1b763c:0015 d4825a1af3d31c64:0614 d4825a1af3d31c64:0602 d4825a1af3d31c64:0608 88138f1cdf1b763c:0160,{}
+d04,multi,claude,decomposition+hyde+jev,0.6666666666666666,1.0,1.0,0.6666666666666666,1.0,True,20.785,3,30,56c6bfc5e8c4e7c9:0047 56c6bfc5e8c4e7c9:0120 56c6bfc5e8c4e7c9:0050 56c6bfc5e8c4e7c9:0039 56c6bfc5e8c4e7c9:0055,{}
+d05,paraphrase,claude,decomposition+hyde+jev,1.0,1.0,1.0,1.0,1.0,True,27.414,4,29,56c6bfc5e8c4e7c9:0045 56c6bfc5e8c4e7c9:0053 56c6bfc5e8c4e7c9:0118 56c6bfc5e8c4e7c9:0063 56c6bfc5e8c4e7c9:0044,{}
+d06,multi,claude,decomposition+hyde+jev,1.0,1.0,1.0,1.0,1.0,True,32.634,4,35,56c6bfc5e8c4e7c9:0163 56c6bfc5e8c4e7c9:0050 56c6bfc5e8c4e7c9:0054 d3e7cff20880c16d:0127 d3e7cff20880c16d:0169,{}
+d07,multi,claude,decomposition+hyde+jev,1.0,1.0,1.0,1.0,1.0,True,15.383,3,25,56c6bfc5e8c4e7c9:0119 56c6bfc5e8c4e7c9:0126 56c6bfc5e8c4e7c9:0128 56c6bfc5e8c4e7c9:0116 5dc99a513d86dc54:0080,{}
+d08,multi,claude,decomposition+hyde+jev,1.0,1.0,1.0,1.0,1.0,True,16.269,3,33,88138f1cdf1b763c:0216 d4825a1af3d31c64:0484 d4825a1af3d31c64:0514 d4825a1af3d31c64:0487 d4825a1af3d31c64:0374,{}
+d09,paraphrase,claude,decomposition+hyde+jev,0.0,0.0,0.0,0.0,0.0,True,19.858,3,35,d4825a1af3d31c64:0345 d4825a1af3d31c64:0347 88138f1cdf1b763c:0472 d55d891c30d0f714:0193 d3e7cff20880c16d:0174,{}
+d10,multi,claude,decomposition+hyde+jev,1.0,1.0,1.0,1.0,1.0,True,20.817,3,25,d4825a1af3d31c64:0669 d4825a1af3d31c64:0668 d4825a1af3d31c64:0678 d4825a1af3d31c64:0674 d3e7cff20880c16d:0028,{}

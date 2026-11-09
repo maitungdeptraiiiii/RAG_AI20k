@@ -1,0 +1,434 @@
+{
+  "verified_questions": 25,
+  "recomputed_metrics_match": true,
+  "old_dataset_unchanged": true,
+  "candidate_recall_mean": 0.89,
+  "missing_gold_categories": {
+    "missing_from_candidate_pool": 10,
+    "in_top20_but_not_top5": 8
+  },
+  "frequently_missing_articles": [
+    [
+      "bo_luat_to_tung_dan_su_2015 Điều 91",
+      5
+    ],
+    [
+      "bo_luat_to_tung_dan_su_2015 Điều 94",
+      2
+    ],
+    [
+      "bo_luat_to_tung_hinh_su_2015 Điều 85",
+      2
+    ],
+    [
+      "bo_luat_to_tung_dan_su_2015 Điều 126",
+      1
+    ],
+    [
+      "bo_luat_dan_su_2015 Điều 166",
+      1
+    ],
+    [
+      "bo_luat_dan_su_2015 Điều 579",
+      1
+    ],
+    [
+      "bo_luat_dan_su_2015 Điều 554",
+      1
+    ],
+    [
+      "bo_luat_to_tung_dan_su_2015 Điều 32",
+      1
+    ],
+    [
+      "bo_luat_hinh_su_2015 Điều 57",
+      1
+    ],
+    [
+      "bo_luat_to_tung_hinh_su_2015 Điều 447",
+      1
+    ],
+    [
+      "bo_luat_hinh_su_2015 Điều 341",
+      1
+    ],
+    [
+      "bo_luat_to_tung_dan_su_2015 Điều 184",
+      1
+    ]
+  ],
+  "listwise_gate_reasons": {
+    "clear_cutoff": 8,
+    "ambiguous_cutoff": 8,
+    "few_eligible_candidates": 9
+  },
+  "listwise_triggered": 8,
+  "listwise_changes": [
+    {
+      "id": "mh25_02",
+      "before_recall5": 0.6666666666666666,
+      "after_recall5": 1.0
+    },
+    {
+      "id": "mh25_09",
+      "before_recall5": 0.6666666666666666,
+      "after_recall5": 1.0
+    },
+    {
+      "id": "mh25_10",
+      "before_recall5": 0.75,
+      "after_recall5": 0.75
+    },
+    {
+      "id": "mh25_11",
+      "before_recall5": 0.5,
+      "after_recall5": 0.5
+    },
+    {
+      "id": "mh25_12",
+      "before_recall5": 1.0,
+      "after_recall5": 1.0
+    },
+    {
+      "id": "mh25_16",
+      "before_recall5": 0.5,
+      "after_recall5": 1.0
+    },
+    {
+      "id": "mh25_17",
+      "before_recall5": 0.8,
+      "after_recall5": 0.8
+    },
+    {
+      "id": "mh25_20",
+      "before_recall5": 0.5,
+      "after_recall5": 0.75
+    }
+  ],
+  "per_question": [
+    {
+      "id": "mh25_01",
+      "question": "tôi đi biệt tích lâu quá nên tòa đã tuyên là chết, giờ về mới biết người nhận thừa kế biết tôi còn sống nhưng cố tình giấu tin để hưởng tài sản và tiền cho thuê căn kho; tôi phải xin tòa xử lý quyết định cũ thế nào rồi đòi lại kho và khoản tiền đó ra sao?",
+      "recall@5": 1.0,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0,
+      "missing": []
+    },
+    {
+      "id": "mh25_02",
+      "question": "cậu tôi là người giám hộ của chị bị mất năng lực hành vi, tự ký bán bộ máy làm nghề của chị cho chính mình rồi lại đòi đứng ra đại diện chị khi gia đình kiện; giao dịch ấy có được giữ không, máy và tiền xử lý sao, ai có thể đại diện khi hai bên đang đối đầu?",
+      "recall@5": 1.0,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0,
+      "missing": []
+    },
+    {
+      "id": "mh25_03",
+      "question": "tôi chỉ ủy quyền cho quản lý mua máy tối đa 200 triệu, anh ấy ký 350 triệu; tôi biết việc rồi phản đối ngay, bên bán nói tôi đã đồng ý qua điện thoại nhưng chỉ có một đoạn ghi âm không rõ người nói; phần vượt có buộc tôi trả không và ra tòa bên nào phải đưa chứng cứ cho chuyện đồng ý ấy?",
+      "recall@5": 0.3333333333333333,
+      "recall@20": 0.6666666666666666,
+      "candidate_recall": 0.6666666666666666,
+      "missing": [
+        {
+          "gold_index": 1,
+          "article": "bo_luat_to_tung_dan_su_2015 Điều 91",
+          "purpose": "Gắn người viện dẫn việc chấp nhận với nghĩa vụ chứng minh.",
+          "category": "missing_from_candidate_pool"
+        },
+        {
+          "gold_index": 2,
+          "article": "bo_luat_to_tung_dan_su_2015 Điều 94",
+          "purpose": "Phân loại bản ghi âm là nguồn chứng cứ, không tự coi lời khẳng định là sự thật.",
+          "category": "in_top20_but_not_top5"
+        }
+      ]
+    },
+    {
+      "id": "mh25_04",
+      "question": "bên phải trả tiền mua nguyên liệu cho tôi làm giấy tặng toàn bộ máy xưởng cho em ruột nhưng vẫn tự dùng máy, họ còn rao bán tiếp; nếu giấy tặng chỉ để né nghĩa vụ thì tôi xin xử lý giao dịch, lấy lại hiện trạng và ngăn họ tẩu tán máy trong lúc kiện bằng cách nào?",
+      "recall@5": 0.6666666666666666,
+      "recall@20": 0.6666666666666666,
+      "candidate_recall": 0.6666666666666666,
+      "missing": [
+        {
+          "gold_index": 2,
+          "article": "bo_luat_to_tung_dan_su_2015 Điều 126",
+          "purpose": "Xác định điều kiện phong tỏa tài sản của người có nghĩa vụ khi có nguy cơ tẩu tán.",
+          "category": "missing_from_candidate_pool"
+        }
+      ]
+    },
+    {
+      "id": "mh25_05",
+      "question": "máy ảnh của tôi bị lấy trộm rồi bán qua hai người, người đang giữ đưa hóa đơn mua đồ cũ và bảo mua ngay tình nên tôi hết quyền đòi; máy không phải loại đăng ký sở hữu, vậy tôi có đòi chính cái máy từ họ được không và khi kiện phải chứng minh những chuyện gì?",
+      "recall@5": 0.3333333333333333,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0,
+      "missing": [
+        {
+          "gold_index": 0,
+          "article": "bo_luat_dan_su_2015 Điều 166",
+          "purpose": "Xác lập quyền chủ sở hữu đòi lại tài sản.",
+          "category": "in_top20_but_not_top5"
+        },
+        {
+          "gold_index": 2,
+          "article": "bo_luat_to_tung_dan_su_2015 Điều 91",
+          "purpose": "Nối điều kiện đòi tài sản với chứng cứ sở hữu và nguồn gốc mất máy.",
+          "category": "in_top20_but_not_top5"
+        }
+      ]
+    },
+    {
+      "id": "mh25_06",
+      "question": "xưởng tôi còn nợ tiền vải, chủ hàng âm thầm chuyển quyền thu tiền cho người khác mà không báo; tôi đã thanh toán đủ cho chủ cũ, giờ người mới kiện đòi lần nữa, tôi dùng việc đã trả và chuyện không được báo để chống yêu cầu đó thế nào, phải lưu giấy tờ gì?",
+      "recall@5": 1.0,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0,
+      "missing": []
+    },
+    {
+      "id": "mh25_07",
+      "question": "tôi bảo lãnh khoản tiền mua thiết bị cho bạn, giấy chỉ nói trả thay khi bạn đến hạn không trả; bên bán đòi tôi trước hạn nên tôi chưa trả, sau đó đến hạn bạn không trả thì tôi đã trả thay đủ; giờ tôi đòi bạn khoản nào và nếu kiện thì phải chứng minh hai mốc đó ra sao?",
+      "recall@5": 1.0,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0,
+      "missing": []
+    },
+    {
+      "id": "mh25_08",
+      "question": "tôi đòi tiền thiết kế đã quá ba năm từ ngày khách không thanh toán, nhưng sáu tháng trước họ ký xác nhận còn thiếu và trả một phần; giờ họ yêu cầu tòa áp dụng hết thời hiệu, tòa phải nối ngày xác nhận với hạn kiện và thời điểm họ nêu yêu cầu thế nào?",
+      "recall@5": 1.0,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0,
+      "missing": []
+    },
+    {
+      "id": "mh25_09",
+      "question": "tôi với bạn góp tiền mua chung một máy in công nghiệp theo phần, bạn lén bán phần của mình cho người ngoài mà không cho tôi cơ hội mua, tôi mới biết được một tháng và người mua đang rao bán tiếp phần ấy; tôi còn cách yêu cầu thay người mua và giữ phần máy đang tranh chấp đến lúc tòa xử không?",
+      "recall@5": 1.0,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0,
+      "missing": []
+    },
+    {
+      "id": "mh25_10",
+      "question": "kế toán chuyển nhầm tiền công ty tôi vào tài khoản người lạ, họ biết nhầm nhưng đem gửi lấy lãi và không trả; tôi có thể đòi cả gốc lẫn phần lãi ấy không, nếu không tự lấy được sao kê thì nhờ tòa thu thập thế nào và có chặn tiền trong tài khoản lúc kiện được không?",
+      "recall@5": 0.75,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0,
+      "missing": [
+        {
+          "gold_index": 0,
+          "article": "bo_luat_dan_su_2015 Điều 579",
+          "purpose": "Xác định được lợi không có căn cứ phải hoàn trả.",
+          "category": "in_top20_but_not_top5"
+        }
+      ]
+    },
+    {
+      "id": "mh25_11",
+      "question": "tôi gửi mười máy pha cà phê cho kho giữ có trả phí, kho tự đem cho thuê rồi làm mất hai máy, họ đổ do bão nhưng không đưa chứng cứ; tôi ở Huế còn kho đặt trụ sở Đà Nẵng, muốn đòi máy và bồi thường thì dựa vào nghĩa vụ nào, ai phải làm rõ bất khả kháng và thường nộp đơn ở đâu?",
+      "recall@5": 0.5,
+      "recall@20": 0.5,
+      "candidate_recall": 0.5,
+      "missing": [
+        {
+          "gold_index": 0,
+          "article": "bo_luat_dan_su_2015 Điều 554",
+          "purpose": "Nhận diện quan hệ gửi giữ có nghĩa vụ bảo quản và hoàn trả.",
+          "category": "missing_from_candidate_pool"
+        },
+        {
+          "gold_index": 2,
+          "article": "bo_luat_to_tung_dan_su_2015 Điều 91",
+          "purpose": "Phân bổ nghĩa vụ chứng minh yêu cầu và phản đối.",
+          "category": "missing_from_candidate_pool"
+        }
+      ]
+    },
+    {
+      "id": "mh25_12",
+      "question": "tôi sơ suất làm hỏng dụng cụ của xưởng, thiệt hại không nghiêm trọng và dưới mười tháng lương tối thiểu vùng, công ty bắt đền nguyên giá máy mới dù dụng cụ đã cũ; nhà tôi đang khó khăn, biên bản định giá công ty giữ, mức đền phải nối lỗi, thiệt hại thực tế với hoàn cảnh của tôi thế nào và ai phải đưa chứng cứ?",
+      "recall@5": 1.0,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0,
+      "missing": []
+    },
+    {
+      "id": "mh25_13",
+      "question": "tôi làm văn phòng theo hợp đồng một năm, hết hạn rồi vẫn làm thêm 45 ngày mà chưa ký gì mới, giờ hai bên cãi nhau hợp đồng đã thành không xác định thời hạn chưa; nếu tôi chỉ yêu cầu xác định loại hợp đồng thì phải đi hòa giải trước và tính hạn yêu cầu hòa giải, kiện từ đâu?",
+      "recall@5": 1.0,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0,
+      "missing": []
+    },
+    {
+      "id": "mh25_14",
+      "question": "tôi được tuyển làm kế toán, xưởng chuyển sang đóng gói cộng dồn 70 ngày làm việc trong năm mà tôi không đồng ý bằng văn bản; tôi không nhận phần ngày vượt nên họ cho ngồi chờ không lương, tôi cần nối giới hạn điều chuyển với tiền ngừng việc ra sao, hồ sơ chấm công họ giữ thì ai phải đưa ra?",
+      "recall@5": 1.0,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0,
+      "missing": []
+    },
+    {
+      "id": "mh25_15",
+      "question": "kho bị thiếu hàng nên tôi bị tạm đình chỉ 20 ngày, lúc đó công ty ứng nửa lương; hết xác minh họ xác nhận tôi không vi phạm nhưng vẫn bắt trả tiền ứng và không thanh toán nửa còn lại, nếu tôi kiện đòi phần thiếu thì được tính thế nào, có phải hòa giải và công ty phải nộp hồ sơ xác minh không?",
+      "recall@5": 1.0,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0,
+      "missing": []
+    },
+    {
+      "id": "mh25_16",
+      "question": "người ký hợp đồng tuyển tôi bên công ty hóa ra không có quyền ký, công ty muốn coi toàn bộ thời gian đã làm như không tồn tại để khỏi thanh toán; tôi có thể tự coi hợp đồng vô hiệu không, cơ quan nào tuyên và quyền lợi công việc đã làm xử lý thế nào?",
+      "recall@5": 1.0,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0,
+      "missing": []
+    },
+    {
+      "id": "mh25_17",
+      "question": "xưởng thay dây chuyền tự động nên dự tính cho cả tổ nghỉ, không làm phương án sử dụng lao động hay xem có thể đào tạo lại, họ bảo chỉ cần trả trợ cấp là xong; việc cắt giảm phải qua những bước nào, trợ cấp mất việc gắn với thời gian làm ra sao và nếu tôi kiện riêng khoản trợ cấp thì có bắt buộc hòa giải không?",
+      "recall@5": 0.8,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0,
+      "missing": [
+        {
+          "gold_index": 4,
+          "article": "bo_luat_to_tung_dan_su_2015 Điều 32",
+          "purpose": "Nối ngoại lệ hòa giải với thẩm quyền giải quyết tranh chấp lao động cá nhân của tòa.",
+          "category": "in_top20_but_not_top5"
+        }
+      ]
+    },
+    {
+      "id": "mh25_18",
+      "question": "em tôi chỉ nhận canh cửa cho nhóm đột nhập phá một máy chủ, người trực tiếp vào lại tự ý làm thêm chuyện khác mà em không biết và không cùng ý định; nếu bị xử chung vụ thì phải tách phần vượt quá với vai trò canh cửa thế nào, tòa có được lấy tình tiết riêng của người kia áp hết cho em không?",
+      "recall@5": 0.6666666666666666,
+      "recall@20": 0.6666666666666666,
+      "candidate_recall": 0.6666666666666666,
+      "missing": [
+        {
+          "gold_index": 2,
+          "article": "bo_luat_to_tung_hinh_su_2015 Điều 85",
+          "purpose": "Nối phạm vi cố ý, lỗi và tình tiết với những vấn đề phải chứng minh.",
+          "category": "missing_from_candidate_pool"
+        }
+      ]
+    },
+    {
+      "id": "mh25_19",
+      "question": "tôi định đầu độc đàn cá của trại đối thủ, mới mang chai hóa chất đến bể thì tự thấy sai nên cất đi, không ai phát hiện hay cản; người cùng đi lại khai tôi chỉ dừng vì thấy bảo vệ, chưa con cá nào chết, hai cách dừng ấy ảnh hưởng trách nhiệm và cách xác minh ra sao?",
+      "recall@5": 0.5,
+      "recall@20": 0.5,
+      "candidate_recall": 0.5,
+      "missing": [
+        {
+          "gold_index": 2,
+          "article": "bo_luat_hinh_su_2015 Điều 57",
+          "purpose": "Nối phân loại giai đoạn với giới hạn quyết định hình phạt, không tự kết luận mới mang hóa chất đã là chưa đạt.",
+          "category": "missing_from_candidate_pool"
+        },
+        {
+          "gold_index": 3,
+          "article": "bo_luat_to_tung_hinh_su_2015 Điều 85",
+          "purpose": "Chứng minh hành vi đã thực hiện, ý chí và nguyên nhân dừng trước khi phân loại.",
+          "category": "missing_from_candidate_pool"
+        }
+      ]
+    },
+    {
+      "id": "mh25_20",
+      "question": "anh tôi bị điều tra vì một hành vi lúc trước, nay bệnh nặng không nhận thức được; gia đình nói anh cũng đã mất khả năng nhận thức ngay lúc xảy ra việc nhưng chưa giám định, phải làm rõ hai thời điểm ấy thế nào để phân biệt không chịu trách nhiệm với chữa bệnh rồi còn bị xử?",
+      "recall@5": 0.75,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0,
+      "missing": [
+        {
+          "gold_index": 3,
+          "article": "bo_luat_to_tung_hinh_su_2015 Điều 447",
+          "purpose": "Nối kết luận chuyên môn với điều kiện, thẩm quyền bắt buộc chữa bệnh.",
+          "category": "in_top20_but_not_top5"
+        }
+      ]
+    },
+    {
+      "id": "mh25_21",
+      "question": "người bán đưa tôi giấy xác nhận của cơ quan nhưng hóa ra là giấy giả, tôi vì tin giấy đó mới mua cả lô thiết bị; nay công an điều tra chuyện làm giả, tôi muốn hủy giao dịch lấy lại tiền thì trách nhiệm hình sự, vô hiệu vì bị lừa và khoản hoàn trả có thể được xử lý chung hay phải tách thế nào?",
+      "recall@5": 0.75,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0,
+      "missing": [
+        {
+          "gold_index": 0,
+          "article": "bo_luat_hinh_su_2015 Điều 341",
+          "purpose": "Kiểm tra hành vi làm, sử dụng tài liệu giả và đủ dấu hiệu tội phạm, không suy từ giấy giả ra mọi người đều phạm tội.",
+          "category": "in_top20_but_not_top5"
+        }
+      ]
+    },
+    {
+      "id": "mh25_22",
+      "question": "tôi gửi hải sản bằng tàu biển, hãng biết kho lạnh hỏng mà vẫn nhận nên cả lô hỏng; vận đơn không khai giá, hãng đòi tính mức đền tối đa theo kiện, tôi phải nối nghĩa vụ chuẩn bị kho lạnh với điều kiện mất mức giới hạn ấy ra sao và ở tòa ai chứng minh việc họ biết trước?",
+      "recall@5": 0.75,
+      "recall@20": 0.75,
+      "candidate_recall": 0.75,
+      "missing": [
+        {
+          "gold_index": 3,
+          "article": "bo_luat_to_tung_dan_su_2015 Điều 91",
+          "purpose": "Gắn yêu cầu vượt giới hạn với chứng cứ về lỗi, nhận thức và thiệt hại.",
+          "category": "missing_from_candidate_pool"
+        }
+      ]
+    },
+    {
+      "id": "mh25_23",
+      "question": "lô cà phê đi biển được bán lại cho tôi bằng vận đơn theo lệnh đã ký hậu, tôi giữ bản gốc nhưng người gửi cũ vẫn đòi hãng trả hàng cho họ; hãng nói ai cũng có bản chụp nên không biết giao ai, tư cách người nhận phải nối từ ký hậu đến xuất trình thế nào, nếu kiện cần dùng những giấy tờ gì?",
+      "recall@5": 0.75,
+      "recall@20": 0.75,
+      "candidate_recall": 0.75,
+      "missing": [
+        {
+          "gold_index": 3,
+          "article": "bo_luat_to_tung_dan_su_2015 Điều 94",
+          "purpose": "Nối vận đơn gốc và tài liệu giao dịch với nguồn chứng cứ khi tranh chấp.",
+          "category": "missing_from_candidate_pool"
+        }
+      ]
+    },
+    {
+      "id": "mh25_24",
+      "question": "tôi bán nhiên liệu cho tàu nhưng chưa được trả, nghe nói cứ là nợ liên quan tàu thì được ưu tiên hơn ngân hàng nhận thế chấp; tàu còn nợ phí cảng và tiền công thuyền bộ, làm sao phân loại khoản nào có quyền cầm giữ, thứ tự trả với thế chấp, và nếu kiện tôi phải chứng minh loại nợ gì?",
+      "recall@5": 0.75,
+      "recall@20": 1.0,
+      "candidate_recall": 1.0,
+      "missing": [
+        {
+          "gold_index": 3,
+          "article": "bo_luat_to_tung_dan_su_2015 Điều 91",
+          "purpose": "Chứng minh bản chất khoản nợ, không chỉ tồn tại hóa đơn.",
+          "category": "in_top20_but_not_top5"
+        }
+      ]
+    },
+    {
+      "id": "mh25_25",
+      "question": "tàu chở hàng của tôi gặp hiểm họa do lỗi phía tàu, thuyền trưởng chủ động ném một phần hàng để cứu cả chuyến; họ vừa đòi tôi góp tổn thất chung vừa nói tôi không được đòi người gây lỗi, lại tính cả thời gian phân bổ vào hạn kiện, ba chuyện đó có phải đi cùng nhau như họ nói không?",
+      "recall@5": 0.75,
+      "recall@20": 0.75,
+      "candidate_recall": 0.75,
+      "missing": [
+        {
+          "gold_index": 3,
+          "article": "bo_luat_to_tung_dan_su_2015 Điều 184",
+          "purpose": "Nối tính thời hiệu chuyên ngành với điều kiện tòa áp dụng thời hiệu theo yêu cầu.",
+          "category": "missing_from_candidate_pool"
+        }
+      ]
+    }
+  ],
+  "max_old_word_jaccard": 0.16326530612244897,
+  "max_internal_word_jaccard": 0.2692307692307692
+}

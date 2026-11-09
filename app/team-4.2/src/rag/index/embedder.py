@@ -230,6 +230,8 @@ class JinaEmbedder:
     PASSAGE_TASK = "retrieval.passage"
     QUERY_TASK = "retrieval.query"
     RETRY_STATUS = frozenset({429, 500, 502, 503, 504})
+    _rate_lock = threading.Lock()
+    _last_req_time: float = 0.0
 
     def __init__(
         self,
@@ -241,6 +243,7 @@ class JinaEmbedder:
         batch_size: int = 32,
         max_retries: int = 6,
         timeout: float = 120.0,
+        min_interval: float = 0.35,
         post: Callable[[str, dict[str, Any], str, float], dict[str, Any]] | None = None,
         sleep: Callable[[float], None] = time.sleep,
     ) -> None:
@@ -252,6 +255,7 @@ class JinaEmbedder:
         self.batch_size = batch_size
         self.max_retries = max_retries
         self.timeout = timeout
+        self.min_interval = min_interval
         self._post = post or _jina_post
         self._sleep = sleep
 
@@ -290,7 +294,13 @@ class JinaEmbedder:
         payload = {"model": self.model_id, "task": task, "input": batch, "normalized": True}
         for attempt in range(self.max_retries + 1):
             try:
-                data = self._post(JINA_URL, payload, self._key(), self.timeout)
+                with JinaEmbedder._rate_lock:
+                    if self.min_interval > 0:
+                        elapsed = time.time() - JinaEmbedder._last_req_time
+                        if elapsed < self.min_interval:
+                            self._sleep(self.min_interval - elapsed)
+                    data = self._post(JINA_URL, payload, self._key(), self.timeout)
+                    JinaEmbedder._last_req_time = time.time()
                 break
             except JinaHTTPError as e:
                 if e.status not in self.RETRY_STATUS or attempt == self.max_retries:

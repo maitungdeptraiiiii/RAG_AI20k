@@ -4,7 +4,7 @@
 
 Team 4.2 xây Legal RAG cho văn bản pháp luật tiếng Việt. Inventory này mô tả **dữ liệu fixture giả lập** để kiểm tra pipeline Week 2; nó không thay thế manifest production hoặc corpus snapshot 6 Bộ luật.
 
-- Raw artifact nằm trong `data/team-4.2/fixtures/raw/`; chỉ dùng `DATA_DIR` Week 2 riêng khi ingest.
+- Raw artifact nằm trong [`data/team-4.2/fixtures/raw/`](../../../data/team-4.2/fixtures/raw/) (30 fixture, chia `dev`/`test` trong `labels.jsonl`); chỉ dùng `DATA_DIR` Week 2 riêng khi ingest.
 - `fixtures/manifest.jsonl` là FixtureManifest: input metadata/hint cho ingest. Repository mới tạo `SourceRecord`, `DocumentRecord`, `VersionRecord`, checksum và UUID.
 - `fixtures/labels.jsonl` là ground truth evaluation; detector, parser và chunker không được đọc file này.
 - Content gốc, output OCR và mô tả LLM/enrichment là ba lớp riêng. Text trong `Block` là bằng chứng nguồn; `GeneratedContext` không được ghi đè nó.
@@ -14,15 +14,31 @@ Team 4.2 xây Legal RAG cho văn bản pháp luật tiếng Việt. Inventory n�
 
 | Nhóm | Artifact hiện có | Fixture | Rủi ro chính | Biểu diễn chính |
 |---|---:|---|---|---|
-| Văn bản native | TXT, Markdown | `w02-01`–`w02-08`, `w02-14`–`w02-18` | mất heading/Điều, dedup sai, lẫn version | `Block(kind="heading"|"paragraph")`, `Locator.heading_path`, `ContentUnit` theo Điều |
-| Bảng native | CSV | `w02-03`, `w02-09`–`w02-13`, `w02-19`–`w02-22` | mất header/đơn vị/kỳ, ép float, sai tổng, PII | `Block(kind="table")` + `TableData` |
-| Ảnh scan | PNG | `w02-23`–`w02-25` | OCR sai, mất bố cục bảng/flow, provenance không đủ | `OCRPageInput` → `OCRResult` → `Block(origin="ocr")` + `image_artifact` |
+| Văn bản native | TXT, Markdown | `w02-01`–`w02-08`, `w02-14`–`w02-18`, `w02-26` | mất heading/Điều, dedup sai, lẫn version | `Block(kind="heading"|"paragraph")`, `Locator.heading_path`, `ContentUnit` theo Điều |
+| Bảng native | CSV, XLSX, bảng trong DOCX | `w02-03`, `w02-09`–`w02-13`, `w02-19`–`w02-22`, `w02-27`, `w02-28` | mất header/đơn vị/kỳ, ép float, sai tổng, PII | **Đã triển khai:** `ParsedTable` → chunk Markdown lặp caption + đơn vị + header (`rag/ingest/tables.py`) |
+| Ảnh scan | PNG | `w02-23`–`w02-25`, `w02-30` | OCR sai, mất bố cục bảng/flow, provenance không đủ | `OCRPageInput` → `OCRResult` → `Block(origin="ocr")` + `image_artifact` |
 | HTML web | Chưa có fixture | khảo sát parser URL | menu/footer lẫn content, URL đổi nội dung | Raw HTML/artifact; block theo heading/paragraph; URL + collected time |
 | PDF có text layer | Chưa có fixture | khảo sát parser PDF | mất page/heading/footnote | page-level `Block`, `Locator.page`; giữ PDF gốc |
-| PDF scan | Chưa có fixture riêng | cùng policy với PNG scan | OCR confidence/rotation/region | ảnh từng trang + bbox chuẩn hoá + OCR provenance |
+| PDF scan | PDF ảnh (`w02-29`) | cùng policy với PNG scan | OCR confidence/rotation/region | ảnh từng trang + bbox chuẩn hoá + OCR provenance |
 | Slide, org chart, biểu đồ | Chưa có fixture | ngoài ba nhóm bắt buộc | plain text làm mất quan hệ/ảnh | slide/page `Locator`; `image_artifact`; relation/entity chỉ khi triển khai bonus |
 
 HTML, PDF, slide, org chart và biểu đồ phải được khảo sát trong report/data inventory theo yêu cầu Week 2; ba nhóm bắt buộc để chạy end-to-end là văn bản, bảng/CSV và scan/OCR.
+
+## Thông tin bị mất với parser tuần 1 (đo thật)
+
+Chạy `load_source` + `chunk_document` của commit `89f07de` (trước tuần 2) trên fixture và một DOCX
+bảng lương 60 hàng sinh tạm; so với parser tuần 2 trên cùng đầu vào.
+
+| Loại | Đầu vào | Parser tuần 1 | Thông tin bị mất | Parser tuần 2 |
+|---|---|---|---|---|
+| CSV | `19_budget_valid_multiline_header.csv` | `UnsupportedSourceError: Không hỗ trợ loại file '.csv'` | toàn bộ bảng | `TablePage`, header 2 tầng → nhãn `Mức xử phạt 2026 / Hành vi`, ghi chú `Kỳ 2026-Q1` giữ lại |
+| XLSX | `28_fee_schedule_pii.xlsx` | `UnsupportedSourceError: ... '.xlsx'` | toàn bộ bảng, caption gộp ô, đơn vị | caption `Bảng phí cấp bản sao năm 2026`, `Đơn vị: nghìn đồng`, sheet trống bị bỏ |
+| Bảng DOCX dài | DOCX 60 hàng, có `Bảng 2...` + `Đơn vị: nghìn đồng` | Làm phẳng thành dòng `Vùng 1 \| 4010 \| 21`; 2 chunk, **chỉ 1/2 chunk có header, 1/2 có đơn vị** | chunk sau không biết cột nào là "Mức lương tháng", không biết đơn vị nghìn đồng | 3 chunk bảng, **3/3 có header và đơn vị** (thân văn bản vẫn giữ bảng tại chỗ cho ngữ cảnh Điều) |
+| PDF scan | `29_legal_text_blurred_scan.pdf` | 0 ký tự, cảnh báo "có thể là PDF scan, cần OCR", 0 chunk → ingest lỗi | toàn bộ nội dung | Vẫn cần OCR (task W02-02c của Tùng); pipeline báo lỗi rõ, không index trang rỗng |
+| Ảnh PNG | `24_legal_fee_table_clear.png` | `UnsupportedSourceError: ... '.png'` | toàn bộ | Chờ OCR adapter (W02-02c) |
+| PII | `22_contact_pii.csv`, `27_application_pii.docx` | Không có bước mask: email/SĐT/CCCD đi thẳng vào embedding, BM25, `chunks.jsonl` | — (rò rỉ) | Mask trước mọi bước; test rò rỉ quét embedding, BM25, contextual LLM, log, `chunks.jsonl`, file Qdrant: 0 kết quả |
+
+Tái tạo: `python evals/team-4.2/runners/measure_w02_parser_loss.py --out evals/team-4.2/results/w02-inventory` → [`summary.json`](../../../evals/team-4.2/results/w02-inventory/summary.json).
 
 ## Inventory fixture và cách biểu diễn
 
@@ -46,6 +62,11 @@ HTML, PDF, slide, org chart và biểu đồ phải được khảo sát trong r
 | `w02-23` | PNG flowchart | OCR/structure medium-low | original image, page=1, bbox, order, relation/condition | OCR blocks + `next`/`branch` nếu đủ tin cậy; nếu không `ocr.low_confidence`/review |
 | `w02-24` | PNG bảng pháp lý | baseline bảng ảnh | image, bbox, header levels, unit, note | OCR/table blocks; không báo false positive chỉ vì là ảnh |
 | `w02-25` | PNG văn bản pháp lý | baseline OCR text | image, heading path, page/bbox | OCR heading/paragraph blocks và provenance ảnh |
+| `w02-26` | TXT | exact duplicate thứ 2 (bản sao của `w02-14`) | bytes, checksum | `duplicate`, `link_existing`, 0 chunk mới |
+| `w02-27` | DOCX | PII trong đoạn văn + bảng (họ tên, CCCD, SĐT, MST, STK, email) và mẫu âm (số hiệu, ngày, số tiền, Điều) | bảng có cấu trúc, caption | Mask cả bảng lẫn thân văn bản; số hiệu/ngày/số tiền giữ nguyên |
+| `w02-28` | XLSX | bảng phí: caption gộp ô, dòng đơn vị, sheet trống, cột SĐT | sheet, caption, unit, header | `TablePage` theo sheet; cột SĐT mask theo header |
+| `w02-29` | PDF ảnh | OCR kém: mờ, nghiêng 2.5°, nhiễu, nén mạnh (từ `w02-25`) | ảnh trang, page=1 | không có text layer → `ocr.low_confidence`, review |
+| `w02-30` | PNG | OCR kém: bảng nghiêng −7°, nhiễu (từ `w02-24`) | ảnh, bbox | `ocr.low_confidence`, review; không dùng số từ OCR khi chưa duyệt |
 
 ## Contract mapping
 

@@ -21,8 +21,15 @@ không theo `chunk_id`; 27 câu `multi` nằm trong `test` phục vụ agent mul
 Chạy `python evals/team-4.2/runners/validate_w02_data.py` trước eval để kiểm
 tra consistency fixtures/câu hỏi; runner này không phải detector chất lượng.
 
-`python evals/team-4.2/runners/score_w02_quality.py --observed <findings.jsonl> --out <result.json>`
-tính TP/FN/FP offline từ labels đã đóng băng. Findings phải mang `fixture_id`
+Data quality W02-03 (chi tiết: `results/w02-quality/README.md`):
+
+```powershell
+python evals/team-4.2/runners/run_w02_detectors.py --out evals/team-4.2/results/w02-quality/findings.jsonl
+python evals/team-4.2/runners/score_w02_quality.py --observed evals/team-4.2/results/w02-quality/findings.jsonl --out-dir evals/team-4.2/results/w02-quality
+python evals/team-4.2/runners/measure_w02_parser_loss.py --out evals/team-4.2/results/w02-inventory
+```
+
+`score_w02_quality.py` tính TP/FN/FP offline từ labels đã đóng băng, theo mã issue và theo split. Findings phải mang `fixture_id`
 qua eval adapter; labels tuyệt đối không được đưa vào detector.
 
 ## Bộ multi-hop khó bổ sung — 06/11/2026

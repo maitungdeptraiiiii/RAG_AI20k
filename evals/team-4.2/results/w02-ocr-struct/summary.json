@@ -1,0 +1,290 @@
+{
+ "tesseract": {
+  "ALL": {
+   "n": 30,
+   "gt_tables": 67,
+   "TEDS": "N/A",
+   "TEDS_S": "N/A",
+   "heading_rec": "N/A",
+   "order": 95.6,
+   "hf_leak": 29.5,
+   "sec_page": 3.74
+  },
+  "COMMON (trang mọi engine đều chạy)": {
+   "n": 20,
+   "gt_tables": 52,
+   "TEDS": "N/A",
+   "TEDS_S": "N/A",
+   "heading_rec": "N/A",
+   "order": 94.8,
+   "hf_leak": 34.5,
+   "sec_page": 3.78
+  },
+  "academic_literature": {
+   "n": 6,
+   "gt_tables": 13,
+   "TEDS": "N/A",
+   "TEDS_S": "N/A",
+   "heading_rec": "N/A",
+   "order": 95.8,
+   "hf_leak": 93.3,
+   "sec_page": 3.12
+  },
+  "book": {
+   "n": 8,
+   "gt_tables": 17,
+   "TEDS": "N/A",
+   "TEDS_S": "N/A",
+   "heading_rec": "N/A",
+   "order": 97.4,
+   "hf_leak": 37.5,
+   "sec_page": 3.12
+  },
+  "exam_paper": {
+   "n": 3,
+   "gt_tables": 12,
+   "TEDS": "N/A",
+   "TEDS_S": "N/A",
+   "heading_rec": "N/A",
+   "order": null,
+   "hf_leak": 0.0,
+   "sec_page": 3.82
+  },
+  "magazine": {
+   "n": 3,
+   "gt_tables": 9,
+   "TEDS": "N/A",
+   "TEDS_S": "N/A",
+   "heading_rec": "N/A",
+   "order": 68.8,
+   "hf_leak": 30.0,
+   "sec_page": 3.74
+  },
+  "research_report": {
+   "n": 10,
+   "gt_tables": 16,
+   "TEDS": "N/A",
+   "TEDS_S": "N/A",
+   "heading_rec": "N/A",
+   "order": 100.0,
+   "hf_leak": 7.3,
+   "sec_page": 6.0
+  }
+ },
+ "gemini": {
+  "ALL": {
+   "n": 20,
+   "gt_tables": 52,
+   "TEDS": 59.2,
+   "TEDS_S": 63.8,
+   "heading_rec": 0.0,
+   "order": 93.4,
+   "hf_leak": 72.4,
+   "sec_page": 8.18
+  },
+  "COMMON (trang mọi engine đều chạy)": {
+   "n": 20,
+   "gt_tables": 52,
+   "TEDS": 59.2,
+   "TEDS_S": 63.8,
+   "heading_rec": 0.0,
+   "order": 93.4,
+   "hf_leak": 72.4,
+   "sec_page": 8.18
+  },
+  "academic_literature": {
+   "n": 4,
+   "gt_tables": 9,
+   "TEDS": 58.2,
+   "TEDS_S": 72.2,
+   "heading_rec": null,
+   "order": 82.6,
+   "hf_leak": 84.6,
+   "sec_page": 8.88
+  },
+  "book": {
+   "n": 5,
+   "gt_tables": 11,
+   "TEDS": 94.7,
+   "TEDS_S": 96.3,
+   "heading_rec": 0.0,
+   "order": 100.0,
+   "hf_leak": 90.0,
+   "sec_page": 7.14
+  },
+  "exam_paper": {
+   "n": 3,
+   "gt_tables": 12,
+   "TEDS": 61.9,
+   "TEDS_S": 64.9,
+   "heading_rec": 0.0,
+   "order": 98.0,
+   "hf_leak": 16.7,
+   "sec_page": 6.21
+  },
+  "magazine": {
+   "n": 3,
+   "gt_tables": 9,
+   "TEDS": 43.8,
+   "TEDS_S": 44.4,
+   "heading_rec": 0.0,
+   "order": 96.6,
+   "hf_leak": 50.0,
+   "sec_page": 13.41
+  },
+  "research_report": {
+   "n": 5,
+   "gt_tables": 11,
+   "TEDS": 34.0,
+   "TEDS_S": 39.1,
+   "heading_rec": 0.0,
+   "order": 91.5,
+   "hf_leak": 84.2,
+   "sec_page": 9.43
+  }
+ },
+ "gemini35lite": {
+  "ALL": {
+   "n": 20,
+   "gt_tables": 52,
+   "TEDS": 72.8,
+   "TEDS_S": 77.4,
+   "heading_rec": 23.7,
+   "order": 93.9,
+   "hf_leak": 74.1,
+   "sec_page": 5.21
+  },
+  "COMMON (trang mọi engine đều chạy)": {
+   "n": 20,
+   "gt_tables": 52,
+   "TEDS": 72.8,
+   "TEDS_S": 77.4,
+   "heading_rec": 23.7,
+   "order": 93.9,
+   "hf_leak": 74.1,
+   "sec_page": 5.21
+  },
+  "academic_literature": {
+   "n": 4,
+   "gt_tables": 9,
+   "TEDS": 85.8,
+   "TEDS_S": 98.1,
+   "heading_rec": null,
+   "order": 89.1,
+   "hf_leak": 92.3,
+   "sec_page": 11.46
+  },
+  "book": {
+   "n": 5,
+   "gt_tables": 11,
+   "TEDS": 92.4,
+   "TEDS_S": 94.6,
+   "heading_rec": 0.0,
+   "order": 97.4,
+   "hf_leak": 100.0,
+   "sec_page": 4.43
+  },
+  "exam_paper": {
+   "n": 3,
+   "gt_tables": 12,
+   "TEDS": 58.3,
+   "TEDS_S": 59.0,
+   "heading_rec": 0.0,
+   "order": 99.0,
+   "hf_leak": 16.7,
+   "sec_page": 3.51
+  },
+  "magazine": {
+   "n": 3,
+   "gt_tables": 9,
+   "TEDS": 70.1,
+   "TEDS_S": 76.8,
+   "heading_rec": 66.7,
+   "order": 100.0,
+   "hf_leak": 40.0,
+   "sec_page": 16.17
+  },
+  "research_report": {
+   "n": 5,
+   "gt_tables": 11,
+   "TEDS": 60.8,
+   "TEDS_S": 63.6,
+   "heading_rec": 29.2,
+   "order": 92.0,
+   "hf_leak": 84.2,
+   "sec_page": 5.74
+  }
+ },
+ "mineru": {
+  "ALL": {
+   "n": 30,
+   "gt_tables": 67,
+   "TEDS": 94.2,
+   "TEDS_S": 97.3,
+   "heading_rec": 69.1,
+   "order": 96.8,
+   "hf_leak": 6.8,
+   "sec_page": 8.85
+  },
+  "COMMON (trang mọi engine đều chạy)": {
+   "n": 20,
+   "gt_tables": 52,
+   "TEDS": 93.0,
+   "TEDS_S": 96.6,
+   "heading_rec": 65.8,
+   "order": 95.2,
+   "hf_leak": 6.9,
+   "sec_page": 8.85
+  },
+  "academic_literature": {
+   "n": 6,
+   "gt_tables": 13,
+   "TEDS": 92.7,
+   "TEDS_S": 99.1,
+   "heading_rec": null,
+   "order": 95.5,
+   "hf_leak": 0.0,
+   "sec_page": 8.85
+  },
+  "book": {
+   "n": 8,
+   "gt_tables": 17,
+   "TEDS": 97.4,
+   "TEDS_S": 98.0,
+   "heading_rec": 100.0,
+   "order": 96.1,
+   "hf_leak": 6.2,
+   "sec_page": 8.85
+  },
+  "exam_paper": {
+   "n": 3,
+   "gt_tables": 12,
+   "TEDS": 91.9,
+   "TEDS_S": 96.3,
+   "heading_rec": 50.0,
+   "order": 98.1,
+   "hf_leak": 0.0,
+   "sec_page": 8.85
+  },
+  "magazine": {
+   "n": 3,
+   "gt_tables": 9,
+   "TEDS": 86.9,
+   "TEDS_S": 91.6,
+   "heading_rec": 66.7,
+   "order": 62.1,
+   "hf_leak": 10.0,
+   "sec_page": 8.85
+  },
+  "research_report": {
+   "n": 10,
+   "gt_tables": 16,
+   "TEDS": 98.0,
+   "TEDS_S": 99.0,
+   "heading_rec": 67.9,
+   "order": 98.3,
+   "hf_leak": 9.8,
+   "sec_page": 8.85
+  }
+ }
+}

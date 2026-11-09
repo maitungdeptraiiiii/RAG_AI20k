@@ -14,10 +14,10 @@ Owner: C · Reviewer: B · Ngày 1 → ngày 4 · File: `src/rag/ingest/ocr/`, `
 
 - [ ] Interface `OCREngine.parse(pdf_or_image) -> list[Block]`
       `Block = {page, type: title|text|table|figure|header|footer, level, text | html, bbox, confidence, engine}`
-- [ ] Chọn engine qua `.env`: `OCR_ENGINE=tesseract|gemini|mineru|ppstructure`
+- [x] Chọn engine qua `.env`: `OCR_ENGINE=tesseract|gemini|mineru|ppstructure`
 - [ ] Block → `Page`/`Chunk`: `table` → chunk bảng (dùng chung W02-02b) · `title` → `heading_path` ·
       `header/footer` → bỏ · `figure` → giữ đường dẫn ảnh gốc
-- [ ] Phát hiện trang scan theo **từng trang** (có text layer → dùng luôn; không → OCR)
+- [x] Phát hiện trang scan theo **từng trang** (có text layer → dùng luôn; không → OCR)
 
 ### A2. `TesseractEngine` (baseline, ngày 2)
 
@@ -28,11 +28,11 @@ Owner: C · Reviewer: B · Ngày 1 → ngày 4 · File: `src/rag/ingest/ocr/`, `
 
 ### A3. `GeminiEngine` (ngày 2–3)
 
-- [ ] Chốt: Google AI Studio hay Vertex AI · model còn được hỗ trợ (kiểm tra 2.5 Flash) · `GEMINI_API_KEY` trong `.env.example`
-- [ ] Gửi từng trang · `temperature=0` · prompt chép nguyên văn, không sửa, chỗ mờ ghi `[không đọc được]` · output JSON block
-- [ ] Retry/rate-limit · phát hiện output bị cắt / `RECITATION`
+- [x] Chốt: Google AI Studio hay Vertex AI · model còn được hỗ trợ (kiểm tra 2.5 Flash) · `GEMINI_API_KEY` trong `.env.example`
+- [x] Gửi từng trang · `temperature=0` · prompt chép nguyên văn, không sửa, chỗ mờ ghi `[không đọc được]` · output JSON block
+- [x] Retry/rate-limit · phát hiện output bị cắt / `RECITATION`
 - [ ] Gắn `content_origin=vlm_ocr`, `engine`, `prompt_version`, ngày chạy
-- [ ] Ghi rõ hạn chế: ảnh chứa PII bị gửi ra ngoài trước khi mask (chỉ dùng với fixtures giả)
+- [x] Ghi rõ hạn chế: ảnh chứa PII bị gửi ra ngoài trước khi mask (chỉ dùng với fixtures giả)
 
 ### A4. Engine cấu trúc local (ngày 3, chọn 1 sau khi đo nhanh)
 
@@ -42,7 +42,7 @@ Owner: C · Reviewer: B · Ngày 1 → ngày 4 · File: `src/rag/ingest/ocr/`, `
 ### A5. Đối chiếu chéo = điểm chất lượng (bonus)
 
 - [ ] So số, ngày, "Điều N" giữa 2 engine trên cùng trang → lệch ⇒ `needs_review` + mục review queue
-- [ ] Cache kết quả OCR theo checksum + engine (không OCR lại khi ingest lặp)
+- [x] Cache kết quả OCR theo checksum + engine (không OCR lại khi ingest lặp)
 
 ---
 
@@ -146,4 +146,12 @@ Nếu không dùng được Batch: bỏ phần niits và cắt nrl-ai synthetic 
 
 ## Ghi chú
 
--
+- **OCR trong pipeline (09/11/2026):** `src/rag/ingest/ocr.py` + `loaders.py` (`OCRPage`, `load_image`) + `RAGPipeline(ocr=...)`; test `tests/test_ocr.py` (không gọi mạng).
+  - Engine: **Gemini 3.5 Flash-Lite qua OpenRouter** (`OCR_ENGINE=gemini`, `OPENROUTER_API_KEY`), prompt `v1` giữ nguyên như benchmark, `reasoning.effort=minimal`, ảnh 1600 px.
+    Lý do: `results/w02-ocr-gemini-compare` (CER 3.88 %, sai dấu 0.19 %, không RECITATION, ~0.0016 USD/trang); 2.5 Flash có lịch ngừng.
+  - Chất lượng: Gemini không có confidence → **Tesseract local** đo confidence trên cùng ảnh; < 65 (chọn trên dev w02-23 = 43.4 / w02-24 = 84.0) hoặc `[không đọc được]` → `ocr.low_confidence`; RECITATION/MAX_TOKENS → `ocr.truncated`. Đây là bản đơn giản của đối chiếu chéo A5.
+  - PDF: chỉ OCR trang < 20 ký tự text layer; bảng `<table>` trong output → `TablePage` (rowspan/colspan, caption, đơn vị) → chunk bảng W02-02b có `page`.
+  - Cache `DATA_DIR/cache/ocr` theo sha256 ảnh + model + prompt; trần `OCR_COST_CAP_USD`; lỗi 401/402/403 dừng ngay, không retry.
+  - **Bỏ header/footer** (`src/rag/ingest/headers.py`, test `tests/test_headers.py`): tầng 1 theo mẫu ở 3 dòng mép (số trang, Trang N, URL, bản quyền kèm năm, "CÔNG BÁO/Số", "Tập/Số"); tầng 2 dòng mép lặp ≥ 50 % trang (PDF nhiều trang); không bao giờ bỏ Chương/Điều/Khoản, bảng, dòng dài. Đo trên output đã cache (`results/w02-ocr-hf-filter`, 0 USD): MDPBench-VI Gemini 3.5 Flash-Lite `hf_leak` 95.5 → 63.6 %, `block_ned` giữ 10.1 (không xoá nhầm nội dung). Phần còn lọt là tiêu đề chạy trên ảnh trang rời (không có tín hiệu lặp).
+  - Chưa làm: block `figure`, `content_origin` trên `Chunk` (chờ schema W02-02a), engine local (MinerU/Tesseract text) làm fallback khi RECITATION.
+  - **Đã chạy thật** (09/11/2026): 5 trang fixture, 0.0097 USD; `ocr.low_confidence` 3/3 đúng, 0 báo nhầm (`results/w02-quality`). `OCR_ENGINE=gemini` đã bật trong `.env`.

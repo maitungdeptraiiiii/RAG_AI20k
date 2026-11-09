@@ -1,0 +1,289 @@
+{
+ "mdpbench_vi": {
+  "gemini35lite": {
+   "n_pages": 20,
+   "VI_all": 91.2,
+   "digital": 90.8,
+   "photo": 91.7,
+   "VI_reweighted_1to3": 91.5,
+   "text_edit_all": 7.5,
+   "table_TEDS_all": 68.5,
+   "text_edit_digital": 8.5,
+   "table_TEDS_digital": 70.1,
+   "text_edit_photo": 6.1,
+   "table_TEDS_photo": 66.9,
+   "order_edit_all": 15.4
+  },
+  "gemini": {
+   "n_pages": 20,
+   "VI_all": 80.4,
+   "digital": 85.4,
+   "photo": 75.3,
+   "VI_reweighted_1to3": 77.8,
+   "text_edit_all": 18.6,
+   "table_TEDS_all": 72.4,
+   "text_edit_digital": 14.9,
+   "table_TEDS_digital": 96.8,
+   "text_edit_photo": 23.9,
+   "table_TEDS_photo": 48.1,
+   "order_edit_all": 21.7
+  },
+  "mineru_common": {
+   "n_pages": 20,
+   "VI_all": 68.7,
+   "digital": 89.4,
+   "photo": 47.9,
+   "VI_reweighted_1to3": 58.3,
+   "text_edit_all": 24.8,
+   "table_TEDS_all": 44.4,
+   "text_edit_digital": 6.6,
+   "table_TEDS_digital": 62.4,
+   "text_edit_photo": 50.2,
+   "table_TEDS_photo": 26.3,
+   "order_edit_all": 24.6
+  },
+  "mineru": {
+   "n_pages": 80,
+   "VI_all": 77.6,
+   "digital": 89.3,
+   "photo": 66.0,
+   "VI_reweighted_1to3": 71.8,
+   "text_edit_all": 19.2,
+   "table_TEDS_all": 60.3,
+   "text_edit_digital": 6.5,
+   "table_TEDS_digital": 65.3,
+   "text_edit_photo": 33.5,
+   "table_TEDS_photo": 55.4,
+   "order_edit_all": 22.0
+  },
+  "tesseract_common": {
+   "n_pages": 20,
+   "VI_all": 50.1,
+   "digital": 71.4,
+   "photo": 28.7,
+   "VI_reweighted_1to3": 39.4,
+   "text_edit_all": 39.7,
+   "table_TEDS_all": 3.1,
+   "text_edit_digital": 18.4,
+   "table_TEDS_digital": 0.0,
+   "text_edit_photo": 67.5,
+   "table_TEDS_photo": 6.3,
+   "order_edit_all": 29.1
+  },
+  "tesseract": {
+   "n_pages": 80,
+   "VI_all": 48.0,
+   "digital": 68.0,
+   "photo": 28.1,
+   "VI_reweighted_1to3": 38.1,
+   "text_edit_all": 42.9,
+   "table_TEDS_all": 1.6,
+   "text_edit_digital": 20.6,
+   "table_TEDS_digital": 0.2,
+   "text_edit_photo": 68.1,
+   "table_TEDS_photo": 3.0,
+   "order_edit_all": 32.9
+  }
+ },
+ "omnidocbench": {
+  "gemini": {
+   "n_pages": 20,
+   "text_edit": 11.4,
+   "table_TEDS": 63.1,
+   "table_TEDS_S": 65.7,
+   "order_edit": 31.3,
+   "formula_edit": 8.3,
+   "text_TEDS_mean_noCDM": 75.9,
+   "text_edit_by_page_attr": {
+    "ALL": 11.4,
+    "data_source: academic_literature": 4.3,
+    "data_source: book": 0.9,
+    "data_source: exam_paper": 17.7,
+    "data_source: magazine": 94.8,
+    "data_source: research_report": 6.3,
+    "fuzzy_scan": 16.2,
+    "language: english": 16.5,
+    "language: simplified_chinese": 7.5,
+    "layout: 1andmore_column": 5.5,
+    "layout: double_column": 13.4,
+    "layout: other_layout": 47.7,
+    "layout: single_column": 1.1,
+    "subset: v1.5": 11.4
+   }
+  },
+  "gemini35lite": {
+   "n_pages": 20,
+   "text_edit": 5.2,
+   "table_TEDS": 71.5,
+   "table_TEDS_S": 74.8,
+   "order_edit": 29.9,
+   "formula_edit": 2.8,
+   "text_TEDS_mean_noCDM": 83.2,
+   "text_edit_by_page_attr": {
+    "ALL": 5.2,
+    "data_source: academic_literature": 0.2,
+    "data_source: book": 0.4,
+    "data_source: exam_paper": 27.0,
+    "data_source: magazine": 0.0,
+    "data_source: research_report": 5.4,
+    "fuzzy_scan": 0.4,
+    "language: english": 0.3,
+    "language: simplified_chinese": 9.0,
+    "layout: 1andmore_column": 3.4,
+    "layout: double_column": 18.0,
+    "layout: other_layout": 0.0,
+    "layout: single_column": 0.6,
+    "subset: v1.5": 5.2
+   }
+  },
+  "mineru": {
+   "n_pages": 30,
+   "text_edit": 2.8,
+   "table_TEDS": 92.3,
+   "table_TEDS_S": 94.3,
+   "order_edit": 27.4,
+   "formula_edit": 2.8,
+   "text_TEDS_mean_noCDM": 94.8,
+   "text_edit_by_page_attr": {
+    "ALL": 2.8,
+    "data_source: academic_literature": 0.1,
+    "data_source: book": 1.1,
+    "data_source: exam_paper": 21.3,
+    "data_source: magazine": 0.0,
+    "data_source: research_report": 2.0,
+    "fuzzy_scan": 0.0,
+    "language: english": 0.7,
+    "language: simplified_chinese": 4.1,
+    "layout: 1andmore_column": 1.5,
+    "layout: double_column": 10.6,
+    "layout: other_layout": 0.0,
+    "layout: single_column": 1.3,
+    "subset: table_hard": 0.0,
+    "subset: v1.5": 2.9,
+    "with_watermark": 0.0
+   }
+  },
+  "mineru_common": {
+   "n_pages": 20,
+   "text_edit": 3.9,
+   "table_TEDS": 91.1,
+   "table_TEDS_S": 93.5,
+   "order_edit": 28.8,
+   "formula_edit": 2.8,
+   "text_TEDS_mean_noCDM": 93.6,
+   "text_edit_by_page_attr": {
+    "ALL": 3.9,
+    "data_source: academic_literature": 0.2,
+    "data_source: book": 1.6,
+    "data_source: exam_paper": 21.3,
+    "data_source: magazine": 0.0,
+    "data_source: research_report": 2.5,
+    "fuzzy_scan": 0.0,
+    "language: english": 1.0,
+    "language: simplified_chinese": 6.1,
+    "layout: 1andmore_column": 1.7,
+    "layout: double_column": 14.2,
+    "layout: other_layout": 0.0,
+    "layout: single_column": 2.2,
+    "subset: v1.5": 3.9
+   }
+  },
+  "tesseract": {
+   "n_pages": 30,
+   "text_edit": 31.0,
+   "table_TEDS": 0.3,
+   "table_TEDS_S": 0.6,
+   "order_edit": 51.6,
+   "formula_edit": 100.0,
+   "text_TEDS_mean_noCDM": 34.7,
+   "text_edit_by_page_attr": {
+    "ALL": 31.0,
+    "data_source: academic_literature": 4.6,
+    "data_source: book": 19.1,
+    "data_source: exam_paper": 74.3,
+    "data_source: magazine": 99.2,
+    "data_source: research_report": 38.4,
+    "fuzzy_scan": 93.2,
+    "language: english": 20.0,
+    "language: simplified_chinese": 38.2,
+    "layout: 1andmore_column": 27.8,
+    "layout: double_column": 42.5,
+    "layout: other_layout": 49.6,
+    "layout: single_column": 23.0,
+    "subset: table_hard": 21.6,
+    "subset: v1.5": 31.4,
+    "with_watermark": 21.6
+   }
+  },
+  "tesseract_common": {
+   "n_pages": 20,
+   "text_edit": 32.9,
+   "table_TEDS": 0.4,
+   "table_TEDS_S": 0.7,
+   "order_edit": 56.8,
+   "formula_edit": 100.0,
+   "text_TEDS_mean_noCDM": 33.7,
+   "text_edit_by_page_attr": {
+    "ALL": 32.9,
+    "data_source: academic_literature": 0.4,
+    "data_source: book": 3.8,
+    "data_source: exam_paper": 74.3,
+    "data_source: magazine": 99.2,
+    "data_source: research_report": 52.4,
+    "fuzzy_scan": 93.2,
+    "language: english": 15.4,
+    "language: simplified_chinese": 46.6,
+    "layout: 1andmore_column": 33.0,
+    "layout: double_column": 49.5,
+    "layout: other_layout": 49.6,
+    "layout: single_column": 5.1,
+    "subset: v1.5": 32.9
+   }
+  }
+ },
+ "leaderboard_mdp_vi": {
+  "Gemini-3-pro-preview": 85.9,
+  "MinerU-2.5-Pro-1.2B": 74.2,
+  "PaddleOCR-VL-1.6": 80.9,
+  "PP-StructureV3": 52.7,
+  "MinerU-2.5-VLM": 46.0,
+  "MinerU-2.5-pipeline": 27.6
+ },
+ "leaderboard_omnidocbench": {
+  "MinerU2.5-Pro": [
+   95.75,
+   0.036,
+   93.42,
+   95.92,
+   0.12
+  ],
+  "MinerU-2.5": [
+   93.04,
+   0.045,
+   87.88,
+   91.47,
+   0.13
+  ],
+  "Gemini 3 Flash": [
+   92.62,
+   0.066,
+   89.29,
+   93.51,
+   0.172
+  ],
+  "Gemini 3 Pro": [
+   92.91,
+   0.064,
+   89.15,
+   92.96,
+   0.165
+  ],
+  "MinerU-Pipeline": [
+   86.47,
+   0.055,
+   81.88,
+   88.68,
+   0.153
+  ]
+ }
+}

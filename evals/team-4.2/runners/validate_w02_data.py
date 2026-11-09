@@ -30,7 +30,7 @@ def validate_fixtures(errors: list[str]) -> None:
     labels = load_jsonl(FIXTURE_DIR / "labels.jsonl")
     ids = [item.get("fixture_id") for item in manifest]
     label_ids = [item.get("fixture_id") for item in labels]
-    require(len(manifest) == 25, f"Cần 25 fixtures, có {len(manifest)}", errors)
+    require(20 <= len(manifest) <= 30, f"Cần 20–30 fixtures, có {len(manifest)}", errors)
     require(len(set(ids)) == len(ids), "fixture_id bị trùng trong manifest", errors)
     require(set(ids) == set(label_ids), "manifest và labels không cùng fixture_id", errors)
     allowed_status = {"duplicate", "needs_review", "activated", "failed"}
@@ -44,9 +44,12 @@ def validate_fixtures(errors: list[str]) -> None:
         version = item.get("version", {})
         require(version.get("approval") in {"approved", "pending", "rejected"}, f"{fixture_id}: approval thiếu/sai", errors)
         require(bool(item.get("collected_at")), f"{fixture_id}: thiếu collected_at", errors)
+    splits = {label.get("split") for label in labels}
+    require(splits == {"dev", "test"}, f"labels phải chia đủ dev và test, có {sorted(map(str, splits))}", errors)
     for label in labels:
         expected = label.get("expected", {})
         fixture_id = label.get("fixture_id", "?")
+        require(label.get("split") in {"dev", "test"}, f"{fixture_id}: thiếu split dev|test", errors)
         require("ingest_status" in expected and "dedup_action" in expected,
                 f"{fixture_id}: thiếu expected ingest/dedup", errors)
         require(expected.get("ingest_status") in allowed_status, f"{fixture_id}: ingest_status không hợp lệ", errors)
@@ -65,6 +68,14 @@ def validate_questions(errors: list[str]) -> None:
     allowed_types = {"lookup", "paraphrase", "multi", "out_of_scope"}
     allowed_surfaces = {"answer", "review"}
     require(len(set(ids)) == len(ids), "question id bị trùng", errors)
+    require(15 <= len(questions) <= 20, f"Cần 15–20 câu hỏi fixture, có {len(questions)}", errors)
+    groups = [question.get("task_group", "") for question in questions]
+    require(sum(g.startswith("table") for g in groups) >= 5, "Cần ≥5 câu bảng", errors)
+    require(sum(g == "version_current" for g in groups) >= 4, "Cần ≥4 câu bản hiện hành", errors)
+    require(sum(g.startswith("version") and g not in {"version_current", "version_review"} for g in groups) >= 3,
+            "Cần ≥3 câu lịch sử/as-of", errors)
+    require(sum(g.startswith("ocr") for g in groups) >= 3, "Cần ≥3 câu OCR", errors)
+    require(sum(question.get("type") == "out_of_scope" for question in questions) >= 2, "Cần ≥2 câu out_of_scope", errors)
     for question in questions:
         question_id = question.get("id", "?")
         require(question.get("type") in allowed_types, f"{question_id}: type không hợp lệ", errors)

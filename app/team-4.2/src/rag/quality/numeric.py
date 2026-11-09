@@ -13,14 +13,14 @@ from typing import Literal
 
 ComparisonRelation = Literal["equal", "different", "incomparable", "invalid"]
 
+_SCALES = {"": Decimal("1"), "nghìn": Decimal("1000"), "ngàn": Decimal("1000"),
+           "triệu": Decimal("1000000"), "tỷ": Decimal("1000000000"), "tỉ": Decimal("1000000000")}
+_CURRENCIES = ("vnd", "vnđ", "đồng", "đ")
 UNIT_SCALES: dict[str, Decimal] = {
-    "vnd": Decimal("1"),
-    "đồng": Decimal("1"),
-    "nghìn vnd": Decimal("1000"),
-    "nghìn đồng": Decimal("1000"),
-    "triệu vnd": Decimal("1000000"),
-    "triệu đồng": Decimal("1000000"),
+    f"{scale} {cur}".strip(): factor for scale, factor in _SCALES.items() for cur in _CURRENCIES
 }
+UNIT_SCALES.update({"trđ": Decimal("1000000"), "tr đồng": Decimal("1000000"), "nghìn đ": Decimal("1000")})
+"""Đơn vị tiền -> hệ số quy về đồng (VND): đồng / nghìn / triệu / tỷ, nhiều cách viết."""
 
 
 @dataclass(frozen=True)
@@ -48,6 +48,13 @@ class NumericNormalizationConfig:
             raise ValueError("decimal_separator và group_separator không được trùng")
         if self.tolerance < 0:
             raise ValueError("tolerance phải >= 0")
+
+
+CSV_MACHINE = NumericNormalizationConfig(locale="csv-machine", decimal_separator=".", group_separator=None)
+"""CSV/XLSX xuất từ máy: dấu chấm thập phân, không ngăn cách nhóm (1500000, 1.5)."""
+
+VI_TEXT = NumericNormalizationConfig(locale="vi-VN", decimal_separator=",", group_separator=".")
+"""Văn bản tiếng Việt: 1.500.000 = 1500000, 1,5 = 1.5."""
 
 
 @dataclass(frozen=True)
@@ -79,7 +86,10 @@ def parse_decimal(raw_value: str, *, config: NumericNormalizationConfig) -> Deci
     if any(char not in allowed for char in value) or value.count(config.decimal_separator) > 1:
         return None
     if config.group_separator:
-        groups = value.split(config.decimal_separator, 1)[0].lstrip("+-").split(config.group_separator)
+        integer_part, _, fraction = value.partition(config.decimal_separator)
+        if config.group_separator in fraction:      # "1,500.000" theo vi-VN: nhóm nằm sau dấu thập phân
+            return None
+        groups = integer_part.lstrip("+-").split(config.group_separator)
         if len(groups) > 1 and (not groups[0] or any(len(group) != 3 or not group.isdigit() for group in groups[1:])):
             return None
         value = value.replace(config.group_separator, "")
@@ -128,5 +138,5 @@ def sum_matches(parts: tuple[NumericFactDraft, ...], total: NumericFactDraft, *,
     if any(part.metric != total.metric or part.period != total.period or part.dimensions != total.dimensions for part in parts):
         return NumericComparisonDraft("incomparable", sum(part_values), total_value, None, "context_mismatch")
     computed = sum(part_values, start=Decimal("0"))
-    relation: ComparisonRelation = "equal" if computed == total_value else "different"
+    relation: ComparisonRelation = "equal" if abs(computed - total_value) <= config.tolerance else "different"
     return NumericComparisonDraft(relation, computed, total_value, "VND", "arithmetic_only_not_verified")

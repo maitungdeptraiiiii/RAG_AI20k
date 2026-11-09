@@ -1,0 +1,58 @@
+{
+ "cross/tesseract": {
+  "pages": 80,
+  "lines_removed": 19,
+  "hf_leak_before": 45.4,
+  "hf_leak_after": 38.0,
+  "block_ned_before": 41.2,
+  "block_ned_after": 41.3
+ },
+ "cross/gemini": {
+  "pages": 20,
+  "lines_removed": 13,
+  "hf_leak_before": 90.9,
+  "hf_leak_after": 59.1,
+  "block_ned_before": 20.2,
+  "block_ned_after": 20.2
+ },
+ "cross/gemini35lite": {
+  "pages": 20,
+  "lines_removed": 15,
+  "hf_leak_before": 95.5,
+  "hf_leak_after": 63.6,
+  "block_ned_before": 10.1,
+  "block_ned_after": 10.1
+ },
+ "cross/mineru": {
+  "pages": 80,
+  "lines_removed": 2,
+  "hf_leak_before": 18.5,
+  "hf_leak_after": 16.7,
+  "block_ned_before": 13.4,
+  "block_ned_after": 13.4
+ },
+ "struct/tesseract": {
+  "pages": 30,
+  "lines_removed": 13,
+  "hf_leak_before": 29.5,
+  "hf_leak_after": 21.6
+ },
+ "struct/gemini": {
+  "pages": 20,
+  "lines_removed": 15,
+  "hf_leak_before": 72.4,
+  "hf_leak_after": 58.6
+ },
+ "struct/gemini35lite": {
+  "pages": 20,
+  "lines_removed": 15,
+  "hf_leak_before": 74.1,
+  "hf_leak_after": 58.6
+ },
+ "struct/mineru": {
+  "pages": 30,
+  "lines_removed": 0,
+  "hf_leak_before": 6.8,
+  "hf_leak_after": 6.8
+ }
+}

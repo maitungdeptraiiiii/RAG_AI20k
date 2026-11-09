@@ -1,6 +1,6 @@
 # Quality fixtures — Team 4.2
 
-25 fixture nhỏ, hoàn toàn giả lập về **văn bản pháp luật Việt Nam**, tạo ở Week 2 nhưng dùng xuyên suốt các tuần sau để kiểm tra ingestion, data quality, versioning, retrieval và regression. Chúng là **ground truth cho evaluation**, không phải dữ liệu để detector đọc.
+30 fixture nhỏ, hoàn toàn giả lập về **văn bản pháp luật Việt Nam**, tạo ở Week 2 nhưng dùng xuyên suốt các tuần sau để kiểm tra ingestion, data quality, versioning, retrieval và regression. Chúng là **ground truth cho evaluation**, không phải dữ liệu để detector đọc.
 
 ## Cách dùng
 
@@ -24,10 +24,19 @@ Mọi email, điện thoại và mã định danh trong fixtures là dữ liệu
 | 23 | `w02-23` | Flowchart thủ tục: OCR/structure quality trung bình-thấp |
 | 24 | `w02-24` | Bảng pháp lý rõ: multi-header, đơn vị và ghi chú |
 | 25 | `w02-25` | Văn bản pháp lý rõ: heading và paragraph |
+| 26 | `w02-26` | Exact duplicate thứ 2 (bản sao bytes của `w02-14`) |
+| 27 | `w02-27` | DOCX: PII giả trong đoạn văn + bảng; có mẫu âm (số hiệu, ngày, số tiền, Điều) |
+| 28 | `w02-28` | XLSX: caption gộp ô, dòng đơn vị, sheet trống, cột SĐT giả |
+| 29 | `w02-29` | PDF scan mờ/nghiêng/nhiễu (từ `w02-25`): OCR kém, không có text layer |
+| 30 | `w02-30` | PNG bảng nghiêng −7°, nhiễu (từ `w02-24`): OCR kém |
 
-Ba PNG scan là artifact raster để Tesseract/OCR adapter đọc trực tiếp. Chỉ `w02-23` là failure case `ocr.low_confidence`; `w02-24` và `w02-25` là baseline để kiểm tra parser không báo nhầm. Kỳ vọng text/confidence chính xác phụ thuộc engine OCR; không chấm khớp từng ký tự OCR.
+`w02-26`…`w02-30` được sinh xác định bằng `evals/team-4.2/runners/build_w02_extra_fixtures.py`.
+
+Ba PNG scan `w02-23`…`w02-25` là artifact raster để Tesseract/OCR adapter đọc trực tiếp. `w02-23`, `w02-29`, `w02-30` là failure case `ocr.low_confidence`; `w02-24` và `w02-25` là baseline để kiểm tra parser không báo nhầm. Kỳ vọng text/confidence chính xác phụ thuộc engine OCR; không chấm khớp từng ký tự OCR.
 
 ## Quy ước nhãn
+
+- Mỗi nhãn có `split`: `dev` (13 fixture, để chỉnh ngưỡng) hoặc `test` (17 fixture, số báo cáo). Không chuyển fixture test sang dev sau khi đã xem kết quả.
 
 - `expected.ingest_status` dùng đúng enum `IngestReportV2`.
 - `dedup_action` dùng enum `DedupResult`.

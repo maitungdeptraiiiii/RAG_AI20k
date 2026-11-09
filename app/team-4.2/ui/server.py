@@ -36,7 +36,7 @@ from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-from starlette.responses import HTMLResponse, JSONResponse, Response, PlainTextResponse, RedirectResponse
+from starlette.responses import HTMLResponse, JSONResponse, Response, PlainTextResponse, RedirectResponse, StreamingResponse
 from starlette.routing import Route
 
 from rag.config import Settings
@@ -108,6 +108,8 @@ async def handle_info(request: Request) -> JSONResponse:
             "advanced": advanced_str,
             "decomp_enabled": settings.decomp_enabled,
             "listwise_enabled": settings.listwise_enabled,
+            "listwise_model": settings.listwise_model,
+            "condense_model": settings.condense_model,
             "context_min_p": settings.context_min_p,
             "top_k": settings.top_k,
         },
@@ -129,8 +131,8 @@ def _format_hits(hits: list, chunks_map: dict, limit: int = 5) -> list[dict[str,
     return rows
 
 
-def _sync_ask(query: str, pipeline: RAGPipeline) -> dict[str, Any]:
-    trace: AskTrace = pipeline.ask_debug(query)
+def _sync_ask(query: str, pipeline: RAGPipeline, history: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    trace: AskTrace = pipeline.ask_debug(query, history=history)
     chunks = pipeline.retriever.chunks
 
     # Danh sách các khối context thực tế đưa vào LLM
@@ -180,6 +182,7 @@ def _sync_ask(query: str, pipeline: RAGPipeline) -> dict[str, Any]:
         "trace": {
             "context_mode": trace.context.mode,
             "n_context_blocks": len(trace.context.blocks),
+            "condensed_query": trace.condensed_query,
             "reranked": res.reranked,
             "errors": res.errors,
             "arms": arms_data,
@@ -188,21 +191,47 @@ def _sync_ask(query: str, pipeline: RAGPipeline) -> dict[str, Any]:
     }
 
 
-async def handle_chat(request: Request) -> JSONResponse:
-    """Xử lý câu hỏi, gọi ask_debug trong thread pool để không block event loop."""
+def _sync_stream(query: str, pipeline: RAGPipeline, history: list[dict[str, Any]] | None = None):
+    try:
+        for event in pipeline.ask_stream(query, history=history):
+            yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+    except Exception as e:
+        log.exception("Lỗi khi stream chat: %s", e)
+        error_event = {"type": "error", "error": f"Lỗi hệ thống: {e}"}
+        yield f"data: {json.dumps(error_event, ensure_ascii=False)}\n\n"
+
+
+async def handle_chat(request: Request) -> Response:
+    """Xử lý câu hỏi, hỗ trợ cả JSONResponse (backward compatible) và SSE StreamingResponse."""
     try:
         body = await request.json()
     except Exception:
         return JSONResponse({"error": "Body JSON không hợp lệ"}, status_code=400)
 
     query = (body.get("query") or "").strip()
+    history = body.get("history") or []
+    is_stream = bool(body.get("stream", False))
+    if not isinstance(history, list):
+        history = []
     if not query:
         return JSONResponse({"error": "Câu hỏi không được rỗng"}, status_code=400)
 
     pipeline, _ = get_pipeline()
+
+    if is_stream:
+        return StreamingResponse(
+            _sync_stream(query, pipeline, history),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no",
+            },
+        )
+
     loop = asyncio.get_running_loop()
     try:
-        data = await loop.run_in_executor(_executor, _sync_ask, query, pipeline)
+        data = await loop.run_in_executor(_executor, _sync_ask, query, pipeline, history)
         return JSONResponse(data)
     except Exception as e:
         log.exception("Lỗi khi xử lý chat: %s", e)

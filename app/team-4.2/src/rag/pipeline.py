@@ -23,13 +23,14 @@ from __future__ import annotations
 
 import json
 import logging
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from rag.advanced.condense import QueryCondenser
 from rag.config import Settings
-from rag.generate.answer import answer_question
+from rag.generate.answer import answer_question, build_citations, build_prompt
 from rag.index.bm25_index import BM25Index
 from rag.index.embedder import EmbeddingCache, make_embedder
 from rag.index.store import ChunkStore
@@ -39,7 +40,7 @@ from rag.ingest.loaders import load_source
 from rag.retrieve.context import ContextConfig, ContextSelection, select_context
 from rag.retrieve.hybrid import HybridRetriever, Mode, RetrievalResult
 from rag.retrieve.rerank import make_reranker
-from rag.schema import LLM, Answer, Page
+from rag.schema import REFUSAL, LLM, Answer, Page, nfc
 
 log = logging.getLogger(__name__)
 
@@ -64,6 +65,7 @@ class AskTrace:
     retrieval: RetrievalResult
     context: ContextSelection
     llm_called: bool
+    condensed_query: str | None = None
 
 
 def index_signature(settings: Settings, index_enhancers: Sequence[str]) -> dict[str, Any]:
@@ -102,6 +104,7 @@ class RAGPipeline:
         context: ContextConfig | None = None,
         index_enhancers: Sequence[Any] = (),
         loader: Callable[..., list[Page]] = load_source,
+        condenser: QueryCondenser | None = None,
     ) -> None:
         self.store = store
         self.retriever = retriever
@@ -111,6 +114,7 @@ class RAGPipeline:
         self.context_config = context or ContextConfig(fixed_k=top_k)
         self.index_enhancers = list(index_enhancers)
         self._loader = loader
+        self.condenser = condenser or QueryCondenser(llm)
         if len(store):
             # khởi động lại: dựng BM25 trong RAM, Qdrant bỏ qua chunk đã có; chunk đã lưu kèm context
             self.retriever.build(store.all())
@@ -160,8 +164,16 @@ class RAGPipeline:
             rewrite_for_rerank=s.rewrite_for_rerank,
             coverage=(CoverageConfig(s.coverage_anchor_k,s.coverage_min_p,s.coverage_weight,s.coverage_branch_k)
                       if s.coverage_enabled else None),
-            listwise=(ListwiseSelector(llm,ListwiseConfig(s.listwise_candidate_n,s.listwise_margin,
-                      s.listwise_min_p,s.listwise_excerpt_words)) if s.listwise_enabled else None),
+            listwise=(ListwiseSelector(
+                OpenAIChatLLM(
+                    s.listwise_model,
+                    temperature=0.0,
+                    base_url=s.llm_base_url,
+                    api_key=s.llm_api_key,
+                    cache=LLMCache(s.cache_dir / "listwise_llm.sqlite"),
+                ),
+                ListwiseConfig(s.listwise_candidate_n, s.listwise_margin, s.listwise_min_p, s.listwise_excerpt_words)
+            ) if s.listwise_enabled else None),
         )
         if s.query_rewrite_enabled:
             from rag.advanced.rewrite import QueryRewriter
@@ -182,10 +194,18 @@ class RAGPipeline:
             fixed_k=s.top_k,
         )
         log.info("Phương pháp nâng cao: %s", [e.name for e in enhancements] or "không (baseline)")
+        condenser_llm = OpenAIChatLLM(
+            s.condense_model,
+            temperature=0.0,
+            base_url=s.llm_base_url,
+            api_key=s.llm_api_key,
+            cache=LLMCache(s.cache_dir / "condense_llm.sqlite"),
+        )
         return cls(
             ChunkStore(s.chunks_path), retriever, llm,
             top_k=s.top_k, max_syllables=s.max_syllables, context=context,
             index_enhancers=index_enhancers,
+            condenser=QueryCondenser(condenser_llm),
         )
 
     # --- ingest ----------------------------------------------------------------
@@ -226,23 +246,171 @@ class RAGPipeline:
         self,
         query: str,
         *,
+        history: Sequence[dict[str, Any]] | None = None,
         mode: Mode = "hybrid",
         arms: Sequence[str] | None = None,
         rerank: bool = True,
     ) -> AskTrace:
-        retrieval = self.retriever.retrieve(query, self.top_k, mode=mode, arms=arms, rerank=rerank)
+        effective_query = (
+            self.condenser.condense(query, history=history)
+            if hasattr(self, "condenser") and self.condenser
+            else query
+        )
+        retrieval = self.retriever.retrieve(effective_query, self.top_k, mode=mode, arms=arms, rerank=rerank)
         selection = select_context(retrieval.ranked, self.retriever.chunks, self.context_config)
 
         # GUARDRAIL (trước LLM, TV5): chặn theo ngưỡng điểm RRF khi không rerank — chưa làm.
         if selection.empty:
-            return AskTrace(Answer.refusal(retrieval.hits), retrieval, selection, llm_called=False)
+            return AskTrace(
+                Answer.refusal(retrieval.hits),
+                retrieval,
+                selection,
+                llm_called=False,
+                condensed_query=effective_query,
+            )
 
-        answer = answer_question(retrieval.query, selection.blocks, self.llm, retrieval.hits)
+        answer = answer_question(effective_query, selection.blocks, self.llm, retrieval.hits)
         # GUARDRAIL (sau LLM, TV5): loại [n] sai, không còn citation hợp lệ thì từ chối — chưa làm.
-        return AskTrace(answer, retrieval, selection, llm_called=True)
+        return AskTrace(
+            answer,
+            retrieval,
+            selection,
+            llm_called=True,
+            condensed_query=effective_query,
+        )
 
-    def ask(self, query: str) -> Answer:
-        return self.ask_debug(query).answer
+    def ask(self, query: str, *, history: Sequence[dict[str, Any]] | None = None) -> Answer:
+        return self.ask_debug(query, history=history).answer
+
+    def ask_stream(
+        self,
+        query: str,
+        *,
+        history: Sequence[dict[str, Any]] | None = None,
+        mode: Mode = "hybrid",
+        arms: Sequence[str] | None = None,
+        rerank: bool = True,
+    ) -> Iterator[dict[str, Any]]:
+        effective_query = (
+            self.condenser.condense(query, history=history)
+            if hasattr(self, "condenser") and self.condenser
+            else query
+        )
+        retrieval = self.retriever.retrieve(effective_query, self.top_k, mode=mode, arms=arms, rerank=rerank)
+        selection = select_context(retrieval.ranked, self.retriever.chunks, self.context_config)
+
+        if selection.empty:
+            yield {
+                "type": "done",
+                "answer": REFUSAL,
+                "refused": True,
+                "citations": [],
+                "sources": [],
+                "trace": {
+                    "condensed_query": effective_query,
+                    "context_mode": selection.mode,
+                    "n_context_blocks": 0,
+                    "reranked": retrieval.reranked,
+                    "errors": retrieval.errors,
+                },
+            }
+            return
+
+        chunks = self.retriever.chunks
+        scores_map = {h.chunk_id: round(float(h.score), 4) for h in retrieval.ranked}
+        sources = []
+        for b in selection.blocks:
+            c = b.chunk
+            sources.append({
+                "n": b.n,
+                "chunk_id": c.chunk_id,
+                "source": c.source,
+                "section": c.section or "Không có tiêu đề",
+                "page": c.page_start,
+                "score": scores_map.get(c.chunk_id, 0.0),
+                "text": c.text,
+            })
+
+        # Yield sources right after retrieval so UI can show them immediately
+        yield {
+            "type": "sources",
+            "sources": sources,
+            "condensed_query": effective_query,
+        }
+
+        # Build prompt
+        system, user = build_prompt(effective_query, selection.blocks)
+        collected: list[str] = []
+
+        if hasattr(self.llm, "stream"):
+            for delta in self.llm.stream(system, user):
+                collected.append(delta)
+                yield {"type": "token", "delta": delta}
+        else:
+            text = self.llm.complete(system, user)
+            collected.append(text)
+            yield {"type": "token", "delta": text}
+
+        full_text = nfc("".join(collected)).strip()
+        answer = build_citations(full_text, selection.blocks, retrieval.hits)
+
+        citations_data = []
+        for c in answer.citations:
+            chunk_obj = chunks.get(c.chunk_id)
+            citations_data.append({
+                "n": c.n,
+                "chunk_id": c.chunk_id,
+                "source": c.source,
+                "section": chunk_obj.section if chunk_obj else "Căn cứ pháp lý",
+                "page": c.page,
+                "quote": c.quote,
+                "score": scores_map.get(c.chunk_id, 0.0),
+                "text": chunk_obj.text if chunk_obj else "",
+            })
+
+        arms_data = {}
+        for arm_name, arm_hits in retrieval.arms.items():
+            rows = []
+            for h in arm_hits[:5]:
+                c = chunks.get(h.chunk_id)
+                rows.append({
+                    "rank": h.rank,
+                    "score": round(float(h.score), 4),
+                    "source": c.source if c else "",
+                    "section": c.section if c else "",
+                    "page": c.page_start if c else None,
+                    "text": " ".join(c.text.split())[:180] if c else "",
+                })
+            arms_data[arm_name] = rows
+
+        final_hits = []
+        for h in retrieval.hits[:5]:
+            c = chunks.get(h.chunk_id)
+            final_hits.append({
+                "rank": h.rank,
+                "score": round(float(h.score), 4),
+                "source": c.source if c else "",
+                "section": c.section if c else "",
+                "page": c.page_start if c else None,
+                "text": " ".join(c.text.split())[:180] if c else "",
+            })
+
+        yield {
+            "type": "done",
+            "answer": answer.text,
+            "refused": answer.refused,
+            "citations": citations_data,
+            "sources": sources,
+            "trace": {
+                "context_mode": selection.mode,
+                "n_context_blocks": len(selection.blocks),
+                "condensed_query": effective_query,
+                "reranked": retrieval.reranked,
+                "errors": retrieval.errors,
+                "arms": arms_data,
+                "final_hits": final_hits,
+            },
+        }
 
 
 __all__ = ["AskTrace", "IndexConfigMismatchError", "IngestReport", "RAGPipeline", "check_index_config",

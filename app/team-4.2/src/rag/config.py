@@ -67,6 +67,7 @@ class Settings:
     llm_base_url: str | None = None
     llm_api_key: str | None = None
     llm_temperature: float | None = None  # None = không gửi tham số (gpt-6-luna chỉ nhận mặc định)
+    condense_model: str = "gpt-4o-mini"   # Model nhẹ cho QueryCondenser gộp ngữ cảnh chat nhanh
 
     # Chunking (TV1)
     max_syllables: int = 300
@@ -101,15 +102,16 @@ class Settings:
     coverage_branch_k: int = 5
 
     listwise_enabled: bool = False
+    listwise_model: str = "gpt-6-luna"
     listwise_candidate_n: int = 10
     listwise_margin: float = 0.05
     listwise_min_p: float = 0.5
     listwise_excerpt_words: int = 300
 
     # Context (retrieve/context.py)
-    context_min_p: float = 0.7
-    context_max_blocks: int = 8
-    context_max_words: int = 2400
+    context_min_p: float = 0.4
+    context_max_blocks: int = 10
+    context_max_words: int = 2800
 
     # Phương pháp nâng cao (src/rag/advanced/), vd. "hyde,contextual"; rỗng = baseline
     advanced: str = ""

@@ -1039,30 +1039,17 @@
             </div>
 
             <!-- Assistant Response Container -->
-            <div class="flex items-start space-x-3 w-full">
-              <div class="w-7 h-7 rounded-lg bg-neutral-900 text-white flex items-center justify-center p-1.5 flex-shrink-0 mt-0.5 shadow-sm">
-                <!-- 3D Ice Cube Logo (Just-ice) -->
-                <svg class="w-4 h-4 text-sky-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 2.5L20 7V17L12 21.5L4 17V7L12 2.5Z" />
-                  <path d="M12 12V21.5" />
-                  <path d="M12 12L20 7" />
-                  <path d="M12 12L4 7" />
-                  <path d="M10 5L14 7.2" stroke-width="1.4" opacity="0.85" />
-                  <path d="M7 11.5V15" stroke-width="1.4" opacity="0.85" />
-                </svg>
+            <div class="w-full">
+              <!-- Animated Loading 3 Dots -->
+              <div id="${msgId}-loading" class="flex items-center space-x-1.5 py-2 text-neutral-400">
+                <div class="w-2 h-2 rounded-full bg-neutral-400 dot-1"></div>
+                <div class="w-2 h-2 rounded-full bg-neutral-400 dot-2"></div>
+                <div class="w-2 h-2 rounded-full bg-neutral-400 dot-3"></div>
+                <span class="text-[12px] text-neutral-400 ml-2 font-normal">Just-ice đang phân rã câu hỏi & đối chiếu 6 bộ luật...</span>
               </div>
-              <div class="flex-1 min-w-0">
-                <!-- Animated Loading 3 Dots -->
-                <div id="${msgId}-loading" class="flex items-center space-x-1.5 py-2 text-neutral-400">
-                  <div class="w-2 h-2 rounded-full bg-neutral-400 dot-1"></div>
-                  <div class="w-2 h-2 rounded-full bg-neutral-400 dot-2"></div>
-                  <div class="w-2 h-2 rounded-full bg-neutral-400 dot-3"></div>
-                  <span class="text-[12px] text-neutral-400 ml-2 font-normal">Just-ice đang phân rã câu hỏi & đối chiếu 6 bộ luật...</span>
-                </div>
 
-                <!-- Assistant Content Box -->
-                <div id="${msgId}-content" class="hidden"></div>
-              </div>
+              <!-- Assistant Content Box -->
+              <div id="${msgId}-content" class="hidden"></div>
             </div>
           </div>
         `;
@@ -1874,29 +1861,16 @@
                 ${escapeHtml(turn.query)}
               </div>
             </div>
-            <div class="flex items-start space-x-3 w-full">
-              <div class="w-7 h-7 rounded-lg bg-neutral-900 text-white flex items-center justify-center p-1.5 flex-shrink-0 mt-0.5 shadow-sm">
-                <!-- 3D Ice Cube Logo (Just-ice) -->
-                <svg class="w-4 h-4 text-sky-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 2.5L20 7V17L12 21.5L4 17V7L12 2.5Z" />
-                  <path d="M12 12V21.5" />
-                  <path d="M12 12L20 7" />
-                  <path d="M12 12L4 7" />
-                  <path d="M10 5L14 7.2" stroke-width="1.4" opacity="0.85" />
-                  <path d="M7 11.5V15" stroke-width="1.4" opacity="0.85" />
-                </svg>
-              </div>
-              <div class="flex-1 min-w-0">
-                ${isPending ? `
-                  <div id="${msgId}-loading" class="flex items-center space-x-1.5 py-2 text-neutral-400">
-                    <div class="w-2 h-2 rounded-full bg-neutral-400 dot-1"></div>
-                    <div class="w-2 h-2 rounded-full bg-neutral-400 dot-2"></div>
-                    <div class="w-2 h-2 rounded-full bg-neutral-400 dot-3"></div>
-                    <span class="text-[12px] text-neutral-400 ml-2 font-normal">Just-ice đang phân rã câu hỏi & đối chiếu 6 bộ luật...</span>
-                  </div>
-                ` : ''}
-                <div id="${msgId}-content" class="${isPending ? 'hidden' : ''}"></div>
-              </div>
+            <div class="w-full">
+              ${isPending ? `
+                <div id="${msgId}-loading" class="flex items-center space-x-1.5 py-2 text-neutral-400">
+                  <div class="w-2 h-2 rounded-full bg-neutral-400 dot-1"></div>
+                  <div class="w-2 h-2 rounded-full bg-neutral-400 dot-2"></div>
+                  <div class="w-2 h-2 rounded-full bg-neutral-400 dot-3"></div>
+                  <span class="text-[12px] text-neutral-400 ml-2 font-normal">Just-ice đang phân rã câu hỏi & đối chiếu 6 bộ luật...</span>
+                </div>
+              ` : ''}
+              <div id="${msgId}-content" class="${isPending ? 'hidden' : ''}"></div>
             </div>
           </div>
         `;

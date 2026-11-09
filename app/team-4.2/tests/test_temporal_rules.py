@@ -49,3 +49,10 @@ def test_no_dates():
 
 def test_law_number_is_not_a_date():
     assert extract_rule_anchors("Theo Luật Nhà ở số 27/2023/QH15 thì sao?", asked_at=ASKED) == []
+
+
+def test_dieu_kien_is_not_dispute():
+    (a,) = extract_rule_anchors("Năm 2024 điều kiện làm chủ đầu tư là gì?", asked_at=ASKED)
+    assert a.role != "dispute"
+    (b,) = extract_rule_anchors("Năm 2025 tôi khởi kiện chủ đầu tư.", asked_at=ASKED)
+    assert b.role == "dispute"

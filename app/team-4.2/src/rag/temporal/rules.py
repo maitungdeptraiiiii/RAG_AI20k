@@ -30,6 +30,12 @@ _RANGE = re.compile(rf"từ\s+(?:ngày\s+)?(?P<a>{_POINT})\s+(?:đến|tới)\s+
 _LAW_NAME_BEFORE = re.compile(r"(?:Bộ\s+luật|Luật|Nghị\s+quyết|Nghị\s+định|Thông\s+tư)\s+[A-ZĐÀ-Ỹ][^\s,.;]*"
                               r"(?:\s+[^\s,.;]+){0,6}\s+$")
 _BEFORE, _AFTER = 40, 25
+_NOT_AFTER = {"kiện": "điều "}                      # "điều kiện" không phải "kiện" (khởi kiện)
+
+
+def _kw(word: str) -> str:
+    guard = f"(?<!{re.escape(_NOT_AFTER[word])})" if word in _NOT_AFTER else ""
+    return rf"(?<!\w){guard}{re.escape(word)}(?!\w)"
 
 
 def _parse_point(text: str) -> tuple[date, date, Precision] | None:
@@ -84,7 +90,7 @@ def _role(text: str, start: int, end: int, fallback: Role = "unspecified") -> tu
     best: tuple[int, str, str] | None = None
     for role, words in ROLE_KEYWORDS.items():
         for w in words:
-            for m in re.finditer(rf"(?<!\w){re.escape(w)}(?!\w)", before):
+            for m in re.finditer(_kw(w), before):
                 pos = lo + m.start()
                 if best is None or pos > best[0]:
                     best = (pos, role, w)
@@ -96,7 +102,7 @@ def _role(text: str, start: int, end: int, fallback: Role = "unspecified") -> tu
     nearest: tuple[int, str, str] | None = None
     for role, words in ROLE_KEYWORDS.items():
         for w in words:
-            m = re.search(rf"(?<!\w){re.escape(w)}(?!\w)", after)
+            m = re.search(_kw(w), after)
             if m and (nearest is None or m.start() < nearest[0]):
                 nearest = (m.start(), role, w)
     if nearest is not None:

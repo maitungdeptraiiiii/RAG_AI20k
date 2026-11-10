@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nạp tài liệu — Just-ice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --surface: #ffffff;
+      --page: #f7f7f8;
+      --ink: #0d0d0d;
+      --ink-2: #525252;
+      --ink-3: #8a8a8a;
+      --hairline: #e5e5e5;
+      /* status palette (dataviz): luôn đi kèm icon + nhãn, không dùng màu đơn lẻ */
+      --good: #0ca30c;
+      --good-track: #dcf3dc;
+      --warning: #fab219;
+      --warning-track: #fdf0d2;
+      --critical: #d03b3b;
+      --critical-track: #f8dddd;
+      --neutral-fill: #c3c2b7;
+      --good-text: #006300;
+      --warning-text: #8a5a00;
+      --critical-text: #b42318;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--page); color: var(--ink); font-size: 14px; }
+    .card { background: var(--surface); border: 1px solid var(--hairline); border-radius: 16px; }
+    .tabular { font-variant-numeric: tabular-nums; }
+    .dropzone.drag { border-color: #0d0d0d; background: #f4f4f5; }
+    .page-cell { width: 18px; height: 18px; border-radius: 4px; cursor: pointer; outline-offset: 2px; }
+    .page-cell:focus-visible, .page-cell.active { outline: 2px solid var(--ink); }
+    .seg { height: 8px; border-radius: 999px; display: flex; gap: 2px; overflow: hidden; background: var(--surface); }
+    .seg > div { height: 100%; border-radius: 999px; }
+    .meter { height: 6px; border-radius: 999px; width: 72px; overflow: hidden; }
+    .meter > div { height: 100%; border-radius: 999px; }
+    .chip { border: 1px solid var(--hairline); border-radius: 999px; padding: 3px 10px; font-size: 12px; color: var(--ink-2); background: var(--surface); }
+    .chip.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+    #tooltip { pointer-events: none; }
+    .report-item.active { background: #f0f0f1; }
+    .pending-tag { flex-shrink: 0; font-size: 10.5px; font-weight: 500; border-radius: 999px; padding: 0 7px;
+                   background: var(--warning-track, #fef3c7); color: var(--warning-text, #92400e); }
+    .dl-link { font-size: 12px; border: 1px solid var(--hairline); border-radius: 6px; padding: 2px 8px; color: var(--ink-2); }
+    .dl-link:hover { background: #f5f5f5; }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- Top bar -->
+  <header class="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-neutral-200">
+    <div class="max-w-[1320px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <a href="/" class="flex items-center gap-1.5 text-[13px] text-neutral-600 hover:text-black rounded-lg px-2 py-1 hover:bg-neutral-100 flex-shrink-0">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+          <span>Quay lại chat</span>
+        </a>
+        <h1 class="text-[15px] font-semibold truncate">Nạp tài liệu &amp; kiểm tra chất lượng</h1>
+      </div>
+      <span id="ocr-badge" class="hidden sm:inline text-[12px] text-neutral-500"></span>
+    </div>
+  </header>
+
+  <main class="max-w-[1320px] mx-auto px-4 sm:px-6 py-5 grid grid-cols-1 lg:grid-cols-[340px_minmax(0,1fr)] gap-5">
+    <!-- ============ LEFT: upload + history ============ -->
+    <aside class="space-y-5 min-w-0">
+      <section class="card p-4 space-y-3">
+        <h2 class="text-[14px] font-semibold">Tải lên</h2>
+        <label id="dropzone" for="file-input" class="dropzone block border-2 border-dashed border-neutral-300 rounded-xl p-5 text-center cursor-pointer transition-colors">
+          <svg class="w-7 h-7 mx-auto text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          <div class="mt-2 text-[13px] text-neutral-700 font-medium">Kéo thả file vào đây hoặc bấm để chọn</div>
+          <div class="mt-1 text-[11.5px] text-neutral-500">PDF · DOCX · TXT · MD · CSV · XLSX · ảnh scan (PNG, JPG, TIFF, WEBP)</div>
+          <input id="file-input" type="file" multiple class="hidden" accept=".pdf,.docx,.txt,.md,.csv,.xlsx,.png,.jpg,.jpeg,.tif,.tiff,.webp">
+        </label>
+        <ul id="file-list" class="space-y-1 text-[12.5px] text-neutral-700"></ul>
+        <input id="url-input" type="url" placeholder="Hoặc dán URL văn bản luật" class="w-full border border-neutral-300 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-neutral-500">
+        <button id="btn-upload" class="w-full bg-neutral-900 hover:bg-black disabled:bg-neutral-400 text-white rounded-lg py-2 text-[13px] font-medium transition-colors">Trích xuất &amp; OCR</button>
+        <p class="text-[11.5px] text-neutral-500 leading-snug">Bước này chỉ đọc / OCR và kiểm tra chất lượng. Tài liệu <b>chưa</b> vào kho tra cứu cho tới khi bạn bấm "Embedding &amp; lưu vào kho" ở báo cáo.</p>
+        <div id="upload-status" class="text-[12.5px] hidden" role="status" aria-live="polite"></div>
+      </section>
+
+      <section class="card p-2">
+        <div class="flex items-center justify-between px-2 pt-2 pb-1">
+          <h2 class="text-[14px] font-semibold">Lịch sử nạp</h2>
+          <span id="history-count" class="text-[12px] text-neutral-500"></span>
+        </div>
+        <ul id="history" class="max-h-[52vh] overflow-y-auto"></ul>
+      </section>
+    </aside>
+
+    <!-- ============ RIGHT: detail ============ -->
+    <section id="detail" class="min-w-0">
+      <div id="detail-empty" class="card p-10 text-center text-neutral-500">
+        <div class="text-[15px] font-medium text-neutral-700">Chưa chọn tài liệu</div>
+        <div class="mt-1 text-[13px]">Nạp một tài liệu hoặc chọn trong lịch sử để xem báo cáo từng trang sau OCR.</div>
+      </div>
+      <div id="detail-body" class="hidden space-y-5"></div>
+    </section>
+  </main>
+
+  <div id="tooltip" class="fixed z-50 hidden max-w-[280px] bg-white border border-neutral-200 rounded-lg shadow-lg px-3 py-2 text-[12px] leading-snug"></div>
+
+  <script>
+    // ---------------------------------------------------------------- helpers
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const fmtPct = v => v == null ? '—' : `${Number(v).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}%`;
+    const fmtTime = s => { if (!s) return ''; const d = new Date(s); return isNaN(d) ? s : d.toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' }); };
+
+    const ICON = {
+      good: '<svg class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 20 20" fill="var(--good)"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.7-9.3a1 1 0 00-1.4-1.4L9 10.6 7.7 9.3a1 1 0 00-1.4 1.4l2 2a1 1 0 001.4 0l4-4z" clip-rule="evenodd"/></svg>',
+      warning: '<svg class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 20 20" fill="var(--warning)"><path fill-rule="evenodd" d="M8.3 2.9a2 2 0 013.4 0l6.1 10.6A2 2 0 0116.1 16.5H3.9a2 2 0 01-1.7-3L8.3 2.9zM10 7a1 1 0 00-1 1v3a1 1 0 102 0V8a1 1 0 00-1-1zm0 7.5a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>',
+      critical: '<svg class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 20 20" fill="var(--critical)"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.7 7.3a1 1 0 00-1.4 1.4L8.6 10l-1.3 1.3a1 1 0 101.4 1.4L10 11.4l1.3 1.3a1 1 0 001.4-1.4L11.4 10l1.3-1.3a1 1 0 00-1.4-1.4L10 8.6 8.7 7.3z" clip-rule="evenodd"/></svg>',
+    };
+    const DOC_STATUS = {
+      ok: { tone: 'good', label: 'Đầy đủ, đáng tin' },
+      review: { tone: 'warning', label: 'Cần kiểm tra' },
+      incomplete: { tone: 'critical', label: 'Thiếu nội dung' },
+    };
+    const KIND = {
+      text: 'Text gốc', ocr: 'OCR', flagged: 'Font lỗi', table: 'Bảng', empty: 'Trống',
+    };
+    const REASON = {
+      image: 'ảnh / PDF scan', bad_chars: 'text layer vỡ dấu', empty_text: 'trang không có text layer',
+    };
+
+    function statusBadge(status) {
+      const s = DOC_STATUS[status] || { tone: 'warning', label: 'Chưa rõ' };
+      return `<span class="inline-flex items-center gap-1.5 text-[12px] font-medium" style="color:var(--${s.tone}-text)">${ICON[s.tone]}${esc(s.label)}</span>`;
+    }
+
+    // Trạng thái 1 trang -> tone dùng chung cho ô bản đồ trang, thanh tổng hợp, bảng
+    function pageTone(p) {
+      if (!p.complete) return 'critical';
+      if (p.confidence_status === 'low' || p.kind === 'flagged') return 'warning';
+      return 'good';
+    }
+    const TONE_LABEL = { good: 'Đầy đủ', warning: 'Cần kiểm tra', critical: 'Thiếu / hỏng' };
+    // bảng đánh số theo thứ tự giữa các bảng (_tableNo gán trong showReport), trang theo số trang gốc
+    const pageLabel = p => p.kind === 'table' ? `Bảng ${p._tableNo}` : (p.page != null ? `Trang ${p.page}` : 'Toàn văn');
+
+    // ---------------------------------------------------------------- tooltip
+    const tip = $('tooltip');
+    function showTip(ev, html) {
+      tip.innerHTML = html; tip.classList.remove('hidden');
+      const r = tip.getBoundingClientRect();
+      let x = ev.clientX + 12, y = ev.clientY + 14;
+      if (x + r.width > innerWidth - 8) x = ev.clientX - r.width - 12;
+      if (y + r.height > innerHeight - 8) y = ev.clientY - r.height - 14;
+      tip.style.left = Math.max(8, x) + 'px'; tip.style.top = Math.max(8, y) + 'px';
+    }
+    const hideTip = () => tip.classList.add('hidden');
+
+    // ---------------------------------------------------------------- upload
+    const fileInput = $('file-input'), dz = $('dropzone');
+    let pickedFiles = [];
+    function renderPicked() {
+      $('file-list').innerHTML = pickedFiles.map((f, i) => `
+        <li class="flex items-center justify-between gap-2 bg-neutral-50 rounded-md px-2 py-1">
+          <span class="truncate">${esc(f.name)} <span class="text-neutral-400">· ${(f.size / 1024).toFixed(0)} KB</span></span>
+          <button data-i="${i}" class="rm text-neutral-400 hover:text-black" aria-label="Bỏ ${esc(f.name)}">✕</button>
+        </li>`).join('');
+      document.querySelectorAll('#file-list .rm').forEach(b => b.onclick = e => {
+        e.preventDefault(); pickedFiles.splice(+b.dataset.i, 1); renderPicked();
+      });
+    }
+    fileInput.onchange = () => { pickedFiles.push(...fileInput.files); fileInput.value = ''; renderPicked(); };
+    ['dragenter', 'dragover'].forEach(t => dz.addEventListener(t, e => { e.preventDefault(); dz.classList.add('drag'); }));
+    ['dragleave', 'drop'].forEach(t => dz.addEventListener(t, e => { e.preventDefault(); dz.classList.remove('drag'); }));
+    dz.addEventListener('drop', e => { pickedFiles.push(...e.dataTransfer.files); renderPicked(); });
+
+    function setStatus(html, tone) {
+      const el = $('upload-status');
+      el.className = 'text-[12.5px] block';
+      el.style.color = tone ? `var(--${tone}-text)` : 'var(--ink-2)';
+      el.innerHTML = html;
+    }
+
+    $('btn-upload').onclick = async () => {
+      const url = $('url-input').value.trim();
+      if (!pickedFiles.length && !url) { setStatus('Chọn ít nhất 1 file hoặc nhập URL.', 'critical'); return; }
+      const btn = $('btn-upload');
+      btn.disabled = true; btn.textContent = 'Đang trích xuất, OCR...';
+      setStatus('Tài liệu scan cần OCR từng trang nên có thể mất vài phút.');
+      const fd = new FormData();
+      if (url) fd.append('url', url);
+      pickedFiles.forEach(f => fd.append('files', f));
+      fd.append('mode', 'prepare');          // chỉ trích xuất / OCR; embedding là bước riêng
+      try {
+        const res = await fetch('/api/ingest', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || `Lỗi server (${res.status})`);
+        const results = data.results || [];
+        const errors = results.filter(r => r.error);
+        const ok = results.filter(r => !r.error);
+        const lines = [];
+        ok.forEach(r => lines.push(`${r.skipped ? '↺' : '✓'} ${esc(r.source)}${r.skipped ? ' — đã có trong kho tra cứu' : ' — đã trích xuất, chưa vào kho'}`));
+        errors.forEach(r => lines.push(`✕ ${esc(r.source)}: ${esc(r.error)}`));
+        setStatus(lines.join('<br>'), errors.length ? 'critical' : null);
+        pickedFiles = []; renderPicked(); $('url-input').value = '';
+        await loadHistory();
+        const first = ok.find(r => r.needs_review) || ok[0];
+        if (first) showReport(first);
+      } catch (err) {
+        setStatus(`Lỗi: ${esc(err.message)}`, 'critical');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Trích xuất & OCR';
+      }
+    };
+
+    // ---------------------------------------------------------------- history
+    let activeDocId = null;
+    async function loadHistory() {
+      try {
+        const res = await fetch('/api/ingest_reports');
+        const { reports = [] } = await res.json();
+        $('history-count').textContent = `${reports.length} tài liệu`;
+        $('history').innerHTML = reports.length ? reports.map(r => {
+          const s = DOC_STATUS[r.status] || DOC_STATUS.review;
+          return `
+          <li>
+            <button data-id="${esc(r.doc_id)}" class="report-item w-full text-left px-2.5 py-2 rounded-lg hover:bg-neutral-100 ${r.doc_id === activeDocId ? 'active' : ''}">
+              <div class="flex items-center gap-2 min-w-0">${ICON[s.tone]}<span class="truncate text-[13px] font-medium">${esc(r.source)}</span>${r.indexed === false ? '<span class="pending-tag">Chưa vào kho</span>' : ''}</div>
+              <div class="mt-0.5 pl-[22px] text-[11.5px] text-neutral-500 tabular">
+                ${esc(s.label)} · đầy đủ ${fmtPct(r.completeness_pct)}${r.ocr_pages ? ` · OCR ${r.ocr_pages} trang` : ''} · ${esc(fmtTime(r.ingested_at))}
+              </div>
+            </button>
+          </li>`;
+        }).join('') : '<li class="px-2.5 py-3 text-[12.5px] text-neutral-500">Chưa có báo cáo. Tài liệu nạp trước khi có trang này sẽ không có báo cáo chi tiết.</li>';
+        document.querySelectorAll('#history .report-item').forEach(b => b.onclick = () => openReport(b.dataset.id));
+      } catch (e) { console.warn(e); }
+    }
+
+    async function openReport(docId) {
+      const res = await fetch('/api/ingest_reports/' + encodeURIComponent(docId));
+      if (!res.ok) return;
+      showReport(await res.json());
+    }
+
+
+    // ---------------------------------------------------------------- bước 2: embedding / tải / bỏ
+    function actionPanel(r, s) {
+      const id = encodeURIComponent(r.doc_id);
+      const dl = `
+        <div class="flex items-center gap-1.5">
+          <span class="text-[12px] text-neutral-500">Tải bản OCR:</span>
+          <a href="/api/extracted/${id}/download?format=md" class="dl-link">.md</a>
+          <a href="/api/extracted/${id}/download?format=txt" class="dl-link">.txt</a>
+          <a href="/api/extracted/${id}/download?format=json" class="dl-link">.json</a>
+        </div>`;
+      if (r.indexed !== false) {
+        return `
+        <div class="mt-4 pt-4 border-t border-neutral-100 flex flex-wrap items-center justify-between gap-3">
+          <span class="inline-flex items-center gap-1.5 text-[12.5px]" style="color:var(--good-text)">${ICON.good}Đã trong kho tra cứu · ${(r.n_chunks ?? 0).toLocaleString('vi-VN')} chunk${r.indexed_at ? ' · ' + esc(fmtTime(r.indexed_at)) : ''}</span>
+          ${dl}
+        </div>`;
+      }
+      const warn = s.status && s.status !== 'ok'
+        ? `<div class="text-[12px] mt-1" style="color:var(--warning-text)">Báo cáo có trang cần kiểm tra. Nên mở "Xem bản trích xuất" đối chiếu trước khi đưa vào kho.</div>` : '';
+      return `
+        <div class="mt-4 pt-4 border-t border-neutral-100">
+          <div class="text-[13px] font-semibold">Bước tiếp theo</div>
+          <div class="text-[12px] text-neutral-500 mt-0.5">Tài liệu mới được trích xuất. Chatbot chưa tìm thấy nội dung này cho tới khi embedding.</div>
+          ${warn}
+          <div class="mt-3 flex flex-wrap items-center gap-2">
+            <button id="act-index" class="text-[12.5px] bg-neutral-900 hover:bg-black disabled:bg-neutral-400 text-white rounded-lg px-3.5 py-1.5 font-medium">Embedding &amp; lưu vào kho</button>
+            <button id="act-discard" class="text-[12.5px] border border-neutral-200 rounded-lg px-3 py-1.5 hover:bg-neutral-50" style="color:var(--critical-text)">Bỏ, không lưu</button>
+            <span class="flex-1"></span>
+            ${dl}
+          </div>
+          <div id="act-status" class="text-[12px] mt-2"></div>
+        </div>`;
+    }
+
+    function bindActions(r) {
+      const idx = $('act-index'), dis = $('act-discard'), st = $('act-status');
+      if (!idx) return;
+      const id = encodeURIComponent(r.doc_id);
+      idx.onclick = async () => {
+        idx.disabled = dis.disabled = true; idx.textContent = 'Đang chunk & embedding...';
+        st.style.color = 'var(--ink-2)'; st.textContent = '';
+        try {
+          const res = await fetch(`/api/index/${id}`, { method: 'POST' });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || `Lỗi server (${res.status})`);
+          await loadHistory();
+          showReport(data);
+        } catch (err) {
+          st.style.color = 'var(--critical-text)'; st.textContent = `Lỗi: ${err.message}`;
+          idx.disabled = dis.disabled = false; idx.textContent = 'Embedding & lưu vào kho';
+        }
+      };
+      dis.onclick = async () => {
+        if (!confirm(`Bỏ "${r.source}"? File đã upload, báo cáo và bản trích xuất sẽ bị xoá.`)) return;
+        idx.disabled = dis.disabled = true;
+        try {
+          const res = await fetch(`/api/discard/${id}`, { method: 'POST' });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || `Lỗi server (${res.status})`);
+          currentReport = null; activeDocId = null;
+          $('detail-body').classList.add('hidden'); $('detail-empty').classList.remove('hidden');
+          await loadHistory();
+        } catch (err) {
+          st.style.color = 'var(--critical-text)'; st.textContent = `Lỗi: ${err.message}`;
+          idx.disabled = dis.disabled = false;
+        }
+      };
+    }
+
+    // ---------------------------------------------------------------- detail
+    let currentReport = null, pageFilter = 'all';
+
+    function statTile(label, value, sub) {
+      return `
+        <div class="card p-4 min-w-0">
+          <div class="text-[12px] text-neutral-500">${esc(label)}</div>
+          <div class="mt-1 text-[22px] font-semibold leading-tight">${value}</div>
+          ${sub ? `<div class="mt-1 text-[11.5px] text-neutral-500">${sub}</div>` : ''}
+        </div>`;
+    }
+
+    function showReport(r) {
+      currentReport = r; activeDocId = r.doc_id; pageFilter = 'all';
+      document.querySelectorAll('#history .report-item').forEach(b => b.classList.toggle('active', b.dataset.id === r.doc_id));
+      history.replaceState(null, '', '#' + encodeURIComponent(r.doc_id || ''));
+      const s = r.summary || {};
+      const pages = r.pages_detail || [];
+      let tableNo = 0;
+      pages.forEach(p => { if (p.kind === 'table') p._tableNo = ++tableNo; });
+      const issues = r.quality_issues || [];
+      const pii = Object.entries(r.pii_counts || {});
+      const kinds = s.pages_by_kind || {};
+
+      // nhóm trang theo tone cho thanh tổng hợp
+      const toneCount = { good: 0, warning: 0, critical: 0 };
+      pages.forEach(p => toneCount[pageTone(p)]++);
+      const total = pages.length || 1;
+      const kindLine = Object.entries(kinds).filter(([, n]) => n).map(([k, n]) => `${n} ${KIND[k].toLowerCase()}`).join(' · ');
+
+      const unmeasuredLow = pages.filter(p => p.kind === 'ocr' && p.confidence == null && p.confidence_status === 'low').length;
+      let confSub;
+      if (!s.ocr_pages) confSub = 'Không có trang OCR';
+      else if (s.mean_confidence != null) {
+        confSub = `thấp nhất ${fmtPct(s.min_confidence)} · đo được ${s.confidence_measured_pages}/${s.ocr_pages} trang OCR`;
+        if (unmeasuredLow) confSub += ` · ${unmeasuredLow} trang không nhận ra chữ`;
+      } else if (unmeasuredLow) confSub = `Tesseract không nhận ra chữ trên ${unmeasuredLow}/${s.ocr_pages} trang OCR (ảnh nghiêng/mờ)`;
+      else confSub = 'Tesseract không khả dụng, chưa đo được';
+
+      $('detail-empty').classList.add('hidden');
+      const body = $('detail-body');
+      body.classList.remove('hidden');
+      body.innerHTML = `
+        <div class="card p-5">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="min-w-0">
+              <div class="text-[12px] text-neutral-500">${r.skipped ? 'Đã có trong kho · báo cáo lần nạp ' : 'Nạp lúc '}${esc(fmtTime(r.ingested_at))}</div>
+              <h2 class="mt-0.5 text-[18px] font-semibold break-words">${esc(r.source)}</h2>
+              <div class="mt-1 text-[12px] text-neutral-500 break-all">doc_id ${esc(r.doc_id)}</div>
+            </div>
+            <div class="flex items-center gap-3">
+              ${statusBadge(s.status)}
+              <a href="/extracted/${encodeURIComponent(r.doc_id)}" target="_blank" rel="noopener" class="text-[12.5px] border border-neutral-200 rounded-lg px-3 py-1.5 hover:bg-neutral-50" title="Toàn văn sau OCR / trích xuất, đặt cạnh ảnh trang gốc">Xem bản trích xuất</a>
+              <a href="/doc/${encodeURIComponent(r.source)}" target="_blank" rel="noopener" class="text-[12.5px] border border-neutral-200 rounded-lg px-3 py-1.5 hover:bg-neutral-50" title="Mở file gốc đã upload">Xem file gốc</a>
+            </div>
+          </div>
+          ${actionPanel(r, s)}
+        </div>
+
+        <div class="grid grid-cols-2 xl:grid-cols-5 gap-3">
+          ${statTile('Độ đầy đủ', fmtPct(s.completeness_pct), `${s.pages_complete ?? 0}/${s.pages_total ?? 0} trang có nội dung trọn vẹn`)}
+          ${statTile('Tin cậy OCR trung bình', s.mean_confidence != null ? fmtPct(s.mean_confidence) : '—', esc(confSub))}
+          ${statTile('Trang / phần', (s.pages_total ?? r.n_pages ?? 0).toLocaleString('vi-VN'), esc(kindLine))}
+          ${r.indexed === false
+            ? statTile('Chunk đã index', 'Chưa', 'Chưa embedding, chưa vào kho tra cứu')
+            : statTile('Chunk đã index', (r.n_chunks ?? 0).toLocaleString('vi-VN'), r.n_tables ? `${r.n_tables} bảng` : '')}
+          ${statTile('Chi phí OCR', `${Number(s.ocr_cost_usd ?? r.ocr_cost_usd ?? 0).toFixed(4)} USD`, s.ocr_cached_pages ? `${s.ocr_cached_pages} trang lấy từ cache` : '')}
+        </div>
+
+        <div class="card p-5 space-y-3">
+          <div class="flex flex-wrap items-baseline justify-between gap-2">
+            <h3 class="text-[14px] font-semibold">Bản đồ trang</h3>
+            <span class="text-[12px] text-neutral-500">Di chuột hoặc bấm vào một ô để xem trang</span>
+          </div>
+          <div class="seg" role="img" aria-label="${['good', 'warning', 'critical'].map(t => `${TONE_LABEL[t]} ${toneCount[t]} trang`).join(', ')}">
+            ${['good', 'warning', 'critical'].filter(t => toneCount[t]).map(t =>
+              `<div class="seg-part" data-tone="${t}" style="width:${100 * toneCount[t] / total}%;background:var(--${t})"></div>`).join('')}
+          </div>
+          <div class="flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-neutral-700">
+            ${['good', 'warning', 'critical'].map(t => `<span class="inline-flex items-center gap-1.5">${ICON[t]}${TONE_LABEL[t]} <span class="text-neutral-500 tabular">${toneCount[t]}</span></span>`).join('')}
+          </div>
+          <div id="page-map" class="flex flex-wrap gap-[3px] pt-1">
+            ${pages.map(p => `<button class="page-cell" data-i="${p.index}" aria-label="${esc(pageLabel(p))}: ${TONE_LABEL[pageTone(p)]}" style="background:var(--${pageTone(p)})"></button>`).join('')}
+          </div>
+        </div>
+
+        ${issues.length || pii.length ? `
+        <div class="grid grid-cols-1 ${issues.length && pii.length ? 'xl:grid-cols-[minmax(0,1fr)_300px]' : ''} gap-5">
+          <div class="card p-5 ${issues.length ? '' : 'hidden'}">
+            <h3 class="text-[14px] font-semibold">Cảnh báo chất lượng <span class="text-neutral-500 font-normal">· ${issues.length}</span></h3>
+            <ul class="mt-3 space-y-2">
+              ${issues.map(i => {
+                const tone = i.severity === 'error' ? 'critical' : i.severity === 'warning' ? 'warning' : 'good';
+                return `<li class="flex gap-2 text-[13px]">${ICON[tone]}<div class="min-w-0"><div><span class="font-medium">${esc(i.location)}</span> · <code class="text-[12px] text-neutral-600">${esc(i.type)}</code></div><div class="text-neutral-600">${esc(i.detail)}</div></div></li>`;
+              }).join('')}
+            </ul>
+          </div>
+          <div class="card p-5 ${pii.length ? '' : 'hidden'}">
+            <h3 class="text-[14px] font-semibold">PII đã che trước khi index</h3>
+            <div class="mt-3 flex flex-wrap gap-1.5">
+              ${pii.map(([k, n]) => `<span class="chip">🔒 ${esc(k)} <span class="tabular">×${n}</span></span>`).join('')}
+            </div>
+            <p class="mt-3 text-[12px] text-neutral-500">Giá trị gốc không được lưu vào chunk, embedding hay log.</p>
+          </div>
+        </div>` : ''}
+
+        <div class="card overflow-hidden">
+          <div class="p-4 flex flex-wrap items-center justify-between gap-2 border-b border-neutral-100">
+            <h3 class="text-[14px] font-semibold">Chi tiết từng trang</h3>
+            <div id="page-filters" class="flex flex-wrap gap-1.5"></div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-[13px]">
+              <thead class="text-left text-[11.5px] text-neutral-500 bg-neutral-50">
+                <tr>
+                  <th class="px-4 py-2 font-medium whitespace-nowrap">Trang</th>
+                  <th class="px-3 py-2 font-medium whitespace-nowrap">Nguồn text</th>
+                  <th class="px-3 py-2 font-medium whitespace-nowrap">Độ tin cậy OCR</th>
+                  <th class="px-3 py-2 font-medium whitespace-nowrap text-right">Số từ</th>
+                  <th class="px-3 py-2 font-medium whitespace-nowrap">Trạng thái</th>
+                  <th class="px-3 py-2 font-medium whitespace-nowrap">Ghi chú</th>
+                </tr>
+              </thead>
+              <tbody id="page-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      `;
+
+      // bản đồ trang: hover = tooltip, click = mở dòng tương ứng
+      document.querySelectorAll('#page-map .page-cell').forEach(c => {
+        const p = pages[+c.dataset.i];
+        const html = pageTipHtml(p);
+        c.onmouseenter = e => showTip(e, html); c.onmousemove = e => showTip(e, html); c.onmouseleave = hideTip;
+        c.onfocus = () => { const r = c.getBoundingClientRect(); showTip({ clientX: r.right, clientY: r.bottom }, html); };
+        c.onblur = hideTip;
+        c.onclick = () => { pageFilter = 'all'; renderRows(p.index); };
+      });
+      document.querySelectorAll('.seg-part').forEach(el => {
+        const t = el.dataset.tone;
+        const html = `<b>${TONE_LABEL[t]}</b>: ${toneCount[t]} trang (${fmtPct(100 * toneCount[t] / total)})`;
+        el.onmouseenter = e => showTip(e, html); el.onmousemove = e => showTip(e, html); el.onmouseleave = hideTip;
+      });
+      renderFilters();
+      renderRows();
+      bindActions(r);
+    }
+
+    function pageTipHtml(p) {
+      const tone = pageTone(p);
+      const parts = [`<div class="font-semibold">${esc(pageLabel(p))} · ${esc(KIND[p.kind])}</div>`,
+        `<div class="flex items-center gap-1.5 mt-0.5">${ICON[tone]}${TONE_LABEL[tone]}</div>`];
+      if (p.kind === 'ocr') parts.push(`<div class="text-neutral-600 mt-0.5">Độ tin cậy: ${p.confidence != null ? fmtPct(p.confidence) : 'chưa đo được'}</div>`);
+      parts.push(`<div class="text-neutral-600">${p.words.toLocaleString('vi-VN')} từ</div>`);
+      (p.issues || []).forEach(i => parts.push(`<div class="text-neutral-600">• ${esc(i.detail)}</div>`));
+      return parts.join('');
+    }
+
+    function renderFilters() {
+      const pages = currentReport.pages_detail || [];
+      const defs = [
+        ['all', 'Tất cả', pages.length],
+        ['review', 'Cần xem', pages.filter(p => pageTone(p) !== 'good').length],
+        ['ocr', 'OCR', pages.filter(p => p.kind === 'ocr').length],
+      ];
+      $('page-filters').innerHTML = defs.map(([k, l, n]) =>
+        `<button class="chip ${pageFilter === k ? 'on' : ''}" data-f="${k}">${l} <span class="tabular">${n}</span></button>`).join('');
+      document.querySelectorAll('#page-filters .chip').forEach(b => b.onclick = () => { pageFilter = b.dataset.f; renderFilters(); renderRows(); });
+    }
+
+    function confCell(p) {
+      if (p.kind !== 'ocr') return '<span class="text-neutral-400">—</span>';
+      if (p.confidence == null) {
+        // Tesseract không nhận ra chữ (ảnh nghiêng/mờ) -> bị gắn cờ thấp; hoặc Tesseract không cài
+        return p.confidence_status === 'low'
+          ? `<span class="inline-flex items-center gap-1.5" style="color:var(--warning-text)">${ICON.warning}không đo được</span>`
+          : '<span class="text-neutral-500">Tesseract không khả dụng</span>';
+      }
+      const tone = p.confidence_status === 'low' ? 'warning' : 'good';
+      return `<div class="flex items-center gap-2">
+        <div class="meter" style="background:var(--${tone}-track)"><div style="width:${Math.max(2, Math.min(100, p.confidence))}%;background:var(--${tone})"></div></div>
+        <span class="tabular">${fmtPct(p.confidence)}</span></div>`;
+    }
+
+    function renderRows(openIndex) {
+      const pages = (currentReport.pages_detail || []).filter(p =>
+        pageFilter === 'all' || (pageFilter === 'review' && pageTone(p) !== 'good') || (pageFilter === 'ocr' && p.kind === 'ocr'));
+      renderFilters();
+      document.querySelectorAll('#page-map .page-cell').forEach(c => c.classList.toggle('active', +c.dataset.i === openIndex));
+      $('page-rows').innerHTML = pages.length ? pages.map(p => {
+        const tone = pageTone(p);
+        const notes = [];
+        if (p.kind === 'ocr' && p.ocr_reason) notes.push(`OCR vì ${esc(REASON[p.ocr_reason] || p.ocr_reason)}`);
+        if (p.cached) notes.push('cache');
+        (p.issues || []).forEach(i => notes.push(esc(i.detail)));
+        return `
+          <tr class="border-t border-neutral-100 hover:bg-neutral-50 cursor-pointer align-top" data-i="${p.index}">
+            <td class="px-4 py-2.5 font-medium whitespace-nowrap">${esc(pageLabel(p))}</td>
+            <td class="px-3 py-2.5 whitespace-nowrap">${esc(KIND[p.kind])}</td>
+            <td class="px-3 py-2.5 whitespace-nowrap">${confCell(p)}</td>
+            <td class="px-3 py-2.5 text-right tabular">${p.words.toLocaleString('vi-VN')}</td>
+            <td class="px-3 py-2.5 whitespace-nowrap"><span class="inline-flex items-center gap-1.5" style="color:var(--${tone}-text)">${ICON[tone]}${TONE_LABEL[tone]}</span></td>
+            <td class="px-3 py-2.5 text-neutral-600 min-w-[200px]">${notes.join(' · ') || '<span class="text-neutral-400">—</span>'}</td>
+          </tr>
+          <tr class="preview-row ${p.index === openIndex ? '' : 'hidden'}" data-for="${p.index}">
+            <td colspan="6" class="px-4 pb-3">
+              <div class="bg-neutral-50 border border-neutral-200 rounded-lg p-3 text-[12.5px] text-neutral-700 leading-relaxed">
+                <div class="text-[11px] text-neutral-500 mb-1">Trích đoạn đầu trang (đã che PII)${p.ocr_model ? ` · ${esc(p.ocr_model)}` : ''}</div>
+                ${p.preview ? esc(p.preview) + (p.chars > p.preview.length ? '…' : '') : '<i class="text-neutral-400">Không có chữ</i>'}
+                <div class="mt-2"><a href="/extracted/${encodeURIComponent(currentReport.doc_id)}#p${p.index}" target="_blank" rel="noopener" class="text-[12px] underline text-neutral-700 hover:text-neutral-900">Xem toàn văn trang này cạnh ảnh gốc →</a></div>
+              </div>
+            </td>
+          </tr>`;
+      }).join('') : '<tr><td colspan="6" class="px-4 py-6 text-center text-neutral-500">Không có trang nào khớp bộ lọc.</td></tr>';
+      document.querySelectorAll('#page-rows tr[data-i]').forEach(tr => tr.onclick = () => {
+        const row = document.querySelector(`#page-rows tr[data-for="${tr.dataset.i}"]`);
+        if (row) row.classList.toggle('hidden');
+      });
+      if (openIndex != null) {
+        const tr = document.querySelector(`#page-rows tr[data-i="${openIndex}"]`);
+        if (tr) tr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    // ---------------------------------------------------------------- boot
+    (async () => {
+      try {
+        const info = await (await fetch('/api/info')).json();
+        const ocr = info.settings && info.settings.ocr;
+        $('ocr-badge').textContent = ocr ? `OCR: ${ocr}` : 'OCR: tắt (PDF scan sẽ không có chữ)';
+      } catch (e) {}
+      await loadHistory();
+      const hash = decodeURIComponent(location.hash.slice(1));
+      if (hash) openReport(hash);
+    })();
+  </script>
+</body>
+</html>

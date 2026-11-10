@@ -75,6 +75,13 @@ class VersionedIndex:
     def has_dense(self) -> bool:
         return self._state.dense is not None
 
+    def capture_state(self) -> _State:
+        """Pin the published generation; subsequent builds swap the whole state.
+
+        Consumers must not mutate its dictionaries or index backends.
+        """
+        return self._state
+
     def build(self) -> int:
         chunks: dict[str, VersionedChunk] = {}
         builds: dict[str, str] = {}

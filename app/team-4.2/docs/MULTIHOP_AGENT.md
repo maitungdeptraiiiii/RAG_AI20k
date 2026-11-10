@@ -5,8 +5,33 @@ Think là chế độ opt-in trên composer. Mặc định tắt vẫn chạy `R
 có giới hạn nằm riêng trong từng request. Không cần ingest lại để bật agent.
 
 Trong nhánh tích hợp temporal, Think tắt giữ routing temporal hiện tại. Think bật có
-che PII theo phiên nhưng vẫn ở chế độ snapshot; không nhận `as_of`. Xem
+che PII theo phiên; nếu chọn ngày (`as_of`) sẽ dùng temporal multi-hop trên kho có phiên bản.
+Không chọn ngày thì giữ chế độ snapshot như trước. Xem
 [ghi chú merge và cách kiểm tra tay](MERGE_TEMPORAL_MULTIHOP.md).
+
+## Think cùng ngày áp dụng
+
+`POST /api/chat` có `think: true` và `as_of: YYYY-MM-DD` chọn `TemporalScopeFactory`.
+Sau condense có kiểm soát ngân sách, backend xây timeline bằng cơ chế temporal hiện có,
+pin generation của `VersionedIndex` và đưa ra phạm vi chunk hợp lệ cho từng anchor.
+
+- Từng query được tìm trong từng phạm vi mốc riêng rồi gộp xen kẽ; không so/cộng score chéo mốc.
+- ID gộp Điều bao gồm document/build/khoảng hiệu lực, tránh trộn revision cùng số Điều.
+- Xref dùng danh tính văn bản và giao anchor IDs. Nhiều đích còn mơ hồ thì giữ ambiguity,
+  không tự chọn bản mới nhất. Không có đích hợp lệ tại mốc thì không đọc bản ngoài phạm vi.
+- Mọi role model, kể cả timeline/temporal review/HyDE, dùng chung ledger và deadline.
+  Giữ thêm một slot model cho temporal review cuối, không mở ngân sách mới theo ngày.
+- Metadata hiệu lực, trạng thái xác minh, provenance và toàn văn quy định chuyển tiếp liên quan
+  đi vào assessor/composer/verifier. Temporal review chỉ phân loại claims đã xác minh, không
+  được viết lại nội dung đáp án hoặc tạo citation mới.
+- Tái sử dụng `enforce()` để hạ certainty. Còn chuyển tiếp/mốc chưa giải quyết hoặc không thể
+  kết luận thì không xuất các khẳng định áp dụng như đã chắc chắn; yêu cầu làm rõ thay thế.
+- Khi build của nguồn thay đổi giữa request, dừng kết luận thay vì trộn generation. Audit log
+  chỉ ghi câu hỏi/đáp án đã che, trước khi mở che cho người hỏi.
+
+Chế độ ngày chỉ dùng kho versioned. Kho legacy không rõ phiên bản không được dùng làm fallback.
+Thiếu kho trả unavailable; thiếu căn cứ tại mốc trả rõ không đủ dữ liệu. UI giữ timeline,
+hiệu lực từng nguồn, chuyển tiếp, certainty và câu hỏi bổ sung qua cả JSON/SSE.
 
 ## Luồng thực thi
 
@@ -89,7 +114,7 @@ Backend custom chỉ có protocol `search`/`complete` cần tự bảo đảm ti
 
 ## Snapshot và xref
 
-V1 chạy ở `snapshot_only`: hash chính xác nội dung/metadata chunks được pin cho mỗi run.
+Khi không chọn ngày, agent chạy ở `snapshot_only`: hash chính xác nội dung/metadata chunks được pin cho mỗi run.
 Không tự bịa `unit_revision_id`, ngày hiệu lực hoặc giả định văn bản đang có hiệu lực.
 Nếu index đổi trong lúc còn phải search, run dừng thay vì trộn thế hệ. Index build lỗi
 không được dùng để cấp snapshot agent mới. Nội dung đã pin là các `Chunk` bất biến.
@@ -143,6 +168,7 @@ context cuối trong response chỉ giữ nguồn được trích dẫn, metric 
 mới, checkpoint mỗi câu và không tự tuyên bố correctness từ verdict của agent.
 
 Mốc kiểm tra implementation: bộ tests offline; smoke/API thật chỉ khi có chấp thuận phù hợp.
-Không coi một smoke test là bằng chứng tăng accuracy. Temporal integration end-to-end,
-quality-approved generation publication và expert-reviewed holdout vẫn là phần cần hoàn thiện
-trước khi cam kết trả lời theo pháp luật hiện hành.
+Không coi một smoke test là bằng chứng tăng accuracy. Adapter temporal theo ngày đã có,
+nhưng chưa chạy thêm test theo yêu cầu người dùng; cần kiểm tra tay/nghiệm thu tích hợp.
+Quality-approved generation publication và expert-reviewed holdout vẫn cần hoàn thiện
+trước khi cam kết chất lượng trả lời theo pháp luật hiện hành.

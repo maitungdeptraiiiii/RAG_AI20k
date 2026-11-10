@@ -11,6 +11,10 @@ from rag.retrieve.rerank import FallbackReranker, JevReranker
 
 
 def bounded_dense(dense, budget: Budget):
+    from rag.temporal.index import ValidityFilteredArm
+
+    if isinstance(dense, ValidityFilteredArm):
+        return ValidityFilteredArm(bounded_dense(dense.inner, budget), set(dense.allowed), dense.arm)
     if not isinstance(dense, VectorIndex):
         return dense  # Local/test/custom protocol implementations.
     original = dense.embedder

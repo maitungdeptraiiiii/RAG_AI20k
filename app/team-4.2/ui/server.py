@@ -56,6 +56,7 @@ from rag.config import Settings
 from rag.pipeline import AskTrace, IngestReport, RAGPipeline
 from rag.quality.pii import MaskState
 from rag.agent import AgentConfig, AgentPipeline
+from rag.agent.temporal import TemporalScopeFactory, TemporalScopeUnavailable
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("rag.ui.server")
@@ -111,13 +112,21 @@ def _get_pipeline() -> tuple[RAGPipeline, Settings]:
     return _pipeline, _settings
 
 
-def get_agent_pipeline() -> AgentPipeline:
+def get_agent_pipeline(as_of=None) -> AgentPipeline:
     """Reuse the open index; each agent run owns independent state and budgets."""
     global _agent_pipeline
+    baseline, settings = get_pipeline()
+    config = AgentConfig.from_settings(settings)
+    if as_of is not None:
+        # Do not hold the pipeline lock while the temporal initializer acquires
+        # its own lock and accesses get_pipeline().
+        qa = get_temporal_qa()
+        if qa is None:
+            raise TemporalScopeUnavailable("Kho luật có phiên bản chưa sẵn sàng để tra cứu theo ngày. Vui lòng thử lại sau.")
+        return AgentPipeline(baseline, config, scope_factory=TemporalScopeFactory(baseline, qa, as_of, config))
     with _pipeline_init_lock:
-        baseline, settings = get_pipeline()
         if _agent_pipeline is None or _agent_pipeline.baseline is not baseline:
-            _agent_pipeline = AgentPipeline(baseline, AgentConfig.from_settings(settings))
+            _agent_pipeline = AgentPipeline(baseline, config)
         return _agent_pipeline
 
 
@@ -401,14 +410,16 @@ def _sse(event: dict[str, Any]) -> str:
     return f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
 
 
-def _sync_agent(query: str, mask_state: MaskState, history=None) -> dict[str, Any]:
-    return get_agent_pipeline().ask_debug(query, history=history, mask_state=mask_state).to_response(query)
+def _sync_agent(query: str, mask_state: MaskState, history=None, as_of=None) -> dict[str, Any]:
+    return get_agent_pipeline(as_of).ask_debug(query, history=history, mask_state=mask_state).to_response(query)
 
 
-def _sync_agent_stream(query: str, mask_state: MaskState, history=None):
+def _sync_agent_stream(query: str, mask_state: MaskState, history=None, as_of=None):
     try:
-        for event in get_agent_pipeline().ask_stream(query, history=history, mask_state=mask_state):
+        for event in get_agent_pipeline(as_of).ask_stream(query, history=history, mask_state=mask_state):
             yield _sse(event)
+    except TemporalScopeUnavailable as exc:
+        yield _sse({"type": "error", "error": str(exc), "code": "temporal_scope_unavailable"})
     except Exception as exc:
         log.error("Think streaming failed: %s", type(exc).__name__)
         yield _sse({"type": "error", "error": "Chưa thể hoàn tất Think. Vui lòng thử lại."})
@@ -464,15 +475,9 @@ async def handle_chat(request: Request) -> Response:
             return JSONResponse({"error": "as_of phải là ngày hợp lệ dạng YYYY-MM-DD"}, status_code=400)
     mask_state = get_mask_state(session_id)
 
-    if think and as_of is not None:
-        return JSONResponse({
-            "error": "Think hiện tra cứu theo snapshot tài liệu, chưa hỗ trợ ngày áp dụng. Hãy tắt Think để hỏi theo ngày đã chọn, hoặc bỏ ngày để dùng Think.",
-            "code": "agent_temporal_unsupported",
-        }, status_code=400)
-
     if is_stream:
         return StreamingResponse(
-            (_sync_agent_stream(query, mask_state, history) if think
+            (_sync_agent_stream(query, mask_state, history, as_of) if think
              else _sync_stream(query, as_of, mask_state, history)),
             media_type="text/event-stream",
             headers={
@@ -485,10 +490,12 @@ async def handle_chat(request: Request) -> Response:
     loop = asyncio.get_running_loop()
     try:
         if think:
-            data = await loop.run_in_executor(_executor, _sync_agent, query, mask_state, history)
+            data = await loop.run_in_executor(_executor, _sync_agent, query, mask_state, history, as_of)
         else:
             data = await loop.run_in_executor(_executor, _sync_chat, query, as_of, mask_state, history)
         return JSONResponse(data)
+    except TemporalScopeUnavailable as exc:
+        return JSONResponse({"error": str(exc), "code": "temporal_scope_unavailable"}, status_code=503)
     except Exception as e:
         log.exception("Lỗi khi xử lý chat: %s", e)
         return JSONResponse({"error": f"Lỗi hệ thống: {e}"}, status_code=500)

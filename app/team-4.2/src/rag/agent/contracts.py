@@ -81,13 +81,14 @@ class Budget:
     calls: list[dict[str, Any]] = field(default_factory=list)
     service_requests: dict[str, int] = field(default_factory=dict)
     _lock: Any = field(default_factory=Lock, repr=False)
+    finalization_reserve: int = 0
 
     def check(self):
         if time.monotonic() - self.started >= self.config.deadline_s:
             raise BudgetExceeded("deadline_exceeded")
 
     def can_finalize_after_search(self) -> bool:
-        return self.model_calls + 5 <= self.config.max_model_calls
+        return self.model_calls + 5 + self.finalization_reserve <= self.config.max_model_calls
 
     def remaining_s(self):
         self.check()
@@ -130,6 +131,8 @@ class ModelGateway:
     def call(self, stage: str, system: str, user: str, *, reserve_calls: int = 4) -> str:
         b, c = self.budget, self.budget.config
         b.check()
+        if stage != "temporal_review":
+            reserve_calls += b.finalization_reserve
         if b.model_calls + 1 + reserve_calls > c.max_model_calls:
             raise BudgetExceeded("model_call_limit")
         if len(system) + len(user) > c.max_input_chars:
@@ -215,6 +218,7 @@ class Claim:
 
 @dataclass
 class RunState:
+    scope: Any = None
     requirements: list[Requirement] = field(default_factory=list)
     evidence: dict[str, Evidence] = field(default_factory=dict)
     by_unit: dict[tuple[str, ...], str] = field(default_factory=dict)

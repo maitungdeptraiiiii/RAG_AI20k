@@ -83,6 +83,29 @@ class CorpusSnapshot:
         hit = Hit(ids[0], 0.0, 1, "xref", ids[1:])
         return merged_chunk(hit, self.chunks), ids
 
+    def reference_target(self, chunk: Chunk, number: str, tail: str):
+        """Overridable identity/scope resolution; extraction keeps literal spans."""
+        normalized = fold(tail)
+        doc = chunk.doc_id
+        status = "resolved"
+        mentions = set()
+        for alias, docs in self.aliases.items():
+            if re.search(r"\b" + re.escape(alias) + r"\b", normalized):
+                mentions.update(docs)
+        if len(mentions) == 1:
+            doc = next(iter(mentions))
+        elif len(mentions) > 1:
+            status = "ambiguous"
+        elif re.search(r"\b(?:bo luat|luat|nghi dinh|thong tu)\b", normalized):
+            if not re.search(r"\b(?:bo luat|luat|nghi dinh|thong tu) nay\b", normalized):
+                status = "unresolved_document"
+        elif re.search(r"\bcủa\s+[A-ZĐ][A-ZĐ0-9]{1,}\b", tail):
+            status = "unresolved_document"
+        target = self.articles.get((doc, number.casefold())) if status == "resolved" else None
+        if target is None and status == "resolved":
+            status = "missing_target"
+        return target, status
+
     def xrefs(self, key: tuple[str, ...]) -> list[Xref]:
         if key in self._xref_cache:
             return self._xref_cache[key]
@@ -100,25 +123,7 @@ class CorpusSnapshot:
                 if next_reference:
                     tail = tail[:next_reference.start()]
                 reference = chunk.text[match.start():match.end()] + tail
-                normalized = fold(tail)
-                doc = chunk.doc_id
-                status = "resolved"
-                mentions = set()
-                for alias, docs in self.aliases.items():
-                    if re.search(r"\b" + re.escape(alias) + r"\b", normalized):
-                        mentions.update(docs)
-                if len(mentions) == 1:
-                    doc = next(iter(mentions))
-                elif len(mentions) > 1:
-                    status = "ambiguous"
-                elif re.search(r"\b(?:bo luat|luat|nghi dinh|thong tu)\b", normalized):
-                    if not re.search(r"\b(?:bo luat|luat|nghi dinh|thong tu) nay\b", normalized):
-                        status = "unresolved_document"
-                elif re.search(r"\bcủa\s+[A-ZĐ][A-ZĐ0-9]{1,}\b", tail):
-                    status = "unresolved_document"
-                target = self.articles.get((doc, match[1].casefold())) if status == "resolved" else None
-                if target is None and status == "resolved":
-                    status = "missing_target"
+                target, status = self.reference_target(chunk, match[1], tail)
                 signature = (reference, target, status)
                 if signature in seen:
                     continue

@@ -30,6 +30,7 @@ import threading
 from pathlib import Path
 import sys
 from typing import Any
+from threading import RLock
 
 # Đảm bảo import được package rag khi chạy trực tiếp từ bất kỳ thư mục nào
 _HERE = Path(__file__).resolve().parent
@@ -54,6 +55,7 @@ from starlette.routing import Route
 from rag.config import Settings
 from rag.pipeline import AskTrace, IngestReport, RAGPipeline
 from rag.quality.pii import MaskState
+from rag.agent import AgentConfig, AgentPipeline
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("rag.ui.server")
@@ -67,6 +69,9 @@ REVIEW_HTML_PATH = UI_DIR / "review.html"
 _pipeline: RAGPipeline | None = None
 _settings: Settings | None = None
 _executor = ThreadPoolExecutor(max_workers=2)
+_agent_pipeline: AgentPipeline | None = None
+_pipeline_init_lock = RLock()
+
 _legal_service = None
 
 # Bảng tra PII (placeholder <-> giá trị gốc) theo phiên chat, chỉ nằm trong RAM của server.
@@ -88,6 +93,11 @@ def get_mask_state(session_id: str | None) -> MaskState:
 
 
 def get_pipeline() -> tuple[RAGPipeline, Settings]:
+    with _pipeline_init_lock:
+        return _get_pipeline()
+
+
+def _get_pipeline() -> tuple[RAGPipeline, Settings]:
     global _pipeline, _settings
     if _pipeline is None:
         log.info("Khởi tạo RAGPipeline...")
@@ -99,6 +109,16 @@ def get_pipeline() -> tuple[RAGPipeline, Settings]:
             len(_pipeline.store.docs()),
         )
     return _pipeline, _settings
+
+
+def get_agent_pipeline() -> AgentPipeline:
+    """Reuse the open index; each agent run owns independent state and budgets."""
+    global _agent_pipeline
+    with _pipeline_init_lock:
+        baseline, settings = get_pipeline()
+        if _agent_pipeline is None or _agent_pipeline.baseline is not baseline:
+            _agent_pipeline = AgentPipeline(baseline, AgentConfig.from_settings(settings))
+        return _agent_pipeline
 
 
 async def handle_index(request: Request) -> HTMLResponse:
@@ -381,6 +401,19 @@ def _sse(event: dict[str, Any]) -> str:
     return f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
 
 
+def _sync_agent(query: str, mask_state: MaskState, history=None) -> dict[str, Any]:
+    return get_agent_pipeline().ask_debug(query, history=history, mask_state=mask_state).to_response(query)
+
+
+def _sync_agent_stream(query: str, mask_state: MaskState, history=None):
+    try:
+        for event in get_agent_pipeline().ask_stream(query, history=history, mask_state=mask_state):
+            yield _sse(event)
+    except Exception as exc:
+        log.error("Think streaming failed: %s", type(exc).__name__)
+        yield _sse({"type": "error", "error": "Chưa thể hoàn tất Think. Vui lòng thử lại."})
+
+
 def _sync_stream(query: str, as_of, mask_state: MaskState, history: list[dict[str, Any]] | None = None):
     """SSE: kho có phiên bản đang dùng được -> trả trọn câu trả lời theo mốc trong một sự kiện ``done``
     (TemporalQA chưa stream); không thì pipeline cũ stream token (``sources`` -> ``token``... -> ``done``).
@@ -404,6 +437,13 @@ async def handle_chat(request: Request) -> Response:
     except Exception:
         return JSONResponse({"error": "Body JSON không hợp lệ"}, status_code=400)
 
+    if not isinstance(body, dict):
+        return JSONResponse({"error": "Body JSON phải là object"}, status_code=400)
+    think = body.get("think", False)
+    if not isinstance(think, bool):
+        return JSONResponse({"error": "think phải là boolean (true hoặc false)"}, status_code=400)
+    if not isinstance(body.get("query", ""), str):
+        return JSONResponse({"error": "Câu hỏi phải là chuỗi"}, status_code=400)
     query = (body.get("query") or "").strip()
     history = body.get("history") or []
     is_stream = bool(body.get("stream", False))
@@ -411,6 +451,8 @@ async def handle_chat(request: Request) -> Response:
         history = []
     if not query:
         return JSONResponse({"error": "Câu hỏi không được rỗng"}, status_code=400)
+    if think and len(query) > 8000:
+        return JSONResponse({"error": "Câu hỏi Think tối đa 8000 ký tự"}, status_code=400)
 
     session_id = str(body.get("session_id") or "").strip()[:128] or None
     as_of = None
@@ -422,9 +464,16 @@ async def handle_chat(request: Request) -> Response:
             return JSONResponse({"error": "as_of phải là ngày hợp lệ dạng YYYY-MM-DD"}, status_code=400)
     mask_state = get_mask_state(session_id)
 
+    if think and as_of is not None:
+        return JSONResponse({
+            "error": "Think hiện tra cứu theo snapshot tài liệu, chưa hỗ trợ ngày áp dụng. Hãy tắt Think để hỏi theo ngày đã chọn, hoặc bỏ ngày để dùng Think.",
+            "code": "agent_temporal_unsupported",
+        }, status_code=400)
+
     if is_stream:
         return StreamingResponse(
-            _sync_stream(query, as_of, mask_state, history),
+            (_sync_agent_stream(query, mask_state, history) if think
+             else _sync_stream(query, as_of, mask_state, history)),
             media_type="text/event-stream",
             headers={
                 "Cache-Control": "no-cache",
@@ -435,7 +484,10 @@ async def handle_chat(request: Request) -> Response:
 
     loop = asyncio.get_running_loop()
     try:
-        data = await loop.run_in_executor(_executor, _sync_chat, query, as_of, mask_state, history)
+        if think:
+            data = await loop.run_in_executor(_executor, _sync_agent, query, mask_state, history)
+        else:
+            data = await loop.run_in_executor(_executor, _sync_chat, query, as_of, mask_state, history)
         return JSONResponse(data)
     except Exception as e:
         log.exception("Lỗi khi xử lý chat: %s", e)

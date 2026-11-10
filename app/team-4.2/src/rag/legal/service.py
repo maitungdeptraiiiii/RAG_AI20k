@@ -166,6 +166,10 @@ class LegalService:
         build_id = _sha1(key, inputs)[:16]
         versions = build_versions(doc, provisions, effectivity, ops, build_id=build_id, default_dates=default_dates)
         versions = self._flag_known_gaps(doc, ops, versions)
+        if not doc.source_verified:
+            versions = _flag(versions, lambda pid: True, None, "source.no_vbpl_metadata")
+        if doc.metadata_conflicts:
+            versions = _flag(versions, lambda pid: True, None, "source.inherited_metadata_conflict")
         versions = self._check_vbhn(key, versions)
         run = BuildRun(build_id, key, tuple(o.operation_id for o in ops), inputs, self.now(), self.code_version)
         self.store.save_build(run, versions)
@@ -253,13 +257,21 @@ class LegalService:
                 and item.payload.get("built_excerpt") == mismatch.built_excerpt
                 and item.payload.get("vbhn_excerpt") == mismatch.vbhn_excerpt)
 
-    def build_all(self) -> list[BuildRun]:
+    def build_all(self, progress: Callable[[str, int, int], None] | None = None) -> list[BuildRun]:
         docs = sorted((d for d in self.store.documents() if not d.is_consolidated),
                       key=lambda d: (d.issued_on or date.min, d.document_key))
-        for d in docs:
+        n = len(docs)
+        for i, d in enumerate(docs, 1):
             self.plan_operations(d.document_key)
+            if progress:
+                progress("plan", i, n)
         # mới trước, cũ sau: ngày "hết hiệu lực" của luật cũ đọc từ bản dựng của luật mới (Điều hiệu lực đã sửa)
-        return [self.build_law(d.document_key) for d in reversed(docs)]
+        runs = []
+        for i, d in enumerate(reversed(docs), 1):
+            runs.append(self.build_law(d.document_key))
+            if progress:
+                progress("build", i, n)
+        return runs
 
     # --- duyệt ----------------------------------------------------------------------------
 

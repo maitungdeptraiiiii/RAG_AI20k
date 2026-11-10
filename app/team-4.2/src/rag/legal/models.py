@@ -50,6 +50,13 @@ class LegalDocument:
     raw_checksum: str
     fetched_at: datetime
     discovered_via: str | None = None
+    text_source: Literal["vbpl", "file"] = "vbpl"
+    content_verified: dict[str, str] | None = None   # {"by": str, "at": iso}; None với nguồn vbpl
+    source_verified: bool = True
+    source_checked_at: datetime | None = None
+    # tên trường -> {"source": "vbpl"|"text"|"user"|"inherited", "at": iso, "detail": str}
+    field_sources: dict[str, dict[str, str]] = field(default_factory=dict)
+    metadata_conflicts: tuple[str, ...] = ()         # mâu thuẫn giữa giá trị kế thừa và text mới
 
 
 @dataclass(frozen=True)

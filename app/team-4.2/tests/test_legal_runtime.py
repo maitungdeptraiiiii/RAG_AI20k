@@ -16,6 +16,7 @@ from rag.legal.rawfiles import write_text
 from rag.legal.service import LegalService
 from rag.legal.snapshots import SnapshotManager
 from rag.legal.store import LegalStore
+from rag.schema import Chunk
 from rag.temporal.index import VersionedIndex
 
 UI = Path(__file__).resolve().parents[1] / "ui"
@@ -208,13 +209,15 @@ def test_two_uploads_while_indexing_never_mix_or_go_back(env):
     a = env.worker.submit("upload", "u1", "An", add_law_a)
     b = env.worker.submit("upload", "u2", "Bình", add_law_b)
     seen: list[str] = []
+    violations: list[str] = []
     stop = threading.Event()
 
     def watch():
         while not stop.is_set():
             rt = env.holder.get()
-            assert rt.index.snapshot_id == rt.snapshot_id
-            if not seen or seen[-1] != rt.snapshot_id:
+            if rt is None or rt.index.snapshot_id != rt.snapshot_id:
+                violations.append(f"cặp lệch: {rt and rt.snapshot_id} / {rt and rt.index.snapshot_id}")
+            elif not seen or seen[-1] != rt.snapshot_id:
                 seen.append(rt.snapshot_id)
             time.sleep(0.005)
 
@@ -225,6 +228,8 @@ def test_two_uploads_while_indexing_never_mix_or_go_back(env):
     finally:
         stop.set()
         t.join()
+    assert violations == []
+    assert len(seen) >= 2
     rt = env.holder.get()
     assert rt.snapshot_id == env.worker.job(b.job_id).snapshot_id and rt.index.snapshot_id == rt.snapshot_id
     order = [s.snapshot_id for s in reversed(env.snapshots.list())]       # cũ -> mới
@@ -298,6 +303,61 @@ def test_on_upload_done_error_does_not_kill_worker(env):
     b = env.worker.submit("upload", "u2", "An", add_law_b)
     assert env.worker.wait_idle(10)
     assert env.worker.job(a.job_id).state == "done" and env.worker.job(b.job_id).state == "done"
+
+
+def test_unexpected_error_gives_terminal_state_to_callback(env):
+    def broken_index(job):
+        raise RuntimeError("trước try của _index")
+    env.worker._index = broken_index
+    job = env.worker.submit("upload", "u1", "An", add_law)
+    assert env.worker.wait_idle(10)
+    assert env.done == [(job.job_id, "failed")]
+    assert "trước try" in env.worker.job(job.job_id).error
+
+
+def test_wait_idle_from_callback_is_refused_not_deadlocked(env):
+    errors = []
+
+    def cb(job):
+        try:
+            env.worker.wait_idle(5)
+        except RuntimeError as exc:
+            errors.append(exc)
+    env.worker._on_upload_done = cb
+    start = time.monotonic()
+    env.worker.submit("upload", "u1", "An", add_law)
+    assert env.worker.wait_idle(10) and time.monotonic() - start < 4
+    assert len(errors) == 1
+
+
+def test_shared_dense_search_while_other_index_builds(env):
+    first = env.snapshots.current().snapshot_id
+    dense = VectorIndex(HashEmbedder(dim=16))
+    old = VersionedIndex(env.snapshots.store(first), dense=dense, snapshot_id=first)
+    old.build()
+    errors: list[BaseException] = []
+    stop = threading.Event()
+
+    def search_loop():
+        while not stop.is_set():
+            try:
+                old.search("phạm vi", date(2025, 9, 1), date(2025, 9, 1), k=5)
+            except BaseException as exc:    # noqa: BLE001
+                errors.append(exc)
+                return
+
+    threads = [threading.Thread(target=search_loop) for _ in range(3)]
+    for t in threads:
+        t.start()
+    try:
+        for i in range(400):                # nhiều lần thêm chunk mới vào vector store dùng chung
+            dense.build([Chunk(f"x{i}-{j}", "d", "t", None, None, "s", f"nội dung {i} {j}") for j in range(10)])
+    finally:
+        stop.set()
+        for t in threads:
+            t.join()
+    assert errors == []
+    assert len(dense) >= 400 * 10
 
 
 def test_holder_without_runtime_when_initial_index_fails(tmp_path):

@@ -174,6 +174,8 @@ class WriteWorker:
             return [replace(j) for j in self._jobs.values()]
 
     def wait_idle(self, timeout: float) -> bool:
+        if threading.current_thread() is self._thread:
+            raise RuntimeError("wait_idle không được gọi từ luồng ghi (vd. trong on_upload_done): sẽ tự chờ chính nó")
         with self._cond:
             return self._cond.wait_for(lambda: not self._queue and not self._busy, timeout)
 
@@ -205,28 +207,33 @@ class WriteWorker:
                 if job.state not in _TERMINAL:
                     self._update(job, state="failed", error=_describe(exc))
             finally:
+                if job.state not in _TERMINAL:     # phòng hờ: callback chỉ thấy trạng thái cuối
+                    self._update(job, state="failed", error=job.error or "kết thúc không rõ trạng thái")
+                self._after(job)
                 with self._cond:
                     self._busy = False
                     self._cond.notify_all()
 
     def _process(self, job: Job, fn: Callable[[LegalService], Any] | None) -> None:
-        try:
-            if job.kind == "reindex":
-                self._update(job, snapshot_id=self._snapshots.current().snapshot_id)
-            else:
-                self._write(job, fn)
-            if job.state != "failed":
-                self._index(job)
-        finally:
-            if job.kind == "upload" and self._on_upload_done is not None:
-                try:
-                    self._on_upload_done(replace(job))
-                except Exception:              # noqa: BLE001
-                    log.exception("on_upload_done lỗi cho việc %s", job.job_id)
+        if job.kind == "reindex":
+            self._update(job, snapshot_id=self._snapshots.current().snapshot_id)
+        else:
+            self._write(job, fn)
+        if job.state != "failed":
+            self._index(job)
+
+    def _after(self, job: Job) -> None:
+        """Chạy trên luồng ghi khi việc đã ở trạng thái cuối, TRƯỚC khi worker rảnh (nên `wait_idle` trả True nghĩa
+        là callback đã chạy xong). Callback không được gọi `wait_idle` (bị chặn bằng RuntimeError)."""
+        if job.kind == "upload" and self._on_upload_done is not None:
             try:
-                self._snapshots.cleanup(in_use=self._holder.in_use())
-            except Exception:                  # noqa: BLE001
-                log.exception("Dọn snapshot cũ lỗi")
+                self._on_upload_done(replace(job))
+            except BaseException:              # noqa: BLE001
+                log.exception("on_upload_done lỗi cho việc %s", job.job_id)
+        try:
+            self._snapshots.cleanup(in_use=self._holder.in_use())
+        except BaseException:                  # noqa: BLE001
+            log.exception("Dọn snapshot cũ lỗi")
 
     def _write(self, job: Job, fn: Callable[[LegalService], Any] | None) -> None:
         assert fn is not None

@@ -1,0 +1,509 @@
+{
+  "n": 18,
+  "k": 10,
+  "anchor_accuracy": 1.0,
+  "version_accuracy": 0.9444444444444444,
+  "rows": [
+    {
+      "id": "t01",
+      "anchor_ok": true,
+      "version_ok": true,
+      "anchors": [
+        [
+          "signing",
+          "2023-06-15",
+          "2023-06-15"
+        ]
+      ],
+      "expected_anchors": [
+        [
+          "signing",
+          "2023-06-15",
+          "2023-06-15"
+        ]
+      ],
+      "found": {
+        "signing": [
+          "luat:65/2014/QH13",
+          "luat:66/2014/QH13"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "id": "t02",
+      "anchor_ok": true,
+      "version_ok": true,
+      "anchors": [
+        [
+          "unspecified",
+          "2024-09-01",
+          "2024-09-01"
+        ]
+      ],
+      "expected_anchors": [
+        [
+          "unspecified",
+          "2024-09-01",
+          "2024-09-01"
+        ]
+      ],
+      "found": {
+        "unspecified": [
+          "luat:27/2023/QH15",
+          "luat:31/2024/QH15"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "id": "t03",
+      "anchor_ok": true,
+      "version_ok": true,
+      "anchors": [
+        [
+          "unspecified",
+          "2024-01-01",
+          "2024-12-31"
+        ]
+      ],
+      "expected_anchors": [
+        [
+          "unspecified",
+          "2024-01-01",
+          "2024-12-31"
+        ]
+      ],
+      "found": {
+        "unspecified": [
+          "luat:27/2023/QH15",
+          "luat:65/2014/QH13"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "id": "t04",
+      "anchor_ok": true,
+      "version_ok": true,
+      "anchors": [
+        [
+          "signing",
+          "2020-03-10",
+          "2020-03-10"
+        ]
+      ],
+      "expected_anchors": [
+        [
+          "signing",
+          "2020-03-10",
+          "2020-03-10"
+        ]
+      ],
+      "found": {
+        "signing": [
+          "bo-luat:91/2015/QH13",
+          "luat:45/2013/QH13",
+          "luat:66/2014/QH13"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "id": "t05",
+      "anchor_ok": true,
+      "version_ok": true,
+      "anchors": [
+        [
+          "unspecified",
+          "2024-10-15",
+          "2024-10-15"
+        ]
+      ],
+      "expected_anchors": [
+        [
+          "unspecified",
+          "2024-10-15",
+          "2024-10-15"
+        ]
+      ],
+      "found": {
+        "unspecified": [
+          "luat:29/2023/QH15",
+          "luat:31/2024/QH15"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "id": "t06",
+      "anchor_ok": true,
+      "version_ok": true,
+      "anchors": [
+        [
+          "unspecified",
+          "2019-01-01",
+          "2019-12-31"
+        ]
+      ],
+      "expected_anchors": [
+        [
+          "unspecified",
+          "2019-01-01",
+          "2019-12-31"
+        ]
+      ],
+      "found": {
+        "unspecified": [
+          "luat:65/2014/QH13",
+          "luat:66/2014/QH13"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "id": "t07",
+      "anchor_ok": true,
+      "version_ok": true,
+      "anchors": [
+        [
+          "unspecified",
+          "2025-03-01",
+          "2025-03-31"
+        ]
+      ],
+      "expected_anchors": [
+        [
+          "unspecified",
+          "2025-03-01",
+          "2025-03-31"
+        ]
+      ],
+      "found": {
+        "unspecified": [
+          "luat:29/2023/QH15"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "id": "t08",
+      "anchor_ok": true,
+      "version_ok": true,
+      "anchors": [
+        [
+          "unspecified",
+          "2025-12-20",
+          "2025-12-20"
+        ]
+      ],
+      "expected_anchors": [
+        [
+          "unspecified",
+          "2025-12-20",
+          "2025-12-20"
+        ]
+      ],
+      "found": {
+        "unspecified": [
+          "luat:27/2023/QH15",
+          "luat:61/2020/QH14"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "id": "t09",
+      "anchor_ok": true,
+      "version_ok": true,
+      "anchors": [
+        [
+          "signing",
+          "2018-01-01",
+          "2018-01-01"
+        ]
+      ],
+      "expected_anchors": [
+        [
+          "signing",
+          "2018-01-01",
+          "2018-01-01"
+        ]
+      ],
+      "found": {
+        "signing": [
+          "luat:65/2014/QH13"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "id": "t10",
+      "anchor_ok": true,
+      "version_ok": true,
+      "anchors": [
+        [
+          "evaluation",
+          "2026-11-09",
+          "2026-11-09"
+        ],
+        [
+          "signing",
+          "2023-06-15",
+          "2023-06-15"
+        ]
+      ],
+      "expected_anchors": [
+        [
+          "evaluation",
+          "2026-11-09",
+          "2026-11-09"
+        ],
+        [
+          "signing",
+          "2023-06-15",
+          "2023-06-15"
+        ]
+      ],
+      "found": {
+        "signing": [
+          "luat:65/2014/QH13",
+          "luat:66/2014/QH13"
+        ],
+        "evaluation": [
+          "luat:27/2023/QH15",
+          "luat:29/2023/QH15"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "id": "t11",
+      "anchor_ok": true,
+      "version_ok": true,
+      "anchors": [
+        [
+          "unspecified",
+          "2023-05-01",
+          "2023-05-01"
+        ]
+      ],
+      "expected_anchors": [
+        [
+          "unspecified",
+          "2023-05-01",
+          "2023-05-01"
+        ]
+      ],
+      "found": {
+        "unspecified": [
+          "luat:45/2013/QH13",
+          "luat:61/2020/QH14",
+          "luat:66/2014/QH13"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "id": "t12",
+      "anchor_ok": true,
+      "version_ok": true,
+      "anchors": [
+        [
+          "unspecified",
+          "2025-05-01",
+          "2025-05-01"
+        ]
+      ],
+      "expected_anchors": [
+        [
+          "unspecified",
+          "2025-05-01",
+          "2025-05-01"
+        ]
+      ],
+      "found": {
+        "unspecified": [
+          "luat:29/2023/QH15",
+          "luat:31/2024/QH15",
+          "luat:61/2020/QH14"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "id": "t13",
+      "anchor_ok": true,
+      "version_ok": true,
+      "anchors": [
+        [
+          "evaluation",
+          "2026-11-09",
+          "2026-11-09"
+        ]
+      ],
+      "expected_anchors": [
+        [
+          "evaluation",
+          "2026-11-09",
+          "2026-11-09"
+        ]
+      ],
+      "found": {
+        "evaluation": [
+          "luat:27/2023/QH15"
+        ]
+      },
+      "warnings": [
+        "timeline.default_today"
+      ]
+    },
+    {
+      "id": "t14",
+      "anchor_ok": true,
+      "version_ok": true,
+      "anchors": [
+        [
+          "signing",
+          "2025-01-01",
+          "2025-12-31"
+        ]
+      ],
+      "expected_anchors": [
+        [
+          "signing",
+          "2025-01-01",
+          "2025-12-31"
+        ]
+      ],
+      "found": {
+        "signing": [
+          "luat:27/2023/QH15",
+          "luat:29/2023/QH15"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "id": "t15",
+      "anchor_ok": true,
+      "version_ok": true,
+      "anchors": [
+        [
+          "signing",
+          "2016-08-05",
+          "2016-08-05"
+        ]
+      ],
+      "expected_anchors": [
+        [
+          "signing",
+          "2016-08-05",
+          "2016-08-05"
+        ]
+      ],
+      "found": {
+        "signing": [
+          "bo-luat:33/2005/QH11",
+          "luat:45/2013/QH13",
+          "luat:65/2014/QH13",
+          "luat:66/2014/QH13"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "id": "t16",
+      "anchor_ok": true,
+      "version_ok": true,
+      "anchors": [
+        [
+          "evaluation",
+          "2026-11-09",
+          "2026-11-09"
+        ]
+      ],
+      "expected_anchors": [
+        [
+          "evaluation",
+          "2026-11-09",
+          "2026-11-09"
+        ]
+      ],
+      "found": {
+        "evaluation": [
+          "luat:27/2023/QH15",
+          "luat:29/2023/QH15",
+          "luat:31/2024/QH15"
+        ]
+      },
+      "warnings": [
+        "timeline.default_today"
+      ]
+    },
+    {
+      "id": "t17",
+      "anchor_ok": true,
+      "version_ok": false,
+      "anchors": [
+        [
+          "performance",
+          "2024-01-01",
+          "2024-12-31"
+        ]
+      ],
+      "expected_anchors": [
+        [
+          "performance",
+          "2024-01-01",
+          "2024-12-31"
+        ]
+      ],
+      "found": {
+        "performance": [
+          "luat:27/2023/QH15",
+          "luat:29/2023/QH15",
+          "luat:31/2024/QH15",
+          "luat:35/2018/QH14",
+          "luat:40/2019/QH14"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "id": "t18",
+      "anchor_ok": true,
+      "version_ok": true,
+      "anchors": [
+        [
+          "unspecified",
+          "2022-05-10",
+          "2022-05-10"
+        ]
+      ],
+      "expected_anchors": [
+        [
+          "unspecified",
+          "2022-05-10",
+          "2022-05-10"
+        ]
+      ],
+      "found": {
+        "unspecified": [
+          "luat:61/2020/QH14",
+          "luat:65/2014/QH13"
+        ]
+      },
+      "warnings": []
+    }
+  ],
+  "llm": {
+    "n": 18,
+    "firm": 0,
+    "qualified": 7,
+    "cannot_conclude": 11,
+    "firm_on_unverified": 0,
+    "errors": 0,
+    "firm_on_unverified_note": "tính lại theo căn cứ được dẫn trong câu trả lời (runner cũ đếm mọi nguồn trong ngữ cảnh, kể cả nguồn kho cũ không được dẫn); runner hiện tại đếm theo citations của issues"
+  }
+}

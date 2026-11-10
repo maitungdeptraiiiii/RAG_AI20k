@@ -26,7 +26,7 @@ dependencies = [
 [project.optional-dependencies]
 jev = ["typesafe-sdk"]                 # RERANK_BACKEND=jev
 neural = ["torch", "transformers"]    # ADVANCED=splade / colbert
-dev = ["pytest"]
+dev = ["pytest", "pytest-asyncio"]   # tests/test_stream.py dùng @pytest.mark.asyncio
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -34,3 +34,4 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src", "."]
+asyncio_default_fixture_loop_scope = "function"

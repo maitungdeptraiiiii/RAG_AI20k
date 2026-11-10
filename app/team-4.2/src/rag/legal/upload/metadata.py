@@ -8,10 +8,9 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Any, Literal
 
-from rag.ingest.vbpl import VbplError, metadata_from_detail, pick_detail
+from rag.ingest.vbpl import metadata_from_detail, pick_detail
 from rag.legal.crawl import _type_name
 from rag.legal.effectivity import parse_effectivity, parse_vn_date
-from rag.legal.keys import normalize_number
 from rag.legal.models import LegalDocument
 from rag.legal.structure import ARTICLE_RE, parse_structure
 
@@ -28,6 +27,8 @@ class FieldValue:
 
 FIELDS = ("doc_type", "doc_number", "title", "issuer", "issued_on",
           "vbpl_id", "vbpl_effective_from", "vbpl_effective_to", "eff_status")
+
+INHERITABLE = ("vbpl_id", "eff_status", "vbpl_effective_from", "vbpl_effective_to", "issuer")
 
 ACCEPTED_TYPES = ("Luật", "Bộ luật", "Nghị quyết")
 REJECT_TYPE_MESSAGE = "Kho luật chỉ nhận Luật / Bộ luật / Nghị quyết / VBHN của VPQH; hãy dùng 'Tài liệu thường'"
@@ -106,7 +107,7 @@ def lookup_vbpl(client, doc_type: str, doc_number: str) -> dict | None:
         items = [i for i in client.search_by_number(doc_number)
                  if _type_name(i.get("docType")).casefold() == doc_type.casefold()]
         return pick_detail(client, items) if items else None
-    except VbplError:
+    except Exception:  # mọi lỗi từ client (VbplError, requests.*) -> không tra được
         return None
 
 
@@ -121,7 +122,7 @@ def merge_fields(*layers: dict[str, FieldValue]) -> dict[str, FieldValue]:
 
 def inherit_fields(new: dict[str, FieldValue], old_doc: LegalDocument, now: datetime) -> dict[str, FieldValue]:
     out = dict(new)
-    for name in FIELDS:
+    for name in INHERITABLE:
         if name in out and out[name].value is not None:
             continue
         value = getattr(old_doc, name, None)
@@ -144,11 +145,6 @@ def metadata_conflicts(fields: dict[str, FieldValue], text: str, key: str) -> tu
         read = parse_effectivity(parse_structure(text, key)).default_from
         if read is not None and read != eff.value:
             out.append(f"Ngày hiệu lực kế thừa {_fmt(eff.value)} khác ngày đọc từ điều hiệu lực {_fmt(read)}")
-    num = fields.get("doc_number")
-    if num and num.source == "inherited" and num.value:
-        found = header_fields(text, datetime.min).get("doc_number")
-        if found and normalize_number(found.value) != normalize_number(num.value):
-            out.append(f"Số hiệu kế thừa {num.value} khác số hiệu đọc từ văn bản {found.value}")
     return tuple(out)
 
 

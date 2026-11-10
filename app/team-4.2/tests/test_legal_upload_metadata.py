@@ -3,6 +3,7 @@ from datetime import date, datetime
 from pathlib import Path
 
 import pytest
+import requests
 
 from rag.ingest.vbpl import VbplError
 from rag.legal.models import LegalDocument
@@ -45,6 +46,11 @@ class FakeClient:
 class FailingClient:
     def search_by_number(self, number):
         raise VbplError("down")
+
+
+class RaisingClient:
+    def search_by_number(self, number):
+        raise requests.ConnectionError("down")
 
 
 def doc(**kw):
@@ -122,3 +128,15 @@ def test_type_problem(t, n, ok):
 
 def test_is_consolidated():
     assert is_consolidated("Văn bản hợp nhất", "01/VBHN-VPQH") and not is_consolidated("Luật", "43/2024/QH15")
+
+
+def test_lookup_network_error_returns_none():
+    assert lookup_vbpl(RaisingClient(), "Luật", "43/2024/QH15") is None
+
+
+def test_only_vbpl_fields_are_inherited():
+    old = doc(vbpl_id="99", title="Cũ", doc_number="31/2024/QH15", issued_on=date(2024, 1, 18),
+              issuer="Quốc hội")
+    f = inherit_fields({}, old, NOW)
+    assert set(f) == {"vbpl_id", "issuer"}
+    assert "doc_number" not in f and "issued_on" not in f and "title" not in f

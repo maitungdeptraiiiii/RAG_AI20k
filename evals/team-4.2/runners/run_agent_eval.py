@@ -23,11 +23,18 @@ def main():
     parser.add_argument("--dataset", type=Path, default=Path("evals/team-4.2/datasets/benchmark_multihop_hard25.jsonl"))
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--limit", type=int, default=3)
+    parser.add_argument("--ids", type=str, default="", help="Comma-separated question IDs (e.g. mh25_03,mh25_04)")
     args = parser.parse_args()
     if args.limit < 1:
         parser.error("--limit must be positive")
     raw = args.dataset.read_bytes()
-    rows = [json.loads(line) for line in raw.decode("utf-8").splitlines() if line.strip()][:args.limit]
+    all_rows = [json.loads(line) for line in raw.decode("utf-8").splitlines() if line.strip()]
+    if args.ids:
+        target_ids = [x.strip() for x in args.ids.split(",") if x.strip()]
+        id_map = {row["id"]: row for row in all_rows}
+        rows = [id_map[qid] for qid in target_ids if qid in id_map]
+    else:
+        rows = all_rows[:args.limit]
     if not rows or any(not isinstance(row.get("question"), str) for row in rows):
         parser.error("Dataset needs nonempty rows with question strings")
     args.out.mkdir(parents=True, exist_ok=False)
@@ -37,6 +44,7 @@ def main():
     agent = AgentPipeline(baseline, config)
     manifest = {
         "dataset_sha256": hashlib.sha256(raw).hexdigest(), "n": len(rows),
+        "target_ids": [r["id"] for r in rows],
         "agent": asdict(config), "model": settings.llm_model, "embed_model": settings.embed_model,
         "rerank_backend": settings.rerank_backend, "semantic_quality": "human_review_required",
     }
@@ -56,16 +64,26 @@ def main():
                 "candidate_recall": len(expected & retrieved) / len(expected) if expected else None,
                 "all_gold_candidate": expected <= retrieved if expected else None,
                 "all_gold_final_context": expected <= supplied if expected else None,
+                "gold_total": len(expected),
+                "gold_retrieved": len(expected & retrieved),
+                "gold_supplied": len(expected & supplied),
+                "missing_from_candidate": [f"{s} :: {sec}" for s, sec in (expected - retrieved)],
                 "rounds": trace.agent["budget"]["rounds"],
                 "model_calls": trace.agent["budget"]["model_calls"],
-                "elapsed_s": trace.agent["budget"]["elapsed_s"],
+                "elapsed_s": round(trace.agent["budget"]["elapsed_s"], 2),
             }
             outcomes.append(metric)
             output.write(json.dumps({"id": row["id"], "metrics": metric, "response": response}, ensure_ascii=False) + "\n")
             output.flush()
             print(json.dumps(metric, ensure_ascii=False), flush=True)
-    summary = {"n": len(outcomes), "outcomes": outcomes,
-               "semantic_quality": "human_review_required; agent verification is not ground truth"}
+    summary = {
+        "n": len(outcomes),
+        "avg_candidate_recall": sum(o["candidate_recall"] for o in outcomes if o["candidate_recall"] is not None) / len(outcomes) if outcomes else 0,
+        "all_gold_candidate_rate": sum(1 for o in outcomes if o["all_gold_candidate"]) / len(outcomes) if outcomes else 0,
+        "all_gold_final_context_rate": sum(1 for o in outcomes if o["all_gold_final_context"]) / len(outcomes) if outcomes else 0,
+        "outcomes": outcomes,
+        "semantic_quality": "human_review_required; agent verification is not ground truth"
+    }
     (args.out / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
     return 0
 

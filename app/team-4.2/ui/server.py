@@ -10,6 +10,10 @@ Endpoints:
     GET  /upload     -> Trang nạp tài liệu + báo cáo chi tiết sau OCR (upload.html)
     GET  /api/ingest_reports            -> Danh sách báo cáo ingest đã lưu (tóm tắt)
     GET  /api/ingest_reports/{doc_id}   -> Báo cáo chi tiết: từng trang, độ tin cậy OCR, độ đầy đủ
+    GET  /review     -> Trang duyệt kho luật có phiên bản (review.html)
+    GET  /api/legal/reviews?status=open|resolved|all     -> Danh sách mục cần duyệt
+    GET  /api/legal/reviews/{review_id}                  -> Chi tiết: chỉ dẫn gốc, thao tác, trước/sau
+    POST /api/legal/reviews/{review_id}/decision         -> approve / reject / correct rồi dựng lại luật
     GET  /api/info   -> Danh sách bộ luật đã index, số chunk, thông tin mô hình
     POST /api/chat   -> Truy vấn RAG, trả lời + căn cứ pháp lý + thống kê ranking
     POST /api/ingest -> Tải lên file mới hoặc nạp URL luật vào kho
@@ -58,10 +62,12 @@ log = logging.getLogger("rag.ui.server")
 UI_DIR = Path(__file__).resolve().parent
 HTML_PATH = UI_DIR / "index.html"
 UPLOAD_HTML_PATH = UI_DIR / "upload.html"
+REVIEW_HTML_PATH = UI_DIR / "review.html"
 
 _pipeline: RAGPipeline | None = None
 _settings: Settings | None = None
 _executor = ThreadPoolExecutor(max_workers=2)
+_legal_service = None
 
 # Bảng tra PII (placeholder <-> giá trị gốc) theo phiên chat, chỉ nằm trong RAM của server.
 # Cùng một session_id -> cùng một khách hàng luôn là cùng placeholder qua các lượt hỏi.
@@ -852,6 +858,121 @@ async def handle_discard_doc(request: Request) -> JSONResponse:
     return JSONResponse({"status": "discarded", "doc_id": doc_id})
 
 
+# --- kho luật có phiên bản: duyệt -------------------------------------------------------------
+
+def get_legal_service():
+    """LegalService trên DATA_DIR/legal/catalog.sqlite (không cần khởi tạo RAG pipeline)."""
+    global _legal_service
+    if _legal_service is None:
+        from rag.legal.service import LegalService
+        from rag.legal.store import LegalStore
+
+        _legal_service = LegalService(LegalStore(Settings.load().data_dir / "legal" / "catalog.sqlite"))
+    return _legal_service
+
+
+def _review_title(item, op) -> str:
+    if op is not None:
+        target = op.target
+        where = ""
+        if target is not None:
+            where = f" → Điều {target.article}" + (f" khoản {target.clause}" if target.clause else "")                 + (f" điểm {target.point}" if target.point else "")
+        return f"{op.source_locator} · {op.operation_type}{where}"
+    return f"{item.kind} · {item.provision_id or item.document_key}"
+
+
+def _sync_list_reviews(status: str | None) -> dict[str, Any]:
+    from rag.legal.store import encode
+
+    svc = get_legal_service()
+    out = []
+    for item in svc.store.review_items(status):
+        op = svc.store.operation(item.operation_id) if item.operation_id else None
+        row = encode(item)
+        row.pop("payload", None)
+        row["title"] = _review_title(item, op)
+        row["target_law_name"] = op.target_law_name if op else None
+        out.append(row)
+    return {"items": out}
+
+
+async def handle_list_reviews(request: Request) -> JSONResponse:
+    status = request.query_params.get("status", "open")
+    loop = asyncio.get_running_loop()
+    data = await loop.run_in_executor(_executor, _sync_list_reviews, None if status == "all" else status)
+    return JSONResponse(data)
+
+
+def _sync_review_detail(review_id: str) -> dict[str, Any] | None:
+    from datetime import timedelta
+
+    from rag.legal.keys import provision_id
+    from rag.legal.store import encode
+
+    svc = get_legal_service()
+    item = svc.store.review_item(review_id)
+    if item is None:
+        return None
+    op = svc.store.operation(item.operation_id) if item.operation_id else None
+    data = encode(item)
+    data["operation"] = encode(op) if op else None
+    data["source_excerpt"] = item.payload.get("source_excerpt")
+    data["target_before"] = data["target_after"] = None
+    if op is not None:
+        data["target_after"] = op.new_text
+        if op.target is not None and op.target_document_key and op.effective_from:
+            kind = ("article_title" if op.target.part == "title" else "clause_lead_in" if op.target.part == "lead_in"
+                    else "point" if op.target.point else "clause" if op.target.clause else "article")
+            pid = provision_id(op.target_document_key, op.target, kind)
+            before = [v for v in svc.store.provisions_as_of(op.target_document_key, op.effective_from - timedelta(days=1))
+                      if v.provision_id == pid]
+            data["target_before"] = before[0].text if before else None
+    if item.kind == "vbhn_mismatch":
+        data["vbhn"] = item.payload
+    return data
+
+
+async def handle_review_detail(request: Request) -> JSONResponse:
+    loop = asyncio.get_running_loop()
+    data = await loop.run_in_executor(_executor, _sync_review_detail, request.path_params["review_id"])
+    if data is None:
+        return JSONResponse({"error": "Không có mục duyệt này"}, status_code=404)
+    return JSONResponse(data)
+
+
+async def handle_review_decision(request: Request) -> JSONResponse:
+    from datetime import datetime, timezone
+
+    from rag.legal.models import ReviewDecision
+    from rag.legal.service import ReviewClosedError
+
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse({"error": "Body JSON không hợp lệ"}, status_code=400)
+    reviewer, note = str(body.get("reviewer") or "").strip(), str(body.get("note") or "").strip()
+    if not reviewer or not note:
+        return JSONResponse({"error": "Cần tên người duyệt và ghi chú"}, status_code=400)
+    decision = ReviewDecision(request.path_params["review_id"], body.get("action"), reviewer, note,
+                              body.get("corrected_fields") or {}, datetime.now(timezone.utc))
+    loop = asyncio.get_running_loop()
+    try:
+        run = await loop.run_in_executor(_executor, get_legal_service().decide, decision)
+    except ReviewClosedError as e:
+        return JSONResponse({"error": str(e)}, status_code=409)
+    except KeyError:
+        return JSONResponse({"error": "Không có mục duyệt này"}, status_code=404)
+    except (ValueError, TypeError) as e:
+        return JSONResponse({"error": str(e)}, status_code=400)
+    return JSONResponse({"status": "ok", "build_id": run.build_id if run else None})
+
+
+async def handle_review_page(request: Request) -> HTMLResponse:
+    if not REVIEW_HTML_PATH.exists():
+        return HTMLResponse("<h1>review.html chưa được tạo</h1>", status_code=404)
+    return HTMLResponse(REVIEW_HTML_PATH.read_text(encoding="utf-8"))
+
+
 routes = [
     Route("/api/index/{doc_id}", handle_index_doc, methods=["POST"]),
     Route("/api/discard/{doc_id}", handle_discard_doc, methods=["POST"]),
@@ -860,6 +981,10 @@ routes = [
     Route("/api/page_image/{doc_id}/{page}", handle_page_image, methods=["GET"]),
     Route("/", handle_index, methods=["GET"]),
     Route("/upload", handle_upload_page, methods=["GET"]),
+    Route("/review", handle_review_page, methods=["GET"]),
+    Route("/api/legal/reviews", handle_list_reviews, methods=["GET"]),
+    Route("/api/legal/reviews/{review_id:path}/decision", handle_review_decision, methods=["POST"]),
+    Route("/api/legal/reviews/{review_id:path}", handle_review_detail, methods=["GET"]),
     Route("/api/ingest_reports", handle_list_reports, methods=["GET"]),
     Route("/api/ingest_reports/{doc_id:path}", handle_get_report, methods=["GET"]),
     Route("/api/info", handle_info, methods=["GET"]),

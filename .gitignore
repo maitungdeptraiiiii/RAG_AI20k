@@ -35,3 +35,5 @@ data/team-*/processed/
 data/team-*/indexes/
 data/team-*/ocr_bench/
 data/team-*/ingest_reports/
+data/team-*/legal/raw/
+data/team-*/legal/*.sqlite

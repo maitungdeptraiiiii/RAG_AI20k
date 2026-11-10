@@ -1,0 +1,8 @@
+# Danh sách luật gốc cho kho luật có phiên bản (rag.legal). Crawler tự tìm và thêm văn bản sửa đổi,
+# văn bản bị thay thế và VBHN liên quan (xem docs/superpowers/specs/2026-11-09-legal-version-builder-design.md).
+# Phạm vi đầu: bất động sản.
+laws:
+  - {type: "Luật", number: "31/2024/QH15"}     # Luật Đất đai
+  - {type: "Luật", number: "27/2023/QH15"}     # Luật Nhà ở
+  - {type: "Luật", number: "29/2023/QH15"}     # Luật Kinh doanh bất động sản
+  - {type: "Bộ luật", number: "91/2015/QH13"}  # Bộ luật Dân sự

@@ -8,6 +8,7 @@ import pytest
 from rag.index.store import ChunkStore
 from rag.ingest.chunker import chunk_document
 from rag.ingest.loaders import (
+    TablePage,
     UnsupportedSourceError,
     clean_text,
     load_docx,
@@ -79,9 +80,14 @@ def test_load_docx_paragraphs_tables_and_chunking():
     with tempfile.TemporaryDirectory() as d:
         path = Path(d) / "luat.docx"
         _write_docx(path)
-        pages = load_source(path, source="Luật đất đai.docx")
+        all_pages = load_source(path, source="Luật đất đai.docx")
         again = load_docx(path)
+    # trang 0 = thân văn bản (giữ bảng tại chỗ); các trang sau = TablePage có cấu trúc (W02-02b)
+    pages = [p for p in all_pages if not isinstance(p, TablePage)]
+    tables = [p.table for p in all_pages if isinstance(p, TablePage)]
     assert len(pages) == 1 and pages[0].page is None and pages[0].source == "Luật đất đai.docx"
+    assert len(tables) == 1 and tables[0].headers == (("Loại đất", "Thời hạn"),)
+    assert tables[0].rows == (("Đất nông nghiệp", "50 năm"),)
     assert pages[0].doc_id == again[0].doc_id
     assert "Loại đất | Thời hạn\nĐất nông nghiệp | 50 năm" in pages[0].text
     # bảng nằm đúng vị trí giữa Điều 1 và Điều 2

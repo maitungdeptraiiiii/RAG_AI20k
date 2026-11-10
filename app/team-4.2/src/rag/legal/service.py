@@ -162,7 +162,13 @@ class LegalService:
                 day = parse_effectivity(self.provisions_for(src)).default_from
                 if day is not None:
                     default_dates[src] = day
-        inputs = _sha1(doc.raw_checksum, *sorted(f"{o.operation_id}:{o.review_status}:{o.effective_from}" for o in ops))
+        extra = []
+        if not doc.source_verified:
+            extra.append("src:unverified")
+        if doc.metadata_conflicts:
+            extra.append("conflicts:" + "|".join(sorted(doc.metadata_conflicts)))
+        inputs = _sha1(doc.raw_checksum, *sorted(f"{o.operation_id}:{o.review_status}:{o.effective_from}" for o in ops),
+                       *extra)
         build_id = _sha1(key, inputs)[:16]
         versions = build_versions(doc, provisions, effectivity, ops, build_id=build_id, default_dates=default_dates)
         versions = self._flag_known_gaps(doc, ops, versions)

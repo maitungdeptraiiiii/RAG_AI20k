@@ -87,3 +87,33 @@ def test_build_all_reports_progress(svc_with_doc):
     seen = []
     svc_with_doc().build_all(progress=lambda stage, i, n: seen.append((stage, i, n)))
     assert ("plan", 1, 1) in seen and ("build", 1, 1) in seen
+
+
+def test_corrupt_existing_content_file_is_rewritten(tmp_path):
+    p, c = write_text(tmp_path, "luat:1/2024/QH15", "A\n")
+    p.write_text("tru", encoding="utf-8")
+    assert write_text(tmp_path, "luat:1/2024/QH15", "A\n") == (p, c)
+    assert p.read_text(encoding="utf-8") == "A\n"
+    assert [f.name for f in p.parent.iterdir()] == [p.name]
+
+
+def _build(svc):
+    svc.build_all()
+    return svc.store.latest_build(KEY)
+
+
+def test_flags_change_build_id_and_inputs(tmp_path, svc_with_doc):
+    base = _build(svc_with_doc())
+    unv = _build(svc_with_doc(source_verified=False))
+    conf = _build(svc_with_doc(metadata_conflicts=("x",)))
+    assert len({base.build_id, unv.build_id, conf.build_id}) == 3
+    assert len({base.inputs_checksum, unv.inputs_checksum, conf.inputs_checksum}) == 3
+
+
+def test_default_doc_build_id_matches_old_formula(svc_with_doc):
+    from rag.legal.service import _sha1
+    svc = svc_with_doc()
+    run = _build(svc)
+    doc = svc.store.document(KEY)
+    inputs = _sha1(doc.raw_checksum)
+    assert run.inputs_checksum == inputs and run.build_id == _sha1(KEY, inputs)[:16]

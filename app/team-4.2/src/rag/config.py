@@ -113,6 +113,27 @@ class Settings:
     context_max_blocks: int = 10
     context_max_words: int = 2800
 
+    # Opt-in Think agent; these do not change the baseline RAG path.
+    agent_max_rounds: int = 3
+    agent_max_searches: int = 8
+    agent_initial_subqueries: int = 3
+    agent_followup_searches: int = 2
+    agent_candidates_per_search: int = 10
+    agent_initial_pool_size: int = 30
+    agent_new_units_per_round: int = 10
+    agent_max_units: int = 50
+    agent_max_xref_depth: int = 2
+    agent_xrefs_per_round: int = 6
+    agent_max_xref_targets: int = 12
+    agent_max_requirements: int = 8
+    agent_max_model_calls: int = 24
+    agent_max_service_requests: int = 240
+    agent_max_model_bytes: int = 600000
+    agent_max_input_chars: int = 60000
+    agent_max_output_tokens: int = 3000
+    agent_deadline_s: float = 180.0
+    agent_retrieval_mode: str = "dense"
+
     # Phương pháp nâng cao (src/rag/advanced/), vd. "hyde,contextual"; rỗng = baseline
     advanced: str = ""
     # Checkpoint cho ADVANCED=splade / colbert (mặc định là bản tiếng Anh — đổi sang đa ngữ/tiếng Việt)

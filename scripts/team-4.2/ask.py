@@ -9,6 +9,9 @@ from __future__ import annotations
 
 import argparse
 import sys
+import json
+from pathlib import Path
+from dataclasses import replace
 
 from rag.config import Settings
 from rag.pipeline import RAGPipeline
@@ -24,17 +27,39 @@ def _row(hit, chunks) -> str:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("query")
-    ap.add_argument("--mode", default="hybrid", help="hybrid | bm25 | dense | arm nâng cao đang bật (vd. splade)")
+    ap.add_argument("--mode", default=None, help="hybrid | bm25 | dense; mặc định baseline=hybrid, Think=AGENT_RETRIEVAL_MODE")
+    ap.add_argument("--think", action="store_true", help="dùng agent multi-hop có kiểm chứng")
+    ap.add_argument("--trace-out", type=Path, help="ghi response/trace của Think ra JSON")
     ap.add_argument("--no-rerank", action="store_true")
     ap.add_argument("--retrieve-only", action="store_true", help="chỉ retrieve, không gọi LLM")
     args = ap.parse_args()
+    if args.think and (args.retrieve_only or args.no_rerank):
+        ap.error("--think không dùng cùng --retrieve-only hoặc --no-rerank")
+    if args.trace_out and not args.think:
+        ap.error("--trace-out cần --think")
+    if args.trace_out and args.trace_out.exists():
+        ap.error("--trace-out phải là file mới để giữ nguyên kết quả trước")
 
-    p = RAGPipeline.from_settings(Settings.load())
+    settings = Settings.load()
+    p = RAGPipeline.from_settings(settings)
     chunks = p.retriever.chunks
     if args.retrieve_only:
-        res = p.retriever.retrieve(args.query, p.top_k, mode=args.mode, rerank=not args.no_rerank)
+        res = p.retriever.retrieve(args.query, p.top_k, mode=args.mode or "hybrid", rerank=not args.no_rerank)
     else:
-        trace = p.ask_debug(args.query, mode=args.mode, rerank=not args.no_rerank)
+        if args.think:
+            from rag.agent import AgentConfig, AgentPipeline
+
+            config = AgentConfig.from_settings(settings)
+            if args.mode:
+                config = replace(config, retrieval_mode=args.mode)
+            trace = AgentPipeline(p, config).ask_debug(args.query)
+            print(f"Think: {trace.status}; {trace.agent['budget']['rounds']} vòng; {trace.agent['stop_reason']}")
+            if args.trace_out:
+                args.trace_out.parent.mkdir(parents=True, exist_ok=True)
+                with args.trace_out.open("x", encoding="utf-8") as output:
+                    json.dump(trace.to_response(args.query), output, ensure_ascii=False, indent=2)
+        else:
+            trace = p.ask_debug(args.query, mode=args.mode or "hybrid", rerank=not args.no_rerank)
         res = trace.retrieval
         print("\n=== TRẢ LỜI ===")
         print(trace.answer.text)

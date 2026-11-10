@@ -38,6 +38,25 @@
       line-height: 1.6;
     }
 
+    #think-toggle {
+      color: #737373;
+      background-color: transparent;
+    }
+    #think-toggle:hover {
+      background-color: #f5f5f5;
+    }
+    #think-toggle[aria-pressed="true"] {
+      color: #3569ce;
+      background-color: #eaf0fb;
+    }
+    #think-toggle[aria-pressed="true"]:hover {
+      background-color: #dfe8fa;
+    }
+    #think-toggle:focus-visible {
+      outline: 2px solid #3569ce;
+      outline-offset: 2px;
+    }
+
     /* Scrollbar styling */
     ::-webkit-scrollbar {
       width: 5px;
@@ -343,11 +362,11 @@
               </button>
 
               <!-- Auto-expanding Textarea -->
-              <textarea id="main-query-input" rows="1" placeholder="Ask Just-ice" class="flex-1 max-h-[160px] resize-none border-0 focus:ring-0 px-2 py-1.5 text-[15.5px] text-neutral-900 placeholder-neutral-400 outline-none bg-transparent leading-relaxed"></textarea>
+              <textarea id="main-query-input" rows="1" placeholder="Ask Just-ice" class="flex-1 min-w-0 max-h-[160px] resize-none border-0 focus:ring-0 px-2 py-1.5 text-[15.5px] text-neutral-900 placeholder-neutral-400 outline-none bg-transparent leading-relaxed"></textarea>
 
               <!-- Think Button -->
-              <button type="button" class="hidden sm:flex items-center space-x-1.5 px-2.5 py-1 text-[13.5px] text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 rounded-full transition-colors flex-shrink-0" title="Chế độ suy luận chuyên sâu">
-                <svg class="w-4 h-4 text-neutral-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <button id="think-toggle" type="button" onclick="setThinkEnabled(!thinkEnabled)" aria-label="Think — dùng agent cho câu hỏi" aria-pressed="false" class="flex items-center space-x-1.5 px-3 py-2 text-[14px] rounded-full transition-colors flex-shrink-0" title="Bật Think để dùng agent">
+                <svg aria-hidden="true" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9.5 4a3.5 3.5 0 0 0-3.5 3.5c0 .7.2 1.4.6 2A3.5 3.5 0 0 0 6 16.5 3.5 3.5 0 0 0 9.5 20h.5V4h-.5zm5 0a3.5 3.5 0 0 1 3.5 3.5c0 .7-.2 1.4-.6 2A3.5 3.5 0 0 1 18 16.5 3.5 3.5 0 0 1 14.5 20h-.5V4h.5z"/>
                 </svg>
                 <span>Think</span>
@@ -651,6 +670,14 @@
     let contextMenuSessionId = null;
     let appConfig = {};
     let popoverHideTimer = null;
+    let thinkEnabled = false;
+
+    function setThinkEnabled(enabled) {
+      thinkEnabled = enabled === true;
+      const button = document.getElementById('think-toggle');
+      button.setAttribute('aria-pressed', String(thinkEnabled));
+      button.title = thinkEnabled ? 'Think đang bật — dùng agent' : 'Bật Think để dùng agent';
+    }
 
     const DOC_TITLES = {
       'bo_luat_dan_su_2015.txt': 'Bộ luật Dân sự 2015',
@@ -919,6 +946,7 @@
 
     function resetToHero() {
       currentSessionId = null;
+      setThinkEnabled(false);
       setChatInputPosition('hero');
       document.getElementById('hero-view').classList.remove('hidden');
       document.getElementById('chat-thread-view').classList.add('hidden');
@@ -967,6 +995,8 @@
     }
 
     async function startQuery(rawQuery) {
+      // Capture this turn's mode before any async work or later toggle changes.
+      const requestThinkEnabled = thinkEnabled;
       // 1. Determine target session
       if (!currentSessionId) {
         const cleanTitle = rawQuery.length > 36 ? rawQuery.slice(0, 36) + '...' : rawQuery;
@@ -1002,6 +1032,7 @@
         targetSession.turns.push({
           turnId: msgId,
           query: rawQuery,
+          think: requestThinkEnabled,
           data: null, // null means pending
           timestamp: Date.now(),
         });
@@ -1057,7 +1088,7 @@
                   <div class="w-2 h-2 rounded-full bg-neutral-400 dot-1"></div>
                   <div class="w-2 h-2 rounded-full bg-neutral-400 dot-2"></div>
                   <div class="w-2 h-2 rounded-full bg-neutral-400 dot-3"></div>
-                  <span class="text-[12px] text-neutral-400 ml-2 font-normal">Just-ice đang phân rã câu hỏi & đối chiếu 6 bộ luật...</span>
+                  <span class="text-[12px] text-neutral-400 ml-2 font-normal">${requestThinkEnabled ? 'Think · Đang chuẩn bị tra cứu chuyên sâu...' : 'Just-ice đang tra cứu tài liệu...'}</span>
                 </div>
 
                 <!-- Assistant Content Box -->
@@ -1084,7 +1115,7 @@
         const response = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: rawQuery, history: historyPayload, stream: true }),
+          body: JSON.stringify({ query: rawQuery, history: historyPayload, stream: true, think: requestThinkEnabled }),
         });
 
         if (!response.ok) {
@@ -1131,7 +1162,12 @@
                 continue;
               }
 
-              if (evt.type === 'sources') {
+              if (evt.type === 'progress') {
+                if (currentSessionId === targetSessionId) {
+                  const loadingSpan = document.getElementById(`${msgId}-loading`)?.querySelector('span');
+                  if (loadingSpan) loadingSpan.textContent = evt.message || 'Think · Đang kiểm chứng…';
+                }
+              } else if (evt.type === 'sources') {
                 (evt.sources || []).forEach(s => {
                   storedSourcesMap[s.chunk_id] = s;
                 });
@@ -1175,9 +1211,10 @@
             }
           }
 
-          if (!finalData && streamedText) {
+          if (!finalData && streamedText && !requestThinkEnabled) {
             finalData = { answer: streamedText, sources: [], citations: [] };
           }
+          if (!finalData) throw new Error('Phản hồi bị gián đoạn trước khi hoàn tất. Vui lòng thử lại.');
         } else {
           finalData = await response.json();
         }
@@ -1241,7 +1278,7 @@
             source: c.source,
             section: c.section,
             page: c.page,
-            score: c.score || 0.95,
+            score: c.score ?? null,
             text: c.text || c.quote || '',
           };
         }
@@ -1286,7 +1323,7 @@
       const arms = trace.arms || {};
       const finalHits = trace.final_hits || [];
 
-      const traceHtml = `
+      const traceHtml = trace.agent ? renderAgentTrace(msgId, trace.agent) : `
         <div id="${msgId}-trace" class="hidden mt-4 pt-3 border-t border-neutral-100 text-[12px] bg-neutral-50 rounded-xl p-4">
           <div class="flex items-center justify-between font-semibold text-neutral-700 pb-2 border-b border-neutral-200">
             <span>Minh bạch đối chiếu Retrieval (Dense Vector + BM25 + Jev Reranker)</span>
@@ -1347,6 +1384,7 @@
       `;
 
       contentBox.innerHTML = `
+        ${trace.agent ? `<div class="mb-3 text-[12px] font-medium ${data.status === 'answer' ? 'text-blue-600' : 'text-amber-700'}">Think · ${escapeHtml(agentStatusLabel(data.status))}</div>` : ''}
         <div id="${msgId}-text" class="chatgpt-prose select-text">
           ${formattedText}
         </div>
@@ -1355,6 +1393,25 @@
       `;
 
       scrollToBottom();
+    }
+
+    function agentStatusLabel(status) {
+      return ({ answer: 'Đã kiểm chứng theo tài liệu', partial: 'Mới xác minh được một phần',
+        clarify: 'Cần làm rõ dữ kiện', abstain: 'Chưa đủ căn cứ', error: 'Chưa thể kiểm chứng' })[status] || 'Đã kết thúc';
+    }
+
+    function renderAgentTrace(msgId, agent) {
+      const budget = agent.budget || {};
+      const assessments = agent.assessments || [];
+      return `<div id="${msgId}-trace" class="hidden mt-4 border border-blue-100 rounded-xl bg-blue-50/40 p-4 text-[12px]">
+        <div class="font-semibold text-blue-700 mb-2">Think · ${escapeHtml(agentStatusLabel(agent.status))}</div>
+        <div class="text-neutral-500 mb-3">${Number(budget.rounds || 0)} vòng tra cứu · ${Number(budget.searches || 0)} truy vấn · ${Number(budget.xref_targets || 0)} dẫn chiếu</div>
+        ${(agent.requirements || []).map(r => {
+          const assessment = assessments.find(a => a.requirement_id === r.id);
+          return `<div class="py-2 border-t border-blue-100"><div class="font-medium">${escapeHtml(r.question)}</div><div class="text-neutral-600">${escapeHtml(assessment?.reason || 'Chưa có đánh giá bằng chứng.')}</div></div>`;
+        }).join('')}
+        <div class="mt-3 text-neutral-500">${escapeHtml(agent.scope_warning || '')}</div>
+      </div>`;
     }
 
     function renderHitList(hits) {
@@ -1450,7 +1507,7 @@
       badgeEl.textContent = `[${citationNum || src.n || 1}]`;
       titleEl.textContent = docTitle;
       subtitleEl.textContent = secInfo.article || src.section || 'Toàn văn';
-      scoreBadge.textContent = src.score ? `Độ khớp: p = ${src.score}` : 'Độ khớp cao';
+      scoreBadge.textContent = src.score != null ? `Độ khớp: p = ${src.score}` : 'Nguồn được trích dẫn';
 
       if (tabBtn) {
         tabBtn.href = isLink ? src.source : ('/doc/' + encodeURIComponent(src.source));
@@ -1655,7 +1712,7 @@
       document.getElementById('popover-doc').textContent = docName;
       document.getElementById('popover-article').textContent = secInfo.article;
       document.getElementById('popover-quote').textContent = `"${quoteText}"`;
-      document.getElementById('popover-score').textContent = src.score ? `Độ khớp: p = ${src.score}` : 'Độ khớp cao';
+      document.getElementById('popover-score').textContent = src.score != null ? `Độ khớp: p = ${src.score}` : 'Nguồn được trích dẫn';
       document.getElementById('popover-page').textContent = src.page ? `Trang ${src.page}` : '';
       document.getElementById('popover-view-btn').onclick = () => {
         hideCitePopover();
@@ -1851,6 +1908,7 @@
       if (!sess) return;
 
       currentSessionId = sess.id;
+      setThinkEnabled(false);
       setChatInputPosition('bottom');
       document.getElementById('hero-view').classList.add('hidden');
       const wrapper = document.getElementById('main-content-wrapper');
@@ -2005,7 +2063,7 @@
       document.getElementById('modal-source-title').textContent = secInfo.article;
       document.getElementById('modal-source-doc').textContent = formatDocTitle(src.source);
       document.getElementById('modal-source-page').textContent = src.page ? `Trang ${src.page}` : 'Toàn văn';
-      document.getElementById('modal-source-score').textContent = src.score ? `Độ khớp: p = ${src.score}` : 'Độ khớp cao';
+      document.getElementById('modal-source-score').textContent = src.score != null ? `Độ khớp: p = ${src.score}` : 'Nguồn được trích dẫn';
       document.getElementById('modal-source-text').textContent = src.text || src.quote || '';
 
       const tabBtn = document.getElementById('modal-source-tab-btn');

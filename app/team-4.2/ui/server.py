@@ -20,6 +20,7 @@ import logging
 from pathlib import Path
 import sys
 from typing import Any
+from threading import RLock
 
 # Đảm bảo import được package rag khi chạy trực tiếp từ bất kỳ thư mục nào
 _HERE = Path(__file__).resolve().parent
@@ -41,6 +42,7 @@ from starlette.routing import Route
 
 from rag.config import Settings
 from rag.pipeline import AskTrace, RAGPipeline
+from rag.agent import AgentConfig, AgentPipeline
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("rag.ui.server")
@@ -52,9 +54,16 @@ HTML_PATH = UI_DIR / "index.html"
 _pipeline: RAGPipeline | None = None
 _settings: Settings | None = None
 _executor = ThreadPoolExecutor(max_workers=2)
+_agent_pipeline: AgentPipeline | None = None
+_pipeline_init_lock = RLock()
 
 
 def get_pipeline() -> tuple[RAGPipeline, Settings]:
+    with _pipeline_init_lock:
+        return _get_pipeline()
+
+
+def _get_pipeline() -> tuple[RAGPipeline, Settings]:
     global _pipeline, _settings
     if _pipeline is None:
         log.info("Khởi tạo RAGPipeline...")
@@ -66,6 +75,16 @@ def get_pipeline() -> tuple[RAGPipeline, Settings]:
             len(_pipeline.store.docs()),
         )
     return _pipeline, _settings
+
+
+def get_agent_pipeline() -> AgentPipeline:
+    """Reuse the open index; each agent run owns independent state and budgets."""
+    global _agent_pipeline
+    with _pipeline_init_lock:
+        baseline, settings = get_pipeline()
+        if _agent_pipeline is None or _agent_pipeline.baseline is not baseline:
+            _agent_pipeline = AgentPipeline(baseline, AgentConfig.from_settings(settings))
+        return _agent_pipeline
 
 
 async def handle_index(request: Request) -> HTMLResponse:
@@ -131,8 +150,10 @@ def _format_hits(hits: list, chunks_map: dict, limit: int = 5) -> list[dict[str,
     return rows
 
 
-def _sync_ask(query: str, pipeline: RAGPipeline, history: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+def _sync_ask(query: str, pipeline: RAGPipeline | AgentPipeline, history: list[dict[str, Any]] | None = None) -> dict[str, Any]:
     trace: AskTrace = pipeline.ask_debug(query, history=history)
+    if isinstance(pipeline, AgentPipeline):
+        return trace.to_response(query)
     chunks = pipeline.retriever.chunks
 
     # Danh sách các khối context thực tế đưa vào LLM
@@ -191,7 +212,7 @@ def _sync_ask(query: str, pipeline: RAGPipeline, history: list[dict[str, Any]] |
     }
 
 
-def _sync_stream(query: str, pipeline: RAGPipeline, history: list[dict[str, Any]] | None = None):
+def _sync_stream(query: str, pipeline: RAGPipeline | AgentPipeline, history: list[dict[str, Any]] | None = None):
     try:
         for event in pipeline.ask_stream(query, history=history):
             yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
@@ -208,6 +229,13 @@ async def handle_chat(request: Request) -> Response:
     except Exception:
         return JSONResponse({"error": "Body JSON không hợp lệ"}, status_code=400)
 
+    if not isinstance(body, dict):
+        return JSONResponse({"error": "Body JSON phải là object"}, status_code=400)
+    think = body.get("think", False)
+    if not isinstance(think, bool):
+        return JSONResponse({"error": "think phải là boolean (true hoặc false)"}, status_code=400)
+    if not isinstance(body.get("query", ""), str):
+        return JSONResponse({"error": "Câu hỏi phải là chuỗi"}, status_code=400)
     query = (body.get("query") or "").strip()
     history = body.get("history") or []
     is_stream = bool(body.get("stream", False))
@@ -215,8 +243,26 @@ async def handle_chat(request: Request) -> Response:
         history = []
     if not query:
         return JSONResponse({"error": "Câu hỏi không được rỗng"}, status_code=400)
+    if think and len(query) > 8000:
+        return JSONResponse({"error": "Câu hỏi Think tối đa 8000 ký tự"}, status_code=400)
 
-    pipeline, _ = get_pipeline()
+    if think:
+        try:
+            pipeline = get_agent_pipeline()
+        except Exception as exc:
+            log.error("Agent initialization failed: %s", type(exc).__name__)
+            return JSONResponse({"error": "Chưa khởi tạo được Think. Vui lòng kiểm tra cấu hình hoặc thử lại.",
+                                 "code": "agent_initialization_failed"}, status_code=503)
+        if pipeline is None:
+            return JSONResponse(
+                {
+                    "error": "Chế độ Think chưa sẵn sàng. Bạn có thể tắt Think để tra cứu thông thường.",
+                    "code": "agent_unavailable",
+                },
+                status_code=503,
+            )
+    else:
+        pipeline, _ = get_pipeline()
 
     if is_stream:
         return StreamingResponse(

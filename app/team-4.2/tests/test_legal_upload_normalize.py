@@ -32,22 +32,32 @@ def _ids_and_directives(text):
             [(d.source_locator, d.operation_type) for d in parse_directives(provs)])
 
 
-@pytest.mark.parametrize("name,key,width", [
-    ("luat_43_2024_QH15.txt", "luat:43/2024/QH15", 70),
-    ("luat_43_2024_QH15.txt", "luat:43/2024/QH15", 95),
-    ("luat_31_2024_QH15.txt", "luat:31/2024/QH15", 80),
-    ("luat_43_2024_QH15.txt", "luat:43/2024/QH15", 60),
-    ("luat_29_2023_QH15.txt", "luat:29/2023/QH15", 75),
-])
-def test_pdf_wrapped_text_parses_to_same_articles_and_directives(name, key, width):
-    real = (FIXTURES / name).read_text(encoding="utf-8")
+REAL_FILES = sorted(FIXTURES.glob("luat_*.txt"))
+
+
+def _key_of(path):
+    _, num, year, kind = path.stem.split("_")
+    return f"luat:{num}/{year}/{kind}"
+
+
+def _all_ids(text, key):
+    return [(p.provision_id, p.kind) for p in parse_structure(text, key)]
+
+
+@pytest.mark.parametrize("width", [60, 70, 80, 95])
+@pytest.mark.parametrize("path", REAL_FILES, ids=lambda p: p.stem)
+def test_pdf_wrapped_text_round_trips_every_real_fixture(path, width):
+    key = _key_of(path)
+    real = path.read_text(encoding="utf-8")
     norm = normalize_legal_text(pages_of(wrap_like_pdf(real, width=width)))
-    a = [p.provision_id for p in parse_structure(norm, key) if p.kind == "article"]
-    b = [p.provision_id for p in parse_structure(real, key) if p.kind == "article"]
-    assert a == b and a
+    assert _all_ids(norm, key) == _all_ids(real, key)
     da = [(d.source_locator, d.operation_type) for d in parse_directives(parse_structure(norm, key))]
     db = [(d.source_locator, d.operation_type) for d in parse_directives(parse_structure(real, key))]
     assert da == db
+
+
+def test_fixture_glob_covers_all_eight():
+    assert len(REAL_FILES) == 8
 
 
 def test_real_43_has_directives():
@@ -83,3 +93,31 @@ def test_structure_check_gap_and_effectivity():
 
 def test_inserted_article_labels_are_not_gaps():
     assert check_structure("Điều 5. A\nĐiều 5a. B\nĐiều 6. C", "k").gaps == ()
+
+
+def test_wrapped_article_reference_at_line_start_is_not_a_unit():
+    assert normalize_legal_text(["1. Nội dung quy định tại\nĐiều 5.\nTiếp theo..."]) == \
+        "1. Nội dung quy định tại Điều 5. Tiếp theo..."
+    assert normalize_legal_text(["1. Theo quy định tại\nĐiều 5, Điều 6 của Luật này."]) == \
+        "1. Theo quy định tại Điều 5, Điều 6 của Luật này."
+
+
+def test_wrapped_chapter_or_section_reference_is_not_a_heading():
+    assert normalize_legal_text(["1. Các quy định tại\nChương II của Luật này được áp dụng."]) == \
+        "1. Các quy định tại Chương II của Luật này được áp dụng."
+    assert normalize_legal_text(["1. Các quy định tại\nMục 3 và Mục 4 được áp dụng."]) == \
+        "1. Các quy định tại Mục 3 và Mục 4 được áp dụng."
+
+
+def test_long_unbreakable_token_does_not_break_round_trip():
+    path = FIXTURES / "luat_45_2013_QH13.txt"
+    key = _key_of(path)
+    real = path.read_text(encoding="utf-8") + "\n" + "x" * 400
+    norm = normalize_legal_text(pages_of(wrap_like_pdf(real, width=70)))
+    assert _all_ids(norm, key) == _all_ids(real, key)
+
+
+def test_real_headings_still_split():
+    body = [f"{n}. " + "Nội dung dài của khoản " * 6 + "." for n in range(1, 6)]
+    src = ["Chương I", "QUY ĐỊNH CHUNG", "Điều 1. A", *body, "Mục 2. Khác"]
+    assert normalize_legal_text(["\n".join(src)]).splitlines() == src

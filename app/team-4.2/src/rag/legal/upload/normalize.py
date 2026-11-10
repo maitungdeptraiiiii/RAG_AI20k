@@ -27,7 +27,7 @@ _POINT = _Q + r"[a-zđ]\d?\)\s+\S"
 
 _HEADING_START = re.compile("^(?:" + "|".join((_ARTICLE, _CHAPTER, _SECTION, _PART)) + ")")
 _ITEM_START = re.compile("^(?:" + "|".join((_CLAUSE, _POINT)) + ")")
-_MID_START = "(?:" + "|".join((_ARTICLE, _CLAUSE, _POINT, _CHAPTER + r"\s+[A-ZĐ]", _SECTION + r"\s+[A-ZĐ0-9]")) + ")"
+_MID_START = "(?:" + "|".join(x[len(_Q):] for x in (_ARTICLE, _CLAUSE, _POINT)) + "|" + _CHAPTER[len(_Q):] + r"\s+[A-ZĐ]|" + _SECTION[len(_Q):] + r"\s+[A-ZĐ0-9])"   # mở trích dẫn giữa dòng không tách
 _MID_SPLIT = re.compile(r"(?<=[.;:!?”\"])\s+(?=" + _MID_START + ")")
 _TERMINATOR = re.compile(r"[.;:!?…”\"]$")
 _PAGE_NO = re.compile(r"^(?:[-–—]\s*)?(?:(?:trang|page)\s+)?\d{1,4}(?:\s*(?:/|of|trên)\s*\d{1,4})?(?:\s*[-–—])?$", re.IGNORECASE)
@@ -70,15 +70,30 @@ def _strip_pages(pages: Sequence[str]) -> list[str]:
     return out
 
 
+_DANGLING_REF = re.compile(r"(?:Điều|khoản|điểm|Chương|Mục)\s+\d+[a-zđ]?\.$", re.IGNORECASE)   # "... tại Điều 5." bị ngắt
+_HEADING_WORD = re.compile(r"(?:(?:Điều|Mục)\s+\d|(?:Chương|Phần)\s+(?:[IVXLCDM]+|\d))")
+_HEADING_TOKEN = re.compile(r"^[\"“]?(?:Điều\s+\d+[a-zđ]?\s*[.:]?|Chương\s+\S+|Mục\s+\d+[a-z]?|Phần\s+(?:thứ\s+)?\S+)\s*")
+
+
+def _is_reference(line: str) -> bool:
+    """Dòng bắt đầu bằng "Điều N."/"Chương X"/"Mục N" nhưng phần sau là dấu phẩy/chữ thường (hoặc trống với Điều):
+    đó là tham chiếu giữa câu bị ngắt dòng, không phải đơn vị mới."""
+    m = _HEADING_TOKEN.match(line)
+    rest = line[m.end():] if m else ""
+    if line.lstrip("\"“").startswith("Điều") and not rest:
+        return True
+    return bool(rest) and (rest[0] in ",;" or rest[0].islower() or _HEADING_WORD.match(rest) is not None)
+
+
 def _joins(prev: str, prev_filled: bool, line: str) -> bool:
     """Dòng `line` (đã làm sạch) có nối vào dòng `prev` không (False: bắt đầu dòng mới). `prev_filled`: dòng vật lý
     trước không còn chỗ cho từ đầu của `line` (độ rộng dòng của tài liệu), tức là bị ngắt vì hết chỗ chứ không phải hết đoạn."""
-    if _HEADING_START.match(line):
-        return False
     heading = bool(_HEADING_START.match(prev))
-    terminated = bool(_TERMINATOR.search(prev))
+    terminated = bool(_TERMINATOR.search(prev)) and not _DANGLING_REF.search(prev)
+    if _HEADING_START.match(line):
+        return not (terminated or heading) and (_is_reference(line) or (prev_filled and not prev.isupper()))  # tham chiếu giữa câu bị ngắt dòng
     if _ITEM_START.match(line):
-        return not (terminated or heading)
+        return not (terminated or heading) and prev_filled        # dòng trước bị ngắt vì hết chỗ, không phải hết ý
     if prev_filled:
         return True
     if not (line[:1].isupper() or line[:1] in "\"“"):
@@ -88,7 +103,8 @@ def _joins(prev: str, prev_filled: bool, line: str) -> bool:
 
 def normalize_legal_text(pages: Sequence[str]) -> str:
     lines = _strip_pages(pages)
-    width = max((len(l) for l in lines), default=0)
+    lengths = sorted(len(l) for l in lines)
+    width = lengths[int(0.9 * (len(lengths) - 1))] if lengths else 0     # độ rộng dòng vật lý, bỏ qua dòng quá dài lẻ tẻ
     merged: list[str] = []
     prev_len = 0
     for line in lines:

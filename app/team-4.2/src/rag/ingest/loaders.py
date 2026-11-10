@@ -4,7 +4,11 @@
     load_docx(path)  python-docx, đoạn văn + bảng theo thứ tự; một Page (page=None); doc_id = hash bytes file
     load_url(url)    trafilatura lấy nội dung chính; một Page (page=None); doc_id = hash text
     load_text(path)  file text UTF-8; một Page (page=None); doc_id = hash text
+    load_table(path) CSV/TSV/XLSX: mỗi bảng (sheet) một TablePage; doc_id = hash bytes file
     load_source(x)   tự chọn loader theo URL / đuôi file
+
+DOCX và CSV/XLSX trả thêm ``TablePage`` (Page + ParsedTable) cho từng bảng (W02-02b); chunk các
+trang này bằng ``rag.ingest.tables.chunk_tables`` (lặp header + đơn vị ở mọi chunk).
 
 Text được chuẩn hoá NFC và dọn khoảng trắng. Trang rỗng (thường là PDF scan, không có lớp text)
 vẫn giữ lại nhưng ghi cảnh báo; chunker sẽ bỏ qua trang rỗng. PDF scan cần OCR — ngoài phạm vi
@@ -18,8 +22,10 @@ import logging
 import re
 import zipfile
 from collections.abc import Callable, Sequence
+from dataclasses import dataclass, replace
 from pathlib import Path
 
+from rag.ingest.tables import TABLE_SUFFIXES, ParsedTable, docx_tables, load_tables, table_markdown
 from rag.schema import Page, make_doc_id, nfc
 
 log = logging.getLogger(__name__)
@@ -34,6 +40,17 @@ TEXT_SUFFIXES = {".txt", ".md", ".text"}
 
 class UnsupportedSourceError(ValueError):
     pass
+
+
+@dataclass(frozen=True)
+class TablePage(Page):
+    """Một bảng có cấu trúc; ``text`` = Markdown của cả bảng (để xem/đếm), chunk bằng ``table``."""
+
+    table: ParsedTable | None = None
+
+
+def table_pages(doc_id: str, source: str, tables: Sequence[ParsedTable]) -> list[TablePage]:
+    return [TablePage(doc_id, source, t.page, table_markdown(t), table=t) for t in tables]
 
 
 def clean_text(text: str) -> str:
@@ -108,7 +125,24 @@ def load_docx(path: Path | str, *, source: str | None = None) -> list[Page]:
     name = source or path.name
     if not text:
         log.warning("%s: tài liệu rỗng", name)
-    return [Page(make_doc_id(data), name, None, text)]
+    doc_id = make_doc_id(data)
+    # Thân văn bản vẫn giữ bảng tại chỗ (ngữ cảnh Điều); bảng có cấu trúc đi kèm thành TablePage.
+    return [Page(doc_id, name, None, text), *table_pages(doc_id, name, docx_tables(doc, name))]
+
+
+def load_table(path: Path | str, *, source: str | None = None, header_rows: int = 1) -> list[Page]:
+    """CSV/TSV/XLSX -> TablePage cho từng bảng/sheet."""
+    path = Path(path)
+    data = path.read_bytes()
+    name = source or path.name
+    try:
+        tables = load_tables(path, header_rows=header_rows)
+    except (ValueError, KeyError, zipfile.BadZipFile) as e:
+        raise UnsupportedSourceError(f"{name}: không đọc được bảng ({e})") from e
+    tables = [replace(t, source_name=name) for t in tables]
+    if not tables:
+        log.warning("%s: không có bảng nào có dữ liệu", name)
+    return list(table_pages(make_doc_id(data), name, tables))
 
 
 def load_text(path: Path | str, *, source: str | None = None) -> list[Page]:
@@ -169,18 +203,23 @@ def load_source(value: str | Path, *, source: str | None = None) -> list[Page]:
         return load_docx(path, source=source)
     if suffix in TEXT_SUFFIXES:
         return load_text(path, source=source)
+    if suffix in TABLE_SUFFIXES:
+        return load_table(path, source=source)
     raise UnsupportedSourceError(
-        f"Không hỗ trợ loại file {suffix!r} (chỉ PDF, DOCX, TXT/MD hoặc URL)"
+        f"Không hỗ trợ loại file {suffix!r} (chỉ PDF, DOCX, TXT/MD, CSV/XLSX hoặc URL)"
     )
 
 
 __all__ = [
+    "TablePage",
     "UnsupportedSourceError",
     "clean_text",
     "is_url",
     "load_docx",
     "load_pdf",
     "load_source",
+    "load_table",
+    "table_pages",
     "load_text",
     "load_url",
     "pages_from_texts",

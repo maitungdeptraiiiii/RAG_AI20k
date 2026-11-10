@@ -340,6 +340,12 @@
           <!-- Hero input slot: Capsule is placed here on initial load / new chat -->
           <div id="hero-input-slot" class="w-full mb-3">
             <!-- ==================== CHAT INPUT CAPSULE ==================== -->
+            <div id="as-of-row" class="flex flex-wrap items-center gap-x-2 gap-y-1 px-3 pb-1.5 text-[12px] text-neutral-500">
+              <label for="as-of-input" class="font-medium text-neutral-600">Mốc pháp lý</label>
+              <input type="date" id="as-of-input" class="border border-neutral-300 rounded-md px-1.5 py-0.5 text-[12px] text-neutral-800 bg-white" aria-describedby="as-of-hint">
+              <button type="button" id="as-of-clear" class="text-neutral-400 hover:text-neutral-800 hidden" aria-label="Bỏ ngày đã chọn">✕</button>
+              <span id="as-of-hint">để trống: tự nhận diện mốc trong câu hỏi, không có thì dùng luật hiện hành</span>
+            </div>
             <div id="chat-input-capsule" class="w-full bg-white rounded-full border border-neutral-300 shadow-[0_2px_14px_rgba(0,0,0,0.06)] focus-within:border-neutral-400 focus-within:shadow-[0_4px_20px_rgba(0,0,0,0.09)] p-2 pl-3.5 pr-2.5 flex items-center space-x-2 transition-all">
               <!-- Attach / Upload button (+) -->
               <button onclick="toggleIngestModal(true)" class="p-1.5 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-full transition-colors flex-shrink-0" title="Nạp tài liệu mới">
@@ -714,16 +720,19 @@
       const heroSlot = document.getElementById('hero-input-slot');
       const bottomSlot = document.getElementById('bottom-input-slot');
       const bottomBar = document.getElementById('floating-bottom-bar');
+      const asOfRow = document.getElementById('as-of-row');
 
       if (!capsule) return;
 
       if (mode === 'hero') {
         if (heroSlot && !heroSlot.contains(capsule)) {
+          if (asOfRow) heroSlot.appendChild(asOfRow);
           heroSlot.appendChild(capsule);
         }
         if (bottomBar) bottomBar.classList.add('hidden');
       } else if (mode === 'bottom') {
         if (bottomSlot && !bottomSlot.contains(capsule)) {
+          if (asOfRow) bottomSlot.appendChild(asOfRow);
           bottomSlot.appendChild(capsule);
         }
         if (bottomBar) bottomBar.classList.remove('hidden');
@@ -1082,7 +1091,8 @@
           headers: { 'Content-Type': 'application/json' },
           // session_id: server giữ bảng tra PII theo phiên để cùng một thông tin cá nhân
           // luôn là cùng placeholder qua các lượt hỏi
-          body: JSON.stringify({ query: rawQuery, session_id: targetSessionId }),
+          body: JSON.stringify(Object.assign({ query: rawQuery, session_id: targetSessionId },
+            document.getElementById('as-of-input').value ? { as_of: document.getElementById('as-of-input').value } : {})),
         });
 
         if (!response.ok) {
@@ -1168,7 +1178,7 @@
         const src = (data.sources || []).find(s => String(s.n) === String(firstNum));
         const chunkId = src ? src.chunk_id : '';
         const secInfo = src ? parseSectionInfo(src.section) : null;
-        const shortDoc = src ? (DOC_SHORT_NAMES[src.source] || 'Luật') : 'Luật';
+        const shortDoc = src ? (DOC_SHORT_NAMES[src.source] || (src.store === 'versioned' ? String(src.source).replace(/^[a-z_]+:/, '') : 'Luật')) : 'Luật';
         
         let label = shortDoc;
         if (secInfo && secInfo.article) {
@@ -1185,6 +1195,7 @@
             class="chatgpt-cite-pill" 
             data-chunk-id="${chunkId}">
             <span class="pill-dot"></span>
+            ${src && src.document_status && src.document_status !== 'verified' ? '<span aria-label="chưa xác minh" title="Căn cứ chưa xác minh đầy đủ" style="color:#8a5a00">⚠</span>' : ''}
             <span>${escapeHtml(label)}</span>
             ${moreCount > 0 ? `<span class="pill-more">+${moreCount}</span>` : ''}
           </button>
@@ -1263,10 +1274,16 @@
           🔒 Đã ẩn thông tin cá nhân trong câu hỏi trước khi gửi đi (${escapeHtml(piiEntries.map(([k, n]) => `${k} ×${n}`).join(', '))}).
         </div>` : '';
 
+      const temporal = renderTemporalBlocks(data);
+
       contentBox.innerHTML = `
+        ${temporal.timeline}
         <div id="${msgId}-text" class="chatgpt-prose select-text">
           ${formattedText}
         </div>
+        ${temporal.certainty}
+        ${temporal.transitions}
+        ${temporal.followups}
         ${piiHtml}
         ${actionBarHtml}
         ${traceHtml}
@@ -1274,6 +1291,99 @@
 
       scrollToBottom();
     }
+
+    // ===== Hỏi đáp theo mốc thời gian (phần 2) =====
+    const ROLE_LABEL = { signing: 'Ký kết', contract_effective: 'Hợp đồng có hiệu lực', performance: 'Thực hiện',
+      discovery: 'Phát hiện', dispute: 'Tranh chấp', evaluation: 'Đánh giá', unspecified: 'Mốc' };
+    const SOURCE_LABEL = { calendar: 'ngày đã chọn', question: 'từ câu hỏi', default: 'mặc định hôm nay' };
+    const DOC_STATUS_LABEL = { verified: ['✓', 'Đã xác minh phiên bản', '#006300'],
+      partially_verified: ['◐', 'Xác minh một phần', '#8a5a00'], unversioned: ['?', 'Chưa xác định phiên bản', '#8a5a00'],
+      outdated: ['⊘', 'Không còn hiệu lực tại mốc', '#b42318'], unknown: ['?', 'Chưa đủ dữ liệu', '#8a5a00'] };
+    const ASSESS_LABEL = { not_applicable: 'Không áp dụng', potentially_applicable: 'Có thể áp dụng — cần xem xét',
+      applicable: 'Áp dụng (theo phân tích)', undetermined: 'Chưa xác định — thiếu dữ kiện' };
+    const WARN_LABEL = { 'timeline.default_today': 'Không thấy mốc thời gian trong câu hỏi — đang áp dụng pháp luật hiện hành.',
+      'timeline.llm_failed': 'Không phân tích được vai trò các mốc; đã dùng nhận diện theo quy tắc.',
+      'timeline.evidence_not_found': 'Đã bỏ một mốc không có căn cứ trong câu hỏi.' };
+    const fmtDay = d => d ? d.split('-').reverse().join('/') : '';
+
+    function anchorWhen(a) {
+      if (!a.start) return 'chưa xác định';
+      if (a.start === a.end) return fmtDay(a.start);
+      if (a.precision === 'year') return 'năm ' + a.start.slice(0, 4);
+      if (a.precision === 'month') return 'tháng ' + a.start.slice(5, 7) + '/' + a.start.slice(0, 4);
+      return fmtDay(a.start) + ' – ' + fmtDay(a.end);
+    }
+
+    function warningText(w) {
+      if (WARN_LABEL[w]) return WARN_LABEL[w];
+      if (w.startsWith('timeline.calendar_conflict')) return 'Câu hỏi nhắc một mốc khác ngày đã chọn — đang ưu tiên ngày đã chọn, xem lại nếu chưa đúng.';
+      if (w.startsWith('timeline.relative_unresolved')) return 'Chưa quy được "' + w.split(':').slice(1).join(':') + '" ra ngày cụ thể — hãy cho ngày rõ hơn.';
+      return w;
+    }
+
+    function docStatusBadge(status) {
+      const s = DOC_STATUS_LABEL[status];
+      if (!s) return '';
+      return `<span class="inline-flex items-center gap-1 text-[11px] font-medium" style="color:${s[2]}">${s[0]} ${escapeHtml(s[1])}</span>`;
+    }
+
+    function renderTemporalBlocks(data) {
+      const out = { timeline: '', certainty: '', transitions: '', followups: '' };
+      const tl = data.timeline;
+      if (tl && tl.anchors) {
+        const chips = tl.anchors.map(a => `
+          <span class="inline-flex flex-wrap items-baseline gap-1 border border-neutral-200 bg-neutral-50 rounded-lg px-2 py-1">
+            <span class="text-[11px] text-neutral-500">${escapeHtml(ROLE_LABEL[a.role] || a.role)}</span>
+            <span class="text-[12.5px] font-medium text-neutral-800">${escapeHtml(anchorWhen(a))}</span>
+            <span class="text-[10.5px] text-neutral-400">${escapeHtml(SOURCE_LABEL[a.source] || a.source)}</span>
+          </span>`).join('');
+        const warns = (tl.warnings || []).map(w => `<div class="text-[11.5px]" style="color:#8a5a00">⚠ ${escapeHtml(warningText(w))}</div>`).join('');
+        out.timeline = `<div class="mb-3 space-y-1.5"><div class="text-[11.5px] font-semibold text-neutral-500 uppercase tracking-wide">Mốc pháp lý đang sử dụng</div>
+          <div class="flex flex-wrap gap-1.5">${chips}</div>${warns}</div>`;
+      }
+      if (data.certainty && data.certainty !== 'firm') {
+        const text = data.certainty === 'cannot_conclude'
+          ? 'Chưa đủ căn cứ để kết luận.'
+          : 'Kết luận có điều kiện — phụ thuộc vào căn cứ chưa xác minh đầy đủ, quy định chuyển tiếp hoặc mốc thời gian chưa đủ cụ thể.';
+        out.certainty = `<div class="mt-3 text-[12.5px] rounded-lg px-3 py-2 border" style="border-color:#fab219;background:#fffaf0;color:#8a5a00">⚠ ${escapeHtml(text)}</div>`;
+      }
+      const rules = data.transition_rules || [];
+      if (rules.length) {
+        const assess = Object.fromEntries((data.transition_assessments || []).map(t => [t.rule_id, t]));
+        out.transitions = `<div class="mt-3 border border-neutral-200 rounded-lg p-3 space-y-2">
+          <div class="text-[12.5px] font-semibold text-neutral-800">Quy định chuyển tiếp cần xem xét</div>
+          ${rules.map(r => {
+            const a = assess[r.rule_id] || {};
+            const missing = (a.missing_information || []).length ? `<div class="text-[11.5px] text-neutral-600">Cần bổ sung: ${escapeHtml(a.missing_information.join('; '))}</div>` : '';
+            return `<div class="text-[12px]"><div><span class="font-medium">${escapeHtml(r.source_article)}</span> — ${escapeHtml(r.source_document_key)}
+              <span class="ml-1" style="color:${a.assessment === 'not_applicable' ? '#006300' : '#8a5a00'}">· ${escapeHtml(ASSESS_LABEL[a.assessment] || 'Chưa đánh giá')}</span></div>
+              <div class="text-neutral-500">${escapeHtml((r.excerpt || '').length > 220 ? r.excerpt.slice(0, 220) + '…' : (r.excerpt || ''))}</div>${missing}</div>`;
+          }).join('')}</div>`;
+      }
+      const fu = data.follow_up_questions || [];
+      if (fu.length) {
+        out.followups = `<div class="mt-3 flex flex-wrap gap-1.5">${fu.map(q =>
+          `<button type="button" class="followup-chip text-[12px] border border-neutral-300 rounded-full px-3 py-1 hover:bg-neutral-100" data-q="${escapeHtml(q)}">${escapeHtml(q)}</button>`).join('')}</div>`;
+      }
+      return out;
+    }
+
+    document.addEventListener('click', (e) => {
+      const chip = e.target.closest('.followup-chip');
+      if (!chip) return;
+      const input = document.getElementById('main-query-input');
+      input.value = chip.dataset.q;
+      input.focus();
+    });
+
+    (function initAsOf() {
+      const input = document.getElementById('as-of-input');
+      const clear = document.getElementById('as-of-clear');
+      if (!input || !clear) return;
+      const sync = () => clear.classList.toggle('hidden', !input.value);
+      input.addEventListener('change', sync);
+      clear.addEventListener('click', () => { input.value = ''; sync(); });
+    })();
 
     function renderHitList(hits) {
       if (!hits || hits.length === 0) {
@@ -1384,7 +1494,16 @@
       const quoteOrText = src.quote || src.text || '';
       renderCanvasContent(quoteOrText, quoteOrText, secInfo.article, true);
 
-      // 2. If it's a URL, no raw local file to fetch
+      // 2. Căn cứ có phiên bản: toàn văn gốc là bản CHƯA sửa đổi -> chỉ hiện nội dung phiên bản đã dùng
+      if (src.store === 'versioned') {
+        if (tabBtn) tabBtn.classList.add('hidden');
+        subtitleEl.textContent = (secInfo.article || src.section || '') + (src.valid_from
+          ? ` · hiệu lực ${fmtDay(src.valid_from)} → ${src.valid_to ? fmtDay(src.valid_to) : 'nay'}` : '');
+        return;
+      }
+      if (tabBtn) tabBtn.classList.remove('hidden');
+
+      // 2b. If it's a URL, no raw local file to fetch
       if (isLink) {
         return;
       }
@@ -1574,7 +1693,11 @@
       document.getElementById('popover-article').textContent = secInfo.article;
       document.getElementById('popover-quote').textContent = `"${quoteText}"`;
       document.getElementById('popover-score').textContent = src.score ? `Độ khớp: p = ${src.score}` : 'Độ khớp cao';
-      document.getElementById('popover-page').textContent = src.page ? `Trang ${src.page}` : '';
+      document.getElementById('popover-page').innerHTML = src.store
+        ? (src.valid_from ? `Hiệu lực ${escapeHtml(fmtDay(src.valid_from))} → ${escapeHtml(src.valid_to ? fmtDay(src.valid_to) : 'nay')} · ` : 'Kho luật cũ · ')
+          + docStatusBadge(src.document_status)
+          + ((src.provenance || []).length ? ` · do ${escapeHtml(src.provenance.join(', '))} sửa` : '')
+        : (src.page ? `Trang ${src.page}` : '');
       document.getElementById('popover-view-btn').onclick = () => {
         hideCitePopover();
         openCanvas(chunkId, n);

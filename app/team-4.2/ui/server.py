@@ -223,6 +223,93 @@ def _sync_ask(query: str, pipeline: RAGPipeline, mask_state: MaskState) -> dict[
     }
 
 
+# --- hỏi đáp theo mốc thời gian (phần 2) -----------------------------------------------------
+
+_temporal_qa = None
+
+
+def get_temporal_qa():
+    """TemporalQA dùng kho có phiên bản (DATA_DIR/legal) + kho cũ (pipeline hiện tại) để tham khảo.
+    Chỉ mục kho mới dựng lại khi có bản dựng mới. Dense cho kho mới chỉ bật khi LEGAL_DENSE=1 (tránh embed hàng
+    chục nghìn chunk lần đầu)."""
+    global _temporal_qa
+    import os
+
+    from rag.temporal.index import VersionedIndex
+    from rag.temporal.log import QALog
+    from rag.temporal.qa import TemporalQA
+    from rag.temporal.status import load_legacy_map
+
+    if _temporal_qa is None:
+        pipeline, settings = get_pipeline()
+        service = get_legal_service()
+        embedder = None
+        if os.environ.get("LEGAL_DENSE") == "1":
+            from rag.index.embedder import EmbeddingCache, make_embedder
+            embedder = make_embedder(settings.embed_model, settings.embed_dim,
+                                     cache=EmbeddingCache(settings.cache_dir / "embeddings.sqlite"),
+                                     jina_api_key=settings.jina_api_key)
+        index = VersionedIndex(service.store, embedder)
+        index.build()
+
+        def legacy_search(query: str, k: int):
+            result = pipeline.retriever.retrieve(query, k)
+            chunks = pipeline.retriever.chunks
+            return [chunks[h.chunk_id] for h in result.hits[:k] if h.chunk_id in chunks]
+
+        legacy_map_path = _REPO_ROOT / "data" / "team-4.2" / "legal" / "legacy_map.yaml"
+        _temporal_qa = TemporalQA(service, index, pipeline.llm, legacy_search=legacy_search,
+                                  legacy_map=load_legacy_map(legacy_map_path) if legacy_map_path.exists() else {},
+                                  log=QALog(settings.data_dir / "legal" / "qa_log.sqlite"))
+    elif _temporal_qa.index.stale():
+        _temporal_qa.index.build()
+    return _temporal_qa
+
+
+def _iso(value):
+    return value.isoformat() if value is not None else None
+
+
+def _sync_temporal(query: str, qa, as_of, mask_state: MaskState) -> dict[str, Any]:
+    import re as _re
+
+    from rag.legal.store import encode
+
+    result = qa.ask(query, calendar_date=as_of, mask_state=mask_state)
+    sources = []
+    for it in result.items:
+        sources.append({
+            "n": it.n, "chunk_id": it.chunk_id,
+            "source": it.document_key if it.store == "versioned" else it.title,
+            "title": it.title, "section": it.section or "Không có tiêu đề", "page": None, "score": 0.0,
+            "text": it.text, "store": it.store, "document_status": it.document_status,
+            "provision_status": it.provision_status, "valid_from": _iso(it.valid_from), "valid_to": _iso(it.valid_to),
+            "provenance": list(it.provenance), "anchor_roles": list(it.anchor_roles),
+        })
+    cited = {int(n) for n in _re.findall(r"\[(\d+)\]", result.answer.answer_markdown)}
+    citations = [dict(s, quote=s["text"][:300]) for s in sources if s["n"] in cited]
+    timeline = encode(result.timeline)
+    return {
+        "query": query,
+        "answer": result.answer.answer_markdown,
+        "refused": not result.llm_called,
+        "query_pii": result.query_pii,
+        "citations": citations,
+        "sources": sources,
+        "trace": {"context_mode": "temporal", "n_context_blocks": len(sources), "reranked": False, "errors": {},
+                  "arms": {}, "final_hits": []},
+        "timeline": {"anchors": timeline["anchors"], "primary": timeline["primary"], "warnings": timeline["warnings"]},
+        "issues": result.answer.issues,
+        "certainty": result.answer.certainty,
+        "downgrade_reasons": result.answer.downgrade_reasons,
+        "transition_assessments": result.answer.transition_assessments,
+        "transition_rules": [{k: v for k, v in encode(r).items() if k != "text"} | {"excerpt": r.text[:400]}
+                             for r in result.rules],
+        "follow_up_questions": result.answer.follow_up_questions,
+        "log_id": result.log_id,
+    }
+
+
 async def handle_chat(request: Request) -> JSONResponse:
     """Xử lý câu hỏi, gọi ask_debug trong thread pool để không block event loop."""
     try:
@@ -235,12 +322,25 @@ async def handle_chat(request: Request) -> JSONResponse:
         return JSONResponse({"error": "Câu hỏi không được rỗng"}, status_code=400)
 
     session_id = str(body.get("session_id") or "").strip()[:128] or None
-    pipeline, _ = get_pipeline()
+    as_of = None
+    if body.get("as_of"):
+        from datetime import date as _date
+        try:
+            as_of = _date.fromisoformat(str(body["as_of"]))
+        except ValueError:
+            return JSONResponse({"error": "as_of phải là ngày hợp lệ dạng YYYY-MM-DD"}, status_code=400)
     loop = asyncio.get_running_loop()
     try:
-        data = await loop.run_in_executor(
-            _executor, _sync_ask, query, pipeline, get_mask_state(session_id)
-        )
+        qa = get_temporal_qa()
+        if qa is not None:
+            data = await loop.run_in_executor(
+                _executor, _sync_temporal, query, qa, as_of, get_mask_state(session_id)
+            )
+        else:
+            pipeline, _ = get_pipeline()
+            data = await loop.run_in_executor(
+                _executor, _sync_ask, query, pipeline, get_mask_state(session_id)
+            )
         return JSONResponse(data)
     except Exception as e:
         log.exception("Lỗi khi xử lý chat: %s", e)

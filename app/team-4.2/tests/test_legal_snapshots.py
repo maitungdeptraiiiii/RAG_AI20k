@@ -1,3 +1,4 @@
+import os
 import sqlite3
 from dataclasses import replace
 from datetime import date, datetime, timedelta, timezone
@@ -177,6 +178,80 @@ def test_cleanup_keeps_three_current_and_in_use(tmp_path, mgr_with_law):
     assert boot in removed
     assert not (tmp_path / "snapshots" / ids[1]).exists() and (tmp_path / "snapshots" / ids[0]).exists()
     assert mgr_with_law.cleanup(keep=3, in_use={ids[0]}) == []
+
+
+def test_store_of_removed_snapshot_raises_without_recreating(tmp_path, mgr_with_law):
+    boot = mgr_with_law.current().snapshot_id
+    for _ in range(2):
+        mgr_with_law.write("cli:build", "t", lambda s: None)
+    assert boot in mgr_with_law.cleanup(keep=1)
+    with pytest.raises(FileNotFoundError):
+        mgr_with_law.store(boot)
+    with pytest.raises(FileNotFoundError):
+        mgr_with_law.service(boot)
+    assert not (tmp_path / "snapshots" / boot).exists()
+
+
+def test_store_of_missing_catalog_raises(tmp_path, mgr_with_law):
+    snap = mgr_with_law.write("cli:build", "t", lambda s: None).snapshot
+    parent = mgr_with_law.get(snap.parent_id)
+    parent.catalog_path.unlink()
+    with pytest.raises(FileNotFoundError):
+        mgr_with_law.store(parent.snapshot_id)
+    assert not parent.catalog_path.exists()
+    with pytest.raises(KeyError):
+        mgr_with_law.store("s00000000000000-000000")
+
+
+def test_publish_retries_pointer_replace_on_permission_error(tmp_path, mgr_with_law, monkeypatch):
+    import rag.legal.snapshots as snapshots
+    real, calls = os.replace, []
+
+    def flaky(src, dst):
+        if Path(dst).name == "CURRENT":
+            calls.append(1)
+            if len(calls) <= 3:
+                raise PermissionError(13, "file in use")      # người đọc đang mở CURRENT (Windows)
+        return real(src, dst)
+
+    monkeypatch.setattr(snapshots.os, "replace", flaky)
+    res = mgr_with_law.write("cli:build", "t", lambda s: None)
+    assert len(calls) == 4 and res.snapshot.status == "published"
+    assert mgr_with_law.current().snapshot_id == res.snapshot.snapshot_id
+    assert not list(tmp_path.glob("CURRENT.*.tmp"))
+
+
+def test_publish_gives_up_after_persistent_permission_error(tmp_path, mgr_with_law, monkeypatch):
+    import rag.legal.snapshots as snapshots
+    before = mgr_with_law.current().snapshot_id
+    real = os.replace
+
+    def always(src, dst):
+        if Path(dst).name == "CURRENT":
+            raise PermissionError(13, "file in use")
+        return real(src, dst)
+
+    monkeypatch.setattr(snapshots, "_RETRY_DELAYS", (0.0, 0.0))
+    monkeypatch.setattr(snapshots.os, "replace", always)
+    with pytest.raises(PermissionError):
+        mgr_with_law.write("cli:build", "t", lambda s: None)
+    assert mgr_with_law.current().snapshot_id == before and mgr_with_law.list()[0].status == "failed"
+    assert not list(tmp_path.glob("CURRENT.*.tmp"))
+
+
+def test_current_retries_pointer_read_on_permission_error(tmp_path, mgr_with_law, monkeypatch):
+    expected = mgr_with_law.current().snapshot_id
+    real, calls = Path.read_text, []
+
+    def flaky(self, *a, **kw):
+        if self.name == "CURRENT":
+            calls.append(1)
+            if len(calls) <= 2:
+                raise PermissionError(13, "being replaced")
+        return real(self, *a, **kw)
+
+    monkeypatch.setattr(Path, "read_text", flaky)
+    assert mgr_with_law.current().snapshot_id == expected and len(calls) == 3
 
 
 def test_cleanup_removes_old_failed_staging(tmp_path, small_legacy_catalog):

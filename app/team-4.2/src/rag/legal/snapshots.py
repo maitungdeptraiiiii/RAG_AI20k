@@ -17,6 +17,7 @@ import secrets
 import shutil
 import sqlite3
 import tempfile
+import time
 from collections.abc import Callable, Collection, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -40,6 +41,18 @@ CREATE TABLE IF NOT EXISTS snapshots (seq INTEGER PRIMARY KEY AUTOINCREMENT, sna
 _COLUMNS = "snapshot_id, parent_id, status, reason, actor, created_at, published_at, error"
 _FAILED_RETENTION = timedelta(days=7)
 _BOOTSTRAP_LOCK_TIMEOUT = 60.0
+# Windows: open() không có FILE_SHARE_DELETE -> os.replace vào CURRENT lỗi PermissionError khi có người đang đọc nó,
+# và đọc CURRENT có thể lỗi đúng lúc đang thay. Thử lại ngắn (~1s tổng).
+_RETRY_DELAYS = (0.01, 0.02, 0.05, 0.1, 0.2, 0.25, 0.4)
+
+
+def _retry_on_permission(action: Callable[[], T]) -> T:
+    for delay in _RETRY_DELAYS:
+        try:
+            return action()
+        except PermissionError:
+            time.sleep(delay)
+    return action()
 
 
 @dataclass(frozen=True)
@@ -149,7 +162,7 @@ class SnapshotManager:
                 f.write(snapshot_id + "\n")
                 f.flush()
                 os.fsync(f.fileno())
-            os.replace(tmp, self._pointer)
+            _retry_on_permission(lambda: os.replace(tmp, self._pointer))
         except BaseException:
             if os.path.exists(tmp):
                 os.unlink(tmp)
@@ -174,7 +187,7 @@ class SnapshotManager:
     # --- đọc ---------------------------------------------------------------------------
 
     def current(self) -> Snapshot:
-        return self.get(self._pointer.read_text(encoding="utf-8").strip())
+        return self.get(_retry_on_permission(lambda: self._pointer.read_text(encoding="utf-8")).strip())
 
     def get(self, snapshot_id: str) -> Snapshot:
         with self._db() as c:
@@ -189,7 +202,15 @@ class SnapshotManager:
         return [self._row(r) for r in rows]
 
     def store(self, snapshot_id: str | None = None) -> LegalStore:
+        """Kho của snapshot (mặc định: đang công bố). Không bao giờ tạo kho: snapshot đã dọn hoặc mất file ->
+        `FileNotFoundError` (thay vì một kho rỗng khiến chat trả lời "không có dữ liệu"); id lạ -> `KeyError`."""
         snap = self.get(snapshot_id) if snapshot_id is not None else self.current()
+        with self._db() as c:
+            removed = c.execute("SELECT removed_at FROM snapshots WHERE snapshot_id=?", (snap.snapshot_id,)).fetchone()
+        if removed and removed[0]:
+            raise FileNotFoundError(f"Snapshot {snap.snapshot_id} đã được dọn lúc {removed[0]}")
+        if not snap.catalog_path.is_file():
+            raise FileNotFoundError(f"Snapshot {snap.snapshot_id} không còn file kho: {snap.catalog_path}")
         return LegalStore(snap.catalog_path)
 
     def service(self, snapshot_id: str | None = None) -> LegalService:

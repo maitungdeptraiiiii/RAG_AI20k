@@ -76,6 +76,20 @@ def test_header_fields_from_real_amending_law():
     assert f["title"].value.startswith("SỬA ĐỔI, BỔ SUNG MỘT SỐ ĐIỀU")
 
 
+@pytest.mark.parametrize("name,number", [("luat_31_2024_QH15.txt", "31/2024/QH15"),
+                                         ("luat_27_2023_QH15.txt", "27/2023/QH15")])
+def test_header_number_with_type_prefix_from_real_fixture(name, number):
+    # header vbpl thật ghi "Luật số: 31/2024/QH15"
+    f = header_fields((FIXTURES / name).read_text(encoding="utf-8"), NOW)
+    assert f["doc_number"].value == number and f["doc_number"].detail.startswith("Luật số:")
+
+
+@pytest.mark.parametrize("line", ["Nghị quyết số: 61/2022/QH15", "Bộ luật số: 91/2015/QH13", "Số 61/2022/QH15"])
+def test_header_number_line_variants(line):
+    text = f"QUỐC HỘI\n{line}\nNGHỊ QUYẾT\nTHỬ\nĐiều 1. X\n"
+    assert header_fields(text, NOW)["doc_number"].value == line.split()[-1]
+
+
 def test_vbpl_wins_over_text_and_keeps_source():
     m = merge_fields(header_fields(REAL_43_2024, NOW), vbpl_fields(DETAIL_43, NOW))
     assert m["vbpl_id"].source == "vbpl" and m["doc_number"].source == "vbpl"

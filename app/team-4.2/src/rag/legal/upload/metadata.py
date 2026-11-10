@@ -35,7 +35,7 @@ REJECT_TYPE_MESSAGE = "Kho luật chỉ nhận Luật / Bộ luật / Nghị quy
 
 _URL = re.compile(r"^https://vbpl\.vn/van-ban/chi-tiet/([^/?#\s]+)(?:[?#].*)?$")
 _TYPE_LINE = re.compile(r"^(LUẬT|BỘ\s+LUẬT|NGHỊ\s+QUYẾT|VĂN\s+BẢN\s+HỢP\s+NHẤT)$")
-_NUMBER_LINE = re.compile(r"^Số\s*:?\s*(\d+(?:/\d{4})?/[A-Z0-9Đ\-]+(?:/[A-Z0-9Đ\-]+)*)", re.IGNORECASE)
+_NUMBER_LINE = re.compile(r"^(?:(?:Bộ\s+luật|Luật|Nghị\s+quyết)\s+)?Số\s*:?\s*(\d+(?:/\d{4})?/[A-Z0-9Đ\-]+(?:/[A-Z0-9Đ\-]+)*)", re.IGNORECASE)
 _DATE_LINE = re.compile(r"ngày\s+\d{1,2}\s+tháng\s+\d{1,2}\s+năm\s+\d{4}", re.IGNORECASE)
 _TITLE_END = re.compile(r"^(Căn\s+cứ|Quốc\s+hội\s+ban\s+hành|Theo\s+đề\s+nghị)", re.IGNORECASE)
 _ISSUERS = {"QUỐC HỘI": "Quốc hội", "ỦY BAN THƯỜNG VỤ QUỐC HỘI": "Ủy ban Thường vụ Quốc hội",

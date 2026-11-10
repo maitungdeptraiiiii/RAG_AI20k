@@ -69,8 +69,7 @@ class FakeVbplClient:
 
 @functools.lru_cache(maxsize=None)
 def _fixture_text(name: str) -> str:
-    # header "Luật số: N" -> "Số: N": header_fields (Task 4) chỉ đọc dòng bắt đầu bằng "Số"
-    return (FIXTURES / name).read_text(encoding="utf-8").replace("Luật số:", "Số:", 1)
+    return (FIXTURES / name).read_text(encoding="utf-8")       # nguyên văn fixture, header "Luật số: N"
 
 
 @functools.lru_cache(maxsize=None)
@@ -396,6 +395,45 @@ def test_apply_is_stale_when_same_number_appeared(svc_env):
         svc_env.snapshots.write(f"upload:{d.upload_id}", "An", lambda s: svc_env.upload.apply_to(s, d.upload_id))
 
 
+def test_apply_replace_keeps_rejected_relation(svc_env):
+    from rag.legal.models import DocumentRelation
+
+    def seed(s):
+        text = TXT_43.read_text(encoding="utf-8").replace("Luật này có hiệu lực", "Luật này có hiệu  lực")
+        path, checksum = write_text(s.store.path.parents[2] / "raw", AMEND, text)
+        s.store.upsert_document(_doc(AMEND, "43/2024/QH15", "Luật sửa đổi 43", date(2024, 6, 29), path, checksum,
+                                     text_source="file"))
+        s.store.add_relation(DocumentRelation(AMEND, LAND, "SUA_DOI_BO_SUNG", "người duyệt: sai", "rejected"))
+    svc_env.snapshots.write("seed", "B", seed)
+    d = walk_to_step3(svc_env, TXT_43, replace=True)
+    d = svc_env.upload.submit(d.upload_id, "An")
+    res = svc_env.snapshots.write(f"upload:{d.upload_id}", "An", lambda s: svc_env.upload.apply_to(s, d.upload_id))
+    rels = {(r.target_key, r.relation): r for r in svc_env.snapshots.store(res.snapshot.snapshot_id).relations(AMEND)}
+    assert (rels[(LAND, "SUA_DOI_BO_SUNG")].status, rels[(LAND, "SUA_DOI_BO_SUNG")].evidence) == \
+        ("rejected", "người duyệt: sai")
+    assert rels[(HOUSING, "SUA_DOI_BO_SUNG")].status == "confirmed"          # quan hệ mới vẫn được thêm
+
+
+def test_apply_rechecks_source_rule(svc_env):
+    d = walk_to_step3(svc_env, _file(svc_env, "99.txt", UPLOADED_V2), replace=True)
+    d = svc_env.upload.submit(d.upload_id, "An")
+    # crawler nạp lại cùng text (cùng checksum) nhưng giờ là nguồn vbpl: file không được thay text vbpl
+    svc_env.snapshots.write("crawler", "B", lambda s: s.store.upsert_document(
+        replace(s.store.document(KEY_UPLOADED), text_source="vbpl")))
+    with pytest.raises(StepError, match="vbpl") as exc:
+        svc_env.snapshots.write(f"upload:{d.upload_id}", "An", lambda s: svc_env.upload.apply_to(s, d.upload_id))
+    assert not isinstance(exc.value, StaleDraftError)
+
+
+def test_relookup_rechecks_duplicate_when_key_changes(svc_env):
+    d = svc_env.upload.create_from_url("https://vbpl.vn/van-ban/chi-tiet/171234")
+    d = svc_env.upload.confirm_text(d.upload_id, "An")
+    svc_env.client.details["171234"] = {**DETAIL_43, "docNum": "99/2024/QH15"}
+    d = svc_env.upload.relookup_vbpl(d.upload_id)
+    assert d.duplicate and d.duplicate["document_key"] == KEY_UPLOADED
+    assert d.state == "step1" and d.confirmations == {} and d.duplicate["replace_allowed"] is True
+
+
 def test_apply_requires_queued(svc_env):
     d = walk_to_step3(svc_env, TXT_43)
     with pytest.raises(StepError):
@@ -411,18 +449,39 @@ def test_drafts_survive_restart(tmp_path, svc_env):
     assert loaded.text == d.text and loaded == d
 
 
+U1, U2, U3 = "u20261110090000-aaaaa1", "u20261110090000-aaaaa2", "u20261110090000-aaaaa3"
+
+
 def test_draft_store_list_and_mark_interrupted(tmp_path):
     store = DraftStore(tmp_path)
-    base = Draft("u1", NOW, "queued", "file", "a.txt", "t", "c", [], {}, {}, False, "s1", None)
+    base = Draft(U1, NOW, "queued", "file", "a.txt", "t", "c", [], {}, {}, False, "s1", None)
     store.save(base)
-    store.save(replace(base, upload_id="u2", created_at=NOW.replace(hour=10), state="building"))
-    store.save(replace(base, upload_id="u3", created_at=NOW.replace(hour=8), state="step1"))
-    assert [d.upload_id for d in store.list()] == ["u2", "u1", "u3"]
-    assert sorted(store.mark_interrupted()) == ["u1", "u2"]
-    assert store.load("u1").state == "failed" and store.load("u1").error == "server khởi động lại giữa chừng"
-    assert store.load("u3").state == "step1"
+    store.save(replace(base, upload_id=U2, created_at=NOW.replace(hour=10), state="building"))
+    store.save(replace(base, upload_id=U3, created_at=NOW.replace(hour=8), state="step1"))
+    assert [d.upload_id for d in store.list()] == [U2, U1, U3]
+    assert sorted(store.mark_interrupted()) == [U1, U2]
+    assert store.load(U1).state == "failed" and store.load(U1).error == "server khởi động lại giữa chừng"
+    assert store.load(U3).state == "step1"
     with pytest.raises(KeyError):
-        store.load("nope")
+        store.load("u20261110090000-bbbbbb")
+
+
+@pytest.mark.parametrize("bad", ["C:foo", "..\\x", "../x", "..", "", "u1", "u20261110090000-AAAAAA",
+                                 "u20261110090000-aaaaaa/../x", "C:\\Windows", "u20261110090000-aaaaaa\n"])
+def test_draft_store_rejects_ids_outside_format(tmp_path, bad):
+    store = DraftStore(tmp_path / "uploads")
+    with pytest.raises(KeyError):
+        store.load(bad)
+    with pytest.raises(KeyError):
+        store.save(Draft(bad, NOW, "step1", "file", "a.txt", "t", "c", [], {}, {}, False, "s1", None))
+    with pytest.raises(KeyError):
+        store.save_original(bad, TXT_43, ".txt")
+    assert list(tmp_path.iterdir()) == [tmp_path / "uploads"]
+
+
+def test_generated_ids_match_store_format(svc_env):
+    d = svc_env.upload.create_from_file(TXT_43, "43.txt")
+    assert DraftStore(svc_env.drafts_root).folder(d.upload_id).parent == svc_env.drafts_root
 
 
 def test_cancel(svc_env):

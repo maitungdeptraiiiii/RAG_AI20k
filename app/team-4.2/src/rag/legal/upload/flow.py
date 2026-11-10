@@ -381,17 +381,22 @@ class UploadService:
                     raise StepError(f"Trường không hợp lệ: {name}")
                 fields[name] = FieldValue(_parse_value(name, raw), "user", now, who)
             d.fields, d.preview = _enc_fields(fields), None
-            if _key(d) != before:                   # số hiệu / loại đổi: kiểm trùng lại (có thể quay về so sánh)
-                d.replace = False
-                self._check_duplicate(d)
-                if d.duplicate is not None:
-                    d.confirmations = {}
+            self._recheck_if_rekeyed(d, before)
             return self._save(d)
+
+    def _recheck_if_rekeyed(self, d: Draft, before: str | None) -> None:
+        """Số hiệu / loại đổi: kiểm trùng lại; trùng thì quay về bước ① (so sánh), bỏ các xác nhận."""
+        if _key(d) == before:
+            return
+        d.replace = False
+        self._check_duplicate(d)
+        if d.duplicate is not None:
+            d.confirmations = {}
 
     def relookup_vbpl(self, upload_id: str) -> Draft:
         with self._lock:
             d = self._load(upload_id, "step1", "step2")
-            fields, now = _dec_fields(d.fields), self.now()
+            fields, now, before = _dec_fields(d.fields), self.now(), _key(d)
             client = self.client_factory()
             if d.origin == "url":
                 try:
@@ -405,6 +410,7 @@ class UploadService:
                 user = {k: v for k, v in fields.items() if v.source == "user"}
                 d.fields = _enc_fields(merge_fields(fields, vbpl_fields(detail, now), user))
                 d.source_verified, d.preview = True, None
+                self._recheck_if_rekeyed(d, before)
             return self._save(d)
 
     def preview(self, upload_id: str) -> Draft:
@@ -539,10 +545,15 @@ class UploadService:
             raise StaleDraftError()
         if existing is not None and not d.replace:
             raise StepError("Văn bản đã có trong kho mà bản nháp không ở chế độ thay thế")
+        if existing is not None and existing.text_source == "vbpl" and d.origin == "file":
+            raise StepError("Bản trong kho lấy từ vbpl (bản vbpl là text gốc) — không thay bằng file tải lên được")
         doc = self._document(d, key, self.snapshots.legal_dir / "raw", existing)
         svc.store.upsert_document(doc)
+        # thay thế giữ mọi quan hệ: không bao giờ ghi đè trạng thái / bằng chứng của quan hệ đã có (kể cả `rejected`)
+        known = {(r.source_key, r.target_key, r.relation) for r in svc.store.relations(key)}
         for rel in self._relations(svc.store, doc, d.text):
-            svc.store.add_relation(rel)
+            if (rel.source_key, rel.target_key, rel.relation) not in known:
+                svc.store.add_relation(rel)
 
     def _relations(self, store: LegalStore, doc: LegalDocument, text: str) -> list[DocumentRelation]:
         """Quan hệ `confirmed` kèm bằng chứng câu chữ (như `discovery._confirm`); quan hệ cũ không bị xoá."""

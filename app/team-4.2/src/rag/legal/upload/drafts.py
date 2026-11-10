@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import tempfile
 from dataclasses import dataclass, field, replace
@@ -21,6 +22,7 @@ from rag.legal.store import decode, encode
 DraftState = Literal["step1", "step2", "step3", "queued", "building", "published",
                      "failed", "stale", "duplicate", "cancelled"]
 INTERRUPTED = "server khởi động lại giữa chừng"
+UPLOAD_ID_RE = re.compile(r"u\d{14}-[0-9a-f]{6}")      # "u" + yyyymmddHHMMSS + "-" + 6 hex (UploadService._new_id)
 
 
 @dataclass
@@ -52,7 +54,8 @@ class DraftStore:
         self.root.mkdir(parents=True, exist_ok=True)
 
     def folder(self, upload_id: str) -> Path:
-        if not upload_id or "/" in upload_id or "\\" in upload_id or upload_id.startswith("."):
+        """Chỉ nhận id đúng dạng do `UploadService` sinh: không bao giờ thoát khỏi `root` ("C:foo", "..\\x")."""
+        if not isinstance(upload_id, str) or not UPLOAD_ID_RE.fullmatch(upload_id):
             raise KeyError(upload_id)
         return self.root / upload_id
 
@@ -107,4 +110,4 @@ class DraftStore:
         return ids
 
 
-__all__ = ["Draft", "DraftState", "DraftStore", "INTERRUPTED"]
+__all__ = ["Draft", "DraftState", "DraftStore", "INTERRUPTED", "UPLOAD_ID_RE"]

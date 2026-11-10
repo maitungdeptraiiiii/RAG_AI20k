@@ -20,6 +20,7 @@ dependencies = [
     "streamlit",
     "pandas",
     "pyyaml",            # rag.legal: seeds.yaml
+    "filelock",          # rag.legal.snapshots: khoá ghi kho luật
     "ragas",
 ]
 

@@ -15,7 +15,8 @@ from typing import Any, get_args
 from rag.legal.builder import build_versions
 from rag.legal.directives import _target_law, parse_directives
 from rag.legal.effectivity import parse_effectivity
-from rag.legal.models import Address, AmendmentOperation, OperationType, BuildRun, Provision, ReviewDecision, ReviewItem
+from rag.legal.models import (Address, AmendmentOperation, BuildRun, LegalDocument, OperationType, Provision,
+                              ReviewDecision, ReviewItem)
 from rag.legal.operations import _label_ok, build_operations, repeal_operations
 from rag.legal.status import _finalize, _flag, demote_amended_directives
 from rag.legal.store import LegalStore, encode
@@ -137,19 +138,36 @@ class LegalService:
 
     # --- dựng ------------------------------------------------------------------------------
 
-    def build_law(self, key: str) -> BuildRun:
+    def _ops_for_build(self, key: str) -> tuple[LegalDocument, list[AmendmentOperation]]:
         doc = self.store.document(key)
         if doc is None:
             raise KeyError(key)
-        provisions = self.provisions_for(key)
-        effectivity = parse_effectivity(provisions)
         all_ops = self.store.operations()
         directive_articles: dict[str, set[str]] = {}
         for o in all_ops:
             if o.operation_type != "REPEAL_DOCUMENT" and o.source_address is not None:
                 directive_articles.setdefault(o.source_document_key, set()).add(o.source_address.article)
         all_ops = demote_amended_directives(all_ops, directive_articles=directive_articles)
-        ops = [self._repeal_on_current_date(o) for o in all_ops if o.target_document_key == key]
+        return doc, [self._repeal_on_current_date(o) for o in all_ops if o.target_document_key == key]
+
+    @staticmethod
+    def _inputs(doc: LegalDocument, ops: list[AmendmentOperation]) -> str:
+        extra = []
+        if not doc.source_verified:
+            extra.append("src:unverified")
+        if doc.metadata_conflicts:
+            extra.append("conflicts:" + "|".join(sorted(doc.metadata_conflicts)))
+        return _sha1(doc.raw_checksum, *sorted(f"{o.operation_id}:{o.review_status}:{o.effective_from}" for o in ops),
+                     *extra)
+
+    def build_inputs(self, key: str) -> str:
+        """`inputs_checksum` mà `build_law(key)` sẽ ghi nếu dựng lại ngay bây giờ (không ghi gì vào kho)."""
+        return self._inputs(*self._ops_for_build(key))
+
+    def build_law(self, key: str) -> BuildRun:
+        doc, ops = self._ops_for_build(key)
+        provisions = self.provisions_for(key)
+        effectivity = parse_effectivity(provisions)
         for o in ops:
             amended = [r for r in o.status_reasons if r.startswith("operation.source_amended")]
             if amended and o.reviewer is None:
@@ -162,13 +180,7 @@ class LegalService:
                 day = parse_effectivity(self.provisions_for(src)).default_from
                 if day is not None:
                     default_dates[src] = day
-        extra = []
-        if not doc.source_verified:
-            extra.append("src:unverified")
-        if doc.metadata_conflicts:
-            extra.append("conflicts:" + "|".join(sorted(doc.metadata_conflicts)))
-        inputs = _sha1(doc.raw_checksum, *sorted(f"{o.operation_id}:{o.review_status}:{o.effective_from}" for o in ops),
-                       *extra)
+        inputs = self._inputs(doc, ops)
         build_id = _sha1(key, inputs)[:16]
         versions = build_versions(doc, provisions, effectivity, ops, build_id=build_id, default_dates=default_dates)
         versions = self._flag_known_gaps(doc, ops, versions)

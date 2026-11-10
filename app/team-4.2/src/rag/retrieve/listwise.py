@@ -37,9 +37,10 @@ TIÊU CHÍ CHỌN VÀ XẾP HẠNG:
 4. Chọn đúng select_k ID khác nhau. Sắp xếp bằng chứng trực tiếp nhất trước, rồi các bằng
    chứng cần thiết bổ sung. Đánh giá nội dung, không dựa vị trí hiển thị, số Điều lớn/nhỏ,
    hoặc cố chia đều cho từng câu con. Không bắt buộc mỗi câu con có một ID.
-5. Chỉ được chọn ID đang có. Không tạo ID, không trả lời pháp lý, không viện dẫn kiến thức
-   bên ngoài để bù cho nội dung không xuất hiện. Khi có nhiều lựa chọn, ưu tiên bằng chứng
-   cụ thể cho nhu cầu gốc thay vì quy định chung chỉ liên quan xa.
+5. Chỉ được chọn ID đang có (từ C01 đến C10 theo trường 'id' của candidates). TUYỆT ĐỐI KHÔNG
+   tự tạo ID và KHÔNG lấy số Điều luật để đặt ID (ví dụ: 'Điều 37' có id là 'C07', KHÔNG ĐƯỢC viết thành 'C37').
+   Không trả lời pháp lý, không viện dẫn kiến thức bên ngoài để bù cho nội dung không xuất hiện.
+   Khi có nhiều lựa chọn, ưu tiên bằng chứng cụ thể cho nhu cầu gốc thay vì quy định chung chỉ liên quan xa.
 
 Tự kiểm tra ID, số lượng, dữ kiện và độ bổ sung. Không xuất quá trình tự kiểm tra.
 Chỉ xuất một JSON object, không markdown hay giải thích:
@@ -67,6 +68,7 @@ class ListwisePlan:
     reason: str
     candidates: dict[str,Hit] = field(default_factory=dict)
     payload: str | None = None
+    alias_map: dict[str, str] = field(default_factory=dict)
 
     @property
     def triggered(self) -> bool:
@@ -118,9 +120,17 @@ class ListwiseSelector:
             candidates.append({'id':cid,'source':chunk.source,
                 'section':' > '.join((chunk.section or '').split(' > ')[-2:]),
                 'text':text,'truncated':len(words)>self.config.excerpt_words})
+        alias_map = {}
+        for cid, hit in candidate_map.items():
+            import re
+            sec = chunks[hit.chunk_id].section or ""
+            m = re.search(r"Điều\s+(\d+)", sec)
+            if m:
+                alias_map[f"C{m.group(1)}"] = cid
+
         payload=json.dumps({'query':q,'subqueries':children,'select_k':k,'candidates':candidates},
                            ensure_ascii=False,separators=(',',':'))
-        return ListwisePlan(original,'ambiguous_cutoff',candidate_map,payload)
+        return ListwisePlan(original,'ambiguous_cutoff',candidate_map,payload,alias_map=alias_map)
 
     def select(self,plan: ListwisePlan,*,k: int=5) -> ListwiseResult:
         metadata={'triggered':plan.triggered,'reason':plan.reason,'payload_sha256':plan.payload_sha256,
@@ -129,11 +139,17 @@ class ListwiseSelector:
         if not plan.triggered:
             return ListwiseResult(list(plan.ranked),metadata)
         try:
-            raw=self.llm.complete(LISTWISE_SYSTEM,plan.payload)
-            data=json.loads(raw)
-            if not isinstance(data,dict) or set(data)!={'selected_ids'}:
+            raw = self.llm.complete(LISTWISE_SYSTEM, plan.payload).strip()
+            if raw.startswith("```"):
+                import re
+                raw = re.sub(r"^```(?:json)?\s*", "", raw)
+                raw = re.sub(r"\s*```$", "", raw).strip()
+            data = json.loads(raw)
+            if not isinstance(data, dict) or set(data) != {'selected_ids'}:
                 raise ValueError('Expected only selected_ids')
-            ids=data['selected_ids']
+            ids = data['selected_ids']
+            if hasattr(plan, 'alias_map') and plan.alias_map:
+                ids = [plan.alias_map.get(cid, cid) for cid in ids]
             if (not isinstance(ids,list) or len(ids)!=k or any(not isinstance(cid,str) for cid in ids)
                     or len(set(ids))!=k or any(cid not in plan.candidates for cid in ids)):
                 raise ValueError('Selection must contain exactly k unique valid IDs')

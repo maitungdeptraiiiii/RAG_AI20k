@@ -15,7 +15,7 @@ import logging
 import sqlite3
 import threading
 import time
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterator, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -125,6 +125,43 @@ class OpenAIChatLLM:
         if self.cache is not None:
             self.cache.put(key, text)
         return text
+
+    def stream(self, system: str, user: str) -> Iterator[str]:
+        messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
+        key = LLMCache.key(self.model_id, self.temperature, messages)
+        if self.cache is not None:
+            hit = self.cache.get(key)
+            if hit is not None:
+                yield hit
+                return
+
+        params: dict[str, Any] = {"model": self.model_id, "messages": messages, "stream": True}
+        if self.temperature is not None:
+            params["temperature"] = self.temperature
+        retry_on = self._retry_on if self._retry_on is not None else _openai_retryable()
+        client = self._get_client()
+
+        for attempt in range(self.max_retries + 1):
+            try:
+                stream_resp = client.chat.completions.create(**params)
+                break
+            except retry_on as e:
+                if attempt == self.max_retries:
+                    raise
+                wait = min(2**attempt, 30)
+                log.warning("LLM stream lỗi (%r), thử lại sau %ss", e, wait)
+                self._sleep(wait)
+
+        collected = []
+        for chunk in stream_resp:
+            delta = chunk.choices[0].delta.content if chunk.choices and chunk.choices[0].delta else None
+            if delta:
+                collected.append(delta)
+                yield delta
+
+        full_text = "".join(collected).strip()
+        if self.cache is not None:
+            self.cache.put(key, full_text)
 
 
 __all__ = ["LLM", "LLMCache", "OpenAIChatLLM"]

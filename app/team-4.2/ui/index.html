@@ -1054,30 +1054,17 @@
             </div>
 
             <!-- Assistant Response Container -->
-            <div class="flex items-start space-x-3 w-full">
-              <div class="w-7 h-7 rounded-lg bg-neutral-900 text-white flex items-center justify-center p-1.5 flex-shrink-0 mt-0.5 shadow-sm">
-                <!-- 3D Ice Cube Logo (Just-ice) -->
-                <svg class="w-4 h-4 text-sky-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 2.5L20 7V17L12 21.5L4 17V7L12 2.5Z" />
-                  <path d="M12 12V21.5" />
-                  <path d="M12 12L20 7" />
-                  <path d="M12 12L4 7" />
-                  <path d="M10 5L14 7.2" stroke-width="1.4" opacity="0.85" />
-                  <path d="M7 11.5V15" stroke-width="1.4" opacity="0.85" />
-                </svg>
+            <div class="w-full">
+              <!-- Animated Loading 3 Dots -->
+              <div id="${msgId}-loading" class="flex items-center space-x-1.5 py-2 text-neutral-400">
+                <div class="w-2 h-2 rounded-full bg-neutral-400 dot-1"></div>
+                <div class="w-2 h-2 rounded-full bg-neutral-400 dot-2"></div>
+                <div class="w-2 h-2 rounded-full bg-neutral-400 dot-3"></div>
+                <span class="text-[12px] text-neutral-400 ml-2 font-normal">Just-ice đang phân rã câu hỏi & đối chiếu 6 bộ luật...</span>
               </div>
-              <div class="flex-1 min-w-0">
-                <!-- Animated Loading 3 Dots -->
-                <div id="${msgId}-loading" class="flex items-center space-x-1.5 py-2 text-neutral-400">
-                  <div class="w-2 h-2 rounded-full bg-neutral-400 dot-1"></div>
-                  <div class="w-2 h-2 rounded-full bg-neutral-400 dot-2"></div>
-                  <div class="w-2 h-2 rounded-full bg-neutral-400 dot-3"></div>
-                  <span class="text-[12px] text-neutral-400 ml-2 font-normal">Just-ice đang phân rã câu hỏi & đối chiếu 6 bộ luật...</span>
-                </div>
 
-                <!-- Assistant Content Box -->
-                <div id="${msgId}-content" class="hidden"></div>
-              </div>
+              <!-- Assistant Content Box -->
+              <div id="${msgId}-content" class="hidden"></div>
             </div>
           </div>
         `;
@@ -1085,13 +1072,24 @@
         scrollToBottom();
       }
 
+      // Trích xuất lịch sử hội thoại gần nhất (tối đa 3 lượt trước đó đã có câu trả lời)
+      let historyPayload = [];
+      if (targetSession && targetSession.turns) {
+        const previousTurns = targetSession.turns.filter(t => t.turnId !== msgId && t.data && t.data.answer);
+        historyPayload = previousTurns.slice(-3).map(t => ({
+          query: t.query || "",
+          answer: (t.data && t.data.answer) ? t.data.answer.slice(0, 250) : ""
+        })).filter(h => h.query.trim().length > 0);
+      }
+
       try {
         const response = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           // session_id: server giữ bảng tra PII theo phiên để cùng một thông tin cá nhân
-          // luôn là cùng placeholder qua các lượt hỏi
-          body: JSON.stringify(Object.assign({ query: rawQuery, session_id: targetSessionId },
+          // luôn là cùng placeholder qua các lượt hỏi; history: server che PII rồi mới gộp lịch sử
+          body: JSON.stringify(Object.assign(
+            { query: rawQuery, session_id: targetSessionId, history: historyPayload, stream: true },
             document.getElementById('as-of-input').value ? { as_of: document.getElementById('as-of-input').value } : {})),
         });
 
@@ -1100,24 +1098,112 @@
           throw new Error(errData.error || `Lỗi server (${response.status})`);
         }
 
-        const data = await response.json();
+        let finalData = null;
+        const contentType = response.headers.get('content-type') || '';
+
+        if (contentType.includes('text/event-stream') && response.body) {
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder('utf-8');
+          let buffer = '';
+          let streamedText = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+
+            let boundary;
+            while ((boundary = buffer.indexOf('\n\n')) !== -1) {
+              const block = buffer.slice(0, boundary).trim();
+              buffer = buffer.slice(boundary + 2);
+              if (!block) continue;
+
+              let dataStr = '';
+              const lines = block.split('\n');
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  dataStr += line.slice(6);
+                } else if (line.startsWith('data:')) {
+                  dataStr += line.slice(5);
+                }
+              }
+              if (!dataStr) continue;
+
+              let evt;
+              try {
+                evt = JSON.parse(dataStr);
+              } catch (e) {
+                console.warn('Lỗi parse SSE chunk:', e, dataStr);
+                continue;
+              }
+
+              if (evt.type === 'sources') {
+                (evt.sources || []).forEach(s => {
+                  storedSourcesMap[s.chunk_id] = s;
+                });
+                if (currentSessionId === targetSessionId) {
+                  const loadingEl = document.getElementById(`${msgId}-loading`);
+                  if (loadingEl) {
+                    const span = loadingEl.querySelector('span');
+                    if (span) {
+                      span.textContent = `Đã tìm thấy ${evt.sources.length} trích dẫn luật · Đang sinh câu trả lời...`;
+                    }
+                  }
+                }
+              } else if (evt.type === 'token') {
+                streamedText += evt.delta;
+                if (currentSessionId === targetSessionId) {
+                  const loadingEl = document.getElementById(`${msgId}-loading`);
+                  if (loadingEl && !loadingEl.classList.contains('hidden')) {
+                    loadingEl.classList.add('hidden');
+                  }
+                  const contentBox = document.getElementById(`${msgId}-content`);
+                  if (contentBox) {
+                    if (contentBox.classList.contains('hidden')) {
+                      contentBox.classList.remove('hidden');
+                    }
+                    let streamContainer = document.getElementById(`${msgId}-stream-container`);
+                    if (!streamContainer) {
+                      contentBox.innerHTML = `
+                        <div id="${msgId}-stream-container" class="chatgpt-prose select-text"></div>
+                      `;
+                      streamContainer = document.getElementById(`${msgId}-stream-container`);
+                    }
+                    streamContainer.innerHTML = marked.parse(streamedText) + '<span class="inline-block w-1.5 h-4 ml-1 bg-neutral-800 animate-pulse align-middle"></span>';
+                    scrollToBottom();
+                  }
+                }
+              } else if (evt.type === 'done') {
+                finalData = evt;
+              } else if (evt.type === 'error') {
+                throw new Error(evt.error || 'Lỗi xử lý server');
+              }
+            }
+          }
+
+          if (!finalData && streamedText) {
+            finalData = { answer: streamedText, sources: [], citations: [] };
+          }
+        } else {
+          finalData = await response.json();
+        }
 
         // 5. Always persist response data into targetSession (never lost!)
         const s = chatSessions.find(item => item.id === targetSessionId);
         if (s) {
           const t = (s.turns || []).find(item => item.turnId === msgId);
           if (t) {
-            t.data = data;
+            t.data = finalData;
           } else {
-            s.turns.push({ turnId: msgId, query: rawQuery, data: data, timestamp: Date.now() });
+            s.turns.push({ turnId: msgId, query: rawQuery, data: finalData, timestamp: Date.now() });
           }
           s.updatedAt = Date.now();
           saveSessionsToStorage();
         }
 
         // 6. Only update the visible DOM if the user is STILL viewing targetSessionId!
-        if (currentSessionId === targetSessionId) {
-          renderAssistantAnswer(msgId, rawQuery, data);
+        if (currentSessionId === targetSessionId && finalData) {
+          renderAssistantAnswer(msgId, rawQuery, finalData);
         }
       } catch (err) {
         console.error('Lỗi khi xử lý chat:', err);
@@ -1915,29 +2001,16 @@
                 ${escapeHtml(turn.query)}
               </div>
             </div>
-            <div class="flex items-start space-x-3 w-full">
-              <div class="w-7 h-7 rounded-lg bg-neutral-900 text-white flex items-center justify-center p-1.5 flex-shrink-0 mt-0.5 shadow-sm">
-                <!-- 3D Ice Cube Logo (Just-ice) -->
-                <svg class="w-4 h-4 text-sky-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 2.5L20 7V17L12 21.5L4 17V7L12 2.5Z" />
-                  <path d="M12 12V21.5" />
-                  <path d="M12 12L20 7" />
-                  <path d="M12 12L4 7" />
-                  <path d="M10 5L14 7.2" stroke-width="1.4" opacity="0.85" />
-                  <path d="M7 11.5V15" stroke-width="1.4" opacity="0.85" />
-                </svg>
-              </div>
-              <div class="flex-1 min-w-0">
-                ${isPending ? `
-                  <div id="${msgId}-loading" class="flex items-center space-x-1.5 py-2 text-neutral-400">
-                    <div class="w-2 h-2 rounded-full bg-neutral-400 dot-1"></div>
-                    <div class="w-2 h-2 rounded-full bg-neutral-400 dot-2"></div>
-                    <div class="w-2 h-2 rounded-full bg-neutral-400 dot-3"></div>
-                    <span class="text-[12px] text-neutral-400 ml-2 font-normal">Just-ice đang phân rã câu hỏi & đối chiếu 6 bộ luật...</span>
-                  </div>
-                ` : ''}
-                <div id="${msgId}-content" class="${isPending ? 'hidden' : ''}"></div>
-              </div>
+            <div class="w-full">
+              ${isPending ? `
+                <div id="${msgId}-loading" class="flex items-center space-x-1.5 py-2 text-neutral-400">
+                  <div class="w-2 h-2 rounded-full bg-neutral-400 dot-1"></div>
+                  <div class="w-2 h-2 rounded-full bg-neutral-400 dot-2"></div>
+                  <div class="w-2 h-2 rounded-full bg-neutral-400 dot-3"></div>
+                  <span class="text-[12px] text-neutral-400 ml-2 font-normal">Just-ice đang phân rã câu hỏi & đối chiếu 6 bộ luật...</span>
+                </div>
+              ` : ''}
+              <div id="${msgId}-content" class="${isPending ? 'hidden' : ''}"></div>
             </div>
           </div>
         `;

@@ -48,7 +48,7 @@ from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-from starlette.responses import HTMLResponse, JSONResponse, Response, PlainTextResponse, RedirectResponse
+from starlette.responses import HTMLResponse, JSONResponse, Response, PlainTextResponse, RedirectResponse, StreamingResponse
 from starlette.routing import Route
 
 from rag.config import Settings
@@ -141,6 +141,8 @@ async def handle_info(request: Request) -> JSONResponse:
             "advanced": advanced_str,
             "decomp_enabled": settings.decomp_enabled,
             "listwise_enabled": settings.listwise_enabled,
+            "listwise_model": settings.listwise_model,
+            "condense_model": settings.condense_model,
             "context_min_p": settings.context_min_p,
             "top_k": settings.top_k,
             "ocr": settings.ocr_model if settings.ocr_engine.lower() == "gemini" else None,
@@ -163,8 +165,9 @@ def _format_hits(hits: list, chunks_map: dict, limit: int = 5) -> list[dict[str,
     return rows
 
 
-def _sync_ask(query: str, pipeline: RAGPipeline, mask_state: MaskState) -> dict[str, Any]:
-    trace: AskTrace = pipeline.ask_debug(query, mask_state=mask_state)
+def _sync_ask(query: str, pipeline: RAGPipeline, mask_state: MaskState,
+              history: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    trace: AskTrace = pipeline.ask_debug(query, history=history, mask_state=mask_state)
     chunks = pipeline.retriever.chunks
 
     # Danh sách các khối context thực tế đưa vào LLM
@@ -215,6 +218,7 @@ def _sync_ask(query: str, pipeline: RAGPipeline, mask_state: MaskState) -> dict[
         "trace": {
             "context_mode": trace.context.mode,
             "n_context_blocks": len(trace.context.blocks),
+            "condensed_query": trace.condensed_query,
             "reranked": res.reranked,
             "errors": res.errors,
             "arms": arms_data,
@@ -354,22 +358,57 @@ def _sync_temporal(query: str, qa, as_of, mask_state: MaskState) -> dict[str, An
     }
 
 
-def _sync_chat(query: str, as_of, mask_state: MaskState) -> dict[str, Any]:
+def _sync_chat(query: str, as_of, mask_state: MaskState,
+               history: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    pipeline, _ = get_pipeline()
     qa = get_temporal_qa()
     if qa is not None:
+        if history:
+            # câu hỏi nối tiếp ("còn năm 2025 thì sao?"): che PII câu hỏi + lịch sử, gộp thành câu độc lập,
+            # rồi mới đưa cho TemporalQA (cùng mask_state -> che lại không đổi placeholder, mở che đúng)
+            condensed, pii = pipeline._prepare_query(query, history, mask_state)
+            data = _sync_temporal(condensed, qa, as_of, mask_state)
+            data["query"] = query
+            data["query_pii"] = {k: pii.get(k, 0) + data["query_pii"].get(k, 0)
+                                 for k in {*pii, *data["query_pii"]}}
+            data["trace"]["condensed_query"] = condensed
+            return data
         return _sync_temporal(query, qa, as_of, mask_state)
-    pipeline, _ = get_pipeline()
-    return _sync_ask(query, pipeline, mask_state)
+    return _sync_ask(query, pipeline, mask_state, history)
 
 
-async def handle_chat(request: Request) -> JSONResponse:
-    """Xử lý câu hỏi, gọi ask_debug trong thread pool để không block event loop."""
+def _sse(event: dict[str, Any]) -> str:
+    return f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+
+
+def _sync_stream(query: str, as_of, mask_state: MaskState, history: list[dict[str, Any]] | None = None):
+    """SSE: kho có phiên bản đang dùng được -> trả trọn câu trả lời theo mốc trong một sự kiện ``done``
+    (TemporalQA chưa stream); không thì pipeline cũ stream token (``sources`` -> ``token``... -> ``done``).
+    Starlette chạy generator đồng bộ này trong threadpool nên không block event loop."""
+    try:
+        if get_temporal_qa() is not None:
+            yield _sse({"type": "done", **_sync_chat(query, as_of, mask_state, history)})
+            return
+        pipeline, _ = get_pipeline()
+        for event in pipeline.ask_stream(query, history=history, mask_state=mask_state):
+            yield _sse(event)
+    except Exception as e:  # noqa: BLE001 — báo lỗi cho UI qua luồng SSE
+        log.exception("Lỗi khi stream chat: %s", e)
+        yield _sse({"type": "error", "error": f"Lỗi hệ thống: {e}"})
+
+
+async def handle_chat(request: Request) -> Response:
+    """Xử lý câu hỏi trong thread pool để không block event loop. ``stream: true`` -> SSE, không thì JSON."""
     try:
         body = await request.json()
     except Exception:
         return JSONResponse({"error": "Body JSON không hợp lệ"}, status_code=400)
 
     query = (body.get("query") or "").strip()
+    history = body.get("history") or []
+    is_stream = bool(body.get("stream", False))
+    if not isinstance(history, list):
+        history = []
     if not query:
         return JSONResponse({"error": "Câu hỏi không được rỗng"}, status_code=400)
 
@@ -381,9 +420,22 @@ async def handle_chat(request: Request) -> JSONResponse:
             as_of = _date.fromisoformat(str(body["as_of"]))
         except ValueError:
             return JSONResponse({"error": "as_of phải là ngày hợp lệ dạng YYYY-MM-DD"}, status_code=400)
+    mask_state = get_mask_state(session_id)
+
+    if is_stream:
+        return StreamingResponse(
+            _sync_stream(query, as_of, mask_state, history),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no",
+            },
+        )
+
     loop = asyncio.get_running_loop()
     try:
-        data = await loop.run_in_executor(_executor, _sync_chat, query, as_of, get_mask_state(session_id))
+        data = await loop.run_in_executor(_executor, _sync_chat, query, as_of, mask_state, history)
         return JSONResponse(data)
     except Exception as e:
         log.exception("Lỗi khi xử lý chat: %s", e)

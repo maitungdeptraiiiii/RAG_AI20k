@@ -24,13 +24,14 @@ from __future__ import annotations
 import json
 import re
 import logging
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterator, Sequence
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
+from rag.advanced.condense import QueryCondenser
 from rag.config import Settings
-from rag.generate.answer import answer_question
+from rag.generate.answer import answer_question, build_citations, build_prompt
 from rag.index.bm25_index import BM25Index
 from rag.index.embedder import EmbeddingCache, make_embedder
 from rag.index.store import ChunkStore
@@ -46,7 +47,7 @@ from rag.quality.validate import TableFact
 from rag.retrieve.context import ContextConfig, ContextSelection, select_context
 from rag.retrieve.hybrid import HybridRetriever, Mode, RetrievalResult
 from rag.retrieve.rerank import make_reranker
-from rag.schema import LLM, Answer, Page
+from rag.schema import REFUSAL, LLM, Answer, Page, nfc
 
 log = logging.getLogger(__name__)
 
@@ -123,12 +124,21 @@ def save_extracted(extracted_dir: Path, report: IngestReport, pages: Sequence[Pa
 DENSE_WRAPPERS = ("hyde",)
 
 
+def _listwise_llm(s: Settings) -> LLM:
+    from rag.generate.llm import LLMCache, OpenAIChatLLM
+
+    return OpenAIChatLLM(s.listwise_model, temperature=0.0, base_url=s.llm_base_url, api_key=s.llm_api_key,
+                         cache=LLMCache(s.cache_dir / "listwise_llm.sqlite"))
+
+
 def make_hybrid_retriever(s: Settings, llm: LLM, bm25: Any, dense: Any, *,
                           extra_arms: dict[str, Any] | None = None, reranker: Any = None,
-                          wrap_dense: Sequence[Any] | None = None) -> HybridRetriever:
+                          wrap_dense: Sequence[Any] | None = None,
+                          listwise_llm: LLM | None = None) -> HybridRetriever:
     """HybridRetriever cấu hình đúng như pipeline chính: BM25 + Dense (bọc HyDE... theo ADVANCED) -> RRF -> rerank
     (RERANK_BACKEND), cùng arm_k / rerank_n / gộp theo Điều / rewrite / decomposition / coverage / listwise.
-    `wrap_dense=None`: tự dựng các phương pháp trong DENSE_WRAPPERS đang bật trong ADVANCED."""
+    `wrap_dense=None`: tự dựng các phương pháp trong DENSE_WRAPPERS đang bật trong ADVANCED.
+    `listwise_llm=None` (khi LISTWISE bật): dựng LLM riêng theo LISTWISE_MODEL, cache listwise_llm.sqlite."""
     from rag.advanced import Components, build_enhancements, parse_names
     from rag.retrieve.coverage import CoverageConfig
     from rag.retrieve.listwise import ListwiseConfig, ListwiseSelector
@@ -156,7 +166,8 @@ def make_hybrid_retriever(s: Settings, llm: LLM, bm25: Any, dense: Any, *,
         rewrite_for_rerank=s.rewrite_for_rerank,
         coverage=(CoverageConfig(s.coverage_anchor_k,s.coverage_min_p,s.coverage_weight,s.coverage_branch_k)
                   if s.coverage_enabled else None),
-        listwise=(ListwiseSelector(llm,ListwiseConfig(s.listwise_candidate_n,s.listwise_margin,
+        listwise=(ListwiseSelector(listwise_llm or _listwise_llm(s),
+                  ListwiseConfig(s.listwise_candidate_n,s.listwise_margin,
                   s.listwise_min_p,s.listwise_excerpt_words)) if s.listwise_enabled else None),
     )
     if s.query_rewrite_enabled:
@@ -219,6 +230,7 @@ class AskTrace:
     context: ContextSelection
     llm_called: bool
     query_pii: dict[str, int] = field(default_factory=dict)   # số PII đã che trong câu hỏi, theo loại
+    condensed_query: str | None = None   # câu hỏi độc lập sau khi gộp lịch sử chat (ĐÃ che PII)
 
 
 # Chỉ thêm vào prompt khi câu hỏi có PII đã che, để câu hỏi thường giữ nguyên prompt (và LLM cache)
@@ -266,6 +278,7 @@ class RAGPipeline:
         mask_queries: bool = True,
         ocr: Any = None,
         extracted_dir: Path | None = None,
+        condenser: QueryCondenser | None = None,
     ) -> None:
         self.store = store
         self.ocr = ocr                      # engine OCR cho PDF scan / ảnh (None = không OCR)
@@ -281,6 +294,7 @@ class RAGPipeline:
         self.context_config = context or ContextConfig(fixed_k=top_k)
         self.index_enhancers = list(index_enhancers)
         self._loader = loader
+        self.condenser = condenser or QueryCondenser(llm)
         if len(store):
             # khởi động lại: dựng BM25 trong RAM, Qdrant bỏ qua chunk đã có; chunk đã lưu kèm context
             self.retriever.build(store.all())
@@ -320,10 +334,18 @@ class RAGPipeline:
             fixed_k=s.top_k,
         )
         log.info("Phương pháp nâng cao: %s", [e.name for e in enhancements] or "không (baseline)")
+        condenser_llm = OpenAIChatLLM(
+            s.condense_model,
+            temperature=0.0,
+            base_url=s.llm_base_url,
+            api_key=s.llm_api_key,
+            cache=LLMCache(s.cache_dir / "condense_llm.sqlite"),
+        )
         return cls(
             ChunkStore(s.chunks_path), retriever, llm,
             top_k=s.top_k, max_syllables=s.max_syllables, context=context,
             index_enhancers=index_enhancers, ocr=make_ocr_engine(s), extracted_dir=s.data_dir / "extracted",
+            condenser=QueryCondenser(condenser_llm),
         )
 
     # --- ingest ----------------------------------------------------------------
@@ -424,49 +446,228 @@ class RAGPipeline:
         self,
         query: str,
         *,
+        history: Sequence[dict[str, Any]] | None = None,
         mode: Mode = "hybrid",
         arms: Sequence[str] | None = None,
         rerank: bool = True,
         mask_state: MaskState | None = None,
     ) -> AskTrace:
-        """Hỏi đáp. Câu hỏi được che PII TRƯỚC mọi bước (HyDE, embedding, rerank, LLM, cache, log);
-        câu trả lời được mở che ở bước cuối, chỉ cho người hỏi thấy.
+        """Hỏi đáp. Câu hỏi (và lịch sử chat) được che PII TRƯỚC mọi bước (condense, HyDE, embedding,
+        rerank, LLM, cache, log); câu trả lời được mở che ở bước cuối, chỉ cho người hỏi thấy.
 
         ``mask_state``: truyền cùng một state cho cả phiên chat (``new_query_mask_state()``) để
         cùng một khách hàng luôn là cùng placeholder qua các lượt; bỏ trống = state riêng mỗi câu.
         Bảng tra placeholder -> giá trị gốc chỉ nằm trong state (RAM của người gọi).
+        ``history``: các lượt trước ``[{"query", "answer"}]`` — QueryCondenser gộp thành câu hỏi độc lập.
         """
         state = mask_state if mask_state is not None else self.new_query_mask_state()
-        if self.mask_queries:
-            before = dict(state.counts)
-            query = mask_text(query, state=state).masked_text
-            query_pii = {k: v - before.get(k, 0) for k, v in state.counts.items() if v - before.get(k, 0)}
-        else:
-            query_pii = {}
+        effective_query, query_pii = self._prepare_query(query, history, state)
 
-        retrieval = self.retriever.retrieve(query, self.top_k, mode=mode, arms=arms, rerank=rerank)
+        retrieval = self.retriever.retrieve(effective_query, self.top_k, mode=mode, arms=arms, rerank=rerank)
         selection = select_context(retrieval.ranked, self.retriever.chunks, self.context_config)
 
         # GUARDRAIL (trước LLM, TV5): chặn theo ngưỡng điểm RRF khi không rerank — chưa làm.
         if selection.empty:
             return AskTrace(Answer.refusal(retrieval.hits), retrieval, selection, llm_called=False,
-                            query_pii=query_pii)
+                            query_pii=query_pii, condensed_query=effective_query)
 
-        has_placeholder = f"[{QUERY_PREFIX}" in retrieval.query
-        prompt_query = retrieval.query + PII_NOTE if has_placeholder else retrieval.query
-        answer = answer_question(prompt_query, selection.blocks, self.llm, retrieval.hits)
+        answer = answer_question(self._prompt_query(retrieval.query), selection.blocks, self.llm, retrieval.hits)
         # GUARDRAIL (sau LLM, TV5): loại [n] sai, không còn citation hợp lệ thì từ chối — chưa làm.
         if not answer.refused:
             answer.text = state.unmask(answer.text)   # sau LLM + cache: cache chỉ giữ bản đã che
-        return AskTrace(answer, retrieval, selection, llm_called=True, query_pii=query_pii)
+        return AskTrace(answer, retrieval, selection, llm_called=True, query_pii=query_pii,
+                        condensed_query=effective_query)
 
-    def ask(self, query: str, *, mask_state: MaskState | None = None) -> Answer:
-        return self.ask_debug(query, mask_state=mask_state).answer
+    def ask(self, query: str, *, history: Sequence[dict[str, Any]] | None = None,
+            mask_state: MaskState | None = None) -> Answer:
+        return self.ask_debug(query, history=history, mask_state=mask_state).answer
 
     @staticmethod
     def new_query_mask_state() -> MaskState:
         """State che PII cho một phiên hỏi đáp: placeholder dạng [USER_PHONE_1]."""
         return MaskState(prefix=QUERY_PREFIX)
+
+    def _prepare_query(self, query: str, history: Sequence[dict[str, Any]] | None,
+                       state: MaskState) -> tuple[str, dict[str, int]]:
+        """Che PII câu hỏi + lịch sử bằng CÙNG state (cùng người -> cùng placeholder), rồi condense.
+        Trả (câu hỏi đã che và đã gộp lịch sử, số PII mới che trong câu hỏi theo loại)."""
+        if not self.mask_queries:
+            masked_history = history
+            query_pii: dict[str, int] = {}
+        else:
+            masked_history = [
+                {**turn, **{k: mask_text(str(turn[k]), state=state).masked_text
+                            for k in ("query", "answer") if turn.get(k)}}
+                for turn in (history or []) if isinstance(turn, dict)
+            ]
+            before = dict(state.counts)
+            query = mask_text(query, state=state).masked_text
+            query_pii = {k: v - before.get(k, 0) for k, v in state.counts.items() if v - before.get(k, 0)}
+        effective = self.condenser.condense(query, history=masked_history) if self.condenser else query
+        return effective, query_pii
+
+    @staticmethod
+    def _prompt_query(query: str) -> str:
+        return query + PII_NOTE if f"[{QUERY_PREFIX}" in query else query
+
+    def ask_stream(
+        self,
+        query: str,
+        *,
+        history: Sequence[dict[str, Any]] | None = None,
+        mode: Mode = "hybrid",
+        arms: Sequence[str] | None = None,
+        rerank: bool = True,
+        mask_state: MaskState | None = None,
+    ) -> Iterator[dict[str, Any]]:
+        """Như ``ask_debug`` nhưng trả sự kiện: ``sources`` -> nhiều ``token`` -> ``done``.
+        Token được mở che PII trước khi gửi; placeholder bị cắt giữa hai token được giữ lại tới token sau."""
+        state = mask_state if mask_state is not None else self.new_query_mask_state()
+        effective_query, query_pii = self._prepare_query(query, history, state)
+        retrieval = self.retriever.retrieve(effective_query, self.top_k, mode=mode, arms=arms, rerank=rerank)
+        selection = select_context(retrieval.ranked, self.retriever.chunks, self.context_config)
+
+        if selection.empty:
+            yield {
+                "type": "done",
+                "answer": REFUSAL,
+                "refused": True,
+                "citations": [],
+                "sources": [],
+                "query_pii": query_pii,
+                "trace": {
+                    "condensed_query": effective_query,
+                    "context_mode": selection.mode,
+                    "n_context_blocks": 0,
+                    "reranked": retrieval.reranked,
+                    "errors": retrieval.errors,
+                },
+            }
+            return
+
+        chunks = self.retriever.chunks
+        scores_map = {h.chunk_id: round(float(h.score), 4) for h in retrieval.ranked}
+        sources = []
+        for b in selection.blocks:
+            c = b.chunk
+            sources.append({
+                "n": b.n,
+                "chunk_id": c.chunk_id,
+                "source": c.source,
+                "section": c.section or "Không có tiêu đề",
+                "page": c.page_start,
+                "score": scores_map.get(c.chunk_id, 0.0),
+                "text": c.text,
+            })
+
+        # Yield sources right after retrieval so UI can show them immediately
+        yield {
+            "type": "sources",
+            "sources": sources,
+            "condensed_query": effective_query,
+        }
+
+        system, user = build_prompt(self._prompt_query(retrieval.query), selection.blocks)
+        collected: list[str] = []
+        unmasker = _StreamUnmasker(state)
+
+        deltas = self.llm.stream(system, user) if hasattr(self.llm, "stream") else [self.llm.complete(system, user)]
+        for delta in deltas:
+            collected.append(delta)
+            shown = unmasker.feed(delta)
+            if shown:
+                yield {"type": "token", "delta": shown}
+        tail = unmasker.flush()
+        if tail:
+            yield {"type": "token", "delta": tail}
+
+        full_text = nfc("".join(collected)).strip()
+        answer = build_citations(full_text, selection.blocks, retrieval.hits)
+        if not answer.refused:
+            answer.text = state.unmask(answer.text)
+
+        citations_data = []
+        for c in answer.citations:
+            chunk_obj = chunks.get(c.chunk_id)
+            citations_data.append({
+                "n": c.n,
+                "chunk_id": c.chunk_id,
+                "source": c.source,
+                "section": chunk_obj.section if chunk_obj else "Căn cứ pháp lý",
+                "page": c.page,
+                "quote": c.quote,
+                "score": scores_map.get(c.chunk_id, 0.0),
+                "text": chunk_obj.text if chunk_obj else "",
+            })
+
+        arms_data = {}
+        for arm_name, arm_hits in retrieval.arms.items():
+            rows = []
+            for h in arm_hits[:5]:
+                c = chunks.get(h.chunk_id)
+                rows.append({
+                    "rank": h.rank,
+                    "score": round(float(h.score), 4),
+                    "source": c.source if c else "",
+                    "section": c.section if c else "",
+                    "page": c.page_start if c else None,
+                    "text": " ".join(c.text.split())[:180] if c else "",
+                })
+            arms_data[arm_name] = rows
+
+        final_hits = []
+        for h in retrieval.hits[:5]:
+            c = chunks.get(h.chunk_id)
+            final_hits.append({
+                "rank": h.rank,
+                "score": round(float(h.score), 4),
+                "source": c.source if c else "",
+                "section": c.section if c else "",
+                "page": c.page_start if c else None,
+                "text": " ".join(c.text.split())[:180] if c else "",
+            })
+
+        yield {
+            "type": "done",
+            "answer": answer.text,
+            "refused": answer.refused,
+            "citations": citations_data,
+            "sources": sources,
+            "query_pii": query_pii,
+            "trace": {
+                "context_mode": selection.mode,
+                "n_context_blocks": len(selection.blocks),
+                "condensed_query": effective_query,
+                "reranked": retrieval.reranked,
+                "errors": retrieval.errors,
+                "arms": arms_data,
+                "final_hits": final_hits,
+            },
+        }
+
+
+class _StreamUnmasker:
+    """Mở che PII trên luồng token: giữ lại đoạn từ dấu ``[`` chưa đóng cuối cùng (có thể là nửa đầu
+    của ``[USER_PHONE_1]``) cho tới khi nhận đủ, để không bao giờ gửi placeholder dở dang ra UI."""
+
+    _MAX_HOLD = 40   # placeholder dài nhất cỡ [USER_CCCD_12]; "[" mở quá xa thì không phải placeholder
+
+    def __init__(self, state: MaskState) -> None:
+        self.state = state
+        self.buf = ""
+
+    def feed(self, delta: str) -> str:
+        self.buf += delta
+        cut = self.buf.rfind("[")
+        if cut == -1 or "]" in self.buf[cut:] or len(self.buf) - cut > self._MAX_HOLD:
+            out, self.buf = self.buf, ""
+        else:
+            out, self.buf = self.buf[:cut], self.buf[cut:]
+        return self.state.unmask(out)
+
+    def flush(self) -> str:
+        out, self.buf = self.buf, ""
+        return self.state.unmask(out)
 
 
 __all__ = ["DENSE_WRAPPERS", "make_hybrid_retriever", "AskTrace", "IndexConfigMismatchError", "IngestReport", "RAGPipeline", "check_index_config",

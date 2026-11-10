@@ -46,6 +46,9 @@ class Draft:
     snapshot_id: str | None = None
     error: str | None = None
     progress: dict | None = None        # {"stage", "done", "total"}
+    result: dict | None = None          # sau khi công bố: {"laws": [{"document_key","title","changed_provisions",...}]}
+    job_id: str | None = None           # việc ghi gần nhất trong hàng đợi (chỉ sống trong tiến trình server)
+    index_error: str | None = None      # kho đã công bố nhưng dựng chỉ mục lỗi (chat giữ cặp cũ) -> "Dựng lại chỉ mục"
 
 
 class DraftStore:

@@ -13,7 +13,8 @@ Endpoints:
     GET  /review     -> Trang duyệt kho luật có phiên bản (review.html)
     GET  /api/legal/reviews?status=open|resolved|all     -> Danh sách mục cần duyệt
     GET  /api/legal/reviews/{review_id}                  -> Chi tiết: chỉ dẫn gốc, thao tác, trước/sau
-    POST /api/legal/reviews/{review_id}/decision         -> approve / reject / correct rồi dựng lại luật
+    POST /api/legal/reviews/{review_id}/decision         -> approve / reject / correct: vào hàng đợi ghi, 202 {job_id}
+    /api/legal/uploads..., /api/legal/jobs/{id}, /api/legal/reindex, /api/legal/pending-base-laws -> ui/legal_api.py
     GET  /api/info   -> Danh sách bộ luật đã index, số chunk, thông tin mô hình
     POST /api/chat   -> Truy vấn RAG, trả lời + căn cứ pháp lý + thống kê ranking
     POST /api/ingest -> Tải lên file mới hoặc nạp URL luật vào kho
@@ -36,7 +37,7 @@ _HERE = Path(__file__).resolve().parent
 _TEAM_DIR = _HERE.parent
 _SRC_DIR = _TEAM_DIR / "src"
 _REPO_ROOT = _TEAM_DIR.parent.parent
-for _p in (_SRC_DIR, _REPO_ROOT):
+for _p in (_SRC_DIR, _REPO_ROOT, _HERE):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
@@ -44,6 +45,7 @@ import html
 import json
 import re
 import time
+from contextlib import contextmanager
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
@@ -54,6 +56,8 @@ from starlette.routing import Route
 from rag.config import Settings
 from rag.pipeline import AskTrace, IngestReport, RAGPipeline
 from rag.quality.pii import MaskState
+
+import legal_api
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("rag.ui.server")
@@ -67,7 +71,6 @@ REVIEW_HTML_PATH = UI_DIR / "review.html"
 _pipeline: RAGPipeline | None = None
 _settings: Settings | None = None
 _executor = ThreadPoolExecutor(max_workers=2)
-_legal_service = None
 
 # Bảng tra PII (placeholder <-> giá trị gốc) theo phiên chat, chỉ nằm trong RAM của server.
 # Cùng một session_id -> cùng một khách hàng luôn là cùng placeholder qua các lượt hỏi.
@@ -228,89 +231,118 @@ def _sync_ask(query: str, pipeline: RAGPipeline, mask_state: MaskState,
 
 
 # --- hỏi đáp theo mốc thời gian (phần 2) -----------------------------------------------------
+#
+# Chat dùng cặp (snapshot kho luật, chỉ mục) của `RuntimeHolder` (ui/legal_runtime.py), giữ bằng `lease()` suốt
+# request. Cặp mới chỉ được gán sau khi hàng đợi ghi công bố snapshot VÀ dựng xong chỉ mục của chính snapshot đó
+# (thay cho vòng kiểm tra `index.stale()` cũ). Kho mới lỗi / chưa có chỉ mục -> chat dùng pipeline cũ.
 
-_temporal_qa = None
-_temporal_lock = threading.Lock()
-_temporal_failed_at: float | None = None
-_temporal_checked_at = 0.0
-_TEMPORAL_RETRY_S = 300.0          # khởi tạo lỗi: chờ bấy lâu mới thử lại (trong lúc đó chat chạy pipeline cũ)
-_TEMPORAL_STALE_EVERY_S = 30.0     # kiểm tra bản dựng mới của kho luật tối đa 1 lần / 30 giây
+_legal_dense = None                 # VectorIndex Dense dùng chung mọi snapshot (mở một lần)
+_legal_dense_lock = threading.Lock()
+_legal_reranker = None
 
 
-def _build_temporal_qa():
-    """TemporalQA dùng kho có phiên bản (DATA_DIR/legal) + kho cũ (pipeline hiện tại) để tham khảo.
-    Kho mới tìm bằng đúng bộ tìm kiếm của pipeline chính (BM25 + Dense/HyDE -> RRF -> rerank), lọc hiệu lực trước.
-    Lần đầu: dùng ngay BM25 + rerank; Dense embed ở luồng nền rồi tự chuyển sang hybrid. LEGAL_DENSE=0 để tắt Dense."""
-    import os
+def _shared_legal_dense(settings: Settings):
+    global _legal_dense
+    with _legal_dense_lock:
+        if _legal_dense is None:
+            from rag.index.vector_index import VectorIndex
+            from rag.temporal import wiring
 
-    from rag.retrieve.rerank import make_reranker
-    from rag.temporal.log import QALog
-    from rag.temporal.qa import TemporalQA
-    from rag.temporal.status import load_legacy_map
-    from rag.temporal.wiring import legal_embedder, legal_vector_dir, make_versioned_index
+            _legal_dense = VectorIndex.open_qdrant(wiring.legal_vector_dir(settings), wiring.legal_embedder(settings))
+        return _legal_dense
 
-    pipeline, settings = get_pipeline()
-    service = get_legal_service()
-    reranker = make_reranker(settings.rerank_backend, cache_path=settings.cache_dir / "rerank.sqlite")
-    index = make_versioned_index(settings, pipeline.llm, service.store, reranker=reranker)
-    index.build()
 
-    def legacy_search(query: str, k: int):
-        result = pipeline.retriever.retrieve(query, k)
-        chunks = pipeline.retriever.chunks
-        return [chunks[h.chunk_id] for h in result.hits[:k] if h.chunk_id in chunks]
+def _shared_legal_reranker(settings: Settings):
+    global _legal_reranker
+    if _legal_reranker is None:
+        from rag.retrieve.rerank import make_reranker
 
-    legacy_map_path = _REPO_ROOT / "data" / "team-4.2" / "legal" / "legacy_map.yaml"
-    qa = TemporalQA(service, index, pipeline.llm, legacy_search=legacy_search,
-                    legacy_map=load_legacy_map(legacy_map_path) if legacy_map_path.exists() else {},
-                    log=QALog(settings.data_dir / "legal" / "qa_log.sqlite"), k_per_anchor=settings.top_k)
+        _legal_reranker = make_reranker(settings.rerank_backend, cache_path=settings.cache_dir / "rerank.sqlite")
+    return _legal_reranker
 
-    if os.environ.get("LEGAL_DENSE", "1") != "0":
-        def upgrade() -> None:
+
+def make_legal_runtime_factory(snapshots):
+    """`make_runtime(snapshot_id)`: service + VersionedIndex (BM25 + Dense dùng chung khi LEGAL_DENSE != "0", bộ tìm
+    kiếm của pipeline chính -> RRF -> rerank, lọc hiệu lực trước) + TemporalQA, tất cả từ CÙNG một snapshot."""
+
+    def make_runtime(snapshot_id: str):
+        import os
+
+        from legal_runtime import LegalRuntime
+        from rag.temporal import wiring
+        from rag.temporal.log import QALog
+        from rag.temporal.qa import TemporalQA
+        from rag.temporal.status import load_legacy_map
+
+        pipeline, settings = get_pipeline()
+        service = snapshots.service(snapshot_id)
+        dense = None
+        if os.environ.get("LEGAL_DENSE", "1") != "0":
             try:
-                dense_index = make_versioned_index(settings, pipeline.llm, service.store,
-                                                   embedder=legal_embedder(settings),
-                                                   vector_dir=legal_vector_dir(settings), reranker=reranker)
-                n = dense_index.build()
-                with _temporal_lock:
-                    qa.index = dense_index
-                log.info("Kho luật có phiên bản: đã bật hybrid (BM25 + Dense) cho %d chunk", n)
-            except Exception:  # noqa: BLE001 — embed lỗi thì tiếp tục BM25 + rerank
-                log.exception("Không dựng được Dense cho kho luật có phiên bản; tiếp tục BM25 + rerank")
+                dense = _shared_legal_dense(settings)
+            except Exception:  # noqa: BLE001 — Dense lỗi thì tiếp tục BM25 + rerank
+                log.exception("Không mở được Dense cho kho luật có phiên bản; dùng BM25 + rerank")
+        def build(dense_index):
+            idx = wiring.make_versioned_index(settings, pipeline.llm, service.store,
+                                              reranker=_shared_legal_reranker(settings), dense=dense_index,
+                                              snapshot_id=snapshot_id)
+            return idx, idx.build()
 
-        threading.Thread(target=upgrade, name="legal-dense", daemon=True).start()
-    return qa
+        try:
+            index, n = build(dense)
+        except Exception:  # noqa: BLE001 — embed lỗi: chỉ mục BM25 của cùng snapshot (vẫn một cặp nhất quán)
+            if dense is None:
+                raise
+            log.exception("Embed Dense lỗi cho snapshot %s; dựng chỉ mục BM25 + rerank", snapshot_id)
+            index, n = build(None)
+        log.info("Chỉ mục kho luật snapshot %s: %d chunk (%s)", snapshot_id, n,
+                 "BM25 + Dense" if index.has_dense else "BM25")
+
+        def legacy_search(query: str, k: int):
+            result = pipeline.retriever.retrieve(query, k)
+            chunks = pipeline.retriever.chunks
+            return [chunks[h.chunk_id] for h in result.hits[:k] if h.chunk_id in chunks]
+
+        legacy_map_path = _REPO_ROOT / "data" / "team-4.2" / "legal" / "legacy_map.yaml"
+        qa = TemporalQA(service, index, pipeline.llm, legacy_search=legacy_search,
+                        legacy_map=load_legacy_map(legacy_map_path) if legacy_map_path.exists() else {},
+                        log=QALog(settings.data_dir / "legal" / "qa_log.sqlite"), k_per_anchor=settings.top_k)
+        return LegalRuntime(snapshot_id, service, index, qa)
+
+    return make_runtime
+
+
+def _make_upload_ocr():
+    from rag.pipeline import make_ocr_engine
+
+    return make_ocr_engine(Settings.load())
+
+
+legal_api.CONFIG.make_runtime_for = make_legal_runtime_factory
+legal_api.CONFIG.ocr_factory = _make_upload_ocr
+
+
+def _legal_holder():
+    """Gọi trong thread pool (không trên event loop): lần đầu dựng runtime đồng bộ. None -> pipeline cũ."""
+    return legal_api.chat_holder()
+
+
+@contextmanager
+def lease_temporal_qa():
+    """TemporalQA của cặp (snapshot, chỉ mục) hiện tại, giữ (lease) tới khi request xong; None -> pipeline cũ."""
+    holder = _legal_holder()
+    if holder is None:
+        yield None
+        return
+    with holder.lease() as rt:
+        yield rt.qa if rt is not None else None
 
 
 def get_temporal_qa():
-    """Gọi trong thread pool (không trên event loop). Trả None nếu kho mới chưa dùng được -> chat dùng pipeline cũ.
-    Dựng lại chỉ mục khi có bản dựng mới: chỉ một luồng làm, các luồng khác tiếp tục dùng chỉ mục hiện tại
-    (VersionedIndex đổi trạng thái nguyên khối nên search đồng thời vẫn nhất quán)."""
-    global _temporal_qa, _temporal_failed_at, _temporal_checked_at
-    if _temporal_qa is None:
-        if _temporal_failed_at is not None and time.monotonic() - _temporal_failed_at < _TEMPORAL_RETRY_S:
-            return None
-        with _temporal_lock:
-            if _temporal_qa is None:
-                try:
-                    _temporal_qa = _build_temporal_qa()
-                    _temporal_failed_at = None
-                    _temporal_checked_at = time.monotonic()
-                except Exception:  # noqa: BLE001 — kho mới lỗi không được làm hỏng chat
-                    log.exception("Không khởi tạo được hỏi đáp theo mốc; dùng pipeline cũ")
-                    _temporal_failed_at = time.monotonic()
-                    return None
-        return _temporal_qa
-    if time.monotonic() - _temporal_checked_at >= _TEMPORAL_STALE_EVERY_S and _temporal_lock.acquire(blocking=False):
-        try:
-            _temporal_checked_at = time.monotonic()
-            if _temporal_qa.index.stale():
-                _temporal_qa.index.build()
-        except Exception:  # noqa: BLE001 — dựng lại lỗi thì giữ chỉ mục cũ
-            log.exception("Dựng lại chỉ mục kho luật lỗi; giữ chỉ mục hiện tại")
-        finally:
-            _temporal_lock.release()
-    return _temporal_qa
+    """TemporalQA hiện tại (không lease; cho kiểm tra / công cụ). None nếu kho mới chưa dùng được."""
+    holder = _legal_holder()
+    rt = holder.get() if holder is not None else None
+    return rt.qa if rt is not None else None
 
 
 def _iso(value):
@@ -358,22 +390,28 @@ def _sync_temporal(query: str, qa, as_of, mask_state: MaskState) -> dict[str, An
     }
 
 
+def _chat_temporal(qa, query: str, as_of, mask_state: MaskState,
+                   history: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    if history:
+        # câu hỏi nối tiếp ("còn năm 2025 thì sao?"): che PII câu hỏi + lịch sử, gộp thành câu độc lập,
+        # rồi mới đưa cho TemporalQA (cùng mask_state -> che lại không đổi placeholder, mở che đúng)
+        pipeline, _ = get_pipeline()
+        condensed, pii = pipeline._prepare_query(query, history, mask_state)
+        data = _sync_temporal(condensed, qa, as_of, mask_state)
+        data["query"] = query
+        data["query_pii"] = {k: pii.get(k, 0) + data["query_pii"].get(k, 0)
+                             for k in {*pii, *data["query_pii"]}}
+        data["trace"]["condensed_query"] = condensed
+        return data
+    return _sync_temporal(query, qa, as_of, mask_state)
+
+
 def _sync_chat(query: str, as_of, mask_state: MaskState,
                history: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    with lease_temporal_qa() as qa:          # một cặp (snapshot, chỉ mục) cho cả request
+        if qa is not None:
+            return _chat_temporal(qa, query, as_of, mask_state, history)
     pipeline, _ = get_pipeline()
-    qa = get_temporal_qa()
-    if qa is not None:
-        if history:
-            # câu hỏi nối tiếp ("còn năm 2025 thì sao?"): che PII câu hỏi + lịch sử, gộp thành câu độc lập,
-            # rồi mới đưa cho TemporalQA (cùng mask_state -> che lại không đổi placeholder, mở che đúng)
-            condensed, pii = pipeline._prepare_query(query, history, mask_state)
-            data = _sync_temporal(condensed, qa, as_of, mask_state)
-            data["query"] = query
-            data["query_pii"] = {k: pii.get(k, 0) + data["query_pii"].get(k, 0)
-                                 for k in {*pii, *data["query_pii"]}}
-            data["trace"]["condensed_query"] = condensed
-            return data
-        return _sync_temporal(query, qa, as_of, mask_state)
     return _sync_ask(query, pipeline, mask_state, history)
 
 
@@ -386,9 +424,10 @@ def _sync_stream(query: str, as_of, mask_state: MaskState, history: list[dict[st
     (TemporalQA chưa stream); không thì pipeline cũ stream token (``sources`` -> ``token``... -> ``done``).
     Starlette chạy generator đồng bộ này trong threadpool nên không block event loop."""
     try:
-        if get_temporal_qa() is not None:
-            yield _sse({"type": "done", **_sync_chat(query, as_of, mask_state, history)})
-            return
+        with lease_temporal_qa() as qa:
+            if qa is not None:
+                yield _sse({"type": "done", **_chat_temporal(qa, query, as_of, mask_state, history)})
+                return
         pipeline, _ = get_pipeline()
         for event in pipeline.ask_stream(query, history=history, mask_state=mask_state):
             yield _sse(event)
@@ -759,8 +798,7 @@ async def handle_doc_content(request: Request) -> JSONResponse:
     })
 
 
-_IMAGE_TYPES = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp",
-                 ".tif": "image/tiff", ".tiff": "image/tiff"}
+_IMAGE_TYPES = legal_api.IMAGE_TYPES
 
 
 def _load_extracted(pipeline: RAGPipeline, settings: Settings, doc_id: str) -> tuple[dict[str, Any] | None, bool]:
@@ -893,24 +931,7 @@ async def handle_page_image(request: Request) -> Response:
     report = _load_report(settings, doc_id) or {}
     source = (data or {}).get("source") or report.get("source")
     src_file = _find_doc_file(settings, source) if source else None
-    if src_file is None or page_no < 1:
-        return Response(status_code=404)
-    suffix = src_file.suffix.lower()
-    headers = {"Cache-Control": "private, max-age=3600"}
-    if suffix in _IMAGE_TYPES:
-        return Response(src_file.read_bytes(), media_type=_IMAGE_TYPES[suffix], headers=headers)
-    if suffix != ".pdf":
-        return Response(status_code=404)
-    import fitz
-
-    def render() -> bytes | None:
-        with fitz.open(src_file) as doc:
-            if page_no > doc.page_count:
-                return None
-            return doc[page_no - 1].get_pixmap(matrix=fitz.Matrix(1.5, 1.5)).tobytes("png")
-
-    png = await asyncio.get_running_loop().run_in_executor(None, render)
-    return Response(png, media_type="image/png", headers=headers) if png else Response(status_code=404)
+    return await legal_api.page_image_response(src_file, page_no)
 
 
 # --- bước 2 sau khi trích xuất: embedding / tải bản OCR / bỏ ------------------------------------
@@ -1016,14 +1037,9 @@ async def handle_discard_doc(request: Request) -> JSONResponse:
 # --- kho luật có phiên bản: duyệt -------------------------------------------------------------
 
 def get_legal_service():
-    """LegalService trên DATA_DIR/legal/catalog.sqlite (không cần khởi tạo RAG pipeline)."""
-    global _legal_service
-    if _legal_service is None:
-        from rag.legal.service import LegalService
-        from rag.legal.store import LegalStore
-
-        _legal_service = LegalService(LegalStore(Settings.load().data_dir / "legal" / "catalog.sqlite"))
-    return _legal_service
+    """LegalService trên snapshot đang công bố — chỉ để đọc ở /review; mọi lần ghi đi qua hàng đợi ghi
+    (`legal_api.handle_review_decision`). Không cần khởi tạo RAG pipeline."""
+    return legal_api.get_backend().snapshots.service()
 
 
 def _review_title(item, op) -> str:
@@ -1095,33 +1111,6 @@ async def handle_review_detail(request: Request) -> JSONResponse:
     return JSONResponse(data)
 
 
-async def handle_review_decision(request: Request) -> JSONResponse:
-    from datetime import datetime, timezone
-
-    from rag.legal.models import ReviewDecision
-    from rag.legal.service import ReviewClosedError
-
-    try:
-        body = await request.json()
-    except Exception:
-        return JSONResponse({"error": "Body JSON không hợp lệ"}, status_code=400)
-    reviewer, note = str(body.get("reviewer") or "").strip(), str(body.get("note") or "").strip()
-    if not reviewer or not note:
-        return JSONResponse({"error": "Cần tên người duyệt và ghi chú"}, status_code=400)
-    decision = ReviewDecision(request.path_params["review_id"], body.get("action"), reviewer, note,
-                              body.get("corrected_fields") or {}, datetime.now(timezone.utc))
-    loop = asyncio.get_running_loop()
-    try:
-        run = await loop.run_in_executor(_executor, get_legal_service().decide, decision)
-    except ReviewClosedError as e:
-        return JSONResponse({"error": str(e)}, status_code=409)
-    except KeyError:
-        return JSONResponse({"error": "Không có mục duyệt này"}, status_code=404)
-    except (ValueError, TypeError) as e:
-        return JSONResponse({"error": str(e)}, status_code=400)
-    return JSONResponse({"status": "ok", "build_id": run.build_id if run else None})
-
-
 async def handle_review_page(request: Request) -> HTMLResponse:
     if not REVIEW_HTML_PATH.exists():
         return HTMLResponse("<h1>review.html chưa được tạo</h1>", status_code=404)
@@ -1138,7 +1127,7 @@ routes = [
     Route("/upload", handle_upload_page, methods=["GET"]),
     Route("/review", handle_review_page, methods=["GET"]),
     Route("/api/legal/reviews", handle_list_reviews, methods=["GET"]),
-    Route("/api/legal/reviews/{review_id:path}/decision", handle_review_decision, methods=["POST"]),
+    Route("/api/legal/reviews/{review_id:path}/decision", legal_api.handle_review_decision, methods=["POST"]),
     Route("/api/legal/reviews/{review_id:path}", handle_review_detail, methods=["GET"]),
     Route("/api/ingest_reports", handle_list_reports, methods=["GET"]),
     Route("/api/ingest_reports/{doc_id:path}", handle_get_report, methods=["GET"]),
@@ -1147,6 +1136,7 @@ routes = [
     Route("/api/ingest", handle_ingest, methods=["POST"]),
     Route("/api/doc_content/{filename:path}", handle_doc_content, methods=["GET"]),
     Route("/doc/{filename:path}", handle_view_doc, methods=["GET"]),
+    *legal_api.routes,
 ]
 
 middleware = [

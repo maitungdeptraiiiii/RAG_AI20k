@@ -219,8 +219,18 @@
           { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || res.status);
+        // quyết định vào hàng đợi ghi: staging -> kiểm tra -> công bố -> dựng chỉ mục
+        result.textContent = 'Đang áp dụng quyết định...';
+        let job = { state: 'queued' };
+        while (!['done', 'failed', 'index_failed'].includes(job.state)) {
+          await new Promise(r => setTimeout(r, 1000));
+          job = await (await fetch('/api/legal/jobs/' + encodeURIComponent(data.job_id))).json();
+          if (job.error && !job.state) throw new Error(job.error);
+        }
+        if (job.state === 'failed') throw new Error(job.error || 'không áp dụng được');
         result.style.color = 'var(--good-text)';
-        result.textContent = `Đã lưu. ${data.build_id ? 'Bản dựng mới: ' + data.build_id : ''}`;
+        result.textContent = job.state === 'done' ? 'Đã áp dụng quyết định.'
+          : 'Kho đã cập nhật nhưng chỉ mục hỏi đáp lỗi, chat đang dùng dữ liệu trước đó (cần "Dựng lại chỉ mục").';
         await loadList();
       } catch (e) {
         result.style.color = 'var(--critical-text)'; result.textContent = 'Lỗi: ' + e.message;

@@ -1,4 +1,5 @@
 import sys
+from contextlib import contextmanager, nullcontext
 from datetime import date, datetime, timezone
 from pathlib import Path
 
@@ -8,10 +9,13 @@ from starlette.testclient import TestClient
 from rag.temporal.answer import ContextItem, TemporalAnswer
 from rag.temporal.models import LegalTimeline, TimeAnchor, TransitionRule
 from rag.temporal.qa import TemporalResult
+from types import SimpleNamespace as NS
+from rag.config import Settings
 
 UI = Path(__file__).resolve().parents[1] / "ui"
 if str(UI) not in sys.path:
     sys.path.insert(0, str(UI))
+import legal_api  # noqa: E402
 import server  # noqa: E402
 
 NOW = datetime(2026, 11, 9, tzinfo=timezone.utc)
@@ -41,7 +45,7 @@ class FakeQA:
 @pytest.fixture
 def client(monkeypatch):
     qa = FakeQA()
-    monkeypatch.setattr(server, "get_temporal_qa", lambda: qa)
+    monkeypatch.setattr(server, "lease_temporal_qa", lambda: nullcontext(qa))
     return TestClient(server.app), qa
 
 
@@ -84,13 +88,44 @@ def test_temporal_init_failure_falls_back_to_old_pipeline(monkeypatch):
     def boom():
         raise RuntimeError("catalog hỏng")
 
-    monkeypatch.setattr(server, "_temporal_qa", None)
-    monkeypatch.setattr(server, "_temporal_failed_at", None, raising=False)
-    monkeypatch.setattr(server, "_build_temporal_qa", boom)
+    monkeypatch.setattr(legal_api, "get_backend", boom)
     monkeypatch.setattr(server, "get_pipeline", lambda: (object(), None))
     monkeypatch.setattr(server, "_sync_ask", lambda q, p, m, h=None: {"query": q, "answer": "cũ", "refused": False})
     r = TestClient(server.app).post("/api/chat", json={"query": "Hỏi?"})
     assert r.status_code == 200 and r.json()["answer"] == "cũ"
+    assert server.get_temporal_qa() is None
+
+
+def test_chat_without_runtime_falls_back_to_old_pipeline(monkeypatch):
+    # kho mới khởi tạo được nhưng chưa có cặp (snapshot, chỉ mục) dùng được -> pipeline cũ
+    holder = NS(get=lambda: None, lease=lambda: nullcontext(None))
+    monkeypatch.setattr(server, "_legal_holder", lambda: holder)
+    monkeypatch.setattr(server, "get_pipeline", lambda: (object(), None))
+    monkeypatch.setattr(server, "_sync_ask", lambda q, p, m, h=None: {"query": q, "answer": "cũ", "refused": False})
+    assert TestClient(server.app).post("/api/chat", json={"query": "Hỏi?"}).json()["answer"] == "cũ"
+
+
+def test_chat_leases_runtime_for_whole_request(monkeypatch):
+    # cặp (snapshot, chỉ mục) được giữ suốt request: lease mở trước khi hỏi, đóng sau khi trả lời
+    events = []
+    qa = FakeQA()
+    real_ask = qa.ask
+
+    def ask(*a, **kw):
+        events.append("ask")
+        return real_ask(*a, **kw)
+
+    qa.ask = ask
+
+    @contextmanager
+    def lease():
+        events.append("lease")
+        yield qa
+        events.append("release")
+
+    monkeypatch.setattr(server, "lease_temporal_qa", lease)
+    assert TestClient(server.app).post("/api/chat", json={"query": "Hỏi?"}).status_code == 200
+    assert events == ["lease", "ask", "release"]
 
 
 def test_temporal_qa_is_resolved_off_the_event_loop(monkeypatch):
@@ -99,57 +134,44 @@ def test_temporal_qa_is_resolved_off_the_event_loop(monkeypatch):
     seen = []
     qa = FakeQA()
 
-    def fake_get():
+    @contextmanager
+    def fake_lease():
         try:
             asyncio.get_running_loop()
             seen.append("on_loop")
         except RuntimeError:
             seen.append("worker")
-        return qa
+        yield qa
 
-    monkeypatch.setattr(server, "get_temporal_qa", fake_get)
+    monkeypatch.setattr(server, "lease_temporal_qa", fake_lease)
     TestClient(server.app).post("/api/chat", json={"query": "Hỏi?"})
     assert seen == ["worker"] and qa.calls
 
 
-def test_build_starts_bm25_then_swaps_to_dense_index(monkeypatch, tmp_path):
-    # hybrid mặc định: trả lời ngay bằng BM25 + rerank, Dense dựng ở luồng nền rồi đổi chỉ mục
-    from dataclasses import replace
-    from types import SimpleNamespace as NS
-
+def test_make_runtime_shares_one_dense_index(monkeypatch, tmp_path):
+    # LEGAL_DENSE != 0: mọi snapshot dùng chung MỘT VectorIndex mở một lần; LEGAL_DENSE=0: chỉ BM25
+    from rag.index.embedder import HashEmbedder
+    from rag.index.vector_index import VectorIndex
+    from rag.legal.snapshots import SnapshotManager
     import rag.temporal.wiring as wiring
-    from rag.config import Settings
-    from rag.legal.store import LegalStore
 
-    built = []
+    opened = []
 
-    class Idx:
-        def __init__(self, dense):
-            self.dense, self.chunks = dense, {}
+    def fake_open(index_dir, embedder, **kw):
+        opened.append(index_dir)
+        return VectorIndex(embedder)
 
-        def build(self):
-            built.append(self.dense)
-            return 0
-
-    monkeypatch.setattr(wiring, "make_versioned_index", lambda s, llm, store, embedder=None, **kw: Idx(embedder))
-    monkeypatch.setattr(wiring, "legal_embedder", lambda s: "EMB")
-    settings = replace(Settings.load(), data_dir=tmp_path)
+    monkeypatch.setattr(VectorIndex, "open_qdrant", staticmethod(fake_open))
+    monkeypatch.setattr(wiring, "legal_embedder", lambda s: HashEmbedder(16))
+    settings = Settings(data_dir=tmp_path)
     monkeypatch.setattr(server, "get_pipeline", lambda: (NS(llm=None, retriever=None), settings))
-    monkeypatch.setattr(server, "get_legal_service", lambda: NS(store=LegalStore(tmp_path / "c.sqlite")))
+    monkeypatch.setattr(server, "_legal_dense", None)
+    snaps = SnapshotManager(tmp_path / "legal")
+    sid = snaps.current().snapshot_id
+    make_runtime = server.make_legal_runtime_factory(snaps)
     monkeypatch.delenv("LEGAL_DENSE", raising=False)
-    started = []
-    real_thread = server.threading.Thread
-
-    class SyncThread(real_thread):
-        def start(self):
-            started.append(self.name)
-            self.run()
-
-    monkeypatch.setattr(server.threading, "Thread", SyncThread)
-    qa = server._build_temporal_qa()
-    assert built == [None, "EMB"] and started == ["legal-dense"] and qa.index.dense == "EMB"
-
-    built.clear()
+    a, b = make_runtime(sid), make_runtime(sid)
+    assert len(opened) == 1 and a.index.dense is b.index.dense is not None
+    assert a.snapshot_id == a.index.snapshot_id == sid and a.qa.index is a.index and a.qa.service is a.service
     monkeypatch.setenv("LEGAL_DENSE", "0")
-    qa = server._build_temporal_qa()
-    assert built == [None] and qa.index.dense is None
+    assert make_runtime(sid).index.dense is None

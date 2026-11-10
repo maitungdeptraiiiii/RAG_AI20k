@@ -534,8 +534,20 @@ class UploadService:
             field_sources={k: {"source": f.source, "at": f.at.isoformat(), "detail": f.detail} for k, f in fields.items()},
             metadata_conflicts=metadata_conflicts(fields, d.text, key))
 
+    def mutate(self, upload_id: str, fn: Callable[[Draft], None]) -> Draft:
+        """Đọc - sửa - ghi bản nháp dưới cùng khoá với các bước (không mất cập nhật khi hàng đợi ghi chạy song song).
+        `fn` có thể ném `StepError` để từ chối."""
+        with self._lock:
+            d = self.drafts.load(upload_id)
+            fn(d)
+            return self._save(d)
+
     def apply_to(self, svc: LegalService, upload_id: str) -> None:
-        d = self._load(upload_id, "queued", "building")
+        with self._lock:
+            d = self._load(upload_id, "queued", "building")
+            if d.state == "queued":
+                d.state, d.error = "building", None
+                self._save(d)
         key = _key(d)
         if key is None:
             raise StepError("Bản nháp thiếu loại văn bản / số hiệu")

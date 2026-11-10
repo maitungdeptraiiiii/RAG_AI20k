@@ -1,8 +1,15 @@
-"""CLI kho luật: python -m rag.legal <crawl|build|show|report|fixture>. Dữ liệu ở DATA_DIR/legal/."""
+"""CLI kho luật: python -m rag.legal <crawl|build|show|report|fixture>. Dữ liệu ở DATA_DIR/legal/.
+
+`crawl` / `build` ghi qua `SnapshotManager.write` (staging -> kiểm tra -> công bố nguyên khối) dưới cùng khoá ghi với
+server: đang có lần cập nhật khác (vd. server đang áp dụng một upload) -> thoát mã 2, không ghi gì. `show` / `report`
+đọc snapshot đang công bố. Server đang chạy KHÔNG tự chuyển chat sang snapshot do CLI công bố: nó thấy snapshot đó ở
+lần "Dựng lại chỉ mục" (POST /api/legal/reindex) hoặc lần ghi kế tiếp của server (upload / quyết định duyệt).
+"""
 
 from __future__ import annotations
 
 import argparse
+import getpass
 import json
 import logging
 import sys
@@ -19,11 +26,27 @@ def _legal_dir() -> Path:
     return Settings.load().data_dir / "legal"
 
 
-def _service():
-    from rag.legal.service import LegalService
-    from rag.legal.store import LegalStore
+LOCKED_MESSAGE = "Đang có lần cập nhật kho khác, thử lại sau"
 
-    return LegalService(LegalStore(_legal_dir() / "catalog.sqlite"))
+
+def _snapshots():
+    from rag.legal.snapshots import SnapshotManager
+
+    return SnapshotManager(_legal_dir())
+
+
+def _service():
+    """Service trên snapshot đang công bố (chỉ đọc)."""
+    from rag.legal.service import LegalService
+
+    return LegalService(_snapshots().store())
+
+
+def _user() -> str:
+    try:
+        return getpass.getuser()
+    except Exception:  # noqa: BLE001 - không có biến môi trường người dùng
+        return "cli"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -47,18 +70,34 @@ def main(argv: list[str] | None = None) -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
 
+    from rag.legal.snapshots import WriteLockedError
+
+    try:
+        return _run(args)
+    except WriteLockedError:
+        print(LOCKED_MESSAGE)
+        return 2
+
+
+def _run(args: argparse.Namespace) -> int:
     if args.cmd == "crawl":
         from rag.ingest.vbpl import VbplClient
         from rag.legal.discovery import discover, load_seeds
 
-        svc = _service()
-        report = discover(VbplClient(), svc.store, load_seeds(args.seeds), _legal_dir() / "raw", max_depth=args.max_depth)
-        print(json.dumps({"added": report.added, "rejected": report.rejected, "suspicious": report.suspicious},
-                         ensure_ascii=False, indent=2))
+        client, seeds, raw = VbplClient(), load_seeds(args.seeds), _legal_dir() / "raw"
+        res = _snapshots().write("cli:crawl", _user(), lambda svc: discover(client, svc.store, seeds, raw,
+                                                                            max_depth=args.max_depth))
+        report = res.value
+        print(json.dumps({"snapshot_id": res.snapshot.snapshot_id, "added": report.added, "rejected": report.rejected,
+                          "suspicious": report.suspicious}, ensure_ascii=False, indent=2))
     elif args.cmd == "build":
-        runs = _service().build_all()
-        print(json.dumps([{"document": r.document_key, "build_id": r.build_id, "operations": len(r.operation_ids)}
-                          for r in runs], ensure_ascii=False, indent=2))
+        snapshots = _snapshots()
+        res = snapshots.write("cli:build", _user(), lambda svc: None)
+        store = snapshots.store(res.snapshot.snapshot_id)
+        print(json.dumps({"snapshot_id": res.snapshot.snapshot_id,
+                          "laws": [{"document": d.document_key, "build_id": run.build_id}
+                                   for d in store.documents() if (run := store.latest_build(d.document_key))]},
+                         ensure_ascii=False, indent=2))
     elif args.cmd == "show":
         svc = _service()
         for v in svc.store.provisions_as_of(args.key, args.as_of):

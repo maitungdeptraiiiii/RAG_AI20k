@@ -503,6 +503,7 @@
     "qualified": 7,
     "cannot_conclude": 11,
     "firm_on_unverified": 0,
-    "errors": 0
+    "errors": 0,
+    "firm_on_unverified_note": "tính lại theo căn cứ được dẫn trong câu trả lời (runner cũ đếm mọi nguồn trong ngữ cảnh, kể cả nguồn kho cũ không được dẫn); runner hiện tại đếm theo citations của issues"
   }
 }

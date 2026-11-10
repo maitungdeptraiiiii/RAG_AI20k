@@ -24,6 +24,7 @@ import argparse
 import json
 import sys
 import tempfile
+import time
 from datetime import date, datetime
 from pathlib import Path
 
@@ -54,8 +55,19 @@ def version_check(expected: dict[str, list[str]], forbidden: dict[str, list[str]
     return all(not (set(keys) & found.get(role, set())) for role, keys in forbidden.items())
 
 
+def firm_on_unverified(answer, items) -> bool:
+    """Câu trả lời `firm` mà một căn cứ ĐƯỢC DẪN trong các issue chưa xác minh (nguồn chỉ nằm trong ngữ cảnh mà không
+    được dẫn thì không tính)."""
+    if answer.certainty != "firm":
+        return False
+    by_n = {i.n: i for i in items}
+    cited = {n for issue in answer.issues for n in issue.get("citations") or []}
+    return any(by_n[n].document_status != "verified" for n in cited if n in by_n)
+
+
 def evaluate(rows: list[dict], index, *, k: int = 10) -> dict:
     out = []
+    t0 = time.perf_counter()
     for row in rows:
         asked_at = datetime.fromisoformat(row["asked_at"])
         as_of = date.fromisoformat(row["as_of"]) if row.get("as_of") else None
@@ -73,27 +85,19 @@ def evaluate(rows: list[dict], index, *, k: int = 10) -> dict:
                     "anchors": [list(x) for x in got], "expected_anchors": [list(x) for x in want],
                     "found": {r: sorted(v) for r, v in found.items()}, "warnings": list(tl.warnings)})
     n = len(out) or 1
-    return {"n": len(out), "k": k,
+    return {"n": len(out), "k": k, "search_seconds": round(time.perf_counter() - t0, 1),
             "anchor_accuracy": sum(r["anchor_ok"] for r in out) / n,
             "version_accuracy": sum(r["version_ok"] for r in out) / n,
             "rows": out}
 
 
-def run_llm(rows: list[dict], legal_dir: Path, answers_path: Path | None) -> dict:
+def run_llm(rows: list[dict], index, pipeline, answers_path: Path | None, *, k_per_anchor: int = 6) -> dict:
     """TemporalQA thật: LLM + kho cũ. Đếm `firm` trên căn cứ chưa xác minh (enforce phải chặn)."""
-    from rag.config import Settings
     from rag.legal.service import LegalService
-    from rag.legal.store import LegalStore
-    from rag.pipeline import RAGPipeline
-    from rag.temporal.index import VersionedIndex
     from rag.temporal.qa import TemporalQA
     from rag.temporal.status import load_legacy_map
 
-    settings = Settings.load()
-    pipeline = RAGPipeline.from_settings(settings)
-    service = LegalService(LegalStore(legal_dir / "catalog.sqlite"))
-    index = VersionedIndex(service.store)
-    index.build()
+    service = LegalService(index.store)
 
     def legacy_search(query: str, k: int):
         result = pipeline.retriever.retrieve(query, k)
@@ -101,12 +105,14 @@ def run_llm(rows: list[dict], legal_dir: Path, answers_path: Path | None) -> dic
         return [chunks[h.chunk_id] for h in result.hits[:k] if h.chunk_id in chunks]
 
     legacy_map = load_legacy_map(ROOT / "data" / "team-4.2" / "legal" / "legacy_map.yaml")
-    stats = {"n": 0, "firm": 0, "qualified": 0, "cannot_conclude": 0, "firm_on_unverified": 0, "errors": 0}
+    stats = {"n": 0, "firm": 0, "qualified": 0, "cannot_conclude": 0, "firm_on_unverified": 0, "errors": 0,
+             "seconds_per_question": 0.0}
+    t0 = time.perf_counter()
     answers = []
     for row in rows:
         asked_at = datetime.fromisoformat(row["asked_at"])
         qa = TemporalQA(service, index, pipeline.llm, legacy_search=legacy_search, legacy_map=legacy_map,
-                        now=lambda asked_at=asked_at: asked_at)
+                        k_per_anchor=k_per_anchor, now=lambda asked_at=asked_at: asked_at)
         as_of = date.fromisoformat(row["as_of"]) if row.get("as_of") else None
         stats["n"] += 1
         try:
@@ -117,14 +123,16 @@ def run_llm(rows: list[dict], legal_dir: Path, answers_path: Path | None) -> dic
             continue
         cert = r.answer.certainty
         stats[cert] = stats.get(cert, 0) + 1
-        if cert == "firm" and any(i.document_status != "verified" for i in r.items):
+        if firm_on_unverified(r.answer, r.items):
             stats["firm_on_unverified"] += 1
         answers.append({"id": row["id"], "question": row["question"], "certainty": cert,
                         "downgrade_reasons": r.answer.downgrade_reasons, "answer": r.answer.answer_markdown,
+                        "issues": r.answer.issues,
                         "sources": [{"n": i.n, "store": i.store, "document": i.document_key or i.title,
                                      "article": i.article_id or i.section, "status": i.document_status,
                                      "valid_from": _iso(i.valid_from), "valid_to": _iso(i.valid_to)} for i in r.items],
                         "transition_rules": [t.rule_id for t in r.rules]})
+    stats["seconds_per_question"] = round((time.perf_counter() - t0) / max(stats["n"], 1), 1)
     if answers_path:
         answers_path.parent.mkdir(parents=True, exist_ok=True)
         answers_path.write_text("\n".join(json.dumps(a, ensure_ascii=False) for a in answers) + "\n", encoding="utf-8")
@@ -139,6 +147,8 @@ def main(argv: list[str] | None = None) -> int:
     src.add_argument("--legal-dir", type=Path, help="thư mục chứa catalog.sqlite (DATA_DIR/legal)")
     ap.add_argument("--k", type=int, default=10)
     ap.add_argument("--llm", action="store_true", help="chạy TemporalQA thật (cần --legal-dir)")
+    ap.add_argument("--hybrid", action="store_true",
+                    help="tìm bằng bộ tìm kiếm của pipeline chính (BM25 + Dense/HyDE -> RRF -> rerank), cần --legal-dir")
     ap.add_argument("--out", type=Path)
     ap.add_argument("--answers", type=Path)
     args = ap.parse_args(argv)
@@ -146,6 +156,8 @@ def main(argv: list[str] | None = None) -> int:
     from rag.temporal.index import VersionedIndex
 
     rows = load_dataset(args.dataset)
+    if (args.llm or args.hybrid) and not args.legal_dir:
+        ap.error("--llm / --hybrid cần --legal-dir")
     if args.fixture:
         from tests.test_temporal_index import realestate_service
         service = realestate_service(Path(tempfile.mkdtemp(prefix="temporal-eval-")))
@@ -153,13 +165,27 @@ def main(argv: list[str] | None = None) -> int:
     else:
         from rag.legal.store import LegalStore
         store = LegalStore(args.legal_dir / "catalog.sqlite")
-    index = VersionedIndex(store)
+    pipeline = settings = None
+    if args.llm or args.hybrid:
+        from rag.config import Settings
+        from rag.pipeline import RAGPipeline
+        settings = Settings.load()
+        pipeline = RAGPipeline.from_settings(settings)
+    if args.hybrid:
+        from rag.temporal.wiring import legal_embedder, make_versioned_index
+        index = make_versioned_index(settings, pipeline.llm, store, embedder=legal_embedder(settings),
+                                     vector_dir=args.legal_dir / "vector")
+    else:
+        index = VersionedIndex(store)
+    t0 = time.perf_counter()
     index.build()
+    build_s = round(time.perf_counter() - t0, 1)
     report = evaluate(rows, index, k=args.k)
+    report["retrieval"] = "hybrid+hyde+rerank" if args.hybrid else "bm25"
+    report["build_seconds"] = build_s
     if args.llm:
-        if not args.legal_dir:
-            ap.error("--llm cần --legal-dir")
-        report["llm"] = run_llm(rows, args.legal_dir, args.answers)
+        report["llm"] = run_llm(rows, index, pipeline, args.answers,
+                                k_per_anchor=settings.top_k if args.hybrid else 6)
     for r in report["rows"]:
         if not (r["anchor_ok"] and r["version_ok"]):
             print(f"  FAIL {r['id']}: anchor_ok={r['anchor_ok']} version_ok={r['version_ok']} "

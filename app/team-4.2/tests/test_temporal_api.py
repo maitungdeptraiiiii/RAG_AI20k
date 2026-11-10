@@ -110,3 +110,46 @@ def test_temporal_qa_is_resolved_off_the_event_loop(monkeypatch):
     monkeypatch.setattr(server, "get_temporal_qa", fake_get)
     TestClient(server.app).post("/api/chat", json={"query": "Hỏi?"})
     assert seen == ["worker"] and qa.calls
+
+
+def test_build_starts_bm25_then_swaps_to_dense_index(monkeypatch, tmp_path):
+    # hybrid mặc định: trả lời ngay bằng BM25 + rerank, Dense dựng ở luồng nền rồi đổi chỉ mục
+    from dataclasses import replace
+    from types import SimpleNamespace as NS
+
+    import rag.temporal.wiring as wiring
+    from rag.config import Settings
+    from rag.legal.store import LegalStore
+
+    built = []
+
+    class Idx:
+        def __init__(self, dense):
+            self.dense, self.chunks = dense, {}
+
+        def build(self):
+            built.append(self.dense)
+            return 0
+
+    monkeypatch.setattr(wiring, "make_versioned_index", lambda s, llm, store, embedder=None, **kw: Idx(embedder))
+    monkeypatch.setattr(wiring, "legal_embedder", lambda s: "EMB")
+    settings = replace(Settings.load(), data_dir=tmp_path)
+    monkeypatch.setattr(server, "get_pipeline", lambda: (NS(llm=None, retriever=None), settings))
+    monkeypatch.setattr(server, "get_legal_service", lambda: NS(store=LegalStore(tmp_path / "c.sqlite")))
+    monkeypatch.delenv("LEGAL_DENSE", raising=False)
+    started = []
+    real_thread = server.threading.Thread
+
+    class SyncThread(real_thread):
+        def start(self):
+            started.append(self.name)
+            self.run()
+
+    monkeypatch.setattr(server.threading, "Thread", SyncThread)
+    qa = server._build_temporal_qa()
+    assert built == [None, "EMB"] and started == ["legal-dense"] and qa.index.dense == "EMB"
+
+    built.clear()
+    monkeypatch.setenv("LEGAL_DENSE", "0")
+    qa = server._build_temporal_qa()
+    assert built == [None] and qa.index.dense is None

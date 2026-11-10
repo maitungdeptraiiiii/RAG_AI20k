@@ -119,6 +119,61 @@ def save_extracted(extracted_dir: Path, report: IngestReport, pages: Sequence[Pa
     return path
 
 
+# phương pháp nâng cao chỉ tác động lúc truy vấn lên arm Dense (dùng được cho kho khác, vd. kho luật có phiên bản)
+DENSE_WRAPPERS = ("hyde",)
+
+
+def make_hybrid_retriever(s: Settings, llm: LLM, bm25: Any, dense: Any, *,
+                          extra_arms: dict[str, Any] | None = None, reranker: Any = None,
+                          wrap_dense: Sequence[Any] | None = None) -> HybridRetriever:
+    """HybridRetriever cấu hình đúng như pipeline chính: BM25 + Dense (bọc HyDE... theo ADVANCED) -> RRF -> rerank
+    (RERANK_BACKEND), cùng arm_k / rerank_n / gộp theo Điều / rewrite / decomposition / coverage / listwise.
+    `wrap_dense=None`: tự dựng các phương pháp trong DENSE_WRAPPERS đang bật trong ADVANCED."""
+    from rag.advanced import Components, build_enhancements, parse_names
+    from rag.retrieve.coverage import CoverageConfig
+    from rag.retrieve.listwise import ListwiseConfig, ListwiseSelector
+
+    if wrap_dense is None:
+        names = [n for n in parse_names(s.advanced_methods) if n in DENSE_WRAPPERS]
+        comps = Components(settings=s, llm=llm, embedder=getattr(dense, "embedder", None), dense=dense)
+        wrap_dense = [e.wrap_dense for e in build_enhancements(names, comps) if e.wrap_dense is not None]
+    dense_arm = dense
+    for wrap in wrap_dense:               # vd. HyDE: arm Dense tìm bằng (câu hỏi + đoạn giả)
+        dense_arm = wrap(dense_arm)
+    if reranker is None:
+        reranker = make_reranker(s.rerank_backend, cache_path=s.cache_dir / "rerank.sqlite")
+    retriever = HybridRetriever(
+        bm25,
+        dense_arm,
+        extra_arms=extra_arms,
+        reranker=reranker,
+        arm_k=s.arm_k,
+        rrf_k=s.rrf_k,
+        rerank_n=s.rerank_n,
+        merge_articles=s.merge_articles,
+        article_pool_factor=s.article_pool_factor,
+        bm25_rrf_weight=s.bm25_rrf_weight,
+        rewrite_for_rerank=s.rewrite_for_rerank,
+        coverage=(CoverageConfig(s.coverage_anchor_k,s.coverage_min_p,s.coverage_weight,s.coverage_branch_k)
+                  if s.coverage_enabled else None),
+        listwise=(ListwiseSelector(llm,ListwiseConfig(s.listwise_candidate_n,s.listwise_margin,
+                  s.listwise_min_p,s.listwise_excerpt_words)) if s.listwise_enabled else None),
+    )
+    if s.query_rewrite_enabled:
+        from rag.advanced.rewrite import QueryRewriter
+
+        retriever.rewriter = QueryRewriter(llm)
+    if s.decomp_enabled:
+        from rag.advanced.decomposition import QueryDecomposer
+
+        retriever.decomposer = QueryDecomposer(
+            llm, s.decomp_max_subqueries, s.decomp_include_original,
+            s.decomp_per_query_k, s.decomp_pool_size,
+            s.decomp_max_new_articles,
+        )
+    return retriever
+
+
 class IndexConfigMismatchError(RuntimeError):
     """Index trên đĩa được build với cấu hình index khác (chunk size, embedding, phương pháp lúc index)."""
 
@@ -234,8 +289,6 @@ class RAGPipeline:
     def from_settings(cls, s: Settings, *, llm: LLM | None = None) -> RAGPipeline:
         from rag.advanced import Components, build_enhancements
         from rag.generate.llm import LLMCache, OpenAIChatLLM
-        from rag.retrieve.coverage import CoverageConfig
-        from rag.retrieve.listwise import ListwiseConfig, ListwiseSelector
 
         llm = llm or OpenAIChatLLM(
             s.llm_model,
@@ -257,39 +310,9 @@ class RAGPipeline:
         check_index_config(s.index_config_path, index_signature(s, [e.name for e in index_enhancers]))
 
         extra_arms = {name: arm for e in enhancements for name, arm in e.arms.items()}
-        dense_arm = dense
-        for e in enhancements:            # vd. HyDE: arm Dense tìm bằng (câu hỏi + đoạn giả)
-            if e.wrap_dense is not None:
-                dense_arm = e.wrap_dense(dense_arm)
-        retriever = HybridRetriever(
-            BM25Index(),
-            dense_arm,
-            extra_arms=extra_arms,
-            reranker=make_reranker(s.rerank_backend, cache_path=s.cache_dir / "rerank.sqlite"),
-            arm_k=s.arm_k,
-            rrf_k=s.rrf_k,
-            rerank_n=s.rerank_n,
-            merge_articles=s.merge_articles,
-            article_pool_factor=s.article_pool_factor,
-            bm25_rrf_weight=s.bm25_rrf_weight,
-            rewrite_for_rerank=s.rewrite_for_rerank,
-            coverage=(CoverageConfig(s.coverage_anchor_k,s.coverage_min_p,s.coverage_weight,s.coverage_branch_k)
-                      if s.coverage_enabled else None),
-            listwise=(ListwiseSelector(llm,ListwiseConfig(s.listwise_candidate_n,s.listwise_margin,
-                      s.listwise_min_p,s.listwise_excerpt_words)) if s.listwise_enabled else None),
-        )
-        if s.query_rewrite_enabled:
-            from rag.advanced.rewrite import QueryRewriter
-
-            retriever.rewriter = QueryRewriter(llm)
-        if s.decomp_enabled:
-            from rag.advanced.decomposition import QueryDecomposer
-
-            retriever.decomposer = QueryDecomposer(
-                llm, s.decomp_max_subqueries, s.decomp_include_original,
-                s.decomp_per_query_k, s.decomp_pool_size,
-                s.decomp_max_new_articles,
-            )
+        retriever = make_hybrid_retriever(
+            s, llm, BM25Index(), dense, extra_arms=extra_arms,
+            wrap_dense=[e.wrap_dense for e in enhancements if e.wrap_dense is not None])
         context = ContextConfig(
             min_p=s.context_min_p,
             max_blocks=s.context_max_blocks,
@@ -446,5 +469,5 @@ class RAGPipeline:
         return MaskState(prefix=QUERY_PREFIX)
 
 
-__all__ = ["AskTrace", "IndexConfigMismatchError", "IngestReport", "RAGPipeline", "check_index_config",
+__all__ = ["DENSE_WRAPPERS", "make_hybrid_retriever", "AskTrace", "IndexConfigMismatchError", "IngestReport", "RAGPipeline", "check_index_config",
            "index_signature"]

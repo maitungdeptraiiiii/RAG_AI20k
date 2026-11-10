@@ -235,23 +235,20 @@ _TEMPORAL_STALE_EVERY_S = 30.0     # kiểm tra bản dựng mới của kho lu�
 
 def _build_temporal_qa():
     """TemporalQA dùng kho có phiên bản (DATA_DIR/legal) + kho cũ (pipeline hiện tại) để tham khảo.
-    Dense cho kho mới chỉ bật khi LEGAL_DENSE=1 (tránh embed hàng chục nghìn chunk lần đầu)."""
+    Kho mới tìm bằng đúng bộ tìm kiếm của pipeline chính (BM25 + Dense/HyDE -> RRF -> rerank), lọc hiệu lực trước.
+    Lần đầu: dùng ngay BM25 + rerank; Dense embed ở luồng nền rồi tự chuyển sang hybrid. LEGAL_DENSE=0 để tắt Dense."""
     import os
 
-    from rag.temporal.index import VersionedIndex
+    from rag.retrieve.rerank import make_reranker
     from rag.temporal.log import QALog
     from rag.temporal.qa import TemporalQA
     from rag.temporal.status import load_legacy_map
+    from rag.temporal.wiring import legal_embedder, legal_vector_dir, make_versioned_index
 
     pipeline, settings = get_pipeline()
     service = get_legal_service()
-    embedder = None
-    if os.environ.get("LEGAL_DENSE") == "1":
-        from rag.index.embedder import EmbeddingCache, make_embedder
-        embedder = make_embedder(settings.embed_model, settings.embed_dim,
-                                 cache=EmbeddingCache(settings.cache_dir / "embeddings.sqlite"),
-                                 jina_api_key=settings.jina_api_key)
-    index = VersionedIndex(service.store, embedder)
+    reranker = make_reranker(settings.rerank_backend, cache_path=settings.cache_dir / "rerank.sqlite")
+    index = make_versioned_index(settings, pipeline.llm, service.store, reranker=reranker)
     index.build()
 
     def legacy_search(query: str, k: int):
@@ -260,9 +257,25 @@ def _build_temporal_qa():
         return [chunks[h.chunk_id] for h in result.hits[:k] if h.chunk_id in chunks]
 
     legacy_map_path = _REPO_ROOT / "data" / "team-4.2" / "legal" / "legacy_map.yaml"
-    return TemporalQA(service, index, pipeline.llm, legacy_search=legacy_search,
-                      legacy_map=load_legacy_map(legacy_map_path) if legacy_map_path.exists() else {},
-                      log=QALog(settings.data_dir / "legal" / "qa_log.sqlite"))
+    qa = TemporalQA(service, index, pipeline.llm, legacy_search=legacy_search,
+                    legacy_map=load_legacy_map(legacy_map_path) if legacy_map_path.exists() else {},
+                    log=QALog(settings.data_dir / "legal" / "qa_log.sqlite"), k_per_anchor=settings.top_k)
+
+    if os.environ.get("LEGAL_DENSE", "1") != "0":
+        def upgrade() -> None:
+            try:
+                dense_index = make_versioned_index(settings, pipeline.llm, service.store,
+                                                   embedder=legal_embedder(settings),
+                                                   vector_dir=legal_vector_dir(settings), reranker=reranker)
+                n = dense_index.build()
+                with _temporal_lock:
+                    qa.index = dense_index
+                log.info("Kho luật có phiên bản: đã bật hybrid (BM25 + Dense) cho %d chunk", n)
+            except Exception:  # noqa: BLE001 — embed lỗi thì tiếp tục BM25 + rerank
+                log.exception("Không dựng được Dense cho kho luật có phiên bản; tiếp tục BM25 + rerank")
+
+        threading.Thread(target=upgrade, name="legal-dense", daemon=True).start()
+    return qa
 
 
 def get_temporal_qa():
@@ -326,7 +339,8 @@ def _sync_temporal(query: str, qa, as_of, mask_state: MaskState) -> dict[str, An
         "query_pii": result.query_pii,
         "citations": citations,
         "sources": sources,
-        "trace": {"context_mode": "temporal", "n_context_blocks": len(sources), "reranked": False, "errors": {},
+        "trace": {"context_mode": "temporal", "n_context_blocks": len(sources),
+                  "retrieval": "hybrid" if getattr(getattr(qa, "index", None), "has_dense", False) else "bm25", "reranked": True, "errors": {},
                   "arms": {}, "final_hits": []},
         "timeline": {"anchors": timeline["anchors"], "primary": timeline["primary"], "warnings": timeline["warnings"]},
         "issues": result.answer.issues,

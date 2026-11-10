@@ -26,6 +26,51 @@ hiệu lực trước khi xếp hạng hoạt động đúng.
 Chi tiết: `report.json` (từng câu: mốc dựng được, văn bản tìm thấy theo vai trò) và `answers.jsonl` (câu trả lời, mức
 chắc chắn, lý do hạ mức, nguồn, quy định chuyển tiếp).
 
+## Cập nhật: dùng bộ tìm kiếm của pipeline chính (`hybrid/`)
+
+Kho luật có phiên bản giờ tìm bằng đúng `HybridRetriever` của pipeline chính, cùng cấu hình `.env`:
+
+- BM25 + Dense (Jina v5, có cache embedding);
+- HyDE trên nhánh dense (theo `ADVANCED`);
+- gộp RRF, rerank Jev, gộp chunk theo Điều.
+
+Mỗi nhánh tìm kiếm chỉ chấm và trả các chunk có hiệu lực tại mốc (`ValidityFilteredArm`), nên RRF, HyDE và reranker
+không bao giờ thấy phiên bản sai.
+
+| Chạy trên kho thật, 18 câu | BM25 (trước) | Hybrid + HyDE + rerank (sau) |
+|---|---|---|
+| Độ đúng mốc | 18/18 | 18/18 |
+| Độ đúng phiên bản (top-10) | 17/18 | **18/18** |
+| `cannot_conclude` | 11 | **6** |
+| `qualified` / `firm` | 7 / 0 | 11 / 1 |
+| `firm` dựa trên căn cứ chưa xác minh | 0 | 0 |
+| Thời gian trả lời trung bình mỗi câu (gồm LLM) | không đo | 16,7 s |
+| Dựng chỉ mục lần đầu | ~1 phút | ~8 phút |
+
+Ghi chú khi đọc bảng:
+
+- **Top-10 ở bản hybrid tính theo Điều**, các chunk cùng Điều được gộp lại. Bản BM25 tính theo chunk.
+- **Dựng chỉ mục lần đầu ~8 phút** vì phải embed toàn kho qua Jina và bị giới hạn tốc độ (429). Các lần sau dùng
+  cache embedding và Qdrant trên đĩa (`<legal-dir>/vector`).
+- **Chỉ số `firm` dựa trên căn cứ chưa xác minh đã được tính lại** theo nguồn mà câu trả lời thực sự dẫn. Runner bản
+  đầu đếm mọi nguồn có trong ngữ cảnh, nên lần chạy hybrid báo nhầm 1 câu (t13). Câu t13 chỉ dẫn [1], [2], [4], cả
+  ba đều `verified`; hai điều Bộ luật Hình sự từ kho cũ không được dẫn.
+
+Thay đổi rõ nhất:
+
+- **t01** giờ tìm được Điều 21 Luật Nhà ở 2014 (điều kiện làm chủ đầu tư), nên không còn trả "chưa đủ căn cứ".
+- **t17** có đủ cả Luật Đất đai 2013 và 2024 trong khoảng năm 2024: gộp theo Điều giữ được cả hai phiên bản.
+
+Còn yếu:
+
+- **t14, t16:** điều luật trả lời trực tiếp vẫn chưa lọt vào top.
+- **t15:** lấy được Bộ luật Dân sự 2005 (còn hiệu lực ngày 05/08/2016, đúng phiên bản) nhưng câu trả lời dẫn số
+  trích dẫn không hợp lệ, nên bị hạ xuống `cannot_conclude`.
+- **Chưa dùng cho kho luật có phiên bản:** các phương pháp nâng cao dựng chỉ mục riêng (SPLADE, ColBERT, contextual).
+  Hiện `ADVANCED=hyde` nên cấu hình đang giống hệt pipeline chính.
+
+Chạy lại: thêm `--hybrid` vào lệnh dưới đây (cần `.env`).
+
 ## Ví dụ
 
 - **t10** — "Ký hợp đồng mua nhà ngày 15/06/2023, bây giờ tôi muốn kiện chủ đầu tư…":

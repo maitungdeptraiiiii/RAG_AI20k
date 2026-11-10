@@ -50,3 +50,14 @@ def test_forbidden_document_is_a_failure():
     assert runner.version_check({"signing": ["a"]}, {"signing": ["b"]}, {"signing": {"a", "b"}}) is False
     assert runner.version_check({"signing": ["a"]}, {}, {"signing": {"a"}}) is True
     assert runner.version_check({"signing": ["a"]}, {}, {}) is False      # thiếu mốc có vai trò đó
+
+
+def test_firm_on_unverified_counts_only_cited_sources():
+    runner = load_runner()
+    from types import SimpleNamespace as NS
+    items = [NS(n=1, document_status="verified"), NS(n=2, document_status="unversioned")]
+    firm_ok = NS(certainty="firm", issues=[{"citations": [1]}])
+    firm_bad = NS(certainty="firm", issues=[{"citations": [1, 2]}])
+    assert runner.firm_on_unverified(firm_ok, items) is False      # nguồn chưa xác minh có trong ngữ cảnh nhưng không được dẫn
+    assert runner.firm_on_unverified(firm_bad, items) is True
+    assert runner.firm_on_unverified(NS(certainty="qualified", issues=[{"citations": [2]}]), items) is False

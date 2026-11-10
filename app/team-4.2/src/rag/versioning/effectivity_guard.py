@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from datetime import date
 import re
+import unicodedata
 
 from rag.models.results import ParseResult
 from rag.versioning.amendment_guard import source_text
@@ -59,7 +60,12 @@ def unsupported_effectivity_reasons(parsed: ParseResult, *, effective_from: date
     dates. Multiple mentions of the SAME date are supported; distinct dates or
     a contradiction with caller metadata require review.
     """
-    text = re.sub(r"\s+", " ", source_text(parsed.blocks))
+    return effectivity_reasons_for_text(source_text(parsed.blocks), effective_from=effective_from)
+
+
+def effectivity_reasons_for_text(text: str, *, effective_from: date | None) -> tuple[str, ...]:
+    """Như `unsupported_effectivity_reasons` nhưng nhận text thô (dùng bởi rag.legal)."""
+    text = re.sub(r"\s+", " ", unicodedata.normalize("NFC", text).casefold())
     reasons = []
     if _RELATIVE.search(text):
         reasons.append("effectivity.relative_date: relative effective dates require a verified explicit date and resolved source conditions")

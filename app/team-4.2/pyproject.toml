@@ -19,6 +19,7 @@ dependencies = [
     "qdrant-client",
     "streamlit",
     "pandas",
+    "pyyaml",            # rag.legal: seeds.yaml
     "ragas",
 ]
 

@@ -1,0 +1,511 @@
+{
+  "all": {
+    "expected_count": 17,
+    "observed_count": 11,
+    "tp": 11,
+    "fn": 6,
+    "fp": 0,
+    "precision": 1.0,
+    "recall": 0.6470588235294118,
+    "true_positive": [
+      {
+        "fixture_id": "w02-11",
+        "issue_code": "numeric.conflict"
+      },
+      {
+        "fixture_id": "w02-13",
+        "issue_code": "numeric.invalid_locale"
+      },
+      {
+        "fixture_id": "w02-20",
+        "issue_code": "numeric.sum_mismatch"
+      },
+      {
+        "fixture_id": "w02-21",
+        "issue_code": "table.missing_period"
+      },
+      {
+        "fixture_id": "w02-21",
+        "issue_code": "table.missing_unit"
+      },
+      {
+        "fixture_id": "w02-22",
+        "issue_code": "pii.detected"
+      },
+      {
+        "fixture_id": "w02-23",
+        "issue_code": "ocr.low_confidence"
+      },
+      {
+        "fixture_id": "w02-27",
+        "issue_code": "pii.detected"
+      },
+      {
+        "fixture_id": "w02-28",
+        "issue_code": "pii.detected"
+      },
+      {
+        "fixture_id": "w02-29",
+        "issue_code": "ocr.low_confidence"
+      },
+      {
+        "fixture_id": "w02-30",
+        "issue_code": "ocr.low_confidence"
+      }
+    ],
+    "false_negative": [
+      {
+        "fixture_id": "w02-05",
+        "issue_code": "dedup.near"
+      },
+      {
+        "fixture_id": "w02-07",
+        "issue_code": "dedup.near"
+      },
+      {
+        "fixture_id": "w02-08",
+        "issue_code": "dedup.near"
+      },
+      {
+        "fixture_id": "w02-17",
+        "issue_code": "version.ambiguous"
+      },
+      {
+        "fixture_id": "w02-18",
+        "issue_code": "version.ambiguous"
+      },
+      {
+        "fixture_id": "w02-23",
+        "issue_code": "flow.structure_loss"
+      }
+    ],
+    "false_positive": []
+  },
+  "by_code": {
+    "dedup.near": {
+      "tp": 0,
+      "fn": 3,
+      "fp": 0,
+      "precision": null,
+      "recall": 0.0,
+      "in_scope": false
+    },
+    "flow.structure_loss": {
+      "tp": 0,
+      "fn": 1,
+      "fp": 0,
+      "precision": null,
+      "recall": 0.0,
+      "in_scope": false
+    },
+    "numeric.conflict": {
+      "tp": 1,
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "in_scope": true
+    },
+    "numeric.invalid_locale": {
+      "tp": 1,
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "in_scope": true
+    },
+    "numeric.sum_mismatch": {
+      "tp": 1,
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "in_scope": true
+    },
+    "ocr.low_confidence": {
+      "tp": 3,
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "in_scope": true
+    },
+    "pii.detected": {
+      "tp": 3,
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "in_scope": true
+    },
+    "table.missing_period": {
+      "tp": 1,
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "in_scope": true
+    },
+    "table.missing_unit": {
+      "tp": 1,
+      "fn": 0,
+      "fp": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "in_scope": true
+    },
+    "version.ambiguous": {
+      "tp": 0,
+      "fn": 2,
+      "fp": 0,
+      "precision": null,
+      "recall": 0.0,
+      "in_scope": false
+    }
+  },
+  "splits": {
+    "dev": {
+      "all": {
+        "expected_count": 6,
+        "observed_count": 3,
+        "tp": 3,
+        "fn": 3,
+        "fp": 0,
+        "precision": 1.0,
+        "recall": 0.5,
+        "true_positive": [
+          {
+            "fixture_id": "w02-20",
+            "issue_code": "numeric.sum_mismatch"
+          },
+          {
+            "fixture_id": "w02-22",
+            "issue_code": "pii.detected"
+          },
+          {
+            "fixture_id": "w02-23",
+            "issue_code": "ocr.low_confidence"
+          }
+        ],
+        "false_negative": [
+          {
+            "fixture_id": "w02-05",
+            "issue_code": "dedup.near"
+          },
+          {
+            "fixture_id": "w02-17",
+            "issue_code": "version.ambiguous"
+          },
+          {
+            "fixture_id": "w02-23",
+            "issue_code": "flow.structure_loss"
+          }
+        ],
+        "false_positive": []
+      },
+      "in_scope": {
+        "expected_count": 3,
+        "observed_count": 3,
+        "tp": 3,
+        "fn": 0,
+        "fp": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positive": [
+          {
+            "fixture_id": "w02-20",
+            "issue_code": "numeric.sum_mismatch"
+          },
+          {
+            "fixture_id": "w02-22",
+            "issue_code": "pii.detected"
+          },
+          {
+            "fixture_id": "w02-23",
+            "issue_code": "ocr.low_confidence"
+          }
+        ],
+        "false_negative": [],
+        "false_positive": []
+      },
+      "by_code": {
+        "dedup.near": {
+          "tp": 0,
+          "fn": 1,
+          "fp": 0,
+          "precision": null,
+          "recall": 0.0,
+          "in_scope": false
+        },
+        "flow.structure_loss": {
+          "tp": 0,
+          "fn": 1,
+          "fp": 0,
+          "precision": null,
+          "recall": 0.0,
+          "in_scope": false
+        },
+        "numeric.sum_mismatch": {
+          "tp": 1,
+          "fn": 0,
+          "fp": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "in_scope": true
+        },
+        "ocr.low_confidence": {
+          "tp": 1,
+          "fn": 0,
+          "fp": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "in_scope": true
+        },
+        "pii.detected": {
+          "tp": 1,
+          "fn": 0,
+          "fp": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "in_scope": true
+        },
+        "version.ambiguous": {
+          "tp": 0,
+          "fn": 1,
+          "fp": 0,
+          "precision": null,
+          "recall": 0.0,
+          "in_scope": false
+        }
+      }
+    },
+    "test": {
+      "all": {
+        "expected_count": 11,
+        "observed_count": 8,
+        "tp": 8,
+        "fn": 3,
+        "fp": 0,
+        "precision": 1.0,
+        "recall": 0.7272727272727273,
+        "true_positive": [
+          {
+            "fixture_id": "w02-11",
+            "issue_code": "numeric.conflict"
+          },
+          {
+            "fixture_id": "w02-13",
+            "issue_code": "numeric.invalid_locale"
+          },
+          {
+            "fixture_id": "w02-21",
+            "issue_code": "table.missing_period"
+          },
+          {
+            "fixture_id": "w02-21",
+            "issue_code": "table.missing_unit"
+          },
+          {
+            "fixture_id": "w02-27",
+            "issue_code": "pii.detected"
+          },
+          {
+            "fixture_id": "w02-28",
+            "issue_code": "pii.detected"
+          },
+          {
+            "fixture_id": "w02-29",
+            "issue_code": "ocr.low_confidence"
+          },
+          {
+            "fixture_id": "w02-30",
+            "issue_code": "ocr.low_confidence"
+          }
+        ],
+        "false_negative": [
+          {
+            "fixture_id": "w02-07",
+            "issue_code": "dedup.near"
+          },
+          {
+            "fixture_id": "w02-08",
+            "issue_code": "dedup.near"
+          },
+          {
+            "fixture_id": "w02-18",
+            "issue_code": "version.ambiguous"
+          }
+        ],
+        "false_positive": []
+      },
+      "in_scope": {
+        "expected_count": 8,
+        "observed_count": 8,
+        "tp": 8,
+        "fn": 0,
+        "fp": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "true_positive": [
+          {
+            "fixture_id": "w02-11",
+            "issue_code": "numeric.conflict"
+          },
+          {
+            "fixture_id": "w02-13",
+            "issue_code": "numeric.invalid_locale"
+          },
+          {
+            "fixture_id": "w02-21",
+            "issue_code": "table.missing_period"
+          },
+          {
+            "fixture_id": "w02-21",
+            "issue_code": "table.missing_unit"
+          },
+          {
+            "fixture_id": "w02-27",
+            "issue_code": "pii.detected"
+          },
+          {
+            "fixture_id": "w02-28",
+            "issue_code": "pii.detected"
+          },
+          {
+            "fixture_id": "w02-29",
+            "issue_code": "ocr.low_confidence"
+          },
+          {
+            "fixture_id": "w02-30",
+            "issue_code": "ocr.low_confidence"
+          }
+        ],
+        "false_negative": [],
+        "false_positive": []
+      },
+      "by_code": {
+        "dedup.near": {
+          "tp": 0,
+          "fn": 2,
+          "fp": 0,
+          "precision": null,
+          "recall": 0.0,
+          "in_scope": false
+        },
+        "numeric.conflict": {
+          "tp": 1,
+          "fn": 0,
+          "fp": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "in_scope": true
+        },
+        "numeric.invalid_locale": {
+          "tp": 1,
+          "fn": 0,
+          "fp": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "in_scope": true
+        },
+        "ocr.low_confidence": {
+          "tp": 2,
+          "fn": 0,
+          "fp": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "in_scope": true
+        },
+        "pii.detected": {
+          "tp": 2,
+          "fn": 0,
+          "fp": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "in_scope": true
+        },
+        "table.missing_period": {
+          "tp": 1,
+          "fn": 0,
+          "fp": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "in_scope": true
+        },
+        "table.missing_unit": {
+          "tp": 1,
+          "fn": 0,
+          "fp": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "in_scope": true
+        },
+        "version.ambiguous": {
+          "tp": 0,
+          "fn": 1,
+          "fp": 0,
+          "precision": null,
+          "recall": 0.0,
+          "in_scope": false
+        }
+      }
+    }
+  },
+  "in_scope": {
+    "expected_count": 11,
+    "observed_count": 11,
+    "tp": 11,
+    "fn": 0,
+    "fp": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "true_positive": [
+      {
+        "fixture_id": "w02-11",
+        "issue_code": "numeric.conflict"
+      },
+      {
+        "fixture_id": "w02-13",
+        "issue_code": "numeric.invalid_locale"
+      },
+      {
+        "fixture_id": "w02-20",
+        "issue_code": "numeric.sum_mismatch"
+      },
+      {
+        "fixture_id": "w02-21",
+        "issue_code": "table.missing_period"
+      },
+      {
+        "fixture_id": "w02-21",
+        "issue_code": "table.missing_unit"
+      },
+      {
+        "fixture_id": "w02-22",
+        "issue_code": "pii.detected"
+      },
+      {
+        "fixture_id": "w02-23",
+        "issue_code": "ocr.low_confidence"
+      },
+      {
+        "fixture_id": "w02-27",
+        "issue_code": "pii.detected"
+      },
+      {
+        "fixture_id": "w02-28",
+        "issue_code": "pii.detected"
+      },
+      {
+        "fixture_id": "w02-29",
+        "issue_code": "ocr.low_confidence"
+      },
+      {
+        "fixture_id": "w02-30",
+        "issue_code": "ocr.low_confidence"
+      }
+    ],
+    "false_negative": [],
+    "false_positive": []
+  }
+}

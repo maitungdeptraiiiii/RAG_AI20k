@@ -33,3 +33,5 @@ data/indexes/
 data/team-*/raw/
 data/team-*/processed/
 data/team-*/indexes/
+data/team-*/ocr_bench/
+data/team-*/ingest_reports/

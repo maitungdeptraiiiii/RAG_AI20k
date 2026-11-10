@@ -38,6 +38,7 @@
   const who = () => (byName() ? byName().value.trim() : store.get('legal_by'));
   const fieldVal = (d, n) => (d.fields[n] || {}).value;
   const fmtDate = (s) => { if (!s) return '—'; const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s); return m ? `${m[3]}/${m[2]}/${m[1]}` : s; };
+  const fd = (s) => esc(fmtDate(s));      // dùng khi chèn vào HTML
 
   async function api(method, path, body, form) {
     const opt = { method };
@@ -139,6 +140,7 @@
     if (!prev || prev.state !== d.state) { L.dirty = false; L.openOp = null; }
     document.querySelectorAll('#legal-history .legal-item').forEach((b) => b.classList.toggle('active', b.dataset.id === d.upload_id));
     render();
+    if (!prev && window.innerWidth < 1024) $('legal-detail').scrollIntoView({ block: 'start' });   // điện thoại: đưa bước lên đầu
   }
 
   function renderSteps() {
@@ -357,9 +359,9 @@
   function effectivityBlock(eff) {
     const ex = eff.exceptions || [], cu = eff.conditional_units || [], flags = eff.flags_vi || [];
     return `<div class="card p-4 space-y-3"><h3 class="text-[14px] font-semibold">Hiệu lực</h3>
-      <div class="text-[13px]"><span class="text-neutral-500">Ngày hiệu lực chung:</span> <b>${eff.default_from ? fmtDate(eff.default_from) : 'chưa đọc được'}</b>
+      <div class="text-[13px]"><span class="text-neutral-500">Ngày hiệu lực chung:</span> <b>${eff.default_from ? fd(eff.default_from) : 'chưa đọc được'}</b>
         ${eff.evidence ? `<div class="legal-text mt-1 border-l-2 border-neutral-300 pl-2 text-neutral-600">“${esc(eff.evidence)}”</div>` : ''}</div>
-      ${ex.length ? `<div><div class="text-[12px] text-neutral-500 mb-1">Ngoại lệ theo đơn vị</div><ul class="space-y-1.5 text-[13px]">${ex.map((e) => `<li><b>${esc(e.units.join(', '))}</b> hiệu lực từ <b>${fmtDate(e.date)}</b>${e.evidence ? `<div class="legal-text border-l-2 border-neutral-300 pl-2 text-neutral-600">“${esc(e.evidence)}”</div>` : ''}</li>`).join('')}</ul></div>` : ''}
+      ${ex.length ? `<div><div class="text-[12px] text-neutral-500 mb-1">Ngoại lệ theo đơn vị</div><ul class="space-y-1.5 text-[13px]">${ex.map((e) => `<li><b>${esc(e.units.join(', '))}</b> hiệu lực từ <b>${fd(e.date)}</b>${e.evidence ? `<div class="legal-text border-l-2 border-neutral-300 pl-2 text-neutral-600">“${esc(e.evidence)}”</div>` : ''}</li>`).join('')}</ul></div>` : ''}
       ${cu.length ? `<div><div class="text-[12px] text-neutral-500 mb-1">Hiệu lực theo sự kiện (không theo ngày)</div><ul class="space-y-1.5 text-[13px]">${cu.map((c) => `<li><b>${esc(c.unit)}</b>${c.evidence ? `<div class="legal-text border-l-2 border-neutral-300 pl-2 text-neutral-600">“${esc(c.evidence)}”</div>` : ''}</li>`).join('')}</ul></div>` : ''}
       ${flags.map((f) => banner('warning', esc(f))).join('')}
     </div>`;
@@ -371,7 +373,7 @@
       ${t.length ? `<div><div class="text-[12px] text-neutral-500 mb-1">${pv.kind === 'consolidated' ? 'Luật được hợp nhất' : 'Luật bị sửa'}</div><ul class="space-y-1.5">
         ${t.map((x) => `<li>${x.in_store ? `<div class="text-[13px] flex items-start gap-1.5">${ICON.good}<span class="break-words"><b>${esc(x.name || '')} ${esc(x.number || '')}</b> — có trong kho (${esc(x.document_key)})</span></div>` : banner('warning', esc(x.warning || 'Kho chưa có luật này.'))}</li>`).join('')}</ul></div>`
         : (pv.kind === 'base' ? '<div class="text-[13px] text-neutral-600">Không sửa luật nào khác.</div>' : '')}
-      ${rp.length ? `<div><div class="text-[12px] text-neutral-500 mb-1">Làm hết hiệu lực</div><ul class="space-y-1.5 text-[13px]">${rp.map((r) => `<li><b>${esc(r.name || '')} ${esc(r.number || '')}</b>${r.units && r.units.length ? ' — ' + esc(r.units.join(', ')) : ''} ${r.effective_from ? 'từ ' + fmtDate(r.effective_from) : ''} ${r.in_store ? '' : '<span class="text-neutral-500">(chưa có trong kho)</span>'}${r.evidence ? `<div class="legal-text border-l-2 border-neutral-300 pl-2 text-neutral-600">“${esc(r.evidence)}”</div>` : ''}</li>`).join('')}</ul></div>` : ''}
+      ${rp.length ? `<div><div class="text-[12px] text-neutral-500 mb-1">Làm hết hiệu lực</div><ul class="space-y-1.5 text-[13px]">${rp.map((r) => `<li><b>${esc(r.name || '')} ${esc(r.number || '')}</b>${r.units && r.units.length ? ' — ' + esc(r.units.join(', ')) : ''} ${r.effective_from ? 'từ ' + fd(r.effective_from) : ''} ${r.in_store ? '' : '<span class="text-neutral-500">(chưa có trong kho)</span>'}${r.evidence ? `<div class="legal-text border-l-2 border-neutral-300 pl-2 text-neutral-600">“${esc(r.evidence)}”</div>` : ''}</li>`).join('')}</ul></div>` : ''}
       ${pv.waiting_for_this ? banner('good', `Có <b>${pv.waiting_for_this}</b> chỉ dẫn từ các văn bản đã có trong kho đang chờ luật này; sẽ được áp dụng khi luật vào kho.`) : ''}
       ${pv.replace_note ? banner('info', esc(pv.replace_note)) : ''}
     </div>`;
@@ -389,7 +391,7 @@
         const [lab, tone] = REVIEW_VI[o.review_status] || [o.review_status, 'warning'];
         return `<tr class="op-row border-t border-neutral-100 hover:bg-neutral-50 cursor-pointer align-top" data-i="${i}" tabindex="0">
           <td class="px-4 py-2.5 whitespace-nowrap">${esc(o.source_locator)}</td><td class="px-3 py-2.5 min-w-[200px]">${esc(o.description)}</td>
-          <td class="px-3 py-2.5 whitespace-nowrap tabular">${o.effective_from ? fmtDate(o.effective_from) : '<span style="color:var(--warning-text)">chưa rõ</span>'}</td>
+          <td class="px-3 py-2.5 whitespace-nowrap tabular">${o.effective_from ? fd(o.effective_from) : '<span style="color:var(--warning-text)">chưa rõ</span>'}</td>
           <td class="px-3 py-2.5 whitespace-nowrap"><span class="inline-flex items-center gap-1.5" style="color:var(--${tone}-text)">${ICON[tone] || ''}${esc(lab)}</span></td>
           <td class="px-3 py-2.5 text-neutral-600">${(o.reasons_vi || []).map(esc).join('; ') || '<span class="text-neutral-400">—</span>'}</td></tr>
           <tr class="${L.openOp === i ? '' : 'hidden'}" data-for="${i}"><td colspan="5" class="px-4 pb-3"><div class="legal-text bg-neutral-50 border border-neutral-200 rounded-lg p-3 max-h-[260px] overflow-y-auto">${esc(o.excerpt || '')}</div></td></tr>`;
@@ -459,7 +461,8 @@
   function stopPoll() { if (L.timer) { clearTimeout(L.timer); L.timer = null; } L.jobId = null; }
 
   function stageIndex(job) {
-    const i = JOB_STAGES.findIndex(([k]) => k === job.state);
+    const state = job.state === 'publishing' ? 'validating' : job.state;      // "Kiểm tra & công bố" là một giai đoạn
+    const i = JOB_STAGES.findIndex(([k]) => k === state);
     return i < 0 ? 0 : i;
   }
   function stagesHtml(job) {
@@ -556,8 +559,8 @@
         const terminal = job && ['done', 'failed', 'index_failed'].includes(job.state);
         if (!job || terminal) {            // việc đã kết thúc (hoặc server khởi động lại): đọc lại bản nháp
           const nd = await api('GET', `/api/legal/uploads/${uid}`);
-          if (nd.state === 'queued' || nd.state === 'building') {
-            if (!job) { L.cur = nd; render(); L.timer = setTimeout(tick, 1500); return; }
+          if (!job && (nd.state === 'queued' || nd.state === 'building')) {
+            L.cur = nd; renderStep3(); return;      // renderStep3 -> startPoll: luôn đúng một timer
           }
           showDraft(nd); loadHistory(); loadPending();
           if (kind === 'reindex') flash(job && job.state === 'done' ? 'Đã dựng lại chỉ mục, chat đã chuyển sang dữ liệu mới.' : esc((job && job.error) || 'Dựng lại chỉ mục lỗi.'), job && job.state === 'done' ? 'good' : 'critical');

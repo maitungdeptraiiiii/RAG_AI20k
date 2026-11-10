@@ -87,3 +87,18 @@ def test_extracted_view_falls_back_to_chunks_for_old_documents(client):
     r = client.get("/extracted/old")
     assert r.status_code == 200 and "Điều 9. Đoạn cũ" in r.text and "dựng lại từ" in r.text
     assert client.get("/extracted/khong-co").status_code == 404
+
+
+def test_upload_page_has_legal_mode(client):
+    r = client.get("/upload")
+    assert r.status_code == 200
+    assert 'id="mode-legal"' in r.text and 'id="legal-steps"' in r.text and 'id="mode-normal"' in r.text
+    js = client.get("/upload_legal.js")
+    assert js.status_code == 200 and "javascript" in js.headers["content-type"]
+    assert "/api/legal/uploads" in js.text and "/api/legal/jobs/" in js.text
+
+
+def test_review_page_polls_jobs(client):
+    r = client.get("/review")
+    assert r.status_code == 200
+    assert "/api/legal/jobs/" in r.text and "Đang áp dụng quyết định…" in r.text and "document" in r.text

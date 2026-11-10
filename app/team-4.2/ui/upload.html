@@ -46,6 +46,36 @@
                    background: var(--warning-track, #fef3c7); color: var(--warning-text, #92400e); }
     .dl-link { font-size: 12px; border: 1px solid var(--hairline); border-radius: 6px; padding: 2px 8px; color: var(--ink-2); }
     .dl-link:hover { background: #f5f5f5; }
+    .mode-sw { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: #ececee; border-radius: 12px; }
+    .mode-sw button { border-radius: 9px; padding: 7px 8px; font-size: 13px; font-weight: 500; color: var(--ink-2); }
+    .mode-sw button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+    /* thanh bước pháp luật */
+    .step-btn { display: flex; align-items: center; gap: 8px; min-width: 0; text-align: left; border: 1px solid var(--hairline); border-radius: 12px;
+                padding: 8px 12px; background: var(--surface); font-size: 13px; font-weight: 500; }
+    .step-btn[aria-current="step"] { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+    .step-btn:disabled { color: var(--ink-3); background: #f3f3f4; cursor: not-allowed; }
+    .step-btn .num { flex-shrink: 0; width: 22px; height: 22px; border-radius: 999px; background: var(--ink); color: #fff; font-size: 12px; display: grid; place-items: center; }
+    .step-btn:disabled .num { background: var(--neutral-fill); }
+    .src-chip { font-size: 10.5px; font-weight: 500; border-radius: 999px; padding: 1px 8px; border: 1px solid var(--hairline); color: var(--ink-2); background: #f5f5f6; cursor: help; white-space: nowrap; }
+    .src-chip.vbpl { background: #e6f0ff; color: #1d4ed8; border-color: #c7dcff; }
+    .src-chip.text { background: var(--good-track); color: var(--good-text); border-color: #bfe5bf; }
+    .src-chip.user { background: #f1e8ff; color: #6d28d9; border-color: #dcc9fb; }
+    .src-chip.inherited { background: var(--warning-track); color: var(--warning-text); border-color: #f3d98f; }
+    .lf-input { width: 100%; border: 1px solid #d4d4d8; border-radius: 8px; padding: 7px 10px; font-size: 13px; outline: none; background: #fff; }
+    .lf-input:focus { border-color: #737373; }
+    .lf-input.warn { border-color: var(--warning); background: #fffbeb; }
+    .w-delete { background: var(--critical-track); color: var(--critical-text); text-decoration: line-through; border-radius: 3px; }
+    .w-insert { background: var(--good-track); color: var(--good-text); border-radius: 3px; }
+    .legal-text { white-space: pre-wrap; word-break: break-word; font-size: 12.5px; line-height: 1.55; }
+    .btn-primary { background: var(--ink); color: #fff; border-radius: 8px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
+    .btn-primary:disabled { background: #a3a3a3; cursor: not-allowed; }
+    .btn-ghost { border: 1px solid #d4d4d8; background: #fff; border-radius: 8px; padding: 7px 14px; font-size: 13px; }
+    .btn-ghost:hover { background: #f5f5f5; }
+    .banner { border-radius: 12px; padding: 10px 14px; font-size: 13px; display: flex; gap: 8px; align-items: flex-start; }
+    .banner.warning { background: var(--warning-track); color: var(--warning-text); border: 1px solid #f3d98f; }
+    .banner.critical { background: var(--critical-track); color: var(--critical-text); border: 1px solid #efb7b7; }
+    .banner.good { background: var(--good-track); color: var(--good-text); border: 1px solid #bfe5bf; }
+    .banner.info { background: #f1f5f9; color: #334155; border: 1px solid #dbe3ec; }
   </style>
 </head>
 <body class="min-h-screen">
@@ -66,6 +96,41 @@
   <main class="max-w-[1320px] mx-auto px-4 sm:px-6 py-5 grid grid-cols-1 lg:grid-cols-[340px_minmax(0,1fr)] gap-5">
     <!-- ============ LEFT: upload + history ============ -->
     <aside class="space-y-5 min-w-0">
+      <div class="mode-sw" role="group" aria-label="Loại tài liệu">
+        <button id="mode-normal" type="button" aria-pressed="true">Tài liệu thường</button>
+        <button id="mode-legal" type="button" aria-pressed="false">Văn bản pháp luật</button>
+      </div>
+
+      <div id="legal-left" class="hidden space-y-5">
+        <section class="card p-4 space-y-3">
+          <h2 class="text-[14px] font-semibold">Tải lên văn bản pháp luật</h2>
+          <label id="legal-dropzone" for="legal-file" class="dropzone block border-2 border-dashed border-neutral-300 rounded-xl p-5 text-center cursor-pointer transition-colors">
+            <svg class="w-7 h-7 mx-auto text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+            <div class="mt-2 text-[13px] text-neutral-700 font-medium">Kéo thả file vào đây hoặc bấm để chọn</div>
+            <div class="mt-1 text-[11.5px] text-neutral-500">PDF · DOCX · TXT · ảnh scan — tải từ vbpl</div>
+            <input id="legal-file" type="file" class="hidden" accept=".pdf,.docx,.txt,.md,.png,.jpg,.jpeg,.tif,.tiff,.webp">
+          </label>
+          <div id="legal-picked" class="text-[12.5px] text-neutral-700"></div>
+          <input id="legal-url" type="url" placeholder="Hoặc dán link vbpl: https://vbpl.vn/van-ban/chi-tiet/…" class="lf-input">
+          <button id="legal-upload" class="w-full btn-primary">Tải lên</button>
+          <p class="text-[11.5px] text-neutral-500 leading-snug">Kho luật chỉ nhận Luật / Bộ luật / Nghị quyết / VBHN của VPQH. Văn bản chỉ vào kho sau khi bạn xác nhận đủ 3 bước.</p>
+          <div id="legal-status" class="text-[12.5px] hidden" role="status" aria-live="polite"></div>
+        </section>
+        <section class="card p-2">
+          <div class="flex items-center justify-between px-2 pt-2 pb-1">
+            <h2 class="text-[14px] font-semibold">Bản nháp &amp; lịch sử</h2>
+            <span id="legal-count" class="text-[12px] text-neutral-500"></span>
+          </div>
+          <ul id="legal-history" class="max-h-[40vh] overflow-y-auto"></ul>
+        </section>
+        <section class="card p-4">
+          <h2 class="text-[14px] font-semibold">Chỉ dẫn đang chờ luật gốc</h2>
+          <p class="text-[11.5px] text-neutral-500 mt-0.5">Sẽ tự áp dụng khi luật gốc vào kho.</p>
+          <ul id="legal-pending" class="mt-2 space-y-1.5 text-[12.5px]"></ul>
+        </section>
+      </div>
+
+      <div id="normal-left" class="space-y-5">
       <section class="card p-4 space-y-3">
         <h2 class="text-[14px] font-semibold">Tải lên</h2>
         <label id="dropzone" for="file-input" class="dropzone block border-2 border-dashed border-neutral-300 rounded-xl p-5 text-center cursor-pointer transition-colors">
@@ -88,6 +153,7 @@
         </div>
         <ul id="history" class="max-h-[52vh] overflow-y-auto"></ul>
       </section>
+      </div>
     </aside>
 
     <!-- ============ RIGHT: detail ============ -->
@@ -97,6 +163,18 @@
         <div class="mt-1 text-[13px]">Nạp một tài liệu hoặc chọn trong lịch sử để xem báo cáo từng trang sau OCR.</div>
       </div>
       <div id="detail-body" class="hidden space-y-5"></div>
+    </section>
+    <section id="legal-detail" class="hidden min-w-0 space-y-4">
+      <nav id="legal-steps" aria-label="Các bước" class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <button class="step-btn" data-step="1" type="button"><span class="num">1</span><span class="min-w-0">Text đúng chưa?</span></button>
+        <button class="step-btn" data-step="2" type="button" disabled><span class="num">2</span><span class="min-w-0">Hệ thống hiểu đúng chưa?</span></button>
+        <button class="step-btn" data-step="3" type="button" disabled><span class="num">3</span><span class="min-w-0">Đưa vào kho</span></button>
+      </nav>
+      <div id="legal-empty" class="card p-10 text-center text-neutral-500">
+        <div class="text-[15px] font-medium text-neutral-700">Chưa chọn bản nháp</div>
+        <div class="mt-1 text-[13px]">Tải một văn bản pháp luật lên hoặc chọn bản nháp trong lịch sử. Mỗi bước chỉ mở sau khi bạn xác nhận bước trước.</div>
+      </div>
+      <div id="legal-body" class="hidden space-y-4"></div>
     </section>
   </main>
 
@@ -533,6 +611,26 @@
       }
     }
 
+    // ---------------------------------------------------------------- chế độ: tài liệu thường | văn bản pháp luật
+    const modeStore = {
+      get() { try { return localStorage.getItem('upload_mode') || 'normal'; } catch (e) { return 'normal'; } },
+      set(v) { try { localStorage.setItem('upload_mode', v); } catch (e) {} },
+    };
+    let legalLoaded = false;
+    function setMode(mode) {
+      const legal = mode === 'legal';
+      $('mode-normal').setAttribute('aria-pressed', String(!legal));
+      $('mode-legal').setAttribute('aria-pressed', String(legal));
+      $('normal-left').classList.toggle('hidden', legal);
+      $('legal-left').classList.toggle('hidden', !legal);
+      $('detail').classList.toggle('hidden', legal);
+      $('legal-detail').classList.toggle('hidden', !legal);
+      modeStore.set(mode);
+      if (legal && !legalLoaded && window.legalInit) { legalLoaded = true; window.legalInit(); }
+    }
+    $('mode-normal').onclick = () => setMode('normal');
+    $('mode-legal').onclick = () => setMode('legal');
+
     // ---------------------------------------------------------------- boot
     (async () => {
       try {
@@ -544,6 +642,8 @@
       const hash = decodeURIComponent(location.hash.slice(1));
       if (hash) openReport(hash);
     })();
+    window.addEventListener('load', () => setMode(modeStore.get()));
   </script>
+  <script src="/upload_legal.js"></script>
 </body>
 </html>

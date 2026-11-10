@@ -95,13 +95,18 @@
     const addr = a => !a ? '—' : `Điều ${a.article}${a.clause ? ' khoản ' + a.clause : ''}${a.point ? ' điểm ' + a.point : ''}${a.part === 'title' ? ' (tên điều)' : a.part === 'lead_in' ? ' (đoạn mở đầu)' : ''}`;
 
     let status = 'open', items = [], activeId = null;
+    const docParam = new URLSearchParams(location.search).get('document') || '';
+    let docApplied = false;
 
     async function loadList() {
       const res = await fetch('/api/legal/reviews?status=' + status);
       items = (await res.json()).items || [];
       const laws = [...new Set(items.map(i => i.document_key))].sort();
+      if (docParam && !laws.includes(docParam)) laws.push(docParam);
       const reasons = [...new Set(items.flatMap(i => (i.reasons || []).map(reasonKey)))].sort();
-      const keepLaw = $('filter-law').value, keepReason = $('filter-reason').value;
+      const keepLaw = !docApplied && docParam ? docParam : $('filter-law').value;
+      docApplied = true;
+      const keepReason = $('filter-reason').value;
       $('filter-law').innerHTML = '<option value="">Mọi luật</option>' + laws.map(l => `<option ${l === keepLaw ? 'selected' : ''}>${esc(l)}</option>`).join('');
       $('filter-reason').innerHTML = '<option value="">Mọi lý do</option>' + reasons.map(r => `<option value="${esc(r)}" ${r === keepReason ? 'selected' : ''}>${esc(REASON_TEXT[r] || r)}</option>`).join('');
       $('summary').textContent = `${items.length} mục ${status === 'open' ? 'đang mở' : status === 'resolved' ? 'đã xử lý' : ''}`;
@@ -220,10 +225,10 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || res.status);
         // quyết định vào hàng đợi ghi: staging -> kiểm tra -> công bố -> dựng chỉ mục
-        result.textContent = 'Đang áp dụng quyết định...';
+        result.textContent = 'Đang áp dụng quyết định…';
         let job = { state: 'queued' };
         while (!['done', 'failed', 'index_failed'].includes(job.state)) {
-          await new Promise(r => setTimeout(r, 1000));
+          await new Promise(r => setTimeout(r, 1500));
           job = await (await fetch('/api/legal/jobs/' + encodeURIComponent(data.job_id))).json();
           if (job.error && !job.state) throw new Error(job.error);
         }

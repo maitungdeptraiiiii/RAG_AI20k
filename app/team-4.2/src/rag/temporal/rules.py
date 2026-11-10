@@ -29,6 +29,10 @@ _POINT = rf"(?:{_D_LONG}|{_D}|{_M}|{_Y})"
 _RANGE = re.compile(rf"từ\s+(?:ngày\s+)?(?P<a>{_POINT})\s+(?:đến|tới)\s+(?:ngày\s+)?(?P<b>{_POINT})", re.IGNORECASE)
 _LAW_NAME_BEFORE = re.compile(r"(?:Bộ\s+luật|Luật|Nghị\s+quyết|Nghị\s+định|Thông\s+tư)\s+[A-ZĐÀ-Ỹ][^\s,.;]*"
                               r"(?:\s+[^\s,.;]+){0,6}\s+$")
+# cụm mơ hồ không quy được thành khoảng: "mấy năm trước", "2 tháng trước", "tuần trước", "vài hôm trước"...
+_QUANT = r"(?:mấy|vài|một vài|dăm|\d+|hai|ba|bốn|năm|sáu|bảy|tám|chín|mười)"
+_VAGUE = re.compile(rf"(?<!\w)(?:{_QUANT}\s+(?:năm|tháng|tuần|ngày|hôm)|(?:{_QUANT}\s+)?(?:tuần|ngày|hôm))\s+trước(?!\w)",
+                    re.IGNORECASE)
 _BEFORE, _AFTER = 40, 25
 _NOT_AFTER = {"kiện": "điều "}                      # "điều kiện" không phải "kiện" (khởi kiện)
 
@@ -133,6 +137,10 @@ def extract_rule_anchors(question: str, *, asked_at: datetime) -> list[TimeAncho
             parsed = _parse_point(m.group(0))
             if parsed:
                 found.append((m.start(), m.end(), parsed[0], parsed[1], parsed[2], None))
+    for m in _VAGUE.finditer(text):
+        if free(m.start(), m.end()):
+            taken.append((m.start(), m.end()))
+            found.append((m.start(), m.end(), None, None, "relative_unresolved", m.group(0)))
     low = text.casefold()
     for phrase in _RELATIVE:
         for m in re.finditer(rf"(?<!\w){re.escape(phrase)}(?!\w)", low):

@@ -93,3 +93,11 @@ def test_unresolved_relative_warns():
                                     "evidence": "hôm kia nữa", "confidence": 0.5}]}, ensure_ascii=False)
     t = build_timeline("Tôi phát hiện từ hôm kia nữa, năm 2023 ký hợp đồng.", asked_at=ASKED, llm=FakeLLM(reply))
     assert any(w.startswith("timeline.relative_unresolved") for w in t.warnings)
+
+
+def test_only_unresolved_anchors_still_default_today():
+    # review I2: chỉ có mốc không quy được -> vẫn thêm mốc đánh giá = hôm nay để có luật hiện hành
+    t = build_timeline("Tuần trước tôi ký hợp đồng đặt cọc, giờ có đòi lại cọc được không?", asked_at=ASKED)
+    assert t.primary.start == date(2026, 11, 9) and t.primary.role == "evaluation"
+    assert "timeline.default_today" in t.warnings
+    assert any(w.startswith("timeline.relative_unresolved") for w in t.warnings)

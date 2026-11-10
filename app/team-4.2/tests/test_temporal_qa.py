@@ -1,3 +1,4 @@
+import re
 import json
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -118,3 +119,24 @@ def test_provenance_points_to_amending_law(corpus, tmp_path):
                                                      "trường hợp quy định tại khoản 2 Điều này?")
     d197 = [i for i in r.items if i.article_id == "luat:27/2023/QH15#d197"]
     assert d197 and "luat:43/2024/QH15" in d197[0].provenance
+
+
+def test_placeholders_unmasked_in_all_user_fields(corpus, tmp_path):
+    # review M1: issues / follow-up / missing_information không được lộ token che PII ra giao diện
+    from rag.quality.pii import QUERY_PREFIX, MaskState
+    state = MaskState(prefix=QUERY_PREFIX)
+    ans = {"answer_markdown": "Theo [1].", "issues": [{"issue": "{P}", "citations": [1], "certainty": "qualified"}],
+           "follow_up_questions": ["{P} đã nhận nhà chưa?"],
+           "transition_assessments": [{"rule_id": "r", "assessment": "undetermined", "missing_information": ["{P}"]}]}
+
+    class EchoLLM(FakeLLM):
+        def complete(self, system, user):
+            if system == TIMELINE_PROMPT:
+                return '{"events": []}'
+            token = re.search(r"\[[A-Z_]+_\d+\]", user).group(0)
+            return json.dumps(ans, ensure_ascii=False).replace("{P}", token)
+
+    r = make_qa(corpus, EchoLLM(FIRM), tmp_path).ask("Tôi số 0912345678, ký hợp đồng mua nhà ngày 15/06/2023 thì điều "
+                                                     "kiện chủ đầu tư là gì?", mask_state=state)
+    blob = json.dumps([r.answer.issues, r.answer.follow_up_questions, r.answer.transition_assessments], ensure_ascii=False)
+    assert "0912345678" in blob and not re.search(r"\[[A-Z_]+_\d+\]", blob)

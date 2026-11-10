@@ -136,10 +136,11 @@ def build_timeline(question: str, *, asked_at: datetime, calendar_date: date | N
             if a.start is not None and not (a.start <= calendar_date <= (a.end or a.start)):
                 warnings.append(f"timeline.calendar_conflict:{a.role}")
         anchors = [primary, *anchors]
-    elif not anchors:
+    elif not any(a.start is not None for a in anchors):
+        # không có mốc nào quy được ra ngày (kể cả chỉ có cụm mơ hồ) -> đánh giá theo luật hiện hành, có cảnh báo
         today = local_today(asked_at)
         primary = TimeAnchor("evaluation", today, today, "day", "default", None, None, 1.0)
-        anchors = [primary]
+        anchors = [*anchors, primary]
         warnings.append("timeline.default_today")
     else:
         dated = [a for a in anchors if a.start is not None]

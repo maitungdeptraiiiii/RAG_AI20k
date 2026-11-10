@@ -81,3 +81,10 @@ def test_firm_kept_when_all_verified_and_no_rules():
     a = enforce(parse_answer(reply([{"issue": "x", "citations": [1], "certainty": "firm"}])), [item(1)], [], TL,
                 year_change=False)
     assert a.certainty == "firm" and a.downgrade_reasons == []
+
+
+def test_numeric_string_citations_are_kept():
+    # review M4: "citations": ["1"] là trích dẫn hợp lệ
+    a = enforce(parse_answer(reply([{"issue": "x", "citations": ["1"], "certainty": "firm"}])),
+                [item(1)], [], TL, year_change=False)
+    assert a.issues[0]["citations"] == [1] and a.certainty == "firm"

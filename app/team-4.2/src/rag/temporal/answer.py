@@ -119,6 +119,17 @@ def _unverified(item: ContextItem) -> bool:
             or item.provision_status not in (None, "verified"))
 
 
+def _cite_num(value) -> int | None:
+    """Số trích dẫn: nhận int hoặc chuỗi số ("1", "[1]"); bỏ bool và giá trị khác."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str) and value.strip().strip("[]").isdigit():
+        return int(value.strip().strip("[]"))
+    return None
+
+
 def enforce(answer: TemporalAnswer, items: Sequence[ContextItem], rules: Sequence[TransitionRule],
             timeline: LegalTimeline, *, year_change: bool) -> TemporalAnswer:
     by_n = {it.n: it for it in items}
@@ -142,7 +153,7 @@ def enforce(answer: TemporalAnswer, items: Sequence[ContextItem], rules: Sequenc
     issues = []
     for issue in answer.issues:
         issue = dict(issue)
-        cites = [n for n in issue.get("citations") or [] if isinstance(n, int) and n in by_n]
+        cites = [c for c in (_cite_num(x) for x in issue.get("citations") or []) if c in by_n]
         issue["citations"] = cites
         certainty = issue.get("certainty", "qualified")
         if not cites:

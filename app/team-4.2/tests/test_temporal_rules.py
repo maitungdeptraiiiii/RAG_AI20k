@@ -56,3 +56,11 @@ def test_dieu_kien_is_not_dispute():
     assert a.role != "dispute"
     (b,) = extract_rule_anchors("Năm 2025 tôi khởi kiện chủ đầu tư.", asked_at=ASKED)
     assert b.role == "dispute"
+
+
+def test_vague_quantified_relative_is_unresolved():
+    # review I1: "mấy năm trước" không phải "năm trước" (năm ngoái)
+    for q in ("Mấy năm trước tôi mua nhà thì sao?", "Vài năm trước tôi ký hợp đồng", "2 năm trước tôi đặt cọc",
+              "Mấy tháng trước tôi ký hợp đồng"):
+        anchors = extract_rule_anchors(q, asked_at=ASKED)
+        assert anchors and all(a.start is None and a.precision == "relative_unresolved" for a in anchors), q

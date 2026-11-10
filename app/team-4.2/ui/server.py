@@ -226,13 +226,16 @@ def _sync_ask(query: str, pipeline: RAGPipeline, mask_state: MaskState) -> dict[
 # --- hỏi đáp theo mốc thời gian (phần 2) -----------------------------------------------------
 
 _temporal_qa = None
+_temporal_lock = threading.Lock()
+_temporal_failed_at: float | None = None
+_temporal_checked_at = 0.0
+_TEMPORAL_RETRY_S = 300.0          # khởi tạo lỗi: chờ bấy lâu mới thử lại (trong lúc đó chat chạy pipeline cũ)
+_TEMPORAL_STALE_EVERY_S = 30.0     # kiểm tra bản dựng mới của kho luật tối đa 1 lần / 30 giây
 
 
-def get_temporal_qa():
+def _build_temporal_qa():
     """TemporalQA dùng kho có phiên bản (DATA_DIR/legal) + kho cũ (pipeline hiện tại) để tham khảo.
-    Chỉ mục kho mới dựng lại khi có bản dựng mới. Dense cho kho mới chỉ bật khi LEGAL_DENSE=1 (tránh embed hàng
-    chục nghìn chunk lần đầu)."""
-    global _temporal_qa
+    Dense cho kho mới chỉ bật khi LEGAL_DENSE=1 (tránh embed hàng chục nghìn chunk lần đầu)."""
     import os
 
     from rag.temporal.index import VersionedIndex
@@ -240,29 +243,56 @@ def get_temporal_qa():
     from rag.temporal.qa import TemporalQA
     from rag.temporal.status import load_legacy_map
 
+    pipeline, settings = get_pipeline()
+    service = get_legal_service()
+    embedder = None
+    if os.environ.get("LEGAL_DENSE") == "1":
+        from rag.index.embedder import EmbeddingCache, make_embedder
+        embedder = make_embedder(settings.embed_model, settings.embed_dim,
+                                 cache=EmbeddingCache(settings.cache_dir / "embeddings.sqlite"),
+                                 jina_api_key=settings.jina_api_key)
+    index = VersionedIndex(service.store, embedder)
+    index.build()
+
+    def legacy_search(query: str, k: int):
+        result = pipeline.retriever.retrieve(query, k)
+        chunks = pipeline.retriever.chunks
+        return [chunks[h.chunk_id] for h in result.hits[:k] if h.chunk_id in chunks]
+
+    legacy_map_path = _REPO_ROOT / "data" / "team-4.2" / "legal" / "legacy_map.yaml"
+    return TemporalQA(service, index, pipeline.llm, legacy_search=legacy_search,
+                      legacy_map=load_legacy_map(legacy_map_path) if legacy_map_path.exists() else {},
+                      log=QALog(settings.data_dir / "legal" / "qa_log.sqlite"))
+
+
+def get_temporal_qa():
+    """Gọi trong thread pool (không trên event loop). Trả None nếu kho mới chưa dùng được -> chat dùng pipeline cũ.
+    Dựng lại chỉ mục khi có bản dựng mới: chỉ một luồng làm, các luồng khác tiếp tục dùng chỉ mục hiện tại
+    (VersionedIndex đổi trạng thái nguyên khối nên search đồng thời vẫn nhất quán)."""
+    global _temporal_qa, _temporal_failed_at, _temporal_checked_at
     if _temporal_qa is None:
-        pipeline, settings = get_pipeline()
-        service = get_legal_service()
-        embedder = None
-        if os.environ.get("LEGAL_DENSE") == "1":
-            from rag.index.embedder import EmbeddingCache, make_embedder
-            embedder = make_embedder(settings.embed_model, settings.embed_dim,
-                                     cache=EmbeddingCache(settings.cache_dir / "embeddings.sqlite"),
-                                     jina_api_key=settings.jina_api_key)
-        index = VersionedIndex(service.store, embedder)
-        index.build()
-
-        def legacy_search(query: str, k: int):
-            result = pipeline.retriever.retrieve(query, k)
-            chunks = pipeline.retriever.chunks
-            return [chunks[h.chunk_id] for h in result.hits[:k] if h.chunk_id in chunks]
-
-        legacy_map_path = _REPO_ROOT / "data" / "team-4.2" / "legal" / "legacy_map.yaml"
-        _temporal_qa = TemporalQA(service, index, pipeline.llm, legacy_search=legacy_search,
-                                  legacy_map=load_legacy_map(legacy_map_path) if legacy_map_path.exists() else {},
-                                  log=QALog(settings.data_dir / "legal" / "qa_log.sqlite"))
-    elif _temporal_qa.index.stale():
-        _temporal_qa.index.build()
+        if _temporal_failed_at is not None and time.monotonic() - _temporal_failed_at < _TEMPORAL_RETRY_S:
+            return None
+        with _temporal_lock:
+            if _temporal_qa is None:
+                try:
+                    _temporal_qa = _build_temporal_qa()
+                    _temporal_failed_at = None
+                    _temporal_checked_at = time.monotonic()
+                except Exception:  # noqa: BLE001 — kho mới lỗi không được làm hỏng chat
+                    log.exception("Không khởi tạo được hỏi đáp theo mốc; dùng pipeline cũ")
+                    _temporal_failed_at = time.monotonic()
+                    return None
+        return _temporal_qa
+    if time.monotonic() - _temporal_checked_at >= _TEMPORAL_STALE_EVERY_S and _temporal_lock.acquire(blocking=False):
+        try:
+            _temporal_checked_at = time.monotonic()
+            if _temporal_qa.index.stale():
+                _temporal_qa.index.build()
+        except Exception:  # noqa: BLE001 — dựng lại lỗi thì giữ chỉ mục cũ
+            log.exception("Dựng lại chỉ mục kho luật lỗi; giữ chỉ mục hiện tại")
+        finally:
+            _temporal_lock.release()
     return _temporal_qa
 
 
@@ -310,6 +340,14 @@ def _sync_temporal(query: str, qa, as_of, mask_state: MaskState) -> dict[str, An
     }
 
 
+def _sync_chat(query: str, as_of, mask_state: MaskState) -> dict[str, Any]:
+    qa = get_temporal_qa()
+    if qa is not None:
+        return _sync_temporal(query, qa, as_of, mask_state)
+    pipeline, _ = get_pipeline()
+    return _sync_ask(query, pipeline, mask_state)
+
+
 async def handle_chat(request: Request) -> JSONResponse:
     """Xử lý câu hỏi, gọi ask_debug trong thread pool để không block event loop."""
     try:
@@ -331,16 +369,7 @@ async def handle_chat(request: Request) -> JSONResponse:
             return JSONResponse({"error": "as_of phải là ngày hợp lệ dạng YYYY-MM-DD"}, status_code=400)
     loop = asyncio.get_running_loop()
     try:
-        qa = get_temporal_qa()
-        if qa is not None:
-            data = await loop.run_in_executor(
-                _executor, _sync_temporal, query, qa, as_of, get_mask_state(session_id)
-            )
-        else:
-            pipeline, _ = get_pipeline()
-            data = await loop.run_in_executor(
-                _executor, _sync_ask, query, pipeline, get_mask_state(session_id)
-            )
+        data = await loop.run_in_executor(_executor, _sync_chat, query, as_of, get_mask_state(session_id))
         return JSONResponse(data)
     except Exception as e:
         log.exception("Lỗi khi xử lý chat: %s", e)

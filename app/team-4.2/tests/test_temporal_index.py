@@ -79,3 +79,20 @@ def test_deterministic(built):
     _, index = built
     assert index.search(QUERY, date(2023, 6, 15), date(2023, 6, 15), k=10) == \
         index.search(QUERY, date(2023, 6, 15), date(2023, 6, 15), k=10)
+
+
+def test_rebuild_keeps_old_state_visible_until_swap(built, monkeypatch):
+    # review I3: trong lúc build lại, search đồng thời vẫn thấy chỉ mục cũ đầy đủ (đổi nguyên khối)
+    import rag.temporal.index as mod
+    _, index = built
+    before = len(index.chunks)
+    seen = []
+    real = mod.export_chunks
+
+    def spy(store, key):
+        seen.append(len(index.chunks))
+        return real(store, key)
+
+    monkeypatch.setattr(mod, "export_chunks", spy)
+    index.build()
+    assert seen and all(n == before for n in seen)

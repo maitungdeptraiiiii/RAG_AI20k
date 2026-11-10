@@ -60,9 +60,11 @@ def collect_transition_rules(service: LegalService, used: Sequence[VersionedChun
             continue
         in_force: dict[str, set[str]] = {}
         for a in dated:
-            for d in store.laws_in_force(a.start):
-                if d.document_key in members:
-                    in_force.setdefault(d.document_key, set()).add(a.role)
+            # mốc là khoảng (năm, tháng...) có thể trùm ngày đổi luật: xét cả đầu và cuối khoảng
+            for day in dict.fromkeys((a.start, a.end or a.start)):
+                for d in store.laws_in_force(day):
+                    if d.document_key in members:
+                        in_force.setdefault(d.document_key, set()).add(a.role)
         if len(in_force) < 2:
             continue
         ordered = sorted(in_force, key=lambda k: members[k].issued_on or members[k].fetched_at.date())

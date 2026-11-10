@@ -65,3 +65,11 @@ def test_rules_unique(svc):
     rules = collect_transition_rules(svc, used, timeline(anchor("signing", date(2023, 6, 15)),
                                                          anchor("evaluation", date(2025, 6, 15))))
     assert len({r.rule_id for r in rules}) == len(rules)
+
+
+def test_year_anchor_straddling_change_adds_transition(svc):
+    # review I5: mốc cả năm 2024 trùm ngày đổi luật 01/8/2024 -> phải có điều chuyển tiếp của luật mới
+    used = [chunk_of(svc, "luat:65/2014/QH13", date(2024, 1, 1)), chunk_of(svc, "luat:27/2023/QH15", date(2024, 9, 1))]
+    year = TimeAnchor("signing", date(2024, 1, 1), date(2024, 12, 31), "year", "question", "x", None, 0.9)
+    rules = collect_transition_rules(svc, used, timeline(year))
+    assert any(r.new_law_key == "luat:27/2023/QH15" and r.old_law_key == "luat:65/2014/QH13" for r in rules)

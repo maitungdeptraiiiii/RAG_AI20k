@@ -133,8 +133,23 @@ class TemporalQA:
                 "builds": {c.document_key: c.build_id for c in chunks},
                 "items": [encode(i) | {"text": None} for i in items], "rules": encode(rules),
                 "answer": encode(result.answer), "year_change": year_change})
-        result.answer.answer_markdown = state.unmask(result.answer.answer_markdown)
+        # sau khi ghi log (chỉ bản đã che) mới trả lại giá trị thật cho mọi trường hiển thị
+        a = result.answer
+        a.answer_markdown = state.unmask(a.answer_markdown)
+        a.issues = _unmask_deep(a.issues, state)
+        a.follow_up_questions = _unmask_deep(a.follow_up_questions, state)
+        a.transition_assessments = _unmask_deep(a.transition_assessments, state)
         return result
+
+
+def _unmask_deep(value, state: MaskState):
+    if isinstance(value, str):
+        return state.unmask(value)
+    if isinstance(value, list):
+        return [_unmask_deep(v, state) for v in value]
+    if isinstance(value, dict):
+        return {k: _unmask_deep(v, state) for k, v in value.items()}
+    return value
 
 
 def collect_rules(service: LegalService, chunks: Sequence[VersionedChunk], timeline: LegalTimeline):

@@ -58,6 +58,8 @@ CONFIG = SimpleNamespace(
     legacy_search=None,        # (query, k) -> list[Chunk] | None
     ocr_factory=lambda: None,
     today=lambda: date.today(),
+    agent_baseline=None,       # () -> RAGPipeline kho cũ (llm, condenser, context_config, top_k, retriever)
+    agent_config=None,         # () -> AgentConfig
 )
 _store: ContractStore | None = None
 
@@ -170,6 +172,30 @@ def chat_answer(cid: str, question: str, history: list[dict]) -> dict[str, Any]:
             "contract_id": cid, "contract_units": out["units"], "legal_status": out["legal_status"],
             "anchor": out["anchor"], "trace": {"context_mode": "contract", "n_context_blocks": len(sources),
                                                "errors": {}, "arms": {}, "final_hits": []}}
+
+
+def chat_think(cid: str, question: str, history: list[dict], stream: bool = False):
+    """Hỏi với hợp đồng + Think: agent multi-hop trên hợp đồng + luật có phiên bản tại ngày ký + kho cũ.
+    stream=True -> iterator sự kiện (progress ... done); lease giữ tới khi iterator chạy xong."""
+    from rag.contracts.agent_view import run_contract_agent
+
+    c = get(cid)
+    baseline = CONFIG.agent_baseline()
+    legacy = baseline.retriever
+
+    def legacy_hits(query: str, k: int):
+        return legacy.retrieve(query, k).hits
+
+    config = CONFIG.agent_config() if CONFIG.agent_config else None
+    if not stream:
+        with CONFIG.lease() as runtime:
+            return run_contract_agent(c, baseline, config, runtime, legacy.chunks, legacy_hits, question, history)
+
+    def events():
+        with CONFIG.lease() as runtime:
+            yield from run_contract_agent(c, baseline, config, runtime, legacy.chunks, legacy_hits, question,
+                                          history, stream=True)
+    return events()
 
 
 def download(cid: str, rid: str, fmt: str) -> Response:

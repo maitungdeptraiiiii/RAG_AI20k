@@ -201,3 +201,29 @@ def test_server_registers_contract_routes():
     server = _server()
     paths = {getattr(r, "path", "") for r in server.app.routes}
     assert "/api/contracts" in paths and "/api/contracts/{cid}/run" in paths
+
+
+@pytest.mark.parametrize("stream", [False, True])
+def test_think_with_contract_uses_contract_agent(monkeypatch, stream):
+    import asyncio
+
+    server = _server()
+    seen = []
+
+    def fake_think(cid, q, h, stream=False):
+        seen.append((cid, q, stream))
+        done = {"answer": "ok", "contract_id": cid, "status": "answer"}
+        return iter([{"type": "progress", "message": "Think"}, {"type": "done", **done}]) if stream else done
+    monkeypatch.setattr(server.contracts_api, "chat_think", fake_think)
+    monkeypatch.setattr(server.contracts_api, "chat_answer", lambda *a: (_ for _ in ()).throw(AssertionError("no")))
+    monkeypatch.setattr(server, "get_agent_pipeline", lambda: (_ for _ in ()).throw(AssertionError("Think tự do")))
+
+    async def go():
+        resp = await server.handle_chat(_request({"query": "Hỏi?", "contract_id": "abc", "think": True,
+                                                  "stream": stream}))
+        assert resp.status_code == 200
+        if stream:
+            body = "".join([c if isinstance(c, str) else c.decode() async for c in resp.body_iterator])
+            assert '"type": "progress"' in body and '"type": "done"' in body
+    asyncio.run(go())
+    assert seen == [("abc", "Hỏi?", stream)]

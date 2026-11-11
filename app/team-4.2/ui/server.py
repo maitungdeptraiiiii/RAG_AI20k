@@ -371,6 +371,8 @@ contracts_api.CONFIG.llm_factory = lambda: get_pipeline()[0].llm
 contracts_api.CONFIG.lease = _lease_legal_runtime
 contracts_api.CONFIG.legacy_search = _contract_legacy_search
 contracts_api.CONFIG.ocr_factory = _make_upload_ocr
+contracts_api.CONFIG.agent_baseline = lambda: get_pipeline()[0]
+contracts_api.CONFIG.agent_config = lambda: AgentConfig.from_settings(get_pipeline()[1])
 
 
 def _legal_holder():
@@ -498,12 +500,19 @@ def _sync_agent_stream(query: str, agent: AgentPipeline, history: list[dict[str,
 
 
 async def _contract_chat(contract_id: str, query: str, history: list, think: bool, is_stream: bool) -> Response:
+    """Hỏi với hợp đồng. think=True -> agent multi-hop trên hợp đồng + luật tại ngày ký (đã che PII)."""
     def run():
+        if think:
+            return contracts_api.chat_think(contract_id, query, history)
         return contracts_api.chat_answer(contract_id, query, history)
 
     if is_stream:
         def events():
             try:
+                if think:
+                    for event in contracts_api.chat_think(contract_id, query, history, stream=True):
+                        yield _sse(event)
+                    return
                 yield _sse({"type": "done", **run()})
             except KeyError:
                 yield _sse({"type": "error", "error": contracts_api.GONE})

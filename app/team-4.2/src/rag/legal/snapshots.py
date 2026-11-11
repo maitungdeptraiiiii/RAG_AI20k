@@ -7,11 +7,16 @@ Bố cục trong `legal_dir`:
 - `snapshots/index.sqlite`           metadata các snapshot (bảng `snapshots`)
 - `snapshots/<id>/catalog.sqlite`    kho của từng snapshot
 - `raw/`                             text nguồn theo nội dung, dùng chung mọi snapshot (không sao chép)
+- `catalog.sqlite`                   kho cũ (trước snapshot): chỉ đọc, sao chép một lần khi bootstrap
+
+Khởi tạo: bootstrap (nếu chưa có CURRENT) -> chuyển đổi file text của kho crawl cũ (snapshot `migration` nếu cần)
+-> cảnh báo nếu kho cũ có dữ liệu chưa được nhập (`legacy_catalog_warning`).
 """
 
 from __future__ import annotations
 
 import hashlib
+import logging
 import os
 import secrets
 import shutil
@@ -20,15 +25,18 @@ import tempfile
 import time
 from collections.abc import Callable, Collection, Iterator
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Generic, Literal, TypeVar
 
 from filelock import FileLock, Timeout
 
+from rag.legal.rawfiles import write_text
 from rag.legal.service import LegalService
 from rag.legal.store import LegalStore
+
+log = logging.getLogger(__name__)
 
 T = TypeVar("T")
 SnapshotStatus = Literal["building", "validated", "published", "failed"]
@@ -37,8 +45,11 @@ _INDEX_SCHEMA = """
 CREATE TABLE IF NOT EXISTS snapshots (seq INTEGER PRIMARY KEY AUTOINCREMENT, snapshot_id TEXT UNIQUE NOT NULL,
     parent_id TEXT, status TEXT NOT NULL, reason TEXT NOT NULL, actor TEXT NOT NULL, created_at TEXT NOT NULL,
     published_at TEXT, error TEXT, removed_at TEXT);
+CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT);
 """
 _COLUMNS = "snapshot_id, parent_id, status, reason, actor, created_at, published_at, error"
+_SELECT = _COLUMNS + ", seq"
+_LEGACY_MTIME = "legacy_catalog_mtime_ns"     # mtime kho cũ lúc bootstrap ("" = lúc đó chưa có kho cũ)
 _FAILED_RETENTION = timedelta(days=7)
 _BOOTSTRAP_LOCK_TIMEOUT = 60.0
 # Windows: open() không có FILE_SHARE_DELETE -> os.replace vào CURRENT lỗi PermissionError khi có người đang đọc nó,
@@ -66,6 +77,7 @@ class Snapshot:
     published_at: datetime | None
     error: str | None
     catalog_path: Path          # legal_dir/snapshots/<id>/catalog.sqlite
+    seq: int = 0                # thứ tự tạo trong index, tăng dần (không phụ thuộc đồng hồ): so "mới hơn" bằng seq
 
 
 @dataclass(frozen=True)
@@ -103,6 +115,28 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _legacy_text_fix(path: Path, checksum: str) -> str | None:
+    """Text đúng checksum của một file crawl cũ (ghi `text + "\\n"` ở chế độ text: CRLF trên Windows và một "\\n"
+    cuối), hoặc None nếu không khôi phục được."""
+    text = path.read_text(encoding="utf-8")         # newline phổ dụng: CRLF -> LF
+    for cand in ((text[:-1],) if text.endswith("\n") else ()) + (text,):
+        if hashlib.sha256(cand.encode("utf-8")).hexdigest() == checksum:
+            return cand
+    return None
+
+
+def _count_documents(catalog: Path) -> int | None:
+    """Số văn bản trong một kho sqlite, mở CHỈ ĐỌC (không đổi file / mtime). Lỗi -> None."""
+    try:
+        conn = sqlite3.connect(catalog.resolve().as_uri() + "?mode=ro", uri=True)
+        try:
+            return int(conn.execute("SELECT COUNT(*) FROM documents").fetchone()[0])
+        finally:
+            conn.close()
+    except sqlite3.Error:
+        return None
+
+
 class SnapshotManager:
     def __init__(self, legal_dir: Path, *, now: Callable[[], datetime] = _utcnow,
                  service_factory: Callable[[LegalStore], LegalService] = LegalService,
@@ -120,6 +154,10 @@ class SnapshotManager:
             c.executescript(_INDEX_SCHEMA)
         if not self._pointer.exists():
             self._bootstrap()
+        self._migrate_legacy_text()
+        warning = self.legacy_catalog_warning()
+        if warning:
+            log.warning("KHO LUẬT CŨ CHƯA ĐƯỢC NHẬP: %s", warning)
 
     # --- index -------------------------------------------------------------------------
 
@@ -136,9 +174,9 @@ class SnapshotManager:
         return self._snapshots_dir / snapshot_id / "catalog.sqlite"
 
     def _row(self, row: tuple) -> Snapshot:
-        sid, parent, status, reason, actor, created, published, error = row
+        sid, parent, status, reason, actor, created, published, error, seq = row
         return Snapshot(sid, parent, status, reason, actor, datetime.fromisoformat(created),
-                        datetime.fromisoformat(published) if published else None, error, self._catalog(sid))
+                        datetime.fromisoformat(published) if published else None, error, self._catalog(sid), seq)
 
     def _new_id(self) -> str:
         return "s" + self.now().strftime("%Y%m%d%H%M%S") + "-" + secrets.token_hex(3)
@@ -176,8 +214,12 @@ class SnapshotManager:
             sid = self._new_id()
             path = self._catalog(sid)
             legacy = self.legal_dir / "catalog.sqlite"
+            mtime = ""
             if legacy.exists():
+                mtime = str(legacy.stat().st_mtime_ns)
                 _copy_sqlite(legacy, path)
+            with self._db() as c:
+                c.execute("INSERT OR REPLACE INTO meta VALUES (?, ?)", (_LEGACY_MTIME, mtime))
             LegalStore(path)                    # bảo đảm schema (kho rỗng nếu không có kho cũ)
             self._insert(sid, None, "building", "bootstrap", "system")
             now = self.now()
@@ -191,14 +233,14 @@ class SnapshotManager:
 
     def get(self, snapshot_id: str) -> Snapshot:
         with self._db() as c:
-            row = c.execute(f"SELECT {_COLUMNS} FROM snapshots WHERE snapshot_id=?", (snapshot_id,)).fetchone()
+            row = c.execute(f"SELECT {_SELECT} FROM snapshots WHERE snapshot_id=?", (snapshot_id,)).fetchone()
         if row is None:
             raise KeyError(snapshot_id)
         return self._row(row)
 
     def list(self) -> list[Snapshot]:
         with self._db() as c:
-            rows = c.execute(f"SELECT {_COLUMNS} FROM snapshots ORDER BY seq DESC").fetchall()
+            rows = c.execute(f"SELECT {_SELECT} FROM snapshots ORDER BY seq DESC").fetchall()
         return [self._row(r) for r in rows]
 
     def store(self, snapshot_id: str | None = None) -> LegalStore:
@@ -226,33 +268,142 @@ class SnapshotManager:
         except Timeout:
             raise WriteLockedError() from None
         try:
-            parent = self.current()
-            sid = self._new_id()
-            path = self._catalog(sid)
-            self._insert(sid, parent.snapshot_id, "building", reason, actor)
-            try:
-                _copy_sqlite(parent.catalog_path, path)
-                svc = self.service_factory(LegalStore(path))
-                try:
-                    value = fn(svc)
-                except (ValueError, KeyError):
-                    self._discard(sid)          # lỗi nghiệp vụ: không giữ staging
-                    raise
-                svc.build_all(progress)
-                problems = self.validate(svc)
-                if problems:
-                    raise SnapshotValidationError(problems)
-                self._set_status(sid, "validated")
-                # dòng index trước, con trỏ sau: lỗi khi đổi con trỏ -> `failed` bên dưới, CURRENT không đổi
-                self._set_status(sid, "published", published_at=self.now())
-                self._write_pointer(sid)
-            except BaseException as exc:
-                if self._exists(sid):
-                    self._set_status(sid, "failed", error=f"{type(exc).__name__}: {exc}")
-                raise
-            return WriteResult(self.get(sid), value)
+            return self._write_locked(reason, actor, fn, progress)
         finally:
             lock.release()
+
+    def _write_locked(self, reason: str, actor: str, fn: Callable[[LegalService], T],
+                      progress: Callable[[str, int, int], None] | None) -> WriteResult[T]:
+        """Thân của `write`: người gọi đang giữ khoá ghi."""
+        parent = self.current()
+        sid = self._new_id()
+        path = self._catalog(sid)
+        self._insert(sid, parent.snapshot_id, "building", reason, actor)
+        try:
+            _copy_sqlite(parent.catalog_path, path)
+            svc = self.service_factory(LegalStore(path))
+            try:
+                value = fn(svc)
+            except (ValueError, KeyError):
+                self._discard(sid)              # lỗi nghiệp vụ: không giữ staging
+                raise
+            svc.build_all(progress)
+            problems = self.validate(svc)
+            if problems:
+                raise SnapshotValidationError(problems)
+            self._set_status(sid, "validated")
+            # dòng index trước, con trỏ sau: lỗi khi đổi con trỏ -> `failed` bên dưới, CURRENT không đổi
+            self._set_status(sid, "published", published_at=self.now())
+            self._write_pointer(sid)
+        except BaseException as exc:
+            if self._exists(sid):
+                self._set_status(sid, "failed", error=f"{type(exc).__name__}: {exc}")
+            raise
+        return WriteResult(self.get(sid), value)
+
+    # --- kho cũ ------------------------------------------------------------------------
+
+    def _legacy_text_fixes(self, store: LegalStore) -> tuple[dict[str, str], list[str]]:
+        """(document_key -> text đúng checksum, các văn bản lệch checksum không khôi phục được)."""
+        fixes: dict[str, str] = {}
+        broken: list[str] = []
+        for d in store.documents():
+            path = Path(d.raw_text_path)
+            try:
+                if not path.is_file() or _sha256(path) == d.raw_checksum:
+                    continue                    # thiếu file: validate báo; khớp: không cần chuyển
+                text = _legacy_text_fix(path, d.raw_checksum)
+            except (OSError, UnicodeDecodeError):
+                text = None
+            if text is None:
+                broken.append(f"{d.document_key} ({path})")
+            else:
+                fixes[d.document_key] = text
+        return fixes, broken
+
+    def _migrate_legacy_text(self) -> Snapshot | None:
+        """Kho crawl cũ: file text ghi `text + "\\n"` ở chế độ text (CRLF trên Windows) nhưng checksum tính trên `text`
+        -> mọi lần ghi sau đều lỗi validate. Ghi lại text đúng checksum bằng `rawfiles.write_text` (file mới, đánh địa
+        chỉ theo nội dung; file cũ giữ nguyên) rồi công bố snapshot `migration` trỏ tới file mới, qua đúng luồng
+        staging -> build_all -> validate -> publish. Không sửa snapshot đã công bố tại chỗ. Idempotent: không còn file
+        lệch -> không làm gì. Còn file lệch không khôi phục được -> log lỗi, không chuyển (validate sẽ báo)."""
+        try:
+            fixes, broken = self._legacy_text_fixes(self.store())
+        except Exception:                       # noqa: BLE001 - khởi tạo không được hỏng vì chuyển đổi
+            log.exception("Không kiểm tra được file text của snapshot đang công bố")
+            return None
+        if broken:
+            log.error("File text lệch checksum, KHÔNG tự sửa được (mọi lần ghi kho sẽ lỗi kiểm tra cho tới khi nạp lại "
+                      "các văn bản này): %s", "; ".join(broken))
+            return None
+        if not fixes:
+            return None
+        lock = FileLock(self._lock_path, timeout=max(self.lock_timeout, _BOOTSTRAP_LOCK_TIMEOUT))
+        try:
+            lock.acquire()
+        except Timeout:
+            log.warning("Đang có lần ghi kho khác: hoãn chuyển đổi file text kho crawl cũ tới lần khởi động sau")
+            return None
+        try:
+            fixes, broken = self._legacy_text_fixes(self.store())    # kiểm lại dưới khoá (tiến trình khác vừa làm?)
+            if broken or not fixes:
+                return None
+            raw_dir = self.legal_dir / "raw"
+
+            def apply(svc: LegalService) -> list[str]:
+                for key, text in fixes.items():
+                    doc = svc.store.document(key)
+                    path, checksum = write_text(raw_dir, key, text)
+                    if checksum != doc.raw_checksum:
+                        raise RuntimeError(f"{key}: checksum sau chuyển đổi không khớp")
+                    svc.store.upsert_document(replace(doc, raw_text_path=str(path)))
+                return sorted(fixes)
+
+            res = self._write_locked("migration", "system", apply, None)
+            log.warning("Đã chuyển đổi file text của %d văn bản kho crawl cũ (snapshot %s): %s",
+                        len(res.value), res.snapshot.snapshot_id, ", ".join(res.value))
+            return res.snapshot
+        except Exception:                       # noqa: BLE001
+            log.exception("Chuyển đổi file text kho crawl cũ lỗi; snapshot đang công bố không đổi")
+            return None
+        finally:
+            lock.release()
+
+    def _meta(self, key: str) -> str | None:
+        with self._db() as c:
+            row = c.execute("SELECT value FROM meta WHERE key=?", (key,)).fetchone()
+        return row[0] if row else None
+
+    def legacy_catalog_warning(self) -> str | None:
+        """Kho cũ `legal_dir/catalog.sqlite` có văn bản mà kho có phiên bản chưa nhập (kho cũ được ghi sau lần
+        bootstrap, hoặc bootstrap rỗng trong khi kho cũ có dữ liệu). Không tự nhập: trả lời nhắn cho người dùng."""
+        legacy = self.legal_dir / "catalog.sqlite"
+        if not legacy.is_file():
+            return None
+        n = _count_documents(legacy)
+        if not n:
+            return None
+        mtime = legacy.stat().st_mtime_ns
+        recorded = self._meta(_LEGACY_MTIME)
+        if recorded is not None:                # bootstrap đã ghi mtime kho cũ lúc sao chép
+            changed = recorded == "" or mtime > int(recorded)
+        else:                                   # index của phiên bản code trước: so với thời điểm bootstrap
+            with self._db() as c:
+                row = c.execute("SELECT created_at FROM snapshots WHERE reason='bootstrap' ORDER BY seq "
+                                "LIMIT 1").fetchone()
+            changed = row is None or mtime / 1e9 > datetime.fromisoformat(row[0]).timestamp()
+        if not changed:
+            try:
+                cur = self.current()
+                changed = cur.reason == "bootstrap" and not LegalStore(cur.catalog_path).documents()
+            except Exception:                   # noqa: BLE001
+                changed = False
+        if not changed:
+            return None
+        return (f"Kho luật cũ ({legacy}) có {n} văn bản và đã được ghi sau khi kho luật có phiên bản được khởi tạo; "
+                f"các thay đổi đó KHÔNG có trong kho đang dùng (chat, /review, upload). Hãy nạp lại các văn bản cần "
+                f"thiết bằng lệnh `python -m rag.legal crawl` hoặc trang Upload → \"Văn bản pháp luật\", rồi đổi tên "
+                f"hoặc chuyển file catalog.sqlite cũ đi chỗ khác để tắt cảnh báo này.")
 
     def _exists(self, snapshot_id: str) -> bool:
         with self._db() as c:

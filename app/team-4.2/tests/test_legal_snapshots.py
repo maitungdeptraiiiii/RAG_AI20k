@@ -271,3 +271,92 @@ def test_scratch_does_not_touch_current(tmp_path, mgr_with_law):
         scratch_dir = svc.store.path.parent
     assert other_doc().document_key not in {d.document_key for d in mgr_with_law.store().documents()}
     assert not scratch_dir.exists()
+
+
+# --- kho crawl cũ: file text CRLF + "\n" cuối, checksum tính trên text (crawl.save_detail cũ) ---------------------
+
+
+@pytest.fixture
+def legacy_crlf_catalog(tmp_path):
+    """Như crawl.save_detail cũ: `path.write_text(text + "\n")` ở chế độ text trên Windows (CRLF), checksum = sha256(text)."""
+    import hashlib
+
+    legacy_file = tmp_path / "raw" / "luat_99_2024_QH15.txt"
+    legacy_file.parent.mkdir(parents=True, exist_ok=True)
+    legacy_file.write_bytes((LAW_TEXT + "\n").replace("\n", "\r\n").encode("utf-8"))
+    checksum = hashlib.sha256(LAW_TEXT.encode("utf-8")).hexdigest()
+    store = LegalStore(tmp_path / "catalog.sqlite")
+    store.upsert_document(_doc(KEY, "99/2024/QH15", "Luật thử nghiệm", date(2024, 1, 1), legacy_file, checksum))
+    LegalService(store, now=lambda: NOW).build_all()
+    return legacy_file
+
+
+def test_legacy_crlf_store_is_migrated_and_writable(tmp_path, legacy_crlf_catalog):
+    original = legacy_crlf_catalog.read_bytes()
+    mgr = SnapshotManager(tmp_path)
+    snaps = mgr.list()
+    assert [s.reason for s in reversed(snaps)] == ["bootstrap", "migration"]
+    boot, mig = snaps[1], snaps[0]
+    assert mgr.current().snapshot_id == mig.snapshot_id and mig.parent_id == boot.snapshot_id
+    # snapshot đã công bố không bị sửa tại chỗ: bootstrap vẫn trỏ file cũ
+    assert mgr.store(boot.snapshot_id).document(KEY).raw_text_path == str(legacy_crlf_catalog)
+    doc = mgr.store().document(KEY)
+    assert Path(doc.raw_text_path) != legacy_crlf_catalog and Path(doc.raw_text_path).read_bytes() == \
+        LAW_TEXT.encode("utf-8")
+    res = mgr.write("cli:build", "t", add_second_law)               # trước đây: validate lỗi checksum
+    assert res.snapshot.status == "published"
+    assert legacy_crlf_catalog.read_bytes() == original             # file cũ còn nguyên
+    assert len(SnapshotManager(tmp_path).list()) == 3                # idempotent: không migration lần nữa
+
+
+def test_unfixable_text_mismatch_is_logged_not_migrated(tmp_path, legacy_crlf_catalog, caplog):
+    legacy_crlf_catalog.write_bytes(b"noi dung khac\r\n")
+    with caplog.at_level("ERROR"):
+        mgr = SnapshotManager(tmp_path)
+    assert [s.reason for s in mgr.list()] == ["bootstrap"]
+    assert any(KEY in r.getMessage() for r in caplog.records if r.levelname == "ERROR")
+
+
+# --- kho cũ được ghi sau khi kho có phiên bản đã khởi tạo ------------------------------------------------------
+
+
+def test_legacy_catalog_populated_after_bootstrap_is_reported(tmp_path, caplog):
+    mgr = SnapshotManager(tmp_path)                                 # bootstrap rỗng: chưa có kho cũ
+    assert mgr.legacy_catalog_warning() is None
+    path, checksum = write_text(tmp_path / "raw", KEY, LAW_TEXT)    # sau đó crawler cũ ghi vào kho cũ
+    LegalStore(tmp_path / "catalog.sqlite").upsert_document(
+        _doc(KEY, "99/2024/QH15", "Luật thử nghiệm", date(2024, 1, 1), path, checksum))
+    with caplog.at_level("WARNING"):
+        mgr2 = SnapshotManager(tmp_path)
+    msg = mgr2.legacy_catalog_warning()
+    assert msg and "catalog.sqlite" in msg and "1 văn bản" in msg
+    assert any("catalog.sqlite" in r.getMessage() for r in caplog.records if r.levelno >= 30)
+    assert mgr2.store().documents() == []                           # không tự nhập âm thầm
+
+
+def test_legacy_catalog_modified_after_bootstrap_is_reported(tmp_path, small_legacy_catalog):
+    mgr = SnapshotManager(tmp_path)
+    assert mgr.legacy_catalog_warning() is None                      # đã nhập lúc bootstrap
+    st = os.stat(tmp_path / "catalog.sqlite")
+    LegalStore(tmp_path / "catalog.sqlite").upsert_document(other_doc())
+    os.utime(tmp_path / "catalog.sqlite", ns=(st.st_atime_ns, st.st_mtime_ns + 5_000_000_000))
+    assert "2 văn bản" in SnapshotManager(tmp_path).legacy_catalog_warning()
+
+
+def test_legacy_catalog_without_bootstrap_record_compares_creation_time(tmp_path, small_legacy_catalog):
+    mgr = SnapshotManager(tmp_path, now=lambda: datetime(2020, 1, 1, tzinfo=timezone.utc))
+    with sqlite3.connect(tmp_path / "snapshots" / "index.sqlite") as c:   # index của phiên bản code trước
+        c.execute("DELETE FROM meta")
+    assert mgr.legacy_catalog_warning() is not None                 # kho cũ sửa sau 2020 (thời điểm khởi tạo)
+
+
+# --- thứ tự snapshot theo seq, không theo đồng hồ ---------------------------------------------------------------
+
+
+def test_snapshot_seq_increases_even_when_clock_goes_back(tmp_path, small_legacy_catalog):
+    times = iter([NOW + timedelta(hours=5 - i) for i in range(20)])      # đồng hồ lùi dần
+    mgr = SnapshotManager(tmp_path, now=lambda: next(times))
+    a = mgr.current()
+    b = mgr.write("cli:build", "t", lambda svc: None).snapshot
+    assert b.published_at < a.published_at and b.seq > a.seq
+    assert mgr.get(b.snapshot_id).seq == b.seq and mgr.list()[0].seq == b.seq

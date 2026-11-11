@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 import html
+import traceback
 from dataclasses import asdict, dataclass, field, replace
 from itertools import zip_longest
 from collections.abc import Iterator, Sequence
@@ -240,6 +241,7 @@ class AgentPipeline:
                           "origins": [{k: v for k, v in origin.items() if k != "focus_text"} for origin in e.origins]}
                          for e in state.evidence.values()],
             "claims": [asdict(c) for c in claims], "verified_quotes": quotes, "events": list(state.events),
+            "failure_stage": state.events[-1]["stage"] if status == "error" and state.events else None,
         }
         trace = AgentTrace(
             answer=answer, retrieval=retrieval,
@@ -289,6 +291,8 @@ class AgentPipeline:
         conversation = conversation_context(history)
         reason, repair_used = "max_rounds", False
         last_verified = None
+        assessment_repair_used = False
+        verification_schema_repair_used = False
         try:
             yield self._event(state, "prepare", "Think · Đang xác định câu hỏi và phạm vi tài liệu…")
             if history:
@@ -421,9 +425,21 @@ class AgentPipeline:
                 payload = self._payload(query, raw_query, history, state, bundle)
                 payload.update(available_xrefs=[edge.to_dict() for _, edge in xrefs.values()],
                                followup_limit=self.config.followup_searches, searched_queries=sorted(state.searched))
-                data = gateway.json("assess", prompts.ASSESS, payload)
-                state.assessments, next_queries, selected_xrefs = parse_assessment(
-                    data, state.requirements, bundle, xrefs, self.config.followup_searches)
+                assessment_warnings = []
+                try:
+                    data = gateway.json("assess", prompts.ASSESS, payload)
+                    state.assessments, next_queries, selected_xrefs = parse_assessment(
+                        data, state.requirements, bundle, xrefs, self.config.followup_searches, assessment_warnings)
+                except OutputError:
+                    if assessment_repair_used:
+                        raise
+                    assessment_repair_used = True
+                    data = gateway.json("assess_repair", prompts.ASSESS,
+                                        {**payload, "format_repair": "Return the exact schema. Every supported premise needs a literal source quote."})
+                    state.assessments, next_queries, selected_xrefs = parse_assessment(
+                        data, state.requirements, bundle, xrefs, self.config.followup_searches, assessment_warnings)
+                for warning in assessment_warnings:
+                    state.errors[warning] = "discarded"
                 supported = {a.requirement_id for a in state.assessments if a.status == "supported"}
                 pending_queries = [(rid, q) for rid, q in next_queries if " ".join(nfc(q).casefold().split()) not in state.searched]
                 pending_xrefs = [xrefs[xid] for xid in selected_xrefs]
@@ -462,10 +478,22 @@ class AgentPipeline:
                     yield self._event(state, "verify", "Think · Đang kiểm chứng từng kết luận và trích dẫn…")
                     verification_payload = {**payload, "claims": [asdict(c) for c in claims],
                                             "followup_limit": self.config.followup_searches}
-                    report = gateway.json("verify", prompts.VERIFY, verification_payload, reserve_calls=0)
                     verification_warnings = []
-                    verdicts, coverage, quotes, verifier_queries = parse_verification(
-                        report, state.requirements, claims, bundle, self.config.followup_searches, verification_warnings)
+                    try:
+                        report = gateway.json("verify", prompts.VERIFY, verification_payload, reserve_calls=0)
+                        verdicts, coverage, quotes, verifier_queries = parse_verification(
+                            report, state.requirements, claims, bundle, self.config.followup_searches, verification_warnings,
+                            degrade_invalid_claims=True)
+                    except OutputError:
+                        if verification_schema_repair_used:
+                            raise
+                        verification_schema_repair_used = True
+                        report = gateway.json("verify_schema_repair", prompts.VERIFY,
+                                              {**verification_payload, "format_repair": "Use the exact schema, real booleans and every claim/requirement once. Supported claims require literal evidence. Never mark a claim supported just to fix format."},
+                                              reserve_calls=0)
+                        verdicts, coverage, quotes, verifier_queries = parse_verification(
+                            report, state.requirements, claims, bundle, self.config.followup_searches, verification_warnings,
+                            degrade_invalid_claims=True)
                     for warning in verification_warnings:
                         state.errors[warning] = "discarded"
                     facts_ok = report["facts_preserved"] and report["scope_respected"]
@@ -538,5 +566,7 @@ class AgentPipeline:
         except Exception as exc:
             # Do not expose SDK exception bodies/URLs/credentials to users.
             state.errors["agent"] = type(exc).__name__
+            frame = traceback.extract_tb(exc.__traceback__)[-1]
+            state.errors["location"] = f"{frame.name}:{frame.lineno}"
             yield {"type": "result", "result": self._finish(
                 query, state, budget, corpus, bundle, status="error", reason="tool_failure")}

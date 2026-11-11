@@ -6,6 +6,7 @@ import json
 import math
 import time
 import hashlib
+import re
 from dataclasses import dataclass, field, fields
 from typing import Any
 from threading import Lock
@@ -148,6 +149,7 @@ class ModelGateway:
                   "prompt_sha256": hashlib.sha256(system.encode("utf-8")).hexdigest(),
                   "input_sha256": hashlib.sha256(user.encode("utf-8")).hexdigest()}
         b.calls.append(record)
+        call_started = time.monotonic()
         try:
             bounded = getattr(self.llm, "complete_bounded", None)
             # An attempted provider call is still a request if it raises.
@@ -165,15 +167,20 @@ class ModelGateway:
             b.provider_requests -= int(result.cache_hit)
             b.input_tokens += result.input_tokens
             b.output_tokens += result.output_tokens
-            record.update(status="ok", cache_hit=result.cache_hit)
+            record.update(status="ok", cache_hit=result.cache_hit,
+                          elapsed_ms=round((time.monotonic() - call_started) * 1000, 2))
             b.check()
             return result.text
         except Exception as exc:
-            record.update(status="error", error=type(exc).__name__)
+            record.update(status="error", error=type(exc).__name__,
+                          elapsed_ms=round((time.monotonic() - call_started) * 1000, 2))
             raise
 
     def json(self, stage: str, system: str, payload: dict, *, reserve_calls: int = 4) -> dict:
         raw = self.call(stage, system, json.dumps(payload, ensure_ascii=False), reserve_calls=reserve_calls)
+        fence = re.fullmatch(r"\s*```(?:json)?\s*\n?(.*?)\n?```\s*", raw, re.S | re.I)
+        if fence:
+            raw = fence.group(1)
         try:
             data = json.loads(raw)
         except (TypeError, ValueError) as exc:

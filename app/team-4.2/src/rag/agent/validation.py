@@ -184,12 +184,15 @@ def parse_quotes(value, bundle, allowed=None):
     return tuple(evidence_ids), quotes
 
 
-def parse_assessment(data, requirements, bundle, available_xrefs, limit):
+def parse_assessment(data, requirements, bundle, available_xrefs, limit, warnings=None):
     obj(data, ("assessments", "followup_queries", "xref_ids"))
     req_ids = {r.id for r in requirements}
     seen, assessments = set(), []
     statuses = {"supported", "partial", "missing", "conflicting", "missing_user_fact"}
     for row in items(data["assessments"], len(requirements)):
+        if isinstance(row, dict) and row.get("status") in {"missing", "missing_user_fact"} and set(row) == {
+                "requirement_id", "status", "reason"}:
+            row = {**row, "evidence": []}
         obj(row, ("requirement_id", "status", "evidence", "reason"))
         rid = row["requirement_id"]
         if not isinstance(rid, str) or rid not in req_ids or rid in seen:
@@ -203,8 +206,20 @@ def parse_assessment(data, requirements, bundle, available_xrefs, limit):
         assessments.append(Assessment(rid, row["status"], eids, text(row["reason"])))
     if seen != req_ids:
         raise OutputError("Assessments must cover every requirement")
-    queries = parse_queries(data["followup_queries"], req_ids, limit)
-    xrefs = identifiers(data["xref_ids"], set(available_xrefs))
+    try:
+        queries = parse_queries(data["followup_queries"], req_ids, limit)
+    except OutputError:
+        if warnings is None:
+            raise
+        warnings.append("invalid_assessor_followups_discarded")
+        queries = []
+    try:
+        xrefs = identifiers(data["xref_ids"], set(available_xrefs))
+    except OutputError:
+        if warnings is None:
+            raise
+        warnings.append("invalid_assessor_xrefs_discarded")
+        xrefs = ()
     return assessments, queries, xrefs
 
 
@@ -229,20 +244,34 @@ def parse_claims(data, requirements, bundle):
     return claims
 
 
-def parse_verification(data, requirements, claims, bundle, limit, warnings=None):
+def parse_verification(data, requirements, claims, bundle, limit, warnings=None, *, degrade_invalid_claims=False):
     obj(data, ("claims", "requirements", "facts_preserved", "scope_respected", "followup_queries"))
     for key in ("facts_preserved", "scope_respected"):
         if type(data[key]) is not bool:
             raise OutputError("Verification flags must be booleans")
     verdicts, quotes = {}, {}
     for row in items(data["claims"], len(claims)):
+        if isinstance(row, dict) and row.get("supported") is False and set(row) == {"index", "supported", "reason"}:
+            row = {**row, "evidence": []}
         obj(row, ("index", "supported", "reason", "evidence"))
         idx = row["index"]
         if type(idx) is not int or idx not in range(len(claims)) or idx in verdicts:
             raise OutputError("Invalid claim index")
         if type(row["supported"]) is not bool:
             raise OutputError("Claim verdict must be boolean")
-        eids, spans = parse_quotes(row["evidence"], bundle, claims[idx].evidence_ids)
+        text(row["reason"])
+        if not row["supported"]:
+            verdicts[idx], quotes[idx] = False, {}
+            continue
+        try:
+            eids, spans = parse_quotes(row["evidence"], bundle, claims[idx].evidence_ids)
+        except OutputError:
+            if not degrade_invalid_claims:
+                raise
+            verdicts[idx], quotes[idx] = False, {}
+            if warnings is not None:
+                warnings.append(f"claim_{idx}_evidence_rejected")
+            continue
         if row["supported"] and set(eids) != set(claims[idx].evidence_ids):
             verdicts[idx] = False
         else:

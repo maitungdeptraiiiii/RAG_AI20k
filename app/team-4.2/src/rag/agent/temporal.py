@@ -183,8 +183,8 @@ class TemporalScope:
         rows, self.metadata, self.versioned = {}, {}, {}
         for cid, version in pinned.chunks.items():
             active = {aid: a for aid, a in self.anchors.items() if a.start is not None and
-                      version.valid_from <= (a.end or a.start) and
-                      (version.valid_to is None or version.valid_to > a.start)}
+                      (version.valid_from is None or (version.valid_from <= (a.end or a.start) and
+                      (version.valid_to is None or version.valid_to > a.start)))}
             if not active or version.document_key not in self.documents:
                 continue
             # Date interval/build in identity prevents merging revisions of one article.
@@ -193,8 +193,10 @@ class TemporalScope:
             rows[cid] = Chunk(cid, revision, doc.title, None, None, version.section, version.text)
             self.versioned[cid] = version
             self.metadata[cid] = {
-                "store": "versioned", "document_key": version.document_key, "title": doc.title,
-                "article_id": version.article_id, "valid_from": version.valid_from.isoformat(),
+                "store": "reference" if version.valid_from is None else "versioned",
+                "document_key": version.document_key, "title": doc.title,
+                "article_id": version.article_id,
+                "valid_from": version.valid_from.isoformat() if version.valid_from else None,
                 "valid_to": version.valid_to.isoformat() if version.valid_to else None,
                 "provision_status": version.verification_status,
                 "provenance": list(qa._provenance(version)),
@@ -204,7 +206,8 @@ class TemporalScope:
         for version in self.versioned.values():
             by_doc[version.document_key].append(version)
         for meta in self.metadata.values():
-            meta["document_status"] = versioned_status(by_doc[meta["document_key"]])
+            meta["document_status"] = ("unversioned" if meta["store"] == "reference" else
+                                       versioned_status(by_doc[meta["document_key"]]))
         allowed = set(rows)
         bm25 = ValidityFilteredArm(pinned.bm25, allowed, "bm25")
         dense = ValidityFilteredArm(pinned.dense or _EmptyArm(), allowed, "dense")
@@ -223,7 +226,8 @@ class TemporalScope:
         # Search-only view of already built indices: never build/re-embed here.
         self.retriever._chunks = rows
         self.corpus = TemporalCorpus(rows, self.metadata, self.documents, self.planning_payload())
-        self.rules = tuple(collect_rules(qa.service, list(self.versioned.values()), self.timeline)) if rows else ()
+        dated = [vc for vc in self.versioned.values() if vc.valid_from is not None]
+        self.rules = tuple(collect_rules(qa.service, dated, self.timeline)) if dated else ()
         self.rule_builds = {
             key: (build.build_id if (build := qa.service.store.latest_build(key)) is not None else None)
             for key in {r.source_document_key for r in self.rules}
@@ -259,7 +263,7 @@ class TemporalScope:
             vc = self.versioned[block.chunk.chunk_id]
             meta = self.metadata[vc.chunk_id]
             result.append(ContextItem(
-                block.n, "versioned", vc.document_key, meta["title"], vc.article_id,
+                block.n, meta["store"], vc.document_key, meta["title"], vc.article_id,
                 vc.section, block.chunk.text, vc.valid_from, vc.valid_to,
                 meta["document_status"], vc.verification_status,
                 tuple(meta["provenance"]), tuple(meta["anchor_roles"]), vc.chunk_id,
@@ -267,8 +271,11 @@ class TemporalScope:
         return result
 
     def _current(self):
+        references = self.qa.service.store.reference_checksums()
         for key in {v.document_key for v in self.versioned.values()}:
             latest = self.qa.service.store.latest_build(key)
+            if latest is None and key in references and self.builds.get(key) == "reference:" + references[key]:
+                continue
             if latest is None or latest.build_id != self.builds.get(key):
                 raise CorpusChangedError("Temporal corpus changed during the request")
         for key, captured in self.rule_builds.items():
@@ -348,18 +355,28 @@ class TemporalScope:
             claims = trace.agent["claims"]
             numbered = {eid: next(b.n for b in trace.context.blocks if b.chunk.chunk_id == state.evidence[eid].chunk.chunk_id)
                         for claim in claims for eid in claim["evidence_ids"]}
-            data = gateway.json("temporal_review", TEMPORAL_REVIEW, {
+            review_payload = {
                 "question": self.query, "scope": self.payload(state, {eid: bundle[eid] for eid in numbered}),
                 "request_context": self.request_context,
                 "claims": claims, "excerpts": {eid: bundle[eid].text for eid in numbered},
-            }, reserve_calls=0)
-            issues, assessments, questions = self._parse_review(data, claims, state, bundle, rules, numbered)
+            }
+            try:
+                data = gateway.json("temporal_review", TEMPORAL_REVIEW, review_payload, reserve_calls=0)
+                issues, assessments, questions = self._parse_review(data, claims, state, bundle, rules, numbered)
+            except OutputError:
+                # One bounded format repair, never acceptance of incomplete
+                # applicability evidence or unassessed transition rules.
+                data = gateway.json("temporal_review", TEMPORAL_REVIEW,
+                                    {**review_payload, "format_repair": "Use the exact schema, cover every claim and transition rule. Empty arrays are valid only when no such items exist."},
+                                    reserve_calls=0)
+                issues, assessments, questions = self._parse_review(data, claims, state, bundle, rules, numbered)
+                trace.retrieval.errors["temporal_review_schema_repaired"] = "recovered"
             context_items = self._items(trace)
             year_change = any(
-                a.start != a.end and (vc.valid_from > a.start or (vc.valid_to is not None and vc.valid_to <= (a.end or a.start)))
+                vc.valid_from is not None and a.start != a.end and (vc.valid_from > a.start or (vc.valid_to is not None and vc.valid_to <= (a.end or a.start)))
                 for vc in (self.versioned[b.chunk.chunk_id] for b in trace.context.blocks)
                 for a in self.anchors.values() if a.start is not None and
-                vc.valid_from <= (a.end or a.start) and (vc.valid_to is None or vc.valid_to > a.start)
+                (vc.valid_from is None or vc.valid_from <= (a.end or a.start)) and (vc.valid_to is None or vc.valid_to > a.start)
             )
             answer = enforce(TemporalAnswer(trace.answer.text, issues, assessments, questions),
                              context_items, rules, self.timeline, year_change=year_change)
@@ -391,6 +408,8 @@ class TemporalScope:
             trace.answer = Answer("Chưa thể kiểm chứng câu trả lời lúc này. Vui lòng thử lại.", [], False)
             trace.agent.update(status="error", verified=False, stop_reason="temporal_review_failed")
             trace.retrieval.errors["temporal_review"] = type(exc).__name__
+            if isinstance(exc, OutputError):
+                trace.retrieval.errors["temporal_validation"] = str(exc)
             trace.temporal["downgrade_reasons"] = ["certainty.temporal_review_failed"]
         finally:
             trace.agent["budget"] = gateway.budget.summary()
@@ -406,6 +425,8 @@ class TemporalScope:
                 "answer": trace.answer.text, "certainty": trace.temporal["certainty"],
                 "transition_assessments": trace.temporal["transition_assessments"],
                 "status": trace.status, "stop_reason": trace.agent["stop_reason"],
+                "errors": dict(trace.retrieval.errors), "calls": trace.agent.get("budget", {}).get("calls", []),
+                "failure_stage": trace.agent.get("failure_stage"),
             })
         except Exception as exc:
             # An audit sink error must not turn verified content into an SDK error.

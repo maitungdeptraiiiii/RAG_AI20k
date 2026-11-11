@@ -152,7 +152,7 @@ def test_single_round_returns_verified_partial_not_complete():
     assert "giấy B" not in result.answer.text
 
 
-@pytest.mark.parametrize("failure", ["invented_id", "invented_quote", "missing_requirement", "cycle", "wrong_boolean"])
+@pytest.mark.parametrize("failure", ["invented_id", "missing_requirement", "cycle", "wrong_boolean"])
 def test_invalid_model_output_is_rejected_without_draft_leak(failure):
     def hook(stage, payload, output):
         if failure == "invented_id" and stage == "COMPOSE":

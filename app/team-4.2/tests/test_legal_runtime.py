@@ -370,3 +370,98 @@ def test_holder_without_runtime_when_initial_index_fails(tmp_path):
     assert holder.get() is None and holder.in_use() == set()
     with holder.lease() as rt:
         assert rt is None
+
+
+# --- nâng cấp Dense cho CÙNG snapshot (BM25 trước) -----------------------------------------------------------
+
+
+def _dense_runtime(env: Env, snapshot_id: str) -> LegalRuntime:
+    svc = env.snapshots.service(snapshot_id)
+    index = VersionedIndex(svc.store, dense=VectorIndex(HashEmbedder(dim=16)), snapshot_id=snapshot_id)
+    index.build()
+    return LegalRuntime(snapshot_id, svc, index, qa=object())
+
+
+def test_offer_accepts_same_snapshot_dense_upgrade_only(env):
+    bm25 = env.holder.get()
+    assert not bm25.index.has_dense
+    assert env.holder.offer(env.make_runtime(bm25.snapshot_id)) is False      # cùng snapshot, không nâng cấp
+    up = _dense_runtime(env, bm25.snapshot_id)
+    assert env.holder.offer(up) is True and env.holder.get() is up
+    assert env.holder.offer(_dense_runtime(env, bm25.snapshot_id)) is False   # đã có Dense
+    bad = _dense_runtime(env, bm25.snapshot_id)
+    bad.index.snapshot_id = "s-khac"
+    assert env.holder.offer(bad) is False                                   # cặp lệch vẫn bị từ chối
+
+
+def test_dense_upgrade_for_older_snapshot_is_rejected(env):
+    first = env.holder.get().snapshot_id
+    env.worker.submit("upload", "u1", "An", add_law)
+    assert env.worker.wait_idle(10)
+    newer = env.holder.get()
+    assert newer.snapshot_id != first
+    assert env.holder.offer(_dense_runtime(env, first)) is False
+    assert env.holder.get() is newer
+
+
+def test_worker_upgrade_job_swaps_to_dense_runtime_of_same_snapshot(env):
+    sid = env.holder.get().snapshot_id
+    env.make_runtime = lambda s: _dense_runtime(env, s)      # việc nâng cấp dựng bản đầy đủ (Dense)
+    env.worker._make_runtime = env.make_runtime
+    job = env.worker.upgrade(sid)
+    assert job.kind == "upgrade" and job.state == "queued"
+    assert env.worker.wait_idle(10)
+    assert env.worker.job(job.job_id).state == "done"
+    rt = env.holder.get()
+    assert rt.snapshot_id == sid and rt.index.has_dense and rt.index.snapshot_id == sid
+
+
+def test_worker_upgrade_job_skips_superseded_snapshot(env):
+    first = env.holder.get().snapshot_id
+    env.worker.submit("upload", "u1", "An", add_law)
+    job = env.worker.upgrade(first)
+    assert env.worker.wait_idle(10)
+    assert env.worker.job(job.job_id).state == "done"
+    assert env.holder.get().snapshot_id != first and env.index_calls.count(first) == 1   # không dựng lại snapshot cũ
+
+
+# --- "mới hơn" theo seq của index, không theo đồng hồ ---------------------------------------------------------
+
+
+def test_offer_orders_by_seq_not_wall_clock(tmp_path):
+    from datetime import timedelta
+
+    legal = tmp_path / "legal"
+    legal.mkdir()
+    seed_legacy(legal)
+    times = iter([NOW + timedelta(hours=50 - i) for i in range(200)])     # đồng hồ lùi
+    snaps = SnapshotManager(legal, now=lambda: next(times))
+
+    def make(sid):
+        svc = snaps.service(sid)
+        idx = VersionedIndex(svc.store, snapshot_id=sid)
+        idx.build()
+        return LegalRuntime(sid, svc, idx, qa=object())
+    holder = RuntimeHolder(snaps, make)
+    first = holder.get().snapshot_id
+    second = snaps.write("cli:build", "t", add_law).snapshot.snapshot_id
+    assert snaps.get(second).published_at < snaps.get(first).published_at
+    assert holder.offer(make(second)) is True
+    assert holder.offer(make(first)) is False and holder.get().snapshot_id == second
+
+
+def test_offer_with_equal_published_at_uses_seq(tmp_path):
+    legal = tmp_path / "legal"
+    legal.mkdir()
+    seed_legacy(legal)
+    snaps = SnapshotManager(legal, now=lambda: NOW)                         # đồng hồ đứng yên
+
+    def make(sid):
+        svc = snaps.service(sid)
+        idx = VersionedIndex(svc.store, snapshot_id=sid)
+        idx.build()
+        return LegalRuntime(sid, svc, idx, qa=object())
+    holder = RuntimeHolder(snaps, make)
+    first = holder.get().snapshot_id
+    second = snaps.write("cli:build", "t", add_law).snapshot.snapshot_id
+    assert holder.offer(make(second)) is True and holder.offer(make(first)) is False

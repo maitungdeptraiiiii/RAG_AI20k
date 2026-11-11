@@ -2,9 +2,10 @@
 
 - `LegalRuntime`: một cặp dựng từ CÙNG một snapshot (service + chỉ mục + TemporalQA).
 - `RuntimeHolder`: giữ runtime hiện tại; đổi sang runtime mới bằng một phép gán duy nhất, chỉ khi snapshot của nó mới
-  hơn (theo `published_at`) — không bao giờ lùi. Mỗi request chat `lease()` một runtime và dùng nó đến hết; snapshot
-  của runtime còn lease không bị dọn.
-- `WriteWorker`: một luồng daemon chạy FIFO mọi lần ghi (upload / quyết định duyệt / dựng lại chỉ mục):
+  hơn (theo `seq` tăng dần của index snapshot, không theo đồng hồ) — không bao giờ lùi. Ngoại lệ duy nhất: nâng cấp
+  CÙNG snapshot từ chỉ mục BM25 lên BM25 + Dense (runtime đầu dựng BM25 trước để chat có ngay). Mỗi request chat
+  `lease()` một runtime và dùng nó đến hết; snapshot của runtime còn lease không bị dọn.
+- `WriteWorker`: một luồng daemon chạy FIFO mọi lần ghi (upload / quyết định duyệt / dựng lại chỉ mục / nâng cấp Dense):
   `snapshots.write` (staging -> kiểm tra -> công bố) -> dựng chỉ mục cho snapshot vừa công bố -> `holder.offer`.
   Chỉ mục lỗi -> `index_failed`: kho đã công bố nhưng chat giữ cặp cũ.
 """
@@ -28,8 +29,12 @@ from rag.temporal.qa import TemporalQA
 log = logging.getLogger(__name__)
 
 JobState = Literal["queued", "building", "validating", "publishing", "indexing", "done", "failed", "index_failed"]
-JobKind = Literal["upload", "review", "reindex"]
+JobKind = Literal["upload", "review", "reindex", "upgrade"]
 _TERMINAL = ("done", "failed", "index_failed")
+
+
+def has_dense(rt: LegalRuntime | None) -> bool:
+    return bool(getattr(getattr(rt, "index", None), "has_dense", False))
 
 
 @dataclass(eq=False)
@@ -76,15 +81,14 @@ class RuntimeHolder:
                     if rt.leases <= 0:
                         self._leased.pop(id(rt), None)
 
-    def _newer(self, cand: Snapshot, cur: Snapshot) -> bool:
-        if cand.published_at != cur.published_at:
-            return cand.published_at > cur.published_at
-        # cùng thời điểm (độ phân giải đồng hồ): thứ tự tạo trong index; các lần ghi nối tiếp nhau dưới khoá ghi
-        order = [s.snapshot_id for s in self._snapshots.list()]
-        return order.index(cand.snapshot_id) < order.index(cur.snapshot_id)
+    @staticmethod
+    def _newer(cand: Snapshot, cur: Snapshot) -> bool:
+        # thứ tự tạo trong index (các lần ghi nối tiếp nhau dưới khoá ghi), không phụ thuộc đồng hồ hệ thống
+        return cand.seq > cur.seq
 
     def offer(self, rt: LegalRuntime) -> bool:
-        """Nhận `rt` làm runtime hiện tại nếu cặp nhất quán và snapshot của nó công bố sau snapshot hiện tại."""
+        """Nhận `rt` làm runtime hiện tại nếu cặp nhất quán và: snapshot của nó công bố sau snapshot hiện tại, hoặc
+        nó là bản nâng cấp Dense của CHÍNH snapshot hiện tại (runtime hiện tại chưa có Dense)."""
         if getattr(rt.index, "snapshot_id", None) != rt.snapshot_id:
             log.error("Bỏ runtime: chỉ mục %s không khớp snapshot %s", getattr(rt.index, "snapshot_id", None),
                       rt.snapshot_id)
@@ -98,7 +102,10 @@ class RuntimeHolder:
                 return False
             cur, cur_snap = self._current, self._current_snap
             if cur is not None and cur_snap is not None:
-                if cur.snapshot_id == rt.snapshot_id or not self._newer(cand, cur_snap):
+                if cur.snapshot_id == rt.snapshot_id:
+                    if not (has_dense(rt) and not has_dense(cur)):
+                        return False            # cùng snapshot: chỉ nhận nâng cấp BM25 -> BM25 + Dense
+                elif not self._newer(cand, cur_snap):
                     return False
             with self._lock:
                 self._current_snap = cand
@@ -165,6 +172,11 @@ class WriteWorker:
         """Dựng chỉ mục cho snapshot published mới nhất (vd. sau `index_failed`)."""
         return self._enqueue("reindex", "", "system", None)
 
+    def upgrade(self, snapshot_id: str) -> Job:
+        """Dựng runtime đầy đủ (BM25 + Dense) cho `snapshot_id` rồi `offer` (nâng cấp cùng snapshot). Bỏ qua nếu khi
+        tới lượt chat đã chuyển sang snapshot khác hoặc đã có Dense."""
+        return self._enqueue("upgrade", snapshot_id, "system", None)
+
     def job(self, job_id: str) -> Job:
         with self._cond:
             return replace(self._jobs[job_id])
@@ -217,6 +229,13 @@ class WriteWorker:
     def _process(self, job: Job, fn: Callable[[LegalService], Any] | None) -> None:
         if job.kind == "reindex":
             self._update(job, snapshot_id=self._snapshots.current().snapshot_id)
+        elif job.kind == "upgrade":
+            cur = self._holder.get()
+            self._update(job, snapshot_id=job.ref)
+            if cur is None or cur.snapshot_id != job.ref or has_dense(cur):
+                log.info("Bỏ nâng cấp Dense cho snapshot %s: chat đã dùng runtime khác", job.ref)
+                self._update(job, state="done")
+                return
         else:
             self._write(job, fn)
         if job.state != "failed":

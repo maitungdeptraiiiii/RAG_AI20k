@@ -264,9 +264,10 @@ def _shared_legal_reranker(settings: Settings):
 
 def make_legal_runtime_factory(snapshots):
     """`make_runtime(snapshot_id)`: service + VersionedIndex (BM25 + Dense dùng chung khi LEGAL_DENSE != "0", bộ tìm
-    kiếm của pipeline chính -> RRF -> rerank, lọc hiệu lực trước) + TemporalQA, tất cả từ CÙNG một snapshot."""
+    kiếm của pipeline chính -> RRF -> rerank, lọc hiệu lực trước) + TemporalQA, tất cả từ CÙNG một snapshot.
+    `dense=False`: chỉ BM25 (runtime đầu, dựng nhanh; legal_api đưa việc nâng cấp Dense cùng snapshot vào hàng đợi)."""
 
-    def make_runtime(snapshot_id: str):
+    def make_runtime(snapshot_id: str, dense: bool = True):
         import os
 
         from legal_runtime import LegalRuntime
@@ -277,8 +278,8 @@ def make_legal_runtime_factory(snapshots):
 
         pipeline, settings = get_pipeline()
         service = snapshots.service(snapshot_id)
-        dense = None
-        if os.environ.get("LEGAL_DENSE", "1") != "0":
+        want_dense, dense = dense, None
+        if want_dense and os.environ.get("LEGAL_DENSE", "1") != "0":
             try:
                 dense = _shared_legal_dense(settings)
             except Exception:  # noqa: BLE001 — Dense lỗi thì tiếp tục BM25 + rerank
@@ -324,7 +325,8 @@ legal_api.CONFIG.ocr_factory = _make_upload_ocr
 
 
 def _legal_holder():
-    """Gọi trong thread pool (không trên event loop): lần đầu dựng runtime đồng bộ. None -> pipeline cũ."""
+    """Gọi trong thread pool (không trên event loop): lần đầu dựng runtime BM25 đồng bộ (Dense nâng cấp sau trên luồng
+    ghi). None -> pipeline cũ."""
     return legal_api.chat_holder()
 
 

@@ -59,6 +59,7 @@ from rag.pipeline import AskTrace, IngestReport, RAGPipeline
 from rag.quality.pii import MaskState
 from rag.agent import AgentConfig, AgentPipeline
 
+import contracts_api
 import legal_api
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -345,6 +346,33 @@ legal_api.CONFIG.make_runtime_for = make_legal_runtime_factory
 legal_api.CONFIG.ocr_factory = _make_upload_ocr
 
 
+# --- hợp đồng đính kèm trong chat (phần 4) ---------------------------------------------------------
+
+@contextmanager
+def _lease_legal_runtime():
+    """LegalRuntime (snapshot + chỉ mục) giữ suốt một thao tác trên hợp đồng; None nếu kho mới chưa dùng được."""
+    holder = _legal_holder()
+    if holder is None:
+        yield None
+        return
+    with holder.lease() as rt:
+        yield rt
+
+
+def _contract_legacy_search(query: str, k: int):
+    pipeline, _ = get_pipeline()
+    result = pipeline.retriever.retrieve(query, k)
+    chunks = pipeline.retriever.chunks
+    return [chunks[h.chunk_id] for h in result.hits[:k] if h.chunk_id in chunks]
+
+
+contracts_api.CONFIG.root = Settings.load().data_dir / "contracts"
+contracts_api.CONFIG.llm_factory = lambda: get_pipeline()[0].llm
+contracts_api.CONFIG.lease = _lease_legal_runtime
+contracts_api.CONFIG.legacy_search = _contract_legacy_search
+contracts_api.CONFIG.ocr_factory = _make_upload_ocr
+
+
 def _legal_holder():
     """Gọi trong thread pool (không trên event loop): lần đầu dựng runtime BM25 đồng bộ (Dense nâng cấp sau trên luồng
     ghi). None -> pipeline cũ."""
@@ -469,6 +497,31 @@ def _sync_agent_stream(query: str, agent: AgentPipeline, history: list[dict[str,
         yield _sse({"type": "error", "error": f"Lỗi hệ thống: {e}"})
 
 
+async def _contract_chat(contract_id: str, query: str, history: list, think: bool, is_stream: bool) -> Response:
+    def run():
+        return contracts_api.chat_answer(contract_id, query, history)
+
+    if is_stream:
+        def events():
+            try:
+                yield _sse({"type": "done", **run()})
+            except KeyError:
+                yield _sse({"type": "error", "error": contracts_api.GONE})
+            except Exception as e:  # noqa: BLE001 — báo lỗi cho UI qua luồng SSE
+                log.exception("Lỗi khi hỏi với hợp đồng: %s", e)
+                yield _sse({"type": "error", "error": f"Lỗi hệ thống: {e}"})
+        return StreamingResponse(events(), media_type="text/event-stream",
+                                 headers={"Cache-Control": "no-cache", "Connection": "keep-alive",
+                                          "X-Accel-Buffering": "no"})
+    try:
+        return JSONResponse(await asyncio.get_running_loop().run_in_executor(_executor, run))
+    except KeyError:
+        return JSONResponse({"error": contracts_api.GONE}, status_code=404)
+    except Exception as e:  # noqa: BLE001
+        log.exception("Lỗi khi hỏi với hợp đồng: %s", e)
+        return JSONResponse({"error": f"Lỗi hệ thống: {e}"}, status_code=500)
+
+
 async def handle_chat(request: Request) -> Response:
     """Xử lý câu hỏi trong thread pool để không block event loop. ``stream: true`` -> SSE, không thì JSON."""
     try:
@@ -502,6 +555,9 @@ async def handle_chat(request: Request) -> Response:
         except ValueError:
             return JSONResponse({"error": "as_of phải là ngày hợp lệ dạng YYYY-MM-DD"}, status_code=400)
     mask_state = get_mask_state(session_id)
+    contract_id = str(body.get("contract_id") or "").strip()
+    if contract_id:                            # Hỏi với hợp đồng (phần 4): hợp đồng + luật tại ngày ký
+        return await _contract_chat(contract_id, query, history, think, is_stream)
     if think:                                  # Think = agent multi-hop trên kho cũ (không qua kho có phiên bản)
         try:
             agent = get_agent_pipeline()
@@ -1208,6 +1264,7 @@ routes = [
     Route("/api/doc_content/{filename:path}", handle_doc_content, methods=["GET"]),
     Route("/doc/{filename:path}", handle_view_doc, methods=["GET"]),
     *legal_api.routes,
+    *contracts_api.routes,
 ]
 
 middleware = [

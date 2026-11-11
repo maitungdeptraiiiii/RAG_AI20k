@@ -76,6 +76,10 @@ def client(tmp_path, runtime):
     contracts_api.CONFIG.legacy_search = lambda q, k: []
     contracts_api.CONFIG.ocr_factory = lambda: None
     contracts_api.CONFIG.today = lambda: date(2026, 11, 11)
+    # server.py (nạp lúc thu thập test ở file khác) gán các nguồn trỏ về pipeline thật -> đặt lại hết
+    contracts_api.CONFIG.document_source = None
+    contracts_api.CONFIG.agent_baseline = None
+    contracts_api.CONFIG.agent_config = None
     contracts_api.reset()
     return TestClient(Starlette(routes=contracts_api.routes))
 

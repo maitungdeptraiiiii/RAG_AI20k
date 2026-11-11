@@ -139,7 +139,9 @@ def test_suspicious_partial_status(tmp_path):
 def test_seeds_file_valid():
     seeds = load_seeds(Path(__file__).parents[3] / "data" / "team-4.2" / "legal" / "seeds.yaml")
     assert seeds == [Seed("Luật", "31/2024/QH15"), Seed("Luật", "27/2023/QH15"), Seed("Luật", "29/2023/QH15"),
-                     Seed("Bộ luật", "91/2015/QH13")]
+                     Seed("Bộ luật", "91/2015/QH13"), Seed("Bộ luật", "95/2015/QH13"),
+                     Seed("Bộ luật", "100/2015/QH13"), Seed("Bộ luật", "45/2019/QH14"),
+                     Seed("Bộ luật", "92/2015/QH13"), Seed("Bộ luật", "101/2015/QH13")]
 
 
 def test_subordinate_documents_cannot_amend_a_law(tmp_path):

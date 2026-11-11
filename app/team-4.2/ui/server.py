@@ -367,7 +367,7 @@ def _contract_legacy_search(query: str, k: int):
     return [chunks[h.chunk_id] for h in result.hits[:k] if h.chunk_id in chunks]
 
 
-contracts_api.CONFIG.root = Settings.load().data_dir / "contracts"
+contracts_api.CONFIG.root = lambda: get_pipeline()[1].data_dir / "contracts"   # lazy: không nạp .env lúc import
 contracts_api.CONFIG.llm_factory = lambda: get_pipeline()[0].llm
 contracts_api.CONFIG.lease = _lease_legal_runtime
 contracts_api.CONFIG.legacy_search = _contract_legacy_search

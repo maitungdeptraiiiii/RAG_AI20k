@@ -245,3 +245,11 @@ def test_contract_think_uses_shorter_rounds_and_longer_deadline(client, monkeypa
     contracts_api.CONFIG.agent_config = lambda: AgentConfig(max_rounds=3, deadline_s=180.0)
     contracts_api.chat_think(cid, "Hỏi?", [])
     assert seen["config"].max_rounds == 2 and seen["config"].deadline_s == 300.0
+
+
+def test_importing_server_does_not_load_env_into_process():
+    import os
+
+    before = dict(os.environ)
+    _server()
+    assert dict(os.environ) == before

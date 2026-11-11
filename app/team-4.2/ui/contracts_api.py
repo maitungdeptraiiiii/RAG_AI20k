@@ -74,7 +74,8 @@ def reset() -> None:
 def store() -> ContractStore:
     global _store
     if _store is None:
-        _store = ContractStore(Path(CONFIG.root))
+        root = CONFIG.root() if callable(CONFIG.root) else CONFIG.root
+        _store = ContractStore(Path(root))
     return _store
 
 

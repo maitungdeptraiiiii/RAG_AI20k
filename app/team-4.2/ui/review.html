@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Duyệt kho luật — Just-ice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --surface: #ffffff; --page: #f7f7f8; --ink: #0d0d0d; --ink-2: #525252; --hairline: #e5e5e5;
+      --good: #0ca30c; --warning: #fab219; --critical: #d03b3b;
+      --good-text: #006300; --warning-text: #8a5a00; --critical-text: #b42318;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--page); color: var(--ink); font-size: 14px; }
+    .card { background: var(--surface); border: 1px solid var(--hairline); border-radius: 16px; }
+    .chip { border: 1px solid var(--hairline); border-radius: 999px; padding: 2px 9px; font-size: 11.5px; color: var(--ink-2); background: var(--surface); white-space: nowrap; }
+    .tab { border-radius: 8px; padding: 4px 10px; font-size: 12.5px; color: var(--ink-2); }
+    .tab.on { background: var(--ink); color: #fff; }
+    .item.active { background: #f0f0f1; }
+    .legal-text { white-space: pre-wrap; word-break: break-word; font-size: 13px; line-height: 1.6; }
+    .field-label { font-size: 11.5px; color: #737373; }
+    input, select, textarea { border: 1px solid #d4d4d4; border-radius: 8px; padding: 6px 9px; font-size: 13px; width: 100%; background: #fff; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #737373; }
+  </style>
+</head>
+<body class="min-h-screen">
+  <header class="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-neutral-200">
+    <div class="max-w-[1360px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <a href="/" class="flex items-center gap-1.5 text-[13px] text-neutral-600 hover:text-black rounded-lg px-2 py-1 hover:bg-neutral-100 flex-shrink-0">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+          <span>Quay lại chat</span>
+        </a>
+        <h1 class="text-[15px] font-semibold truncate">Duyệt kho luật có phiên bản</h1>
+      </div>
+      <span id="summary" class="hidden sm:inline text-[12px] text-neutral-500"></span>
+    </div>
+  </header>
+
+  <main class="max-w-[1360px] mx-auto px-4 sm:px-6 py-5 grid grid-cols-1 lg:grid-cols-[380px_minmax(0,1fr)] gap-5">
+    <aside class="card p-2 min-w-0 self-start">
+      <div class="flex flex-wrap items-center gap-1 px-2 pt-2" id="tabs">
+        <button class="tab on" data-s="open">Đang mở</button>
+        <button class="tab" data-s="resolved">Đã xử lý</button>
+        <button class="tab" data-s="all">Tất cả</button>
+      </div>
+      <div class="grid grid-cols-2 gap-2 px-2 py-2">
+        <select id="filter-law" aria-label="Lọc theo luật"><option value="">Mọi luật</option></select>
+        <select id="filter-reason" aria-label="Lọc theo lý do"><option value="">Mọi lý do</option></select>
+      </div>
+      <ul id="list" class="max-h-[45vh] lg:max-h-[70vh] overflow-y-auto"></ul>
+    </aside>
+
+    <section class="min-w-0">
+      <div id="empty" class="card p-10 text-center text-neutral-500">
+        <div class="text-[15px] font-medium text-neutral-700">Chọn một mục để duyệt</div>
+        <div class="mt-1 text-[13px]">Mỗi mục là một chỉ dẫn sửa đổi hệ thống chưa tự áp dụng được, hoặc một chỗ bản dựng lệch văn bản hợp nhất.</div>
+      </div>
+      <div id="detail" class="hidden space-y-5"></div>
+    </section>
+  </main>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const store = {
+      get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
+      set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+    };
+    const REASON_TEXT = {
+      'operation.target_law_not_found': 'Chưa có luật đích trong kho',
+      'operation.target_law_not_loaded': 'Luật đích chưa được nạp',
+      'operation.target_law_mismatch': 'Tên và số hiệu luật đích không khớp',
+      'operation.target_missing': 'Không tìm thấy đơn vị đích',
+      'operation.target_exists': 'Đơn vị bổ sung đã tồn tại',
+      'operation.anchor_missing': 'Không tìm thấy vị trí "vào sau"',
+      'operation.label_mismatch': 'Nội dung mới không khớp nhãn đơn vị',
+      'operation.phrase_not_unique': 'Cụm từ cần thay không duy nhất',
+      'operation.bulk_text_scope': 'Thay cụm từ trên phạm vi không xác định',
+      'operation.cannot_split_content': 'Không tách được nội dung cho từng đích',
+      'operation.unsupported_table_or_appendix': 'Sửa phụ lục / bảng — chưa hỗ trợ',
+      'operation.no_effective_date': 'Chưa xác định ngày hiệu lực',
+      'operation.unparsed_header': 'Không phân tích được chỉ dẫn',
+      'vbhn.text_differs': 'Bản dựng khác văn bản hợp nhất',
+      'vbhn.missing_in_build': 'VBHN có Điều mà bản dựng không có',
+      'vbhn.missing_in_vbhn': 'Bản dựng có Điều mà VBHN không có',
+    };
+    const reasonKey = r => String(r).split(':')[0];
+    const reasonLabel = r => REASON_TEXT[reasonKey(r)] || reasonKey(r);
+    const OP_TYPES = ['REPLACE_ARTICLE', 'REPLACE_ARTICLE_TITLE', 'REPLACE_CLAUSE', 'REPLACE_CLAUSE_LEAD_IN', 'REPLACE_POINT',
+      'INSERT_ARTICLE', 'INSERT_CLAUSE', 'INSERT_POINT', 'DELETE_ARTICLE', 'DELETE_CLAUSE', 'DELETE_POINT', 'REPLACE_TEXT'];
+    const addr = a => !a ? '—' : `Điều ${a.article}${a.clause ? ' khoản ' + a.clause : ''}${a.point ? ' điểm ' + a.point : ''}${a.part === 'title' ? ' (tên điều)' : a.part === 'lead_in' ? ' (đoạn mở đầu)' : ''}`;
+
+    let status = 'open', items = [], activeId = null;
+
+    async function loadList() {
+      const res = await fetch('/api/legal/reviews?status=' + status);
+      items = (await res.json()).items || [];
+      const laws = [...new Set(items.map(i => i.document_key))].sort();
+      const reasons = [...new Set(items.flatMap(i => (i.reasons || []).map(reasonKey)))].sort();
+      const keepLaw = $('filter-law').value, keepReason = $('filter-reason').value;
+      $('filter-law').innerHTML = '<option value="">Mọi luật</option>' + laws.map(l => `<option ${l === keepLaw ? 'selected' : ''}>${esc(l)}</option>`).join('');
+      $('filter-reason').innerHTML = '<option value="">Mọi lý do</option>' + reasons.map(r => `<option value="${esc(r)}" ${r === keepReason ? 'selected' : ''}>${esc(REASON_TEXT[r] || r)}</option>`).join('');
+      $('summary').textContent = `${items.length} mục ${status === 'open' ? 'đang mở' : status === 'resolved' ? 'đã xử lý' : ''}`;
+      renderList();
+    }
+
+    function renderList() {
+      const law = $('filter-law').value, reason = $('filter-reason').value;
+      const shown = items.filter(i => (!law || i.document_key === law) && (!reason || (i.reasons || []).some(r => reasonKey(r) === reason)));
+      $('list').innerHTML = shown.length ? shown.map(i => `
+        <li><button class="item w-full text-left px-2.5 py-2 rounded-lg hover:bg-neutral-100 ${i.review_id === activeId ? 'active' : ''}" data-id="${esc(i.review_id)}">
+          <div class="text-[13px] font-medium break-words">${esc(i.title)}</div>
+          <div class="text-[11.5px] text-neutral-500 mt-0.5 break-all">${esc(i.target_law_name || i.document_key)}</div>
+          <div class="flex flex-wrap gap-1 mt-1">${(i.reasons || []).slice(0, 3).map(r => `<span class="chip">${esc(reasonLabel(r))}</span>`).join('')}</div>
+        </button></li>`).join('') : '<li class="px-3 py-6 text-center text-[12.5px] text-neutral-500">Không có mục nào.</li>';
+      document.querySelectorAll('#list .item').forEach(b => b.onclick = () => openItem(b.dataset.id));
+    }
+
+    async function openItem(id) {
+      activeId = id;
+      renderList();
+      try { history.replaceState(null, '', '#' + encodeURIComponent(id)); } catch (e) {}
+      const res = await fetch('/api/legal/reviews/' + encodeURIComponent(id));
+      if (!res.ok) return;
+      showDetail(await res.json());
+    }
+
+    function textBox(label, text) {
+      return `<div class="min-w-0"><div class="field-label mb-1">${esc(label)}</div>
+        <div class="legal-text bg-neutral-50 border border-neutral-200 rounded-lg p-3 max-h-[320px] overflow-y-auto">${text ? esc(text) : '<i class="text-neutral-400">không có</i>'}</div></div>`;
+    }
+
+    function showDetail(d) {
+      const op = d.operation;
+      $('empty').classList.add('hidden');
+      const el = $('detail');
+      el.classList.remove('hidden');
+      const closed = d.status !== 'open';
+      el.innerHTML = `
+        <div class="card p-5">
+          <div class="text-[12px] text-neutral-500 break-all">${esc(d.document_key)} · ${esc(d.kind)}</div>
+          <h2 class="mt-0.5 text-[17px] font-semibold break-words">${esc(op ? `${op.source_locator} · ${op.operation_type}` : (d.provision_id || d.review_id))}</h2>
+          <div class="flex flex-wrap gap-1.5 mt-2">${(d.reasons || []).map(r => `<span class="chip" title="${esc(r)}" style="color:var(--warning-text)">⚠ ${esc(reasonLabel(r))}</span>`).join('')}</div>
+        </div>
+        ${op ? `
+        <div class="card p-5 space-y-4">
+          <h3 class="text-[14px] font-semibold">Chỉ dẫn trong văn bản sửa đổi</h3>
+          ${textBox(op.source_document_key + ' · ' + op.source_locator, d.source_excerpt)}
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-[13px]">
+            ${[['Luật đích', op.target_document_key || op.target_law_name || '—'], ['Đơn vị đích', addr(op.target)], ['Vào sau', addr(op.anchor)],
+              ['Hiệu lực từ', op.effective_from || '—'], ['Phân tích', op.parse_status], ['Trạng thái', op.review_status],
+              ['Cụm từ cũ', op.old_phrase || '—'], ['Người duyệt', op.reviewer || '—']].map(([k, v]) =>
+              `<div class="min-w-0"><div class="field-label">${esc(k)}</div><div class="break-words">${esc(v)}</div></div>`).join('')}
+          </div>
+        </div>
+        <div class="card p-5">
+          <h3 class="text-[14px] font-semibold mb-3">Trước và sau khi áp dụng</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            ${textBox('Nội dung đang có hiệu lực ngay trước ngày áp dụng', d.target_before)}
+            ${textBox('Nội dung mới theo chỉ dẫn', d.target_after)}
+          </div>
+        </div>` : ''}
+        ${d.vbhn ? `
+        <div class="card p-5">
+          <h3 class="text-[14px] font-semibold mb-3">So với văn bản hợp nhất ${esc(d.vbhn.vbhn_key || '')} (tại ${esc(d.vbhn.cutoff || '')})</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">${textBox('Bản dựng', d.vbhn.built_excerpt)}${textBox('VBHN', d.vbhn.vbhn_excerpt)}</div>
+        </div>` : ''}
+        <div class="card p-5 space-y-3 ${closed ? 'opacity-60' : ''}">
+          <h3 class="text-[14px] font-semibold">Quyết định ${closed ? '<span class="text-neutral-500 font-normal">· mục đã xử lý</span>' : ''}</h3>
+          <div class="grid grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)] gap-3">
+            <div><div class="field-label mb-1">Người duyệt</div><input id="reviewer" value="${esc(store.get('legal_reviewer'))}" ${closed ? 'disabled' : ''}></div>
+            <div><div class="field-label mb-1">Ghi chú (bắt buộc)</div><textarea id="note" rows="2" ${closed ? 'disabled' : ''} placeholder="Vì sao chấp nhận / từ chối / sửa"></textarea></div>
+          </div>
+          ${op ? `<details id="correct-box" class="border border-neutral-200 rounded-lg p-3" ${closed ? 'hidden' : ''}>
+            <summary class="cursor-pointer text-[13px] font-medium">Sửa lại thao tác</summary>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+              <div class="col-span-2"><div class="field-label mb-1">Loại thao tác</div><select id="c-type">${OP_TYPES.map(t => `<option ${t === op.operation_type ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
+              <div class="col-span-2"><div class="field-label mb-1">Luật đích (khoá)</div><input id="c-law" value="${esc(op.target_document_key || '')}" placeholder="luat:59/2020/QH14"></div>
+              <div><div class="field-label mb-1">Điều</div><input id="c-art" value="${esc(op.target?.article || '')}"></div>
+              <div><div class="field-label mb-1">Khoản</div><input id="c-cl" value="${esc(op.target?.clause || '')}"></div>
+              <div><div class="field-label mb-1">Điểm</div><input id="c-pt" value="${esc(op.target?.point || '')}"></div>
+              <div><div class="field-label mb-1">Phần</div><select id="c-part">${['whole', 'title', 'lead_in'].map(p => `<option ${p === (op.target?.part || 'whole') ? 'selected' : ''}>${p}</option>`).join('')}</select></div>
+              <div class="col-span-2"><div class="field-label mb-1">Hiệu lực từ</div><input id="c-date" type="date" value="${esc(op.effective_from || '')}"></div>
+              <div class="col-span-2"><div class="field-label mb-1">Cụm từ cũ (thay cụm từ)</div><input id="c-old" value="${esc(op.old_phrase || '')}"></div>
+              <div class="col-span-2 md:col-span-4"><div class="field-label mb-1">Nội dung mới</div><textarea id="c-new" rows="5">${esc(op.new_text || '')}</textarea></div>
+            </div>
+          </details>` : ''}
+          <div class="flex flex-wrap gap-2 ${closed ? 'hidden' : ''}">
+            <button data-a="approve" class="act px-3.5 py-1.5 rounded-lg text-[13px] font-medium text-white" style="background:var(--good-text)">✓ Chấp nhận</button>
+            <button data-a="reject" class="act px-3.5 py-1.5 rounded-lg text-[13px] font-medium text-white" style="background:var(--critical-text)">✕ Từ chối</button>
+            ${op ? '<button data-a="correct" class="act px-3.5 py-1.5 rounded-lg text-[13px] font-medium border border-neutral-300 bg-white">✎ Lưu bản sửa</button>' : ''}
+          </div>
+          <div id="result" class="text-[12.5px]" role="status" aria-live="polite"></div>
+        </div>`;
+      document.querySelectorAll('#detail .act').forEach(b => b.onclick = () => decide(d.review_id, b.dataset.a));
+      if (window.innerWidth < 1024) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    async function decide(id, action) {
+      const reviewer = $('reviewer').value.trim(), note = $('note').value.trim();
+      const result = $('result');
+      if (!reviewer || !note) { result.style.color = 'var(--critical-text)'; result.textContent = 'Cần tên người duyệt và ghi chú.'; return; }
+      store.set('legal_reviewer', reviewer);
+      const body = { action, reviewer, note, corrected_fields: {} };
+      if (action === 'correct') {
+        const target = $('c-art').value.trim() ? { article: $('c-art').value.trim(), clause: $('c-cl').value.trim() || null,
+          point: $('c-pt').value.trim() || null, part: $('c-part').value } : null;
+        body.corrected_fields = { operation_type: $('c-type').value, target, new_text: $('c-new').value || null,
+          old_phrase: $('c-old').value || null, effective_from: $('c-date').value || null,
+          target_document_key: $('c-law').value.trim() || null };
+      }
+      result.style.color = 'var(--ink-2)'; result.textContent = 'Đang lưu và dựng lại luật...';
+      try {
+        const res = await fetch('/api/legal/reviews/' + encodeURIComponent(id) + '/decision',
+          { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || res.status);
+        result.style.color = 'var(--good-text)';
+        result.textContent = `Đã lưu. ${data.build_id ? 'Bản dựng mới: ' + data.build_id : ''}`;
+        await loadList();
+      } catch (e) {
+        result.style.color = 'var(--critical-text)'; result.textContent = 'Lỗi: ' + e.message;
+      }
+    }
+
+    document.querySelectorAll('#tabs .tab').forEach(t => t.onclick = () => {
+      document.querySelectorAll('#tabs .tab').forEach(x => x.classList.toggle('on', x === t));
+      status = t.dataset.s; loadList();
+    });
+    $('filter-law').onchange = renderList;
+    $('filter-reason').onchange = renderList;
+    loadList().then(() => {
+      const hash = decodeURIComponent(location.hash.slice(1));
+      if (hash) openItem(hash);
+    });
+  </script>
+</body>
+</html>

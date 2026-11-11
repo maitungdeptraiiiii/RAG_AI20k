@@ -1,0 +1,6 @@
+[
+ {"doc_id": "real_tt_37_bca_vehicle", "old": "51/2025/TT-BCA NGÀY 31 THÁNG 3 NĂM 2025", "new": "51/2025/TT-BCA NGÀY 30 THÁNG 6 NĂM 2025",
+  "evidence": "Xem ảnh real/real_tt_37_bca_vehicle_p1.png, dòng tiêu đề y≈1222 px: 'NGÀY 30 THÁNG 6 NĂM 2025'. Cả 3 engine đều đọc 30/6.", "checked": "2026-11-08"},
+ {"doc_id": "real_qd_707_ttg", "old": "81/2019/NĐ-CP ngày 11 tháng 11 năm 2019", "new": "81/2019/NĐ-CP ngày 01 tháng 11 năm 2019",
+  "evidence": "Xem ảnh real/real_qd_707_ttg_p1.png, y≈1321 px: 'ngày 01 tháng 11 năm 2019'. Cả 3 engine đều đọc 01/11.", "checked": "2026-11-08"}
+]

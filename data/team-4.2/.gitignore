@@ -2,3 +2,5 @@ cache/
 # DATA_DIR riêng cho ablation (vd. data/team-4.2/ablation/ctx)
 ablation/
 jina/
+# Toàn văn đã trích xuất theo trang (sinh lúc ingest, xem ở /extracted/<doc_id>)
+extracted/

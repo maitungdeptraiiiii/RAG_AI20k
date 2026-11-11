@@ -1,0 +1,218 @@
+{
+ "tesseract": {
+  "ALL": {
+   "n": 80,
+   "gt_tables": 40,
+   "TEDS": "N/A",
+   "TEDS_S": "N/A",
+   "heading_rec": "N/A",
+   "order": 96.6,
+   "hf_leak": 45.4,
+   "sec_page": 3.11,
+   "text_ned": 46.2,
+   "block_ned": 41.2,
+   "cjk_rate": 0.0
+  },
+  "COMMON (trang mọi engine đều chạy)": {
+   "n": 20,
+   "gt_tables": 14,
+   "TEDS": "N/A",
+   "TEDS_S": "N/A",
+   "heading_rec": "N/A",
+   "order": 97.6,
+   "hf_leak": 45.5,
+   "sec_page": 3.61,
+   "text_ned": 48.4,
+   "block_ned": 43.5,
+   "cjk_rate": 0.0
+  },
+  "digital": {
+   "n": 40,
+   "gt_tables": 20,
+   "TEDS": "N/A",
+   "TEDS_S": "N/A",
+   "heading_rec": "N/A",
+   "order": 97.5,
+   "hf_leak": 85.2,
+   "sec_page": 2.58,
+   "text_ned": 29.7,
+   "block_ned": 19.0,
+   "cjk_rate": 0.0
+  },
+  "photo": {
+   "n": 40,
+   "gt_tables": 20,
+   "TEDS": "N/A",
+   "TEDS_S": "N/A",
+   "heading_rec": "N/A",
+   "order": 90.3,
+   "hf_leak": 5.6,
+   "sec_page": 3.76,
+   "text_ned": 63.6,
+   "block_ned": 63.5,
+   "cjk_rate": 0.0
+  }
+ },
+ "gemini": {
+  "ALL": {
+   "n": 20,
+   "gt_tables": 14,
+   "TEDS": 61.0,
+   "TEDS_S": 71.7,
+   "heading_rec": 0.0,
+   "order": 97.2,
+   "hf_leak": 90.9,
+   "sec_page": 4.86,
+   "text_ned": 36.3,
+   "block_ned": 20.2,
+   "cjk_rate": 0.0
+  },
+  "COMMON (trang mọi engine đều chạy)": {
+   "n": 20,
+   "gt_tables": 14,
+   "TEDS": 61.0,
+   "TEDS_S": 71.7,
+   "heading_rec": 0.0,
+   "order": 97.2,
+   "hf_leak": 90.9,
+   "sec_page": 4.86,
+   "text_ned": 36.3,
+   "block_ned": 20.2,
+   "cjk_rate": 0.0
+  },
+  "digital": {
+   "n": 10,
+   "gt_tables": 7,
+   "TEDS": 83.1,
+   "TEDS_S": 97.3,
+   "heading_rec": 0.0,
+   "order": 99.2,
+   "hf_leak": 100.0,
+   "sec_page": 4.48,
+   "text_ned": 25.4,
+   "block_ned": 20.6,
+   "cjk_rate": 0.0
+  },
+  "photo": {
+   "n": 10,
+   "gt_tables": 7,
+   "TEDS": 38.8,
+   "TEDS_S": 46.2,
+   "heading_rec": 0.0,
+   "order": 95.1,
+   "hf_leak": 81.8,
+   "sec_page": 5.02,
+   "text_ned": 46.3,
+   "block_ned": 19.8,
+   "cjk_rate": 0.0
+  }
+ },
+ "gemini35lite": {
+  "ALL": {
+   "n": 20,
+   "gt_tables": 14,
+   "TEDS": 68.0,
+   "TEDS_S": 73.2,
+   "heading_rec": 31.8,
+   "order": 96.6,
+   "hf_leak": 95.5,
+   "sec_page": 3.67,
+   "text_ned": 22.5,
+   "block_ned": 10.1,
+   "cjk_rate": 0.0
+  },
+  "COMMON (trang mọi engine đều chạy)": {
+   "n": 20,
+   "gt_tables": 14,
+   "TEDS": 68.0,
+   "TEDS_S": 73.2,
+   "heading_rec": 31.8,
+   "order": 96.6,
+   "hf_leak": 95.5,
+   "sec_page": 3.67,
+   "text_ned": 22.5,
+   "block_ned": 10.1,
+   "cjk_rate": 0.0
+  },
+  "digital": {
+   "n": 10,
+   "gt_tables": 7,
+   "TEDS": 70.5,
+   "TEDS_S": 71.4,
+   "heading_rec": 31.8,
+   "order": 97.4,
+   "hf_leak": 100.0,
+   "sec_page": 3.96,
+   "text_ned": 23.5,
+   "block_ned": 10.0,
+   "cjk_rate": 0.0
+  },
+  "photo": {
+   "n": 10,
+   "gt_tables": 7,
+   "TEDS": 65.6,
+   "TEDS_S": 74.9,
+   "heading_rec": 31.8,
+   "order": 95.7,
+   "hf_leak": 90.9,
+   "sec_page": 3.44,
+   "text_ned": 21.4,
+   "block_ned": 10.1,
+   "cjk_rate": 0.0
+  }
+ },
+ "mineru": {
+  "ALL": {
+   "n": 80,
+   "gt_tables": 40,
+   "TEDS": 60.0,
+   "TEDS_S": 65.3,
+   "heading_rec": 39.4,
+   "order": 96.6,
+   "hf_leak": 18.5,
+   "sec_page": 6.75,
+   "text_ned": 17.7,
+   "block_ned": 13.4,
+   "cjk_rate": 0.04
+  },
+  "COMMON (trang mọi engine đều chạy)": {
+   "n": 20,
+   "gt_tables": 14,
+   "TEDS": 39.7,
+   "TEDS_S": 43.3,
+   "heading_rec": 47.7,
+   "order": 99.0,
+   "hf_leak": 4.5,
+   "sec_page": 6.75,
+   "text_ned": 23.0,
+   "block_ned": 20.4,
+   "cjk_rate": 0.02
+  },
+  "digital": {
+   "n": 40,
+   "gt_tables": 20,
+   "TEDS": 68.1,
+   "TEDS_S": 71.2,
+   "heading_rec": 60.0,
+   "order": 98.8,
+   "hf_leak": 5.6,
+   "sec_page": 6.75,
+   "text_ned": 10.1,
+   "block_ned": 6.4,
+   "cjk_rate": 0.07
+  },
+  "photo": {
+   "n": 40,
+   "gt_tables": 20,
+   "TEDS": 51.8,
+   "TEDS_S": 59.4,
+   "heading_rec": 18.9,
+   "order": 93.3,
+   "hf_leak": 31.5,
+   "sec_page": 6.75,
+   "text_ned": 25.3,
+   "block_ned": 20.4,
+   "cjk_rate": 0.02
+  }
+ }
+}

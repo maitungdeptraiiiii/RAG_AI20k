@@ -80,3 +80,45 @@ Sửa pipeline lõi, schema dùng chung, versioning và dedup. Nhóm này giữ 
 - Mọi số trong report phải có thư mục kết quả trong `evals/team-4.2/results/w02-*`.
 - Dữ liệu tuần 2 ingest vào `DATA_DIR` riêng, không ghi đè snapshot 6 Bộ luật.
 - Đổi `schema.py` phải báo cả nhóm.
+
+---
+
+## Chia file để không conflict (từ 10/11/2026)
+
+Lần merge `feat/team-4.2/w02-legal-version-builder` ← `feat/team-4.2/w02-integration` bị conflict ở 6 file,
+15 chỗ. Nguyên nhân: hai bên cùng sửa thân hàm `ask_debug` (PII ↔ lịch sử chat), `handle_chat` (mốc thời
+gian ↔ SSE stream), body `fetch('/api/chat')` trong `index.html`, và cùng tạo `quality/__init__.py`,
+`effectivity_guard.py`. Bảng dưới chia **chủ sở hữu** theo đúng người đã viết phần lớn mỗi vùng.
+
+### 1. Thư mục riêng — chỉ chủ sở hữu sửa
+
+Người khác cần thay đổi thì mở issue hoặc nhắn chủ sở hữu; không sửa thẳng trên nhánh của mình.
+
+| Chủ sở hữu | File / thư mục |
+|---|---|
+| **Tùng** | `src/rag/legal/**`, `src/rag/temporal/**`, `src/rag/ingest/{ocr,page_report,extraction_check,vbpl}.py`, `src/rag/quality/{pii,numeric,validate,issues,apply,tables}.py`, `ui/upload.html`, `ui/review.html`, `tests/test_legal_*`, `tests/test_temporal_*`, `tests/test_pii*`, `tests/test_ocr*`, `tests/test_page_report.py`, `tests/test_merge_pii_stream.py` |
+| **Huy** | `src/rag/retrieve/**`, `src/rag/advanced/**` (gồm `condense.py`), `src/rag/generate/**`, `src/rag/eval/**`, `ui/streamlit_app.py`, `tests/test_{stream,condense,dense,hybrid,rerank,listwise,coverage,rewrite,decomposition*}.py` |
+| **Khánh** | `src/rag/versioning/**`, `src/rag/models/**`, `src/rag/ingest/{checksum,checksum_registry,dedup,near_duplicate,headers,interfaces}.py`, `src/rag/quality/{interfaces,review_queue}.py`, `scripts/demo_*.py`, `scripts/*near_duplicate*.py`, `tests/test_{versioning,partial_versioning,review_queue,near_duplicate*,models,effectivity_guard,amendment_guard,checksum}.py` |
+
+Ngoại lệ đã có: `versioning/effectivity_guard.py` (Khánh) cung cấp `effectivity_reasons_for_text` cho
+`rag.legal` (Tùng). Khánh đổi chữ ký / hành vi hàm này thì báo Tùng; Tùng không sửa file này.
+
+### 2. File dùng chung — một người giữ, người khác chỉ thêm theo quy tắc
+
+| File | Người giữ | Quy tắc cho người khác |
+|---|---|---|
+| `src/rag/pipeline.py` | **Khánh** (Nhóm 1 — tích hợp) | Không viết lại thân `ask_debug` / `ask_stream` / `ingest`. Thêm bước mới bằng **hàm riêng** rồi gọi một dòng (như `_prepare_query`: che PII → condense). Thêm tham số `__init__` thì luôn có giá trị mặc định, đặt **cuối** danh sách. |
+| `ui/server.py` | **Huy** cho `/api/chat`, `/api/info`, trang chat; **Tùng** cho các khối `# --- hỏi đáp theo mốc thời gian`, `# --- báo cáo ingest`, `# --- bước 2 sau khi trích xuất`, `# --- kho luật có phiên bản` | Mỗi người chỉ sửa trong khối `# ---` của mình. Route mới thêm vào `routes = [...]` **mỗi route một dòng**, đặt cạnh các route cùng khối. `handle_chat` chỉ gọi `_sync_chat` / `_sync_stream`; logic mới vào hàm riêng. |
+| `ui/index.html` | **Huy** | Tùng cần trường mới trong request chat thì thêm vào `Object.assign({...}, ...)` của `fetch('/api/chat')`, **không** viết lại cả object. Phần hiển thị kết quả theo mốc (timeline, certainty) nằm trong `renderTemporalBlocks` (Tùng giữ hàm này); Huy không đổi tên các trường `timeline`, `certainty`, `issues`, `follow_up_questions`. |
+| `src/rag/config.py` | **Huy** | Thêm setting mới vào **cuối** nhóm tương ứng, mỗi dòng một trường; không sắp xếp lại / đổi mặc định của người khác mà không báo. |
+| `pyproject.toml`, `.env.example` | **Khánh** | Chỉ thêm dòng dependency / biến môi trường, mỗi dòng một mục kèm chú thích; không định dạng lại cả file (dễ đụng CRLF ↔ LF). |
+| `src/rag/quality/__init__.py`, `src/rag/versioning/__init__.py` | Khánh | Chỉ thêm một dòng mô tả module mới. |
+
+### 3. Quy trình nhánh
+
+- Mỗi người làm trên nhánh riêng, **rebase/merge `feat/team-4.2/w02-integration` vào nhánh mình ít nhất mỗi
+  ngày** trước khi mở PR, để conflict nhỏ và phát hiện sớm.
+- PR chạm vào file ở mục 2 phải tag người giữ file đó làm reviewer.
+- Trước khi push: `cd app/team-4.2 && python -m pytest -q` (cần `pip install -e .[dev]`, đã có
+  `pytest-asyncio` cho `tests/test_stream.py`).
+- Repo dùng `core.autocrlf=true` trên Windows: không commit file đổi toàn bộ line ending.

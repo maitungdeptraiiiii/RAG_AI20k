@@ -258,11 +258,17 @@
           </svg>
           <span>New chat</span>
         </button>
-        <button onclick="toggleIngestModal(true)" class="w-full flex items-center space-x-3 px-2.5 py-1.5 text-[13.5px] text-neutral-800 hover:bg-[#ececec] rounded-lg transition-colors font-normal">
+        <button onclick="location.href='/upload'" class="w-full flex items-center space-x-3 px-2.5 py-1.5 text-[13.5px] text-neutral-800 hover:bg-[#ececec] rounded-lg transition-colors font-normal">
           <svg class="w-4 h-4 text-neutral-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4v16m8-8H4" />
           </svg>
           <span>Nạp tài liệu</span>
+        </button>
+        <button onclick="location.href='/review'" class="w-full flex items-center space-x-3 px-2.5 py-1.5 text-[13.5px] text-neutral-800 hover:bg-[#ececec] rounded-lg transition-colors font-normal">
+          <svg class="w-4 h-4 text-neutral-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z" />
+          </svg>
+          <span>Duyệt kho luật</span>
         </button>
       </div>
 
@@ -353,6 +359,12 @@
           <!-- Hero input slot: Capsule is placed here on initial load / new chat -->
           <div id="hero-input-slot" class="w-full mb-3">
             <!-- ==================== CHAT INPUT CAPSULE ==================== -->
+            <div id="as-of-row" class="flex flex-wrap items-center gap-x-2 gap-y-1 px-3 pb-1.5 text-[12px] text-neutral-500">
+              <label for="as-of-input" class="font-medium text-neutral-600">Mốc pháp lý</label>
+              <input type="date" id="as-of-input" class="border border-neutral-300 rounded-md px-1.5 py-0.5 text-[12px] text-neutral-800 bg-white" aria-describedby="as-of-hint">
+              <button type="button" id="as-of-clear" class="text-neutral-400 hover:text-neutral-800 hidden" aria-label="Bỏ ngày đã chọn">✕</button>
+              <span id="as-of-hint">để trống: tự nhận diện mốc trong câu hỏi, không có thì dùng luật hiện hành</span>
+            </div>
             <div id="chat-input-capsule" class="w-full bg-white rounded-full border border-neutral-300 shadow-[0_2px_14px_rgba(0,0,0,0.06)] focus-within:border-neutral-400 focus-within:shadow-[0_4px_20px_rgba(0,0,0,0.09)] p-2 pl-3.5 pr-2.5 flex items-center space-x-2 transition-all">
               <!-- Attach / Upload button (+) -->
               <button onclick="toggleIngestModal(true)" class="p-1.5 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-full transition-colors flex-shrink-0" title="Nạp tài liệu mới">
@@ -628,7 +640,7 @@
       <div class="p-6 space-y-4">
         <div>
           <label class="block text-[12px] font-medium text-neutral-700 mb-1">Chọn file văn bản (.txt, .pdf, .docx, .md)</label>
-          <input type="file" id="ingest-file-input" multiple class="w-full text-[13px] text-neutral-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[12px] file:font-medium file:bg-neutral-900 file:text-white hover:file:bg-black cursor-pointer">
+          <input type="file" id="ingest-file-input" multiple accept=".pdf,.docx,.txt,.md,.csv,.xlsx,.png,.jpg,.jpeg,.tif,.tiff,.webp" class="w-full text-[13px] text-neutral-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[12px] file:font-medium file:bg-neutral-900 file:text-white hover:file:bg-black cursor-pointer">
         </div>
         <div>
           <label class="block text-[12px] font-medium text-neutral-700 mb-1">Hoặc nhập URL văn bản pháp luật</label>
@@ -735,16 +747,19 @@
       const heroSlot = document.getElementById('hero-input-slot');
       const bottomSlot = document.getElementById('bottom-input-slot');
       const bottomBar = document.getElementById('floating-bottom-bar');
+      const asOfRow = document.getElementById('as-of-row');
 
       if (!capsule) return;
 
       if (mode === 'hero') {
         if (heroSlot && !heroSlot.contains(capsule)) {
+          if (asOfRow) heroSlot.appendChild(asOfRow);
           heroSlot.appendChild(capsule);
         }
         if (bottomBar) bottomBar.classList.add('hidden');
       } else if (mode === 'bottom') {
         if (bottomSlot && !bottomSlot.contains(capsule)) {
+          if (asOfRow) bottomSlot.appendChild(asOfRow);
           bottomSlot.appendChild(capsule);
         }
         if (bottomBar) bottomBar.classList.remove('hidden');
@@ -1070,17 +1085,13 @@
             </div>
 
             <!-- Assistant Response Container -->
-            <div class="flex items-start space-x-3 w-full">
-              <div class="w-7 h-7 rounded-lg bg-neutral-900 text-white flex items-center justify-center p-1.5 flex-shrink-0 mt-0.5 shadow-sm">
-                <!-- 3D Ice Cube Logo (Just-ice) -->
-                <svg class="w-4 h-4 text-sky-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 2.5L20 7V17L12 21.5L4 17V7L12 2.5Z" />
-                  <path d="M12 12V21.5" />
-                  <path d="M12 12L20 7" />
-                  <path d="M12 12L4 7" />
-                  <path d="M10 5L14 7.2" stroke-width="1.4" opacity="0.85" />
-                  <path d="M7 11.5V15" stroke-width="1.4" opacity="0.85" />
-                </svg>
+            <div class="w-full">
+              <!-- Animated Loading 3 Dots -->
+              <div id="${msgId}-loading" class="flex items-center space-x-1.5 py-2 text-neutral-400">
+                <div class="w-2 h-2 rounded-full bg-neutral-400 dot-1"></div>
+                <div class="w-2 h-2 rounded-full bg-neutral-400 dot-2"></div>
+                <div class="w-2 h-2 rounded-full bg-neutral-400 dot-3"></div>
+                <span class="text-[12px] text-neutral-400 ml-2 font-normal">Just-ice đang phân rã câu hỏi & đối chiếu 6 bộ luật...</span>
               </div>
               <div class="flex-1 min-w-0">
                 <!-- Animated Loading 3 Dots -->
@@ -1091,9 +1102,8 @@
                   <span class="text-[12px] text-neutral-400 ml-2 font-normal">${requestThinkEnabled ? 'Think · Đang chuẩn bị tra cứu chuyên sâu...' : 'Just-ice đang tra cứu tài liệu...'}</span>
                 </div>
 
-                <!-- Assistant Content Box -->
-                <div id="${msgId}-content" class="hidden"></div>
-              </div>
+              <!-- Assistant Content Box -->
+              <div id="${msgId}-content" class="hidden"></div>
             </div>
           </div>
         `;
@@ -1295,7 +1305,7 @@
         const src = (data.sources || []).find(s => String(s.n) === String(firstNum));
         const chunkId = src ? src.chunk_id : '';
         const secInfo = src ? parseSectionInfo(src.section) : null;
-        const shortDoc = src ? (DOC_SHORT_NAMES[src.source] || 'Luật') : 'Luật';
+        const shortDoc = src ? (DOC_SHORT_NAMES[src.source] || (src.store === 'versioned' ? String(src.source).replace(/^[a-z_]+:/, '') : 'Luật')) : 'Luật';
         
         let label = shortDoc;
         if (secInfo && secInfo.article) {
@@ -1312,6 +1322,7 @@
             class="chatgpt-cite-pill" 
             data-chunk-id="${chunkId}">
             <span class="pill-dot"></span>
+            ${src && src.document_status && src.document_status !== 'verified' ? '<span aria-label="chưa xác minh" title="Căn cứ chưa xác minh đầy đủ" style="color:#8a5a00">⚠</span>' : ''}
             <span>${escapeHtml(label)}</span>
             ${moreCount > 0 ? `<span class="pill-more">+${moreCount}</span>` : ''}
           </button>
@@ -1383,11 +1394,24 @@
         </div>
       `;
 
+      // 5. Thông báo PII đã được che trong câu hỏi trước khi gửi ra ngoài
+      const piiEntries = Object.entries(data.query_pii || {}).sort(([a], [b]) => a.localeCompare(b));
+      const piiHtml = piiEntries.length ? `
+        <div class="mt-2 text-[12px] text-neutral-500">
+          🔒 Đã ẩn thông tin cá nhân trong câu hỏi trước khi gửi đi (${escapeHtml(piiEntries.map(([k, n]) => `${k} ×${n}`).join(', '))}).
+        </div>` : '';
+
+      const temporal = renderTemporalBlocks(data);
+
       contentBox.innerHTML = `
         ${trace.agent ? `<div class="mb-3 text-[12px] font-medium ${data.status === 'answer' ? 'text-blue-600' : 'text-amber-700'}">Think · ${escapeHtml(agentStatusLabel(data.status))}</div>` : ''}
         <div id="${msgId}-text" class="chatgpt-prose select-text">
           ${formattedText}
         </div>
+        ${temporal.certainty}
+        ${temporal.transitions}
+        ${temporal.followups}
+        ${piiHtml}
         ${actionBarHtml}
         ${traceHtml}
       `;
@@ -1523,7 +1547,16 @@
       const quoteOrText = src.quote || src.text || '';
       renderCanvasContent(quoteOrText, quoteOrText, secInfo.article, true);
 
-      // 2. If it's a URL, no raw local file to fetch
+      // 2. Căn cứ có phiên bản: toàn văn gốc là bản CHƯA sửa đổi -> chỉ hiện nội dung phiên bản đã dùng
+      if (src.store === 'versioned') {
+        if (tabBtn) tabBtn.classList.add('hidden');
+        subtitleEl.textContent = (secInfo.article || src.section || '') + (src.valid_from
+          ? ` · hiệu lực ${fmtDay(src.valid_from)} → ${src.valid_to ? fmtDay(src.valid_to) : 'nay'}` : '');
+        return;
+      }
+      if (tabBtn) tabBtn.classList.remove('hidden');
+
+      // 2b. If it's a URL, no raw local file to fetch
       if (isLink) {
         return;
       }
@@ -1932,29 +1965,16 @@
                 ${escapeHtml(turn.query)}
               </div>
             </div>
-            <div class="flex items-start space-x-3 w-full">
-              <div class="w-7 h-7 rounded-lg bg-neutral-900 text-white flex items-center justify-center p-1.5 flex-shrink-0 mt-0.5 shadow-sm">
-                <!-- 3D Ice Cube Logo (Just-ice) -->
-                <svg class="w-4 h-4 text-sky-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 2.5L20 7V17L12 21.5L4 17V7L12 2.5Z" />
-                  <path d="M12 12V21.5" />
-                  <path d="M12 12L20 7" />
-                  <path d="M12 12L4 7" />
-                  <path d="M10 5L14 7.2" stroke-width="1.4" opacity="0.85" />
-                  <path d="M7 11.5V15" stroke-width="1.4" opacity="0.85" />
-                </svg>
-              </div>
-              <div class="flex-1 min-w-0">
-                ${isPending ? `
-                  <div id="${msgId}-loading" class="flex items-center space-x-1.5 py-2 text-neutral-400">
-                    <div class="w-2 h-2 rounded-full bg-neutral-400 dot-1"></div>
-                    <div class="w-2 h-2 rounded-full bg-neutral-400 dot-2"></div>
-                    <div class="w-2 h-2 rounded-full bg-neutral-400 dot-3"></div>
-                    <span class="text-[12px] text-neutral-400 ml-2 font-normal">Just-ice đang phân rã câu hỏi & đối chiếu 6 bộ luật...</span>
-                  </div>
-                ` : ''}
-                <div id="${msgId}-content" class="${isPending ? 'hidden' : ''}"></div>
-              </div>
+            <div class="w-full">
+              ${isPending ? `
+                <div id="${msgId}-loading" class="flex items-center space-x-1.5 py-2 text-neutral-400">
+                  <div class="w-2 h-2 rounded-full bg-neutral-400 dot-1"></div>
+                  <div class="w-2 h-2 rounded-full bg-neutral-400 dot-2"></div>
+                  <div class="w-2 h-2 rounded-full bg-neutral-400 dot-3"></div>
+                  <span class="text-[12px] text-neutral-400 ml-2 font-normal">Just-ice đang phân rã câu hỏi & đối chiếu 6 bộ luật...</span>
+                </div>
+              ` : ''}
+              <div id="${msgId}-content" class="${isPending ? 'hidden' : ''}"></div>
             </div>
           </div>
         `;
@@ -2159,18 +2179,50 @@
           return;
         }
 
+        // OCR + quality issues (W02): liệt kê để người nạp kiểm tra trước khi dùng số liệu
+        const notes = [];
+        added.forEach(a => {
+          if (a.ocr_pages && a.ocr_pages.length) {
+            notes.push(`ℹ️ ${a.source}: OCR ${a.ocr_pages.length} trang [${a.ocr_pages.join(', ')}] (chi phí ${Number(a.ocr_cost_usd || 0).toFixed(4)} USD)`);
+          }
+          const pii = Object.entries(a.pii_counts || {});
+          if (pii.length) {
+            notes.push(`🔒 ${a.source}: đã che PII ${pii.map(([k, n]) => `${k} ×${n}`).join(', ')}`);
+          }
+          (a.quality_issues || []).forEach(i => {
+            notes.push(`⚠️ ${a.source} · ${i.location}: ${i.type} — ${i.detail}`);
+          });
+          if (a.empty_pages && a.empty_pages.length) {
+            notes.push(`⚠️ ${a.source}: trang không có text (PDF scan?): ${a.empty_pages.join(', ')}`);
+          }
+        });
+        const needsReview = added.some(a => a.needs_review);
+
+        let summary;
         if (skipped.length > 0 && added.length === 0) {
           statusMsg.className = 'text-[12px] text-amber-700 block';
-          statusMsg.textContent = `⚠️ Tài liệu đã có sẵn trong kho: ${skipped.map(s => s.source).join(', ')}`;
+          summary = `⚠️ Tài liệu đã có sẵn trong kho: ${skipped.map(s => s.source).join(', ')}`;
         } else {
-          statusMsg.className = 'text-[12px] text-emerald-700 block';
-          statusMsg.textContent = `✅ Thành công: Đã nạp ${added.map(a => a.source + ' (' + a.chunks + ' chunks)').join(', ')}`;
+          statusMsg.className = `text-[12px] ${needsReview ? 'text-amber-700' : 'text-emerald-700'} block`;
+          summary = `✅ Thành công: Đã nạp ${added.map(a => a.source + ' (' + a.chunks + ' chunks' + (a.tables ? ', ' + a.tables + ' bảng' : '') + ')').join(', ')}`;
+        }
+        statusMsg.style.whiteSpace = 'pre-line';
+        statusMsg.textContent = [summary, ...notes].join('\n');
+        // Báo cáo chi tiết từng trang (độ tin cậy OCR, độ đầy đủ) nằm ở trang /upload
+        const detailTarget = added.find(a => a.needs_review) || added[0] || skipped[0];
+        if (detailTarget && detailTarget.doc_id) {
+          const link = document.createElement('a');
+          link.href = '/upload#' + encodeURIComponent(detailTarget.doc_id);
+          link.className = 'block mt-1 underline text-neutral-800';
+          link.textContent = 'Xem báo cáo chi tiết từng trang →';
+          statusMsg.appendChild(link);
         }
 
         fileInput.value = '';
         urlInput.value = '';
         await fetchAppInfo();
-        setTimeout(() => toggleIngestModal(false), 2200);
+        // Có issue cần review thì giữ modal mở để người dùng đọc hết cảnh báo
+        if (!needsReview && notes.length === 0) setTimeout(() => toggleIngestModal(false), 2200);
       } catch (err) {
         statusMsg.className = 'text-[12px] text-red-600 block';
         statusMsg.textContent = `Lỗi: ${err.message}`;

@@ -1,0 +1,30 @@
+{
+  "baseline": {
+    "parser": "week-1 (89f07de)",
+    "unsupported": {
+      "tables/19_budget_valid_multiline_header.csv": "UnsupportedSourceError: Không hỗ trợ loại file '.csv' (chỉ PDF, DOCX, TXT/MD hoặc URL)",
+      "tables/28_fee_schedule_pii.xlsx": "UnsupportedSourceError: Không hỗ trợ loại file '.xlsx' (chỉ PDF, DOCX, TXT/MD hoặc URL)",
+      "scans/24_legal_fee_table_clear.png": "UnsupportedSourceError: Không hỗ trợ loại file '.png' (chỉ PDF, DOCX, TXT/MD hoặc URL)"
+    },
+    "pdf_scan_text_chars": 0,
+    "long_docx_table": {
+      "chunks": 2,
+      "with_header": 1,
+      "with_unit": 1
+    }
+  },
+  "current": {
+    "parser": "week-2 (working tree)",
+    "unsupported": {
+      "tables/19_budget_valid_multiline_header.csv": "ok: 1 page(s)",
+      "tables/28_fee_schedule_pii.xlsx": "ok: 1 page(s)",
+      "scans/24_legal_fee_table_clear.png": "UnsupportedSourceError: Không hỗ trợ loại file '.png' (chỉ PDF, DOCX, TXT/MD, CSV/XLSX hoặc URL)"
+    },
+    "pdf_scan_text_chars": 0,
+    "long_docx_table": {
+      "chunks": 3,
+      "with_header": 3,
+      "with_unit": 3
+    }
+  }
+}

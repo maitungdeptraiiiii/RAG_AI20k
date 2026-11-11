@@ -69,6 +69,15 @@ class Settings:
     llm_temperature: float | None = None  # None = không gửi tham số (gpt-6-luna chỉ nhận mặc định)
     condense_model: str = "gpt-4o-mini"   # Model nhẹ cho QueryCondenser gộp ngữ cảnh chat nhanh
 
+    # OCR (W02-02c): "none" | "gemini". Gemini gửi ẢNH ra ngoài (OpenRouter -> Google) trước khi
+    # mask PII -> chỉ bật cho tài liệu công khai. Tesseract local làm tín hiệu chất lượng.
+    ocr_engine: str = "none"
+    ocr_model: str = "google/gemini-3.5-flash-lite"
+    openrouter_api_key: str | None = None       # OPENROUTER_API_KEY (hoặc "openrouter=" trong .env cũ)
+    ocr_cost_cap_usd: float = 1.0               # dừng OCR khi tổng chi phí trong cache/ocr vượt ngưỡng
+    tesseract_cmd: str = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    ocr_min_confidence: float = 65.0            # chọn trên split dev của fixtures
+
     # Chunking (TV1)
     max_syllables: int = 300
 
@@ -174,6 +183,12 @@ class Settings:
             if raw is None or raw == "":
                 continue
             kwargs[f.name] = _convert(f.name, raw, getattr(cls, f.name))
+        if "openrouter_api_key" not in kwargs:
+            legacy = {k.strip().lower(): v for k, v in env.items()}.get("openrouter")
+            if legacy:
+                kwargs["openrouter_api_key"] = legacy
+        if kwargs.get("ocr_engine", "none").lower() not in {"none", "gemini"}:
+            raise ValueError(f"OCR_ENGINE phải là none|gemini, nhận {kwargs['ocr_engine']!r}")
         return cls(**kwargs)
 
     @classmethod

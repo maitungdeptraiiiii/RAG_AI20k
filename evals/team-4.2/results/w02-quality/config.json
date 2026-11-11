@@ -1,0 +1,17 @@
+{
+  "commit": "db7d3cf-dirty",
+  "labels": "data/team-4.2/fixtures/labels.jsonl",
+  "observed": "evals/team-4.2/results/w02-quality/findings.jsonl",
+  "match_rule": "fixture_id + issue_code",
+  "in_scope_prefixes": [
+    "pii.",
+    "numeric.",
+    "table.",
+    "date.",
+    "ocr."
+  ],
+  "numeric_config": "csv-machine (decimal '.', no grouping)",
+  "header_rows_override": {
+    "w02-19": 2
+  }
+}

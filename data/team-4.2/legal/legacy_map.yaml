@@ -1,0 +1,9 @@
+# Định danh pháp lý của kho luật cũ (6 Bộ luật trong data/team-4.2/raw/, không có metadata) — dùng để loại trùng với kho
+# có phiên bản (rag.legal) theo (loại văn bản, số hiệu, cơ quan ban hành) và để gắn trạng thái cấp văn bản.
+laws:
+  - {source: bo_luat_dan_su_2015.txt, type: "Bộ luật", number: "91/2015/QH13", issuer: "Quốc hội"}
+  - {source: bo_luat_hang_hai_2015.txt, type: "Bộ luật", number: "95/2015/QH13", issuer: "Quốc hội"}
+  - {source: bo_luat_hinh_su_2015.txt, type: "Bộ luật", number: "100/2015/QH13", issuer: "Quốc hội"}
+  - {source: bo_luat_lao_dong_2019.txt, type: "Bộ luật", number: "45/2019/QH14", issuer: "Quốc hội"}
+  - {source: bo_luat_to_tung_dan_su_2015.txt, type: "Bộ luật", number: "92/2015/QH13", issuer: "Quốc hội"}
+  - {source: bo_luat_to_tung_hinh_su_2015.txt, type: "Bộ luật", number: "101/2015/QH13", issuer: "Quốc hội"}

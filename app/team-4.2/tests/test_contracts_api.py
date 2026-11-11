@@ -159,9 +159,19 @@ def test_ai_failure_is_502(client):
 
 
 def _server():
+    """Nạp server.py để test định tuyến — rồi khôi phục cấu hình dùng chung mà server ghi đè lúc import
+    (legal_api.CONFIG / contracts_api.CONFIG), để không làm bẩn các file test chạy sau."""
+    import legal_api
+
+    saved = [(ns, dict(vars(ns))) for ns in (legal_api.CONFIG, contracts_api.CONFIG)]
     spec = importlib.util.spec_from_file_location("contracts_route_server", UI / "server.py")
     mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
+    try:
+        spec.loader.exec_module(mod)
+    finally:
+        for ns, values in saved:
+            vars(ns).clear()
+            vars(ns).update(values)
     return mod
 
 

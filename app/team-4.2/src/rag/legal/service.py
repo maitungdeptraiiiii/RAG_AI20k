@@ -141,6 +141,8 @@ class LegalService:
         doc = self.store.document(key)
         if doc is None:
             raise KeyError(key)
+        if doc.eff_status == "unverified_import":
+            raise ValueError("Imported snapshot needs reviewed applicability metadata before version building")
         provisions = self.provisions_for(key)
         effectivity = parse_effectivity(provisions)
         all_ops = self.store.operations()
@@ -254,7 +256,7 @@ class LegalService:
                 and item.payload.get("vbhn_excerpt") == mismatch.vbhn_excerpt)
 
     def build_all(self) -> list[BuildRun]:
-        docs = sorted((d for d in self.store.documents() if not d.is_consolidated),
+        docs = sorted((d for d in self.store.documents() if not d.is_consolidated and d.eff_status != "unverified_import"),
                       key=lambda d: (d.issued_on or date.min, d.document_key))
         for d in docs:
             self.plan_operations(d.document_key)

@@ -34,6 +34,8 @@ CREATE INDEX IF NOT EXISTS versions_pid ON versions (build_id, provision_id);
 CREATE TABLE IF NOT EXISTS review_items (review_id TEXT PRIMARY KEY, kind TEXT, document_key TEXT, operation_id TEXT,
     provision_id TEXT, status TEXT, payload TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS decisions (seq INTEGER PRIMARY KEY AUTOINCREMENT, review_id TEXT, payload TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS reference_snapshots (document_key TEXT PRIMARY KEY, checksum TEXT NOT NULL,
+    payload TEXT NOT NULL);
 """
 
 
@@ -115,6 +117,36 @@ class LegalStore:
         with self._conn() as c:
             rows = c.execute("SELECT payload FROM documents ORDER BY document_key").fetchall()
         return [_load(LegalDocument, r[0]) for r in rows]
+
+    def reference_snapshots(self) -> dict[str, dict]:
+        """Imported source snapshots have UNKNOWN applicability, not fake versions."""
+        with self._conn() as c:
+            rows = c.execute("SELECT document_key, payload FROM reference_snapshots").fetchall()
+        return {key: json.loads(payload) for key, payload in rows}
+
+    def reference_checksums(self) -> dict[str, str]:
+        with self._conn() as c:
+            return dict(c.execute("SELECT document_key, checksum FROM reference_snapshots"))
+
+    def import_reference_snapshots(self, entries: Sequence[tuple[LegalDocument, dict]]) -> int:
+        """Publish an entire migration transactionally; never replace a legal build."""
+        changed = 0
+        with self._conn() as c:
+            for doc, snapshot in entries:
+                if c.execute("SELECT 1 FROM builds WHERE document_key=? LIMIT 1", (doc.document_key,)).fetchone():
+                    raise ValueError("Cannot replace a versioned document with a reference snapshot")
+                old = c.execute("SELECT checksum FROM reference_snapshots WHERE document_key=?",
+                                (doc.document_key,)).fetchone()
+                if old and old[0] == snapshot["checksum"]:
+                    continue
+                if not old and c.execute("SELECT 1 FROM documents WHERE document_key=?",
+                                         (doc.document_key,)).fetchone():
+                    raise ValueError("Reference migration collides with an existing catalog document")
+                c.execute("INSERT OR REPLACE INTO documents VALUES (?, ?)", (doc.document_key, _dump(doc)))
+                c.execute("INSERT OR REPLACE INTO reference_snapshots VALUES (?, ?, ?)",
+                          (doc.document_key, snapshot["checksum"], _dump(snapshot)))
+                changed += 1
+        return changed
 
     def add_relation(self, rel: DocumentRelation) -> None:
         with self._conn() as c:

@@ -68,14 +68,16 @@ class TemporalQA:
                 roles.setdefault(chunk.chunk_id, set()).add(anchor.role)
                 window.setdefault(chunk.chunk_id, (anchor.start, end))
                 # phiên bản không phủ kín khoảng mốc -> luật (Điều hoặc cả văn bản) đổi bên trong khoảng
-                if anchor.start != end and (chunk.valid_from > anchor.start
+                if chunk.valid_from is not None and anchor.start != end and (chunk.valid_from > anchor.start
                                             or (chunk.valid_to is not None and chunk.valid_to <= end)):
                     year_change = True
         return list(picked.values()), roles, window, year_change
 
     def _document_status(self, key: str, start: date, end: date) -> str:
-        at = [c for c in self.index.chunks.values() if c.document_key == key and c.valid_from <= end
-              and (c.valid_to is None or c.valid_to > start)]
+        at = [c for c in self.index.chunks.values() if c.document_key == key and
+              (c.valid_from is None or (c.valid_from <= end and (c.valid_to is None or c.valid_to > start)))]
+        if at and all(c.valid_from is None for c in at):
+            return "unversioned"
         return versioned_status(at)
 
     def _provenance(self, chunk: VersionedChunk) -> tuple[str, ...]:
@@ -119,7 +121,7 @@ class TemporalQA:
         for c in chunks:
             start, end = window[c.chunk_id]
             items.append(ContextItem(
-                len(items) + 1, "versioned", c.document_key, titles.get(c.document_key, c.document_key), c.article_id,
+            len(items) + 1, "reference" if c.valid_from is None else "versioned", c.document_key, titles.get(c.document_key, c.document_key), c.article_id,
                 c.section, c.text, c.valid_from, c.valid_to, self._document_status(c.document_key, start, end),
                 c.verification_status, self._provenance(c), tuple(sorted(roles[c.chunk_id])), c.chunk_id))
 
@@ -136,7 +138,8 @@ class TemporalQA:
                     len(items) + 1, "legacy", None, chunk.source, None, chunk.section or "", chunk.text, None, None,
                     legacy_status(store, law, start=p_start, end=p_end), None, (), (), chunk.chunk_id))
 
-        rules = collect_rules(self.service, chunks, timeline) if chunks else []
+        dated_chunks = [c for c in chunks if c.valid_from is not None]
+        rules = collect_rules(self.service, dated_chunks, timeline) if dated_chunks else []
         if not items:
             answer = TemporalAnswer(REFUSAL, certainty="cannot_conclude", downgrade_reasons=["certainty.no_context"])
             result = TemporalResult(timeline, items, rules, answer, query_pii=query_pii)

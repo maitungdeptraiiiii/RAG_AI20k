@@ -23,7 +23,7 @@ class VersionedChunk:
     article_id: str
     section: str
     text: str
-    valid_from: date
+    valid_from: date | None
     valid_to: date | None
     verification_status: VerificationStatus
     status_reasons: tuple[str, ...]

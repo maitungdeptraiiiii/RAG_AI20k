@@ -87,11 +87,24 @@ class VersionedIndex:
         builds: dict[str, str] = {}
         skipped: set[str] = set()
         rows: list[Chunk] = []
+        snapshots = self.store.reference_snapshots()
         for doc in self.store.documents():
             if doc.is_consolidated:
                 continue
             run = self.store.latest_build(doc.document_key)
             if run is None:
+                snapshot = snapshots.get(doc.document_key)
+                if snapshot:
+                    build_id = "reference:" + snapshot["checksum"]
+                    builds[doc.document_key] = build_id
+                    for row in snapshot["chunks"]:
+                        cid = f"{build_id}:{row['chunk_id']}"
+                        vc = VersionedChunk(cid, doc.document_key, row["chunk_id"], row.get("section") or doc.title,
+                                            row["text"], None, None, "needs_review",
+                                            ("migration.applicability_unverified",), (), (), build_id)
+                        chunks[cid] = vc
+                        rows.append(Chunk(cid, doc.document_key, doc.title, row.get("page_start"),
+                                          row.get("page_end"), vc.section, vc.text))
                 continue
             try:
                 provisions = parse_structure(Path(doc.raw_text_path).read_text(encoding="utf-8"), doc.document_key)
@@ -101,7 +114,7 @@ class VersionedIndex:
                 skipped.add(doc.document_key)
                 continue
             builds[doc.document_key] = run.build_id
-            for vc in export_chunks(self.store, doc.document_key):
+            for vc in export_chunks(self.store, doc.document_key, build_id=run.build_id):
                 chunks[vc.chunk_id] = vc
                 rows.append(Chunk(vc.chunk_id, doc.document_key, doc.title, None, None, vc.section, vc.text))
         bm25 = BM25Index()
@@ -117,18 +130,22 @@ class VersionedIndex:
 
     def stale(self) -> bool:
         st = self._state
+        snapshots = self.store.reference_checksums()
         for doc in self.store.documents():
             if doc.is_consolidated or doc.document_key in st.skipped:
                 continue
             run = self.store.latest_build(doc.document_key)
             if run is not None and st.builds.get(doc.document_key) != run.build_id:
                 return True
+            if run is None and doc.document_key in snapshots and st.builds.get(doc.document_key) != (
+                    "reference:" + snapshots[doc.document_key]):
+                return True
         return False
 
     @staticmethod
     def _allowed(chunks: dict[str, VersionedChunk], start: date, end: date) -> set[str]:
         return {cid for cid, c in chunks.items()
-                if c.valid_from <= end and (c.valid_to is None or c.valid_to > start)}
+                if c.valid_from is None or (c.valid_from <= end and (c.valid_to is None or c.valid_to > start))}
 
     def search(self, query: str, start: date, end: date, k: int) -> list[tuple[VersionedChunk, float]]:
         st = self._state

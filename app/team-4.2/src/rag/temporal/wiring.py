@@ -23,7 +23,9 @@ def legal_embedder(settings: Settings):
 
 
 def legal_vector_dir(settings: Settings) -> Path:
-    return settings.data_dir / "legal" / "vector"
+    # Keep the pre-migration index intact for rollback. Both modes use this
+    # catalog index, including explicitly unverified imported snapshots.
+    return settings.data_dir / "legal" / "vector-catalog"
 
 
 def make_versioned_index(settings: Settings, llm: Any, store: LegalStore, *, embedder: Any = None,

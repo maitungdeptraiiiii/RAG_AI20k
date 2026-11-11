@@ -17,6 +17,7 @@ from typing import Any
 from rag.contracts.evidence import LawEvidence, LegacySearch, find_evidence, law_changes
 from rag.contracts.llm_json import ContractAIError, ask_json, quote_ok
 from rag.contracts.models import Contract
+from rag.quality.pii import mask_text
 
 GROUPS = ("illegal", "missing_required", "unfavorable", "ambiguous")
 LEGAL_GROUPS = ("illegal", "missing_required")
@@ -26,6 +27,11 @@ LEGACY_NOTE = "Căn cứ từ Kho cũ — chưa xác định phiên bản; kết
 NO_DATE_NOTE = "Chưa có ngày ký — hãy nhập ngày ký để kiểm tra pháp lý"
 UPLOAD_HINT = "Có thể upload luật ở trang Nạp văn bản pháp luật (/upload)."
 DEFAULT_LAW = "luật điều chỉnh vấn đề này"
+GROUP_LABEL = {"illegal": "Trái luật", "missing_required": "Thiếu nội dung bắt buộc", "unfavorable": "Bất lợi",
+               "ambiguous": "Mơ hồ / dễ tranh chấp"}
+SUSPECT_LABEL = {"illegal": "Nghi vấn trái luật — chưa kết luận",
+                 "missing_required": "Nghi vấn thiếu nội dung bắt buộc — chưa kết luận"}
+UNVERIFIED_NOTE = "Nhận định của AI, chưa có căn cứ trong kho luật"
 
 
 def refusal_text(law: str | None, in_store: bool = False) -> str:
@@ -75,6 +81,7 @@ Trả JSON: {"redlines": [{"finding_id": "...", "old": "đoạn cũ nguyên văn
 
 ANSWER = "BƯỚC: answer\n" + _ROLE + """
 Trả lời câu hỏi của người dùng về hợp đồng, dựa trên các đơn vị và căn cứ luật được cung cấp (laws).
+"legal_conclusion" = true khi câu trả lời khẳng định điều gì đó hợp pháp / trái luật / được hay không được làm theo luật.
 Trả JSON: {"answer": "...", "legal_conclusion": true|false, "law_ids": ["eid đã dùng"], "units": ["uid đã dùng"]}"""
 
 
@@ -84,10 +91,10 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
-def _new_report(contract: Contract, op: str, **extra) -> dict[str, Any]:
+def _new_report(contract: Contract, op: str, coverage: dict | None = None, **extra) -> dict[str, Any]:
     rep = {"rid": uuid.uuid4().hex[:10], "op": op, "created_at": _now(), "party": contract.party or "neutral",
            "anchor": contract.sign_date.isoformat() if contract.sign_date else None,
-           "coverage": {"reviewed": len(contract.units), "total": contract.total_units}, **extra}
+           "coverage": coverage or {"reviewed": len(contract.units), "total": contract.total_units}, **extra}
     contract.reports[rep["rid"]] = rep
     return rep
 
@@ -130,9 +137,15 @@ def _verify(ctx: ReviewContext, contract: Contract, items: list[dict]) -> dict[s
 
 
 def _legal_status(supporting: list[LawEvidence]) -> str:
-    if any(e.store == "versioned" for e in supporting):
+    """Căn cứ kho có phiên bản (không mâu thuẫn) -> concluded; chỉ kho cũ / chỉ phiên bản mâu thuẫn -> conditional."""
+    if any(e.store == "versioned" and e.status != "conflicted" for e in supporting):
         return "concluded"
     return "conditional" if supporting else "cannot_conclude"
+
+
+def _masked(contract: Contract, text: str) -> str:
+    """Câu tra luật đi qua embedding / rerank bên ngoài: che PII như đường chat thường."""
+    return mask_text(text, state=contract.mask_state).masked_text
 
 
 # --- thao tác ---------------------------------------------------------------------------------
@@ -161,7 +174,12 @@ def _scope(ctx: ReviewContext, contract: Contract, unit_ids, topics):
         data = ask_json(ctx.llm, SELECT, {"topics": list(topics), "units": _units_payload(contract.units)},
                         contract.mask_state)
         wanted = {str(x) for x in data.get("units") or []}
-        return [u for u in contract.units if u.uid in wanted]
+        by_label = {u.label.casefold(): u.uid for u in contract.units}
+        wanted |= {by_label[w.casefold()] for w in wanted if w.casefold() in by_label}
+        scope = [u for u in contract.units if u.uid in wanted]
+        if not scope:
+            raise ContractAIError("Không xác định được điều khoản thuộc chủ đề đã chọn — hãy chọn điều khoản cụ thể")
+        return scope
     return list(contract.units)
 
 
@@ -175,16 +193,19 @@ def review(ctx: ReviewContext, contract: Contract, *, unit_ids=None, topics=None
     if not isinstance(raw, list):
         raise ContractAIError()
     by_uid = {u.uid: u for u in scope}
+    by_uid.update({u.label.casefold(): u for u in scope})        # mô hình đôi khi trả nhãn "Điều 8" thay vì uid
     titles = _law_titles(ctx.runtime)
     findings: list[dict[str, Any]] = []
     candidates: dict[str, list[LawEvidence]] = {}
     for i, f in enumerate(raw, 1):
-        if not isinstance(f, dict) or f.get("unit") not in by_uid:
+        key = str(f.get("unit") or "") if isinstance(f, dict) else ""
+        unit = by_uid.get(key) or by_uid.get(key.casefold())
+        if unit is None:
             continue
-        unit = by_uid[f["unit"]]
         group = f.get("group") if f.get("group") in GROUPS else "ambiguous"
         quote = str(f.get("quote") or "")
-        ok = quote_ok(unit.text, quote)
+        # "thiếu nội dung bắt buộc": không có câu chữ để trích -> không bắt trích dẫn
+        ok = quote_ok(unit.text, quote) or (group == "missing_required" and not quote.strip())
         legal = group in LEGAL_GROUPS or bool(f.get("legal_question"))
         item = {"id": f"F{i}", "unit": unit.uid, "unit_label": unit.label, "quote": quote if ok else "",
                 "quote_ok": ok, "needs_check": not ok, "group": group,
@@ -197,9 +218,11 @@ def review(ctx: ReviewContext, contract: Contract, *, unit_ids=None, topics=None
         elif contract.sign_date is None:
             item["legal_status"], item["note"] = "blocked_no_date", NO_DATE_NOTE
         elif ok:
-            q = f.get("legal_question") or item["explanation"]
+            q = _masked(contract, f.get("legal_question") or item["explanation"])
             candidates[item["id"]] = find_evidence(ctx.runtime, ctx.legacy_search, q, contract.sign_date, k=3)
         findings.append(item)
+    if raw and not findings:
+        raise ContractAIError()
 
     support = _verify(ctx, contract, [{"id": fid, "claim": next(x["explanation"] for x in findings if x["id"] == fid),
                                       "quote": next(x["quote"] for x in findings if x["id"] == fid),
@@ -218,6 +241,10 @@ def review(ctx: ReviewContext, contract: Contract, *, unit_ids=None, topics=None
             item["note"] = LEGACY_NOTE
         elif item["legal_status"] == "cannot_conclude":
             item["refusal"] = refusal_text(item["law_hint"], _in_store(item["law_hint"], titles))
+    for item in findings:
+        unverified = item["group"] in SUSPECT_LABEL and item["legal_status"] in ("cannot_conclude", "blocked_no_date")
+        item["group_label"] = SUSPECT_LABEL[item["group"]] if unverified else GROUP_LABEL[item["group"]]
+        item["explanation_note"] = UNVERIFIED_NOTE if unverified else None
 
     def rank(f):
         mine = party != "neutral" and party.casefold() in f["disadvantaged"].casefold()
@@ -225,7 +252,8 @@ def review(ctx: ReviewContext, contract: Contract, *, unit_ids=None, topics=None
 
     findings.sort(key=rank)
     op = "partial" if (unit_ids or topics) else "review"
-    return _new_report(contract, op, scope=[u.label for u in scope], topics=list(topics or []), findings=findings)
+    coverage = {"reviewed": len(scope), "total": contract.total_units}
+    return _new_report(contract, op, coverage=coverage, scope=[u.label for u in scope], topics=list(topics or []), findings=findings)
 
 
 def _latest(contract: Contract, ops: tuple[str, ...]) -> dict | None:
@@ -246,14 +274,14 @@ def law_changes_report(ctx: ReviewContext, contract: Contract) -> dict[str, Any]
     rows = law_changes(ctx.runtime, list(seen.values()), ctx.today)
     for r in rows:
         r["affected_units"] = affected.get(r["eid"], [])
-    return _new_report(contract, "law_changes", based_on=base["rid"], today=ctx.today.isoformat(), changes=rows)
+    return _new_report(contract, "law_changes", coverage=base["coverage"], based_on=base["rid"], today=ctx.today.isoformat(), changes=rows)
 
 
 def redline(ctx: ReviewContext, contract: Contract) -> dict[str, Any]:
     base = _latest(contract, ("review", "partial")) or review(ctx, contract)
     findings = base["findings"]
     if not findings:
-        return _new_report(contract, "redline", based_on=base["rid"], redlines=[])
+        return _new_report(contract, "redline", coverage=base["coverage"], based_on=base["rid"], redlines=[])
     payload = {"party": contract.party or "neutral",
                "findings": [{"id": f["id"], "unit_label": f["unit_label"], "quote": f["quote"],
                              "unit_text": (contract.unit(f["unit"]).text if contract.unit(f["unit"]) else ""),
@@ -271,11 +299,14 @@ def redline(ctx: ReviewContext, contract: Contract) -> dict[str, Any]:
                     "new": str(r.get("new") or ""), "reason": str(r.get("reason") or ""),
                     "legal_note": "Chưa kiểm tra pháp lý" if f["legal_status"] in ("cannot_conclude", "blocked_no_date")
                     else None})
-    return _new_report(contract, "redline", based_on=base["rid"], redlines=out)
+    if not out:
+        raise ContractAIError()
+    return _new_report(contract, "redline", coverage=base["coverage"], based_on=base["rid"], redlines=out)
 
 
 def answer(ctx: ReviewContext, contract: Contract, question: str, history: list[dict]) -> dict[str, Any]:
-    laws = find_evidence(ctx.runtime, ctx.legacy_search, question, contract.sign_date, k=4) if contract.sign_date else []
+    laws = (find_evidence(ctx.runtime, ctx.legacy_search, _masked(contract, question), contract.sign_date, k=4)
+            if contract.sign_date else [])
     data = ask_json(ctx.llm, ANSWER, {
         "question": question, "party": contract.party or "neutral",
         "history": [{"query": str(h.get("query", ""))[:500], "answer": str(h.get("answer", ""))[:500]}
@@ -289,10 +320,11 @@ def answer(ctx: ReviewContext, contract: Contract, question: str, history: list[
     labels = {u.uid: u.label for u in contract.units}
     units = [labels[u] for u in data.get("units") or [] if u in labels]
     status, used = "not_legal", []
+    related = ("\n\nCác điều khoản liên quan trong hợp đồng: " + ", ".join(units) + ".") if units else ""
     if data.get("legal_conclusion"):
         if contract.sign_date is None:
             status = "blocked_no_date"
-            text += "\n\n" + NO_DATE_NOTE + "."
+            text = NO_DATE_NOTE + "." + related          # không nhắc lại kết luận pháp lý chưa kiểm tra
         else:
             by = {e.eid: e for e in laws}
             cands = [by[e] for e in data.get("law_ids") or [] if e in by]
@@ -302,6 +334,6 @@ def answer(ctx: ReviewContext, contract: Contract, question: str, history: list[
             if status == "conditional":
                 text += "\n\n" + LEGACY_NOTE + "."
             elif status == "cannot_conclude":
-                text += "\n\n" + refusal_text(None)
+                text = refusal_text(None) + related      # không nhắc lại kết luận pháp lý chưa kiểm chứng
     return {"answer": text, "legal_status": status, "units": units, "evidence": [e.to_dict() for e in used],
             "anchor": contract.sign_date.isoformat() if contract.sign_date else None}

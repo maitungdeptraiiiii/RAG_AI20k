@@ -19,6 +19,8 @@ import asyncio
 import logging
 import re
 import secrets
+import unicodedata
+from urllib.parse import quote as _urlquote
 import tempfile
 from contextlib import contextmanager
 from datetime import date, datetime, timezone
@@ -214,18 +216,26 @@ def chat_think(cid: str, question: str, history: list[dict], stream: bool = Fals
     return events()
 
 
+def _disposition(stem: str, op: str, fmt: str) -> str:
+    """Header phải là latin-1: tên ASCII (bỏ dấu, đ -> d) + filename* UTF-8 cho trình duyệt hiển thị đúng tên."""
+    ascii_stem = unicodedata.normalize("NFKD", stem.replace("đ", "d").replace("Đ", "D"))
+    ascii_stem = re.sub(r"[^A-Za-z0-9._-]+", "_", ascii_stem.encode("ascii", "ignore").decode()).strip("_")[:60]
+    ascii_name = f"{ascii_stem or 'hop_dong'}_{op}.{fmt}"
+    utf8_name = f"{stem[:60] or 'hop_dong'}_{op}.{fmt}"
+    return f"attachment; filename=\"{ascii_name}\"; filename*=UTF-8''{_urlquote(utf8_name)}"
+
+
 def download(cid: str, rid: str, fmt: str) -> Response:
     c = get(cid)
     rep = c.reports.get(rid)
     if rep is None:
         raise KeyError(rid)
-    stem = re.sub(r"[^\w.-]+", "_", Path(c.filename).stem)[:60] or "hop_dong"
-    name = f"{stem}_{rep['op']}.{fmt}"
     if fmt == "docx":
         data, mime = report_docx(c, rep), "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     else:
         data, mime = report_pdf(c, rep), "application/pdf"
-    return Response(data, media_type=mime, headers={"Content-Disposition": f'attachment; filename="{name}"'})
+    return Response(data, media_type=mime,
+                    headers={"Content-Disposition": _disposition(Path(c.filename).stem, rep["op"], fmt)})
 
 
 # --- HTTP ----------------------------------------------------------------------------------------

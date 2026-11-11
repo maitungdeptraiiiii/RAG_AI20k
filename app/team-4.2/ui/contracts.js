@@ -18,6 +18,7 @@
   const STATUS = { concluded: ['Có căn cứ — kho luật có phiên bản', '#006300'], conditional: ['Có điều kiện — kho cũ', '#8a5a00'],
     cannot_conclude: ['Chưa thể kết luận', '#b42318'], blocked_no_date: ['Chưa có ngày ký', '#8a5a00'],
     not_legal: ['Nhận xét câu chữ / thương mại', '#475467'] };
+  const PROVISION = { verified: 'đã xác minh', needs_review: 'cần xem lại', conflicted: 'có mâu thuẫn' };
   const CHANGE = { unchanged: 'Không đổi', changed: 'Đã sửa đổi', repealed: 'Hết hiệu lực', untracked: 'Không theo dõi được (kho cũ)' };
 
   const state = { cards: {}, active: null, mode: 'free' };
@@ -294,7 +295,7 @@
   // ------------------------------------------------------------------ báo cáo
   function evidenceHtml(e) {
     const when = e.store === 'versioned'
-      ? `hiệu lực ${day(e.valid_from)} → ${e.valid_to ? day(e.valid_to) : 'nay'} · ${esc(e.status)}`
+      ? `hiệu lực ${day(e.valid_from)} → ${e.valid_to ? day(e.valid_to) : 'nay'} · ${esc(PROVISION[e.status] || e.status)}`
       : 'Kho cũ — chưa xác định phiên bản';
     return `<div class="text-[12px] border-l-2 border-neutral-300 pl-2"><span class="font-medium">${esc(e.source_title)}</span> — ${esc(e.section)}
       <span class="text-neutral-500">(${when})</span><div class="text-neutral-500 line-clamp-2">${esc((e.text || '').slice(0, 260))}</div></div>`;
@@ -307,11 +308,11 @@
     return `<div class="border border-neutral-200 rounded-xl p-3 space-y-1.5">
       <div class="flex flex-wrap items-center gap-2 text-[12.5px]"><span class="font-semibold">${i}. ${esc(f.unit_label)}</span>
         <span class="rounded-full px-2 py-0.5" style="color:${sev[1]};background:${sev[2]}">${sev[0]}</span>
-        <span class="text-neutral-600">${esc(GROUP[f.group] || f.group)}</span>
+        <span class="${f.explanation_note ? '' : 'text-neutral-600'}" style="${f.explanation_note ? 'color:#8a5a00' : ''}">${esc(f.group_label || GROUP[f.group] || f.group)}</span>
         ${f.disadvantaged ? `<span class="text-neutral-500">· bất lợi cho ${esc(f.disadvantaged)}</span>` : ''}</div>
       ${f.quote ? `<blockquote class="text-[13px] italic border-l-2 border-neutral-300 pl-2 text-neutral-700">“${esc(f.quote)}”</blockquote>`
         : (f.needs_check ? '<div class="text-[12px]" style="color:#8a5a00">Trích dẫn không khớp hợp đồng — cần kiểm tra lại.</div>' : '')}
-      <div class="text-[13.5px]">${esc(f.explanation)}</div>
+      <div class="text-[13.5px]">${f.explanation_note ? `<span class="text-[11.5px] text-neutral-500">(${esc(f.explanation_note)})</span> ` : ''}${esc(f.explanation)}</div>
       <div class="text-[12px] font-medium" style="color:${st[1]}">${esc(st[0])}</div>
       ${(f.evidence || []).map(evidenceHtml).join('')}${refusal}
       ${f.note ? `<div class="text-[12px] text-neutral-500">${esc(f.note)}</div>` : ''}

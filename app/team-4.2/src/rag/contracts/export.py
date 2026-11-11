@@ -26,6 +26,7 @@ _SEV = {"critical": "Nghiêm trọng", "major": "Cần sửa", "minor": "Lưu ý
 _STATUS = {"concluded": "Có căn cứ (kho luật có phiên bản)", "conditional": "Có điều kiện (kho cũ)",
            "cannot_conclude": "Chưa thể kết luận", "blocked_no_date": "Chưa có ngày ký",
            "not_legal": "Nhận xét câu chữ / thương mại"}
+_PROVISION = {"verified": "đã xác minh", "needs_review": "cần xem lại", "conflicted": "có mâu thuẫn"}
 _CHANGE = {"unchanged": "Không đổi", "changed": "Đã sửa đổi", "repealed": "Hết hiệu lực",
            "untracked": "Không theo dõi được (kho cũ)"}
 _FONTS = ("C:/Windows/Fonts/arial.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
@@ -42,7 +43,7 @@ def _day(iso: str | None) -> str:
 def _evidence_line(e: dict) -> str:
     if e.get("store") == "versioned":
         return (f"{e['source_title']} — {e['section']} (hiệu lực {_day(e.get('valid_from'))} → "
-                f"{_day(e.get('valid_to')) if e.get('valid_to') else 'nay'}; {e.get('status')})")
+                f"{_day(e.get('valid_to')) if e.get('valid_to') else 'nay'}; {_PROVISION.get(e.get('status'), e.get('status'))})")
     return f"{e['source_title']} — {e['section']} (Kho cũ — chưa xác định phiên bản)"
 
 
@@ -65,14 +66,16 @@ def blocks(contract: Contract, report: dict[str, Any]) -> list[tuple[str, Any]]:
         if not report.get("findings"):
             out.append(("para", "Không phát hiện vấn đề trong phạm vi đã soát."))
         for i, f in enumerate(report.get("findings") or [], 1):
-            out.append(("heading", f"{i}. {f['unit_label']} — {_GROUP.get(f['group'], f['group'])} "
+            group = f.get("group_label") or _GROUP.get(f["group"], f["group"])
+            out.append(("heading", f"{i}. {f['unit_label']} — {group} "
                                    f"({_SEV.get(f['severity'], f['severity'])})"))
             if f.get("quote"):
                 out.append(("quote", f["quote"]))
             elif f.get("needs_check"):
                 out.append(("para", "Trích dẫn không khớp hợp đồng — cần kiểm tra lại."))
             out.append(("para", f"Bất lợi cho: {f.get('disadvantaged') or '—'}"))
-            out.append(("para", f"Giải thích: {f.get('explanation') or ''}"))
+            note = f" ({f['explanation_note']})" if f.get("explanation_note") else ""
+            out.append(("para", f"Giải thích{note}: {f.get('explanation') or ''}"))
             out.append(("para", f"Đánh giá pháp lý: {_STATUS.get(f.get('legal_status'), f.get('legal_status'))}"))
             for e in f.get("evidence") or []:
                 out.append(("bullet", "Căn cứ: " + _evidence_line(e)))

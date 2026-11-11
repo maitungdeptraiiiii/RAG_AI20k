@@ -134,10 +134,28 @@ async def handle_index(request: Request) -> HTMLResponse:
     return HTMLResponse(content)
 
 
+def _legal_store():
+    """Kho luật có phiên bản (snapshot đang công bố); None nếu chưa dùng được."""
+    try:
+        return legal_api.get_backend().snapshots.store()
+    except Exception:  # noqa: BLE001 — /api/info không được hỏng vì kho luật
+        log.exception("Không đọc được kho luật có phiên bản cho /api/info")
+        return None
+
+
 async def handle_info(request: Request) -> JSONResponse:
-    """Trả về thông tin kho tài liệu và cấu hình đang chạy."""
+    """Thông tin hai kho: văn bản pháp luật (kho có phiên bản) và tài liệu thường (kho cũ, bỏ 6 bộ luật đã chuyển)."""
+    from datetime import date as _date
+
+    from rag.temporal.status import legacy_documents, legal_overview
+
     pipeline, settings = get_pipeline()
-    docs = pipeline.store.docs()
+    docs = legacy_documents(pipeline.store.docs(), _legacy_map())
+
+    def legal():
+        store = _legal_store()
+        return legal_overview(store, _date.today()) if store is not None else None
+    legal_docs = await asyncio.get_running_loop().run_in_executor(_executor, legal)
     adv_parts = []
     if settings.decomp_enabled:
         adv_parts.append("Decomposition")
@@ -149,7 +167,10 @@ async def handle_info(request: Request) -> JSONResponse:
 
     return JSONResponse({
         "status": "ready",
-        "total_chunks": len(pipeline.store),
+        "total_chunks": sum(d.n_chunks for d in docs),
+        "legal_docs": legal_docs or [],
+        "legal_total": len(legal_docs or []),
+        "legal_ready": legal_docs is not None,
         "docs": [
             {
                 "doc_id": d.doc_id,

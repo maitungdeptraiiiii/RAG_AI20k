@@ -70,3 +70,77 @@ def test_contract_think_uses_document_source_not_raw_old_store(tmp_path, monkeyp
     monkeypatch.setattr(contracts_api.CONFIG, "document_source", lambda: ({"doc:1": NOTE}, lambda q, k: []))
     contracts_api.chat_think("c1", "Hỏi?", [])
     assert list(seen["chunks"]) == ["doc:1"]
+
+
+# --- Task 3: danh sách văn bản pháp luật -------------------------------------------------------
+
+import importlib.util  # noqa: E402
+from datetime import date  # noqa: E402
+
+import pytest  # noqa: E402
+
+from rag.legal.snapshots import SnapshotManager  # noqa: E402
+from rag.temporal.status import legal_overview  # noqa: E402
+
+ROOT = Path(__file__).resolve().parents[3]
+
+
+@pytest.fixture(scope="module")
+def seeded_store(tmp_path_factory):
+    spec = importlib.util.spec_from_file_location("seed", ROOT / "scripts" / "team-4.2" / "seed_legal_demo.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    d = tmp_path_factory.mktemp("legal")
+    mod.seed(d, Path(__file__).parent / "fixtures" / "legal" / "realestate")
+    return SnapshotManager(d).store()
+
+
+def test_legal_overview_reports_status_today(seeded_store):
+    rows = {r["document_key"]: r for r in legal_overview(seeded_store, date(2026, 11, 11))}
+    old, new = rows["luat:65/2014/QH13"], rows["luat:27/2023/QH15"]
+    assert new["status_today"] == "in_force" and new["title"].startswith("Luật Nhà ở")
+    assert old["status_today"] == "repealed" and old["replaced_by"]["document_key"] == "luat:27/2023/QH15"
+    assert rows["luat:43/2024/QH15"]["status_today"] in ("in_force", "amending")
+    assert all(r["doc_type"] for r in rows.values())
+
+
+def test_legal_overview_before_new_law_is_not_yet(seeded_store):
+    rows = {r["document_key"]: r for r in legal_overview(seeded_store, date(2023, 1, 1))}
+    assert rows["luat:27/2023/QH15"]["status_today"] == "not_yet"
+
+
+def test_documents_panel_has_two_groups():
+    page = (Path(__file__).resolve().parents[1] / "ui" / "index.html").read_text(encoding="utf-8")
+    assert "Văn bản pháp luật" in page and "Tài liệu thường" in page and "legal_docs" in page
+
+
+def test_api_info_returns_legal_docs_and_only_ordinary_documents(seeded_store, monkeypatch):
+    import asyncio
+    import json as _json
+    import sys
+    ui = Path(__file__).resolve().parents[1] / "ui"
+    if str(ui) not in sys.path:
+        sys.path.insert(0, str(ui))
+    import legal_api
+    saved = [(ns, dict(vars(ns))) for ns in (legal_api.CONFIG,)]
+    spec = importlib.util.spec_from_file_location("sync_info_server", ui / "server.py")
+    server = importlib.util.module_from_spec(spec)
+    try:
+        spec.loader.exec_module(server)
+    finally:
+        for ns, values in saved:
+            vars(ns).clear()
+            vars(ns).update(values)
+    docs = [SimpleNamespace(doc_id="a", source="bo_luat_dan_su_2015.txt", n_chunks=700),
+            SimpleNamespace(doc_id="b", source="quy_trinh_noi_bo.pdf", n_chunks=5)]
+    pipeline = SimpleNamespace(store=SimpleNamespace(docs=lambda: docs, __len__=lambda: 705))
+    settings = SimpleNamespace(decomp_enabled=False, listwise_enabled=False, advanced="", llm_model="m", embed_model="e",
+                               embed_dim=1, rerank_backend="none", listwise_model="m", condense_model="m",
+                               context_min_p=0.5, top_k=5, ocr_engine="none", ocr_model="")
+    monkeypatch.setattr(server, "get_pipeline", lambda: (pipeline, settings))
+    monkeypatch.setattr(server, "_legal_store", lambda: seeded_store)
+    resp = asyncio.run(server.handle_info(None))
+    data = _json.loads(resp.body)
+    assert [d["source"] for d in data["docs"]] == ["quy_trinh_noi_bo.pdf"]
+    assert data["legal_total"] == len(data["legal_docs"]) > 0
+    assert any(d["document_key"] == "luat:27/2023/QH15" and d["status_today"] == "in_force" for d in data["legal_docs"])

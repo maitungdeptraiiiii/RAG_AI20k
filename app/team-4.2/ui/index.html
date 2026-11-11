@@ -822,6 +822,7 @@
       });
     });
 
+    let allLegalDocs = [];
     let allLoadedDocs = [];
 
     async function fetchAppInfo() {
@@ -831,12 +832,13 @@
         const data = await res.json();
         appConfig = data.settings || {};
         allLoadedDocs = data.docs || [];
+        allLegalDocs = data.legal_docs || [];
         const totalChunks = data.total_chunks || 0;
         const chunksEl = document.getElementById('cfg-chunks');
         if (chunksEl) chunksEl.textContent = totalChunks.toLocaleString() + ' chunks';
 
         // Render projects in sidebar and docs in modal
-        renderProjectsList(allLoadedDocs);
+        renderProjectsList(allLoadedDocs, allLegalDocs);
         renderDocsModal(allLoadedDocs);
       } catch (e) {
         console.warn('Fetch info error:', e);
@@ -848,18 +850,25 @@
       return typeof str === 'string' && (str.startsWith('http://') || str.startsWith('https://'));
     }
 
-    function renderProjectsList(docs) {
+    // Hai nhóm: "Văn bản pháp luật" (kho có phiên bản, data.legal_docs) và "Tài liệu thường" (kho cũ)
+    const LEGAL_STATUS = { in_force: ['Còn hiệu lực', '#006300'], repealed: ['Hết hiệu lực', '#b42318'],
+      not_yet: ['Chưa có hiệu lực', '#8a5a00'] };
+    function renderProjectsList(docs, legalDocs) {
+      docs = docs || []; legalDocs = legalDocs || [];
       const countEl = document.getElementById('projects-doc-count');
       const container = document.getElementById('projects-doc-list');
-      if (countEl) countEl.textContent = `${docs.length} văn bản`;
+      if (countEl) countEl.textContent = `${legalDocs.length + docs.length} văn bản`;
       if (!container) return;
-
-      if (!docs || docs.length === 0) {
-        container.innerHTML = '<div class="px-2.5 py-1 text-[12px] text-neutral-400 italic">Chưa có văn bản</div>';
-        return;
-      }
-
-      container.innerHTML = docs.map(d => {
+      const head = t => `<div class="px-2.5 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">${t}</div>`;
+      const legalHtml = legalDocs.length ? legalDocs.map(d => {
+        const st = LEGAL_STATUS[d.status_today] || ['', '#475467'];
+        const tip = d.replaced_by ? ` · thay bởi ${d.replaced_by.title}` : '';
+        return `<div class="w-full flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-neutral-700 text-left" title="${escapeHtml(d.title + tip)}">
+            <span class="truncate flex-1 text-[13px]">${escapeHtml(d.title)}</span>
+            <span class="text-[10.5px] flex-shrink-0" style="color:${st[1]}">${st[0]}</span></div>`;
+      }).join('') : '<div class="px-2.5 py-1 text-[12px] text-neutral-400 italic">Kho luật chưa sẵn sàng</div>';
+      container.innerHTML = head('Văn bản pháp luật') + legalHtml + head('Tài liệu thường') + (docs.length ? '' :
+        '<div class="px-2.5 py-1 text-[12px] text-neutral-400 italic">Chưa có tài liệu</div>') + docs.map(d => {
         const cleanName = formatDocTitle(d.source);
         const isLink = isUrl(d.source);
         const href = isLink ? d.source : `/doc/${encodeURIComponent(d.source)}`;

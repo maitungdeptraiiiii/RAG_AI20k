@@ -174,6 +174,22 @@ def chat_answer(cid: str, question: str, history: list[dict]) -> dict[str, Any]:
                                                "errors": {}, "arms": {}, "final_hits": []}}
 
 
+CONTRACT_AGENT_ROUNDS = 2
+CONTRACT_AGENT_DEADLINE_S = 300.0
+
+
+def _contract_agent_config(base):
+    """Think với hợp đồng: mỗi lượt có thêm nguồn hợp đồng + luật có phiên bản nên bước kiểm chứng cuối hay chạm hạn
+    180 s của cấu hình chung -> tối đa 2 vòng tìm, hạn 300 s. Think tự do giữ cấu hình chung."""
+    import dataclasses
+
+    from rag.agent import AgentConfig
+
+    base = base or AgentConfig()
+    return dataclasses.replace(base, max_rounds=min(base.max_rounds, CONTRACT_AGENT_ROUNDS),
+                               deadline_s=max(base.deadline_s, CONTRACT_AGENT_DEADLINE_S))
+
+
 def chat_think(cid: str, question: str, history: list[dict], stream: bool = False):
     """Hỏi với hợp đồng + Think: agent multi-hop trên hợp đồng + luật có phiên bản tại ngày ký + kho cũ.
     stream=True -> iterator sự kiện (progress ... done); lease giữ tới khi iterator chạy xong."""
@@ -186,7 +202,7 @@ def chat_think(cid: str, question: str, history: list[dict], stream: bool = Fals
     def legacy_hits(query: str, k: int):
         return legacy.retrieve(query, k).hits
 
-    config = CONFIG.agent_config() if CONFIG.agent_config else None
+    config = _contract_agent_config(CONFIG.agent_config() if CONFIG.agent_config else None)
     if not stream:
         with CONFIG.lease() as runtime:
             return run_contract_agent(c, baseline, config, runtime, legacy.chunks, legacy_hits, question, history)

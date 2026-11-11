@@ -227,3 +227,21 @@ def test_think_with_contract_uses_contract_agent(monkeypatch, stream):
             assert '"type": "progress"' in body and '"type": "done"' in body
     asyncio.run(go())
     assert seen == [("abc", "Hỏi?", stream)]
+
+
+def test_contract_think_uses_shorter_rounds_and_longer_deadline(client, monkeypatch):
+    from rag.agent import AgentConfig
+    import rag.contracts.agent_view as av
+
+    cid = upload(client).json()["contract_id"]
+    seen = {}
+
+    def fake(c, baseline, config, runtime, chunks, search, q, h, stream=False):
+        seen["config"] = config
+        return {"answer": "ok", "status": "answer", "contract_id": c.contract_id}
+    monkeypatch.setattr(av, "run_contract_agent", fake)
+    retriever = SimpleNamespace(chunks={}, retrieve=lambda q, k: SimpleNamespace(hits=[]))
+    contracts_api.CONFIG.agent_baseline = lambda: SimpleNamespace(retriever=retriever)
+    contracts_api.CONFIG.agent_config = lambda: AgentConfig(max_rounds=3, deadline_s=180.0)
+    contracts_api.chat_think(cid, "Hỏi?", [])
+    assert seen["config"].max_rounds == 2 and seen["config"].deadline_s == 300.0

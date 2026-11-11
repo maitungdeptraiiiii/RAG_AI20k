@@ -62,6 +62,26 @@ def document_search(retriever, legacy: Mapping[str, LegacyLaw]):
     return search
 
 
+def legal_overview(store: LegalStore, today: date) -> list[dict]:
+    """Văn bản pháp luật trong kho có phiên bản kèm tình trạng tại `today`: in_force | repealed | not_yet."""
+    in_force = {d.document_key for d in store.laws_in_force(today)}
+    ops = [o for o in store.operations() if o.operation_type == "REPEAL_DOCUMENT" and o.review_status != "rejected"]
+    rows = []
+    for d in store.documents():
+        if d.is_consolidated:
+            continue
+        versions = store.versions(d.document_key)
+        start = min((v.valid_from for v in versions), default=None)
+        status = "in_force" if d.document_key in in_force else (
+            "not_yet" if start is not None and start > today else "repealed")
+        repeal = next((o for o in ops if o.target_document_key == d.document_key), None) if status == "repealed" else None
+        by = store.document(repeal.source_document_key) if repeal else None
+        rows.append({"document_key": d.document_key, "title": d.title, "doc_type": d.doc_type,
+                     "doc_number": d.doc_number, "status_today": status,
+                     "replaced_by": {"document_key": by.document_key, "title": by.title} if by else None})
+    return sorted(rows, key=lambda r: (r["status_today"] != "in_force", r["title"]))
+
+
 def legacy_duplicates(store: LegalStore, legacy: Mapping[str, LegacyLaw]) -> set[str]:
     known = {_identity(d.doc_type, d.doc_number, d.issuer) for d in store.documents() if not d.is_consolidated}
     return {src for src, law in legacy.items() if _identity(law.doc_type, law.doc_number, law.issuer) in known}

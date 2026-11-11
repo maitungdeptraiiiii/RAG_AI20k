@@ -852,7 +852,7 @@
 
     // Hai nhóm: "Văn bản pháp luật" (kho có phiên bản, data.legal_docs) và "Tài liệu thường" (kho cũ)
     const LEGAL_STATUS = { in_force: ['Còn hiệu lực', '#006300'], repealed: ['Hết hiệu lực', '#b42318'],
-      not_yet: ['Chưa có hiệu lực', '#8a5a00'] };
+      not_yet: ['Chưa có hiệu lực', '#8a5a00'], amending: ['Luật sửa đổi', '#475467'], unknown: ['Chưa rõ', '#8a5a00'] };
     function renderProjectsList(docs, legalDocs) {
       docs = docs || []; legalDocs = legalDocs || [];
       const countEl = document.getElementById('projects-doc-count');
@@ -862,7 +862,8 @@
       const head = t => `<div class="px-2.5 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">${t}</div>`;
       const legalHtml = legalDocs.length ? legalDocs.map(d => {
         const st = LEGAL_STATUS[d.status_today] || ['', '#475467'];
-        const tip = d.replaced_by ? ` · thay bởi ${d.replaced_by.title}` : '';
+        const tip = d.replaced_by ? ` · thay bởi ${d.replaced_by.title}`
+          : (d.amends && d.amends.length ? ` · sửa: ${d.amends.map(t => t.title).join('; ')}` : '');
         return `<div class="w-full flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-neutral-700 text-left" title="${escapeHtml(d.title + tip)}">
             <span class="truncate flex-1 text-[13px]">${escapeHtml(d.title)}</span>
             <span class="text-[10.5px] flex-shrink-0" style="color:${st[1]}">${st[0]}</span></div>`;
@@ -1871,7 +1872,11 @@
         openCanvas(chunkId, n);
       };
       const popTab = document.getElementById('popover-tab-btn');
-      if (popTab && src.source) {
+      // Nguồn luật có phiên bản / kho có phiên bản không có tệp để mở ("Luật có phiên bản: " là nhãn của Think)
+      const noFile = !src.source || src.store === 'versioned' || String(src.source).startsWith('Luật có phiên bản: ')
+        || String(src.source).startsWith('Hợp đồng: ');
+      if (popTab) popTab.classList.toggle('hidden', noFile);
+      if (popTab && src.source && !noFile) {
         const isLink = isUrl(src.source);
         popTab.href = isLink ? src.source : ('/doc/' + encodeURIComponent(src.source));
         const spanEl = popTab.querySelector('span');

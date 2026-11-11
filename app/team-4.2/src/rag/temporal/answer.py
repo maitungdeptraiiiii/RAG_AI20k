@@ -22,7 +22,7 @@ SYSTEM_PROMPT = """Bạn là trợ lý pháp lý về pháp luật Việt Nam. C
 Quy tắc bắt buộc:
 - Không tự chọn phiên bản luật: mỗi căn cứ đã được hệ thống gắn khoảng hiệu lực và mốc áp dụng; dùng đúng căn cứ cho đúng mốc.
 - Trả lời theo từng vấn đề pháp lý; mỗi vấn đề nêu mốc áp dụng (vai trò của mốc) và căn cứ tương ứng. Không mặc định luật tại ngày ký điều chỉnh mọi vấn đề phát sinh sau đó.
-- Căn cứ "Kho cũ" (chưa xác định phiên bản) chỉ để tham khảo, không làm căn cứ duy nhất cho kết luận.
+- Nguồn "Tài liệu (không phải văn bản pháp luật)" chỉ để tham khảo, KHÔNG phải căn cứ pháp lý; không dùng làm căn cứ cho kết luận pháp lý.
 - Căn cứ có trạng thái khác verified: nêu rõ giới hạn.
 - Với mỗi QUY ĐỊNH CHUYỂN TIẾP: xác định (1) có liên quan đến loại sự kiện đang xét không, (2) người dùng đã cung cấp đủ dữ kiện chưa, (3) có ngoại lệ có thể đổi kết luận không. Thiếu dữ kiện thì đánh giá "undetermined" và đặt câu hỏi bổ sung, không suy diễn.
 - Nếu mốc chỉ có năm/tháng mà luật thay đổi trong khoảng đó, trình bày khác biệt và yêu cầu ngày cụ thể nếu kết luận phụ thuộc vào nó.
@@ -76,7 +76,7 @@ def build_messages(question: str, timeline: LegalTimeline, items: Sequence[Conte
     for it in items:
         valid = ("chưa xác định phiên bản" if it.valid_from is None else
                  f"hiệu lực từ {it.valid_from.isoformat()} đến {it.valid_to.isoformat() if it.valid_to else 'nay'}")
-        store = "Kho có phiên bản" if it.store == "versioned" else "Kho cũ — chỉ tham khảo"
+        store = "Kho có phiên bản" if it.store == "versioned" else "Tài liệu (không phải văn bản pháp luật)"
         status = f"trạng thái văn bản: {it.document_status}" + (
             f"; điều khoản: {it.provision_status}" if it.provision_status else "")
         prov = f"; sửa đổi bởi: {', '.join(it.provenance)}" if it.provenance else ""

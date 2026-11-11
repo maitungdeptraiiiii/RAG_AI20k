@@ -62,24 +62,39 @@ def document_search(retriever, legacy: Mapping[str, LegacyLaw]):
     return search
 
 
+_AMENDING_TITLE = re.compile(r"sửa\s+đổi", re.IGNORECASE)
+
+
 def legal_overview(store: LegalStore, today: date) -> list[dict]:
-    """Văn bản pháp luật trong kho có phiên bản kèm tình trạng tại `today`: in_force | repealed | not_yet."""
+    """Văn bản pháp luật trong kho có phiên bản kèm tình trạng tại `today`:
+    in_force | repealed | not_yet | amending (luật chỉ để sửa luật khác, kèm danh sách luật bị sửa) | unknown."""
     in_force = {d.document_key for d in store.laws_in_force(today)}
-    ops = [o for o in store.operations() if o.operation_type == "REPEAL_DOCUMENT" and o.review_status != "rejected"]
+    ops = store.operations()
+    docs = {d.document_key: d for d in store.documents() if not d.is_consolidated}
+    amends: dict[str, set[str]] = {}
+    for o in ops:
+        if o.operation_type != "REPEAL_DOCUMENT" and o.target_document_key and o.source_document_key in docs:
+            amends.setdefault(o.source_document_key, set()).add(o.target_document_key)
+    repeals = [o for o in ops if o.operation_type == "REPEAL_DOCUMENT" and o.review_status != "rejected"]
     rows = []
-    for d in store.documents():
-        if d.is_consolidated:
-            continue
-        versions = store.versions(d.document_key)
-        start = min((v.valid_from for v in versions), default=None)
-        status = "in_force" if d.document_key in in_force else (
-            "not_yet" if start is not None and start > today else "repealed")
-        repeal = next((o for o in ops if o.target_document_key == d.document_key), None) if status == "repealed" else None
-        by = store.document(repeal.source_document_key) if repeal else None
-        rows.append({"document_key": d.document_key, "title": d.title, "doc_type": d.doc_type,
-                     "doc_number": d.doc_number, "status_today": status,
-                     "replaced_by": {"document_key": by.document_key, "title": by.title} if by else None})
-    return sorted(rows, key=lambda r: (r["status_today"] != "in_force", r["title"]))
+    for key, d in docs.items():
+        replaced_by, targets = None, []
+        if key in amends and _AMENDING_TITLE.search(d.title):
+            status = "amending"
+            targets = [{"document_key": t, "title": docs[t].title} for t in sorted(amends[key]) if t in docs]
+        elif key in in_force:
+            status = "in_force"
+        else:
+            start = store.first_valid_from(key)
+            status = "unknown" if start is None else ("not_yet" if start > today else "repealed")
+            if status == "repealed":
+                repeal = next((o for o in repeals if o.target_document_key == key), None)
+                by = docs.get(repeal.source_document_key) if repeal else None
+                replaced_by = {"document_key": by.document_key, "title": by.title} if by else None
+        rows.append({"document_key": key, "title": d.title, "doc_type": d.doc_type, "doc_number": d.doc_number,
+                     "status_today": status, "replaced_by": replaced_by, "amends": targets})
+    order = {"in_force": 0, "not_yet": 1, "amending": 2, "repealed": 3, "unknown": 4}
+    return sorted(rows, key=lambda r: (order[r["status_today"]], r["title"]))
 
 
 def legacy_duplicates(store: LegalStore, legacy: Mapping[str, LegacyLaw]) -> set[str]:
@@ -127,5 +142,5 @@ def is_amendment_only(provisions: Sequence[Provision]) -> bool:
     return bool(directive) and all(t in directive or _EFFECT_TITLE.search(t) for t in titles)
 
 
-__all__ = ["DOCUMENT_LABEL", "DocumentStatus", "LegacyLaw", "document_search", "legacy_documents", "is_amendment_only", "legacy_duplicates", "legacy_status",
+__all__ = ["DOCUMENT_LABEL", "DocumentStatus", "LegacyLaw", "document_search", "legacy_documents", "legal_overview", "is_amendment_only", "legacy_duplicates", "legacy_status",
            "load_legacy_map", "versioned_status"]

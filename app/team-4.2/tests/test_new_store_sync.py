@@ -144,3 +144,34 @@ def test_api_info_returns_legal_docs_and_only_ordinary_documents(seeded_store, m
     assert [d["source"] for d in data["docs"]] == ["quy_trinh_noi_bo.pdf"]
     assert data["legal_total"] == len(data["legal_docs"]) > 0
     assert any(d["document_key"] == "luat:27/2023/QH15" and d["status_today"] == "in_force" for d in data["legal_docs"])
+
+
+# --- review cuối phần đồng bộ ------------------------------------------------------------------
+
+def test_legal_overview_marks_amending_laws_with_targets(seeded_store):
+    rows = {r["document_key"]: r for r in legal_overview(seeded_store, date(2026, 11, 11))}
+    amend = rows["luat:43/2024/QH15"]
+    assert amend["status_today"] == "amending"
+    assert "luat:31/2024/QH15" in {t["document_key"] for t in amend["amends"]}
+    assert rows["luat:31/2024/QH15"]["status_today"] == "in_force"
+
+
+def test_legal_overview_does_not_load_all_versions(seeded_store, monkeypatch):
+    monkeypatch.setattr(type(seeded_store), "versions", lambda *a, **k: (_ for _ in ()).throw(AssertionError("chậm")))
+    assert legal_overview(seeded_store, date(2026, 11, 11))
+
+
+def test_first_valid_from_uses_one_query(seeded_store):
+    assert seeded_store.first_valid_from("luat:27/2023/QH15") is not None
+    assert seeded_store.first_valid_from("khong:co") is None
+
+
+def test_answer_prompt_labels_old_store_as_documents():
+    from rag.temporal.answer import SYSTEM_PROMPT, build_messages
+    from rag.temporal.status import DOCUMENT_LABEL
+    assert "Kho cũ" not in SYSTEM_PROMPT and DOCUMENT_LABEL in SYSTEM_PROMPT
+
+
+def test_think_citation_link_is_hidden_for_versioned_sources():
+    page = (Path(__file__).resolve().parents[1] / "ui" / "index.html").read_text(encoding="utf-8")
+    assert "Luật có phiên bản: " in page and "popTab.classList.toggle('hidden'" in page

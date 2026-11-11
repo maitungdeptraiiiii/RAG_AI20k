@@ -241,6 +241,16 @@ class LegalStore:
         run = self.latest_build(key)
         return run.build_id if run else None
 
+    def first_valid_from(self, key: str) -> date | None:
+        """Ngày bắt đầu sớm nhất của bản dựng mới nhất — một truy vấn, không giải mã payload phiên bản."""
+        bid = self._build_id(key, None)
+        if bid is None:
+            return None
+        with self._conn() as conn:
+            row = conn.execute("SELECT MIN(valid_from) FROM versions WHERE build_id=? AND document_key=?",
+                               (bid, key)).fetchone()
+        return date.fromisoformat(row[0]) if row and row[0] else None
+
     def provisions_as_of(self, key: str, day: date, *, build_id: str | None = None) -> list[ProvisionVersion]:
         bid = self._build_id(key, build_id)
         if bid is None:

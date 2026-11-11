@@ -213,6 +213,10 @@ def parse_verification(data, requirements, claims, bundle, limit, warnings=None)
             raise OutputError("Verification flags must be booleans")
     verdicts, quotes = {}, {}
     for row in items(data["claims"], len(claims)):
+        if isinstance(row, dict) and "evidence" not in row:
+            # mô hình đôi khi bỏ khoá "evidence" (thường ở khẳng định không được ủng hộ): coi là không có trích dẫn
+            # -> khẳng định không qua kiểm chứng; không bỏ cả câu trả lời vì một khoá thiếu
+            row = {**row, "evidence": []}
         obj(row, ("index", "supported", "reason", "evidence"))
         idx = row["index"]
         if type(idx) is not int or idx not in range(len(claims)) or idx in verdicts:

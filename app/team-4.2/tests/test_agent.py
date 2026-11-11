@@ -540,3 +540,17 @@ def test_claim_citation_brackets_are_cleaned_gracefully():
     assert len(claims) == 1
     assert "[1]" not in claims[0].text
     assert "Hợp đồng chuyển thành không xác định thời hạn." in claims[0].text
+
+
+def test_verifier_omitting_evidence_of_unsupported_claim_does_not_crash_the_answer():
+    def hook(stage, payload, result):
+        if stage == "VERIFY":
+            row = result["claims"][1]
+            row.pop("evidence")                 # mô hình thật đôi khi bỏ trống "evidence" khi không ủng hộ
+            row["supported"] = False
+        return result
+
+    agent, _ = build_agent(FixtureLLM(hook))
+    final = list(agent.ask_stream("Điều kiện và hồ sơ cần gì?"))[-1]
+    assert final["type"] == "done" and final["status"] in ("partial", "abstain")
+    assert final["status"] != "error"

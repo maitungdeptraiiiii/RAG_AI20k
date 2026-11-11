@@ -76,6 +76,7 @@ _settings: Settings | None = None
 _executor = ThreadPoolExecutor(max_workers=2)
 _agent_pipeline: AgentPipeline | None = None
 _pipeline_init_lock = RLock()
+_catalog_commit_lock = RLock()
 
 _legal_service = None
 _conversations = ConversationStore()
@@ -125,12 +126,7 @@ def get_agent_pipeline(as_of=None) -> AgentPipeline:
     qa = get_temporal_qa()
     if qa is not None:
         return AgentPipeline(baseline, config, scope_factory=TemporalScopeFactory(baseline, qa, as_of, config))
-    if as_of is not None:
-        raise TemporalScopeUnavailable("Kho luật có phiên bản chưa sẵn sàng để tra cứu theo ngày. Vui lòng thử lại sau.")
-    with _pipeline_init_lock:
-        if _agent_pipeline is None or _agent_pipeline.baseline is not baseline:
-            _agent_pipeline = AgentPipeline(baseline, config)
-        return _agent_pipeline
+    raise TemporalScopeUnavailable("Kho tài liệu chưa sẵn sàng. Vui lòng thử lại sau.")
 
 
 async def handle_index(request: Request) -> HTMLResponse:
@@ -143,8 +139,9 @@ async def handle_index(request: Request) -> HTMLResponse:
 
 async def handle_info(request: Request) -> JSONResponse:
     """Trả về thông tin kho tài liệu và cấu hình đang chạy."""
-    pipeline, settings = get_pipeline()
-    docs = pipeline.store.docs()
+    from rag.legal.library import library_documents
+    settings = Settings.load()
+    docs = await asyncio.get_running_loop().run_in_executor(_executor, library_documents, get_legal_service())
     adv_parts = []
     if settings.decomp_enabled:
         adv_parts.append("Decomposition")
@@ -156,15 +153,8 @@ async def handle_info(request: Request) -> JSONResponse:
 
     return JSONResponse({
         "status": "ready",
-        "total_chunks": len(pipeline.store),
-        "docs": [
-            {
-                "doc_id": d.doc_id,
-                "source": d.source,
-                "n_chunks": d.n_chunks,
-            }
-            for d in docs
-        ],
+        "warehouse": "catalog", "total_chunks": sum(d["n_chunks"] for d in docs),
+        "docs": docs,
         "settings": {
             "llm_model": settings.llm_model,
             "embed_model": settings.embed_model,
@@ -270,7 +260,7 @@ _TEMPORAL_STALE_EVERY_S = 30.0     # kiểm tra bản dựng mới của kho lu�
 
 
 def _build_temporal_qa():
-    """TemporalQA dùng kho có phiên bản (DATA_DIR/legal) + kho cũ (pipeline hiện tại) để tham khảo.
+    """TemporalQA reads only DATA_DIR/legal, including unverified imported references.
     Kho mới tìm bằng đúng bộ tìm kiếm của pipeline chính (BM25 + Dense/HyDE -> RRF -> rerank), lọc hiệu lực trước.
     Lần đầu: dùng ngay BM25 + rerank; Dense embed ở luồng nền rồi tự chuyển sang hybrid. LEGAL_DENSE=0 để tắt Dense."""
     import os
@@ -287,14 +277,7 @@ def _build_temporal_qa():
     index = make_versioned_index(settings, pipeline.llm, service.store, reranker=reranker)
     index.build()
 
-    def legacy_search(query: str, k: int):
-        result = pipeline.retriever.retrieve(query, k)
-        chunks = pipeline.retriever.chunks
-        return [chunks[h.chunk_id] for h in result.hits[:k] if h.chunk_id in chunks]
-
-    legacy_map_path = _REPO_ROOT / "data" / "team-4.2" / "legal" / "legacy_map.yaml"
-    qa = TemporalQA(service, index, pipeline.llm, legacy_search=legacy_search,
-                    legacy_map=load_legacy_map(legacy_map_path) if legacy_map_path.exists() else {},
+    qa = TemporalQA(service, index, pipeline.llm,
                     log=QALog(settings.data_dir / "legal" / "qa_log.sqlite"), k_per_anchor=settings.top_k)
 
     if os.environ.get("LEGAL_DENSE", "1") != "0":
@@ -329,7 +312,7 @@ def get_temporal_qa():
                     _temporal_failed_at = None
                     _temporal_checked_at = time.monotonic()
                 except Exception:  # noqa: BLE001 — kho mới lỗi không được làm hỏng chat
-                    log.exception("Không khởi tạo được hỏi đáp theo mốc; dùng pipeline cũ")
+                    log.exception("Không khởi tạo được kho tài liệu; không chuyển sang kho cũ")
                     _temporal_failed_at = time.monotonic()
                     return None
         return _temporal_qa
@@ -396,10 +379,10 @@ def _temporal_response(query, result, qa):
 
 def _sync_chat(query: str, as_of, mask_state: MaskState,
                history: list[dict[str, Any]] | None = None) -> dict[str, Any]:
-    pipeline, _ = get_pipeline()
     qa = get_temporal_qa()
     if qa is not None:
         if history:
+            pipeline, _ = get_pipeline()
             # câu hỏi nối tiếp ("còn năm 2025 thì sao?"): che PII câu hỏi + lịch sử, gộp thành câu độc lập,
             # rồi mới đưa cho TemporalQA (cùng mask_state -> che lại không đổi placeholder, mở che đúng)
             condensed, pii = pipeline._prepare_query(query, history, mask_state)
@@ -410,7 +393,7 @@ def _sync_chat(query: str, as_of, mask_state: MaskState,
             data["trace"]["condensed_query"] = condensed
             return data
         return _sync_temporal(query, qa, as_of, mask_state)
-    return _sync_ask(query, pipeline, mask_state, history)
+    raise TemporalScopeUnavailable("Kho tài liệu chưa sẵn sàng. Vui lòng thử lại sau.")
 
 
 def _sse(event: dict[str, Any]) -> str:
@@ -478,9 +461,9 @@ def _sync_stream(query: str, as_of, mask_state: MaskState, history: list[dict[st
                                      for k in {*pii, *data["query_pii"]}}
                 yield _sse({"type": "done", **data})
             return
-        pipeline, _ = get_pipeline()
-        for event in pipeline.ask_stream(query, history=history, mask_state=mask_state):
-            yield _sse(event)
+        raise TemporalScopeUnavailable("Kho tài liệu chưa sẵn sàng. Vui lòng thử lại sau.")
+    except TemporalScopeUnavailable as exc:
+        yield _sse({"type": "error", "error": str(exc), "code": "catalog_unavailable"})
     except Exception as e:  # noqa: BLE001 — báo lỗi cho UI qua luồng SSE
         log.exception("Lỗi khi stream chat: %s", e)
         yield _sse({"type": "error", "error": f"Lỗi hệ thống: {e}"})
@@ -738,6 +721,12 @@ async def handle_get_report(request: Request) -> JSONResponse:
     return JSONResponse(row)
 
 
+def _publish_catalog(pipeline, settings, doc_id):
+    from rag.legal.migrate import migrate
+    return migrate(settings.data_dir, _REPO_ROOT / "data/team-4.2/legal/legacy_map.yaml", apply=True,
+                   only_doc_ids={doc_id}, records=[chunk.to_dict() for chunk in pipeline.store.all()])
+
+
 async def handle_ingest(request: Request) -> JSONResponse:
     """Nạp file hoặc URL vào kho tài liệu."""
     pipeline, settings = get_pipeline()
@@ -758,7 +747,10 @@ async def handle_ingest(request: Request) -> JSONResponse:
 
     def _do_ingest(target: str | Path, source_name: str | None):
         if not prepare_only:
-            return pipeline.ingest(target, source=source_name)
+            with _catalog_commit_lock:
+                report = pipeline.ingest(target, source=source_name)
+                _publish_catalog(pipeline, settings, report.doc_id)
+            return report
         prepared = pipeline.prepare(target, source=source_name)
         if not prepared.report.skipped:
             _remember_prepared(prepared)
@@ -917,34 +909,15 @@ def _resolve_doc_target(settings: Settings, filename: str) -> tuple[Path | None,
 
 async def handle_view_doc(request: Request) -> Response:
     filename = request.path_params.get("filename", "").strip()
+    from rag.legal.library import library_content
+    catalog_doc = await asyncio.get_running_loop().run_in_executor(
+        _executor, library_content, get_legal_service(), filename)
+    if catalog_doc is not None:
+        return _render_doc_html(catalog_doc["title"], catalog_doc["source"], catalog_doc["content"],
+                                chunks_count=catalog_doc["n_chunks"])
     if not filename:
         return HTMLResponse("<h1>Tên tài liệu không hợp lệ</h1>", status_code=400)
-
-    # Nếu tài liệu là đường link (URL) -> mở ra đường link luôn
-    if filename.startswith("http://") or filename.startswith("https://"):
-        return RedirectResponse(filename, status_code=302)
-
-    pipeline, settings = get_pipeline()
-    target, clean_title = _resolve_doc_target(settings, filename)
-
-    if not target:
-        matching_chunks = [c for c in pipeline.store.all() if c.source == filename]
-        if not matching_chunks:
-            return HTMLResponse(f"<h1>Không tìm thấy tài liệu: {html.escape(filename)}</h1>", status_code=404)
-        full_text = "\n\n".join(c.text for c in matching_chunks)
-        return _render_doc_html(clean_title, filename, full_text, len(matching_chunks))
-
-    suffix = target.suffix.lower()
-    if suffix == ".pdf":
-        return Response(
-            content=target.read_bytes(),
-            media_type="application/pdf",
-            headers={"Content-Disposition": _content_disposition(filename)}
-        )
-
-    content = target.read_text(encoding="utf-8", errors="replace")
-    chunks_count = len([c for c in pipeline.store.all() if c.source == filename])
-    return _render_doc_html(clean_title, filename, content, chunks_count=chunks_count or None)
+    return HTMLResponse("<h1>Không tìm thấy tài liệu trong kho</h1>", status_code=404)
 
 
 async def handle_doc_content(request: Request) -> JSONResponse:
@@ -953,29 +926,12 @@ async def handle_doc_content(request: Request) -> JSONResponse:
     if not filename:
         return JSONResponse({"error": "Tên tài liệu không hợp lệ"}, status_code=400)
 
-    is_link = filename.startswith("http://") or filename.startswith("https://")
-    pipeline, settings = get_pipeline()
-
-    target, clean_title = _resolve_doc_target(settings, filename)
-    matching_chunks = [c for c in pipeline.store.all() if c.source == filename]
-
-    content = ""
-    if not is_link and target and target.suffix.lower() != ".pdf":
-        try:
-            content = target.read_text(encoding="utf-8", errors="replace")
-        except Exception:
-            pass
-
-    if not content and matching_chunks:
-        content = "\n\n".join(c.text for c in matching_chunks)
-
-    return JSONResponse({
-        "source": filename,
-        "title": clean_title,
-        "content": content,
-        "is_url": is_link,
-        "n_chunks": len(matching_chunks),
-    })
+    from rag.legal.library import library_content
+    catalog_doc = await asyncio.get_running_loop().run_in_executor(
+        _executor, library_content, get_legal_service(), filename)
+    if catalog_doc is not None:
+        return JSONResponse(catalog_doc)
+    return JSONResponse({"error": "Không tìm thấy tài liệu trong kho"}, status_code=404)
 
 
 _IMAGE_TYPES = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp",
@@ -1177,7 +1133,10 @@ async def handle_index_doc(request: Request) -> JSONResponse:
             p = pipeline.prepare(target, source=row.get("source"))
         if p.report.doc_id != doc_id:
             raise ValueError("File đã thay đổi so với lần trích xuất; hãy upload lại")
-        return pipeline.commit(p)
+        with _catalog_commit_lock:
+            report = pipeline.commit(p)
+            _publish_catalog(pipeline, settings, report.doc_id)
+        return report
 
     try:
         report = await asyncio.get_running_loop().run_in_executor(_executor, run)

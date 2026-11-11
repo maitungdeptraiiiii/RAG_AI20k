@@ -86,8 +86,7 @@ def test_invalid_as_of_400(client, bad):
     assert r.status_code == 400 and qa.calls == []
 
 
-def test_temporal_init_failure_falls_back_to_old_pipeline(monkeypatch):
-    # review I4: kho mới lỗi khởi tạo -> chat vẫn chạy trên pipeline cũ, không 500
+def test_temporal_init_failure_does_not_silently_fall_back_to_warehouse_one(monkeypatch):
     def boom():
         raise RuntimeError("catalog hỏng")
 
@@ -95,9 +94,9 @@ def test_temporal_init_failure_falls_back_to_old_pipeline(monkeypatch):
     monkeypatch.setattr(server, "_temporal_failed_at", None, raising=False)
     monkeypatch.setattr(server, "_build_temporal_qa", boom)
     monkeypatch.setattr(server, "get_pipeline", lambda: (object(), None))
-    monkeypatch.setattr(server, "_sync_ask", lambda q, p, m, h=None: {"query": q, "answer": "cũ", "refused": False})
+    monkeypatch.setattr(server, "_sync_ask", lambda *args: pytest.fail("Must not fall back to warehouse 1"))
     r = TestClient(server.app).post("/api/chat", json={"query": "Hỏi?"})
-    assert r.status_code == 200 and r.json()["answer"] == "cũ"
+    assert r.status_code == 503
 
 
 def test_temporal_qa_is_resolved_off_the_event_loop(monkeypatch):

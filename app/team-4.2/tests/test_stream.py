@@ -120,6 +120,8 @@ async def test_server_handle_chat_backward_compat_and_stream(monkeypatch):
 
     pipeline = _build_test_pipeline()
     monkeypatch.setattr(server_module, "get_pipeline", lambda: (pipeline, MagicMock()))
+    from tests.test_temporal_api import FakeQA
+    monkeypatch.setattr(server_module, "get_temporal_qa", lambda: FakeQA())
 
     # 1. Non-streaming (stream: false hoặc không truyền) -> JSONResponse
     req_json = Request({

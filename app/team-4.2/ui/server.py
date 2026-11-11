@@ -70,6 +70,7 @@ UI_DIR = Path(__file__).resolve().parent
 HTML_PATH = UI_DIR / "index.html"
 UPLOAD_HTML_PATH = UI_DIR / "upload.html"
 UPLOAD_LEGAL_JS_PATH = UI_DIR / "upload_legal.js"
+CONTRACTS_JS_PATH = UI_DIR / "contracts.js"
 REVIEW_HTML_PATH = UI_DIR / "review.html"
 
 _pipeline: RAGPipeline | None = None
@@ -685,6 +686,13 @@ async def handle_upload_page(request: Request) -> HTMLResponse:
     return HTMLResponse(UPLOAD_HTML_PATH.read_text(encoding="utf-8"))
 
 
+async def handle_contracts_js(request: Request) -> Response:
+    if not CONTRACTS_JS_PATH.exists():
+        return Response("", status_code=404)
+    return Response(CONTRACTS_JS_PATH.read_text(encoding="utf-8"), media_type="text/javascript",
+                    headers={"Cache-Control": "no-cache"})
+
+
 async def handle_upload_legal_js(request: Request) -> Response:
     if not UPLOAD_LEGAL_JS_PATH.exists():
         return Response("", status_code=404)
@@ -1261,6 +1269,7 @@ routes = [
     Route("/", handle_index, methods=["GET"]),
     Route("/upload", handle_upload_page, methods=["GET"]),
     Route("/upload_legal.js", handle_upload_legal_js, methods=["GET"]),
+    Route("/contracts.js", handle_contracts_js, methods=["GET"]),
     Route("/review", handle_review_page, methods=["GET"]),
     Route("/api/legal/reviews", handle_list_reviews, methods=["GET"]),
     Route("/api/legal/reviews/{review_id:path}/decision", legal_api.handle_review_decision, methods=["POST"]),

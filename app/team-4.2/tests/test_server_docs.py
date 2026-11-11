@@ -102,3 +102,14 @@ def test_review_page_polls_jobs(client):
     r = client.get("/review")
     assert r.status_code == 200
     assert "/api/legal/jobs/" in r.text and "Đang áp dụng quyết định…" in r.text and "document" in r.text
+
+
+def test_chat_page_has_contract_hooks_and_script(client):
+    page = client.get("/").text
+    assert 'id="contract-mode-bar"' in page and "/contracts.js" in page and "ContractUI.openPlusMenu" in page
+    js = client.get("/contracts.js")
+    assert js.status_code == 200 and "javascript" in js.headers["content-type"]
+    body = js.text
+    for needle in ("/api/contracts", "Hỏi tự do", "Hỏi với hợp đồng", "Đính kèm hợp đồng để soát", "Tải Word",
+                   "Tải PDF", "Đã soát", "hết phiên", "Trung lập", "/upload"):
+        assert needle in body, needle

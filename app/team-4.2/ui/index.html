@@ -365,9 +365,10 @@
               <button type="button" id="as-of-clear" class="text-neutral-400 hover:text-neutral-800 hidden" aria-label="Bỏ ngày đã chọn">✕</button>
               <span id="as-of-hint">để trống: tự nhận diện mốc trong câu hỏi, không có thì dùng luật hiện hành</span>
             </div>
+            <div id="contract-mode-bar" class="hidden flex flex-wrap items-center gap-1.5 px-3 pb-1.5"></div>
             <div id="chat-input-capsule" class="w-full bg-white rounded-full border border-neutral-300 shadow-[0_2px_14px_rgba(0,0,0,0.06)] focus-within:border-neutral-400 focus-within:shadow-[0_4px_20px_rgba(0,0,0,0.09)] p-2 pl-3.5 pr-2.5 flex items-center space-x-2 transition-all">
               <!-- Attach / Upload button (+) -->
-              <button onclick="toggleIngestModal(true)" class="p-1.5 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-full transition-colors flex-shrink-0" title="Nạp tài liệu mới">
+              <button onclick="ContractUI.openPlusMenu(event)" class="p-1.5 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-full transition-colors flex-shrink-0" title="Nạp tài liệu / đính kèm hợp đồng">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
@@ -961,6 +962,7 @@
 
     function resetToHero() {
       currentSessionId = null;
+      if (window.ContractUI) ContractUI.renderModeBar();
       setThinkEnabled(false);
       setChatInputPosition('hero');
       document.getElementById('hero-view').classList.remove('hidden');
@@ -1012,6 +1014,8 @@
     async function startQuery(rawQuery) {
       // Capture this turn's mode before any async work or later toggle changes.
       const requestThinkEnabled = thinkEnabled;
+      // Hỏi với hợp đồng (phần 4): chốt hợp đồng của lượt này trước mọi bước async
+      const requestContract = window.ContractUI ? ContractUI.requestContract() : null;
       // 1. Determine target session
       if (!currentSessionId) {
         const cleanTitle = rawQuery.length > 36 ? rawQuery.slice(0, 36) + '...' : rawQuery;
@@ -1048,6 +1052,8 @@
           turnId: msgId,
           query: rawQuery,
           think: requestThinkEnabled,
+          contract_id: requestContract ? requestContract.id : null,
+          contract_label: requestContract ? requestContract.label : null,
           data: null, // null means pending
           timestamp: Date.now(),
         });
@@ -1080,6 +1086,7 @@
             <!-- User Query Bubble -->
             <div class="flex justify-end w-full">
               <div class="bg-[#f4f4f4] text-[#0d0d0d] px-5 py-2.5 rounded-3xl max-w-[85%] text-[15px] leading-relaxed select-text shadow-subtle">
+                ${requestContract ? `<div class="text-[11.5px] text-neutral-500 mb-0.5">📎 Hỏi với hợp đồng: ${escapeHtml(requestContract.label)}</div>` : ''}
                 ${escapeHtml(rawQuery)}
               </div>
             </div>
@@ -1129,6 +1136,7 @@
           // luôn là cùng placeholder qua các lượt hỏi; history: server che PII rồi mới gộp lịch sử
           body: JSON.stringify(Object.assign(
             { query: rawQuery, session_id: targetSessionId, history: historyPayload, stream: true, think: requestThinkEnabled },
+            requestContract ? { contract_id: requestContract.id } : {},
             document.getElementById('as-of-input').value ? { as_of: document.getElementById('as-of-input').value } : {})),
         });
 
@@ -2058,12 +2066,17 @@
 
       // Render each turn in this session sequentially
       (sess.turns || []).forEach(turn => {
+        if (turn.kind) {                       // thẻ hợp đồng / báo cáo (phần 4)
+          if (window.ContractUI) ContractUI.renderTurn(turn);
+          return;
+        }
         const msgId = turn.turnId || ('msg-' + (turn.timestamp || Date.now()));
         const isPending = (turn.data === null || turn.data === undefined);
         const turnHtml = `
           <div id="${msgId}-turn" class="space-y-6">
             <div class="flex justify-end w-full">
               <div class="bg-[#f4f4f4] text-[#0d0d0d] px-5 py-2.5 rounded-3xl max-w-[85%] text-[15px] leading-relaxed select-text shadow-subtle">
+                ${turn.contract_label ? `<div class="text-[11.5px] text-neutral-500 mb-0.5">📎 Hỏi với hợp đồng: ${escapeHtml(turn.contract_label)}</div>` : ''}
                 ${escapeHtml(turn.query)}
               </div>
             </div>
@@ -2090,6 +2103,7 @@
       updateSendButtonState();
       scrollToBottom();
       closeContextMenu();
+      if (window.ContractUI) ContractUI.onSessionLoaded(sess);
     }
 
     // ==================== CONTEXT MENU (CHUỘT PHẢI) LOGIC ====================
@@ -2131,6 +2145,7 @@
       closeContextMenu();
 
       activeQuerySessionIds.delete(targetId);
+      if (window.ContractUI) ContractUI.forgetSession(chatSessions.find(s => s.id === targetId));
       chatSessions = chatSessions.filter(s => s.id !== targetId);
       saveSessionsToStorage();
 
@@ -2404,5 +2419,6 @@
         .replace(/'/g, '&#039;');
     }
   </script>
+  <script src="/contracts.js"></script>
 </body>
 </html>

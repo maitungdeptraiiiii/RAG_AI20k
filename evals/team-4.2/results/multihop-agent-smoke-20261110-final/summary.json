@@ -1,0 +1,17 @@
+{
+  "n": 1,
+  "outcomes": [
+    {
+      "id": "mh25_01",
+      "status": "partial",
+      "stop_reason": "max_rounds",
+      "candidate_recall": 1.0,
+      "all_gold_candidate": true,
+      "all_gold_final_context": true,
+      "rounds": 3,
+      "model_calls": 6,
+      "elapsed_s": 29.096
+    }
+  ],
+  "semantic_quality": "human_review_required; agent verification is not ground truth"
+}

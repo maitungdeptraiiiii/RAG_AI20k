@@ -18,10 +18,19 @@ import time
 from collections.abc import Callable, Iterator, Sequence
 from pathlib import Path
 from typing import Any
+from dataclasses import dataclass
 
 from rag.schema import LLM
 
 log = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class BoundedCompletion:
+    text: str
+    input_tokens: int = 0
+    output_tokens: int = 0
+    cache_hit: bool = False
 
 
 class LLMCache:
@@ -125,6 +134,39 @@ class OpenAIChatLLM:
         if self.cache is not None:
             self.cache.put(key, text)
         return text
+
+    def complete_bounded(
+        self, system: str, user: str, *, timeout_s: float, max_output_tokens: int,
+    ) -> BoundedCompletion:
+        """Agent call: explicit deadline/output cap, no hidden SDK retries.
+
+        Separate cache namespace prevents a legacy unbounded completion from
+        bypassing the new output cap. Baseline complete()/stream() stay unchanged.
+        """
+        messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
+        key = hashlib.sha256(json.dumps(
+            ["agent-bounded-v1", self._base_url, self.model_id, self.temperature, messages, max_output_tokens],
+            ensure_ascii=False, sort_keys=True,
+        ).encode("utf-8")).hexdigest()
+        if self.cache is not None:
+            cached = self.cache.get(key)
+            if cached is not None:
+                return BoundedCompletion(cached, cache_hit=True)
+        client = self._get_client().with_options(timeout=timeout_s, max_retries=0)
+        params = {"model": self.model_id, "messages": messages, "max_completion_tokens": max_output_tokens}
+        if self.temperature is not None:
+            params["temperature"] = self.temperature
+        response = client.chat.completions.create(**params)
+        if response.choices[0].finish_reason != "stop":
+            raise ValueError("Agent completion did not finish normally")
+        text = (response.choices[0].message.content or "").strip()
+        usage = response.usage
+        result = BoundedCompletion(
+            text, getattr(usage, "prompt_tokens", 0) or 0, getattr(usage, "completion_tokens", 0) or 0,
+        )
+        if self.cache is not None:
+            self.cache.put(key, text)
+        return result
 
     def stream(self, system: str, user: str) -> Iterator[str]:
         messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]

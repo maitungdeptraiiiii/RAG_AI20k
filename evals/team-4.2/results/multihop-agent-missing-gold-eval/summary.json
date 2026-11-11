@@ -1,0 +1,179 @@
+{
+  "n": 10,
+  "avg_candidate_recall": 0.6666666666666667,
+  "all_gold_candidate_rate": 0.2,
+  "all_gold_final_context_rate": 0.0,
+  "outcomes": [
+    {
+      "id": "mh25_03",
+      "status": "partial",
+      "stop_reason": "max_rounds",
+      "candidate_recall": 0.6666666666666666,
+      "all_gold_candidate": false,
+      "all_gold_final_context": false,
+      "gold_total": 3,
+      "gold_retrieved": 2,
+      "gold_supplied": 2,
+      "missing_from_candidate": [
+        "bo_luat_to_tung_dan_su_2015.txt :: Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương VII CHỨNG MINH VÀ CHỨNG CỨ > Điều 94. Nguồn chứng cứ"
+      ],
+      "rounds": 3,
+      "model_calls": 8,
+      "elapsed_s": 141.24
+    },
+    {
+      "id": "mh25_04",
+      "status": "error",
+      "stop_reason": "OutputError",
+      "candidate_recall": 0.3333333333333333,
+      "all_gold_candidate": false,
+      "all_gold_final_context": false,
+      "gold_total": 3,
+      "gold_retrieved": 1,
+      "gold_supplied": 0,
+      "missing_from_candidate": [
+        "bo_luat_dan_su_2015.txt :: Phần thứ nhất QUY ĐỊNH CHUNG > Chương VIII GIAO DỊCH DÂN SỰ > Điều 124. Giao dịch dân sự vô hiệu do giả tạo",
+        "bo_luat_to_tung_dan_su_2015.txt :: Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương VIII CÁC BIỆN PHÁP KHẨN CẤP TẠM THỜI > Điều 126. Phong tỏa tài sản của người có nghĩa vụ"
+      ],
+      "rounds": 3,
+      "model_calls": 8,
+      "elapsed_s": 120.62
+    },
+    {
+      "id": "mh25_05",
+      "status": "partial",
+      "stop_reason": "verifier_requested_evidence",
+      "candidate_recall": 1.0,
+      "all_gold_candidate": true,
+      "all_gold_final_context": false,
+      "gold_total": 3,
+      "gold_retrieved": 3,
+      "gold_supplied": 2,
+      "missing_from_candidate": [],
+      "rounds": 3,
+      "model_calls": 8,
+      "elapsed_s": 131.51
+    },
+    {
+      "id": "mh25_11",
+      "status": "error",
+      "stop_reason": "OutputError",
+      "candidate_recall": 0.75,
+      "all_gold_candidate": false,
+      "all_gold_final_context": false,
+      "gold_total": 4,
+      "gold_retrieved": 3,
+      "gold_supplied": 0,
+      "missing_from_candidate": [
+        "bo_luat_dan_su_2015.txt :: Phần thứ ba NGHĨA VỤ VÀ HỢP ĐỒNG > Chương XVI MỘT SỐ HỢP ĐỒNG THÔNG DỤNG > Mục 12 HỢP ĐỒNG GỬI GIỮ TÀI SẢN > Điều 554. Hợp đồng gửi giữ tài sản"
+      ],
+      "rounds": 3,
+      "model_calls": 4,
+      "elapsed_s": 85.68
+    },
+    {
+      "id": "mh25_18",
+      "status": "partial",
+      "stop_reason": "corpus_gap",
+      "candidate_recall": 0.6666666666666666,
+      "all_gold_candidate": false,
+      "all_gold_final_context": false,
+      "gold_total": 3,
+      "gold_retrieved": 2,
+      "gold_supplied": 2,
+      "missing_from_candidate": [
+        "bo_luat_to_tung_hinh_su_2015.txt :: Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương VI CHỨNG MINH VÀ CHỨNG CỨ > Điều 85. Những vấn đề phải chứng minh trong vụ án hình sự"
+      ],
+      "rounds": 3,
+      "model_calls": 6,
+      "elapsed_s": 70.42
+    },
+    {
+      "id": "mh25_19",
+      "status": "error",
+      "stop_reason": "OutputError",
+      "candidate_recall": 0.75,
+      "all_gold_candidate": false,
+      "all_gold_final_context": false,
+      "gold_total": 4,
+      "gold_retrieved": 3,
+      "gold_supplied": 0,
+      "missing_from_candidate": [
+        "bo_luat_to_tung_hinh_su_2015.txt :: Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương VI CHỨNG MINH VÀ CHỨNG CỨ > Điều 85. Những vấn đề phải chứng minh trong vụ án hình sự"
+      ],
+      "rounds": 3,
+      "model_calls": 4,
+      "elapsed_s": 86.59
+    },
+    {
+      "id": "mh25_22",
+      "status": "partial",
+      "stop_reason": "corpus_gap",
+      "candidate_recall": 0.75,
+      "all_gold_candidate": false,
+      "all_gold_final_context": false,
+      "gold_total": 4,
+      "gold_retrieved": 3,
+      "gold_supplied": 3,
+      "missing_from_candidate": [
+        "bo_luat_to_tung_dan_su_2015.txt :: Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương VII CHỨNG MINH VÀ CHỨNG CỨ > Điều 91. Nghĩa vụ chứng minh"
+      ],
+      "rounds": 3,
+      "model_calls": 6,
+      "elapsed_s": 90.83
+    },
+    {
+      "id": "mh25_23",
+      "status": "error",
+      "stop_reason": "tool_failure",
+      "candidate_recall": 0.75,
+      "all_gold_candidate": false,
+      "all_gold_final_context": false,
+      "gold_total": 4,
+      "gold_retrieved": 3,
+      "gold_supplied": 0,
+      "missing_from_candidate": [
+        "bo_luat_to_tung_dan_su_2015.txt :: Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương VII CHỨNG MINH VÀ CHỨNG CỨ > Điều 94. Nguồn chứng cứ"
+      ],
+      "rounds": 3,
+      "model_calls": 6,
+      "elapsed_s": 135.83
+    },
+    {
+      "id": "mh25_24",
+      "status": "error",
+      "stop_reason": "OutputError",
+      "candidate_recall": 1.0,
+      "all_gold_candidate": true,
+      "all_gold_final_context": false,
+      "gold_total": 4,
+      "gold_retrieved": 4,
+      "gold_supplied": 0,
+      "missing_from_candidate": [],
+      "rounds": 3,
+      "model_calls": 4,
+      "elapsed_s": 96.18
+    },
+    {
+      "id": "mh25_25",
+      "status": "clarify",
+      "stop_reason": "missing_user_fact",
+      "candidate_recall": 0.0,
+      "all_gold_candidate": false,
+      "all_gold_final_context": false,
+      "gold_total": 4,
+      "gold_retrieved": 0,
+      "gold_supplied": 0,
+      "missing_from_candidate": [
+        "bo_luat_hang_hai_2015.txt :: Chương XVI TỔN THẤT CHUNG > Điều 292. Tổn thất chung",
+        "bo_luat_hang_hai_2015.txt :: Chương XVI TỔN THẤT CHUNG > Điều 297. Thời hiệu khởi kiện về tổn thất chung",
+        "bo_luat_hang_hai_2015.txt :: Chương XVI TỔN THẤT CHUNG > Điều 293. Phân bổ tổn thất chung",
+        "bo_luat_to_tung_dan_su_2015.txt :: Phần thứ nhất NHỮNG QUY ĐỊNH CHUNG > Chương XI THỜI HẠN TỐ TỤNG > Điều 184. Thời hiệu khởi kiện, thời hiệu yêu cầu giải quyết việc dân sự"
+      ],
+      "rounds": 0,
+      "model_calls": 1,
+      "elapsed_s": 12.68
+    }
+  ],
+  "semantic_quality": "human_review_required; agent verification is not ground truth"
+}

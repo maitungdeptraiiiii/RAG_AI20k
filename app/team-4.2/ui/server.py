@@ -30,6 +30,7 @@ import threading
 from pathlib import Path
 import sys
 from typing import Any
+from threading import RLock
 
 # Đảm bảo import được package rag khi chạy trực tiếp từ bất kỳ thư mục nào
 _HERE = Path(__file__).resolve().parent
@@ -52,8 +53,8 @@ from starlette.responses import HTMLResponse, JSONResponse, Response, PlainTextR
 from starlette.routing import Route
 
 from rag.config import Settings
-from rag.pipeline import AskTrace, IngestReport, RAGPipeline
-from rag.quality.pii import MaskState
+from rag.pipeline import AskTrace, RAGPipeline
+from rag.agent import AgentConfig, AgentPipeline
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("rag.ui.server")
@@ -67,27 +68,16 @@ REVIEW_HTML_PATH = UI_DIR / "review.html"
 _pipeline: RAGPipeline | None = None
 _settings: Settings | None = None
 _executor = ThreadPoolExecutor(max_workers=2)
-_legal_service = None
-
-# Bảng tra PII (placeholder <-> giá trị gốc) theo phiên chat, chỉ nằm trong RAM của server.
-# Cùng một session_id -> cùng một khách hàng luôn là cùng placeholder qua các lượt hỏi.
-_MAX_PII_SESSIONS = 500
-_pii_states: OrderedDict[str, MaskState] = OrderedDict()
-_pii_lock = threading.Lock()
-
-
-def get_mask_state(session_id: str | None) -> MaskState:
-    if not session_id:
-        return RAGPipeline.new_query_mask_state()
-    with _pii_lock:
-        state = _pii_states.pop(session_id, None) or RAGPipeline.new_query_mask_state()
-        _pii_states[session_id] = state          # đưa lên cuối = dùng gần nhất
-        while len(_pii_states) > _MAX_PII_SESSIONS:
-            _pii_states.popitem(last=False)
-        return state
+_agent_pipeline: AgentPipeline | None = None
+_pipeline_init_lock = RLock()
 
 
 def get_pipeline() -> tuple[RAGPipeline, Settings]:
+    with _pipeline_init_lock:
+        return _get_pipeline()
+
+
+def _get_pipeline() -> tuple[RAGPipeline, Settings]:
     global _pipeline, _settings
     if _pipeline is None:
         log.info("Khởi tạo RAGPipeline...")
@@ -99,6 +89,16 @@ def get_pipeline() -> tuple[RAGPipeline, Settings]:
             len(_pipeline.store.docs()),
         )
     return _pipeline, _settings
+
+
+def get_agent_pipeline() -> AgentPipeline:
+    """Reuse the open index; each agent run owns independent state and budgets."""
+    global _agent_pipeline
+    with _pipeline_init_lock:
+        baseline, settings = get_pipeline()
+        if _agent_pipeline is None or _agent_pipeline.baseline is not baseline:
+            _agent_pipeline = AgentPipeline(baseline, AgentConfig.from_settings(settings))
+        return _agent_pipeline
 
 
 async def handle_index(request: Request) -> HTMLResponse:
@@ -165,9 +165,10 @@ def _format_hits(hits: list, chunks_map: dict, limit: int = 5) -> list[dict[str,
     return rows
 
 
-def _sync_ask(query: str, pipeline: RAGPipeline, mask_state: MaskState,
-              history: list[dict[str, Any]] | None = None) -> dict[str, Any]:
-    trace: AskTrace = pipeline.ask_debug(query, history=history, mask_state=mask_state)
+def _sync_ask(query: str, pipeline: RAGPipeline | AgentPipeline, history: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    trace: AskTrace = pipeline.ask_debug(query, history=history)
+    if isinstance(pipeline, AgentPipeline):
+        return trace.to_response(query)
     chunks = pipeline.retriever.chunks
 
     # Danh sách các khối context thực tế đưa vào LLM
@@ -227,164 +228,7 @@ def _sync_ask(query: str, pipeline: RAGPipeline, mask_state: MaskState,
     }
 
 
-# --- hỏi đáp theo mốc thời gian (phần 2) -----------------------------------------------------
-
-_temporal_qa = None
-_temporal_lock = threading.Lock()
-_temporal_failed_at: float | None = None
-_temporal_checked_at = 0.0
-_TEMPORAL_RETRY_S = 300.0          # khởi tạo lỗi: chờ bấy lâu mới thử lại (trong lúc đó chat chạy pipeline cũ)
-_TEMPORAL_STALE_EVERY_S = 30.0     # kiểm tra bản dựng mới của kho luật tối đa 1 lần / 30 giây
-
-
-def _build_temporal_qa():
-    """TemporalQA dùng kho có phiên bản (DATA_DIR/legal) + kho cũ (pipeline hiện tại) để tham khảo.
-    Kho mới tìm bằng đúng bộ tìm kiếm của pipeline chính (BM25 + Dense/HyDE -> RRF -> rerank), lọc hiệu lực trước.
-    Lần đầu: dùng ngay BM25 + rerank; Dense embed ở luồng nền rồi tự chuyển sang hybrid. LEGAL_DENSE=0 để tắt Dense."""
-    import os
-
-    from rag.retrieve.rerank import make_reranker
-    from rag.temporal.log import QALog
-    from rag.temporal.qa import TemporalQA
-    from rag.temporal.status import load_legacy_map
-    from rag.temporal.wiring import legal_embedder, legal_vector_dir, make_versioned_index
-
-    pipeline, settings = get_pipeline()
-    service = get_legal_service()
-    reranker = make_reranker(settings.rerank_backend, cache_path=settings.cache_dir / "rerank.sqlite")
-    index = make_versioned_index(settings, pipeline.llm, service.store, reranker=reranker)
-    index.build()
-
-    def legacy_search(query: str, k: int):
-        result = pipeline.retriever.retrieve(query, k)
-        chunks = pipeline.retriever.chunks
-        return [chunks[h.chunk_id] for h in result.hits[:k] if h.chunk_id in chunks]
-
-    legacy_map_path = _REPO_ROOT / "data" / "team-4.2" / "legal" / "legacy_map.yaml"
-    qa = TemporalQA(service, index, pipeline.llm, legacy_search=legacy_search,
-                    legacy_map=load_legacy_map(legacy_map_path) if legacy_map_path.exists() else {},
-                    log=QALog(settings.data_dir / "legal" / "qa_log.sqlite"), k_per_anchor=settings.top_k)
-
-    if os.environ.get("LEGAL_DENSE", "1") != "0":
-        def upgrade() -> None:
-            try:
-                dense_index = make_versioned_index(settings, pipeline.llm, service.store,
-                                                   embedder=legal_embedder(settings),
-                                                   vector_dir=legal_vector_dir(settings), reranker=reranker)
-                n = dense_index.build()
-                with _temporal_lock:
-                    qa.index = dense_index
-                log.info("Kho luật có phiên bản: đã bật hybrid (BM25 + Dense) cho %d chunk", n)
-            except Exception:  # noqa: BLE001 — embed lỗi thì tiếp tục BM25 + rerank
-                log.exception("Không dựng được Dense cho kho luật có phiên bản; tiếp tục BM25 + rerank")
-
-        threading.Thread(target=upgrade, name="legal-dense", daemon=True).start()
-    return qa
-
-
-def get_temporal_qa():
-    """Gọi trong thread pool (không trên event loop). Trả None nếu kho mới chưa dùng được -> chat dùng pipeline cũ.
-    Dựng lại chỉ mục khi có bản dựng mới: chỉ một luồng làm, các luồng khác tiếp tục dùng chỉ mục hiện tại
-    (VersionedIndex đổi trạng thái nguyên khối nên search đồng thời vẫn nhất quán)."""
-    global _temporal_qa, _temporal_failed_at, _temporal_checked_at
-    if _temporal_qa is None:
-        if _temporal_failed_at is not None and time.monotonic() - _temporal_failed_at < _TEMPORAL_RETRY_S:
-            return None
-        with _temporal_lock:
-            if _temporal_qa is None:
-                try:
-                    _temporal_qa = _build_temporal_qa()
-                    _temporal_failed_at = None
-                    _temporal_checked_at = time.monotonic()
-                except Exception:  # noqa: BLE001 — kho mới lỗi không được làm hỏng chat
-                    log.exception("Không khởi tạo được hỏi đáp theo mốc; dùng pipeline cũ")
-                    _temporal_failed_at = time.monotonic()
-                    return None
-        return _temporal_qa
-    if time.monotonic() - _temporal_checked_at >= _TEMPORAL_STALE_EVERY_S and _temporal_lock.acquire(blocking=False):
-        try:
-            _temporal_checked_at = time.monotonic()
-            if _temporal_qa.index.stale():
-                _temporal_qa.index.build()
-        except Exception:  # noqa: BLE001 — dựng lại lỗi thì giữ chỉ mục cũ
-            log.exception("Dựng lại chỉ mục kho luật lỗi; giữ chỉ mục hiện tại")
-        finally:
-            _temporal_lock.release()
-    return _temporal_qa
-
-
-def _iso(value):
-    return value.isoformat() if value is not None else None
-
-
-def _sync_temporal(query: str, qa, as_of, mask_state: MaskState) -> dict[str, Any]:
-    import re as _re
-
-    from rag.legal.store import encode
-
-    result = qa.ask(query, calendar_date=as_of, mask_state=mask_state)
-    sources = []
-    for it in result.items:
-        sources.append({
-            "n": it.n, "chunk_id": it.chunk_id,
-            "source": it.document_key if it.store == "versioned" else it.title,
-            "title": it.title, "section": it.section or "Không có tiêu đề", "page": None, "score": 0.0,
-            "text": it.text, "store": it.store, "document_status": it.document_status,
-            "provision_status": it.provision_status, "valid_from": _iso(it.valid_from), "valid_to": _iso(it.valid_to),
-            "provenance": list(it.provenance), "anchor_roles": list(it.anchor_roles),
-        })
-    cited = {int(n) for n in _re.findall(r"\[(\d+)\]", result.answer.answer_markdown)}
-    citations = [dict(s, quote=s["text"][:300]) for s in sources if s["n"] in cited]
-    timeline = encode(result.timeline)
-    return {
-        "query": query,
-        "answer": result.answer.answer_markdown,
-        "refused": not result.llm_called,
-        "query_pii": result.query_pii,
-        "citations": citations,
-        "sources": sources,
-        "trace": {"context_mode": "temporal", "n_context_blocks": len(sources),
-                  "retrieval": "hybrid" if getattr(getattr(qa, "index", None), "has_dense", False) else "bm25", "reranked": True, "errors": {},
-                  "arms": {}, "final_hits": []},
-        "timeline": {"anchors": timeline["anchors"], "primary": timeline["primary"], "warnings": timeline["warnings"]},
-        "issues": result.answer.issues,
-        "certainty": result.answer.certainty,
-        "downgrade_reasons": result.answer.downgrade_reasons,
-        "transition_assessments": result.answer.transition_assessments,
-        "transition_rules": [{k: v for k, v in encode(r).items() if k != "text"} | {"excerpt": r.text[:400]}
-                             for r in result.rules],
-        "follow_up_questions": result.answer.follow_up_questions,
-        "log_id": result.log_id,
-    }
-
-
-def _sync_chat(query: str, as_of, mask_state: MaskState,
-               history: list[dict[str, Any]] | None = None) -> dict[str, Any]:
-    pipeline, _ = get_pipeline()
-    qa = get_temporal_qa()
-    if qa is not None:
-        if history:
-            # câu hỏi nối tiếp ("còn năm 2025 thì sao?"): che PII câu hỏi + lịch sử, gộp thành câu độc lập,
-            # rồi mới đưa cho TemporalQA (cùng mask_state -> che lại không đổi placeholder, mở che đúng)
-            condensed, pii = pipeline._prepare_query(query, history, mask_state)
-            data = _sync_temporal(condensed, qa, as_of, mask_state)
-            data["query"] = query
-            data["query_pii"] = {k: pii.get(k, 0) + data["query_pii"].get(k, 0)
-                                 for k in {*pii, *data["query_pii"]}}
-            data["trace"]["condensed_query"] = condensed
-            return data
-        return _sync_temporal(query, qa, as_of, mask_state)
-    return _sync_ask(query, pipeline, mask_state, history)
-
-
-def _sse(event: dict[str, Any]) -> str:
-    return f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
-
-
-def _sync_stream(query: str, as_of, mask_state: MaskState, history: list[dict[str, Any]] | None = None):
-    """SSE: kho có phiên bản đang dùng được -> trả trọn câu trả lời theo mốc trong một sự kiện ``done``
-    (TemporalQA chưa stream); không thì pipeline cũ stream token (``sources`` -> ``token``... -> ``done``).
-    Starlette chạy generator đồng bộ này trong threadpool nên không block event loop."""
+def _sync_stream(query: str, pipeline: RAGPipeline | AgentPipeline, history: list[dict[str, Any]] | None = None):
     try:
         if get_temporal_qa() is not None:
             yield _sse({"type": "done", **_sync_chat(query, as_of, mask_state, history)})
@@ -404,6 +248,13 @@ async def handle_chat(request: Request) -> Response:
     except Exception:
         return JSONResponse({"error": "Body JSON không hợp lệ"}, status_code=400)
 
+    if not isinstance(body, dict):
+        return JSONResponse({"error": "Body JSON phải là object"}, status_code=400)
+    think = body.get("think", False)
+    if not isinstance(think, bool):
+        return JSONResponse({"error": "think phải là boolean (true hoặc false)"}, status_code=400)
+    if not isinstance(body.get("query", ""), str):
+        return JSONResponse({"error": "Câu hỏi phải là chuỗi"}, status_code=400)
     query = (body.get("query") or "").strip()
     history = body.get("history") or []
     is_stream = bool(body.get("stream", False))
@@ -411,16 +262,26 @@ async def handle_chat(request: Request) -> Response:
         history = []
     if not query:
         return JSONResponse({"error": "Câu hỏi không được rỗng"}, status_code=400)
+    if think and len(query) > 8000:
+        return JSONResponse({"error": "Câu hỏi Think tối đa 8000 ký tự"}, status_code=400)
 
-    session_id = str(body.get("session_id") or "").strip()[:128] or None
-    as_of = None
-    if body.get("as_of"):
-        from datetime import date as _date
+    if think:
         try:
-            as_of = _date.fromisoformat(str(body["as_of"]))
-        except ValueError:
-            return JSONResponse({"error": "as_of phải là ngày hợp lệ dạng YYYY-MM-DD"}, status_code=400)
-    mask_state = get_mask_state(session_id)
+            pipeline = get_agent_pipeline()
+        except Exception as exc:
+            log.error("Agent initialization failed: %s", type(exc).__name__)
+            return JSONResponse({"error": "Chưa khởi tạo được Think. Vui lòng kiểm tra cấu hình hoặc thử lại.",
+                                 "code": "agent_initialization_failed"}, status_code=503)
+        if pipeline is None:
+            return JSONResponse(
+                {
+                    "error": "Chế độ Think chưa sẵn sàng. Bạn có thể tắt Think để tra cứu thông thường.",
+                    "code": "agent_unavailable",
+                },
+                status_code=503,
+            )
+    else:
+        pipeline, _ = get_pipeline()
 
     if is_stream:
         return StreamingResponse(

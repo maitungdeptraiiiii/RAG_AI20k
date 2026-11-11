@@ -30,6 +30,8 @@ CONTRACT_PREFIX = "Hợp đồng: "
 VERSIONED_PREFIX = "Luật có phiên bản: "
 LEGAL_WARNING = ("Chưa có căn cứ luật có phiên bản tại ngày ký — các kết luận pháp lý (nếu có) chưa thể khẳng định. "
                  "Có thể upload luật ở trang Nạp văn bản pháp luật (/upload).")
+STORE_WARNING = ("Chưa có căn cứ luật có phiên bản tại mốc đang dùng — các kết luận pháp lý (nếu có) chưa thể khẳng "
+                 "định. Có thể upload luật ở trang Nạp văn bản pháp luật (/upload).")
 NO_DATE_WARNING = "Hợp đồng chưa có ngày ký — chưa tra được luật có phiên bản; hãy nhập ngày ký trên thẻ hợp đồng."
 
 LegacySearch = Callable[[str, int], list[Hit]]
@@ -49,18 +51,20 @@ class ContractAgentRetriever:
     rerank_n = 10
     reranker = None
 
-    def __init__(self, contract: Contract, runtime, legacy_chunks: Mapping[str, Chunk] | None,
-                 legacy_search: LegacySearch | None) -> None:
+    def __init__(self, contract: Contract | None, runtime, legacy_chunks: Mapping[str, Chunk] | None,
+                 legacy_search: LegacySearch | None, *, anchor: date | None = None) -> None:
+        """contract=None: Think tự do — chỉ luật có phiên bản tại `anchor` + tài liệu thường."""
         self.contract, self.runtime, self.legacy_search = contract, runtime, legacy_search
-        self.anchor: date | None = contract.sign_date
-        state = contract.mask_state
-        doc = f"contract:{contract.contract_id}"
+        self.anchor: date | None = contract.sign_date if contract is not None else anchor
         self.contract_chunks = {}
-        for u in contract.units:
-            text = mask_text(u.text, state=state).masked_text
-            first = text.split("\n", 1)[0].strip()
-            self.contract_chunks[f"{doc}:{u.uid}"] = Chunk(f"{doc}:{u.uid}", doc, CONTRACT_PREFIX + contract.filename,
-                                                           None, None, first, text)
+        if contract is not None:
+            state = contract.mask_state
+            doc = f"contract:{contract.contract_id}"
+            for u in contract.units:
+                text = mask_text(u.text, state=state).masked_text
+                first = text.split("\n", 1)[0].strip()
+                self.contract_chunks[f"{doc}:{u.uid}"] = Chunk(f"{doc}:{u.uid}", doc, CONTRACT_PREFIX + contract.filename,
+                                                               None, None, first, text)
         self.law_chunks: dict[str, Chunk] = {}
         if runtime is not None and self.anchor is not None:
             titles: dict[str, str] = {}
@@ -163,5 +167,37 @@ def run_contract_agent(contract: Contract, baseline, config: AgentConfig | None,
             event = unmask_payload(event, state)
             if event.get("type") == "done":
                 event = {"type": "done", **_postcheck(contract, {**event, "query": question})}
+            yield event
+    return events()
+
+
+def run_store_agent(baseline, config: AgentConfig | None, runtime, doc_chunks: Mapping[str, Chunk] | None,
+                    doc_search: LegacySearch | None, question: str, history: list[dict], *, anchor: date,
+                    mask_state, stream: bool = False):
+    """Think tự do sau đồng bộ: agent tìm trong luật có phiên bản tại `anchor` + tài liệu thường (kho cũ), câu hỏi và
+    lịch sử che PII bằng `mask_state` của phiên chat, đầu ra mở che."""
+    retriever = ContractAgentRetriever(None, runtime, doc_chunks, doc_search, anchor=anchor)
+    agent = AgentPipeline(AgentBaselineView(baseline, retriever), config or AgentConfig())
+    masked_q = mask_text(question, state=mask_state).masked_text
+    masked_h = mask_payload([h for h in (history or []) if isinstance(h, dict)], mask_state)
+
+    def finish(data: dict[str, Any]) -> dict[str, Any]:
+        data = dict(data)
+        cited = {c.get("source", "") for c in data.get("citations") or []}
+        if data.get("status") in ("answer", "partial") and not any(s.startswith(VERSIONED_PREFIX) for s in cited):
+            data["answer"] = f"{data.get('answer', '')}\n\n{STORE_WARNING}"
+            if data.get("status") == "answer":
+                data["status"] = "partial"
+        data["anchor"] = anchor.isoformat()
+        return data
+
+    if not stream:
+        return finish(unmask_payload(agent.ask_debug(masked_q, history=masked_h).to_response(question), mask_state))
+
+    def events() -> Iterator[dict]:
+        for event in agent.ask_stream(masked_q, history=masked_h):
+            event = unmask_payload(event, mask_state)
+            if event.get("type") == "done":
+                event = {"type": "done", **finish({**event, "query": question})}
             yield event
     return events()

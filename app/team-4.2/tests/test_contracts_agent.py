@@ -161,3 +161,57 @@ def test_agent_question_carries_contract_context():
     plan = json.loads(llm.calls[0])
     assert "Hợp đồng thuê nhà ở" in plan["standalone_question"] and "15/03/2023" in plan["standalone_question"]
     assert "Bên A có được chấm dứt không?" in plan["standalone_question"]
+
+
+# --- Think tự do trên kho mới (đồng bộ) ----------------------------------------------------------
+
+def test_store_agent_without_contract_uses_versioned_law_at_anchor_and_masks_pii():
+    from rag.contracts.agent_view import run_store_agent
+    from rag.contracts.models import new_mask_state
+
+    class LawLLM:
+        """Một yêu cầu (R1) chỉ trả lời được bằng luật có phiên bản."""
+        model_id = "fixture-store-agent"
+
+        def __init__(self):
+            self.calls = []
+
+        def complete(self, system, user):
+            self.calls.append(user)
+            p = json.loads(user)
+            needle = "ít nhất 30 ngày"
+            ex = next((e for e in p.get("excerpts", []) if needle in e["text"]), None)
+            if system == prompts.PLAN:
+                out = {"requirements": [{"id": "R1", "question": "Báo trước bao lâu?", "depends_on": []}],
+                       "clarification": None}
+            elif system == prompts.ASSESS:
+                out = {"assessments": [{"requirement_id": "R1", "status": "supported" if ex else "missing",
+                                        "evidence": [{"id": ex["id"], "quote": needle}] if ex else [], "reason": "ok"}],
+                       "followup_queries": [], "xref_ids": []}
+            elif system == prompts.COMPOSE:
+                out = {"claims": [{"text": "Phải báo trước ít nhất 30 ngày.", "evidence_ids": [ex["id"]],
+                                   "requirement_ids": ["R1"]}] if ex else []}
+            elif system == prompts.VERIFY:
+                out = {"claims": [{"index": 0, "supported": True, "reason": "ok",
+                                   "evidence": [{"id": i, "quote": needle} for i in p["claims"][0]["evidence_ids"]]}],
+                       "requirements": [{"id": "R1", "covered": True}], "facts_preserved": True,
+                       "scope_respected": True, "followup_queries": []}
+            else:
+                out = {"standalone_query": p.get("query", "")}
+            return json.dumps(out, ensure_ascii=False)
+
+    llm = LawLLM()
+    chunks, search = legacy()
+    out = run_store_agent(baseline(llm), AgentConfig(), RUNTIME, chunks, search,
+                          "Gọi 0987 654 321: bên cho thuê đơn phương chấm dứt phải báo trước bao lâu?", [],
+                          anchor=SIGNED, mask_state=new_mask_state())
+    assert out["anchor"] == "2023-03-15"
+    kinds = {s["source"].split(":")[0] for s in out["sources"]}
+    assert VERSIONED_PREFIX.rstrip(": ") in kinds and "Hợp đồng" not in kinds
+    assert all("0987 654 321" not in call for call in llm.calls)
+
+
+def test_store_retriever_has_no_contract_source():
+    r = ContractAgentRetriever(None, RUNTIME, {}, None, anchor=SIGNED)
+    _, snap = r.capture_snapshot()
+    assert snap and all(c.source.startswith(VERSIONED_PREFIX) for c in snap.values())

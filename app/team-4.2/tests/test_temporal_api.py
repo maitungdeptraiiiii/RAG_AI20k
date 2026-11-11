@@ -83,26 +83,25 @@ def test_invalid_as_of_400(client, bad):
     assert r.status_code == 400 and qa.calls == []
 
 
-def test_temporal_init_failure_falls_back_to_old_pipeline(monkeypatch):
-    # review I4: kho mới lỗi khởi tạo -> chat vẫn chạy trên pipeline cũ, không 500
+def test_temporal_init_failure_is_reported_not_answered_from_old_store(monkeypatch):
+    # đồng bộ sang kho mới: kho mới lỗi khởi tạo -> báo rõ (503), không trả lời luật bằng kho cũ, không 500
     def boom():
         raise RuntimeError("catalog hỏng")
 
     monkeypatch.setattr(legal_api, "get_backend", boom)
-    monkeypatch.setattr(server, "get_pipeline", lambda: (object(), None))
-    monkeypatch.setattr(server, "_sync_ask", lambda q, p, m, h=None: {"query": q, "answer": "cũ", "refused": False})
+    monkeypatch.setattr(server, "_sync_ask", lambda *a, **k: (_ for _ in ()).throw(AssertionError("kho cũ")))
     r = TestClient(server.app).post("/api/chat", json={"query": "Hỏi?"})
-    assert r.status_code == 200 and r.json()["answer"] == "cũ"
+    assert r.status_code == 503 and r.json()["error"] == server.LEGAL_NOT_READY
     assert server.get_temporal_qa() is None
 
 
-def test_chat_without_runtime_falls_back_to_old_pipeline(monkeypatch):
-    # kho mới khởi tạo được nhưng chưa có cặp (snapshot, chỉ mục) dùng được -> pipeline cũ
+def test_chat_without_runtime_is_reported(monkeypatch):
+    # kho mới chưa có cặp (snapshot, chỉ mục) dùng được -> báo rõ, không dùng kho cũ
     holder = NS(get=lambda: None, lease=lambda: nullcontext(None))
     monkeypatch.setattr(server, "_legal_holder", lambda: holder)
-    monkeypatch.setattr(server, "get_pipeline", lambda: (object(), None))
-    monkeypatch.setattr(server, "_sync_ask", lambda q, p, m, h=None: {"query": q, "answer": "cũ", "refused": False})
-    assert TestClient(server.app).post("/api/chat", json={"query": "Hỏi?"}).json()["answer"] == "cũ"
+    monkeypatch.setattr(server, "_sync_ask", lambda *a, **k: (_ for _ in ()).throw(AssertionError("kho cũ")))
+    r = TestClient(server.app).post("/api/chat", json={"query": "Hỏi?"})
+    assert r.status_code == 503 and r.json()["error"] == server.LEGAL_NOT_READY
 
 
 def test_chat_leases_runtime_for_whole_request(monkeypatch):

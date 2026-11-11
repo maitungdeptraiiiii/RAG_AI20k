@@ -495,13 +495,19 @@ def _chat_temporal(qa, query: str, as_of, mask_state: MaskState,
     return _sync_temporal(query, qa, as_of, mask_state)
 
 
+LEGAL_NOT_READY = "Kho luật có phiên bản chưa sẵn sàng — hãy thử lại sau ít phút hoặc kiểm tra trang /review."
+
+
+class LegalStoreNotReady(RuntimeError):
+    """Kho luật có phiên bản chưa dùng được: báo rõ, KHÔNG trả lời luật bằng kho cũ (kho cũ chỉ còn tài liệu thường)."""
+
+
 def _sync_chat(query: str, as_of, mask_state: MaskState,
                history: list[dict[str, Any]] | None = None) -> dict[str, Any]:
     with lease_temporal_qa() as qa:          # một cặp (snapshot, chỉ mục) cho cả request
         if qa is not None:
             return _chat_temporal(qa, query, as_of, mask_state, history)
-    pipeline, _ = get_pipeline()
-    return _sync_ask(query, pipeline, mask_state, history)
+    raise LegalStoreNotReady(LEGAL_NOT_READY)
 
 
 def _sse(event: dict[str, Any]) -> str:
@@ -517,11 +523,45 @@ def _sync_stream(query: str, as_of, mask_state: MaskState, history: list[dict[st
             if qa is not None:
                 yield _sse({"type": "done", **_chat_temporal(qa, query, as_of, mask_state, history)})
                 return
-        pipeline, _ = get_pipeline()
-        for event in pipeline.ask_stream(query, history=history, mask_state=mask_state):
-            yield _sse(event)
+        yield _sse({"type": "error", "error": LEGAL_NOT_READY})
     except Exception as e:  # noqa: BLE001 — báo lỗi cho UI qua luồng SSE
         log.exception("Lỗi khi stream chat: %s", e)
+        yield _sse({"type": "error", "error": f"Lỗi hệ thống: {e}"})
+
+
+def _think_json(query: str, agent: AgentPipeline, mask_state: MaskState, history: list[dict[str, Any]] | None,
+                as_of) -> dict[str, Any]:
+    """Think tự do: agent multi-hop trên luật có phiên bản tại mốc (ngày chọn, không có thì hôm nay) + tài liệu thường;
+    câu hỏi che PII bằng bảng tra của phiên chat."""
+    from datetime import date as _date
+
+    from rag.contracts.agent_view import run_store_agent
+
+    with _lease_legal_runtime() as rt:
+        if rt is None:
+            raise LegalStoreNotReady(LEGAL_NOT_READY)
+        chunks, hits = _document_source()
+        return run_store_agent(agent.baseline, agent.config, rt, chunks, hits, query, history or [],
+                               anchor=as_of or _date.today(), mask_state=mask_state)
+
+
+def _think_stream(query: str, agent: AgentPipeline, mask_state: MaskState, history: list[dict[str, Any]] | None,
+                  as_of):
+    from datetime import date as _date
+
+    from rag.contracts.agent_view import run_store_agent
+
+    try:
+        with _lease_legal_runtime() as rt:
+            if rt is None:
+                yield _sse({"type": "error", "error": LEGAL_NOT_READY})
+                return
+            chunks, hits = _document_source()
+            for event in run_store_agent(agent.baseline, agent.config, rt, chunks, hits, query, history or [],
+                                         anchor=as_of or _date.today(), mask_state=mask_state, stream=True):
+                yield _sse(event)
+    except Exception as e:  # noqa: BLE001 — báo lỗi cho UI qua luồng SSE
+        log.exception("Lỗi khi stream chat (Think): %s", e)
         yield _sse({"type": "error", "error": f"Lỗi hệ thống: {e}"})
 
 
@@ -613,13 +653,16 @@ async def handle_chat(request: Request) -> Response:
             return JSONResponse({"error": "Chế độ Think chưa sẵn sàng. Bạn có thể tắt Think để tra cứu thông thường.",
                                  "code": "agent_unavailable"}, status_code=503)
         if is_stream:
-            return StreamingResponse(_sync_agent_stream(query, agent, history), media_type="text/event-stream",
+            return StreamingResponse(_think_stream(query, agent, mask_state, history, as_of),
+                                     media_type="text/event-stream",
                                      headers={"Cache-Control": "no-cache", "Connection": "keep-alive",
                                               "X-Accel-Buffering": "no"})
         loop = asyncio.get_running_loop()
         try:
-            data = await loop.run_in_executor(_executor, _sync_ask, query, agent, mask_state, history)
+            data = await loop.run_in_executor(_executor, _think_json, query, agent, mask_state, history, as_of)
             return JSONResponse(data)
+        except LegalStoreNotReady as e:
+            return JSONResponse({"error": str(e)}, status_code=503)
         except Exception as e:
             log.exception("Lỗi khi xử lý chat (Think): %s", e)
             return JSONResponse({"error": f"Lỗi hệ thống: {e}"}, status_code=500)
@@ -639,6 +682,8 @@ async def handle_chat(request: Request) -> Response:
     try:
         data = await loop.run_in_executor(_executor, _sync_chat, query, as_of, mask_state, history)
         return JSONResponse(data)
+    except LegalStoreNotReady as e:
+        return JSONResponse({"error": str(e)}, status_code=503)
     except Exception as e:
         log.exception("Lỗi khi xử lý chat: %s", e)
         return JSONResponse({"error": f"Lỗi hệ thống: {e}"}, status_code=500)

@@ -9,6 +9,7 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
+from types import SimpleNamespace
 from starlette.requests import Request
 
 
@@ -48,7 +49,7 @@ def test_selects_only_requested_backend(server, monkeypatch, stream, think):
         executed.append((query, baseline, received_history))
         return {"answer": "ok"}
 
-    def ask(query, pipeline, mask_state, received_history):
+    def ask(query, pipeline, mask_state, received_history, as_of):
         executed.append((query, pipeline, received_history))
         return {"answer": "ok"}
 
@@ -56,14 +57,14 @@ def test_selects_only_requested_backend(server, monkeypatch, stream, think):
         chat(query, as_of, mask_state, received_history)
         yield 'data: {"type": "done", "answer": "ok"}\n\n'
 
-    def agent_events(query, pipeline, received_history):
+    def agent_events(query, pipeline, mask_state, received_history, as_of):
         executed.append((query, pipeline, received_history))
         yield 'data: {"type": "done", "answer": "ok"}\n\n'
 
     monkeypatch.setattr(server, "_sync_chat", chat)
-    monkeypatch.setattr(server, "_sync_ask", ask)
+    monkeypatch.setattr(server, "_think_json", ask)
     monkeypatch.setattr(server, "_sync_stream", chat_events)
-    monkeypatch.setattr(server, "_sync_agent_stream", agent_events)
+    monkeypatch.setattr(server, "_think_stream", agent_events)
     body = {"query": "Câu hỏi", "history": history, "stream": stream}
     if think is not None:
         body["think"] = think
@@ -114,3 +115,26 @@ def test_agent_initialization_error_is_sanitized(server, monkeypatch):
     assert response.status_code == 503
     assert "secret-sample-value" not in response.body.decode()
     assert json.loads(response.body)["code"] == "agent_initialization_failed"
+
+
+
+@pytest.mark.parametrize("stream", [False, True])
+def test_chat_reports_unready_legal_store_instead_of_old_store(server, monkeypatch, stream):
+    monkeypatch.setattr(server, "_legal_holder", lambda: None)
+    monkeypatch.setattr(server, "get_pipeline", Mock(side_effect=AssertionError("không được dùng kho cũ trả lời luật")))
+
+    async def run():
+        response = await server.handle_chat(request_for({"query": "Câu hỏi", "stream": stream}))
+        if stream:
+            body = "".join([c if isinstance(c, str) else c.decode() async for c in response.body_iterator])
+            assert server.LEGAL_NOT_READY in body
+        else:
+            assert response.status_code == 503 and json.loads(response.body)["error"] == server.LEGAL_NOT_READY
+    asyncio.run(run())
+
+
+def test_think_without_legal_store_is_reported(server, monkeypatch):
+    monkeypatch.setattr(server, "_legal_holder", lambda: None)
+    agent = SimpleNamespace(baseline=None, config=None)
+    with pytest.raises(server.LegalStoreNotReady):
+        server._think_json("Câu hỏi", agent, None, [], None)

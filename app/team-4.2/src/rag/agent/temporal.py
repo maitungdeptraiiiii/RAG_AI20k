@@ -18,6 +18,7 @@ from rag.advanced.hyde import HydeRetriever
 from rag.agent.contracts import BudgetExceeded, ModelGateway, OutputError
 from rag.agent.corpus import CorpusSnapshot, fold, _ABBREVIATIONS
 from rag.agent.validation import identifiers, items, obj, text
+from rag.generate.style import ANSWER_STYLE
 from rag.legal.store import encode
 from rag.legal.targets import law_name
 from rag.retrieve.hybrid import CorpusChangedError, HybridRetriever, RetrievalError, RetrievalResult
@@ -49,7 +50,7 @@ có sẵn; context hội thoại của assistant không phải dữ kiện ngư�
 "transition_assessments":[{"rule_id":"ID có sẵn","assessment":"not_applicable|potentially_applicable|applicable|undetermined",
 "reasons":["lý do ngắn theo dữ kiện"],"evidence_ids":["E1"],"missing_information":["dữ kiện cần hỏi"]}],
 "follow_up_questions":["câu hỏi về dữ kiện còn thiếu"]}
-"""
+""" + ANSWER_STYLE
 
 
 class _EmptyArm:
@@ -159,7 +160,7 @@ class TemporalCorpus(CorpusSnapshot):
 
 
 class TemporalScopeFactory:
-    def __init__(self, baseline, qa, calendar_date: date, config):
+    def __init__(self, baseline, qa, calendar_date: date | None, config):
         self.baseline, self.qa, self.calendar_date, self.config = baseline, qa, calendar_date, config
 
     def __call__(self, query, gateway):
@@ -167,7 +168,7 @@ class TemporalScopeFactory:
 
 
 class TemporalScope:
-    def __init__(self, baseline, qa, calendar_date, config, query, gateway):
+    def __init__(self, baseline, qa, calendar_date: date | None, config, query, gateway):
         self.qa, self.query, self.calendar_date = qa, query, calendar_date
         self.request_context = {"original_question": query, "history": []}
         gateway.budget.finalization_reserve = 1
@@ -227,11 +228,15 @@ class TemporalScope:
             key: (build.build_id if (build := qa.service.store.latest_build(key)) is not None else None)
             for key in {r.source_document_key for r in self.rules}
         }
-        self.warning = f"Căn cứ được lọc theo mốc đã chọn {calendar_date.isoformat()} và các mốc sự kiện trong câu hỏi; xem trạng thái xác minh của từng nguồn."
+        if calendar_date is not None:
+            self.warning = f"Căn cứ được lọc theo mốc đã chọn {calendar_date.isoformat()} và các mốc sự kiện trong câu hỏi; xem trạng thái xác minh của từng nguồn."
+        else:
+            self.warning = "Căn cứ được lọc theo các mốc sự kiện trong câu hỏi và thời điểm hiện tại; xem trạng thái xác minh của từng nguồn."
 
     def planning_payload(self):
         return {
-            "mode": "temporal", "calendar_date": self.calendar_date.isoformat(),
+            "mode": "temporal",
+            "calendar_date": self.calendar_date.isoformat() if self.calendar_date is not None else None,
             "anchors": [{"anchor_id": aid, **encode(anchor)} for aid, anchor in self.anchors.items()],
             "warnings": list(self.timeline.warnings), "legacy_fallback": False,
         }
@@ -324,7 +329,8 @@ class TemporalScope:
         timeline = encode(self.timeline)
         metadata = {block.chunk.chunk_id: self.metadata[block.chunk.chunk_id] for block in trace.context.blocks}
         trace.temporal = {
-            "as_of": self.calendar_date.isoformat(), "timeline": timeline,
+            "as_of": self.calendar_date.isoformat() if self.calendar_date is not None else None,
+            "timeline": timeline,
             "issues": [], "transition_assessments": [], "transition_rules": [],
             "follow_up_questions": [], "certainty": "cannot_conclude", "downgrade_reasons": [],
             "_source_metadata": {cid: {k: v for k, v in meta.items() if k != "document_key"} |
@@ -332,7 +338,7 @@ class TemporalScope:
         }
         if not trace.answer.citations:
             if trace.status == "abstain":
-                trace.answer = Answer(f"Không có đủ căn cứ trong kho luật có phiên bản tại các mốc yêu cầu (ngày chọn: {self.calendar_date.isoformat()}).", [], False)
+                trace.answer = Answer("Tôi chưa đủ căn cứ để trả lời câu hỏi này.", [], False)
             self._record(trace)
             return
         rules = self._rules_for(metadata)
@@ -368,7 +374,7 @@ class TemporalScope:
                     "Bạn vui lòng cho biết ngày cụ thể của các sự kiện còn chưa xác định được thời điểm."]
             if unresolved or unresolved_dates or answer.certainty == "cannot_conclude":
                 trace.status = "clarify"
-                trace.answer = Answer("Chưa thể kết luận cách áp dụng pháp luật theo mốc đã chọn vì còn thiếu dữ kiện hoặc quy định chuyển tiếp chưa được giải quyết. Xem các câu hỏi cần làm rõ bên dưới.", [], False)
+                trace.answer = Answer("Tôi cần làm rõ thêm một số thông tin trước khi có thể kết luận. Bạn vui lòng bổ sung các thông tin được hỏi bên dưới.", [], False)
                 trace.agent.update(status=trace.status, verified=False, stop_reason="temporal_conditions_unresolved")
                 trace.agent["temporal_claims_blocked"] = True
                 trace.agent["unresolved_requirements"] = [r["id"] for r in trace.agent["requirements"]]
@@ -378,12 +384,11 @@ class TemporalScope:
             else:
                 trace.answer.text = answer.answer_markdown
                 if answer.certainty == "qualified":
-                    trace.answer.text = "Kết luận có điều kiện theo các mốc thời gian đã xác định:\n\n" + trace.answer.text
                     trace.status = "partial"
                     trace.agent.update(status="partial", stop_reason="temporal_qualified")
         except Exception as exc:
             trace.status = "error"
-            trace.answer = Answer("Chưa thể kiểm chứng việc áp dụng pháp luật tại mốc đã chọn. Vui lòng thử lại; hệ thống không thay bằng bản luật ngoài phạm vi ngày yêu cầu.", [], False)
+            trace.answer = Answer("Chưa thể kiểm chứng câu trả lời lúc này. Vui lòng thử lại.", [], False)
             trace.agent.update(status="error", verified=False, stop_reason="temporal_review_failed")
             trace.retrieval.errors["temporal_review"] = type(exc).__name__
             trace.temporal["downgrade_reasons"] = ["certainty.temporal_review_failed"]

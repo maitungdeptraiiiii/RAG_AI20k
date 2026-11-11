@@ -1,0 +1,391 @@
+{
+  "request": {
+    "query": "Chủ đầu tư dự án xây dựng nhà ở thương mại đã ký hợp đồng ngày 15/06/2023, tranh chấp phát sinh ngày 15/09/2025. Điều kiện áp dụng và quy định chuyển tiếp cần xem thế nào?",
+    "as_of": "2025-09-15",
+    "stream": true,
+    "think": true,
+    "session_id": "dated-e2e-multiple_anchors"
+  },
+  "response": {
+    "type": "done",
+    "query": "Chủ đầu tư dự án xây dựng nhà ở thương mại đã ký hợp đồng ngày 15/06/2023, tranh chấp phát sinh ngày 15/09/2025. Điều kiện áp dụng và quy định chuyển tiếp cần xem thế nào?",
+    "answer": "Bạn cần xem điều kiện áp dụng và quy định chuyển tiếp đối với vấn đề pháp lý nào, và hợp đồng ngày 15/06/2023 là loại hợp đồng gì (chẳng hạn hợp đồng mua bán nhà ở hay hợp đồng xây dựng)?",
+    "refused": false,
+    "query_pii": {},
+    "status": "clarify",
+    "citations": [],
+    "sources": [],
+    "trace": {
+      "condensed_query": "Chủ đầu tư dự án xây dựng nhà ở thương mại đã ký hợp đồng ngày 15/06/2023, tranh chấp phát sinh ngày 15/09/2025. Điều kiện áp dụng và quy định chuyển tiếp cần xem thế nào?",
+      "context_mode": "empty",
+      "n_context_blocks": 0,
+      "reranked": false,
+      "errors": {},
+      "arms": {},
+      "final_hits": [],
+      "agent": {
+        "version": "multihop-v1",
+        "scope": "temporal",
+        "scope_warning": "Căn cứ được lọc theo mốc đã chọn 2025-09-15 và các mốc sự kiện trong câu hỏi; xem trạng thái xác minh của từng nguồn.",
+        "snapshot_id": "cf45acbf246d65afa0efdce0bc4563ff50ad5ff5d0fb046c6481447491f973e4",
+        "status": "clarify",
+        "stop_reason": "missing_user_fact",
+        "verified": false,
+        "config": {
+          "max_rounds": 3,
+          "max_searches": 8,
+          "initial_subqueries": 3,
+          "followup_searches": 2,
+          "candidates_per_search": 10,
+          "initial_pool_size": 30,
+          "new_units_per_round": 10,
+          "max_units": 50,
+          "max_xref_depth": 2,
+          "xrefs_per_round": 6,
+          "max_xref_targets": 12,
+          "max_requirements": 8,
+          "max_model_calls": 24,
+          "max_service_requests": 240,
+          "max_model_bytes": 600000,
+          "max_input_chars": 60000,
+          "max_output_tokens": 3000,
+          "deadline_s": 180.0,
+          "retrieval_mode": "dense"
+        },
+        "budget": {
+          "rounds": 0,
+          "searches": 0,
+          "xref_targets": 0,
+          "model_calls": 2,
+          "model_bytes": 5307,
+          "provider_requests": 2,
+          "cache_hits": 0,
+          "input_tokens": 1158,
+          "output_tokens": 511,
+          "elapsed_s": 11.2,
+          "calls": [
+            {
+              "stage": "timeline",
+              "model": "gpt-6-luna",
+              "status": "ok",
+              "prompt_sha256": "741e7d5f80ec8c00da1cceec6e4049629e8e9b5ecfb79971d6ab32be434b708c",
+              "input_sha256": "4f87ff8c9414ac3efdbbf3ea37f47233d4d917f6a67957a56af9af50507bd496",
+              "cache_hit": false
+            },
+            {
+              "stage": "plan",
+              "model": "gpt-6-luna",
+              "status": "ok",
+              "prompt_sha256": "4423d9f67b13a4b1f02db8eb6e269ac1127dd9c4c2d01438ba9c153067631dbe",
+              "input_sha256": "d9c5cc4b320a47c9e7d2c40043606ddcd2096ebcad1a8785b45ee02ee58c7d32",
+              "cache_hit": false
+            }
+          ],
+          "service_requests": {}
+        },
+        "requirements": [],
+        "assessments": [],
+        "unresolved_requirements": [],
+        "evidence": [],
+        "claims": [],
+        "verified_quotes": {},
+        "events": [
+          {
+            "type": "progress",
+            "stage": "prepare",
+            "message": "Think · Đang xác định câu hỏi và phạm vi tài liệu…",
+            "sequence": 1
+          },
+          {
+            "type": "progress",
+            "stage": "scope",
+            "message": "Think · Đang chọn phiên bản luật theo mốc thời gian…",
+            "sequence": 2
+          }
+        ]
+      }
+    },
+    "as_of": "2025-09-15",
+    "timeline": {
+      "anchors": [
+        {
+          "role": "unspecified",
+          "start": "2025-09-15",
+          "end": "2025-09-15",
+          "precision": "day",
+          "source": "calendar",
+          "evidence": null,
+          "relative_expression": null,
+          "confidence": 1.0,
+          "matched_text": null
+        },
+        {
+          "role": "signing",
+          "start": "2023-06-15",
+          "end": "2023-06-15",
+          "precision": "day",
+          "source": "question",
+          "evidence": "ký hợp đồng ngày 15/06/2023",
+          "relative_expression": null,
+          "confidence": 1.0,
+          "matched_text": "15/06/2023"
+        },
+        {
+          "role": "dispute",
+          "start": "2025-09-15",
+          "end": "2025-09-15",
+          "precision": "day",
+          "source": "question",
+          "evidence": "tranh chấp phát sinh ngày 15/09/2025",
+          "relative_expression": null,
+          "confidence": 1.0,
+          "matched_text": "15/09/2025"
+        }
+      ],
+      "primary": {
+        "role": "unspecified",
+        "start": "2025-09-15",
+        "end": "2025-09-15",
+        "precision": "day",
+        "source": "calendar",
+        "evidence": null,
+        "relative_expression": null,
+        "confidence": 1.0,
+        "matched_text": null
+      },
+      "warnings": [
+        "timeline.calendar_conflict:signing"
+      ],
+      "asked_at": "2026-11-10T09:42:58.049567+00:00"
+    },
+    "issues": [],
+    "transition_assessments": [],
+    "transition_rules": [],
+    "follow_up_questions": [],
+    "certainty": "cannot_conclude",
+    "downgrade_reasons": [],
+    "log_id": "416fcbe41fac4402"
+  },
+  "events": [
+    {
+      "type": "progress",
+      "stage": "prepare",
+      "message": "Think · Đang xác định câu hỏi và phạm vi tài liệu…",
+      "sequence": 1
+    },
+    {
+      "type": "progress",
+      "stage": "scope",
+      "message": "Think · Đang chọn phiên bản luật theo mốc thời gian…",
+      "sequence": 2
+    },
+    {
+      "type": "sources",
+      "sources": []
+    },
+    {
+      "type": "token",
+      "delta": "Bạn cần xem điều kiện áp dụng và quy định chuyển tiếp đối với vấn đề pháp lý nào, và hợp đồng ngày 15/06/2023 là loại hợp đồng gì (chẳng hạn hợp đồng mua bán nhà ở hay hợp đồng xây dựng)?"
+    },
+    {
+      "type": "done",
+      "query": "Chủ đầu tư dự án xây dựng nhà ở thương mại đã ký hợp đồng ngày 15/06/2023, tranh chấp phát sinh ngày 15/09/2025. Điều kiện áp dụng và quy định chuyển tiếp cần xem thế nào?",
+      "answer": "Bạn cần xem điều kiện áp dụng và quy định chuyển tiếp đối với vấn đề pháp lý nào, và hợp đồng ngày 15/06/2023 là loại hợp đồng gì (chẳng hạn hợp đồng mua bán nhà ở hay hợp đồng xây dựng)?",
+      "refused": false,
+      "query_pii": {},
+      "status": "clarify",
+      "citations": [],
+      "sources": [],
+      "trace": {
+        "condensed_query": "Chủ đầu tư dự án xây dựng nhà ở thương mại đã ký hợp đồng ngày 15/06/2023, tranh chấp phát sinh ngày 15/09/2025. Điều kiện áp dụng và quy định chuyển tiếp cần xem thế nào?",
+        "context_mode": "empty",
+        "n_context_blocks": 0,
+        "reranked": false,
+        "errors": {},
+        "arms": {},
+        "final_hits": [],
+        "agent": {
+          "version": "multihop-v1",
+          "scope": "temporal",
+          "scope_warning": "Căn cứ được lọc theo mốc đã chọn 2025-09-15 và các mốc sự kiện trong câu hỏi; xem trạng thái xác minh của từng nguồn.",
+          "snapshot_id": "cf45acbf246d65afa0efdce0bc4563ff50ad5ff5d0fb046c6481447491f973e4",
+          "status": "clarify",
+          "stop_reason": "missing_user_fact",
+          "verified": false,
+          "config": {
+            "max_rounds": 3,
+            "max_searches": 8,
+            "initial_subqueries": 3,
+            "followup_searches": 2,
+            "candidates_per_search": 10,
+            "initial_pool_size": 30,
+            "new_units_per_round": 10,
+            "max_units": 50,
+            "max_xref_depth": 2,
+            "xrefs_per_round": 6,
+            "max_xref_targets": 12,
+            "max_requirements": 8,
+            "max_model_calls": 24,
+            "max_service_requests": 240,
+            "max_model_bytes": 600000,
+            "max_input_chars": 60000,
+            "max_output_tokens": 3000,
+            "deadline_s": 180.0,
+            "retrieval_mode": "dense"
+          },
+          "budget": {
+            "rounds": 0,
+            "searches": 0,
+            "xref_targets": 0,
+            "model_calls": 2,
+            "model_bytes": 5307,
+            "provider_requests": 2,
+            "cache_hits": 0,
+            "input_tokens": 1158,
+            "output_tokens": 511,
+            "elapsed_s": 11.2,
+            "calls": [
+              {
+                "stage": "timeline",
+                "model": "gpt-6-luna",
+                "status": "ok",
+                "prompt_sha256": "741e7d5f80ec8c00da1cceec6e4049629e8e9b5ecfb79971d6ab32be434b708c",
+                "input_sha256": "4f87ff8c9414ac3efdbbf3ea37f47233d4d917f6a67957a56af9af50507bd496",
+                "cache_hit": false
+              },
+              {
+                "stage": "plan",
+                "model": "gpt-6-luna",
+                "status": "ok",
+                "prompt_sha256": "4423d9f67b13a4b1f02db8eb6e269ac1127dd9c4c2d01438ba9c153067631dbe",
+                "input_sha256": "d9c5cc4b320a47c9e7d2c40043606ddcd2096ebcad1a8785b45ee02ee58c7d32",
+                "cache_hit": false
+              }
+            ],
+            "service_requests": {}
+          },
+          "requirements": [],
+          "assessments": [],
+          "unresolved_requirements": [],
+          "evidence": [],
+          "claims": [],
+          "verified_quotes": {},
+          "events": [
+            {
+              "type": "progress",
+              "stage": "prepare",
+              "message": "Think · Đang xác định câu hỏi và phạm vi tài liệu…",
+              "sequence": 1
+            },
+            {
+              "type": "progress",
+              "stage": "scope",
+              "message": "Think · Đang chọn phiên bản luật theo mốc thời gian…",
+              "sequence": 2
+            }
+          ]
+        }
+      },
+      "as_of": "2025-09-15",
+      "timeline": {
+        "anchors": [
+          {
+            "role": "unspecified",
+            "start": "2025-09-15",
+            "end": "2025-09-15",
+            "precision": "day",
+            "source": "calendar",
+            "evidence": null,
+            "relative_expression": null,
+            "confidence": 1.0,
+            "matched_text": null
+          },
+          {
+            "role": "signing",
+            "start": "2023-06-15",
+            "end": "2023-06-15",
+            "precision": "day",
+            "source": "question",
+            "evidence": "ký hợp đồng ngày 15/06/2023",
+            "relative_expression": null,
+            "confidence": 1.0,
+            "matched_text": "15/06/2023"
+          },
+          {
+            "role": "dispute",
+            "start": "2025-09-15",
+            "end": "2025-09-15",
+            "precision": "day",
+            "source": "question",
+            "evidence": "tranh chấp phát sinh ngày 15/09/2025",
+            "relative_expression": null,
+            "confidence": 1.0,
+            "matched_text": "15/09/2025"
+          }
+        ],
+        "primary": {
+          "role": "unspecified",
+          "start": "2025-09-15",
+          "end": "2025-09-15",
+          "precision": "day",
+          "source": "calendar",
+          "evidence": null,
+          "relative_expression": null,
+          "confidence": 1.0,
+          "matched_text": null
+        },
+        "warnings": [
+          "timeline.calendar_conflict:signing"
+        ],
+        "asked_at": "2026-11-10T09:42:58.049567+00:00"
+      },
+      "issues": [],
+      "transition_assessments": [],
+      "transition_rules": [],
+      "follow_up_questions": [],
+      "certainty": "cannot_conclude",
+      "downgrade_reasons": [],
+      "log_id": "416fcbe41fac4402"
+    }
+  ],
+  "outcome": {
+    "id": "multiple_anchors",
+    "http": 200,
+    "status": "clarify",
+    "certainty": "cannot_conclude",
+    "stop_reason": "missing_user_fact",
+    "sources": 0,
+    "budget": {
+      "rounds": 0,
+      "searches": 0,
+      "xref_targets": 0,
+      "model_calls": 2,
+      "model_bytes": 5307,
+      "provider_requests": 2,
+      "cache_hits": 0,
+      "input_tokens": 1158,
+      "output_tokens": 511,
+      "elapsed_s": 11.2,
+      "calls": [
+        {
+          "stage": "timeline",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "741e7d5f80ec8c00da1cceec6e4049629e8e9b5ecfb79971d6ab32be434b708c",
+          "input_sha256": "4f87ff8c9414ac3efdbbf3ea37f47233d4d917f6a67957a56af9af50507bd496",
+          "cache_hit": false
+        },
+        {
+          "stage": "plan",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "4423d9f67b13a4b1f02db8eb6e269ac1127dd9c4c2d01438ba9c153067631dbe",
+          "input_sha256": "d9c5cc4b320a47c9e7d2c40043606ddcd2096ebcad1a8785b45ee02ee58c7d32",
+          "cache_hit": false
+        }
+      ],
+      "service_requests": {}
+    },
+    "problems": []
+  }
+}

@@ -17,6 +17,13 @@ import server  # noqa: E402
 NOW = datetime(2026, 11, 9, tzinfo=timezone.utc)
 
 
+@pytest.fixture(autouse=True)
+def isolated_baseline(monkeypatch):
+    # These API-contract tests use FakeQA. Never open the running app's Qdrant
+    # store or instantiate configured external services just to dispatch to it.
+    monkeypatch.setattr(server, "get_pipeline", lambda: (object(), None))
+
+
 class FakeQA:
     def __init__(self):
         self.calls = []

@@ -12,24 +12,27 @@ from datetime import date
 from typing import Literal
 
 from rag.temporal.models import LegalTimeline, TransitionRule
+from rag.generate.style import ANSWER_STYLE
 
 Certainty = Literal["firm", "qualified", "cannot_conclude"]
 _RANK = {"firm": 2, "qualified": 1, "cannot_conclude": 0}
 _RESOLVED = ("not_applicable", "applicable")
 _ASSESSMENTS = ("not_applicable", "potentially_applicable", "applicable", "undetermined")
 
-SYSTEM_PROMPT = """Bạn là trợ lý pháp lý về pháp luật Việt Nam. Chỉ dùng các căn cứ trong NGỮ CẢNH, trích dẫn bằng [n].
+SYSTEM_PROMPT = """Bạn là trợ lý pháp lý về pháp luật Việt Nam. Kết luận pháp lý chỉ dùng căn cứ trong NGỮ CẢNH, trích dẫn bằng [n]. Dữ kiện người dùng tự nêu trong câu hỏi/lịch sử được dùng để hiểu vụ việc hoặc trả lời về hội thoại; không phải căn cứ pháp lý.
 Quy tắc bắt buộc:
 - Không tự chọn phiên bản luật: mỗi căn cứ đã được hệ thống gắn khoảng hiệu lực và mốc áp dụng; dùng đúng căn cứ cho đúng mốc.
-- Trả lời theo từng vấn đề pháp lý; mỗi vấn đề nêu mốc áp dụng (vai trò của mốc) và căn cứ tương ứng. Không mặc định luật tại ngày ký điều chỉnh mọi vấn đề phát sinh sau đó.
-- Căn cứ "Kho cũ" (chưa xác định phiên bản) chỉ để tham khảo, không làm căn cứ duy nhất cho kết luận.
+- Phân tích từng vấn đề pháp lý theo đúng thời điểm và căn cứ tương ứng; ghi vai trò thời điểm vào issues.anchor_role để kiểm tra nội bộ. Không yêu cầu nêu mốc trong answer_markdown. Không mặc định luật tại ngày ký điều chỉnh mọi vấn đề phát sinh sau đó.
+- Căn cứ source_kind=legacy chỉ để tham khảo, không làm căn cứ duy nhất cho kết luận pháp lý.
 - Căn cứ có trạng thái khác verified: nêu rõ giới hạn.
 - Với mỗi QUY ĐỊNH CHUYỂN TIẾP: xác định (1) có liên quan đến loại sự kiện đang xét không, (2) người dùng đã cung cấp đủ dữ kiện chưa, (3) có ngoại lệ có thể đổi kết luận không. Thiếu dữ kiện thì đánh giá "undetermined" và đặt câu hỏi bổ sung, không suy diễn.
 - Nếu mốc chỉ có năm/tháng mà luật thay đổi trong khoảng đó, trình bày khác biệt và yêu cầu ngày cụ thể nếu kết luận phụ thuộc vào nó.
-Trả về DUY NHẤT một JSON:
+Trả về DUY NHẤT một JSON. BẮT BUỘC ghi answer_markdown đầu tiên để streaming;
+nội dung trường này chỉ là đáp án cho người dùng, không thuyết minh metadata/mốc.
+Các thông tin kiểm tra thời điểm/nguồn chỉ ghi ở issues và transition_assessments phía sau:
 {"answer_markdown": "...", "issues": [{"issue": "...", "anchor_role": "...", "citations": [1], "certainty": "firm|qualified|cannot_conclude", "limitation": "..."}],
  "transition_assessments": [{"rule_id": "...", "assessment": "not_applicable|potentially_applicable|applicable|undetermined", "reasons": ["..."], "citations": [1], "missing_information": ["..."]}],
- "follow_up_questions": ["..."]}"""
+ "follow_up_questions": ["..."]}""" + ANSWER_STYLE
 
 
 @dataclass(frozen=True)
@@ -74,9 +77,9 @@ def build_messages(question: str, timeline: LegalTimeline, items: Sequence[Conte
         parts += ["Cảnh báo về mốc: " + "; ".join(timeline.warnings)]
     parts += ["", "NGỮ CẢNH:"]
     for it in items:
-        valid = ("chưa xác định phiên bản" if it.valid_from is None else
+        valid = ("effective_period=unknown" if it.valid_from is None else
                  f"hiệu lực từ {it.valid_from.isoformat()} đến {it.valid_to.isoformat() if it.valid_to else 'nay'}")
-        store = "Kho có phiên bản" if it.store == "versioned" else "Kho cũ — chỉ tham khảo"
+        store = f"source_kind={it.store}; metadata_only"
         status = f"trạng thái văn bản: {it.document_status}" + (
             f"; điều khoản: {it.provision_status}" if it.provision_status else "")
         prov = f"; sửa đổi bởi: {', '.join(it.provenance)}" if it.provenance else ""

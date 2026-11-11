@@ -51,12 +51,16 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, Response, PlainTextResponse, RedirectResponse, StreamingResponse
 from starlette.routing import Route
+from starlette.concurrency import iterate_in_threadpool
+from starlette.background import BackgroundTask
 
 from rag.config import Settings
 from rag.pipeline import AskTrace, IngestReport, RAGPipeline
 from rag.quality.pii import MaskState
 from rag.agent import AgentConfig, AgentPipeline
 from rag.agent.temporal import TemporalScopeFactory, TemporalScopeUnavailable
+from rag.conversation import ConversationStore, ConversationBusy, conversation_context
+from rag.generate.style import present_answer, PRESENTATION_VERSION
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("rag.ui.server")
@@ -74,6 +78,7 @@ _agent_pipeline: AgentPipeline | None = None
 _pipeline_init_lock = RLock()
 
 _legal_service = None
+_conversations = ConversationStore()
 
 # Bảng tra PII (placeholder <-> giá trị gốc) theo phiên chat, chỉ nằm trong RAM của server.
 # Cùng một session_id -> cùng một khách hàng luôn là cùng placeholder qua các lượt hỏi.
@@ -117,13 +122,11 @@ def get_agent_pipeline(as_of=None) -> AgentPipeline:
     global _agent_pipeline
     baseline, settings = get_pipeline()
     config = AgentConfig.from_settings(settings)
-    if as_of is not None:
-        # Do not hold the pipeline lock while the temporal initializer acquires
-        # its own lock and accesses get_pipeline().
-        qa = get_temporal_qa()
-        if qa is None:
-            raise TemporalScopeUnavailable("Kho luật có phiên bản chưa sẵn sàng để tra cứu theo ngày. Vui lòng thử lại sau.")
+    qa = get_temporal_qa()
+    if qa is not None:
         return AgentPipeline(baseline, config, scope_factory=TemporalScopeFactory(baseline, qa, as_of, config))
+    if as_of is not None:
+        raise TemporalScopeUnavailable("Kho luật có phiên bản chưa sẵn sàng để tra cứu theo ngày. Vui lòng thử lại sau.")
     with _pipeline_init_lock:
         if _agent_pipeline is None or _agent_pipeline.baseline is not baseline:
             _agent_pipeline = AgentPipeline(baseline, config)
@@ -346,12 +349,16 @@ def _iso(value):
     return value.isoformat() if value is not None else None
 
 
-def _sync_temporal(query: str, qa, as_of, mask_state: MaskState) -> dict[str, Any]:
-    import re as _re
+def _sync_temporal(query: str, qa, as_of, mask_state: MaskState, history=None) -> dict[str, Any]:
+    result = qa.ask(query, calendar_date=as_of, mask_state=mask_state,
+                    **({"history": history} if history else {}))
+    return _temporal_response(query, result, qa)
 
+
+def _temporal_response(query, result, qa):
+    import re as _re
     from rag.legal.store import encode
 
-    result = qa.ask(query, calendar_date=as_of, mask_state=mask_state)
     sources = []
     for it in result.items:
         sources.append({
@@ -396,7 +403,7 @@ def _sync_chat(query: str, as_of, mask_state: MaskState,
             # câu hỏi nối tiếp ("còn năm 2025 thì sao?"): che PII câu hỏi + lịch sử, gộp thành câu độc lập,
             # rồi mới đưa cho TemporalQA (cùng mask_state -> che lại không đổi placeholder, mở che đúng)
             condensed, pii = pipeline._prepare_query(query, history, mask_state)
-            data = _sync_temporal(condensed, qa, as_of, mask_state)
+            data = _sync_temporal(condensed, qa, as_of, mask_state, history)
             data["query"] = query
             data["query_pii"] = {k: pii.get(k, 0) + data["query_pii"].get(k, 0)
                                  for k in {*pii, *data["query_pii"]}}
@@ -410,13 +417,36 @@ def _sse(event: dict[str, Any]) -> str:
     return f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
 
 
-def _sync_agent(query: str, mask_state: MaskState, history=None, as_of=None) -> dict[str, Any]:
-    return get_agent_pipeline(as_of).ask_debug(query, history=history, mask_state=mask_state).to_response(query)
+class AgentUnavailableError(RuntimeError):
+    def __init__(self, message, code):
+        super().__init__(message)
+        self.code = code
 
 
-def _sync_agent_stream(query: str, mask_state: MaskState, history=None, as_of=None):
+def _load_agent(as_of=None):
     try:
-        for event in get_agent_pipeline(as_of).ask_stream(query, history=history, mask_state=mask_state):
+        agent = get_agent_pipeline(as_of)
+    except TemporalScopeUnavailable:
+        raise
+    except Exception as exc:
+        log.error("Think initialization failed: %s", type(exc).__name__)
+        raise AgentUnavailableError("Chưa khởi tạo được Think. Vui lòng kiểm tra cấu hình hoặc thử lại.",
+                                    "agent_initialization_failed") from exc
+    if agent is None:
+        raise AgentUnavailableError("Chế độ Think chưa sẵn sàng. Bạn có thể tắt Think để tra cứu thông thường.",
+                                    "agent_unavailable")
+    return agent
+
+
+def _sync_agent(query: str, mask_state: MaskState, history=None, as_of=None, agent=None) -> dict[str, Any]:
+    agent = agent if agent is not None else _load_agent(as_of)
+    return agent.ask_debug(query, history=history, mask_state=mask_state).to_response(query)
+
+
+def _sync_agent_stream(query: str, mask_state: MaskState, history=None, as_of=None, agent=None):
+    try:
+        agent = agent if agent is not None else _load_agent(as_of)
+        for event in agent.ask_stream(query, history=history, mask_state=mask_state):
             yield _sse(event)
     except TemporalScopeUnavailable as exc:
         yield _sse({"type": "error", "error": str(exc), "code": "temporal_scope_unavailable"})
@@ -426,12 +456,27 @@ def _sync_agent_stream(query: str, mask_state: MaskState, history=None, as_of=No
 
 
 def _sync_stream(query: str, as_of, mask_state: MaskState, history: list[dict[str, Any]] | None = None):
-    """SSE: kho có phiên bản đang dùng được -> trả trọn câu trả lời theo mốc trong một sự kiện ``done``
-    (TemporalQA chưa stream); không thì pipeline cũ stream token (``sources`` -> ``token``... -> ``done``).
+    """SSE: both TemporalQA and baseline emit answer text incrementally.
     Starlette chạy generator đồng bộ này trong threadpool nên không block event loop."""
     try:
-        if get_temporal_qa() is not None:
-            yield _sse({"type": "done", **_sync_chat(query, as_of, mask_state, history)})
+        qa = get_temporal_qa()
+        if qa is not None:
+            if not callable(getattr(qa, "ask_stream", None)):
+                yield _sse({"type": "done", **_sync_chat(query, as_of, mask_state, history)})
+                return
+            effective, pii = query, {}
+            if history:
+                pipeline, _ = get_pipeline()
+                effective, pii = pipeline._prepare_query(query, history, mask_state)
+            for event in qa.ask_stream(effective, calendar_date=as_of, mask_state=mask_state, history=history):
+                if event["type"] != "result":
+                    yield _sse(event)
+                    continue
+                data = _temporal_response(query, event["result"], qa)
+                data["trace"]["condensed_query"] = effective
+                data["query_pii"] = {k: pii.get(k, 0) + data["query_pii"].get(k, 0)
+                                     for k in {*pii, *data["query_pii"]}}
+                yield _sse({"type": "done", **data})
             return
         pipeline, _ = get_pipeline()
         for event in pipeline.ask_stream(query, history=history, mask_state=mask_state):
@@ -467,19 +512,101 @@ async def handle_chat(request: Request) -> Response:
 
     session_id = str(body.get("session_id") or "").strip()[:128] or None
     as_of = None
-    if body.get("as_of"):
+    raw_as_of = body.get("as_of")
+    if raw_as_of is not None and raw_as_of != "":
+        import re as _re
+        if not isinstance(raw_as_of, str) or not _re.match(r"^\d{4}-\d{2}-\d{2}$", raw_as_of):
+            return JSONResponse({"error": "as_of phải là ngày hợp lệ dạng YYYY-MM-DD"}, status_code=400)
         from datetime import date as _date
         try:
-            as_of = _date.fromisoformat(str(body["as_of"]))
+            as_of = _date.fromisoformat(raw_as_of)
         except ValueError:
             return JSONResponse({"error": "as_of phải là ngày hợp lệ dạng YYYY-MM-DD"}, status_code=400)
     mask_state = get_mask_state(session_id)
 
+    turn_id = str(body.get("turn_id") or "")[:128]
+    try:
+        history = _conversations.begin(session_id, history)
+    except ConversationBusy as exc:
+        return JSONResponse({"error": str(exc), "code": "conversation_busy"}, status_code=409)
+    if turn_id:
+        history = [row for row in history if row.get("turn_id") != turn_id]
+    released = False
+    release_lock = threading.Lock()
+
+    def release():
+        nonlocal released
+        with release_lock:
+            if not released:
+                _conversations.release(session_id)
+                released = True
+
+    def remember(data):
+        presented = present_answer(data.get("answer", ""))
+        data["answer"] = presented.text
+        data.setdefault("trace", {})["presentation"] = {
+            "version": PRESENTATION_VERSION, "suppressed_sentences": presented.suppressed_sentences}
+        if presented.qualified and data.get("certainty") == "firm":
+            data["certainty"] = "qualified"
+        if presented.qualified:
+            for issue in data.get("issues", []):
+                if issue.get("certainty") == "firm":
+                    issue["certainty"] = "qualified"
+            reasons = data.setdefault("downgrade_reasons", [])
+            if "presentation.source_limitation" not in reasons:
+                reasons.append("presentation.source_limitation")
+        _conversations.remember(session_id, turn_id, query, data)
+        context = conversation_context(history)
+        data["conversation"] = {"history_turns": len(history), "truncated": context["truncated"]}
+        return data
+
+    agent = None
+    if think:
+        try:
+            # Initialize in the worker before sending SSE headers, so unavailable
+            # services produce a real 503 rather than a misleading 200 stream.
+            agent = await asyncio.get_running_loop().run_in_executor(_executor, _load_agent, as_of)
+        except TemporalScopeUnavailable as exc:
+            release()
+            return JSONResponse({"error": str(exc), "code": "temporal_scope_unavailable"}, status_code=503)
+        except AgentUnavailableError as exc:
+            release()
+            return JSONResponse({"error": str(exc), "code": exc.code}, status_code=503)
+        except BaseException:
+            release()
+            raise
+
     if is_stream:
+        async def stream_with_memory():
+            events = (_sync_agent_stream(query, mask_state, history, as_of, agent) if think
+                      else _sync_stream(query, as_of, mask_state, history))
+            try:
+                saw_tokens = False
+                async for chunk in iterate_in_threadpool(events):
+                    # Existing backends produce one JSON event per SSE frame.
+                    if chunk.startswith("data: "):
+                        event = json.loads(chunk[6:])
+                        if event.get("type") == "token":
+                            if not think:
+                                yield chunk
+                                continue
+                            # Think keeps verified final-only emission. Normal
+                            # mode streams immediately and reconciles on done.
+                            saw_tokens = True
+                            continue
+                        if event.get("type") == "done":
+                            event = remember(event)
+                            if saw_tokens:
+                                yield _sse({"type": "token", "delta": event["answer"]})
+                            chunk = _sse(event)
+                    yield chunk
+            finally:
+                release()
+
         return StreamingResponse(
-            (_sync_agent_stream(query, mask_state, history, as_of) if think
-             else _sync_stream(query, as_of, mask_state, history)),
+            stream_with_memory(),
             media_type="text/event-stream",
+            background=BackgroundTask(release),
             headers={
                 "Cache-Control": "no-cache",
                 "Connection": "keep-alive",
@@ -488,17 +615,31 @@ async def handle_chat(request: Request) -> Response:
         )
 
     loop = asyncio.get_running_loop()
+    deferred_release = False
     try:
         if think:
-            data = await loop.run_in_executor(_executor, _sync_agent, query, mask_state, history, as_of)
+            worker = loop.run_in_executor(_executor, _sync_agent, query, mask_state, history, as_of, agent)
         else:
-            data = await loop.run_in_executor(_executor, _sync_chat, query, as_of, mask_state, history)
-        return JSONResponse(data)
+            worker = loop.run_in_executor(_executor, _sync_chat, query, as_of, mask_state, history)
+        try:
+            data = await asyncio.shield(worker)
+        except asyncio.CancelledError:
+            # Cancelling an HTTP request does not stop the executor thread. Keep
+            # its session/PII lease until that thread really exits.
+            deferred_release = True
+            worker.add_done_callback(lambda _: release())
+            raise
+        return JSONResponse(remember(data))
     except TemporalScopeUnavailable as exc:
         return JSONResponse({"error": str(exc), "code": "temporal_scope_unavailable"}, status_code=503)
+    except AgentUnavailableError as exc:
+        return JSONResponse({"error": str(exc), "code": exc.code}, status_code=503)
     except Exception as e:
         log.exception("Lỗi khi xử lý chat: %s", e)
         return JSONResponse({"error": f"Lỗi hệ thống: {e}"}, status_code=500)
+    finally:
+        if not deferred_release:
+            release()
 
 
 # --- báo cáo ingest: lưu JSON theo doc_id để xem lại sau (text trong đó đã mask PII) ------------
@@ -748,6 +889,32 @@ def _content_disposition(filename: str, kind: str = "inline") -> str:
     return f"{kind}; filename=\"{ascii_name}\"; filename*=UTF-8''{quote(filename, safe='')}"
 
 
+def _resolve_doc_target(settings: Settings, filename: str) -> tuple[Path | None, str]:
+    clean_title = filename.replace(".txt", "").replace(".md", "").replace(".pdf", "").replace(".docx", "")
+    clean_title = clean_title.replace("bo_luat_", "Bộ luật ").replace("luat_", "Luật ").replace("_", " ").title()
+
+    target = _find_doc_file(settings, filename)
+    if target:
+        return target, clean_title
+
+    # Kiểm tra trong kho luật có phiên bản (LegalStore)
+    if ":" in filename or "/" in filename or filename.startswith("luat"):
+        try:
+            svc = get_legal_service()
+            if hasattr(svc, "store"):
+                doc = svc.store.document(filename)
+                if doc and doc.raw_text_path:
+                    raw_p = Path(doc.raw_text_path)
+                    if not raw_p.is_absolute():
+                        raw_p = _REPO_ROOT / raw_p
+                    if raw_p.is_file():
+                        return raw_p, doc.title
+        except Exception:
+            pass
+
+    return None, clean_title
+
+
 async def handle_view_doc(request: Request) -> Response:
     filename = request.path_params.get("filename", "").strip()
     if not filename:
@@ -758,10 +925,7 @@ async def handle_view_doc(request: Request) -> Response:
         return RedirectResponse(filename, status_code=302)
 
     pipeline, settings = get_pipeline()
-    target = _find_doc_file(settings, filename)
-
-    clean_title = filename.replace(".txt", "").replace(".md", "").replace(".pdf", "").replace(".docx", "")
-    clean_title = clean_title.replace("bo_luat_", "Bộ luật ").replace("luat_", "Luật ").replace("_", " ").title()
+    target, clean_title = _resolve_doc_target(settings, filename)
 
     if not target:
         matching_chunks = [c for c in pipeline.store.all() if c.source == filename]
@@ -792,19 +956,15 @@ async def handle_doc_content(request: Request) -> JSONResponse:
     is_link = filename.startswith("http://") or filename.startswith("https://")
     pipeline, settings = get_pipeline()
 
-    clean_title = filename.replace(".txt", "").replace(".md", "").replace(".pdf", "").replace(".docx", "")
-    clean_title = clean_title.replace("bo_luat_", "Bộ luật ").replace("luat_", "Luật ").replace("_", " ").title()
-
+    target, clean_title = _resolve_doc_target(settings, filename)
     matching_chunks = [c for c in pipeline.store.all() if c.source == filename]
 
     content = ""
-    if not is_link:
-        target = _find_doc_file(settings, filename)
-        if target and target.suffix.lower() != ".pdf":
-            try:
-                content = target.read_text(encoding="utf-8", errors="replace")
-            except Exception:
-                pass
+    if not is_link and target and target.suffix.lower() != ".pdf":
+        try:
+            content = target.read_text(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
 
     if not content and matching_chunks:
         content = "\n\n".join(c.text for c in matching_chunks)

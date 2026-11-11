@@ -132,7 +132,8 @@ def test_follows_xref_and_verifies_before_streaming():
     assert metadata["unresolved_requirements"] == []
     assert len(final["citations"]) == 2
     assert "giấy B" in final["answer"]
-    assert "chưa xác nhận hiệu lực" in final["answer"]
+    assert "đối chiếu thêm hiệu lực" in final["answer"]
+    assert "tài liệu trong kho" not in final["answer"]
     first_token = next(i for i, event in enumerate(events) if event["type"] == "token")
     verify_event = next(i for i, event in enumerate(events) if event.get("stage") == "verify")
     assert first_token > verify_event
@@ -509,6 +510,37 @@ def test_citation_cannot_bridge_an_omitted_segment():
     with pytest.raises(OutputError, match="omitted source segment"):
         parse_quotes([{"id": "E1", "quote": "Điều kiện A."},
                       {"id": "E1", "quote": "Ngoại lệ B."}], {"E1": evidence})
+
+
+def test_selected_numbered_paragraphs_restore_omitted_source_conditions():
+    from rag.agent.validation import parse_quotes
+    source = ("1. Chủ thể phải đáp ứng điều kiện pháp luật quy định.\n"
+              "2. Không áp dụng khi thuộc trường hợp ngoại lệ này.\n"
+              "3. Phải kiểm tra cả điều kiện bổ sung của hợp đồng.\n"
+              "4. Việc thực hiện tuân theo quy định của pháp luật.")
+    evidence = replace(A, text=source)
+    _, quotes = parse_quotes([{"id": "E1", "quote": source.splitlines()[0] + "\n" + source.splitlines()[3]}], {"E1": evidence})
+    assert quotes["E1"] == source
+    assert "Không áp dụng" in quotes["E1"]
+
+
+@pytest.mark.parametrize("bad", ["invented", "reversed", "partial"])
+def test_selected_paragraphs_cannot_fabricate_reorder_or_cut_conditions(bad):
+    from rag.agent.validation import parse_quotes
+    from rag.agent.contracts import OutputError
+    lines = ["1. Chủ thể đáp ứng điều kiện theo quy định của pháp luật.",
+             "2. Việc thực hiện phải theo đầy đủ điều kiện và ngoại lệ."]
+    if bad == "invented":
+        quote = lines[0] + "\n" + "2. Chủ thể được miễn mọi điều kiện theo quy định này."
+    elif bad == "reversed":
+        quote = lines[1] + "\n" + lines[0]
+    else:
+        quote = lines[0] + "\n" + lines[1][:35]
+    with pytest.raises(OutputError):
+        # A partial line directly following the first is already a literal span.
+        # Insert an omitted condition so this actually exercises gap recovery.
+        source = "\n".join([lines[0], "Điều kiện bổ sung phải được kiểm tra đầy đủ.", lines[1]])
+        parse_quotes([{"id": "E1", "quote": quote}], {"E1": replace(A, text=source)})
 
 
 def test_soft_quote_matching_handles_punctuation_and_whitespace():

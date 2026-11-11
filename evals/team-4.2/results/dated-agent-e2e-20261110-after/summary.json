@@ -1,0 +1,115 @@
+[
+  {
+    "id": "before_change",
+    "http": 200,
+    "status": "partial",
+    "certainty": "qualified",
+    "stop_reason": "temporal_qualified",
+    "sources": 5,
+    "budget": {
+      "rounds": 3,
+      "searches": 6,
+      "xref_targets": 1,
+      "model_calls": 9,
+      "model_bytes": 229659,
+      "provider_requests": 7,
+      "cache_hits": 2,
+      "input_tokens": 42979,
+      "output_tokens": 12573,
+      "elapsed_s": 166.085,
+      "calls": [
+        {
+          "stage": "plan",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "4423d9f67b13a4b1f02db8eb6e269ac1127dd9c4c2d01438ba9c153067631dbe",
+          "input_sha256": "71b486230cec39454f5cf241277d9f5c753cb8e1246f4e88e558ce91cc97bab0",
+          "cache_hit": true
+        },
+        {
+          "stage": "assess",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "2f11fa000836b046f54e6e371367eb91160f341e4dad78f4b332c31b1a7be2c4",
+          "input_sha256": "3677c01318549c3b477b3dabbc1ce03db9fa95843a1bf0591618fd90661ab55a",
+          "cache_hit": true
+        },
+        {
+          "stage": "assess",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "2f11fa000836b046f54e6e371367eb91160f341e4dad78f4b332c31b1a7be2c4",
+          "input_sha256": "1dc30bd88f94121c0726b9d9ce06bfdfbff7f60b2940911f23cdfff0def70e2e",
+          "cache_hit": false
+        },
+        {
+          "stage": "assess",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "2f11fa000836b046f54e6e371367eb91160f341e4dad78f4b332c31b1a7be2c4",
+          "input_sha256": "f6214a7568f84c1fa75716dd5c13395a7873ab92b7d4a99c9c13a4585f449596",
+          "cache_hit": false
+        },
+        {
+          "stage": "compose",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "b48673a3b16901dde9fb3a37c239d72e105c8f36ccdd19f90cfd1edd80148fda",
+          "input_sha256": "4deb31608190fd1c18d97b814c383f97962cc30e8d7a406a3dba7753638ac761",
+          "cache_hit": false
+        },
+        {
+          "stage": "verify",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "349850d3d9ec34acc812d41457fb85258de264e7aced043acd4b5dc88b6e1473",
+          "input_sha256": "b0c292e468b542c1a284dccee8898328a70c104b5654a5dd0b9375f755e7e68a",
+          "cache_hit": false
+        },
+        {
+          "stage": "repair",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "b48673a3b16901dde9fb3a37c239d72e105c8f36ccdd19f90cfd1edd80148fda",
+          "input_sha256": "fccb183248bf7b52aab7166f1215abcb7afa3a1502101571a091f7817e3ad484",
+          "cache_hit": false
+        },
+        {
+          "stage": "verify",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "349850d3d9ec34acc812d41457fb85258de264e7aced043acd4b5dc88b6e1473",
+          "input_sha256": "18fefda8873f2947927d85124771f4f1187d47e6fdafd4885643d10e82f26d5c",
+          "cache_hit": false
+        },
+        {
+          "stage": "temporal_review",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "508317f51181509ebd08327190eb6749147f0eaccd200bd01e589441a32f006d",
+          "input_sha256": "b131ea113ac76e4911ed11c7c14120f5fb869c650adb190d33371b568bc54734",
+          "cache_hit": false
+        }
+      ],
+      "service_requests": {
+        "rerank": 40
+      }
+    },
+    "problems": []
+  },
+  {
+    "id": "invalid_date",
+    "http": 400,
+    "problems": []
+  },
+  {
+    "id": "invalid_think",
+    "http": 400,
+    "problems": []
+  },
+  {
+    "id": "catalog_unavailable",
+    "http": 503,
+    "problems": []
+  }
+]

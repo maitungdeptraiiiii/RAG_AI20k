@@ -1,0 +1,292 @@
+{
+  "request": {
+    "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+    "as_of": "1900-01-01",
+    "stream": true,
+    "think": true,
+    "session_id": "dated-e2e-no_version_at_date"
+  },
+  "response": {
+    "type": "done",
+    "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+    "answer": "Không có đủ căn cứ trong kho luật có phiên bản tại các mốc yêu cầu (ngày chọn: 1900-01-01).",
+    "refused": false,
+    "query_pii": {},
+    "status": "abstain",
+    "citations": [],
+    "sources": [],
+    "trace": {
+      "condensed_query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+      "context_mode": "empty",
+      "n_context_blocks": 0,
+      "reranked": false,
+      "errors": {},
+      "arms": {},
+      "final_hits": [],
+      "agent": {
+        "version": "multihop-v1",
+        "scope": "temporal",
+        "scope_warning": "Căn cứ được lọc theo mốc đã chọn 1900-01-01 và các mốc sự kiện trong câu hỏi; xem trạng thái xác minh của từng nguồn.",
+        "snapshot_id": "9e706e309d368934dad3f7d5ef58ca4373b41e0cc997871c35cb36af2a8f028e",
+        "status": "abstain",
+        "stop_reason": "empty_scope",
+        "verified": false,
+        "config": {
+          "max_rounds": 3,
+          "max_searches": 8,
+          "initial_subqueries": 3,
+          "followup_searches": 2,
+          "candidates_per_search": 10,
+          "initial_pool_size": 30,
+          "new_units_per_round": 10,
+          "max_units": 50,
+          "max_xref_depth": 2,
+          "xrefs_per_round": 6,
+          "max_xref_targets": 12,
+          "max_requirements": 8,
+          "max_model_calls": 24,
+          "max_service_requests": 240,
+          "max_model_bytes": 600000,
+          "max_input_chars": 60000,
+          "max_output_tokens": 3000,
+          "deadline_s": 180.0,
+          "retrieval_mode": "dense"
+        },
+        "budget": {
+          "rounds": 0,
+          "searches": 0,
+          "xref_targets": 0,
+          "model_calls": 0,
+          "model_bytes": 0,
+          "provider_requests": 0,
+          "cache_hits": 0,
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "elapsed_s": 0.005,
+          "calls": [],
+          "service_requests": {}
+        },
+        "requirements": [],
+        "assessments": [],
+        "unresolved_requirements": [],
+        "evidence": [],
+        "claims": [],
+        "verified_quotes": {},
+        "events": [
+          {
+            "type": "progress",
+            "stage": "prepare",
+            "message": "Think · Đang xác định câu hỏi và phạm vi tài liệu…",
+            "sequence": 1
+          },
+          {
+            "type": "progress",
+            "stage": "scope",
+            "message": "Think · Đang chọn phiên bản luật theo mốc thời gian…",
+            "sequence": 2
+          }
+        ]
+      }
+    },
+    "as_of": "1900-01-01",
+    "timeline": {
+      "anchors": [
+        {
+          "role": "unspecified",
+          "start": "1900-01-01",
+          "end": "1900-01-01",
+          "precision": "day",
+          "source": "calendar",
+          "evidence": null,
+          "relative_expression": null,
+          "confidence": 1.0,
+          "matched_text": null
+        }
+      ],
+      "primary": {
+        "role": "unspecified",
+        "start": "1900-01-01",
+        "end": "1900-01-01",
+        "precision": "day",
+        "source": "calendar",
+        "evidence": null,
+        "relative_expression": null,
+        "confidence": 1.0,
+        "matched_text": null
+      },
+      "warnings": [],
+      "asked_at": "2026-11-10T09:43:09.261085+00:00"
+    },
+    "issues": [],
+    "transition_assessments": [],
+    "transition_rules": [],
+    "follow_up_questions": [],
+    "certainty": "cannot_conclude",
+    "downgrade_reasons": [],
+    "log_id": "66b2303790114502"
+  },
+  "events": [
+    {
+      "type": "progress",
+      "stage": "prepare",
+      "message": "Think · Đang xác định câu hỏi và phạm vi tài liệu…",
+      "sequence": 1
+    },
+    {
+      "type": "progress",
+      "stage": "scope",
+      "message": "Think · Đang chọn phiên bản luật theo mốc thời gian…",
+      "sequence": 2
+    },
+    {
+      "type": "sources",
+      "sources": []
+    },
+    {
+      "type": "token",
+      "delta": "Không có đủ căn cứ trong kho luật có phiên bản tại các mốc yêu cầu (ngày chọn: 1900-01-01)."
+    },
+    {
+      "type": "done",
+      "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+      "answer": "Không có đủ căn cứ trong kho luật có phiên bản tại các mốc yêu cầu (ngày chọn: 1900-01-01).",
+      "refused": false,
+      "query_pii": {},
+      "status": "abstain",
+      "citations": [],
+      "sources": [],
+      "trace": {
+        "condensed_query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+        "context_mode": "empty",
+        "n_context_blocks": 0,
+        "reranked": false,
+        "errors": {},
+        "arms": {},
+        "final_hits": [],
+        "agent": {
+          "version": "multihop-v1",
+          "scope": "temporal",
+          "scope_warning": "Căn cứ được lọc theo mốc đã chọn 1900-01-01 và các mốc sự kiện trong câu hỏi; xem trạng thái xác minh của từng nguồn.",
+          "snapshot_id": "9e706e309d368934dad3f7d5ef58ca4373b41e0cc997871c35cb36af2a8f028e",
+          "status": "abstain",
+          "stop_reason": "empty_scope",
+          "verified": false,
+          "config": {
+            "max_rounds": 3,
+            "max_searches": 8,
+            "initial_subqueries": 3,
+            "followup_searches": 2,
+            "candidates_per_search": 10,
+            "initial_pool_size": 30,
+            "new_units_per_round": 10,
+            "max_units": 50,
+            "max_xref_depth": 2,
+            "xrefs_per_round": 6,
+            "max_xref_targets": 12,
+            "max_requirements": 8,
+            "max_model_calls": 24,
+            "max_service_requests": 240,
+            "max_model_bytes": 600000,
+            "max_input_chars": 60000,
+            "max_output_tokens": 3000,
+            "deadline_s": 180.0,
+            "retrieval_mode": "dense"
+          },
+          "budget": {
+            "rounds": 0,
+            "searches": 0,
+            "xref_targets": 0,
+            "model_calls": 0,
+            "model_bytes": 0,
+            "provider_requests": 0,
+            "cache_hits": 0,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "elapsed_s": 0.005,
+            "calls": [],
+            "service_requests": {}
+          },
+          "requirements": [],
+          "assessments": [],
+          "unresolved_requirements": [],
+          "evidence": [],
+          "claims": [],
+          "verified_quotes": {},
+          "events": [
+            {
+              "type": "progress",
+              "stage": "prepare",
+              "message": "Think · Đang xác định câu hỏi và phạm vi tài liệu…",
+              "sequence": 1
+            },
+            {
+              "type": "progress",
+              "stage": "scope",
+              "message": "Think · Đang chọn phiên bản luật theo mốc thời gian…",
+              "sequence": 2
+            }
+          ]
+        }
+      },
+      "as_of": "1900-01-01",
+      "timeline": {
+        "anchors": [
+          {
+            "role": "unspecified",
+            "start": "1900-01-01",
+            "end": "1900-01-01",
+            "precision": "day",
+            "source": "calendar",
+            "evidence": null,
+            "relative_expression": null,
+            "confidence": 1.0,
+            "matched_text": null
+          }
+        ],
+        "primary": {
+          "role": "unspecified",
+          "start": "1900-01-01",
+          "end": "1900-01-01",
+          "precision": "day",
+          "source": "calendar",
+          "evidence": null,
+          "relative_expression": null,
+          "confidence": 1.0,
+          "matched_text": null
+        },
+        "warnings": [],
+        "asked_at": "2026-11-10T09:43:09.261085+00:00"
+      },
+      "issues": [],
+      "transition_assessments": [],
+      "transition_rules": [],
+      "follow_up_questions": [],
+      "certainty": "cannot_conclude",
+      "downgrade_reasons": [],
+      "log_id": "66b2303790114502"
+    }
+  ],
+  "outcome": {
+    "id": "no_version_at_date",
+    "http": 200,
+    "status": "abstain",
+    "certainty": "cannot_conclude",
+    "stop_reason": "empty_scope",
+    "sources": 0,
+    "budget": {
+      "rounds": 0,
+      "searches": 0,
+      "xref_targets": 0,
+      "model_calls": 0,
+      "model_bytes": 0,
+      "provider_requests": 0,
+      "cache_hits": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "elapsed_s": 0.005,
+      "calls": [],
+      "service_requests": {}
+    },
+    "problems": []
+  }
+}

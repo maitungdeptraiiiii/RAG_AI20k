@@ -145,6 +145,29 @@ def parse_quotes(value, bundle, allowed=None):
         raw_quote = text(row["quote"], 2000)
         span = find_soft_span(raw_quote, bundle[eid].text)
         if span is None:
+            # Legal sources are often quoted as selected numbered paragraphs.
+            # Accept only complete, literal source lines in their original order,
+            # and restore EVERY omitted line in the enclosing ORIGINAL interval.
+            # Never join fragments into a synthetic citation or fuzzy-match words.
+            parts = [line.strip() for line in raw_quote.splitlines() if line.strip()]
+            spans = []
+            source = bundle[eid].text
+            if 2 <= len(parts) <= 8 and all(len(part) >= 24 for part in parts):
+                for part in parts:
+                    found = find_soft_span(part, source)
+                    if found is None:
+                        break
+                    a, b = found
+                    line_start = source.rfind("\n", 0, a) + 1
+                    line_end = source.find("\n", b)
+                    line_end = len(source) if line_end == -1 else line_end
+                    if (source[line_start:a].strip() or source[b:line_end].strip() or
+                        (spans and a < spans[-1][1])):
+                        break
+                    spans.append(found)
+                if len(spans) == len(parts):
+                    span = (spans[0][0], spans[-1][1])
+        if span is None:
             raise OutputError("Quote is not an exact source span")
         start, end = span
         old_start, old_end = intervals.get(eid, (start, end))

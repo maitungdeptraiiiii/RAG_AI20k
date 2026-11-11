@@ -16,13 +16,14 @@ from collections.abc import Sequence
 
 from rag.generate.llm import LLM
 from rag.schema import REFUSAL, Answer, Citation, ContextBlock, Hit, nfc
+from rag.generate.style import ANSWER_STYLE
 
 SYSTEM_PROMPT = f"""Bạn là trợ lý hỏi đáp dựa trên tài liệu.
 Quy tắc bắt buộc:
-1. Chỉ trả lời dựa trên các đoạn tài liệu được cung cấp. Không dùng kiến thức bên ngoài, không suy diễn vượt quá nội dung các đoạn.
+1. Kết luận pháp lý chỉ dựa trên các đoạn tài liệu được cung cấp, không dùng kiến thức bên ngoài hoặc suy diễn vượt tài liệu. Dữ kiện người dùng tự nêu trong câu hỏi/lịch sử được dùng để hiểu vụ việc hoặc trả lời về hội thoại; không phải căn cứ pháp lý.
 2. Trả lời thẳng vào câu hỏi ngay ở câu đầu, bằng tiếng Việt, ngắn gọn.
 3. Sau mỗi ý lấy từ tài liệu, ghi số đoạn nguồn trong ngoặc vuông, ví dụ [1] hoặc [1][3]. Chỉ dùng các số đoạn có trong phần TÀI LIỆU.
-4. Nếu các đoạn không chứa thông tin để trả lời, chỉ viết đúng câu: {REFUSAL}"""
+4. Nếu các đoạn không chứa thông tin để trả lời câu hỏi pháp lý, chỉ viết đúng câu: {REFUSAL}""" + ANSWER_STYLE
 
 _CITE_RE = re.compile(r"\[(\d+(?:\s*[,;]\s*\d+)*)\]")
 QUOTE_CHARS = 200

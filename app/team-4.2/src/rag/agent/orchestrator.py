@@ -10,6 +10,7 @@ from collections.abc import Iterator, Sequence
 from typing import Any
 
 from rag.advanced.condense import CONDENSE_SYSTEM_PROMPT
+from rag.conversation import conversation_context, normalize_history
 from rag.advanced.hyde import HydeRetriever
 from rag.agent import prompts
 from rag.agent.adapters import bounded_dense, bounded_reranker
@@ -28,7 +29,7 @@ from rag.retrieve.merge import article_key
 from rag.schema import Answer, Citation, ContextBlock, Hit, nfc
 
 
-SCOPE_WARNING = "Câu trả lời dựa trên tài liệu trong kho; chưa xác nhận hiệu lực pháp luật hiện hành."
+SCOPE_WARNING = "Cần đối chiếu thêm hiệu lực của các quy định trước khi áp dụng vào trường hợp cụ thể."
 
 
 def _literal_label(value: str) -> str:
@@ -176,7 +177,8 @@ class AgentPipeline:
     def _payload(query, raw_query, history, state, bundle):
         payload = {
             "original_question": raw_query, "standalone_question": query,
-            "history": history, "scope": "snapshot_only; temporal applicability unverified",
+            "conversation_context": conversation_context(history),
+            "scope": "snapshot_only; temporal applicability unverified",
             "requirements": [asdict(r) for r in state.requirements],
             "excerpts": [{"id": eid, "source": chunk.source, "section": chunk.section,
                           "text": chunk.text, "truncated": chunk.text != state.evidence[eid].chunk.text}
@@ -209,7 +211,8 @@ class AgentPipeline:
             remaining = [r.question for r in state.requirements if not coverage.get(r.id, False)]
             if remaining:
                 content += "\n\nChưa đủ căn cứ để kết luận: " + "; ".join(_literal_label(q) for q in remaining)
-            content += "\n\n" + (state.scope.warning if state.scope is not None else SCOPE_WARNING)
+            if state.scope is None:
+                content += "\n\n" + SCOPE_WARNING
             answer = Answer(content, citations, False)
         elif status == "clarify":
             answer = Answer(_literal_label(clarification or "Bạn vui lòng làm rõ dữ kiện còn thiếu trong câu hỏi."), [], False)
@@ -260,9 +263,9 @@ class AgentPipeline:
             raw_query = mask_text(raw_query, state=state).masked_text
             query_pii = {k: v - before.get(k, 0) for k, v in state.counts.items() if v - before.get(k, 0)}
             history = [
-                {key: mask_text(str(turn.get(key) or ""), state=state).masked_text
-                 for key in ("query", "answer")}
-                for turn in (history or [])[-3:] if isinstance(turn, dict)
+                {**turn, **{key: mask_text(str(turn.get(key) or ""), state=state).masked_text
+                            for key in ("query", "answer")}}
+                for turn in normalize_history(history)
             ]
         for event in self._run_masked_events(raw_query, history=history):
             if event["type"] == "result":
@@ -282,9 +285,8 @@ class AgentPipeline:
         if not query or len(query) > 8000:
             raise ValueError("Agent query must contain 1–8000 characters")
         # Retain context for reference resolution, never treat old answers as facts.
-        history = [{"query": str(h.get("query", ""))[:2000],
-                    "assistant_context_unverified": str(h.get("answer", ""))[:250]}
-                   for h in (history or [])[-3:] if isinstance(h, dict)]
+        history = normalize_history(history)
+        conversation = conversation_context(history)
         reason, repair_used = "max_rounds", False
         last_verified = None
         try:
@@ -292,7 +294,7 @@ class AgentPipeline:
             if history:
                 condenser = ModelGateway(self.baseline.condenser.llm, budget, "condense")
                 data = condenser.json("condense", CONDENSE_SYSTEM_PROMPT + prompts.RULES,
-                                      {"query": query, "history": history}, reserve_calls=5)
+                                      {"query": query, "conversation_context": conversation}, reserve_calls=5)
                 obj(data, ("standalone_query",))
                 condensed = text(data["standalone_query"], 8000)
                 if set(re.findall(r"\d+(?:[.,/]\d+)*", query)).issubset(set(re.findall(r"\d+(?:[.,/]\d+)*", condensed))):
@@ -304,7 +306,8 @@ class AgentPipeline:
             if self.scope_factory is not None:
                 yield self._event(state, "scope", "Think · Đang chọn phiên bản luật theo mốc thời gian…")
                 state.scope = self.scope_factory(query, gateway)
-                state.scope.request_context = {"original_question": raw_query, "history": history}
+                state.scope.request_context = {"original_question": raw_query,
+                                               "conversation_context": conversation}
                 retriever = state.scope.retriever
                 corpus = state.scope.corpus
                 revision, chunks = retriever.capture_snapshot()
@@ -316,7 +319,8 @@ class AgentPipeline:
                     query, state, budget, corpus, bundle, status="abstain", reason="empty_scope")}
                 return
             data = gateway.json("plan", prompts.PLAN, {
-                "original_question": raw_query, "standalone_question": query, "history": history,
+                "original_question": raw_query, "standalone_question": query,
+                "conversation_context": conversation,
                 "max_requirements": self.config.max_requirements,
                 **({"scope": state.scope.planning_payload()} if state.scope is not None else {}),
             })

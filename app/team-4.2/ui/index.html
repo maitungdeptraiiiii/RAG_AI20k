@@ -359,53 +359,82 @@
           <!-- Hero input slot: Capsule is placed here on initial load / new chat -->
           <div id="hero-input-slot" class="w-full mb-3">
             <!-- ==================== CHAT INPUT CAPSULE ==================== -->
-            <div id="as-of-row" class="flex flex-wrap items-center gap-x-2 gap-y-1 px-3 pb-1.5 text-[12px] text-neutral-500">
-              <label for="as-of-input" class="font-medium text-neutral-600">Mốc pháp lý</label>
-              <input type="date" id="as-of-input" class="border border-neutral-300 rounded-md px-1.5 py-0.5 text-[12px] text-neutral-800 bg-white" aria-describedby="as-of-hint">
-              <button type="button" id="as-of-clear" class="text-neutral-400 hover:text-neutral-800 hidden" aria-label="Bỏ ngày đã chọn">✕</button>
-              <span id="as-of-hint">để trống: tự nhận diện mốc trong câu hỏi, không có thì dùng luật hiện hành</span>
-            </div>
-            <div id="chat-input-capsule" class="w-full bg-white rounded-full border border-neutral-300 shadow-[0_2px_14px_rgba(0,0,0,0.06)] focus-within:border-neutral-400 focus-within:shadow-[0_4px_20px_rgba(0,0,0,0.09)] p-2 pl-3.5 pr-2.5 flex items-center space-x-2 transition-all">
-              <!-- Attach / Upload button (+) -->
-              <button onclick="toggleIngestModal(true)" class="p-1.5 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-full transition-colors flex-shrink-0" title="Nạp tài liệu mới">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-              </button>
+            <div id="chat-input-capsule" class="w-full bg-white rounded-2xl sm:rounded-[24px] border border-neutral-300 shadow-[0_2px_14px_rgba(0,0,0,0.06)] focus-within:border-neutral-400 focus-within:shadow-[0_4px_20px_rgba(0,0,0,0.09)] p-2.5 sm:p-3 flex flex-col justify-between transition-all min-h-[88px] sm:min-h-[96px] gap-2">
+              <!-- Top Row: Full-width Textarea -->
+              <div class="w-full flex-1 min-h-[34px]">
+                <textarea id="main-query-input" rows="1" placeholder="Ask Just-ice" class="w-full min-w-0 max-h-[160px] resize-none border-0 focus:ring-0 p-1 text-[15px] sm:text-[15.5px] text-neutral-900 placeholder-neutral-400 outline-none bg-transparent leading-relaxed block"></textarea>
+              </div>
 
-              <!-- Auto-expanding Textarea -->
-              <textarea id="main-query-input" rows="1" placeholder="Ask Just-ice" class="flex-1 min-w-0 max-h-[160px] resize-none border-0 focus:ring-0 px-2 py-1.5 text-[15.5px] text-neutral-900 placeholder-neutral-400 outline-none bg-transparent leading-relaxed"></textarea>
+              <!-- Bottom Row: Actions (Left group & Right group) -->
+              <div class="w-full flex items-center justify-between gap-1 sm:gap-2 flex-wrap sm:flex-nowrap">
+                <!-- Left Action Group: [+] Attach, [Date Picker], [Think] -->
+                <div class="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+                  <!-- [+] Attach / Ingest button -->
+                  <button type="button" onclick="toggleIngestModal(true)" class="p-1.5 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-full transition-colors flex-shrink-0 cursor-pointer" title="Nạp tài liệu mới" aria-label="Nạp tài liệu mới">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                  </button>
 
-              <!-- Think Button -->
-              <button id="think-toggle" type="button" onclick="setThinkEnabled(!thinkEnabled)" aria-label="Think — dùng agent cho câu hỏi" aria-pressed="false" class="flex items-center space-x-1.5 px-3 py-2 text-[14px] rounded-full transition-colors flex-shrink-0" title="Bật Think để dùng agent">
-                <svg aria-hidden="true" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.5 4a3.5 3.5 0 0 0-3.5 3.5c0 .7.2 1.4.6 2A3.5 3.5 0 0 0 6 16.5 3.5 3.5 0 0 0 9.5 20h.5V4h-.5zm5 0a3.5 3.5 0 0 1 3.5 3.5c0 .7-.2 1.4-.6 2A3.5 3.5 0 0 1 18 16.5 3.5 3.5 0 0 1 14.5 20h-.5V4h.5z"/>
-                </svg>
-                <span>Think</span>
-              </button>
+                  <!-- Date Picker Button & Clear Trigger Container -->
+                  <div id="as-of-container" class="relative inline-flex items-center">
+                    <button id="as-of-trigger-btn" type="button" onclick="toggleCalendarPopover(event)" aria-expanded="false" aria-controls="calendar-popover" aria-label="Chọn ngày tra cứu pháp luật" title="Chọn ngày tra cứu pháp luật" class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[13px] font-normal text-neutral-700 bg-neutral-100/80 hover:bg-neutral-200/80 border border-neutral-200/90 rounded-full transition-all flex-shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                      <!-- Calendar Icon -->
+                      <svg id="as-of-icon" class="w-3.5 h-3.5 text-neutral-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                      </svg>
+                      <span id="as-of-label" class="select-none">Hiện tại</span>
+                      <!-- Down Chevron -->
+                      <svg id="as-of-chevron" class="w-3 h-3 text-neutral-400 flex-shrink-0 transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                      </svg>
+                    </button>
+                    <!-- Clear date button (visible when a specific date is chosen) -->
+                    <button id="as-of-clear-btn" type="button" onclick="clearSelectedAsOf(event)" class="hidden ml-1 p-1 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-200/80 rounded-full transition-colors flex-shrink-0 cursor-pointer" title="Bỏ ngày đã chọn (dùng Hiện tại)" aria-label="Bỏ ngày đã chọn">
+                      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                      </svg>
+                    </button>
+                  </div>
 
-              <!-- Voice Input Button (Mic) -->
-              <button type="button" onclick="startVoiceInput()" class="p-1.5 text-neutral-700 hover:text-neutral-950 hover:bg-neutral-100 rounded-full transition-colors flex-shrink-0" title="Nhập bằng giọng nói">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                  <rect x="9" y="2" width="6" height="11" rx="3"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 10a7 7 0 0 0 14 0M12 17v4m-3 0h6"/>
-                </svg>
-              </button>
+                  <!-- Think Button -->
+                  <button id="think-toggle" type="button" onclick="setThinkEnabled(!thinkEnabled)" aria-label="Think — dùng agent cho câu hỏi" aria-pressed="false" class="flex items-center space-x-1 px-2.5 sm:px-3 py-1 text-[13px] rounded-full transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 cursor-pointer" title="Bật Think để dùng agent">
+                    <svg aria-hidden="true" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9.5 4a3.5 3.5 0 0 0-3.5 3.5c0 .7.2 1.4.6 2A3.5 3.5 0 0 0 6 16.5 3.5 3.5 0 0 0 9.5 20h.5V4h-.5zm5 0a3.5 3.5 0 0 1 3.5 3.5c0 .7-.2 1.4-.6 2A3.5 3.5 0 0 1 18 16.5 3.5 3.5 0 0 1 14.5 20h-.5V4h.5z"/>
+                    </svg>
+                    <span class="font-normal select-none">Think</span>
+                  </button>
+                </div>
 
-              <!-- Send / Audio Button: Blue Circle like in the image -->
-              <button id="main-send-btn" onclick="handleSendOrVoice()" class="w-8 h-8 rounded-full bg-[#2563eb] hover:bg-[#1d4ed8] text-white flex items-center justify-center transition-all flex-shrink-0 shadow-sm" title="Gửi câu hỏi hoặc chế độ âm thanh">
-                <!-- Soundwave Icon (when input is empty) -->
-                <svg id="btn-soundwave-icon" class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
-                  <rect x="5" y="9" width="2" height="6" rx="1"/>
-                  <rect x="9" y="5" width="2" height="14" rx="1"/>
-                  <rect x="13" y="3" width="2" height="18" rx="1"/>
-                  <rect x="17" y="7" width="2" height="10" rx="1"/>
-                </svg>
-                <!-- Send Arrow Icon (when input has text) -->
-                <svg id="btn-send-icon" class="w-4 h-4 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                </svg>
-              </button>
+                <!-- Right Action Group: [Mic], [Send Button] -->
+                <div class="flex items-center gap-1.5 ml-auto flex-shrink-0">
+                  <!-- Voice Input Button (Mic) -->
+                  <button type="button" onclick="startVoiceInput()" class="p-1.5 text-neutral-600 hover:text-neutral-950 hover:bg-neutral-100 rounded-full transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 cursor-pointer" title="Nhập bằng giọng nói" aria-label="Nhập bằng giọng nói">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                      <rect x="9" y="2" width="6" height="11" rx="3"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 10a7 7 0 0 0 14 0M12 17v4m-3 0h6"/>
+                    </svg>
+                  </button>
+
+                  <!-- Send / Audio Button -->
+                  <button id="main-send-btn" type="button" onclick="handleSendOrVoice()" class="w-8 h-8 rounded-full bg-[#2563eb] hover:bg-[#1d4ed8] text-white flex items-center justify-center transition-all flex-shrink-0 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 cursor-pointer" title="Gửi câu hỏi hoặc chế độ âm thanh" aria-label="Gửi câu hỏi">
+                    <!-- Soundwave Icon (when input is empty) -->
+                    <svg id="btn-soundwave-icon" class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
+                      <rect x="5" y="9" width="2" height="6" rx="1"/>
+                      <rect x="9" y="5" width="2" height="14" rx="1"/>
+                      <rect x="13" y="3" width="2" height="18" rx="1"/>
+                      <rect x="17" y="7" width="2" height="10" rx="1"/>
+                    </svg>
+                    <!-- Send Arrow Icon (when input has text) -->
+                    <svg id="btn-send-icon" class="w-4 h-4 text-white hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -484,7 +513,7 @@
           </p>
         </div>
       </div>
-      
+
       <!-- Top Action Controls -->
       <div class="flex items-center space-x-1 flex-shrink-0">
         <button id="canvas-jump-btn" onclick="jumpToCitationHighlight()" class="p-1.5 text-neutral-500 hover:text-amber-700 hover:bg-neutral-100 rounded-lg transition-colors flex items-center space-x-1 text-[11.5px] font-medium" title="Cuộn đến đoạn trích dẫn được tô sáng">
@@ -657,19 +686,86 @@
 
   <!-- ==================== SESSION RIGHT-CLICK CONTEXT MENU ==================== -->
   <div id="session-context-menu" class="fixed z-50 hidden bg-white rounded-xl shadow-float border border-neutral-200/90 py-1 min-w-[160px] text-left select-none text-[13px] text-neutral-800 transition-opacity duration-100">
-    <button type="button" onclick="handleRenameSessionFromMenu()" class="w-full px-3.5 py-2 flex items-center space-x-2.5 hover:bg-neutral-100 text-left transition-colors cursor-pointer">
+    <button type="button" onmousedown="handleRenameSessionFromMenu(event)" onclick="handleRenameSessionFromMenu(event)" class="w-full px-3.5 py-2 flex items-center space-x-2.5 hover:bg-neutral-100 text-left transition-colors cursor-pointer">
       <svg class="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
       </svg>
       <span>Đổi tên</span>
     </button>
     <div class="h-px bg-neutral-100 my-1"></div>
-    <button type="button" onclick="handleDeleteSessionFromMenu()" class="w-full px-3.5 py-2 flex items-center space-x-2.5 hover:bg-red-50 text-red-600 text-left transition-colors cursor-pointer">
+    <button type="button" onmousedown="handleDeleteSessionFromMenu(event)" onclick="handleDeleteSessionFromMenu(event)" class="w-full px-3.5 py-2 flex items-center space-x-2.5 hover:bg-red-50 text-red-600 text-left transition-colors cursor-pointer">
       <svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
       </svg>
       <span>Xóa đoạn chat</span>
     </button>
+  </div>
+
+  <!-- ==================== CALENDAR POPOVER ==================== -->
+  <div id="calendar-popover" role="dialog" aria-modal="true" aria-label="Chọn ngày tra cứu pháp luật" class="fixed z-40 hidden bg-white rounded-2xl border border-neutral-200/90 shadow-float w-[296px] p-3 text-neutral-800 select-none transition-all duration-150">
+    <!-- Popover Header: Month/Year navigation & quick selects -->
+    <div class="flex items-center justify-between pb-2 mb-2 border-b border-neutral-100">
+      <!-- Prev Month Button -->
+      <button type="button" id="cal-prev-btn" onclick="calNavigateMonth(-1)" class="p-1 rounded-lg hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 transition-colors cursor-pointer" title="Tháng trước" aria-label="Tháng trước">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+
+      <!-- Month & Year Quick Select Dropdowns -->
+      <div class="flex items-center space-x-1">
+        <select id="cal-month-select" onchange="calChangeMonthYear()" aria-label="Chọn tháng" class="bg-transparent text-[13px] font-medium text-neutral-800 py-0.5 px-1 rounded hover:bg-neutral-100 cursor-pointer outline-none border border-transparent focus:border-neutral-300">
+          <option value="0">Tháng 1</option>
+          <option value="1">Tháng 2</option>
+          <option value="2">Tháng 3</option>
+          <option value="3">Tháng 4</option>
+          <option value="4">Tháng 5</option>
+          <option value="5">Tháng 6</option>
+          <option value="6">Tháng 7</option>
+          <option value="7">Tháng 8</option>
+          <option value="8">Tháng 9</option>
+          <option value="9">Tháng 10</option>
+          <option value="10">Tháng 11</option>
+          <option value="11">Tháng 12</option>
+        </select>
+        <select id="cal-year-select" onchange="calChangeMonthYear()" aria-label="Chọn năm" class="bg-transparent text-[13px] font-medium text-neutral-800 py-0.5 px-1 rounded hover:bg-neutral-100 cursor-pointer outline-none border border-transparent focus:border-neutral-300">
+          <!-- Populated dynamically 2000-2035 -->
+        </select>
+      </div>
+
+      <!-- Next Month Button -->
+      <button type="button" id="cal-next-btn" onclick="calNavigateMonth(1)" class="p-1 rounded-lg hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 transition-colors cursor-pointer" title="Tháng sau" aria-label="Tháng sau">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Weekday Headers (Monday to Sunday in Vietnamese) -->
+    <div class="grid grid-cols-7 text-center text-[11.5px] font-medium text-neutral-400 mb-1">
+      <span title="Thứ Hai">T2</span>
+      <span title="Thứ Ba">T3</span>
+      <span title="Thứ Tư">T4</span>
+      <span title="Thứ Năm">T5</span>
+      <span title="Thứ Sáu">T6</span>
+      <span title="Thứ Bảy">T7</span>
+      <span title="Chủ Nhật">CN</span>
+    </div>
+
+    <!-- Calendar Days Grid (7 cols) -->
+    <div id="cal-days-grid" class="grid grid-cols-7 gap-y-0.5 gap-x-0.5 text-center text-[12.5px] mb-2.5">
+      <!-- Dynamically rendered -->
+    </div>
+
+    <!-- Popover Footer -->
+    <div class="flex items-center justify-between pt-2 border-t border-neutral-100 text-[12px]">
+      <button type="button" onclick="selectCalendarDate(null)" class="text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 px-2.5 py-1 rounded-lg transition-colors cursor-pointer font-medium" title="Xóa lựa chọn ngày, hệ thống tự giải quyết theo ngữ cảnh">
+        Dùng hiện tại
+      </button>
+      <button type="button" onclick="selectToday()" class="text-[#2563eb] hover:text-[#1d4ed8] hover:bg-blue-50 px-2.5 py-1 rounded-lg transition-colors cursor-pointer font-medium" title="Chọn ngày hôm nay cụ thể">
+        Hôm nay
+      </button>
+    </div>
   </div>
 
   <!-- ==================== JAVASCRIPT LOGIC ==================== -->
@@ -691,6 +787,287 @@
       button.title = thinkEnabled ? 'Think đang bật — dùng agent' : 'Bật Think để dùng agent';
     }
 
+    // ==================== AS-OF DATE & CALENDAR LOGIC ====================
+    let currentSessionAsOf = null; // YYYY-MM-DD or null
+    let calViewYear = new Date().getFullYear();
+    let calViewMonth = new Date().getMonth(); // 0-indexed: 0..11
+
+    function isValidCalendarDate(year, month, day) {
+      const y = parseInt(year, 10);
+      const m = parseInt(month, 10);
+      const d = parseInt(day, 10);
+      if (isNaN(y) || isNaN(m) || isNaN(d) || m < 1 || m > 12 || d < 1 || d > 31) return false;
+      const isLeap = (y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0));
+      const daysInMonth = [31, isLeap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      return d <= daysInMonth[m - 1];
+    }
+
+    function formatIsoDate(year, month, day) {
+      const y = String(year).padStart(4, '0');
+      const m = String(month).padStart(2, '0');
+      const d = String(day).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function formatDisplayDate(isoStr) {
+      if (!isoStr || typeof isoStr !== 'string') return 'Hiện tại';
+      const parts = isoStr.trim().split('-');
+      if (parts.length !== 3 || !isValidCalendarDate(parts[0], parts[1], parts[2])) return 'Hiện tại';
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+
+    function getLocalTodayIso() {
+      const now = new Date();
+      return formatIsoDate(now.getFullYear(), now.getMonth() + 1, now.getDate());
+    }
+
+    function initCalendarYears() {
+      const yearSelect = document.getElementById('cal-year-select');
+      if (!yearSelect || yearSelect.options.length > 0) return;
+      const currentY = new Date().getFullYear();
+      const startY = 2000;
+      const endY = Math.max(currentY + 10, 2035);
+      for (let y = startY; y <= endY; y++) {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = y;
+        yearSelect.appendChild(opt);
+      }
+    }
+
+    function renderCalendarGrid() {
+      const container = document.getElementById('cal-days-grid');
+      if (!container) return;
+      initCalendarYears();
+
+      const monthSelect = document.getElementById('cal-month-select');
+      const yearSelect = document.getElementById('cal-year-select');
+      if (monthSelect) monthSelect.value = calViewMonth;
+      if (yearSelect) yearSelect.value = calViewYear;
+
+      const firstDay = new Date(calViewYear, calViewMonth, 1);
+      const firstDayIndex = (firstDay.getDay() + 6) % 7; // Monday = 0, Sunday = 6
+      const daysInCurrentMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate();
+      const daysInPrevMonth = new Date(calViewYear, calViewMonth, 0).getDate();
+      const todayIso = getLocalTodayIso();
+
+      let html = '';
+
+      // Trailing days of previous month
+      for (let i = 0; i < firstDayIndex; i++) {
+        const d = daysInPrevMonth - firstDayIndex + 1 + i;
+        const prevMonth = calViewMonth === 0 ? 11 : calViewMonth - 1;
+        const prevYear = calViewMonth === 0 ? calViewYear - 1 : calViewYear;
+        const iso = formatIsoDate(prevYear, prevMonth + 1, d);
+        const isSelected = (currentSessionAsOf === iso);
+        const isToday = (todayIso === iso);
+        html += renderDayCell(d, iso, false, isSelected, isToday);
+      }
+
+      // Days of current month
+      for (let d = 1; d <= daysInCurrentMonth; d++) {
+        const iso = formatIsoDate(calViewYear, calViewMonth + 1, d);
+        const isSelected = (currentSessionAsOf === iso);
+        const isToday = (todayIso === iso);
+        html += renderDayCell(d, iso, true, isSelected, isToday);
+      }
+
+      // Leading days of next month to fill grid
+      const totalCells = firstDayIndex + daysInCurrentMonth;
+      const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+      for (let d = 1; d <= remaining; d++) {
+        const nextMonth = calViewMonth === 11 ? 0 : calViewMonth + 1;
+        const nextYear = calViewMonth === 11 ? calViewYear + 1 : calViewYear;
+        const iso = formatIsoDate(nextYear, nextMonth + 1, d);
+        const isSelected = (currentSessionAsOf === iso);
+        const isToday = (todayIso === iso);
+        html += renderDayCell(d, iso, false, isSelected, isToday);
+      }
+
+      container.innerHTML = html;
+    }
+
+    function renderDayCell(dayNum, isoStr, isCurrentMonth, isSelected, isToday) {
+      let classes = 'h-8 w-8 mx-auto flex items-center justify-center rounded-lg text-[13px] transition-colors cursor-pointer ';
+      if (isSelected) {
+        classes += 'bg-[#2563eb] text-white font-semibold shadow-sm ';
+      } else if (isToday) {
+        classes += 'font-semibold text-[#2563eb] ring-1 ring-[#2563eb]/60 bg-blue-50/50 hover:bg-blue-100/60 ';
+      } else if (isCurrentMonth) {
+        classes += 'text-neutral-800 hover:bg-neutral-100 font-normal ';
+      } else {
+        classes += 'text-neutral-300 hover:bg-neutral-50 hover:text-neutral-500 font-normal ';
+      }
+      return `<button type="button" onclick="selectCalendarDate('${isoStr}')" aria-label="Ngày ${dayNum}" class="${classes}">${dayNum}</button>`;
+    }
+
+    function calNavigateMonth(step) {
+      calViewMonth += step;
+      if (calViewMonth < 0) {
+        calViewMonth = 11;
+        calViewYear--;
+      } else if (calViewMonth > 11) {
+        calViewMonth = 0;
+        calViewYear++;
+      }
+      renderCalendarGrid();
+    }
+
+    function calChangeMonthYear() {
+      const monthSelect = document.getElementById('cal-month-select');
+      const yearSelect = document.getElementById('cal-year-select');
+      if (monthSelect) calViewMonth = parseInt(monthSelect.value, 10);
+      if (yearSelect) calViewYear = parseInt(yearSelect.value, 10);
+      renderCalendarGrid();
+    }
+
+    function updateAsOfUi(isoDate) {
+      currentSessionAsOf = isoDate || null;
+      const label = document.getElementById('as-of-label');
+      const triggerBtn = document.getElementById('as-of-trigger-btn');
+      const clearBtn = document.getElementById('as-of-clear-btn');
+      const icon = document.getElementById('as-of-icon');
+
+      if (!label || !triggerBtn) return;
+
+      if (currentSessionAsOf && isValidCalendarDate(...currentSessionAsOf.split('-'))) {
+        label.textContent = formatDisplayDate(currentSessionAsOf);
+        triggerBtn.classList.remove('bg-neutral-100/80', 'text-neutral-700', 'border-neutral-200/90', 'hover:bg-neutral-200/80');
+        triggerBtn.classList.add('bg-blue-50', 'text-blue-700', 'border-blue-200', 'hover:bg-blue-100/80');
+        if (icon) {
+          icon.classList.remove('text-neutral-500');
+          icon.classList.add('text-blue-600');
+        }
+        if (clearBtn) clearBtn.classList.remove('hidden');
+      } else {
+        currentSessionAsOf = null;
+        label.textContent = 'Hiện tại';
+        triggerBtn.classList.remove('bg-blue-50', 'text-blue-700', 'border-blue-200', 'hover:bg-blue-100/80');
+        triggerBtn.classList.add('bg-neutral-100/80', 'text-neutral-700', 'border-neutral-200/90', 'hover:bg-neutral-200/80');
+        if (icon) {
+          icon.classList.remove('text-blue-600');
+          icon.classList.add('text-neutral-500');
+        }
+        if (clearBtn) clearBtn.classList.add('hidden');
+      }
+    }
+
+    function positionCalendarPopover() {
+      const popover = document.getElementById('calendar-popover');
+      const btn = document.getElementById('as-of-trigger-btn');
+      if (!popover || !btn || popover.classList.contains('hidden')) return;
+
+      const rect = btn.getBoundingClientRect();
+      const popWidth = 296;
+      const popHeight = popover.offsetHeight || 310;
+
+      let left = rect.left;
+      if (left + popWidth > window.innerWidth - 8) {
+        left = window.innerWidth - popWidth - 8;
+      }
+      if (left < 8) left = 8;
+
+      let top;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+
+      if (spaceBelow < popHeight + 12 && spaceAbove >= popHeight + 12) {
+        // Open above trigger
+        top = rect.top - popHeight - 8;
+      } else {
+        // Open below trigger
+        top = rect.bottom + 8;
+      }
+
+      popover.style.left = `${Math.round(left)}px`;
+      popover.style.top = `${Math.round(top)}px`;
+    }
+
+    function openCalendarPopover() {
+      const popover = document.getElementById('calendar-popover');
+      const btn = document.getElementById('as-of-trigger-btn');
+      if (!popover || !btn) return;
+
+      if (currentSessionAsOf) {
+        const parts = currentSessionAsOf.split('-');
+        if (parts.length === 3) {
+          calViewYear = parseInt(parts[0], 10);
+          calViewMonth = parseInt(parts[1], 10) - 1;
+        }
+      } else {
+        const now = new Date();
+        calViewYear = now.getFullYear();
+        calViewMonth = now.getMonth();
+      }
+
+      renderCalendarGrid();
+      popover.classList.remove('hidden');
+      btn.setAttribute('aria-expanded', 'true');
+      document.getElementById('as-of-chevron')?.classList.add('rotate-180');
+      positionCalendarPopover();
+    }
+
+    function closeCalendarPopover() {
+      const popover = document.getElementById('calendar-popover');
+      if (popover && !popover.classList.contains('hidden')) {
+        popover.classList.add('hidden');
+        const btn = document.getElementById('as-of-trigger-btn');
+        if (btn) {
+          btn.setAttribute('aria-expanded', 'false');
+          btn.focus();
+        }
+        document.getElementById('as-of-chevron')?.classList.remove('rotate-180');
+      }
+    }
+
+    function toggleCalendarPopover(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const popover = document.getElementById('calendar-popover');
+      if (popover && !popover.classList.contains('hidden')) {
+        closeCalendarPopover();
+      } else {
+        openCalendarPopover();
+      }
+    }
+
+    function selectCalendarDate(isoDate) {
+      if (isoDate) {
+        const parts = isoDate.split('-');
+        if (!isValidCalendarDate(parts[0], parts[1], parts[2])) {
+          isoDate = null;
+        }
+      } else {
+        isoDate = null;
+      }
+
+      updateAsOfUi(isoDate);
+
+      if (currentSessionId) {
+        const sess = chatSessions.find(s => String(s.id) === String(currentSessionId));
+        if (sess) {
+          sess.selectedAsOf = isoDate;
+          saveSessionsToStorage();
+        }
+      }
+
+      closeCalendarPopover();
+    }
+
+    function selectToday() {
+      selectCalendarDate(getLocalTodayIso());
+    }
+
+    function clearSelectedAsOf(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      selectCalendarDate(null);
+    }
+
     const DOC_TITLES = {
       'bo_luat_dan_su_2015.txt': 'Bộ luật Dân sự 2015',
       'bo_luat_hang_hai_2015.txt': 'Bộ luật Hàng hải Việt Nam 2015',
@@ -698,6 +1075,14 @@
       'bo_luat_lao_dong_2019.txt': 'Bộ luật Lao động 2019',
       'bo_luat_to_tung_dan_su_2015.txt': 'Bộ luật Tố tụng Dân sự 2015',
       'bo_luat_to_tung_hinh_su_2015.txt': 'Bộ luật Tố tụng Hình sự 2015',
+      'luat:65/2014/QH13': 'Luật Nhà ở 2014',
+      'luat:27/2023/QH15': 'Luật Nhà ở 2023',
+      'luat:45/2013/QH13': 'Luật Đất đai 2013',
+      'luat:31/2024/QH15': 'Luật Đất đai 2024',
+      'luat:66/2014/QH13': 'Luật Kinh doanh BĐS 2014',
+      'luat:29/2023/QH15': 'Luật Kinh doanh BĐS 2023',
+      'luat:03/2022/QH15': 'Luật số 03/2022/QH15',
+      'luat:43/2024/QH15': 'Luật số 43/2024/QH15',
     };
 
     const DOC_SHORT_NAMES = {
@@ -707,6 +1092,12 @@
       'bo_luat_lao_dong_2019.txt': 'BLLĐ',
       'bo_luat_to_tung_dan_su_2015.txt': 'TTDS',
       'bo_luat_to_tung_hinh_su_2015.txt': 'TTHS',
+      'luat:65/2014/QH13': 'Luật Nhà ở 2014',
+      'luat:27/2023/QH15': 'Luật Nhà ở 2023',
+      'luat:45/2013/QH13': 'Luật Đất đai 2013',
+      'luat:31/2024/QH15': 'Luật Đất đai 2024',
+      'luat:66/2014/QH13': 'Luật KDBĐS 2014',
+      'luat:29/2023/QH15': 'Luật KDBĐS 2023',
     };
 
     // Auto-expand Textarea on typing & toggle Send/Soundwave icons
@@ -743,23 +1134,21 @@
     }
 
     function setChatInputPosition(mode) {
+      closeCalendarPopover();
       const capsule = document.getElementById('chat-input-capsule');
       const heroSlot = document.getElementById('hero-input-slot');
       const bottomSlot = document.getElementById('bottom-input-slot');
       const bottomBar = document.getElementById('floating-bottom-bar');
-      const asOfRow = document.getElementById('as-of-row');
 
       if (!capsule) return;
 
       if (mode === 'hero') {
         if (heroSlot && !heroSlot.contains(capsule)) {
-          if (asOfRow) heroSlot.appendChild(asOfRow);
           heroSlot.appendChild(capsule);
         }
         if (bottomBar) bottomBar.classList.add('hidden');
       } else if (mode === 'bottom') {
         if (bottomSlot && !bottomSlot.contains(capsule)) {
-          if (asOfRow) bottomSlot.appendChild(asOfRow);
           bottomSlot.appendChild(capsule);
         }
         if (bottomBar) bottomBar.classList.remove('hidden');
@@ -812,13 +1201,34 @@
         }
       } catch (e) {}
 
-      // Dismiss popover when clicking outside
+      // Dismiss popovers when clicking outside
       document.addEventListener('click', (e) => {
         const popover = document.getElementById('chatgpt-popover');
-        if (!popover.contains(e.target) && !e.target.closest('.chatgpt-cite-pill')) {
+        if (popover && !popover.contains(e.target) && !e.target.closest('.chatgpt-cite-pill')) {
           hideCitePopover();
         }
+        const calPopover = document.getElementById('calendar-popover');
+        const calContainer = document.getElementById('as-of-container');
+        if (calPopover && !calPopover.classList.contains('hidden')) {
+          if (!calPopover.contains(e.target) && (!calContainer || !calContainer.contains(e.target))) {
+            closeCalendarPopover();
+          }
+        }
       });
+
+      // Escape key to dismiss popovers
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          const calPopover = document.getElementById('calendar-popover');
+          if (calPopover && !calPopover.classList.contains('hidden')) {
+            closeCalendarPopover();
+          }
+        }
+      });
+
+      // Reposition calendar popover on scroll or resize
+      window.addEventListener('resize', positionCalendarPopover);
+      window.addEventListener('scroll', positionCalendarPopover, true);
     });
 
     let allLoadedDocs = [];
@@ -935,6 +1345,9 @@
         }
       }
       if (DOC_TITLES[source]) return DOC_TITLES[source];
+      if (typeof source === 'string' && source.startsWith('luat:')) {
+        return 'Luật số ' + source.slice(5);
+      }
       let s = source.replace(/\.(txt|pdf|docx|md)$/i, '');
       s = s.replace(/bo_luat_/g, 'Bộ luật ');
       s = s.replace(/luat_/g, 'Luật ');
@@ -962,6 +1375,8 @@
     function resetToHero() {
       currentSessionId = null;
       setThinkEnabled(false);
+      updateAsOfUi(null);
+      closeCalendarPopover();
       setChatInputPosition('hero');
       document.getElementById('hero-view').classList.remove('hidden');
       document.getElementById('chat-thread-view').classList.add('hidden');
@@ -1010,8 +1425,9 @@
     }
 
     async function startQuery(rawQuery) {
-      // Capture this turn's mode before any async work or later toggle changes.
+      // Capture this turn's mode and as_of before any async work or later toggle changes.
       const requestThinkEnabled = thinkEnabled;
+      const requestAsOf = currentSessionAsOf;
       // 1. Determine target session
       if (!currentSessionId) {
         const cleanTitle = rawQuery.length > 36 ? rawQuery.slice(0, 36) + '...' : rawQuery;
@@ -1021,6 +1437,7 @@
           title: cleanTitle,
           createdAt: Date.now(),
           updatedAt: Date.now(),
+          selectedAsOf: requestAsOf,
           turns: [],
         };
         chatSessions.unshift(newSession);
@@ -1048,6 +1465,7 @@
           turnId: msgId,
           query: rawQuery,
           think: requestThinkEnabled,
+          as_of: requestAsOf,
           data: null, // null means pending
           timestamp: Date.now(),
         });
@@ -1103,13 +1521,15 @@
         scrollToBottom();
       }
 
-      // Trích xuất lịch sử hội thoại gần nhất (tối đa 3 lượt trước đó đã có câu trả lời)
+      // Bootstrap memory after server restart; both modes share the same conversation.
       let historyPayload = [];
       if (targetSession && targetSession.turns) {
-        const previousTurns = targetSession.turns.filter(t => t.turnId !== msgId && t.data && t.data.answer);
-        historyPayload = previousTurns.slice(-3).map(t => ({
+        const previousTurns = targetSession.turns.filter(t => t.turnId !== msgId && t.data && t.data.answer && !t.data.error && t.data.status !== 'error');
+        historyPayload = previousTurns.slice(-64).map((t, i) => ({
+          turn_id: t.turnId || '',
           query: t.query || "",
-          answer: (t.data && t.data.answer) ? t.data.answer.slice(0, 250) : ""
+          answer: t.data.answer,
+          truncated: i === 0 && previousTurns.length > 64
         })).filter(h => h.query.trim().length > 0);
       }
 
@@ -1119,9 +1539,15 @@
           headers: { 'Content-Type': 'application/json' },
           // session_id: server giữ bảng tra PII theo phiên để cùng một thông tin cá nhân
           // luôn là cùng placeholder qua các lượt hỏi; history: server che PII rồi mới gộp lịch sử
-          body: JSON.stringify(Object.assign(
-            { query: rawQuery, session_id: targetSessionId, history: historyPayload, stream: true, think: requestThinkEnabled },
-            document.getElementById('as-of-input').value ? { as_of: document.getElementById('as-of-input').value } : {})),
+          body: JSON.stringify({
+            query: rawQuery,
+            session_id: targetSessionId,
+            turn_id: msgId,
+            history: historyPayload,
+            stream: true,
+            think: requestThinkEnabled,
+            ...(requestAsOf ? { as_of: requestAsOf } : { as_of: null }),
+          }),
         });
 
         if (!response.ok) {
@@ -1302,7 +1728,7 @@
         const chunkId = src ? src.chunk_id : '';
         const secInfo = src ? parseSectionInfo(src.section) : null;
         const shortDoc = src ? (DOC_SHORT_NAMES[src.source] || (src.store === 'versioned' ? String(src.source).replace(/^[a-z_]+:/, '') : 'Luật')) : 'Luật';
-        
+
         let label = shortDoc;
         if (secInfo && secInfo.article) {
           // Extract "Điều xxx"
@@ -1311,11 +1737,11 @@
         }
 
         return `
-          <button type="button" 
-            onclick="handleCitationClick(event, '${chunkId}', '${firstNum}')" 
-            onmouseenter="handleCitationHover(event, '${chunkId}', '${firstNum}')" 
-            onmouseleave="scheduleHideCitePopover()" 
-            class="chatgpt-cite-pill" 
+          <button type="button"
+            onclick="handleCitationClick(event, '${chunkId}', '${firstNum}')"
+            onmouseenter="handleCitationHover(event, '${chunkId}', '${firstNum}')"
+            onmouseleave="scheduleHideCitePopover()"
+            class="chatgpt-cite-pill"
             data-chunk-id="${chunkId}">
             <span class="pill-dot"></span>
             ${src && src.document_status && src.document_status !== 'verified' ? '<span aria-label="chưa xác minh" title="Căn cứ chưa xác minh đầy đủ" style="color:#8a5a00">⚠</span>' : ''}
@@ -1329,13 +1755,16 @@
       const trace = data.trace || {};
       const arms = trace.arms || {};
       const finalHits = trace.final_hits || [];
+      const sources = data.sources || [];
+      const hasArms = Boolean(arms.bm25?.length || arms.dense?.length || finalHits?.length);
 
-      const traceHtml = trace.agent ? renderAgentTrace(msgId, trace.agent) : `
+      const traceHtml = trace.agent ? renderAgentTrace(msgId, trace.agent, sources) : `
         <div id="${msgId}-trace" class="hidden mt-4 pt-3 border-t border-neutral-100 text-[12px] bg-neutral-50 rounded-xl p-4">
           <div class="flex items-center justify-between font-semibold text-neutral-700 pb-2 border-b border-neutral-200">
-            <span>Minh bạch đối chiếu Retrieval (Dense Vector + BM25 + Jev Reranker)</span>
-            <span class="text-[11px] font-normal text-teal-700">Chế độ: ${trace.context_mode || 'threshold'} · Jev Cross-Encoder</span>
+            <span>Minh bạch đối chiếu Retrieval ${trace.context_mode === 'temporal' ? '(Tra cứu theo hiệu lực pháp luật)' : '(Dense Vector + BM25 + Jev Reranker)'}</span>
+            <span class="text-[11px] font-normal text-teal-700">Chế độ: ${trace.context_mode || 'threshold'} · ${sources.length} căn cứ</span>
           </div>
+          ${hasArms ? `
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
             <div class="p-2.5 bg-white rounded-lg border border-neutral-200 space-y-1.5">
               <div class="font-semibold text-neutral-800 text-[11px] uppercase tracking-wide">BM25 Lexical (Top 5)</div>
@@ -1350,6 +1779,13 @@
               ${renderHitList(finalHits)}
             </div>
           </div>
+          ` : ''}
+          ${sources.length > 0 ? `
+          <div class="${hasArms ? 'mt-4 pt-3 border-t border-neutral-200' : 'mt-2'}">
+            <div class="font-semibold text-neutral-700 text-[11.5px] uppercase tracking-wide">Căn cứ & Đoạn trích đối chiếu (${sources.length})</div>
+            ${renderSourcesTrace(sources)}
+          </div>
+          ` : (!hasArms ? '<div class="text-[11.5px] text-neutral-400 italic py-3">Không có đoạn trích nào trong kho văn bản phù hợp với câu hỏi này.</div>' : '')}
         </div>
       `;
 
@@ -1405,10 +1841,10 @@
         <div id="${msgId}-text" class="chatgpt-prose select-text">
           ${formattedText}
         </div>
-        ${temporal.certainty}
-        ${temporal.transitions}
         ${temporal.followups}
+        ${temporal.transitions}
         ${piiHtml}
+        ${data.conversation && data.conversation.truncated ? '<div class="mt-2 text-[12px] text-amber-700">Một phần lịch sử đã vượt giới hạn ngữ cảnh. Bạn hãy nhắc lại dữ kiện cũ nếu câu hỏi cần đến chúng.</div>' : ''}
         ${actionBarHtml}
         ${traceHtml}
       `;
@@ -1420,14 +1856,14 @@
     const ROLE_LABEL = { signing: 'Ký kết', contract_effective: 'Hợp đồng có hiệu lực', performance: 'Thực hiện',
       discovery: 'Phát hiện', dispute: 'Tranh chấp', evaluation: 'Đánh giá', unspecified: 'Mốc' };
     const SOURCE_LABEL = { calendar: 'ngày đã chọn', question: 'từ câu hỏi', default: 'mặc định hôm nay' };
-    const DOC_STATUS_LABEL = { verified: ['✓', 'Đã xác minh phiên bản', '#006300'],
-      partially_verified: ['◐', 'Xác minh một phần', '#8a5a00'], unversioned: ['?', 'Chưa xác định phiên bản', '#8a5a00'],
+    const DOC_STATUS_LABEL = { verified: ['✓', 'Đã đối chiếu hiệu lực', '#006300'],
+      partially_verified: ['◐', 'Cần đối chiếu thêm', '#8a5a00'], unversioned: ['?', 'Cần kiểm tra hiệu lực', '#8a5a00'],
       outdated: ['⊘', 'Không còn hiệu lực tại mốc', '#b42318'], unknown: ['?', 'Chưa đủ dữ liệu', '#8a5a00'] };
     const ASSESS_LABEL = { not_applicable: 'Không áp dụng', potentially_applicable: 'Có thể áp dụng — cần xem xét',
       applicable: 'Áp dụng (theo phân tích)', undetermined: 'Chưa xác định — thiếu dữ kiện' };
-    const WARN_LABEL = { 'timeline.default_today': 'Không thấy mốc thời gian trong câu hỏi — đang áp dụng pháp luật hiện hành.',
-      'timeline.llm_failed': 'Không phân tích được vai trò các mốc; đã dùng nhận diện theo quy tắc.',
-      'timeline.evidence_not_found': 'Đã bỏ một mốc không có căn cứ trong câu hỏi.' };
+    const WARN_LABEL = { 'timeline.default_today': '',
+      'timeline.llm_failed': 'Bạn hãy xác nhận thời điểm xảy ra sự việc nếu ngày đó ảnh hưởng đến câu trả lời.',
+      'timeline.evidence_not_found': '' };
     const fmtDay = d => d ? d.split('-').reverse().join('/') : '';
 
     function anchorWhen(a) {
@@ -1439,10 +1875,10 @@
     }
 
     function warningText(w) {
-      if (WARN_LABEL[w]) return WARN_LABEL[w];
+      if (Object.prototype.hasOwnProperty.call(WARN_LABEL, w)) return WARN_LABEL[w];
       if (w.startsWith('timeline.calendar_conflict')) return 'Câu hỏi nhắc một mốc khác ngày đã chọn — đang ưu tiên ngày đã chọn, xem lại nếu chưa đúng.';
       if (w.startsWith('timeline.relative_unresolved')) return 'Chưa quy được "' + w.split(':').slice(1).join(':') + '" ra ngày cụ thể — hãy cho ngày rõ hơn.';
-      return w;
+      return '';
     }
 
     function docStatusBadge(status) {
@@ -1452,25 +1888,8 @@
     }
 
     function renderTemporalBlocks(data) {
-      const out = { timeline: '', certainty: '', transitions: '', followups: '' };
-      const tl = data.timeline;
-      if (tl && tl.anchors) {
-        const chips = tl.anchors.map(a => `
-          <span class="inline-flex flex-wrap items-baseline gap-1 border border-neutral-200 bg-neutral-50 rounded-lg px-2 py-1">
-            <span class="text-[11px] text-neutral-500">${escapeHtml(ROLE_LABEL[a.role] || a.role)}</span>
-            <span class="text-[12.5px] font-medium text-neutral-800">${escapeHtml(anchorWhen(a))}</span>
-            <span class="text-[10.5px] text-neutral-400">${escapeHtml(SOURCE_LABEL[a.source] || a.source)}</span>
-          </span>`).join('');
-        const warns = (tl.warnings || []).map(w => `<div class="text-[11.5px]" style="color:#8a5a00">⚠ ${escapeHtml(warningText(w))}</div>`).join('');
-        out.timeline = `<div class="mb-3 space-y-1.5"><div class="text-[11.5px] font-semibold text-neutral-500 uppercase tracking-wide">Mốc pháp lý đang sử dụng</div>
-          <div class="flex flex-wrap gap-1.5">${chips}</div>${warns}</div>`;
-      }
-      if (data.certainty && data.certainty !== 'firm') {
-        const text = data.certainty === 'cannot_conclude'
-          ? 'Chưa đủ căn cứ để kết luận.'
-          : 'Kết luận có điều kiện — phụ thuộc vào căn cứ chưa xác minh đầy đủ, quy định chuyển tiếp hoặc mốc thời gian chưa đủ cụ thể.';
-        out.certainty = `<div class="mt-3 text-[12.5px] rounded-lg px-3 py-2 border" style="border-color:#fab219;background:#fffaf0;color:#8a5a00">⚠ ${escapeHtml(text)}</div>`;
-      }
+      const out = { timeline: '', transitions: '', followups: '' };
+      // Timeline remains in the response/trace for validation, not in chat prose.
       const rules = data.transition_rules || [];
       if (rules.length) {
         const assess = Object.fromEntries((data.transition_assessments || []).map(t => [t.rule_id, t]));
@@ -1486,37 +1905,26 @@
       }
       const fu = data.follow_up_questions || [];
       if (fu.length) {
-        out.followups = `<div class="mt-3 flex flex-wrap gap-1.5">${fu.map(q =>
-          `<button type="button" class="followup-chip text-[12px] border border-neutral-300 rounded-full px-3 py-1 hover:bg-neutral-100" data-q="${escapeHtml(q)}">${escapeHtml(q)}</button>`).join('')}</div>`;
+        out.followups = `
+          <div class="mt-4 chatgpt-prose select-text">
+            <p><strong>Để kết luận chính xác hơn, bạn có thể làm rõ thêm:</strong></p>
+            <ul>
+              ${fu.map(q => `<li>${escapeHtml(q)}</li>`).join('')}
+            </ul>
+          </div>`;
       }
       return out;
     }
-
-    document.addEventListener('click', (e) => {
-      const chip = e.target.closest('.followup-chip');
-      if (!chip) return;
-      const input = document.getElementById('main-query-input');
-      input.value = chip.dataset.q;
-      input.focus();
-    });
-
-    (function initAsOf() {
-      const input = document.getElementById('as-of-input');
-      const clear = document.getElementById('as-of-clear');
-      if (!input || !clear) return;
-      const sync = () => clear.classList.toggle('hidden', !input.value);
-      input.addEventListener('change', sync);
-      clear.addEventListener('click', () => { input.value = ''; sync(); });
-    })();
 
     function agentStatusLabel(status) {
       return ({ answer: 'Đã kiểm chứng theo tài liệu', partial: 'Mới xác minh được một phần',
         clarify: 'Cần làm rõ dữ kiện', abstain: 'Chưa đủ căn cứ', error: 'Chưa thể kiểm chứng' })[status] || 'Đã kết thúc';
     }
 
-    function renderAgentTrace(msgId, agent) {
+    function renderAgentTrace(msgId, agent, sources) {
       const budget = agent.budget || {};
       const assessments = agent.assessments || [];
+      const sourcesList = sources || [];
       return `<div id="${msgId}-trace" class="hidden mt-4 border border-blue-100 rounded-xl bg-blue-50/40 p-4 text-[12px]">
         <div class="font-semibold text-blue-700 mb-2">Think · ${escapeHtml(agentStatusLabel(agent.status))}</div>
         <div class="text-neutral-500 mb-3">${Number(budget.rounds || 0)} vòng tra cứu · ${Number(budget.searches || 0)} truy vấn · ${Number(budget.xref_targets || 0)} dẫn chiếu</div>
@@ -1524,8 +1932,60 @@
           const assessment = assessments.find(a => a.requirement_id === r.id);
           return `<div class="py-2 border-t border-blue-100"><div class="font-medium">${escapeHtml(r.question)}</div><div class="text-neutral-600">${escapeHtml(assessment?.reason || 'Chưa có đánh giá bằng chứng.')}</div></div>`;
         }).join('')}
-        <div class="mt-3 text-neutral-500">${escapeHtml(agent.scope_warning || '')}</div>
+        ${agent.scope_warning ? `<div class="mt-3 text-neutral-500">${escapeHtml(agent.scope_warning)}</div>` : ''}
+        ${sourcesList.length > 0 ? `
+        <div class="mt-3 pt-3 border-t border-blue-200/60">
+          <div class="font-semibold text-blue-900 text-[11.5px] uppercase tracking-wide">Căn cứ & Đoạn trích đã xác minh (${sourcesList.length})</div>
+          ${renderSourcesTrace(sourcesList)}
+        </div>
+        ` : (agent.status === 'abstain' || agent.stop_reason === 'empty_scope' ? `
+        <div class="mt-3 p-2.5 rounded-lg bg-amber-50/80 border border-amber-200 text-amber-800 text-[11.5px]">
+          Không tìm thấy điều luật nào có hiệu lực phù hợp với mốc thời gian hoặc câu hỏi trong kho văn bản.
+        </div>` : '')}
       </div>`;
+    }
+
+    function renderSourcesTrace(sources) {
+      if (!sources || sources.length === 0) {
+        return '<div class="text-[11.5px] text-neutral-400 italic py-2">Không tìm thấy căn cứ đối chiếu nào trong phạm vi tra cứu.</div>';
+      }
+      return `
+        <div class="space-y-2 mt-2">
+          ${sources.map(s => {
+            const docTitle = formatDocTitle(s.source || s.title);
+            const secInfo = parseSectionInfo(s.section);
+            let validityText = '';
+            if (s.valid_from || s.valid_to) {
+              const fromStr = s.valid_from ? s.valid_from.split('-').reverse().join('/') : 'Trước đây';
+              const toStr = s.valid_to ? s.valid_to.split('-').reverse().join('/') : 'Hiện hành';
+              validityText = `${fromStr} → ${toStr}`;
+            }
+            const statusBadge = s.provision_status || s.document_status;
+            let statusHtml = '';
+            if (statusBadge) {
+              const isExpired = statusBadge === 'expired' || statusBadge === 'repealed';
+              const isVerified = statusBadge === 'verified' || statusBadge === 'current';
+              const badgeClass = isExpired ? 'bg-amber-100 text-amber-800' : (isVerified ? 'bg-emerald-100 text-emerald-800' : 'bg-neutral-100 text-neutral-600');
+              const label = isExpired ? 'Hết hiệu lực' : (isVerified ? 'Có hiệu lực' : escapeHtml(statusBadge));
+              statusHtml = `<span class="px-1.5 py-0.5 rounded text-[10px] font-medium ${badgeClass}">${label}</span>`;
+            }
+            return `
+              <div class="p-2.5 rounded-lg bg-white border border-neutral-200/90 hover:border-neutral-300 transition-colors space-y-1">
+                <div class="flex items-center justify-between text-[11px]">
+                  <div class="flex items-center space-x-1.5 overflow-hidden">
+                    <span class="px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-700 font-mono font-bold text-[10px]">[${s.n}]</span>
+                    <span class="font-semibold text-neutral-800 truncate">${escapeHtml(secInfo.article || s.section || 'Căn cứ pháp lý')}</span>
+                    ${statusHtml}
+                  </div>
+                  ${validityText ? `<span class="text-[10px] text-neutral-500 font-mono shrink-0">${validityText}</span>` : ''}
+                </div>
+                <div class="text-[11px] text-teal-800 font-medium truncate">${escapeHtml(docTitle)}</div>
+                <div class="text-neutral-600 text-[11px] line-clamp-2 select-text">${escapeHtml(s.text || '')}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
     }
 
     function renderHitList(hits) {
@@ -1615,7 +2075,7 @@
       const scoreBadge = document.getElementById('canvas-score-badge');
 
       const secInfo = parseSectionInfo(src.section);
-      const docTitle = formatDocTitle(src.source);
+      const docTitle = formatDocTitle(src.source || src.title);
       const isLink = isUrl(src.source);
 
       badgeEl.textContent = `[${citationNum || src.n || 1}]`;
@@ -1628,32 +2088,34 @@
         if (tabText) {
           tabText.textContent = isLink ? 'Mở link' : 'Toàn văn';
         }
+        tabBtn.classList.remove('hidden');
       }
 
       // Slide drawer into view (pop from right)
       canvas.classList.remove('translate-x-full');
 
-      // 1. Immediately render chunk text (0ms response)
+      // 1. Immediately render chunk text (0ms response) as a preview while loading full text
       const quoteOrText = src.quote || src.text || '';
       renderCanvasContent(quoteOrText, quoteOrText, secInfo.article, true);
 
-      // 2. Căn cứ có phiên bản: toàn văn gốc là bản CHƯA sửa đổi -> chỉ hiện nội dung phiên bản đã dùng
-      if (src.store === 'versioned') {
-        if (tabBtn) tabBtn.classList.add('hidden');
-        subtitleEl.textContent = (secInfo.article || src.section || '') + (src.valid_from
-          ? ` · hiệu lực ${fmtDay(src.valid_from)} → ${src.valid_to ? fmtDay(src.valid_to) : 'nay'}` : '');
-        return;
+      // Cập nhật thông tin hiệu lực vào subtitle nếu có
+      if (src.valid_from) {
+        subtitleEl.textContent = (secInfo.article || src.section || '') +
+          ` · hiệu lực ${fmtDay(src.valid_from)} → ${src.valid_to ? fmtDay(src.valid_to) : 'nay'}`;
       }
-      if (tabBtn) tabBtn.classList.remove('hidden');
 
-      // 2b. If it's a URL, no raw local file to fetch
+      // 2. If it's a URL, no raw local file to fetch
       if (isLink) {
+        renderCanvasContent(quoteOrText, quoteOrText, secInfo.article, false);
         return;
       }
 
       // 3. Fetch full doc content from cache or API
       const filename = src.source;
-      if (!filename) return;
+      if (!filename) {
+        renderCanvasContent(quoteOrText, quoteOrText, secInfo.article, false);
+        return;
+      }
 
       if (docContentCache[filename]) {
         renderCanvasContent(docContentCache[filename], quoteOrText, secInfo.article, false);
@@ -1668,10 +2130,15 @@
               if (activeCanvasChunkId === chunkId) {
                 renderCanvasContent(fullContent, quoteOrText, secInfo.article, false);
               }
+              return;
             }
           }
         } catch (e) {
           console.error('Lỗi tải nội dung tài liệu:', e);
+        }
+        // Fallback: Nếu không tải được toàn văn, hiển thị đoạn trích và tắt loading spinner
+        if (activeCanvasChunkId === chunkId) {
+          renderCanvasContent(quoteOrText, quoteOrText, secInfo.article, false);
         }
       }
     }
@@ -1960,6 +2427,18 @@
         const raw = localStorage.getItem('justice_chat_sessions_v1');
         if (raw) {
           chatSessions = JSON.parse(raw);
+          if (Array.isArray(chatSessions)) {
+            chatSessions.forEach(s => {
+              if (s.selectedAsOf && typeof s.selectedAsOf === 'string') {
+                const parts = s.selectedAsOf.split('-');
+                if (!isValidCalendarDate(parts[0], parts[1], parts[2])) {
+                  s.selectedAsOf = null;
+                }
+              } else {
+                s.selectedAsOf = null;
+              }
+            });
+          }
           renderRecentsList();
           return;
         }
@@ -2010,32 +2489,49 @@
       }
 
       container.innerHTML = chatSessions.map(s => {
-        const isActive = s.id === currentSessionId;
-        const isQueryingThis = activeQuerySessionIds.has(s.id);
-        const activeClass = isActive 
-          ? 'bg-[#ececec] text-neutral-900 font-medium' 
+        const sid = String(s.id);
+        const isActive = sid === String(currentSessionId);
+        const isQueryingThis = activeQuerySessionIds.has(sid);
+        const activeClass = isActive
+          ? 'bg-[#ececec] text-neutral-900 font-medium'
           : 'text-neutral-700 hover:bg-[#ececec] hover:text-neutral-900 font-normal';
 
         return `
-          <button 
-            type="button"
-            onclick="loadSession('${s.id}')" 
-            oncontextmenu="handleSessionContextMenu(event, '${s.id}')"
-            class="w-full px-2.5 py-1.5 rounded-lg transition-colors text-left text-[13.5px] truncate flex items-center justify-between ${activeClass}" 
-            title="${escapeHtml(s.title || 'Đoạn chat')} (Chuột phải để đổi tên / xóa)">
-            <span class="truncate">${escapeHtml(s.title || 'Đoạn chat')}</span>
-            ${isQueryingThis ? `<span class="w-2 h-2 rounded-full bg-teal-600 animate-pulse ml-2 flex-shrink-0" title="Đang phản hồi..."></span>` : ''}
-          </button>
+          <div
+            class="group relative w-full flex items-center rounded-lg transition-colors ${activeClass}"
+            oncontextmenu="handleSessionContextMenu(event, '${escapeHtml(sid)}')">
+            <button
+              type="button"
+              onclick="loadSession('${escapeHtml(sid)}')"
+              class="w-full px-2.5 py-1.5 text-left text-[13.5px] truncate flex items-center justify-between pr-8 cursor-pointer"
+              title="${escapeHtml(s.title || 'Đoạn chat')} (Chuột phải để đổi tên / xóa)">
+              <span class="truncate">${escapeHtml(s.title || 'Đoạn chat')}</span>
+              ${isQueryingThis ? `<span class="w-2 h-2 rounded-full bg-teal-600 animate-pulse ml-2 flex-shrink-0" title="Đang phản hồi..."></span>` : ''}
+            </button>
+            <div class="absolute right-1.5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center">
+              <button
+                type="button"
+                onclick="event.stopPropagation(); deleteSession('${escapeHtml(sid)}')"
+                class="p-1 rounded hover:bg-neutral-300/60 text-neutral-400 hover:text-red-600 transition-colors cursor-pointer"
+                title="Xóa đoạn chat">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          </div>
         `;
       }).join('');
     }
 
     function loadSession(sessionId) {
-      const sess = chatSessions.find(s => s.id === sessionId);
+      const sess = chatSessions.find(s => String(s.id) === String(sessionId));
       if (!sess) return;
 
       currentSessionId = sess.id;
       setThinkEnabled(false);
+      updateAsOfUi(sess.selectedAsOf || null);
+      closeCalendarPopover();
       setChatInputPosition('bottom');
       document.getElementById('hero-view').classList.add('hidden');
       const wrapper = document.getElementById('main-content-wrapper');
@@ -2084,15 +2580,51 @@
       closeContextMenu();
     }
 
-    // ==================== CONTEXT MENU (CHUỘT PHẢI) LOGIC ====================
+    // ==================== CONTEXT MENU (CHUỘT PHẢI) & XÓA / ĐỔI TÊN LOGIC ====================
+    function deleteSession(sessionId) {
+      if (!sessionId) return;
+      const targetId = String(sessionId);
+      closeContextMenu();
+
+      activeQuerySessionIds.delete(targetId);
+      chatSessions = chatSessions.filter(s => String(s.id) !== targetId);
+      saveSessionsToStorage();
+
+      if (currentSessionId && String(currentSessionId) === targetId) {
+        resetToHero();
+      } else {
+        renderRecentsList();
+        updateSendButtonState();
+      }
+    }
+
+    function renameSession(sessionId) {
+      if (!sessionId) return;
+      const targetId = String(sessionId);
+      closeContextMenu();
+      const sess = chatSessions.find(s => String(s.id) === targetId);
+      if (!sess) return;
+
+      const newTitle = prompt('Nhập tên mới cho đoạn chat:', sess.title);
+      if (newTitle && newTitle.trim()) {
+        sess.title = newTitle.trim();
+        saveSessionsToStorage();
+        if (currentSessionId && String(currentSessionId) === String(sess.id)) {
+          document.getElementById('conversation-title').textContent = sess.title;
+        }
+        renderRecentsList();
+      }
+    }
+
     function handleSessionContextMenu(event, sessionId) {
       event.preventDefault();
       event.stopPropagation();
 
-      contextMenuSessionId = sessionId;
+      contextMenuSessionId = String(sessionId);
       const menu = document.getElementById('session-context-menu');
       if (!menu) return;
 
+      menu.dataset.sessionId = String(sessionId);
       menu.classList.remove('hidden');
 
       const menuWidth = 165;
@@ -2113,48 +2645,39 @@
 
     function closeContextMenu() {
       const menu = document.getElementById('session-context-menu');
-      if (menu) menu.classList.add('hidden');
+      if (menu) {
+        menu.classList.add('hidden');
+        delete menu.dataset.sessionId;
+      }
       contextMenuSessionId = null;
     }
 
-    function handleDeleteSessionFromMenu() {
-      if (!contextMenuSessionId) return;
-      const targetId = contextMenuSessionId;
-      closeContextMenu();
-
-      activeQuerySessionIds.delete(targetId);
-      chatSessions = chatSessions.filter(s => s.id !== targetId);
-      saveSessionsToStorage();
-
-      if (currentSessionId === targetId) {
-        resetToHero();
-      } else {
-        renderRecentsList();
-        updateSendButtonState();
+    function handleDeleteSessionFromMenu(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
       }
+      const menu = document.getElementById('session-context-menu');
+      const targetId = contextMenuSessionId || (menu ? menu.dataset.sessionId : null);
+      if (!targetId) return;
+      deleteSession(targetId);
     }
 
-    function handleRenameSessionFromMenu() {
-      if (!contextMenuSessionId) return;
-      const sess = chatSessions.find(s => s.id === contextMenuSessionId);
-      closeContextMenu();
-      if (!sess) return;
-
-      const newTitle = prompt('Nhập tên mới cho đoạn chat:', sess.title);
-      if (newTitle && newTitle.trim()) {
-        sess.title = newTitle.trim();
-        saveSessionsToStorage();
-        if (currentSessionId === sess.id) {
-          document.getElementById('conversation-title').textContent = sess.title;
-        }
-        renderRecentsList();
+    function handleRenameSessionFromMenu(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
       }
+      const menu = document.getElementById('session-context-menu');
+      const targetId = contextMenuSessionId || (menu ? menu.dataset.sessionId : null);
+      if (!targetId) return;
+      renameSession(targetId);
     }
 
     function clearRecents() {
       chatSessions = [];
-      try { 
-        localStorage.removeItem('justice_chat_sessions_v1'); 
+      try {
+        localStorage.removeItem('justice_chat_sessions_v1');
         localStorage.removeItem('legal_chatgpt_recents');
       } catch (e) {}
       resetToHero();

@@ -104,6 +104,50 @@ def test_no_context_refuses_without_llm(tmp_path):
     assert r.items == [] and r.answer.certainty == "cannot_conclude" and llm.answer_calls == []
 
 
+def test_conversation_reference_is_masked_and_separate_from_temporal_evidence(corpus, tmp_path):
+    llm = FakeLLM(FIRM)
+    qa = make_qa(corpus, llm, tmp_path)
+    qa.ask("Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại?", calendar_date=date(2025, 6, 15),
+           history=[{"query": "Email tôi demo@example.com, tôi là chủ đầu tư.",
+                     "answer": "Mở đầu " * 80 + "2. Cần kiểm tra điều kiện."}])
+    prompt = llm.answer_calls[-1][1]
+    assert "conversation_context" in prompt
+    assert "2. Cần kiểm tra điều kiện." in prompt
+    assert "demo@example.com" not in prompt
+    assert "2025-06-15" in prompt
+
+
+def test_real_temporal_stream_emits_before_model_finishes_without_json_metadata_or_partial_pii(corpus, tmp_path):
+    class StreamingLLM(FakeLLM):
+        finished = False
+
+        def stream(self, system, user):
+            self.prompts.append((system, user))
+            raw = json.dumps(self.answer, ensure_ascii=True)
+            for offset in range(0, len(raw), 3):
+                yield raw[offset:offset + 3]
+            self.finished = True
+
+    answer = {**FIRM, "answer_markdown": "Thông tin [USER_PHONE_1]: chủ đầu tư phải đáp ứng điều kiện. [1]"}
+    model = StreamingLLM(answer)
+    qa = make_qa(corpus, model, tmp_path)
+    tokens, result = [], None
+    for event in qa.ask_stream("Tôi số 0912345678. Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại?",
+                               calendar_date=date(2025, 6, 15)):
+        if event["type"] == "token":
+            assert not model.finished
+            tokens.append(event["delta"])
+            assert "[USER_" not in event["delta"]
+        elif event["type"] == "result":
+            result = event["result"]
+    assert model.finished and result is not None
+    text = "".join(tokens)
+    assert text == result.answer.answer_markdown
+    assert "0912345678" in text
+    assert "answer_markdown" not in text and "anchor_role" not in text
+    assert "0912345678" not in "\n".join(user for _, user in model.prompts)
+
+
 def test_log_records_masked_question(corpus, tmp_path):
     qa = make_qa(corpus, FakeLLM(FIRM), tmp_path)
     r = qa.ask("Tôi số 0912345678, ký hợp đồng mua nhà ngày 15/06/2023 thì điều kiện chủ đầu tư là gì?")

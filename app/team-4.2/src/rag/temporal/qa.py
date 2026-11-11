@@ -7,6 +7,10 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import date, datetime, timezone
 from typing import Any
+import json
+
+from rag.conversation import conversation_context, masked_history
+from rag.generate.json_stream import AnswerFieldStream
 
 from rag.legal.chunks import VersionedChunk
 from rag.legal.service import LegalService
@@ -85,7 +89,21 @@ class TemporalQA:
     # --- hỏi ---------------------------------------------------------------------------------
 
     def ask(self, question: str, *, calendar_date: date | None = None,
+            history: Sequence[dict[str, Any]] | None = None,
             mask_state: MaskState | None = None) -> TemporalResult:
+        for event in self._run(question, calendar_date=calendar_date, history=history, mask_state=mask_state):
+            if event["type"] == "result":
+                return event["result"]
+        raise RuntimeError("TemporalQA ended without a result")
+
+    def ask_stream(self, question: str, *, calendar_date: date | None = None,
+                   history: Sequence[dict[str, Any]] | None = None, mask_state: MaskState | None = None):
+        yield from self._run(question, calendar_date=calendar_date, history=history,
+                             mask_state=mask_state, stream=True)
+
+    def _run(self, question, *, calendar_date=None, history=None, mask_state=None, stream=False):
+        if stream:
+            yield {"type": "progress", "stage": "prepare", "message": "Đang tra cứu tài liệu…"}
         asked_at = self.now()
         state = mask_state if mask_state is not None else MaskState(prefix=QUERY_PREFIX)
         before = dict(state.counts)
@@ -124,7 +142,27 @@ class TemporalQA:
             result = TemporalResult(timeline, items, rules, answer, query_pii=query_pii)
         else:
             system, user = build_messages(query, timeline, items, rules)
-            raw = self.llm.complete(system, user)
+            if history:
+                system += ("\nconversation_context là dữ kiện hội thoại theo thứ tự; ưu tiên đính chính "
+                           "rõ ràng mới nhất của người dùng, không mang chủ đề cũ sang chủ đề mới. "
+                           "Đáp án assistant cũ không phải bằng chứng pháp lý. Nếu thiếu tham chiếu thì hỏi lại.")
+                user += "\n\nconversation_context:\n" + json.dumps(
+                    conversation_context(masked_history(history, state)), ensure_ascii=False)
+            if stream and callable(getattr(self.llm, "stream", None)):
+                # Share the baseline's tested placeholder-safe incremental unmasker.
+                from rag.pipeline import _StreamUnmasker
+                decoder, unmasker, collected = AnswerFieldStream(), _StreamUnmasker(state), []
+                for fragment in self.llm.stream(system, user):
+                    collected.append(fragment)
+                    delta = unmasker.feed(decoder.feed(fragment))
+                    if delta:
+                        yield {"type": "token", "delta": delta}
+                tail = unmasker.flush()
+                if tail:
+                    yield {"type": "token", "delta": tail}
+                raw = "".join(collected)
+            else:
+                raw = self.llm.complete(system, user)
             answer = enforce(parse_answer(raw), items, rules, timeline, year_change=year_change)
             result = TemporalResult(timeline, items, rules, answer, query_pii=query_pii, llm_called=True)
         if self.log is not None:
@@ -139,7 +177,7 @@ class TemporalQA:
         a.issues = _unmask_deep(a.issues, state)
         a.follow_up_questions = _unmask_deep(a.follow_up_questions, state)
         a.transition_assessments = _unmask_deep(a.transition_assessments, state)
-        return result
+        yield {"type": "result", "result": result}
 
 
 def _unmask_deep(value, state: MaskState):

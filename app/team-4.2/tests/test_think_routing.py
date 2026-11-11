@@ -42,16 +42,26 @@ def test_selects_only_requested_backend(server, monkeypatch, stream, think):
     executed = []
     history = [{"query": "Câu trước", "answer": "Đáp án trước"}]
 
-    def ask(query, pipeline, received_history):
-        executed.append((query, pipeline, received_history))
+    def ask(query, as_of, mask_state, received_history):
+        executed.append((query, baseline, received_history))
         return {"answer": "ok"}
 
-    def events(query, pipeline, received_history):
-        ask(query, pipeline, received_history)
+    def events(query, as_of, mask_state, received_history):
+        ask(query, as_of, mask_state, received_history)
         yield 'data: {"type": "done", "answer": "ok"}\n\n'
 
-    monkeypatch.setattr(server, "_sync_ask", ask)
+    def agent_ask(query, mask_state, received_history, as_of, backend):
+        executed.append((query, backend, received_history))
+        return {"answer": "ok"}
+
+    def agent_events(query, mask_state, received_history, as_of, backend):
+        agent_ask(query, mask_state, received_history, as_of, backend)
+        yield 'data: {"type": "done", "answer": "ok"}\n\n'
+
+    monkeypatch.setattr(server, "_sync_chat", ask)
     monkeypatch.setattr(server, "_sync_stream", events)
+    monkeypatch.setattr(server, "_sync_agent", agent_ask)
+    monkeypatch.setattr(server, "_sync_agent_stream", agent_events)
     body = {"query": "Câu hỏi", "history": history, "stream": stream}
     if think is not None:
         body["think"] = think
@@ -66,8 +76,9 @@ def test_selects_only_requested_backend(server, monkeypatch, stream, think):
             assert json.loads(response.body)["answer"] == "ok"
 
     asyncio.run(run())
-    assert executed == [("Câu hỏi", agent if think else baseline, history)]
-    assert baseline_factory.call_count == (0 if think else 1)
+    from rag.conversation import normalize_history
+    assert executed == [("Câu hỏi", agent if think else baseline, normalize_history(history))]
+    baseline_factory.assert_not_called()
     assert agent_factory.call_count == (1 if think else 0)
 
 
@@ -75,7 +86,7 @@ def test_selects_only_requested_backend(server, monkeypatch, stream, think):
 def test_unavailable_agent_does_not_fall_back_or_initialize_baseline(server, monkeypatch, stream):
     baseline_factory = Mock(side_effect=AssertionError("Baseline must not run"))
     monkeypatch.setattr(server, "get_pipeline", baseline_factory)
-    monkeypatch.setattr(server, "get_agent_pipeline", lambda: None)
+    monkeypatch.setattr(server, "get_agent_pipeline", lambda as_of=None: None)
     response = asyncio.run(server.handle_chat(request_for({
         "query": "Câu hỏi", "think": True, "stream": stream,
     })))

@@ -31,6 +31,7 @@ from typing import Any
 
 from rag.advanced.condense import QueryCondenser
 from rag.config import Settings
+from rag.conversation import conversation_context, masked_history
 from rag.generate.answer import answer_question, build_citations, build_prompt
 from rag.index.bm25_index import BM25Index
 from rag.index.embedder import EmbeddingCache, make_embedder
@@ -471,7 +472,7 @@ class RAGPipeline:
             return AskTrace(Answer.refusal(retrieval.hits), retrieval, selection, llm_called=False,
                             query_pii=query_pii, condensed_query=effective_query)
 
-        answer = answer_question(self._prompt_query(retrieval.query), selection.blocks, self.llm, retrieval.hits)
+        answer = answer_question(self._conversation_prompt(retrieval.query, history, state), selection.blocks, self.llm, retrieval.hits)
         # GUARDRAIL (sau LLM, TV5): loại [n] sai, không còn citation hợp lệ thì từ chối — chưa làm.
         if not answer.refused:
             answer.text = state.unmask(answer.text)   # sau LLM + cache: cache chỉ giữ bản đã che
@@ -509,6 +510,16 @@ class RAGPipeline:
     @staticmethod
     def _prompt_query(query: str) -> str:
         return query + PII_NOTE if f"[{QUERY_PREFIX}" in query else query
+
+    def _conversation_prompt(self, query, history, state):
+        prompt = self._prompt_query(query)
+        if history:
+            context = conversation_context(masked_history(history, state) if self.mask_queries else history)
+            prompt += ("\n\nNgữ cảnh hội thoại chỉ dùng để hiểu câu hỏi và dữ kiện người dùng; "
+                       "không phải tài liệu pháp lý. Ưu tiên đính chính rõ ràng mới nhất; bỏ chủ đề cũ "
+                       "khi đổi chủ đề. Không coi đáp án cũ là bằng chứng. Nếu thiếu tham chiếu thì hỏi lại.\n"
+                       + json.dumps(context, ensure_ascii=False))
+        return prompt
 
     def ask_stream(
         self,
@@ -567,7 +578,7 @@ class RAGPipeline:
             "condensed_query": effective_query,
         }
 
-        system, user = build_prompt(self._prompt_query(retrieval.query), selection.blocks)
+        system, user = build_prompt(self._conversation_prompt(retrieval.query, history, state), selection.blocks)
         collected: list[str] = []
         unmasker = _StreamUnmasker(state)
 

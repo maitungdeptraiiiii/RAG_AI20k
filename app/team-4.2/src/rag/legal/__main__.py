@@ -112,14 +112,20 @@ def _run(args: argparse.Namespace) -> int:
         rep["operations"] = {f"{p}/{r}": n for (p, r), n in rep["operations"].items()}
         print(json.dumps(rep, ensure_ascii=False, indent=2))
     elif args.cmd == "fixture":
+        import tempfile
+
         from rag.ingest.vbpl import VbplClient
-        from rag.legal.crawl import fetch_document
+        from rag.legal.crawl import fetch_document, raw_path_for
 
         client = VbplClient()
         args.out.mkdir(parents=True, exist_ok=True)
-        for number in args.numbers:
-            got = fetch_document(client, args.type, number, args.out)
-            print(f"{number}: {'ok ' + got[0].raw_text_path if got else 'không tìm thấy'}")
+        with tempfile.TemporaryDirectory() as tmp:          # fixture: một file phẳng <key>.txt như trước
+            for number in args.numbers:
+                got = fetch_document(client, args.type, number, Path(tmp))
+                if got:
+                    path = raw_path_for(args.out, got[0].document_key)
+                    path.write_text(got[1] + "\n", encoding="utf-8")
+                print(f"{number}: {'ok ' + str(path) if got else 'không tìm thấy'}")
     return 0
 
 

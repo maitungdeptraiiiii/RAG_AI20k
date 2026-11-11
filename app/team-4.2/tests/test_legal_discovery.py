@@ -63,6 +63,24 @@ def test_number_collision_filtered_by_type(tmp_path):
     assert fetch_document(FakeClient([resolution]), "Bộ luật", "91/2015/QH13", tmp_path, now=NOW) is None
 
 
+def test_saved_text_matches_checksum_and_is_never_overwritten(tmp_path):
+    import hashlib
+
+    from rag.legal.crawl import save_detail
+    from rag.legal.snapshots import SnapshotManager
+
+    old, _ = save_detail(ENTERPRISE, tmp_path / "raw", now=NOW)
+    new, _ = save_detail({**ENTERPRISE, "documentContent": {"content": html("Điều 1. Khác\nNội dung.")}},
+                         tmp_path / "raw", now=NOW)
+    for doc in (old, new):
+        assert hashlib.sha256(Path(doc.raw_text_path).read_bytes()).hexdigest() == doc.raw_checksum
+    assert old.raw_text_path != new.raw_text_path                    # bản cũ (snapshot cũ) vẫn nguyên
+    snaps = SnapshotManager(tmp_path / "legal")
+    res = snaps.write("cli:crawl", "t", lambda svc: svc.store.upsert_document(
+        save_detail(ENTERPRISE, snaps.legal_dir / "raw", now=NOW)[0]))   # validate: checksum file khớp
+    assert res.snapshot.status == "published"
+
+
 def test_amendment_confirmed_by_content(tmp_path):
     store = LegalStore(tmp_path / "c.sqlite")
     report = discover(FakeClient([ENTERPRISE, AMEND, FAKE_AMEND]), store, [Seed("Luật", "59/2020/QH14")],

@@ -204,3 +204,31 @@ def chunk_document(
 
 
 __all__ = ["chunk_document", "count_syllables"]
+
+
+def chunk_fixed(pages: Sequence[Page], *, max_syllables: int = 300, overlap: int = 50) -> list[Chunk]:
+    """W02-04 — chunk cố định: cửa sổ `max_syllables` âm tiết, chồng lấp `overlap`, BỎ QUA heading / ranh giới Điều /
+    đoạn văn (để so với chunk theo cấu trúc). `section` = None: chunk có thể vắt qua nhiều Điều."""
+    if max_syllables < 1 or not 0 <= overlap < max_syllables:
+        raise ValueError("Cần max_syllables >= 1 và 0 <= overlap < max_syllables")
+    if not pages:
+        return []
+    doc_ids = {p.doc_id for p in pages}
+    if len(doc_ids) != 1:
+        raise ValueError(f"Các Page phải cùng doc_id, nhận {sorted(doc_ids)}")
+    doc_id, source = pages[0].doc_id, pages[0].source
+    words: list[tuple[str, int | None]] = [(w, p.page) for p in pages for w in p.text.split()]
+    chunks: list[Chunk] = []
+    step = max_syllables - overlap
+    start = 0
+    while start < len(words):
+        window = words[start:start + max_syllables]
+        pages_in = [pg for _, pg in window if pg is not None]
+        chunks.append(Chunk(chunk_id=make_chunk_id(doc_id, len(chunks)), doc_id=doc_id, source=source,
+                            page_start=min(pages_in) if pages_in else None,
+                            page_end=max(pages_in) if pages_in else None,
+                            section=None, text=" ".join(w for w, _ in window)))
+        if start + max_syllables >= len(words):
+            break
+        start += step
+    return chunks

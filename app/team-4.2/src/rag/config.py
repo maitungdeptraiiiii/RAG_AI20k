@@ -80,6 +80,8 @@ class Settings:
 
     # Chunking (TV1)
     max_syllables: int = 300
+    chunk_strategy: str = "structural"          # structural (Điều / đoạn) | fixed (W02-04: cửa sổ cố định)
+    chunk_overlap: int = 50                     # chỉ dùng với chunk_strategy=fixed (âm tiết)
 
     # Retrieval (TV2)
     arm_k: int = 20
@@ -209,6 +211,10 @@ class Settings:
                      "decomp_per_query_k", "decomp_pool_size"):
             if getattr(self, name) < 1:
                 raise ValueError(f"{name.upper()} phải >= 1")
+        if self.chunk_strategy not in ("structural", "fixed"):
+            raise ValueError(f"CHUNK_STRATEGY phải là structural | fixed, nhận {self.chunk_strategy!r}")
+        if not 0 <= self.chunk_overlap < self.max_syllables:
+            raise ValueError("CHUNK_OVERLAP phải >= 0 và < MAX_SYLLABLES")
         if self.rrf_k < 0:
             raise ValueError("RRF_K phải >= 0")
         if not math.isfinite(self.bm25_rrf_weight) or self.bm25_rrf_weight < 0:

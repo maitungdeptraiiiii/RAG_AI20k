@@ -1,0 +1,39 @@
+{
+  "questions": "evals/team-4.2/datasets/benchmark_doi_thuong_w02.jsonl",
+  "configs": [
+    "bm25",
+    "dense",
+    "hybrid",
+    "hybrid+rerank"
+  ],
+  "k": 5,
+  "max_syllables": 300,
+  "fixed_overlap": 50,
+  "embed_model": "jina-embeddings-v5-text-small",
+  "advanced": "hyde",
+  "rerank_backend": "jev",
+  "rerank_n": 20,
+  "top_k": 5,
+  "matching": "span overlap with gold article (rag.eval.span_match)",
+  "strategies": {
+    "structural": {
+      "data_dir": "data\\team-4.2\\w02\\chunk-structural",
+      "n_chunks": 3422,
+      "located": 3422,
+      "avg_syllables": 163.0,
+      "median_syllables": 154.0,
+      "chunks_spanning_2plus_articles": 0,
+      "ingest_seconds": 386.4,
+      "span_vs_section_agreement": "256/256"
+    },
+    "fixed": {
+      "data_dir": "data\\team-4.2\\w02\\chunk-fixed",
+      "n_chunks": 2125,
+      "located": 2125,
+      "avg_syllables": 299.7,
+      "median_syllables": 300,
+      "chunks_spanning_2plus_articles": 1763,
+      "ingest_seconds": 452.2
+    }
+  }
+}

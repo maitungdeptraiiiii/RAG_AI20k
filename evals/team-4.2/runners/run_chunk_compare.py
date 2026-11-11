@@ -26,12 +26,14 @@ from collections import defaultdict
 from pathlib import Path
 
 from rag.config import Settings
-from rag.eval.metrics import load_questions, recall_at_k
+from rag.eval.metrics import recall_at_k
+from rag.schema import Question
 from rag.eval.runner import RETRIEVAL_CONFIGS
 from rag.eval.span_match import ArticleIndex, gold_article
 from rag.pipeline import RAGPipeline
 
 RAW_DIR = Path("data/team-4.2/raw")
+PREVIOUS_CONFIG = "evals/team-4.2/results/w02-chunk-compare/config.json"
 K = 5
 
 
@@ -62,9 +64,13 @@ def run_strategy(base: Settings, strategy: str, questions, configs, out_rows, st
     pipeline = RAGPipeline.from_settings(settings)
     files = sorted(p for p in RAW_DIR.glob("*.txt"))
     t0 = time.time()
-    for f in files:
-        pipeline.ingest(f, source=f.name)
+    reports = [pipeline.ingest(f, source=f.name) for f in files]
     ingest_s = time.time() - t0
+    if all(r.skipped for r in reports):          # index đã dựng ở lần chạy trước: giữ thời gian ingest thật lần đó
+        prev = Path(PREVIOUS_CONFIG)
+        if prev.is_file():
+            ingest_s = json.loads(prev.read_text(encoding="utf-8"))["strategies"].get(strategy, {}).get(
+                "ingest_seconds", ingest_s)
     all_chunks = pipeline.store.all()
     chunks = {c.chunk_id: c for c in all_chunks}
     by_source = defaultdict(list)
@@ -128,7 +134,10 @@ def main() -> int:
     if any(RETRIEVAL_CONFIGS[c][1] for c in args.configs) and base.rerank_backend == "none":
         print("Cấu hình có rerank cần RERANK_BACKEND=jev trong .env", file=sys.stderr)
         return 2
-    questions = load_questions(args.questions)
+    # chỉ câu trong phạm vi (câu out_of_scope không có gold; bản w02 còn kèm `reference` mà schema không nhận)
+    questions = [Question.from_dict(d) for d in (json.loads(line) for line in
+                 Path(args.questions).read_text(encoding="utf-8").splitlines() if line.strip())
+                 if d.get("type") != "out_of_scope"]
     splits = {json.loads(line)["id"]: json.loads(line).get("split", "")
               for line in Path(args.questions).read_text(encoding="utf-8").splitlines() if line.strip()}
     rows, stats, examples_src = [], {}, {}

@@ -27,6 +27,7 @@ def test_structural_chunk_matches_only_its_article():
     idx = ArticleIndex(RAW, chunks)
     assert idx.covers("d:0", "1") and not idx.covers("d:0", "2")
     assert idx.covers("d:1", "2") and not idx.covers("d:1", "3")
+    assert not idx.covers("d:1", "1")                     # chunk bắt đầu đúng tại "Điều 2." không chạm Điều 1
 
 
 def test_fixed_chunk_spanning_two_articles_matches_both():

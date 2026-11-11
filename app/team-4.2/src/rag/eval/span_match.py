@@ -31,6 +31,7 @@ def _normalize(raw: str) -> tuple[str, list[int]]:
     to_norm: list[int] = []
     space = True
     for c in raw:
+        to_norm.append(len(out))            # vị trí TRƯỚC khi thêm: ký tự gốc này nằm ở đâu trong văn bản chuẩn hoá
         if c.isspace():
             if not space:
                 out.append(" ")
@@ -38,7 +39,6 @@ def _normalize(raw: str) -> tuple[str, list[int]]:
         else:
             out.append(c)
             space = False
-        to_norm.append(len(out))
     return "".join(out), to_norm
 
 

@@ -150,3 +150,14 @@ def test_stream_events_end_with_unmasked_done():
                                      "Bên A có được đơn phương chấm dứt không?", [], stream=True))
     assert events[0]["type"] == "progress" and events[-1]["type"] == "done"
     assert events[-1]["contract_id"] == "c1"
+
+
+def test_agent_question_carries_contract_context():
+    llm = AgentLLM()
+    c = contract()
+    c.facts = {"type": "Hợp đồng thuê nhà ở", "parties": [{"role": "Bên cho thuê"}, {"role": "Bên thuê"}]}
+    chunks, search = legacy()
+    run_contract_agent(c, baseline(llm), AgentConfig(), RUNTIME, chunks, search, "Bên A có được chấm dứt không?", [])
+    plan = json.loads(llm.calls[0])
+    assert "Hợp đồng thuê nhà ở" in plan["standalone_question"] and "15/03/2023" in plan["standalone_question"]
+    assert "Bên A có được chấm dứt không?" in plan["standalone_question"]

@@ -41,6 +41,11 @@ class LawEvidence:
                    d["status"], d.get("document_key"), d.get("article_id"))
 
 
+def _article(section: str | None) -> str:
+    """"Chương I > Chương VIII > Mục 3 > Điều 132. ..." -> "Điều 132. ..." (đường dẫn đầy đủ quá dài để hiển thị)."""
+    return (section or "").rsplit(" > ", 1)[-1].strip()
+
+
 def _eid(*parts: str) -> str:
     return "L" + hashlib.sha1("|".join(parts).encode("utf-8")).hexdigest()[:10]
 
@@ -54,16 +59,18 @@ def find_evidence(runtime, legacy_search: LegacySearch | None, query: str, ancho
             if vc.document_key not in titles:
                 doc = store.document(vc.document_key)
                 titles[vc.document_key] = doc.title if doc else vc.document_key
-            out.append(LawEvidence(_eid(vc.chunk_id), "versioned", titles[vc.document_key], vc.section, vc.text,
+            out.append(LawEvidence(_eid(vc.chunk_id), "versioned", titles[vc.document_key], _article(vc.section), vc.text,
                                    vc.valid_from, vc.valid_to, vc.verification_status, vc.document_key, vc.article_id))
     if legacy_search is not None:
         for c in legacy_search(query, k)[:k]:
-            out.append(LawEvidence(_eid(c.chunk_id), "legacy", c.source, c.section or "", c.text, None, None,
+            out.append(LawEvidence(_eid(c.chunk_id), "legacy", c.source, _article(c.section), c.text, None, None,
                                    "unversioned", None, None))
+    # một Điều dài bị chia nhiều chunk: giữ một căn cứ cho mỗi (nguồn, Điều)
     seen, unique = set(), []
     for e in out:
-        if e.eid not in seen:
-            seen.add(e.eid)
+        key = (e.store, e.document_key or e.source_title, e.section or e.eid)
+        if key not in seen:
+            seen.add(key)
             unique.append(e)
     return unique
 
@@ -75,7 +82,11 @@ def _current(history, day: date):
 def law_changes(runtime, evidence: list[LawEvidence], today: date) -> list[dict[str, Any]]:
     """Mỗi căn cứ: unchanged | changed | repealed (+ luật thay thế, ngày, Điều chuyển tiếp) | untracked (kho cũ)."""
     rows: list[dict[str, Any]] = []
+    done: set[tuple[str, str]] = set()
     for e in evidence:
+        if (e.source_title, e.section) in done:
+            continue
+        done.add((e.source_title, e.section))
         row: dict[str, Any] = {"eid": e.eid, "source_title": e.source_title, "section": e.section,
                                "at_signing": e.text, "store": e.store}
         if e.store != "versioned" or runtime is None:

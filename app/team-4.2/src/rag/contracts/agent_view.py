@@ -134,13 +134,24 @@ def _postcheck(contract: Contract, data: dict[str, Any]) -> dict[str, Any]:
     return data
 
 
+def _with_context(contract: Contract, question: str) -> str:
+    """Agent chỉ đọc câu hỏi: nói rõ đang hỏi về hợp đồng đính kèm (loại, các bên, ngày ký), để nó không hỏi ngược
+    "hợp đồng gì?" và tìm đúng điều khoản trong nguồn "Hợp đồng"."""
+    facts = contract.facts or {}
+    roles = ", ".join(p.get("role", "") for p in facts.get("parties") or [] if p.get("role"))
+    signed = contract.sign_date.strftime("%d/%m/%Y") if contract.sign_date else "chưa rõ"
+    party = contract.party if contract.party and contract.party != "neutral" else "trung lập"
+    return (f"[Câu hỏi về hợp đồng đính kèm \"{contract.filename}\": {facts.get('type') or 'hợp đồng'}"
+            f"{'; các bên: ' + roles if roles else ''}; ngày ký {signed}; người hỏi: {party}] {question}")
+
+
 def run_contract_agent(contract: Contract, baseline, config: AgentConfig | None, runtime,
                        legacy_chunks: Mapping[str, Chunk] | None, legacy_search: LegacySearch | None,
                        question: str, history: list[dict], *, stream: bool = False):
     state = contract.mask_state
     retriever = ContractAgentRetriever(contract, runtime, legacy_chunks, legacy_search)
     agent = AgentPipeline(AgentBaselineView(baseline, retriever), config or AgentConfig())
-    masked_q = mask_text(question, state=state).masked_text
+    masked_q = mask_text(_with_context(contract, question), state=state).masked_text
     masked_h = mask_payload([h for h in (history or []) if isinstance(h, dict)], state)
 
     if not stream:

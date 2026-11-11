@@ -66,3 +66,17 @@ def test_law_changes_reports_repeal_and_replacement(runtime):
 def test_law_changes_marks_legacy_untracked():
     ev = find_evidence(None, legacy_search, "phạt vi phạm", SIGNED)
     assert law_changes(None, ev, TODAY)[0]["status"] == "untracked"
+
+
+def test_evidence_section_is_the_article_and_duplicates_merge(runtime):
+    ev = find_evidence(runtime, legacy_search, "đơn phương chấm dứt hợp đồng thuê nhà ở", SIGNED, k=6)
+    versioned = [e for e in ev if e.store == "versioned"]
+    assert versioned and all(e.section.startswith("Điều ") for e in versioned)
+    keys = [(e.document_key, e.section) for e in versioned]
+    assert len(keys) == len(set(keys))
+
+
+def test_law_change_rows_are_unique_per_article(runtime):
+    ev = find_evidence(runtime, lambda q, k: [], "đơn phương chấm dứt hợp đồng thuê nhà ở", SIGNED, k=6)
+    rows = law_changes(runtime, ev + ev, TODAY)
+    assert len(rows) == len({(r["source_title"], r["section"]) for r in rows})

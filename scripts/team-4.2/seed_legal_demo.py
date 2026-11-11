@@ -56,5 +56,7 @@ def seed(legal_dir: Path, fixtures: Path = DEFAULT_FIXTURES, actor: str = "demo-
 if __name__ == "__main__":
     from rag.config import Settings
 
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     sid = seed(Settings.load().data_dir / "legal")
     print(f"Kho luật demo đã sẵn sàng: snapshot {sid}")

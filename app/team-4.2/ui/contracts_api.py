@@ -62,6 +62,7 @@ CONFIG = SimpleNamespace(
     today=lambda: date.today(),
     agent_baseline=None,       # () -> RAGPipeline kho cũ (llm, condenser, context_config, top_k, retriever)
     agent_config=None,         # () -> AgentConfig
+    document_source=None,      # () -> (chunk_id -> Chunk, tìm(q, k) -> [Hit]) tài liệu thường cho agent
 )
 _store: ContractStore | None = None
 
@@ -200,19 +201,22 @@ def chat_think(cid: str, question: str, history: list[dict], stream: bool = Fals
 
     c = get(cid)
     baseline = CONFIG.agent_baseline()
-    legacy = baseline.retriever
+    if CONFIG.document_source is not None:
+        doc_chunks, legacy_hits = CONFIG.document_source()
+    else:
+        doc_chunks = baseline.retriever.chunks
 
-    def legacy_hits(query: str, k: int):
-        return legacy.retrieve(query, k).hits
+        def legacy_hits(query: str, k: int):
+            return baseline.retriever.retrieve(query, k).hits
 
     config = _contract_agent_config(CONFIG.agent_config() if CONFIG.agent_config else None)
     if not stream:
         with CONFIG.lease() as runtime:
-            return run_contract_agent(c, baseline, config, runtime, legacy.chunks, legacy_hits, question, history)
+            return run_contract_agent(c, baseline, config, runtime, doc_chunks, legacy_hits, question, history)
 
     def events():
         with CONFIG.lease() as runtime:
-            yield from run_contract_agent(c, baseline, config, runtime, legacy.chunks, legacy_hits, question,
+            yield from run_contract_agent(c, baseline, config, runtime, doc_chunks, legacy_hits, question,
                                           history, stream=True)
     return events()
 

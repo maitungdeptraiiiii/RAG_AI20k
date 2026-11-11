@@ -323,18 +323,37 @@ def make_legal_runtime_factory(snapshots):
         log.info("Chỉ mục kho luật snapshot %s: %d chunk (%s)", snapshot_id, n,
                  "BM25 + Dense" if index.has_dense else "BM25")
 
-        def legacy_search(query: str, k: int):
-            result = pipeline.retriever.retrieve(query, k)
-            chunks = pipeline.retriever.chunks
-            return [chunks[h.chunk_id] for h in result.hits[:k] if h.chunk_id in chunks]
+        # kho cũ chỉ còn tài liệu thường: 6 bộ luật (legacy_map) đã chuyển sang kho có phiên bản
+        from rag.temporal.status import document_search
 
-        legacy_map_path = _REPO_ROOT / "data" / "team-4.2" / "legal" / "legacy_map.yaml"
-        qa = TemporalQA(service, index, pipeline.llm, legacy_search=legacy_search,
-                        legacy_map=load_legacy_map(legacy_map_path) if legacy_map_path.exists() else {},
+        legacy_map = _legacy_map()
+        qa = TemporalQA(service, index, pipeline.llm, legacy_search=document_search(pipeline.retriever, legacy_map),
+                        legacy_map=legacy_map,
                         log=QALog(settings.data_dir / "legal" / "qa_log.sqlite"), k_per_anchor=settings.top_k)
         return LegalRuntime(snapshot_id, service, index, qa)
 
     return make_runtime
+
+
+_LEGACY_MAP_PATH = _REPO_ROOT / "data" / "team-4.2" / "legal" / "legacy_map.yaml"
+
+
+def _legacy_map():
+    from rag.temporal.status import load_legacy_map
+
+    return load_legacy_map(_LEGACY_MAP_PATH) if _LEGACY_MAP_PATH.exists() else {}
+
+
+def _document_source():
+    """(chunk_id -> Chunk, tìm(query, k) -> [Hit]) của tài liệu thường trong kho cũ (bỏ 6 bộ luật) — nguồn cho agent."""
+    pipeline, _ = get_pipeline()
+    legacy = _legacy_map()
+    chunks = {cid: c for cid, c in pipeline.retriever.chunks.items() if c.source not in legacy}
+
+    def hits(query: str, k: int):
+        return [h for h in pipeline.retriever.retrieve(query, k * 3).hits if h.chunk_id in chunks][:k]
+
+    return chunks, hits
 
 
 def _make_upload_ocr():
@@ -360,17 +379,11 @@ def _lease_legal_runtime():
         yield rt
 
 
-def _contract_legacy_search(query: str, k: int):
-    pipeline, _ = get_pipeline()
-    result = pipeline.retriever.retrieve(query, k)
-    chunks = pipeline.retriever.chunks
-    return [chunks[h.chunk_id] for h in result.hits[:k] if h.chunk_id in chunks]
-
-
 contracts_api.CONFIG.root = lambda: get_pipeline()[1].data_dir / "contracts"   # lazy: không nạp .env lúc import
 contracts_api.CONFIG.llm_factory = lambda: get_pipeline()[0].llm
 contracts_api.CONFIG.lease = _lease_legal_runtime
-contracts_api.CONFIG.legacy_search = _contract_legacy_search
+contracts_api.CONFIG.legacy_search = None          # căn cứ pháp lý chỉ từ kho có phiên bản (kho cũ = tài liệu thường)
+contracts_api.CONFIG.document_source = _document_source
 contracts_api.CONFIG.ocr_factory = _make_upload_ocr
 contracts_api.CONFIG.agent_baseline = lambda: get_pipeline()[0]
 contracts_api.CONFIG.agent_config = lambda: AgentConfig.from_settings(get_pipeline()[1])

@@ -1853,7 +1853,7 @@
       document.getElementById('popover-quote').textContent = `"${quoteText}"`;
       document.getElementById('popover-score').textContent = src.score != null ? `Độ khớp: p = ${src.score}` : 'Nguồn được trích dẫn';
       document.getElementById('popover-page').innerHTML = src.store
-        ? (src.valid_from ? `Hiệu lực ${escapeHtml(fmtDay(src.valid_from))} → ${escapeHtml(src.valid_to ? fmtDay(src.valid_to) : 'nay')} · ` : 'Kho luật cũ · ')
+        ? (src.valid_from ? `Hiệu lực ${escapeHtml(fmtDay(src.valid_from))} → ${escapeHtml(src.valid_to ? fmtDay(src.valid_to) : 'nay')} · ` : 'Tài liệu (không phải văn bản pháp luật) · ')
           + docStatusBadge(src.document_status)
           + ((src.provenance || []).length ? ` · do ${escapeHtml(src.provenance.join(', '))} sửa` : '')
         : (src.page ? `Trang ${src.page}` : '');

@@ -38,6 +38,30 @@ def _identity(doc_type: str, number: str, issuer: str | None) -> tuple[str, str,
     return doc_type.strip().casefold(), normalize_number(number), (issuer or "").strip().casefold()
 
 
+DOCUMENT_LABEL = "Tài liệu (không phải văn bản pháp luật)"
+"""Nhãn nguồn của kho cũ sau khi đồng bộ: kho cũ chỉ còn tài liệu thường, văn bản pháp luật ở kho có phiên bản."""
+
+
+def legacy_documents(docs, legacy: Mapping[str, LegacyLaw]) -> list:
+    """Tài liệu thường của kho cũ: bỏ các bộ luật trong legacy_map (đã chuyển sang kho có phiên bản)."""
+    return [d for d in docs if d.source not in legacy]
+
+
+def document_search(retriever, legacy: Mapping[str, LegacyLaw]):
+    """Tìm trong kho cũ nhưng chỉ trả tài liệu thường (bỏ chunk của các bộ luật trong legacy_map).
+    `retriever` có .retrieve(query, k) -> kết quả có .hits và .chunks (id -> Chunk)."""
+
+    def search(query: str, k: int) -> list:
+        if k < 1:
+            return []
+        result = retriever.retrieve(query, k * 3)
+        chunks = retriever.chunks
+        out = [chunks[h.chunk_id] for h in result.hits if h.chunk_id in chunks]
+        return [c for c in out if c.source not in legacy][:k]
+
+    return search
+
+
 def legacy_duplicates(store: LegalStore, legacy: Mapping[str, LegacyLaw]) -> set[str]:
     known = {_identity(d.doc_type, d.doc_number, d.issuer) for d in store.documents() if not d.is_consolidated}
     return {src for src, law in legacy.items() if _identity(law.doc_type, law.doc_number, law.issuer) in known}
@@ -83,5 +107,5 @@ def is_amendment_only(provisions: Sequence[Provision]) -> bool:
     return bool(directive) and all(t in directive or _EFFECT_TITLE.search(t) for t in titles)
 
 
-__all__ = ["DocumentStatus", "LegacyLaw", "is_amendment_only", "legacy_duplicates", "legacy_status",
+__all__ = ["DOCUMENT_LABEL", "DocumentStatus", "LegacyLaw", "document_search", "legacy_documents", "is_amendment_only", "legacy_duplicates", "legacy_status",
            "load_legacy_map", "versioned_status"]

@@ -6,6 +6,23 @@ Baseline Hybrid RAG (BM25 + Dense + RRF) cho văn bản luật tiếng Việt. S
 
 Tài liệu ingestion/data quality: [schema và interface](docs/SCHEMA_AND_INTERFACES.md) · [luồng xử lý](docs/workflow.md).
 
+## Think trên thanh chat
+
+Nút **Think** mặc định tắt, chuyển sang chữ/icon xanh trên nền xanh nhạt khi bật.
+UI gửi `think: true/false` theo từng câu hỏi; đổi nút khi đang chờ không thay đổi request đã gửi.
+Mở/tạo đoạn chat khác đặt Think về tắt. Lịch sử từng lượt lưu lựa chọn `think`.
+
+`POST /api/chat` không có `think` hoặc có `think: false` dùng RAG hiện tại, bao gồm
+condense/decomposition và các phương pháp retrieval đang cấu hình. `think: true` chỉ đi vào
+`get_agent_pipeline()` trong `ui/server.py`, cho cả JSON và SSE. Agent multi-hop đã được nối:
+lập requirements → tìm kiếm/rerank → đánh giá phần thiếu → search/xref bổ sung → compose → verify.
+Mặc định tối đa 3 vòng, 8 search và 12 đích xref; state/ngân sách riêng theo request.
+SSE hiển thị tiến độ, chỉ phát đáp án sau kiểm chứng; có trạng thái partial/clarify/abstain/error.
+V1 trả lời theo snapshot corpus, chưa xác nhận hiệu lực pháp luật hiện hành.
+Xem [hướng dẫn, cấu hình và giới hạn](docs/MULTIHOP_AGENT.md),
+[bản thiết kế](docs/plans/2026-11-10-multihop-agent-architecture.md).
+CLI: `python scripts/team-4.2/ask.py --think "Câu hỏi nhiều bước"`.
+
 ## Cấu trúc
 
 ```text

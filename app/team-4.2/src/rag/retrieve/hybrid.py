@@ -21,6 +21,8 @@ import logging
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field, replace
 import math
+from threading import RLock
+from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -42,6 +44,10 @@ MODES: tuple[str, ...] = ("hybrid", *CORE_ARMS)
 
 class RetrievalError(RuntimeError):
     """Không arm nào trả được kết quả."""
+
+
+class CorpusChangedError(RuntimeError):
+    """An agent must restart rather than mix two index generations."""
 
 
 @dataclass
@@ -110,6 +116,9 @@ class HybridRetriever:
         self.rewrite_for_rerank = rewrite_for_rerank
         self.coverage = coverage
         self.listwise = listwise
+        self._corpus_lock = RLock()
+        self._corpus_revision = 0
+        self._index_ready = True
 
     # --- build ---------------------------------------------------------------
 
@@ -120,10 +129,50 @@ class HybridRetriever:
         build(toàn bộ chunk) để retriever có text chunk cho reranker.
         """
         chunks = list(chunks)
-        for c in chunks:
-            self._chunks.setdefault(c.chunk_id, c)
-        for retriever in self.arms.values():
-            retriever.build(chunks)
+        with self._corpus_lock:
+            self._corpus_revision += 1
+            self._index_ready = False
+            for c in chunks:
+                if c.chunk_id in self._chunks and self._chunks[c.chunk_id] != c:
+                    raise ValueError("Cannot replace an indexed chunk under the same ID")
+            for retriever in self.arms.values():
+                retriever.build(chunks)
+            for c in chunks:
+                self._chunks.setdefault(c.chunk_id, c)
+            self._index_ready = True
+
+    def capture_snapshot(self) -> tuple[int, Mapping[str, Chunk]]:
+        with self._corpus_lock:
+            if not self._index_ready:
+                raise CorpusChangedError("Index build has not completed")
+            return self._corpus_revision, MappingProxyType(dict(self._chunks))
+
+    def search_candidates(
+        self, query: str, k: int = 20, *, revision: int,
+        chunks: Mapping[str, Chunk], mode: Mode = "dense",
+        dense: Retriever | None = None,
+        reranker: Reranker | None = None,
+    ) -> RetrievalResult:
+        """One bounded search, without rewrite/decomposition/listwise recursion.
+
+        A request-local view can wrap Dense with its own budgeted HyDE client.
+        The shared retriever and its baseline configuration are never mutated.
+        """
+        with self._corpus_lock:
+            if revision != self._corpus_revision or not self._index_ready:
+                raise CorpusChangedError("Corpus changed during the request; retry on the new snapshot")
+            view = HybridRetriever(
+                self.arms["bm25"], dense if dense is not None else self.arms["dense"],
+                reranker=reranker if reranker is not None else self.reranker, arm_k=self.arm_k, rrf_k=self.rrf_k,
+                rerank_n=k, merge_articles=self.merge_articles,
+                article_pool_factor=self.article_pool_factor,
+                bm25_rrf_weight=self.bm25_rrf_weight,
+            )
+            view._chunks = dict(chunks)
+            result = view._retrieve_single(query, k, mode=mode, rerank=True)
+            if revision != self._corpus_revision or not self._index_ready:
+                raise CorpusChangedError("Corpus changed while retrieving")
+            return result
 
     @property
     def chunks(self) -> Mapping[str, Chunk]:
@@ -148,6 +197,13 @@ class HybridRetriever:
         return names
 
     def retrieve(
+        self, query: str, k: int = 5, *, mode: Mode = "hybrid",
+        arms: Sequence[str] | None = None, rerank: bool = True,
+    ) -> RetrievalResult:
+        with self._corpus_lock:
+            return self._retrieve(query, k, mode=mode, arms=arms, rerank=rerank)
+
+    def _retrieve(
         self, query: str, k: int = 5, *, mode: Mode = "hybrid",
         arms: Sequence[str] | None = None, rerank: bool = True,
     ) -> RetrievalResult:

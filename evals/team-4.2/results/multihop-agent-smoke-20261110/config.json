@@ -1,0 +1,29 @@
+{
+  "dataset_sha256": "f356cdcdd4b7c4a6548d6a9ea80b83f5c1d2d3a3505c250560eba848ffdff3d3",
+  "n": 1,
+  "agent": {
+    "max_rounds": 3,
+    "max_searches": 8,
+    "initial_subqueries": 3,
+    "followup_searches": 2,
+    "candidates_per_search": 10,
+    "initial_pool_size": 30,
+    "new_units_per_round": 10,
+    "max_units": 50,
+    "max_xref_depth": 2,
+    "xrefs_per_round": 6,
+    "max_xref_targets": 12,
+    "max_requirements": 8,
+    "max_model_calls": 24,
+    "max_service_requests": 240,
+    "max_model_bytes": 600000,
+    "max_input_chars": 60000,
+    "max_output_tokens": 3000,
+    "deadline_s": 180.0,
+    "retrieval_mode": "dense"
+  },
+  "model": "gpt-6-luna",
+  "embed_model": "jina-embeddings-v5-text-small",
+  "rerank_backend": "jev",
+  "semantic_quality": "human_review_required"
+}

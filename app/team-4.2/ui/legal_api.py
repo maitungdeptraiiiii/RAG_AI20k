@@ -7,13 +7,17 @@ Quy tắc: chat không bao giờ trả lời từ kho nửa cũ nửa mới. M�
 `LegalBackend` có hai phần:
 - nhẹ (dựng ngay): `SnapshotManager`, `DraftStore`, `UploadService` — không cần RAG pipeline;
 - nặng (lần đầu cần, luôn ngoài event loop): `RuntimeHolder` + `WriteWorker`, dựng runtime đầu bằng
-  `CONFIG.make_runtime_for(snapshots)` (server.py cấu hình: BM25 + Dense dùng chung + TemporalQA).
+  `CONFIG.make_runtime_for(snapshots)` (server.py cấu hình: BM25 + Dense dùng chung + TemporalQA). Runtime đầu dựng
+  BM25 trước (đồng bộ, nhanh) rồi đưa việc nâng cấp Dense cho CÙNG snapshot vào hàng đợi ghi (khi `make_runtime` nhận
+  tham số `dense` và LEGAL_DENSE != "0"): chat / /review không phải chờ embed toàn kho.
 """
 
 from __future__ import annotations
 
 import asyncio
+import inspect
 import logging
+import os
 import re
 import tempfile
 import threading
@@ -41,7 +45,10 @@ log = logging.getLogger("rag.ui.legal_api")
 
 TERMINAL = ("done", "failed", "index_failed")
 RETRY_S = 300.0                 # kho mới lỗi khởi tạo / chưa có chỉ mục: chờ bấy lâu mới thử lại (chat dùng pipeline cũ)
-FINALIZE_WAIT_S = 5.0           # việc upload đã xong: chờ bản nháp được cập nhật trước khi báo trạng thái cuối
+# việc upload đã ở trạng thái cuối nhưng bản nháp chưa cập nhật xong (callback trên luồng ghi): UI thấy "finalizing"
+FINALIZING = "finalizing"
+MAX_UPLOAD_BYTES = 50 * 1024 * 1024
+TOO_LARGE_MESSAGE = "File tải lên quá lớn: tối đa 50 MB cho một văn bản pháp luật"
 IMAGE_TYPES = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp",
                ".tif": "image/tiff", ".tiff": "image/tiff"}
 _NUMBER_RE = re.compile(r"\d+\s*/\s*\d{4}\s*/\s*[A-ZĐ0-9-]+", re.IGNORECASE)
@@ -72,9 +79,20 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def _job_dict(job: Job) -> dict[str, Any]:
-    return {"job_id": job.job_id, "kind": job.kind, "ref": job.ref, "actor": job.actor, "state": job.state,
+def _job_dict(job: Job, state: str | None = None) -> dict[str, Any]:
+    return {"job_id": job.job_id, "kind": job.kind, "ref": job.ref, "actor": job.actor, "state": state or job.state,
             "progress": job.progress, "snapshot_id": job.snapshot_id, "error": job.error}
+
+
+def _dense_enabled() -> bool:
+    return os.environ.get("LEGAL_DENSE", "1") != "0"
+
+
+def _accepts_dense(make_runtime: Callable[..., Any]) -> bool:
+    try:
+        return "dense" in inspect.signature(make_runtime).parameters
+    except (TypeError, ValueError):
+        return False
 
 
 def _version_sets(store: LegalStore, key: str) -> dict[str, set]:
@@ -94,6 +112,10 @@ class LegalBackend:
     def __init__(self, legal_dir: Path) -> None:
         self.snapshots = SnapshotManager(legal_dir)
         self.drafts = DraftStore(Path(legal_dir) / "uploads")
+        # tiến trình trước chết giữa lúc công bố và lúc cập nhật bản nháp: snapshot của bản nháp đã công bố -> published
+        reconciled = self.drafts.reconcile_published(self._published_uploads())
+        if reconciled:
+            log.warning("Bản nháp đã vào kho nhưng chưa cập nhật (server dừng giữa chừng) -> published: %s", reconciled)
         # tiến trình trước chết giữa chừng: staging -> failed, bản nháp queued/building -> failed (có nút "Thử lại")
         for what, mark in (("snapshot", self.snapshots.mark_interrupted), ("bản nháp", self.drafts.mark_interrupted)):
             ids = mark()
@@ -113,21 +135,40 @@ class LegalBackend:
         self._lock = threading.Lock()
         self._finished: dict[str, threading.Event] = {}
         self._stale: set[str] = set()
+        for uid in reconciled:                  # bảng kết quả cho bản nháp vừa đối soát (không bắt buộc)
+            try:
+                self.upload.mutate(uid, lambda d: setattr(d, "result", self.result(d.snapshot_id or "", d)))
+            except Exception:                   # noqa: BLE001 - snapshot cha đã dọn...: thiếu bảng kết quả thôi
+                log.exception("Không tính được kết quả cho bản nháp đối soát %s", uid)
+
+    def _published_uploads(self) -> dict[str, str]:
+        """upload_id -> snapshot_id đã công bố mới nhất (theo seq) có reason `upload:<upload_id>`."""
+        out: dict[str, str] = {}
+        for s in reversed(self.snapshots.list()):           # cũ -> mới: bản mới nhất ghi đè
+            if s.status == "published" and s.reason.startswith("upload:"):
+                out[s.reason.split(":", 1)[1]] = s.snapshot_id
+        return out
 
     # --- runtime + hàng đợi ghi ------------------------------------------------------------
 
     def runtime(self) -> tuple[RuntimeHolder, WriteWorker]:
-        """Dựng holder (runtime đầu, đồng bộ) + worker lần đầu cần. Gọi ngoài event loop."""
+        """Dựng holder + worker lần đầu cần. Gọi ngoài event loop. Runtime đầu: chỉ BM25 (đồng bộ, nhanh), rồi việc
+        nâng cấp Dense cho CÙNG snapshot vào hàng đợi ghi; các snapshot sau do worker dựng có Dense luôn."""
         with self._rt_lock:
             if self.worker is None:
                 if CONFIG.make_runtime_for is None:
                     raise RuntimeError("legal_api.CONFIG.make_runtime_for chưa được cấu hình")
                 make_runtime = CONFIG.make_runtime_for(self.snapshots)
-                holder = RuntimeHolder(self.snapshots, make_runtime)
+                upgrade = _dense_enabled() and _accepts_dense(make_runtime)
+                first = (lambda sid: make_runtime(sid, dense=False)) if upgrade else make_runtime
+                holder = RuntimeHolder(self.snapshots, first)
                 self.worker = WriteWorker(self.snapshots, holder, make_runtime=make_runtime,
                                           on_upload_done=self._on_upload_done)
                 self.holder = holder
                 self._index_retry_at = time.monotonic() + RETRY_S
+                rt = holder.get()
+                if upgrade and rt is not None:
+                    self.worker.upgrade(rt.snapshot_id)
             assert self.holder is not None
             return self.holder, self.worker
 
@@ -154,20 +195,31 @@ class LegalBackend:
             cur, snap = self.snapshots.get(rt.snapshot_id), self.snapshots.get(snapshot_id)
         except KeyError:
             return False
-        return bool(cur.published_at and snap.published_at and cur.published_at > snap.published_at)
+        # thứ tự công bố theo seq của index snapshot (tăng dần dưới khoá ghi), không theo đồng hồ hệ thống
+        return cur.status == "published" and snap.status == "published" and cur.seq > snap.seq
 
     def _event(self, job_id: str) -> threading.Event:
         with self._lock:
             return self._finished.setdefault(job_id, threading.Event())
 
+    def _view_state(self, job: Job) -> str:
+        """Việc upload ở trạng thái cuối nhưng callback chưa cập nhật xong bản nháp -> "finalizing" (chưa kết thúc),
+        để UI không đọc bản nháp dở. Xác định, không chờ theo thời gian."""
+        if job.kind == "upload" and job.state in TERMINAL and not self._event(job.job_id).is_set():
+            return FINALIZING
+        return job.state
+
     def job_view(self, job_id: str) -> dict[str, Any]:
         if self.worker is None:
             raise KeyError(job_id)
         job = self.worker.job(job_id)
-        if job.kind == "upload" and job.state in TERMINAL:
-            # callback chạy SAU khi việc ở trạng thái cuối: đợi bản nháp được cập nhật để UI đọc thấy nhất quán
-            self._event(job_id).wait(FINALIZE_WAIT_S)
-        return _job_dict(job)
+        return _job_dict(job, self._view_state(job))
+
+    def status(self) -> dict[str, Any]:
+        rt = self.holder.get() if self.holder is not None else None
+        return {"current_snapshot_id": self.snapshots.current().snapshot_id,
+                "chat_snapshot_id": rt.snapshot_id if rt is not None else None,
+                "legacy_warning": self.snapshots.legacy_catalog_warning()}
 
     # --- upload ----------------------------------------------------------------------------
 
@@ -211,11 +263,18 @@ class LegalBackend:
         return self.upload.mutate(upload_id, retry).job_id or ""
 
     def _on_upload_done(self, job: Job) -> None:
-        """Trên luồng ghi, khi việc upload đã ở trạng thái cuối: cập nhật bản nháp theo kết quả."""
+        """Trên luồng ghi, khi việc upload đã ở trạng thái cuối: cập nhật bản nháp theo kết quả. Bảng kết quả (đọc hai
+        snapshot, có thể chậm) tính NGOÀI khoá của UploadService rồi mới sửa bản nháp dưới khoá."""
         try:
             with self._lock:
                 stale = job.ref in self._stale
                 self._stale.discard(job.ref)
+            result = None
+            if job.state in ("done", "index_failed"):
+                try:
+                    result = self.result(job.snapshot_id or "", self.drafts.load(job.ref))
+                except Exception:               # noqa: BLE001 - kho đã công bố; thiếu bảng kết quả không làm hỏng nó
+                    log.exception("Không tính được kết quả upload %s", job.ref)
 
             def finish(d: Draft) -> None:
                 if d.job_id != job.job_id:
@@ -224,10 +283,8 @@ class LegalBackend:
                 if job.state in ("done", "index_failed"):
                     d.state, d.snapshot_id, d.error = "published", job.snapshot_id, None
                     d.index_error = job.error if job.state == "index_failed" else None
-                    try:
-                        d.result = self.result(job.snapshot_id or "", d)
-                    except Exception:           # noqa: BLE001 - kho đã công bố; thiếu bảng kết quả không làm hỏng nó
-                        log.exception("Không tính được kết quả upload %s", d.upload_id)
+                    if result is not None:
+                        d.result = result
                 elif d.state == "cancelled":
                     pass
                 elif stale:
@@ -269,7 +326,8 @@ class LegalBackend:
         job = None
         if d.job_id and self.worker is not None:
             try:
-                job = _job_dict(self.worker.job(d.job_id))
+                j = self.worker.job(d.job_id)
+                job = _job_dict(j, self._view_state(j))
             except KeyError:                    # việc của tiến trình server trước
                 job = None
         data["job"] = job
@@ -386,7 +444,27 @@ def _by(body: dict[str, Any]) -> str:
     return str(body.get("by") or "")
 
 
+async def _read_capped(request: Request) -> bool:
+    """Đọc body vào bộ nhớ, tối đa MAX_UPLOAD_BYTES (kiểm Content-Length trước, rồi đếm trong lúc đọc — Content-Length
+    có thể thiếu hoặc sai). False -> quá lớn (đã dừng đọc)."""
+    try:
+        declared = int(request.headers.get("content-length") or 0)
+    except ValueError:
+        declared = 0
+    if declared > MAX_UPLOAD_BYTES:
+        return False
+    body = bytearray()
+    async for chunk in request.stream():
+        body += chunk
+        if len(body) > MAX_UPLOAD_BYTES:
+            return False
+    request._body = bytes(body)                 # request.form() đọc lại từ đây (Starlette: stream() dùng _body)
+    return True
+
+
 async def handle_create(request: Request) -> Response:
+    if not await _read_capped(request):
+        return _error(TOO_LARGE_MESSAGE, 413)
     form = await request.form()
     upload = form.get("file")
     url = str(form.get("url") or "").strip()
@@ -409,8 +487,14 @@ async def handle_create(request: Request) -> Response:
 async def handle_list(request: Request) -> Response:
     def run() -> dict[str, Any]:
         backend = get_backend()
-        return {"uploads": [backend.draft_view(d, text=False) for d in backend.drafts.list()]}
+        return {"uploads": [backend.draft_view(d, text=False) for d in backend.drafts.list()],
+                "legacy_warning": backend.snapshots.legacy_catalog_warning()}
     return await _call(run)
+
+
+async def handle_status(request: Request) -> Response:
+    """Trạng thái kho luật cho giao diện: snapshot đang công bố, snapshot chat đang dùng, cảnh báo kho cũ chưa nhập."""
+    return await _call(lambda: get_backend().status())
 
 
 async def handle_get(request: Request) -> Response:
@@ -556,6 +640,7 @@ routes = [
     Route("/api/legal/jobs/{job_id}", handle_job, methods=["GET"]),
     Route("/api/legal/reindex", handle_reindex, methods=["POST"]),
     Route("/api/legal/pending-base-laws", handle_pending_base_laws, methods=["GET"]),
+    Route("/api/legal/status", handle_status, methods=["GET"]),
 ]
 
 __all__ = ["CONFIG", "IMAGE_TYPES", "LegalBackend", "chat_holder", "get_backend", "handle_review_decision",

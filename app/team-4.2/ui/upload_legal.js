@@ -100,16 +100,18 @@
 
   async function loadHistory() {
     try {
-      const { uploads = [] } = await api('GET', '/api/legal/uploads');
+      const { uploads = [], legacy_warning: legacy = null } = await api('GET', '/api/legal/uploads');
       $('legal-count').textContent = `${uploads.length} bản`;
-      $('legal-history').innerHTML = uploads.length ? uploads.map((u) => {
+      // kho luật cũ được ghi sau khi kho có phiên bản khởi tạo: không tự nhập, báo người dùng việc cần làm
+      const warn = legacy ? `<li class="px-1 pb-2">${banner('warning', `<b>Kho luật cũ chưa được nhập.</b><div class="text-[12px] mt-1 break-words">${esc(legacy)}</div>`)}</li>` : '';
+      $('legal-history').innerHTML = warn + (uploads.length ? uploads.map((u) => {
         const idx = u.state === 'published' && u.index_failed ? 'Đã vào kho, chỉ mục lỗi' : null;
         const num = fieldVal(u, 'doc_number'), title = fieldVal(u, 'title');
         return `<li><button class="legal-item report-item w-full text-left px-2.5 py-2 rounded-lg hover:bg-neutral-100 ${L.cur && L.cur.upload_id === u.upload_id ? 'active' : ''}" data-id="${esc(u.upload_id)}">
           <div class="truncate text-[13px] font-medium">${esc(title || num || u.source_name)}</div>
           <div class="mt-0.5 text-[11.5px] text-neutral-500 flex flex-wrap gap-x-2"><span>${stateChip(u.state, idx)}</span><span>${esc(num || '')}</span><span>${esc(fmtTime(u.created_at))}</span></div>
         </button></li>`;
-      }).join('') : '<li class="px-2.5 py-3 text-[12.5px] text-neutral-500">Chưa có bản nháp nào.</li>';
+      }).join('') : '<li class="px-2.5 py-3 text-[12.5px] text-neutral-500">Chưa có bản nháp nào.</li>');
       document.querySelectorAll('#legal-history .legal-item').forEach((b) => { b.onclick = () => openDraft(b.dataset.id); });
     } catch (e) { $('legal-history').innerHTML = `<li class="px-2.5 py-3 text-[12.5px]" style="color:var(--critical-text)">${esc(e.message)}</li>`; }
   }
@@ -461,7 +463,8 @@
   function stopPoll() { if (L.timer) { clearTimeout(L.timer); L.timer = null; } L.jobId = null; }
 
   function stageIndex(job) {
-    const state = job.state === 'publishing' ? 'validating' : job.state;      // "Kiểm tra & công bố" là một giai đoạn
+    // "Kiểm tra & công bố" là một giai đoạn; "finalizing" (việc xong, đang cập nhật bản nháp) vẫn đang chạy: giai đoạn chỉ mục
+    const state = job.state === 'publishing' ? 'validating' : job.state === 'finalizing' ? 'indexing' : job.state;
     const i = JOB_STAGES.findIndex(([k]) => k === state);
     return i < 0 ? 0 : i;
   }

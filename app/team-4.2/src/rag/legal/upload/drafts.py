@@ -104,6 +104,18 @@ class DraftStore:
                 continue
         return sorted(out, key=lambda d: d.created_at, reverse=True)
 
+    def reconcile_published(self, published: dict[str, str]) -> list[str]:
+        """Tiến trình chết giữa lúc ghi CURRENT và lúc cập nhật bản nháp: snapshot `upload:<id>` đã công bố nhưng bản
+        nháp còn `queued`/`building` (hoặc đã bị đánh `failed` ở lần khởi động trước). `published`: upload_id ->
+        snapshot_id đã công bố mới nhất có reason `upload:<upload_id>`. Gọi TRƯỚC `mark_interrupted`."""
+        ids = []
+        for d in self.list():
+            sid = published.get(d.upload_id)
+            if sid and d.state in ("queued", "building", "failed"):
+                self.save(replace(d, state="published", snapshot_id=sid, error=None, progress=None))
+                ids.append(d.upload_id)
+        return ids
+
     def mark_interrupted(self) -> list[str]:
         ids = []
         for d in self.list():

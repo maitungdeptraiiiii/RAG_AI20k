@@ -381,3 +381,179 @@ def test_cli_build_publishes_snapshot_and_report_reads_it(tmp_path, monkeypatch,
     capsys.readouterr()
     assert main(["report"]) == 0
     assert LAND in capsys.readouterr().out
+
+
+# --- review toàn nhánh: runtime BM25 trước, finalizing, đối soát bản nháp, seq, giới hạn upload, kho cũ ------------
+
+
+def _bm25_first_factory(gate, calls):
+    """make_runtime giả: dense=False dựng BM25 ngay; dense=True (Dense) chờ cổng `gate` (embed chậm)."""
+    from legal_runtime import LegalRuntime
+    from rag.index.embedder import HashEmbedder
+    from rag.index.vector_index import VectorIndex
+    from rag.temporal.index import VersionedIndex
+
+    def factory(snaps):
+        def make(sid, dense=True):
+            calls.append((sid, dense))
+            svc = snaps.service(sid)
+            if dense:
+                assert gate.wait(10), "Dense build chặn"
+                idx = VersionedIndex(svc.store, dense=VectorIndex(HashEmbedder(dim=16)), snapshot_id=sid)
+            else:
+                idx = VersionedIndex(svc.store, snapshot_id=sid)
+            idx.build()
+            return LegalRuntime(sid, svc, idx, qa=object())
+        return make
+    return factory
+
+
+@pytest.fixture
+def legal_dir(tmp_path, monkeypatch):
+    seed(tmp_path / "legal")
+    monkeypatch.setattr(legal_api.CONFIG, "ocr_factory", None)
+    monkeypatch.setattr(legal_api.CONFIG, "client_factory", lambda: FakeVbplClient({}))
+    return tmp_path / "legal"
+
+
+def test_first_runtime_is_bm25_then_same_snapshot_dense_upgrade(legal_dir, monkeypatch):
+    monkeypatch.setenv("LEGAL_DENSE", "1")
+    gate, calls = threading.Event(), []
+    monkeypatch.setattr(legal_api.CONFIG, "make_runtime_for", _bm25_first_factory(gate, calls))
+    backend = legal_api.LegalBackend(legal_dir)
+    try:
+        start = time.monotonic()
+        holder, worker = backend.runtime()
+        assert time.monotonic() - start < 5                  # không chờ Dense
+        rt = holder.get()
+        assert rt is not None and not rt.index.has_dense
+        sid = rt.snapshot_id
+        gate.set()
+        assert worker.wait_idle(30)
+        up = holder.get()
+        assert up.index.has_dense and up.snapshot_id == sid == up.index.snapshot_id
+        assert calls == [(sid, False), (sid, True)]
+        assert [j.kind for j in worker.jobs()] == ["upgrade"]
+    finally:
+        gate.set()
+        if backend.worker is not None:
+            backend.worker.wait_idle(30)
+
+
+def test_legal_dense_off_keeps_bm25_only_without_upgrade(legal_dir, monkeypatch):
+    monkeypatch.setenv("LEGAL_DENSE", "0")
+    gate, calls = threading.Event(), []
+    gate.set()
+    monkeypatch.setattr(legal_api.CONFIG, "make_runtime_for", _bm25_first_factory(gate, calls))
+    backend = legal_api.LegalBackend(legal_dir)
+    holder, worker = backend.runtime()
+    assert worker.wait_idle(10)
+    assert len(calls) == 1 and worker.jobs() == []
+
+
+def test_job_view_reports_finalizing_until_draft_updated(client, monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+
+    backend = legal_api.get_backend()
+    gate, entered = threading.Event(), threading.Event()
+    real = backend.result
+
+    def slow_result(sid, d):
+        entered.set()
+        assert gate.wait(60)
+        return real(sid, d)
+
+    monkeypatch.setattr(backend, "result", slow_result)
+    other = create(client, TXT_UPLOADED_V2)["upload_id"]
+    job = submit_upload(client, TXT_43)
+    try:
+        assert entered.wait(120)
+        start = time.monotonic()
+        view = client.get(f"/api/legal/jobs/{job}").json()
+        assert view["state"] == "finalizing" and time.monotonic() - start < 3
+        with ThreadPoolExecutor(1) as ex:                     # bước của bản nháp khác không chờ result()
+            fut = ex.submit(lambda: client.post(f"/api/legal/uploads/{other}/replace", json={"by": "An"}))
+            assert fut.result(timeout=5).status_code == 200
+    finally:
+        gate.set()
+    wait_job(client, job, "done")
+    uid = client.get(f"/api/legal/jobs/{job}").json()["ref"]
+    d = client.get(f"/api/legal/uploads/{uid}").json()
+    assert d["state"] == "published" and d["result"]["laws"]
+
+
+def test_restart_reconciles_draft_whose_snapshot_was_published(legal_dir):
+    from rag.legal.upload.drafts import INTERRUPTED, Draft, DraftStore
+
+    snaps = SnapshotManager(legal_dir)
+    ua, ub, uc = "u20261110090000-aaaaaa", "u20261110090000-bbbbbb", "u20261110090000-cccccc"
+    sa = snaps.write(f"upload:{ua}", "An", lambda svc: None).snapshot.snapshot_id
+    sc = snaps.write(f"upload:{uc}", "An", lambda svc: None).snapshot.snapshot_id
+    drafts = DraftStore(legal_dir / "uploads")
+    drafts.save(Draft(ua, NOW, "building", "file", "a.txt", "t", "c", [], {}, {}, False, sa, None))
+    drafts.save(Draft(ub, NOW, "queued", "file", "b.txt", "t", "c", [], {}, {}, False, sa, None))
+    # lần khởi động trước (code cũ) đã đánh dấu failed dù snapshot đã công bố
+    drafts.save(Draft(uc, NOW, "failed", "file", "c.txt", "t", "c", [], {}, {}, False, sa, None, error=INTERRUPTED))
+    backend = legal_api.LegalBackend(legal_dir)
+    a, b, c = (backend.drafts.load(u) for u in (ua, ub, uc))
+    assert (a.state, a.snapshot_id, a.error) == ("published", sa, None)
+    assert (c.state, c.snapshot_id, c.error) == ("published", sc, None)
+    assert b.state == "failed" and b.error == INTERRUPTED
+
+
+def test_served_orders_by_seq_not_wall_clock(legal_dir):
+    from datetime import datetime, timedelta, timezone
+
+    backend = legal_api.LegalBackend(legal_dir)
+    # bootstrap (đồng hồ thật) rồi đồng hồ lùi về trước nó
+    times = iter([datetime(2020, 1, 1, tzinfo=timezone.utc) - timedelta(hours=i) for i in range(50)])
+    backend.snapshots = SnapshotManager(legal_dir, now=lambda: next(times))
+    first = backend.snapshots.current().snapshot_id
+    second = backend.snapshots.write("cli:build", "t", lambda svc: None).snapshot.snapshot_id
+    assert backend.snapshots.get(second).published_at < backend.snapshots.get(first).published_at
+    backend.holder = NS(get=lambda: NS(snapshot_id=second))
+    assert backend.served(first) is True
+    backend.holder = NS(get=lambda: NS(snapshot_id=first))
+    assert backend.served(second) is False
+
+
+def test_upload_larger_than_cap_is_413_by_content_length(client, monkeypatch):
+    assert legal_api.MAX_UPLOAD_BYTES == 50 * 1024 * 1024
+    monkeypatch.setattr(legal_api, "MAX_UPLOAD_BYTES", 1000)
+    r = client.post("/api/legal/uploads", files={"file": ("big.txt", b"x" * 5000)})
+    assert r.status_code == 413 and "quá lớn" in r.json()["error"]
+    assert legal_api.get_backend().drafts.list() == []
+
+
+def test_upload_cap_enforced_while_reading_without_content_length(monkeypatch):
+    import asyncio
+
+    from starlette.requests import Request
+
+    monkeypatch.setattr(legal_api, "MAX_UPLOAD_BYTES", 1000)
+    msgs = [{"type": "http.request", "body": b"x" * 600, "more_body": True}] * 5
+    msgs.append({"type": "http.request", "body": b"", "more_body": False})
+    it = iter(msgs)
+
+    async def receive():
+        return next(it)
+
+    scope = {"type": "http", "method": "POST", "path": "/api/legal/uploads", "query_string": b"",
+             "headers": [(b"content-type", b"multipart/form-data; boundary=zz")]}
+    resp = asyncio.run(legal_api.handle_create(Request(scope, receive)))
+    assert resp.status_code == 413
+
+
+def test_status_reports_legacy_catalog_written_after_bootstrap(client):
+    import os
+
+    st = client.get("/api/legal/status").json()
+    assert st["legacy_warning"] is None and st["current_snapshot_id"]
+    legal = legal_api.get_backend().snapshots.legal_dir
+    store = LegalStore(legal / "catalog.sqlite")
+    store.upsert_document(store.document(LAND))
+    s = os.stat(legal / "catalog.sqlite")
+    os.utime(legal / "catalog.sqlite", ns=(s.st_atime_ns, s.st_mtime_ns + 5_000_000_000))
+    msg = client.get("/api/legal/status").json()["legacy_warning"]
+    assert msg and "catalog.sqlite" in msg and "Hãy nạp lại" in msg
+    assert client.get("/api/legal/uploads").json()["legacy_warning"] == msg

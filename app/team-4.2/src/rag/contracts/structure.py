@@ -4,7 +4,7 @@ from __future__ import annotations
 import statistics
 
 from rag.contracts.doc import (Assembled, ContractDoc, PageText, ParseReport, PartSpec, Unit, Value,
-                               assemble)
+                               assemble, own_texts)
 from rag.contracts.models import ContractUnit
 from rag.contracts.parts import detect_parts
 from rag.contracts.tree import parse_part
@@ -20,14 +20,13 @@ _MIN_NUMBERED_PAGES = 3
 
 
 def _values(units: list[Unit]) -> list[Value]:
-    """Giá trị của từng đơn vị lá, vị trí tính trong văn bản đơn vị; bỏ giá trị chạm vùng PII."""
-    parents = {u.parent_uid for u in units if u.parent_uid}
+    """Giá trị trong văn bản riêng của từng đơn vị (vị trí tính trong văn bản đơn vị); bỏ giá trị chạm vùng PII."""
+    own = own_texts(units)
     out: list[Value] = []
     for u in units:
-        if u.uid in parents:
-            continue
-        pii = [(s, e) for s, e, _ in pii_spans(u.text)]
-        found = [v for v in extract_values(u.text)
+        text = own[u.uid]
+        pii = [(s, e) for s, e, _ in pii_spans(text)]
+        found = [v for v in extract_values(text)
                  if all(v.end <= s or v.start >= e for s, e in pii)]
         for i, v in enumerate(found, 1):
             out.append(Value(f"{u.uid}#v{i}", u.uid, v.kind, v.raw, v.norm, v.start, v.end))

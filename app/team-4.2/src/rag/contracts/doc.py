@@ -66,6 +66,16 @@ class Unit:
     version: int = 1
 
 
+def own_texts(units: list[Unit]) -> dict[str, str]:
+    """Văn bản riêng của mỗi đơn vị: đơn vị có con chỉ giữ đoạn dẫn trước con đầu tiên."""
+    first: dict[str, int] = {}
+    for u in units:
+        if u.parent_uid:
+            first[u.parent_uid] = min(first.get(u.parent_uid, u.char_start), u.char_start)
+    return {u.uid: u.text[:max(0, first[u.uid] - u.char_start)] if u.uid in first else u.text
+            for u in units}
+
+
 @dataclass(frozen=True)
 class Value:
     vid: str  # f"{uid}#v{i}", i từ 1 trong đơn vị

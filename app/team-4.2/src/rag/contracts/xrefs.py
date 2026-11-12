@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import re
 
-from rag.contracts.doc import CrossRef, PartSpec, Unit
+from rag.contracts.doc import CrossRef, PartSpec, Unit, own_texts
 
 _REF_RE = re.compile(
     r"(?=(?i:điểm|khoản)|Điều)(?i:"
@@ -35,9 +35,9 @@ def _art_code(num: str) -> str:
 
 
 def find_xrefs(units: list[Unit], parts: list[PartSpec]) -> list[CrossRef]:
-    """Tìm dẫn chiếu trong các đơn vị lá và phân giải về mã đơn vị đích."""
+    """Tìm dẫn chiếu trong văn bản riêng của mỗi đơn vị (lá, hoặc đoạn dẫn của đơn vị có con) và phân giải."""
     by_uid = {u.uid: u for u in units}
-    has_child = {u.parent_uid for u in units if u.parent_uid}
+    own = own_texts(units)
     refs: list[CrossRef] = []
     seen: set[tuple[str, str | None, str]] = set()
 
@@ -66,12 +66,13 @@ def find_xrefs(units: list[Unit], parts: list[PartSpec]) -> list[CrossRef]:
         refs.append(CrossRef(u.uid, to_uid, raw, kind))  # type: ignore[arg-type]
 
     for u in units:
-        if u.uid in has_child:
-            continue
         chain = ancestors(u)
         cur_art = next((a.uid for a in chain if a.level == "article"), None)
         cur_clause = next((a.uid for a in chain if a.level == "clause"), None)
-        text = u.text
+        # đơn vị có con: chỉ quét đoạn dẫn trước con đầu tiên (phần còn lại thuộc các con)
+        text = own[u.uid]
+        if not text:
+            continue
         def emit(pt, kh, dn, this, d_end, raw, own_dieu):
             """Phân giải một mục; d_end là vị trí sau 'Điều N' (nếu có) để xét văn bản luật/Hợp đồng."""
             has_dieu = bool(dn or this)

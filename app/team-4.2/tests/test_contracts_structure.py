@@ -40,3 +40,26 @@ def test_values_overlapping_pii_are_dropped():
     assert any(v.raw.startswith("1234567890") for v in extract_values(text))
     doc = parse_contract([PageText(1, text)])
     assert [(v.vid, v.raw) for v in doc.values] == [("p0.d1#v1", "30 ngày")]
+
+
+LEAD_IN = ("Điều 1. Đối tượng\nBên A cho bên B thuê nhà.\n"
+           "Điều 2. Giá thuê là 10.000.000 đồng/tháng, theo Phụ lục 1 và khoản 1 Điều 1.\n"
+           "1. Thanh toán trước ngày 5 hằng tháng, phạt 5%.\n2. Phạt chậm theo khoản 1 Điều này.\n"
+           "Điều 3. Hiệu lực\n1. Có hiệu lực 12 tháng.\n\nPHỤ LỤC 01\nDanh mục tài sản kèm theo hợp đồng\n"
+           "Điều 1. Tủ lạnh\n")
+
+
+def test_article_lead_in_values_and_xrefs_are_kept():
+    doc = parse_contract([PageText(1, LEAD_IN)])
+    d2 = doc.unit("p0.d2")
+    got = [(v.vid, v.raw) for v in doc.values if v.uid == "p0.d2"]
+    assert got == [("p0.d2#v1", "10.000.000 đồng")]
+    v = next(v for v in doc.values if v.uid == "p0.d2")
+    assert d2.text[v.start:v.end] == v.raw
+    assert [(v.vid, v.raw) for v in doc.values if v.uid == "p0.d2.k1"] == [("p0.d2.k1#v1", "5%")]
+    refs = {(x.from_uid, x.raw, x.to_uid) for x in doc.xrefs}
+    assert ("p0.d2", "Phụ lục 1", "p1.pre") in refs
+    assert ("p0.d2", "khoản 1 Điều 1", None) in refs or ("p0.d2", "Điều 1", "p0.d1") in refs
+    assert ("p0.d2.k2", "khoản 1 Điều này", "p0.d2.k1") in refs
+    # khoản của điều không bị quét hai lần qua điều cha
+    assert not any(x.from_uid == "p0.d2" and "Điều này" in x.raw for x in doc.xrefs)

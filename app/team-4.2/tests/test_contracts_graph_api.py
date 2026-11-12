@@ -18,6 +18,7 @@ UI = Path(__file__).resolve().parents[1] / "ui"
 if str(UI) not in sys.path:
     sys.path.insert(0, str(UI))
 import contracts_api  # noqa: E402
+from tests.test_contracts_api import verify_all  # noqa: E402
 
 LIMIT_MSG = "Hợp đồng dài hơn 150 trang — chưa hỗ trợ"
 
@@ -96,7 +97,7 @@ def test_create_long_contract_not_cut(client):
     r = upload(client, contract_text(60))
     assert r.status_code == 200, r.text
     card = r.json()
-    assert len(card["units"]) == 60 and card["coverage"] == {"reviewed": 30, "total": 60}
+    assert len(card["units"]) == 60 and card["coverage"] == {"reviewed": 60, "total": 60}
     assert card["graph"]["published"] is True and card["graph"]["enabled"] is True
     assert [p["part_id"] for p in card["parts"]] == ["p0"]
     assert set(card["parse_report"]) == {"counts", "gaps", "warnings"}
@@ -114,10 +115,11 @@ def test_over_150_pages_rejected(client, monkeypatch, tmp_path):
     assert contracts_api.store()._mem == {}
 
 
-def test_full_review_caps_llm_scope_honestly(client):
+def test_full_review_reads_every_unit_in_batches(client):
     cid = upload(client, contract_text(40)).json()["contract_id"]
+    verify_all(client, cid)
     rep = client.post(f"/api/contracts/{cid}/run", json={"op": "review"}).json()
-    assert rep["coverage"] == {"reviewed": 30, "total": 40}
+    assert rep["coverage"] == {"reviewed": 40, "total": 40} and rep["batches"] == 1
     assert rep["warnings"] == []
 
 
@@ -283,10 +285,10 @@ def test_list_does_not_convert_and_skips_broken(client, tmp_path):
     assert contracts_api.store().get("old4").page_texts == []
 
 
-def test_llm_payloads_capped_at_30_units(client):
+def test_facts_read_every_unit_summary_and_answer_still_capped(client):
     SimpleLLM.SEEN.clear()
     cid = upload(client, contract_text(40)).json()["contract_id"]
-    assert SimpleLLM.SEEN["facts"] == 30
+    assert SimpleLLM.SEEN["facts"] == 40
     assert client.post(f"/api/contracts/{cid}/run", json={"op": "summary"}).status_code == 200
     contracts_api.chat_answer(cid, "Ký ngày nào?", [])
     assert SimpleLLM.SEEN["summary"] == 30 and SimpleLLM.SEEN["answer"] == 30
@@ -317,6 +319,7 @@ def test_layout_without_number_in_title_uses_position():
 def test_redline_ignores_review_from_older_build(client):
     text = contract_text(4)
     cid = upload(client, text).json()["contract_id"]
+    verify_all(client, cid)
     old = client.post(f"/api/contracts/{cid}/run", json={"op": "review"}).json()
     assert old["build_id"] == contracts_api.get(cid).graph["build_id"]
     same = client.post(f"/api/contracts/{cid}/run", json={"op": "redline"}).json()
@@ -333,6 +336,7 @@ def test_redline_ignores_review_from_older_build(client):
 
 def test_pre_graph_review_is_not_reused(client):
     cid = upload(client, contract_text(4)).json()["contract_id"]
+    verify_all(client, cid)
     c = contracts_api.get(cid)
     c.reports["old"] = {"rid": "old", "op": "review", "created_at": "2999-01-01T00:00:00+00:00", "pre_graph": True,
                         "build_id": c.graph["build_id"], "coverage": {"reviewed": 1, "total": 1}, "findings": []}
@@ -377,11 +381,12 @@ def test_table_pages_do_not_trigger_page_warnings():
     assert parse_contract(pages).report.warn_pages == []
 
 
-def test_partial_review_capped_at_30_units(client):
+def test_partial_review_reads_every_selected_unit(client):
     SimpleLLM.SEEN.clear()
     cid = upload(client, contract_text(40)).json()["contract_id"]
+    verify_all(client, cid)
     ids = [u["uid"] for u in contracts_api.card(contracts_api.get(cid))["units"]][:35]
     rep = client.post(f"/api/contracts/{cid}/run", json={"op": "partial", "unit_ids": ids}).json()
-    assert SimpleLLM.SEEN["find"] == 30
-    assert rep["coverage"] == {"reviewed": 30, "total": 40, "requested": 35}
-    assert len(rep["scope"]) == 30
+    assert SimpleLLM.SEEN["find"] == 35
+    assert rep["coverage"] == {"reviewed": 35, "total": 40}
+    assert len(rep["scope"]) == 35

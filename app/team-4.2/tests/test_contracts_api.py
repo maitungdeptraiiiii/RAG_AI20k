@@ -90,6 +90,27 @@ def upload(client, persist=False, name="hop_dong.txt", data=None):
     return client.post("/api/contracts", files={"file": (name, data)}, data={"persist": "1" if persist else "0"})
 
 
+def verify_all(client, cid, **overrides):
+    """Trả lời mọi dữ kiện bắt buộc chưa xác minh (bên = lựa chọn đầu, giá trị máy đọc được thì xác nhận) để soát được."""
+    card = client.get(f"/api/contracts/{cid}").json()
+    answers = {}
+    for f in card["verification"]["fields"]:
+        if f["key"] in overrides:
+            answers[f["key"]] = {"action": "set", "value": overrides[f["key"]]}
+        elif not f["required"] or f["status"] in ("confirmed", "corrected", "unknown"):
+            continue
+        elif f["status"] == "found":
+            answers[f["key"]] = {"action": "confirm"}
+        elif f["options"]:
+            answers[f["key"]] = {"action": "set", "value": f["options"][0]}
+        else:
+            answers[f["key"]] = {"action": "set", "value": "2023-03-15" if f["kind"] == "date" else "Hợp đồng dịch vụ"}
+    r = client.post(f"/api/contracts/{cid}/facts", json={"answers": answers})
+    assert r.status_code == 200, r.text
+    assert r.json()["verification"]["complete"] is True
+    return r.json()
+
+
 def test_upload_returns_card(client):
     r = upload(client)
     assert r.status_code == 200, r.text
@@ -109,6 +130,7 @@ def test_session_upload_leaves_nothing_on_disk(client, tmp_path):
 def test_review_report_and_downloads(client):
     cid = upload(client).json()["contract_id"]
     assert client.post(f"/api/contracts/{cid}/party", json={"party": "Bên thuê"}).status_code == 200
+    verify_all(client, cid)
     rep = client.post(f"/api/contracts/{cid}/run", json={"op": "review"}).json()
     f = rep["findings"][0]
     assert f["legal_status"] == "concluded" and f["evidence"][0]["store"] == "versioned"
@@ -153,6 +175,7 @@ def test_bad_op_and_unsupported_file(client):
 
 def test_ai_failure_is_502(client):
     cid = upload(client).json()["contract_id"]
+    verify_all(client, cid)
 
     class Broken:
         def complete(self, s, u):

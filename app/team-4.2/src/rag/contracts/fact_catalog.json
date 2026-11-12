@@ -1,0 +1,36 @@
+{
+  "version": "1",
+  "job_levels": ["Người quản lý doanh nghiệp", "Công việc cần trình độ cao đẳng trở lên",
+                 "Công việc cần trình độ trung cấp, công nhân kỹ thuật, nhân viên nghiệp vụ", "Công việc khác"],
+  "types": {
+    "common": [
+      {"key": "party", "label": "Bạn là bên nào", "kind": "enum", "required": true, "hint": "lựa chọn lấy từ các bên"},
+      {"key": "sign_date", "label": "Ngày ký", "kind": "date", "required": true, "hint": "ngày các bên ký hợp đồng"},
+      {"key": "type", "label": "Loại hợp đồng", "kind": "text", "required": true, "hint": "vd. Hợp đồng lao động, Hợp đồng thuê nhà ở"},
+      {"key": "effective_date", "label": "Ngày có hiệu lực", "kind": "date", "required": false, "hint": "ngày hợp đồng bắt đầu có hiệu lực"},
+      {"key": "term", "label": "Thời hạn hợp đồng", "kind": "duration", "required": false, "hint": "vd. 24 tháng"},
+      {"key": "value", "label": "Giá trị hợp đồng", "kind": "money", "required": false, "hint": "tổng giá trị hoặc giá theo kỳ"}
+    ],
+    "labor": [
+      {"key": "labor_kind", "label": "Loại hợp đồng lao động", "kind": "enum", "required": true,
+       "options": ["Không xác định thời hạn", "Xác định thời hạn"], "hint": "BLLĐ 2019 Điều 20"},
+      {"key": "job_title", "label": "Chức danh / công việc", "kind": "text", "required": true, "hint": "chức danh hoặc công việc phải làm của người lao động"},
+      {"key": "workplace", "label": "Nơi làm việc", "kind": "text", "required": true, "hint": "địa chỉ nơi làm việc (để xác định vùng lương tối thiểu)"},
+      {"key": "start_date", "label": "Ngày bắt đầu làm việc", "kind": "date", "required": false, "hint": "ngày người lao động bắt đầu làm việc"},
+      {"key": "salary", "label": "Mức lương", "kind": "money", "required": false, "hint": "mức lương theo công việc hoặc chức danh, kèm kỳ trả"},
+      {"key": "job_level", "label": "Nhóm trình độ công việc", "kind": "enum", "required": false, "options": "job_levels",
+       "hint": "nhóm theo BLLĐ Điều 25; chỉ điền khi hợp đồng nói rõ trình độ yêu cầu hoặc chức danh quản lý doanh nghiệp"},
+      {"key": "probation_period", "label": "Thời gian thử việc", "kind": "duration", "required": false, "hint": "vd. 60 ngày"},
+      {"key": "probation_salary", "label": "Lương thử việc", "kind": "percent", "required": false, "hint": "tỉ lệ hoặc số tiền lương trong thời gian thử việc"},
+      {"key": "working_hours", "label": "Thời giờ làm việc", "kind": "text", "required": false, "hint": "số giờ mỗi ngày / tuần"}
+    ],
+    "lease": [
+      {"key": "property", "label": "Tài sản thuê", "kind": "text", "required": true, "hint": "nhà, căn hộ, mặt bằng… kèm địa chỉ"},
+      {"key": "purpose", "label": "Mục đích thuê", "kind": "enum", "required": true,
+       "options": ["Để ở", "Kinh doanh", "Khác"], "hint": "mục đích sử dụng tài sản thuê"},
+      {"key": "rent", "label": "Giá thuê", "kind": "money", "required": false, "hint": "giá thuê theo kỳ"},
+      {"key": "deposit", "label": "Tiền đặt cọc", "kind": "money", "required": false, "hint": "số tiền đặt cọc"},
+      {"key": "handover_date", "label": "Ngày bàn giao", "kind": "date", "required": false, "hint": "ngày bàn giao tài sản"}
+    ]
+  }
+}

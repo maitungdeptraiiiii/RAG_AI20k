@@ -6,9 +6,12 @@
     POST   /api/contracts/{id}/party           {"party": "neutral" | vai trò}
     POST   /api/contracts/{id}/sign-date       {"date": "YYYY-MM-DD", "by"?} (nguồn: người dùng nhập)
     POST   /api/contracts/{id}/layout          {"parts": [{"start", "kind": "appendix", "title"}], "by"?} -> thẻ
+    POST   /api/contracts/{id}/facts           {"answers": {key | "q:<qid>": {"action": confirm|set|unknown, "value"?}},
+                                               "by"?} -> thẻ (bảng xác minh, spec 2026-11-13)
     POST   /api/contracts/{id}/save            chuyển sang "Lưu lại"
     DELETE /api/contracts/{id}                 gỡ / xoá hẳn
     POST   /api/contracts/{id}/run             {"op": summary|review|partial|law_changes|redline, unit_ids?, topics?}
+                                               soát khi còn dữ kiện bắt buộc chưa xác minh -> 409 {"error", "pending"}
     GET    /api/contracts/{id}/reports/{rid}.docx|.pdf
 
 Hợp đồng không bao giờ đi /api/ingest hay vào kho tra cứu. Mỗi thao tác giữ một LegalRuntime (lease) suốt request.
@@ -46,7 +49,7 @@ from rag.contracts.graph.oplog import OperationLog, human_op, machine_op
 from rag.contracts.graph.service import ContractGraphService, GraphBusy
 from rag.contracts.llm_json import ContractAIError
 from rag.contracts.models import Contract
-from rag.contracts.parse import DEMO_MAX_UNITS
+from rag.contracts import verify
 from rag.contracts.parts import detect_parts, heading_number
 from rag.contracts.store import ContractStore
 from rag.contracts.structure import parse_contract, to_contract_units
@@ -116,7 +119,7 @@ def card(c: Contract) -> dict[str, Any]:
             "created_at": c.created_at.isoformat(), "facts": c.facts, "party": c.party,
             "sign_date": c.sign_date.isoformat() if c.sign_date else None, "sign_date_source": c.sign_date_source,
             "units": [{"uid": u.uid, "label": u.label} for u in c.units],
-            "coverage": {"reviewed": min(len(c.units), DEMO_MAX_UNITS), "total": max(len(c.units), c.total_units)},
+            "coverage": {"reviewed": len(c.units), "total": max(len(c.units), c.total_units)},
             "pages": c.pages,
             "reports": [{"rid": r["rid"], "op": r["op"], "created_at": r["created_at"]} for r in c.reports.values()],
             "parts": [{"part_id": p.part_id, "kind": p.kind, "title": p.title} for p in c.doc.parts] if c.doc else [],
@@ -124,7 +127,8 @@ def card(c: Contract) -> dict[str, Any]:
                              "warnings": list(rep.warnings) if rep else []},
             "graph": {"enabled": bool(g.get("enabled")), "published": bool(g.get("published")),
                       "build_id": g.get("build_id"), "error": g.get("error"),
-                      "problems": list(g.get("problems") or [])}}
+                      "problems": list(g.get("problems") or [])},
+            "verification": verify.summary(c)}
 
 
 def _now() -> datetime:
@@ -319,6 +323,13 @@ def set_sign_date(cid: str, value: str, by: str = USER) -> dict[str, Any]:
     return card(c)
 
 
+def set_facts(cid: str, answers, by: str = USER) -> dict[str, Any]:
+    """Xác nhận / sửa / "không biết" cho dữ kiện và câu hỏi; mỗi câu trả lời là một thao tác của người."""
+    c = get(cid)
+    _change(c, lambda now: verify.apply_answers(c, answers, by, now))
+    return card(c)
+
+
 def _layout_parts(text: str, raw) -> list[PartSpec]:
     """p0 luôn giữ; các phần người gửi thành phụ lục p1, p2… theo vị trí bắt đầu."""
     try:
@@ -347,6 +358,7 @@ def run(cid: str, op: str, unit_ids=None, topics=None) -> dict[str, Any]:
     if op not in OPS:
         raise ValueError(f"Thao tác không hợp lệ: {op}")
     c = get(cid)
+    verify.check_gate(c, op)
     with CONFIG.lease() as runtime:
         ctx = _ctx(runtime)
         if op == "summary":
@@ -459,6 +471,8 @@ async def _call(fn, *args) -> Response:
         return _error(str(e), 409)
     except ContractAIError as e:
         return _error(str(e), 502)
+    except verify.NeedsVerification as e:
+        return JSONResponse({"error": str(e), "pending": e.pending}, status_code=409)
     except ValueError as e:
         return _error(str(e), 400)
     except Exception:  # noqa: BLE001 — lỗi ngoài dự kiến: JSON cho UI, chi tiết ở log
@@ -533,6 +547,11 @@ async def handle_layout(request: Request) -> Response:
     return await _call(set_layout, request.path_params["cid"], body.get("parts"), _by(body))
 
 
+async def handle_facts(request: Request) -> Response:
+    body = await _json(request)
+    return await _call(set_facts, request.path_params["cid"], body.get("answers"), _by(body))
+
+
 async def handle_save(request: Request) -> Response:
     return await _call(lambda: card(store().save(request.path_params["cid"])))
 
@@ -567,6 +586,7 @@ routes = [
     Route("/api/contracts/{cid}/sign-date", handle_sign_date, methods=["POST"]),
     Route("/api/contracts/{cid}/save", handle_save, methods=["POST"]),
     Route("/api/contracts/{cid}/layout", handle_layout, methods=["POST"]),
+    Route("/api/contracts/{cid}/facts", handle_facts, methods=["POST"]),
     Route("/api/contracts/{cid}/run", handle_run, methods=["POST"]),
     Route("/api/contracts/{cid}/reports/{rid}.{fmt}", handle_download, methods=["GET"]),
 ]

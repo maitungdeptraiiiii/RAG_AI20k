@@ -20,6 +20,10 @@
     not_legal: ['Nhận xét câu chữ / thương mại', '#475467'] };
   const PROVISION = { verified: 'đã xác minh', needs_review: 'cần xem lại', conflicted: 'có mâu thuẫn' };
   const CHANGE = { unchanged: 'Không đổi', changed: 'Đã sửa đổi', repealed: 'Hết hiệu lực', untracked: 'Không theo dõi được (kho cũ)' };
+  const GATED = ['review', 'partial', 'law_changes', 'redline'];
+  const FACT = { found: ['Máy đọc được — chờ bạn xác nhận', '#475467'], conflict: ['Hợp đồng ghi nhiều giá trị khác nhau — hãy chọn', '#b42318'],
+    missing: ['Không tìm thấy trong hợp đồng', '#8a5a00'], confirmed: ['Đã xác nhận', '#006300'],
+    corrected: ['Bạn đã sửa', '#006300'], unknown: ['Bạn không biết', '#475467'] };
 
   const state = { cards: {}, active: null, mode: 'free' };
   const esc = s => escapeHtml(String(s ?? ''));
@@ -174,20 +178,18 @@
 
   // ------------------------------------------------------------------ thẻ hợp đồng
   function cardHtml(turnId, c) {
-    const parties = (c.facts && c.facts.parties) || [];
     const cov = c.coverage || {};
     const parts = c.parts || [];
     const warnings = (c.parse_report && c.parse_report.warnings) || [];
     const graph = c.graph || {};
     const graphNote = graph.enabled && !graph.published
       ? `<div class="text-[12.5px]" style="color:#8a5a00">Đồ thị chưa cập nhật: ${esc(graph.error || (graph.problems || [])[0] || '')}</div>` : '';
-    const partyBtn = (val, label) => `<button type="button" data-a="party" data-v="${esc(val)}"
-        class="text-[12.5px] border rounded-full px-3 py-1 ${c.party === val ? 'bg-neutral-900 text-white border-neutral-900' : 'border-neutral-300 hover:bg-neutral-100'}">${esc(label)}</button>`;
+    const verified = !c.verification || c.verification.complete;
     return `
       <div class="border border-neutral-200 rounded-2xl p-4 space-y-3 bg-white">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div class="min-w-0"><div class="text-[14.5px] font-semibold truncate">📎 ${esc(c.filename)}</div>
-            <div class="text-[12px] text-neutral-500">${esc((c.facts && c.facts.type) || 'chưa rõ loại')} · ${cov.reviewed}/${cov.total} điều khoản${cov.reviewed < cov.total ? ' (bản demo chỉ soát ' + cov.reviewed + ' đầu)' : ''} · ${c.persist ? 'Đã lưu' : 'Chỉ trong phiên này'}${parts.length > 1 ? ' · ' + (parts.length - 1) + ' phụ lục' : ''}</div></div>
+            <div class="text-[12px] text-neutral-500">${esc((c.facts && c.facts.type) || 'chưa rõ loại')} · ${cov.total} điều khoản · ${c.persist ? 'Đã lưu' : 'Chỉ trong phiên này'}${parts.length > 1 ? ' · ' + (parts.length - 1) + ' phụ lục' : ''}</div></div>
           <div class="flex gap-2 text-[12.5px]">
             ${c.persist ? '' : '<button type="button" data-a="save" class="text-blue-600 hover:underline">Lưu hợp đồng này</button>'}
             <button type="button" data-a="remove" class="text-neutral-500 hover:text-red-700">Gỡ</button></div>
@@ -195,17 +197,12 @@
         ${c.facts && c.facts.error ? `<div class="text-[12.5px]" style="color:#8a5a00">⚠ Chưa trích được thông tin nền: ${esc(c.facts.error)}</div>` : ''}
         ${warnings.map(w => `<div class="text-[12.5px]" style="color:#8a5a00">⚠ ${esc(w)}</div>`).join('')}
         ${graphNote}
-        <div><div class="text-[12px] text-neutral-500 mb-1">Bạn là bên nào?</div>
-          <div class="flex flex-wrap gap-1.5">${parties.map(p => partyBtn(p.role, 'Tôi là ' + p.role)).join('')}${partyBtn('neutral', 'Trung lập / tư vấn')}</div>
-          ${c.party ? '' : '<div class="text-[11.5px] mt-1" style="color:#8a5a00">Chưa chọn bên — AI soát ở chế độ Trung lập.</div>'}</div>
-        <div class="flex flex-wrap items-center gap-2 text-[12.5px]">
-          <span class="text-neutral-500">Ngày ký (mốc pháp lý):</span>
-          <input type="date" data-f="sign" value="${esc(c.sign_date || '')}" class="border border-neutral-300 rounded-md px-1.5 py-0.5">
-          <button type="button" data-a="sign" class="text-blue-600 hover:underline">Lưu ngày</button>
-          <span class="text-neutral-400">${c.sign_date ? (c.sign_date_source === 'user' ? 'bạn nhập' : 'đọc từ hợp đồng') : '<span style="color:#b42318">chưa có — phần pháp lý sẽ bị chặn</span>'}</span>
-        </div>
-        <div class="flex flex-wrap gap-1.5">${OPS.map(([op, label]) => `<button type="button" data-a="op" data-op="${op}"
-            class="text-[13px] border border-neutral-300 rounded-lg px-3 py-1.5 hover:bg-neutral-100">${label}</button>`).join('')}</div>
+        ${verifyHtml(c)}
+        ${questionsHtml(c)}
+        <div class="flex flex-wrap gap-1.5">${OPS.map(([op, label]) => {
+            const locked = GATED.includes(op) && !verified;
+            return `<button type="button" data-a="op" data-op="${op}" ${locked ? 'disabled title="Hãy xác minh thông tin trước"' : ''}
+            class="text-[13px] border border-neutral-300 rounded-lg px-3 py-1.5 ${locked ? 'opacity-40 cursor-not-allowed' : 'hover:bg-neutral-100'}">${label}</button>`; }).join('')}</div>
         <div data-f="partial" class="hidden border-t pt-3 space-y-2 text-[12.5px]">
           <div class="text-neutral-500">Chọn điều khoản hoặc chủ đề cần soát:</div>
           <div class="flex flex-wrap gap-x-3 gap-y-1 max-h-40 overflow-y-auto">${(c.units || []).map(u => `<label class="flex gap-1"><input type="checkbox" data-unit="${esc(u.uid)}"> ${esc(u.label)}</label>`).join('')}</div>
@@ -214,6 +211,107 @@
         </div>
         <div data-f="status" class="text-[12.5px] text-neutral-500" role="status" aria-live="polite"></div>
       </div>`;
+  }
+
+  // ------------------------------------------------------------------ xác minh thông tin
+  function unitLabel(c, uid) { return ((c.units || []).find(u => u.uid === uid) || {}).label || ''; }
+
+  function factInput(c, f) {
+    const cls = 'border border-neutral-300 rounded-md px-1.5 py-0.5 text-[12.5px] max-w-full';
+    const dis = f.status === 'unknown' ? 'disabled' : '';
+    const choices = (f.options && f.options.length) ? f.options
+      : (f.candidates || []).length > 1 ? f.candidates.map(x => x.value) : null;
+    if (choices) {
+      const label = v => (f.option_labels && f.option_labels[v]) || v;
+      return `<select data-fact="${esc(f.key)}" class="${cls}" ${dis}><option value="">— chọn —</option>
+        ${choices.map(v => `<option value="${esc(v)}" ${v === f.value ? 'selected' : ''}>${esc(label(v))}</option>`).join('')}</select>`;
+    }
+    const type = f.kind === 'date' ? 'date' : 'text';
+    return `<input type="${type}" data-fact="${esc(f.key)}" value="${esc(f.value || '')}" class="${cls} w-56" ${dis}>`;
+  }
+
+  function factRow(c, f) {
+    const st = FACT[f.status] || ['', '#475467'];
+    const cands = (f.candidates || []).length > 1
+      ? `<div class="text-[11.5px] text-neutral-500">${f.candidates.map(x => `“${esc(x.quote || x.value)}” (${esc(unitLabel(c, x.unit))})`).join(' · ')}</div>`
+      : (f.quote ? `<div class="text-[11.5px] text-neutral-500 italic">“${esc(f.quote)}”${f.unit ? ` <span class="not-italic">(${esc(unitLabel(c, f.unit))})</span>` : ''}</div>` : '');
+    const canUnknown = !['party', 'sign_date'].includes(f.key);
+    return `<tr class="align-top border-b border-neutral-100">
+      <td class="py-1.5 pr-2 text-[12.5px] whitespace-nowrap">${esc(f.label)}${f.required ? ' <span style="color:#b42318">*</span>' : ''}</td>
+      <td class="py-1.5 pr-2">${factInput(c, f)}${cands}</td>
+      <td class="py-1.5 text-[11.5px]"><div style="color:${st[1]}">${esc(st[0])}</div>
+        ${canUnknown ? `<label class="flex gap-1 text-neutral-500"><input type="checkbox" data-unknown="${esc(f.key)}" ${f.status === 'unknown' ? 'checked' : ''}> không biết</label>` : ''}</td></tr>`;
+  }
+
+  function verifyHtml(c) {
+    const v = c.verification;
+    if (!v) return '';
+    const open = !v.complete || state.editFacts === c.contract_id;
+    const cov = v.coverage && v.coverage.read < v.coverage.total
+      ? `<div class="text-[12px]" style="color:#8a5a00">⚠ AI mới đọc ${v.coverage.read}/${v.coverage.total} điều khoản khi trích thông tin.</div>` : '';
+    const warn = (v.warnings || []).map(w => `<div class="text-[12px]" style="color:#8a5a00">⚠ ${esc(w)}</div>`).join('');
+    if (!open) {
+      const brief = v.fields.filter(f => f.required).map(f => `${esc(f.label)}: <span class="text-neutral-800">${esc(f.status === 'unknown' ? 'không biết' : ((f.option_labels || {})[f.value] || f.value || '—'))}</span>`).join(' · ');
+      return `<div class="text-[12.5px] text-neutral-500"><span style="color:#006300">✓ Đã xác minh thông tin</span> · ${brief}
+        <button type="button" data-a="edit-facts" class="text-blue-600 hover:underline ml-1">Xem / sửa</button></div>`;
+    }
+    const required = v.fields.filter(f => f.required), other = v.fields.filter(f => !f.required);
+    return `<div class="border border-neutral-200 rounded-xl p-3 space-y-2" data-f="verify">
+      <div class="text-[13px] font-semibold">Xác minh thông tin trước khi soát</div>
+      <div class="text-[12px] text-neutral-500">AI đã đọc hợp đồng và điền sẵn. Hãy kiểm tra từng dòng, sửa chỗ sai, chọn “không biết” nếu không rõ.
+        Mục có <span style="color:#b42318">*</span> là bắt buộc trước khi soát.</div>
+      ${cov}${warn}
+      <div class="overflow-x-auto"><table class="w-full"><tbody>${required.map(f => factRow(c, f)).join('')}</tbody></table></div>
+      ${other.length ? `<details ${v.complete ? '' : 'open'}><summary class="text-[12.5px] text-neutral-600 cursor-pointer">Thông tin nên xác nhận (${other.length})</summary>
+        <div class="overflow-x-auto"><table class="w-full"><tbody>${other.map(f => factRow(c, f)).join('')}</tbody></table></div></details>` : ''}
+      <button type="button" data-a="facts" class="bg-neutral-900 text-white rounded-lg px-3 py-1.5 text-[13px]">Xác nhận thông tin</button>
+      ${v.pending.length ? `<span class="text-[12px] ml-2" style="color:#8a5a00">Còn thiếu: ${esc(v.pending.map(p => p.label).join(', '))}</span>` : ''}
+    </div>`;
+  }
+
+  function questionsHtml(c) {
+    const qs = (c.verification && c.verification.questions) || [];
+    if (!qs.length) return '';
+    const open = qs.filter(q => q.status === 'open'), done = qs.filter(q => q.status === 'answered');
+    const answeredUnits = [...new Set(done.map(q => q.unit))];
+    return `<div class="border border-neutral-200 rounded-xl p-3 space-y-2" data-f="questions">
+      <div class="text-[13px] font-semibold">Câu hỏi của AI trong lúc soát</div>
+      ${open.map(q => `<div class="space-y-1 text-[12.5px]" data-q="${esc(q.qid)}">
+        <div>${esc(q.question)} <span class="text-neutral-400">(${esc(q.unit_label || '')})</span></div>
+        ${q.quote ? `<div class="text-[11.5px] text-neutral-500 italic">“${esc(q.quote)}”</div>` : ''}
+        <div class="flex flex-wrap gap-x-3 gap-y-1">${(q.options || []).map(o => `<label class="flex gap-1"><input type="radio" name="q-${esc(q.qid)}" value="${esc(o)}"> ${esc(o)}</label>`).join('')}
+          <label class="flex gap-1"><input type="radio" name="q-${esc(q.qid)}" value="__unknown"> không biết</label>
+          <input type="text" data-qtext="${esc(q.qid)}" placeholder="hoặc ghi câu trả lời" class="border border-neutral-300 rounded-md px-1.5 py-0.5 w-48"></div></div>`).join('')}
+      ${open.length ? '<button type="button" data-a="answer" class="bg-neutral-900 text-white rounded-lg px-3 py-1.5 text-[13px]">Gửi câu trả lời</button>' : ''}
+      ${done.map(q => `<div class="text-[12px] text-neutral-500">✓ ${esc(q.question)} — <span class="text-neutral-800">${esc(q.unknown ? 'không biết' : q.answer)}</span></div>`).join('')}
+      ${answeredUnits.length ? `<button type="button" data-a="rerun" data-units="${esc(answeredUnits.join(','))}" class="text-[12.5px] border border-neutral-300 rounded-lg px-3 py-1 hover:bg-neutral-100">Soát lại ${answeredUnits.length} điều khoản liên quan</button>` : ''}
+    </div>`;
+  }
+
+  function collectFacts(el, c) {
+    const answers = {};
+    for (const f of c.verification.fields) {
+      const unknown = el.querySelector(`[data-unknown="${f.key}"]`);
+      if (unknown && unknown.checked) { if (f.status !== 'unknown') answers[f.key] = { action: 'unknown' }; continue; }
+      const input = el.querySelector(`[data-fact="${f.key}"]`);
+      const value = input ? input.value.trim() : '';
+      if (!value) continue;
+      if (value === (f.value || '') && ['confirmed', 'corrected'].includes(f.status)) continue;
+      answers[f.key] = value === (f.value || '') && f.status === 'found' ? { action: 'confirm' } : { action: 'set', value };
+    }
+    return answers;
+  }
+
+  function collectAnswers(el) {
+    const answers = {};
+    el.querySelectorAll('[data-q]').forEach(box => {
+      const qid = box.dataset.q;
+      const text = box.querySelector('[data-qtext]').value.trim();
+      const picked = box.querySelector('input[type="radio"]:checked');
+      if (text) answers['q:' + qid] = { action: 'set', value: text };
+      else if (picked) answers['q:' + qid] = picked.value === '__unknown' ? { action: 'unknown' } : { action: 'set', value: picked.value };
+    });
+    return answers;
   }
 
   function goneHtml(turn) {
@@ -250,12 +348,24 @@
     const status = el.querySelector('[data-f="status"]');
     const a = btn.dataset.a;
     try {
-      if (a === 'party') { state.cards[cid] = await post(`/${cid}/party`, { party: btn.dataset.v }); renderCardTurn(turn, state.cards[cid]); }
-      else if (a === 'sign') {
-        const v = el.querySelector('[data-f="sign"]').value;
-        if (!v) { status.textContent = 'Hãy chọn ngày ký.'; return; }
-        state.cards[cid] = await post(`/${cid}/sign-date`, { date: v }); renderCardTurn(turn, state.cards[cid]);
+      if (a === 'edit-facts') { state.editFacts = cid; renderCardTurn(turn, state.cards[cid]); }
+      else if (a === 'facts') {
+        const answers = collectFacts(el, state.cards[cid]);
+        if (!Object.keys(answers).length) {
+          if (state.cards[cid].verification.complete) { state.editFacts = null; renderCardTurn(turn, state.cards[cid]); }
+          else status.textContent = 'Hãy điền hoặc xác nhận các mục bắt buộc.';
+          return;
+        }
+        state.cards[cid] = await post(`/${cid}/facts`, { answers });
+        if (state.cards[cid].verification.complete) state.editFacts = null;
+        renderCardTurn(turn, state.cards[cid]);
       }
+      else if (a === 'answer') {
+        const answers = collectAnswers(el);
+        if (!Object.keys(answers).length) { status.textContent = 'Hãy chọn hoặc ghi câu trả lời.'; return; }
+        state.cards[cid] = await post(`/${cid}/facts`, { answers }); renderCardTurn(turn, state.cards[cid]);
+      }
+      else if (a === 'rerun') { await runOp(el, cid, { op: 'partial', unit_ids: btn.dataset.units.split(',') }); await refreshCard(el, turn, cid); }
       else if (a === 'save') { state.cards[cid] = await post(`/${cid}/save`); setSavedIds([...savedIds(), cid]); renderCardTurn(turn, state.cards[cid]); }
       else if (a === 'remove') {
         await fetch(`${API}/${cid}`, { method: 'DELETE' });
@@ -269,16 +379,20 @@
         if (op === 'partial') { el.querySelector('[data-f="partial"]').classList.toggle('hidden'); return; }
         if (op === 'ask') { setActive(cid, 'contract'); document.getElementById('main-query-input').focus(); return; }
         await runOp(el, cid, { op });
+        if (op === 'review' || op === 'redline' || op === 'law_changes') await refreshCard(el, turn, cid);
       }
       else if (a === 'run-partial') {
         const unit_ids = [...el.querySelectorAll('[data-unit]:checked')].map(x => x.dataset.unit);
         const topics = [...el.querySelectorAll('[data-topic]:checked')].map(x => x.dataset.topic);
         if (!unit_ids.length && !topics.length) { status.textContent = 'Hãy chọn ít nhất một điều khoản hoặc chủ đề.'; return; }
         await runOp(el, cid, { op: 'partial', unit_ids, topics });
+        await refreshCard(el, turn, cid);
       }
     } catch (err) {
       if (err.status === 404) { renderCardTurn(turn, null); return; }
-      status.textContent = '⚠ ' + err.message;
+      if (err.status === 409) { await refreshCard(el, turn, cid); }
+      const st = el.querySelector('[data-f="status"]');
+      if (st) st.textContent = '⚠ ' + err.message;
     }
   }
 
@@ -321,6 +435,9 @@
         : (f.needs_check ? '<div class="text-[12px]" style="color:#8a5a00">Trích dẫn không khớp hợp đồng — cần kiểm tra lại.</div>' : '')}
       <div class="text-[13.5px]">${f.explanation_note ? `<span class="text-[11.5px] text-neutral-500">(${esc(f.explanation_note)})</span> ` : ''}${esc(f.explanation)}</div>
       <div class="text-[12px] font-medium" style="color:${st[1]}">${esc(st[0])}</div>
+      ${f.needs_info ? `<div class="text-[12.5px] rounded-lg p-2" style="background:#fffaf0"><div class="font-medium" style="color:#8a5a00">Cần thêm thông tin — kết luận theo từng trường hợp:</div>
+        <ul class="list-disc pl-5">${(f.cases || []).map(x => `<li><span class="text-neutral-500">Nếu</span> ${esc(x.if)}: ${esc(x.conclusion)}</li>`).join('')}</ul>
+        ${(f.questions || []).length ? '<div class="text-[11.5px] text-neutral-500">Trả lời câu hỏi ở thẻ hợp đồng rồi bấm “Soát lại”.</div>' : ''}</div>` : ''}
       ${(f.evidence || []).map(evidenceHtml).join('')}${refusal}
       ${f.note ? `<div class="text-[12px] text-neutral-500">${esc(f.note)}</div>` : ''}
       ${f.suggestion ? `<div class="text-[13px]"><span class="text-neutral-500">Gợi ý sửa:</span> ${esc(f.suggestion)}</div>` : ''}
@@ -334,7 +451,10 @@
     }
     if (r.op === 'review' || r.op === 'partial') {
       const f = r.findings || [];
+      const qs = r.questions || [];
       return (r.op === 'partial' ? `<div class="text-[12.5px] text-neutral-500">Phạm vi: ${esc((r.scope || []).join(', ') || '—')}</div>` : '')
+        + ((r.warnings || []).length ? r.warnings.map(w => `<div class="text-[12.5px]" style="color:#8a5a00">⚠ ${esc(w)}</div>`).join('') : '')
+        + (qs.length ? `<div class="text-[12.5px] rounded-lg p-2" style="background:#fffaf0">AI cần bạn trả lời ${qs.length} câu hỏi để kết luận chắc hơn: ${esc(qs.map(q => q.question).join(' · '))}</div>` : '')
         + (f.length ? f.map((x, i) => findingHtml(x, i + 1)).join('') : '<div class="text-[13.5px]">Không phát hiện vấn đề trong phạm vi đã soát.</div>');
     }
     if (r.op === 'law_changes') {
@@ -373,7 +493,7 @@
     el.innerHTML = `<div class="border border-neutral-200 rounded-2xl p-4 space-y-3 bg-white">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div><div class="text-[14.5px] font-semibold">${esc(TITLE[r.op] || 'Báo cáo')}</div>
-          <div class="text-[12px] text-neutral-500">${esc((state.cards[cid] || {}).filename || '')} · góc nhìn: ${esc(party)} · mốc: ${day(r.anchor)} · Đã soát ${cov.reviewed}/${cov.total} điều khoản</div></div>
+          <div class="text-[12px] text-neutral-500">${esc((state.cards[cid] || {}).filename || '')} · góc nhìn: ${esc(party)} · mốc: ${day(r.anchor)} · Đã soát ${cov.reviewed}/${cov.requested || cov.total} điều khoản</div></div>
         ${r.op === 'summary' ? '' : `<div class="flex gap-2 text-[12.5px]">
           <a href="${API}/${encodeURIComponent(cid)}/reports/${encodeURIComponent(r.rid)}.docx" class="border border-neutral-300 rounded-lg px-2.5 py-1 hover:bg-neutral-100">Tải Word</a>
           <a href="${API}/${encodeURIComponent(cid)}/reports/${encodeURIComponent(r.rid)}.pdf" class="border border-neutral-300 rounded-lg px-2.5 py-1 hover:bg-neutral-100">Tải PDF</a></div>`}

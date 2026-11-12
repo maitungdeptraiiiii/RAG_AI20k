@@ -14,10 +14,12 @@ from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from typing import Any
 
+from rag.contracts.batches import make_batches, run_batches
 from rag.contracts.evidence import LawEvidence, LegacySearch, find_evidence, law_changes
 from rag.contracts.llm_json import ContractAIError, ask_json, quote_ok
 from rag.contracts.models import Contract
 from rag.contracts.parse import llm_units
+from rag.contracts.verify import known_facts, question_id
 from rag.quality.pii import mask_text
 
 GROUPS = ("illegal", "missing_required", "unfavorable", "ambiguous")
@@ -57,12 +59,20 @@ _ROLE = ("Bạn là luật sư Việt Nam soát hợp đồng. Chỉ dựa trên
          "Mọi 'quote' phải chép NGUYÊN VĂN từ hợp đồng.")
 
 FIND = "BƯỚC: find\n" + _ROLE + """
-Tìm các điểm có vấn đề trong các đơn vị được giao. Trả JSON:
+Tìm các điểm có vấn đề trong các đơn vị được giao ("units" — một phần của hợp đồng). "context" và "references" là
+đoạn khác của cùng hợp đồng, chỉ để tham khảo: KHÔNG báo vấn đề cho chúng. "known_facts" là thông tin người dùng đã
+xác minh và câu hỏi đã trả lời: coi là sự thật ("không biết" = người dùng không biết); KHÔNG hỏi lại. Trả JSON:
 {"findings": [{"unit": "uid", "quote": "trích nguyên văn", "group": "illegal|missing_required|unfavorable|ambiguous",
   "severity": "critical|major|minor", "disadvantaged": "vai trò bên chịu bất lợi hoặc 'Cả hai bên'",
   "explanation": "...", "legal_question": "câu tra cứu luật nếu là vấn đề pháp lý, không thì null",
-  "law_hint": "tên luật điều chỉnh nếu biết, không thì null", "suggestion": "gợi ý sửa"}]}
-Ưu tiên các điểm bất lợi cho bên "party". missing_required = thiếu nội dung bắt buộc theo luật (unit = đơn vị gần nhất)."""
+  "law_hint": "tên luật điều chỉnh nếu biết, không thì null", "suggestion": "gợi ý sửa",
+  "needs_info": false, "cases": [{"if": "trường hợp", "conclusion": "kết luận trong trường hợp đó"}]}],
+ "questions": [{"question": "câu hỏi cho người dùng", "options": ["lựa chọn", "..."], "unit": "uid",
+                "quote": "trích nguyên văn liên quan hoặc null"}]}
+Ưu tiên các điểm bất lợi cho bên "party". missing_required = thiếu nội dung bắt buộc theo luật (unit = đơn vị gần nhất).
+Khi kết luận phụ thuộc thông tin KHÔNG có trong hợp đồng và KHÔNG có trong known_facts (vd. trình độ công việc quyết
+định thời gian thử việc tối đa): đặt "needs_info": true, liệt kê kết luận theo từng trường hợp trong "cases", và thêm
+một câu hỏi vào "questions" kèm các lựa chọn. Không đoán thông tin đó. Không cần thì "needs_info": false, "cases": []."""
 
 SELECT = "BƯỚC: select\n" + _ROLE + """
 Chọn các đơn vị liên quan tới các chủ đề người dùng yêu cầu. Trả JSON: {"units": ["uid", ...]}"""
@@ -183,36 +193,77 @@ def _scope(ctx: ReviewContext, contract: Contract, unit_ids, topics):
         wanted = set(unit_ids)
         return [u for u in contract.units if u.uid in wanted]
     if topics:
-        data = ask_json(ctx.llm, SELECT, {"topics": list(topics), "units": _units_payload(llm_units(contract.units))},
-                        contract.mask_state)
-        wanted = {str(x) for x in data.get("units") or []}
+        run = run_batches(make_batches(contract), lambda b: ask_json(
+            ctx.llm, SELECT, {"topics": list(topics), "units": b.payload_units()}, contract.mask_state))
+        if not run.results:
+            raise ContractAIError()
+        wanted = {str(x) for _, data in run.results for x in data.get("units") or []}
         by_label = {u.label.casefold(): u.uid for u in contract.units}
         wanted |= {by_label[w.casefold()] for w in wanted if w.casefold() in by_label}
         scope = [u for u in contract.units if u.uid in wanted]
         if not scope:
             raise ContractAIError("Không xác định được điều khoản thuộc chủ đề đã chọn — hãy chọn điều khoản cụ thể")
         return scope
-    return llm_units(contract.units)          # soát toàn bộ: bản demo gửi LLM tối đa 30 đơn vị đầu
+    return list(contract.units)               # soát toàn bộ: mọi đơn vị, theo lô
+
+
+def _find_batch(ctx: ReviewContext, contract: Contract, party: str, known: dict, batch) -> dict:
+    data = ask_json(ctx.llm, FIND, {"party": party, "contract_type": contract.facts.get("type"),
+                                    "parties": contract.facts.get("parties"), "known_facts": known,
+                                    "units": batch.payload_units(), "context": list(batch.context),
+                                    "references": list(batch.references)}, contract.mask_state)
+    if not isinstance(data.get("findings"), list):
+        raise ContractAIError()
+    return data
+
+
+def _questions(contract: Contract, batch, raw) -> list[dict]:
+    """Câu hỏi hợp lệ của một lô: gắn với đơn vị trong lô; trích dẫn sai thì bỏ trích dẫn, giữ câu hỏi."""
+    out = []
+    for q in raw if isinstance(raw, list) else []:
+        if not isinstance(q, dict) or not str(q.get("question") or "").strip() or q.get("unit") not in batch.uids:
+            continue
+        text = " ".join(str(q["question"]).split())
+        quote = str(q.get("quote") or "")
+        unit = contract.unit(q["unit"])
+        options = [" ".join(str(o).split()) for o in q.get("options") or [] if str(o).strip()][:8]
+        out.append({"qid": question_id(text), "question": text, "options": options, "unit": unit.uid,
+                    "unit_label": unit.label, "quote": quote if quote and quote_ok(unit.text, quote) else None})
+    return out
+
+
+def _remember_questions(contract: Contract, new: list[dict]) -> list[dict]:
+    """Thêm câu hỏi mới vào facts["questions"] (trùng câu hỏi -> giữ bản cũ). Trả câu hỏi của lần soát này."""
+    known = {q["qid"]: q for q in contract.facts.get("questions") or []}
+    asked: list[dict] = []
+    for q in new:
+        known.setdefault(q["qid"], q)
+        if q["qid"] not in [a["qid"] for a in asked]:
+            asked.append(known[q["qid"]])
+    contract.facts["questions"] = list(known.values())
+    return asked
 
 
 def review(ctx: ReviewContext, contract: Contract, *, unit_ids=None, topics=None) -> dict[str, Any]:
     requested = _scope(ctx, contract, unit_ids, topics)
-    scope = llm_units(requested)              # soát một phần cũng chỉ gửi LLM tối đa 30 đơn vị
     party = contract.party or "neutral"
-    data = ask_json(ctx.llm, FIND, {"party": party, "contract_type": contract.facts.get("type"),
-                                    "parties": contract.facts.get("parties"), "units": _units_payload(scope)},
-                    contract.mask_state)
-    raw = data.get("findings")
-    if not isinstance(raw, list):
+    known = known_facts(contract)
+    run = run_batches(make_batches(contract, requested), lambda b: _find_batch(ctx, contract, party, known, b))
+    if not run.results:
         raise ContractAIError()
-    by_uid = {u.uid: u for u in scope}
-    by_uid.update({u.label.casefold(): u for u in scope})        # mô hình đôi khi trả nhãn "Điều 8" thay vì uid
     titles = _law_titles(ctx.runtime)
     findings: list[dict[str, Any]] = []
     candidates: dict[str, list[LawEvidence]] = {}
-    for i, f in enumerate(raw, 1):
-        key = str(f.get("unit") or "") if isinstance(f, dict) else ""
-        unit = by_uid.get(key) or by_uid.get(key.casefold())
+    new_questions: list[dict] = []
+    pairs = []
+    for batch, data in run.results:
+        new_questions += _questions(contract, batch, data.get("questions"))
+        mine = [contract.unit(uid) for uid in batch.uids]
+        lookup = {u.uid: u for u in mine} | {u.label.casefold(): u for u in mine}   # đôi khi trả nhãn "Điều 8"
+        for f in data["findings"]:
+            key = str(f.get("unit") or "") if isinstance(f, dict) else ""
+            pairs.append((f, lookup.get(key) or lookup.get(key.casefold())))
+    for i, (f, unit) in enumerate(pairs, 1):
         if unit is None:
             continue
         group = f.get("group") if f.get("group") in GROUPS else "ambiguous"
@@ -225,7 +276,10 @@ def review(ctx: ReviewContext, contract: Contract, *, unit_ids=None, topics=None
                 "severity": f.get("severity") if f.get("severity") in SEVERITY else "minor",
                 "disadvantaged": str(f.get("disadvantaged") or ""), "explanation": str(f.get("explanation") or ""),
                 "suggestion": str(f.get("suggestion") or ""), "law_hint": f.get("law_hint"), "legal": legal,
-                "legal_status": "not_legal", "evidence": [], "refusal": None, "note": None}
+                "legal_status": "not_legal", "evidence": [], "refusal": None, "note": None,
+                "needs_info": bool(f.get("needs_info")),
+                "cases": [{"if": str(c.get("if") or ""), "conclusion": str(c.get("conclusion") or "")}
+                          for c in f.get("cases") or [] if isinstance(c, dict) and c.get("if") and c.get("conclusion")]}
         if not legal:
             item["note"] = NOT_LEGAL_NOTE
         elif contract.sign_date is None:
@@ -234,8 +288,11 @@ def review(ctx: ReviewContext, contract: Contract, *, unit_ids=None, topics=None
             q = _masked(contract, f.get("legal_question") or item["explanation"])
             candidates[item["id"]] = find_evidence(ctx.runtime, ctx.legacy_search, q, contract.sign_date, k=3)
         findings.append(item)
-    if raw and not findings:
+    if pairs and not findings:
         raise ContractAIError()
+    asked = _remember_questions(contract, new_questions)
+    for item in findings:
+        item["questions"] = [q["qid"] for q in asked if q["unit"] == item["unit"]] if item["needs_info"] else []
 
     support = _verify(ctx, contract, [{"id": fid, "claim": next(x["explanation"] for x in findings if x["id"] == fid),
                                       "quote": next(x["quote"] for x in findings if x["id"] == fid),
@@ -257,6 +314,8 @@ def review(ctx: ReviewContext, contract: Contract, *, unit_ids=None, topics=None
     for item in findings:
         unverified = item["group"] in SUSPECT_LABEL and item["legal_status"] in ("cannot_conclude", "blocked_no_date")
         item["group_label"] = SUSPECT_LABEL[item["group"]] if unverified else GROUP_LABEL[item["group"]]
+        if item["needs_info"] and item["cases"]:          # chưa có một kết luận duy nhất: tùy trường hợp
+            item["group_label"] = f"{GROUP_LABEL[item['group']]}? — tùy trường hợp, cần thêm thông tin"
         item["explanation_note"] = UNVERIFIED_NOTE if unverified else None
 
     def rank(f):
@@ -266,10 +325,15 @@ def review(ctx: ReviewContext, contract: Contract, *, unit_ids=None, topics=None
     findings.sort(key=rank)
     op = "partial" if (unit_ids or topics) else "review"
     # hợp đồng mới: total_units == len(units); bản Phần 4 đã cắt units còn 30 nhưng total_units giữ tổng thật
+    read = set(run.read_uids)
+    scope = [u for u in requested if u.uid in read]
     coverage = {"reviewed": len(scope), "total": max(len(contract.units), contract.total_units)}
-    if len(requested) > len(scope):           # chọn quá 30 đơn vị: ghi rõ số đã chọn
+    if len(requested) > len(scope):           # có lô lỗi: ghi rõ số đã yêu cầu
         coverage["requested"] = len(requested)
-    return _new_report(contract, op, coverage=coverage, scope=[u.label for u in scope], topics=list(topics or []), findings=findings)
+    rep = _new_report(contract, op, coverage=coverage, scope=[u.label for u in scope], topics=list(topics or []),
+                      findings=findings, questions=asked, batches=len(run.results) + len(run.failed))
+    rep["warnings"] = rep["warnings"] + run.warnings()
+    return rep
 
 
 def _latest(contract: Contract, ops: tuple[str, ...]) -> dict | None:

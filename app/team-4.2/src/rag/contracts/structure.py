@@ -63,7 +63,9 @@ def _report(a: Assembled, pages: list[PageText], units: list[Unit], styles: dict
 def parse_contract(pages: list[PageText], parts: list[PartSpec] | None = None) -> ContractDoc:
     """Phân tích các trang hợp đồng thành ContractDoc."""
     a = assemble(pages)
-    parts = detect_parts(a.text) if parts is None else parts
+    detected = detect_parts(a.text)
+    parts = detected if parts is None else parts
+    headings = {(p.start, p.title) for p in detected if p.kind == "appendix"}
     units: list[Unit] = []
     styles: dict[str, str] = {}
     gaps: list[str] = []
@@ -75,7 +77,7 @@ def parse_contract(pages: list[PageText], parts: list[PartSpec] | None = None) -
             appendix_index += 1
             prefix = f"Phụ lục {part.number or appendix_index} — "
         pu, style, g = parse_part(a, part, end, prefix)
-        if part.kind == "appendix":  # dòng tiêu đề phụ lục không phải nội dung
+        if part.kind == "appendix" and (part.start, part.title) in headings:  # chỉ bỏ dòng tiêu đề bộ tách nhận ra
             pu = [u for u in pu if not (u.level == "preamble" and u.text.strip() == part.title)]
         units += pu
         styles[part.part_id] = style

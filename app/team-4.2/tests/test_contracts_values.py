@@ -28,3 +28,19 @@ def test_spans_point_at_raw_text():
     text = "đặt cọc 90 triệu đồng"
     v = extract_values(text)[0]
     assert text[v.start:v.end] == v.raw == "90 triệu đồng"
+
+
+def test_invalid_date_reserves_its_span():
+    assert kinds("ngày 31 tháng 2 năm 2023") == []
+    assert kinds("ngày 15 tháng 3, năm 2023") == [("date", {"iso": "2023-03-15"})]
+
+
+def test_duration_not_taken_from_decimal_or_grouped_number():
+    assert kinds("thời hạn 1,5 năm") == []
+    assert kinds("trong 2.000 ngày") == []
+
+
+def test_money_does_not_absorb_preceding_integer():
+    assert kinds("Điều 5 200.000 đồng") == [("money", {"amount": 200000, "currency": "VND"})]
+    assert kinds("Điều 5\n200.000 đồng") == [("money", {"amount": 200000, "currency": "VND"})]
+    assert kinds("cọc 5 100 000 đồng") == [("money", {"amount": 5100000, "currency": "VND"})]

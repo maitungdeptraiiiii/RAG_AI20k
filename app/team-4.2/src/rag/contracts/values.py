@@ -19,11 +19,12 @@ class RawValue:
     end: int
 
 
-_NUM = r"\d{1,3}(?:[.\s]\d{3})+(?:,\d+)?|\d+(?:,\d+)?"
+# nhóm nghìn nhất quán: toàn dấu "." hoặc toàn dấu cách (không xuống dòng), hoặc số trơn
+_NUM = r"\d{1,3}(?:\.\d{3})+(?:,\d+)?|\d{1,3}(?: \d{3})+(?:,\d+)?|\d+(?:,\d+)?"
 
 # ngày: "ngày D tháng M năm Y" hoặc D/M/Y, D-M-Y
 DATE_RE = re.compile(
-    r"(?<![\d/-])(?:ngày\s+(\d{1,2})\s+tháng\s+(\d{1,2})\s+năm\s+(\d{4})"
+    r"(?<![\d/-])(?:ngày\s+(\d{1,2})\s+tháng\s+(\d{1,2}),?\s+năm\s+(\d{4})"
     r"|(\d{1,2})[/-](\d{1,2})[/-](\d{4}))(?![\d/-])",
     re.IGNORECASE,
 )
@@ -34,7 +35,7 @@ MONEY_RE = re.compile(
     re.IGNORECASE,
 )
 PERCENT_RE = re.compile(r"(?<![\d.,])\d+(?:,\d+)?\s*%")
-DURATION_RE = re.compile(r"\b(\d+)\s*(ngày|tuần|tháng|năm|giờ)\b", re.IGNORECASE)
+DURATION_RE = re.compile(r"(?<![\d.,])(\d+(?:[.,]\d+)*)\s*(ngày|tuần|tháng|năm|giờ)\b", re.IGNORECASE)
 
 _SCALE = {"triệu": 10**6, "tỷ": 10**9}
 
@@ -62,7 +63,8 @@ def extract_values(text: str) -> list[RawValue]:
         try:
             iso = date(int(y), int(mo), int(d)).isoformat()
         except ValueError:
-            continue  # ngày không hợp lệ thì bỏ
+            taken.append(m.span())  # ngày không hợp lệ: bỏ giá trị nhưng vẫn giữ chỗ
+            continue
         add("date", m, {"iso": iso})
 
     for m in MONEY_RE.finditer(text):
@@ -77,7 +79,7 @@ def extract_values(text: str) -> list[RawValue]:
             add("percent", m, {"percent": float(m.group(0).rstrip("% \t").replace(",", "."))})
 
     for m in DURATION_RE.finditer(text):
-        if _free(m.span(), taken):
+        if _free(m.span(), taken) and m.group(1).isdigit():  # bỏ số lẻ / có nhóm nghìn
             add("duration", m, {"n": int(m.group(1)), "unit": m.group(2).lower()})
 
     return sorted(out, key=lambda v: v.start)

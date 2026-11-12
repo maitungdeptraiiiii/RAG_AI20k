@@ -142,7 +142,11 @@ def _load_pages(data: bytes, filename: str) -> tuple[list, list[PageText]]:
         pages = load_source(path, source=filename, ocr=CONFIG.ocr_factory())
     if (len({p.page for p in pages if p.page is not None}) or 1) > MAX_PAGES:
         raise ValueError(TOO_LONG)
-    texts = [PageText(p.page, p.text or "", type(p).__name__) for p in pages]
+    # DOCX giữ bảng ngay trong thân văn bản: bỏ bản sao TablePage. PDF/OCR: bảng OCR đã bị tách khỏi text
+    # trang (split_ocr_markdown) nên TablePage là bản duy nhất -> giữ.
+    docx = suffix == ".docx"
+    texts = [PageText(p.page, p.text or "", type(p).__name__) for p in pages
+             if not (docx and type(p).__name__ == "TablePage")]
     if not any(t.text.strip() for t in texts):
         raise ValueError("Không đọc được nội dung hợp đồng (file trống hoặc ảnh không OCR được)")
     return pages, texts

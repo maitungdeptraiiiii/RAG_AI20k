@@ -34,7 +34,7 @@ def _values(units: list[Unit]) -> list[Value]:
 
 
 def _warn_pages(pages: list[PageText]) -> list[int]:
-    numbered = [p for p in pages if p.page is not None]
+    numbered = [p for p in pages if p.page is not None and p.kind != "TablePage"]  # bảng không phải trang
     if len(numbered) < _MIN_NUMBERED_PAGES:
         return []
     median = statistics.median(len(p.text) for p in numbered)

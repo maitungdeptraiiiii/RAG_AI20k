@@ -338,3 +338,40 @@ def test_pre_graph_review_is_not_reused(client):
                         "build_id": c.graph["build_id"], "coverage": {"reviewed": 1, "total": 1}, "findings": []}
     rep = client.post(f"/api/contracts/{cid}/run", json={"op": "redline"}).json()
     assert rep["based_on"] != "old"
+
+
+def _docx_with_table() -> bytes:
+    import io
+
+    import docx
+    d = docx.Document()
+    for t in ["HỢP ĐỒNG", "Điều 1. Giá", "Lịch thanh toán như bảng sau:"]:
+        d.add_paragraph(t)
+    tb = d.add_table(rows=2, cols=2)
+    tb.cell(0, 0).text, tb.cell(0, 1).text = "Đợt", "Số tiền"
+    tb.cell(1, 0).text, tb.cell(1, 1).text = "1", "10.000.000 đồng"
+    for t in ["Điều 2. Hiệu lực", "Có hiệu lực từ ngày ký.", "", "Phụ lục 01 là phần không tách rời của hợp đồng này.",
+              "Điều 3. Điều khoản chung", "Hai bên cam kết."]:
+        d.add_paragraph(t)
+    buf = io.BytesIO()
+    d.save(buf)
+    return buf.getvalue()
+
+
+def test_docx_table_appears_once(client):
+    r = client.post("/api/contracts", files={"file": ("hd.docx", _docx_with_table())}, data={"persist": "0"})
+    assert r.status_code == 200, r.text
+    c = contracts_api.get(r.json()["contract_id"])
+    assert [p.kind for p in c.page_texts] == ["Page"]
+    assert c.text.count("10.000.000 đồng") == 1
+    assert [(v.uid, v.raw) for v in c.doc.values] == [("p0.d1", "10.000.000 đồng")]
+    assert [p.part_id for p in c.doc.parts] == ["p0"]
+    assert [u.label for u in c.units] == ["Phần mở đầu", "Điều 1", "Điều 2", "Điều 3"]
+
+
+def test_table_pages_do_not_trigger_page_warnings():
+    from rag.contracts.doc import PageText
+    from rag.contracts.structure import parse_contract
+    body = "Điều %d. " + "chữ " * 300
+    pages = [PageText(1, body % 1), PageText(2, body % 2), PageText(3, body % 3), PageText(2, "| a |", "TablePage")]
+    assert parse_contract(pages).report.warn_pages == []

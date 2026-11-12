@@ -52,3 +52,28 @@ Lưu ý: yêu cầu ghi "48 đơn vị gốc"; thực tế card có 49 đơn v�
 - [ ] Nạp hợp đồng ≥ 40 Điều có 2 phụ lục (tự soạn như kịch bản b): thẻ báo đủ Điều và "2 phụ lục"; soát toàn bộ báo `30/49`.
 - [ ] Tắt Docker (`docker compose -f docker/neo4j-compose.yml stop`), sửa ngày ký: thẻ hiện "Đồ thị chưa cập nhật", hợp đồng vẫn hỏi được.
 - [ ] Chụp ảnh đồ thị (nếu có) và đính vào file này.
+
+## Việc để lại cho các kế hoạch sau (từ các lượt review)
+
+- Task 1: minor (deferred): bare "đ" currency (30.000.000đ) and "tỉ" variant not recognised
+- Task 1: minor (deferred): [.\s] / \s* cross newlines; prefer [ \t]
+- Task 1: minor (deferred): more regression tests (decimal percent, USD, no match)
+- Task 1: minor (deferred): space-grouped number ambiguous with preceding integer ("cọc 5 100 000 đồng" -> 5100000) — inherent
+- Task 2: minor (deferred): uppercase body line "PHỤ LỤC kèm theo gồm 02 trang" accepted as appendix part (number=2)
+- Task 2: minor (deferred): "PHỤ LỤC HỢP ĐỒNG SỐ 01/2024" number=1 taken from contract number
+- Task 2: minor (deferred): TOC rule only covers first entry after MỤC LỤC; page_at rebuilds offsets per call; thin tests (blank-before rule, DANH MỤC, \r\n)
+- Task 3: minor (deferred): dotted clause regex optional trailing dot — body line "2.5 lần giá thuê" under Điều 2 becomes k5 with false gap
+- Task 3: minor (deferred): first point letter may be "d" (step 4 from start)
+- Task 4: minor (deferred): duplicate _EXTERNAL_RE match / redundant guard; no word boundary at match start
+- Task 4: minor (deferred): list forms "khoản 1, 2 Điều 5" also add an extra article-level edge to p0.d5
+- Task 4: minor (deferred): "điểm a, b khoản 1" lists not handled; bare-number raws ("2") in lists
+- Task 5: minor (deferred): no tests for appendix title-only preamble drop / appendix intro kept; CRLF/NFC path via assemble not probed
+- Task 6: minor (deferred): set_review no status validation; supersede of already-rejected op overwrites first rejection's reviewer/note; from_json drops duplicate ids silently; no contract_id consistency check; thin tests (KeyError, layout, reviewed_at round-trip)
+- Task 6: minor (deferred): import pytest inside test function
+- Task 7: minor (deferred): edges with missing endpoint uid skipped silently (not recorded as problem); norm keys could overwrite contract_id/build_id; no tests for overlap rule/unknown edge/unresolved_refs
+- Task 8: minor (deferred): edges with missing endpoints dropped silently by MATCH; integration test asserts nodes only (add edge count); no fake-driver test for GraphUnavailable mapping / allowlist ValueError; run(**params) name collision; driver ctor (bad URI) raises ConfigurationError outside _guard
+- Task 9: minor (deferred): no test that lock is released when with-body raises; unexpected-error test doesn't assert published empty / log noise
+- Task 10: minor (deferred): corrupted format-2 file raises non-KeyError (contained by listed() fix only); _unconvertible remembered until restart; converted facts/old reports keep old u* uids; no test for GraphBusy on party/sign-date
+- Task 10: minor (deferred): partial review (unit_ids / topics via by_label) not capped at 30; disk/Neo4j may hold newer build if store.update fails after publish; run() report save outside lock (pre-existing)
+- Parked: PARSER_VERSION bump — saved contracts re-parse doc on load but keep old graph status/build_id until next change; Neo4j may hold a v1 build until then — Ruling: branch unreleased; no saved real contracts yet; clear dev data / rebuild on next change — if wrong, an old v1 build (possibly with unmasked Value nodes) stays in a local Neo4j until the contract is touched.
+- Parked: _new_report reads build_id after the LLM call (race with a concurrent layout change) — Ruling: defer to plan 2 (capture build_id at review start) — rare, single-user demo.

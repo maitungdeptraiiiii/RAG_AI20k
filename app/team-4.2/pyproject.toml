@@ -28,6 +28,7 @@ dependencies = [
 jev = ["typesafe-sdk"]                 # RERANK_BACKEND=jev
 neural = ["torch", "transformers"]    # ADVANCED=splade / colbert
 dev = ["pytest", "pytest-asyncio"]   # tests/test_stream.py dùng @pytest.mark.asyncio
+graph = ["neo4j>=5.28,<6"]            # CONTRACT_GRAPH=1: ghi đồ thị hợp đồng vào Neo4j
 
 [tool.setuptools.packages.find]
 where = ["src"]

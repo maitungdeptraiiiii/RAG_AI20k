@@ -37,3 +37,6 @@ data/team-*/ocr_bench/
 data/team-*/ingest_reports/
 data/team-*/legal/raw/
 data/team-*/legal/*.sqlite
+data/team-*/contracts/
+data/team-*/contracts_real/
+data/team-*/neo4j/

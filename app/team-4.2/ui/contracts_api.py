@@ -19,6 +19,7 @@ khóa ghi của hợp đồng; đồ thị lỗi chỉ báo trong thẻ (card["g
 from __future__ import annotations
 
 import asyncio
+import copy
 import hashlib
 import logging
 import re
@@ -41,10 +42,11 @@ from rag.contracts import review as rv
 from rag.contracts.doc import PageText, PartSpec, assemble
 from rag.contracts.export import report_docx, report_pdf
 from rag.contracts.facts import extract_facts
-from rag.contracts.graph.oplog import human_op, machine_op
+from rag.contracts.graph.oplog import OperationLog, human_op, machine_op
 from rag.contracts.graph.service import ContractGraphService, GraphBusy
 from rag.contracts.llm_json import ContractAIError
 from rag.contracts.models import Contract
+from rag.contracts.parse import DEMO_MAX_UNITS
 from rag.contracts.parts import detect_parts
 from rag.contracts.store import ContractStore
 from rag.contracts.structure import parse_contract, to_contract_units
@@ -60,6 +62,7 @@ TOO_LONG = "Hợp đồng dài hơn 150 trang — chưa hỗ trợ"
 BAD_LAYOUT = "Vị trí phần không hợp lệ"
 USER = "người dùng"            # người sửa mặc định khi request không ghi "by"
 CONVERTED = "chuyển đổi"       # người sửa của thao tác chuyển từ bản Phần 4
+FAILED = "Không cập nhật được hợp đồng — hãy thử lại"
 
 
 @contextmanager
@@ -113,7 +116,8 @@ def card(c: Contract) -> dict[str, Any]:
             "created_at": c.created_at.isoformat(), "facts": c.facts, "party": c.party,
             "sign_date": c.sign_date.isoformat() if c.sign_date else None, "sign_date_source": c.sign_date_source,
             "units": [{"uid": u.uid, "label": u.label} for u in c.units],
-            "coverage": {"reviewed": len(c.units), "total": c.total_units}, "pages": c.pages,
+            "coverage": {"reviewed": min(len(c.units), DEMO_MAX_UNITS), "total": max(len(c.units), c.total_units)},
+            "pages": c.pages,
             "reports": [{"rid": r["rid"], "op": r["op"], "created_at": r["created_at"]} for r in c.reports.values()],
             "parts": [{"part_id": p.part_id, "kind": p.kind, "title": p.title} for p in c.doc.parts] if c.doc else [],
             "parse_report": {"counts": dict(rep.counts) if rep else {}, "gaps": list(rep.gaps) if rep else [],
@@ -180,15 +184,45 @@ def _rebuild(c: Contract, now: datetime) -> None:
     c.builds.append(status["record"])
 
 
+_SNAP = ("party", "sign_date", "sign_date_source", "page_texts", "file_checksum", "text", "pages", "units",
+         "total_units", "doc", "graph", "builds")
+_MISSING = object()
+
+
+def _snapshot(c: Contract) -> dict[str, Any]:
+    snap = {n: copy.copy(getattr(c, n)) for n in _SNAP}
+    snap["oplog"] = c.oplog.to_json()
+    snap["pre_graph"] = {rid: r.get("pre_graph", _MISSING) for rid, r in c.reports.items()}
+    return snap
+
+
+def _restore(c: Contract, snap: dict[str, Any]) -> None:
+    for n in _SNAP:
+        setattr(c, n, snap[n])
+    c.oplog = OperationLog.from_json(c.contract_id, snap["oplog"])
+    for rid, v in snap["pre_graph"].items():
+        if rid in c.reports:
+            if v is _MISSING:
+                c.reports[rid].pop("pre_graph", None)
+            else:
+                c.reports[rid]["pre_graph"] = v
+
+
 def _change(c: Contract, apply) -> None:
-    """Ghi thao tác + dựng lại trong khóa ghi của hợp đồng (GraphBusy -> 409), rồi lưu nếu "Lưu lại".
+    """Ghi thao tác + dựng lại + lưu (nếu "Lưu lại") trong khóa ghi của hợp đồng (GraphBusy -> 409).
+    Trọn gói: lỗi ở bất kỳ bước nào -> hợp đồng trở lại đúng như trước rồi ném lỗi.
     Hợp đồng Phần 4 không còn file gốc chỉ ghi thao tác, không dựng."""
     now = _now()
     with _graph().writing(c.contract_id):
-        apply(now)
-        if c.page_texts:
-            _rebuild(c, now)
-    store().update(c)
+        snap = _snapshot(c)
+        try:
+            apply(now)
+            if c.page_texts:
+                _rebuild(c, now)
+            store().update(c)
+        except BaseException:
+            _restore(c, snap)
+            raise
 
 
 # --- đồng bộ (chạy ngoài event loop) -------------------------------------------------------------
@@ -243,6 +277,8 @@ def _convert_part4(c: Contract) -> None:
         _change(c, apply)
     except GraphBusy:
         log.info("Hợp đồng %s đang được chuyển đổi ở request khác", c.contract_id)
+    except Exception:  # noqa: BLE001 — giữ nguyên bản Phần 4, lần mở sau thử lại
+        log.exception("Chuyển hợp đồng %s sang đồ thị thất bại", c.contract_id)
 
 
 def get(cid: str) -> Contract:
@@ -419,6 +455,9 @@ async def _call(fn, *args) -> Response:
         return _error(str(e), 502)
     except ValueError as e:
         return _error(str(e), 400)
+    except Exception:  # noqa: BLE001 — lỗi ngoài dự kiến: JSON cho UI, chi tiết ở log
+        log.exception("Thao tác hợp đồng thất bại")
+        return _error(FAILED, 500)
     return result if isinstance(result, Response) else JSONResponse(result)
 
 
@@ -454,11 +493,13 @@ async def handle_list(request: Request) -> Response:
 
     def listed():
         out = []
-        for cid in ids:
+        for cid in ids:                 # chỉ đọc thẻ: không chuyển bản Phần 4 (chuyển khi mở từng hợp đồng)
             try:
-                out.append(card(get(cid)))
+                out.append(card(store().get(cid)))
             except KeyError:
                 continue
+            except Exception:  # noqa: BLE001 — một file hỏng không làm hỏng cả danh sách
+                log.warning("Bỏ qua hợp đồng không đọc được: %s", cid)
         return {"contracts": out}
     return await _call(listed)
 

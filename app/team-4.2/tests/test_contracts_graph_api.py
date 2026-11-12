@@ -33,10 +33,17 @@ class FakeStore:
 
 
 class SimpleLLM:
-    """facts: loại + ngày ký; find: không có phát hiện."""
+    """facts: loại + ngày ký; find: không có phát hiện. Ghi số đơn vị mỗi lượt nhận (SEEN)."""
+
+    SEEN: dict[str, int] = {}
 
     def complete(self, system, user):
         stage = system.split("\n", 1)[0].removeprefix("BƯỚC:").strip() if system.startswith("BƯỚC:") else "facts"
+        SimpleLLM.SEEN[stage] = len(json.loads(user).get("units") or [])
+        if stage == "summary":
+            return json.dumps({"sections": [{"title": "Giá", "items": [{"text": "Giá", "unit": "p0.d2"}]}]})
+        if stage == "answer":
+            return json.dumps({"answer": "Theo Điều 1.", "legal_conclusion": False, "law_ids": [], "units": []})
         if stage == "facts":
             return json.dumps({"type": "Hợp đồng dịch vụ", "parties": [],
                                "sign_date": {"value": "2023-03-15", "unit": "p0.d1",
@@ -89,7 +96,7 @@ def test_create_long_contract_not_cut(client):
     r = upload(client, contract_text(60))
     assert r.status_code == 200, r.text
     card = r.json()
-    assert len(card["units"]) == 60 and card["coverage"] == {"reviewed": 60, "total": 60}
+    assert len(card["units"]) == 60 and card["coverage"] == {"reviewed": 30, "total": 60}
     assert card["graph"]["published"] is True and card["graph"]["enabled"] is True
     assert [p["part_id"] for p in card["parts"]] == ["p0"]
     assert set(card["parse_report"]) == {"counts", "gaps", "warnings"}
@@ -212,3 +219,74 @@ def test_saved_contract_roundtrip_keeps_ops(client, tmp_path):
     assert [u.uid for u in again.doc.units] == [u.uid for u in before.doc.units]
     assert [u.uid for u in again.units] == [u.uid for u in before.units]
     assert again.builds == before.builds and again.graph == before.graph
+
+
+def test_failed_rebuild_leaves_contract_unchanged(client, svc, monkeypatch):
+    cid = upload(client, contract_text(4), persist=True).json()["contract_id"]
+    c = contracts_api.get(cid)
+    ops, day, builds = c.oplog.to_json(), c.sign_date, list(c.builds)
+
+    def boom(*a, **k):
+        raise RuntimeError("boom")
+    monkeypatch.setattr(svc, "rebuild", boom)
+    r = client.post(f"/api/contracts/{cid}/sign-date", json={"date": "2023-04-01"})
+    assert r.status_code == 500 and r.json()["error"]
+    c = contracts_api.get(cid)
+    assert c.oplog.to_json() == ops and c.sign_date == day and c.sign_date_source == "text" and c.builds == builds
+    monkeypatch.undo()
+    assert client.post(f"/api/contracts/{cid}/sign-date", json={"date": "2023-04-01"}).status_code == 200
+    assert c.oplog.field("sign_date") == "2023-04-01" and len(c.builds) == 2
+
+
+def _write_part4(root, cid):
+    folder = root / cid
+    folder.mkdir(parents=True)
+    (folder / "original.txt").write_bytes(PART4_TEXT.encode("utf-8"))
+    report = {"rid": "r1", "op": "review", "created_at": "2026-11-01T00:00:00+00:00", "party": "neutral",
+              "anchor": "2023-04-01", "coverage": {"reviewed": 1, "total": 1}, "findings": []}
+    (folder / "contract.json").write_text(json.dumps({
+        "contract_id": cid, "filename": "hd.txt", "persist": True, "created_at": "2026-11-01T00:00:00+00:00",
+        "text": PART4_TEXT, "units": [{"uid": "u1", "label": "Điều 1", "text": PART4_TEXT, "page": None}],
+        "total_units": 1, "facts": {}, "sign_date": "2023-04-01", "sign_date_source": "user",
+        "reports": {"r1": report}}, ensure_ascii=False), encoding="utf-8")
+    return folder
+
+
+def test_failed_part4_conversion_is_retried(client, svc, monkeypatch, tmp_path):
+    folder = _write_part4(tmp_path / "contracts", "old3")
+    raw = (folder / "contract.json").read_text(encoding="utf-8")
+
+    def boom(*a, **k):
+        raise RuntimeError("boom")
+    monkeypatch.setattr(svc, "rebuild", boom)
+    r = client.get("/api/contracts/old3")
+    assert r.status_code == 200 and [u["uid"] for u in r.json()["units"]] == ["u1"]
+    c = contracts_api.get("old3")
+    assert c.page_texts == [] and c.oplog.all() == [] and "pre_graph" not in c.reports["r1"]
+    assert (folder / "contract.json").read_text(encoding="utf-8") == raw
+    monkeypatch.undo()
+    r = client.get("/api/contracts/old3")
+    assert r.status_code == 200 and r.json()["units"][0]["uid"].startswith("p0.")
+    assert contracts_api.get("old3").reports["r1"]["pre_graph"] is True
+
+
+def test_list_does_not_convert_and_skips_broken(client, tmp_path):
+    root = tmp_path / "contracts"
+    folder = _write_part4(root, "old4")
+    (root / "bad1").mkdir()
+    (root / "bad1" / "contract.json").write_text("{không phải json", encoding="utf-8")
+    r = client.get("/api/contracts?ids=old4,bad1,khongco")
+    assert r.status_code == 200
+    listed = r.json()["contracts"]
+    assert [c["contract_id"] for c in listed] == ["old4"] and listed[0]["units"][0]["uid"] == "u1"
+    assert "page_texts" not in json.loads((folder / "contract.json").read_text(encoding="utf-8"))
+    assert contracts_api.store().get("old4").page_texts == []
+
+
+def test_llm_payloads_capped_at_30_units(client):
+    SimpleLLM.SEEN.clear()
+    cid = upload(client, contract_text(40)).json()["contract_id"]
+    assert SimpleLLM.SEEN["facts"] == 30
+    assert client.post(f"/api/contracts/{cid}/run", json={"op": "summary"}).status_code == 200
+    contracts_api.chat_answer(cid, "Ký ngày nào?", [])
+    assert SimpleLLM.SEEN["summary"] == 30 and SimpleLLM.SEEN["answer"] == 30

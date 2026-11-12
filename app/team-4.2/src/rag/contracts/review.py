@@ -17,7 +17,7 @@ from typing import Any
 from rag.contracts.evidence import LawEvidence, LegacySearch, find_evidence, law_changes
 from rag.contracts.llm_json import ContractAIError, ask_json, quote_ok
 from rag.contracts.models import Contract
-from rag.contracts.parse import DEMO_MAX_UNITS
+from rag.contracts.parse import llm_units
 from rag.quality.pii import mask_text
 
 GROUPS = ("illegal", "missing_required", "unfavorable", "ambiguous")
@@ -158,7 +158,7 @@ def _masked(contract: Contract, text: str) -> str:
 # --- thao tác ---------------------------------------------------------------------------------
 
 def summarize(ctx: ReviewContext, contract: Contract) -> dict[str, Any]:
-    data = ask_json(ctx.llm, SUMMARY, {"units": _units_payload(contract.units), "facts": contract.facts},
+    data = ask_json(ctx.llm, SUMMARY, {"units": _units_payload(llm_units(contract.units)), "facts": contract.facts},
                     contract.mask_state)
     labels = {u.uid: u.label for u in contract.units}
     sections = []
@@ -178,7 +178,7 @@ def _scope(ctx: ReviewContext, contract: Contract, unit_ids, topics):
         wanted = set(unit_ids)
         return [u for u in contract.units if u.uid in wanted]
     if topics:
-        data = ask_json(ctx.llm, SELECT, {"topics": list(topics), "units": _units_payload(contract.units)},
+        data = ask_json(ctx.llm, SELECT, {"topics": list(topics), "units": _units_payload(llm_units(contract.units))},
                         contract.mask_state)
         wanted = {str(x) for x in data.get("units") or []}
         by_label = {u.label.casefold(): u.uid for u in contract.units}
@@ -187,7 +187,7 @@ def _scope(ctx: ReviewContext, contract: Contract, unit_ids, topics):
         if not scope:
             raise ContractAIError("Không xác định được điều khoản thuộc chủ đề đã chọn — hãy chọn điều khoản cụ thể")
         return scope
-    return contract.units[:DEMO_MAX_UNITS]          # soát toàn bộ: bản demo gửi LLM tối đa 30 đơn vị đầu
+    return llm_units(contract.units)          # soát toàn bộ: bản demo gửi LLM tối đa 30 đơn vị đầu
 
 
 def review(ctx: ReviewContext, contract: Contract, *, unit_ids=None, topics=None) -> dict[str, Any]:
@@ -319,7 +319,7 @@ def answer(ctx: ReviewContext, contract: Contract, question: str, history: list[
         "question": question, "party": contract.party or "neutral",
         "history": [{"query": str(h.get("query", ""))[:500], "answer": str(h.get("answer", ""))[:500]}
                     for h in (history or [])[-3:] if isinstance(h, dict)],
-        "units": _units_payload(contract.units),
+        "units": _units_payload(llm_units(contract.units)),
         "laws": [{"eid": e.eid, "source_title": e.source_title, "section": e.section, "text": e.text[:1500]}
                  for e in laws]}, contract.mask_state)
     text = str(data.get("answer") or "").strip()

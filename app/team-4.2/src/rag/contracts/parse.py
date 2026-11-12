@@ -13,5 +13,10 @@ def split_units(text: str) -> list[ContractUnit]:
     return to_contract_units(parse_contract([PageText(None, text)]))
 
 
+def llm_units(units: list[ContractUnit]) -> list[ContractUnit]:
+    """Đơn vị gửi LLM trong một lượt: bản demo chỉ DEMO_MAX_UNITS đầu (soát theo lô là kế hoạch 2)."""
+    return list(units[:DEMO_MAX_UNITS])
+
+
 def limit_units(units: list[ContractUnit], n: int = DEMO_MAX_UNITS) -> tuple[list[ContractUnit], int]:
     return units[:n], len(units)

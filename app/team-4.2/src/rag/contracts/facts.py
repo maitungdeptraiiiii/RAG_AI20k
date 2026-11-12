@@ -10,6 +10,7 @@ from typing import Any
 
 from rag.contracts.llm_json import ask_json, quote_ok
 from rag.contracts.models import Contract
+from rag.contracts.parse import llm_units
 
 FACTS_PROMPT = """Bạn đọc một hợp đồng tiếng Việt (đã tách thành các đơn vị có uid) và trích thông tin nền.
 Trả JSON:
@@ -23,7 +24,7 @@ Quy tắc: "quote" phải là đoạn chép NGUYÊN VĂN từ hợp đồng; kh�
 
 
 def _payload(contract: Contract) -> dict:
-    return {"units": [{"uid": u.uid, "label": u.label, "text": u.text} for u in contract.units]}
+    return {"units": [{"uid": u.uid, "label": u.label, "text": u.text} for u in llm_units(contract.units)]}
 
 
 def _checked(item: Any, text: str) -> dict | None:

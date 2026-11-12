@@ -1,0 +1,5 @@
+{
+  "version": "1",
+  "nodes": ["LawDoc", "Provision", "ProvisionVersion", "Appendix"],
+  "relations": ["HAS_PROVISION", "CHILD_OF", "HAS_VERSION", "HAS_APPENDIX", "AMENDS", "REPLACES", "REPEALS", "CONSOLIDATES", "GUIDES", "BASED_ON", "REFERS_TO", "CHANGED_BY"]
+}

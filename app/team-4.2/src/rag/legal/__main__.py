@@ -1,9 +1,12 @@
-"""CLI kho luật: python -m rag.legal <crawl|build|show|report|fixture>. Dữ liệu ở DATA_DIR/legal/.
+"""CLI kho luật: python -m rag.legal <crawl|build|show|report|fixture|graph>. Dữ liệu ở DATA_DIR/legal/.
 
 `crawl` / `build` ghi qua `SnapshotManager.write` (staging -> kiểm tra -> công bố nguyên khối) dưới cùng khoá ghi với
 server: đang có lần cập nhật khác (vd. server đang áp dụng một upload) -> thoát mã 2, không ghi gì. `show` / `report`
 đọc snapshot đang công bố. Server đang chạy KHÔNG tự chuyển chat sang snapshot do CLI công bố: nó thấy snapshot đó ở
 lần "Dựng lại chỉ mục" (POST /api/legal/reindex) hoặc lần ghi kế tiếp của server (upload / quyết định duyệt).
+
+`graph build|check|status`: đồ thị luật trong Neo4j (LEGAL_GRAPH=1, NEO4J_*), dựng từ snapshot đang công bố.
+`crawl` / `build` tự đồng bộ đồ thị sau khi công bố khi LEGAL_GRAPH=1; Neo4j sập chỉ in cảnh báo.
 """
 
 from __future__ import annotations
@@ -42,6 +45,27 @@ def _service():
     return LegalService(_snapshots().store())
 
 
+def _sync_graph(store=None) -> dict:
+    """Đồng bộ đồ thị luật với snapshot đang công bố. Tắt / Neo4j sập: chỉ trả trạng thái."""
+    from rag.legal.graph.service import open_store, sync_legal_graph
+
+    _legal_dir()                                        # nạp .env
+    own = store is None
+    try:
+        store = store or open_store()
+    except ValueError as e:
+        return {"status": "disabled", "error": str(e)}
+    try:
+        result = sync_legal_graph(_snapshots(), store)
+    finally:
+        if own and store is not None:
+            store.close()
+    result.pop("errors", None) if result.get("status") != "invalid" else None
+    if "report" in result:
+        result["report"] = {k: result["report"][k] for k in ("nodes", "edges", "refs")}
+    return result
+
+
 def _user() -> str:
     try:
         return getpass.getuser()
@@ -61,6 +85,8 @@ def main(argv: list[str] | None = None) -> int:
     show.add_argument("--as-of", required=True, type=date.fromisoformat)
     show.add_argument("--provision", help="vd. d60.k3")
     sub.add_parser("report", help="thống kê thao tác / phiên bản / mục duyệt")
+    graph = sub.add_parser("graph", help="đồ thị luật trong Neo4j: build (dựng + công bố), check (chỉ dựng), status")
+    graph.add_argument("action", choices=["build", "check", "status"])
     fixture = sub.add_parser("fixture", help="lưu text của văn bản (Luật) làm fixture test")
     fixture.add_argument("numbers", nargs="+")
     fixture.add_argument("--type", default="Luật")
@@ -89,15 +115,36 @@ def _run(args: argparse.Namespace) -> int:
                                                                             max_depth=args.max_depth))
         report = res.value
         print(json.dumps({"snapshot_id": res.snapshot.snapshot_id, "added": report.added, "rejected": report.rejected,
-                          "suspicious": report.suspicious}, ensure_ascii=False, indent=2))
+                          "suspicious": report.suspicious, "graph": _sync_graph()}, ensure_ascii=False, indent=2))
     elif args.cmd == "build":
         snapshots = _snapshots()
         res = snapshots.write("cli:build", _user(), lambda svc: None)
         store = snapshots.store(res.snapshot.snapshot_id)
         print(json.dumps({"snapshot_id": res.snapshot.snapshot_id,
                           "laws": [{"document": d.document_key, "build_id": run.build_id}
-                                   for d in store.documents() if (run := store.latest_build(d.document_key))]},
-                         ensure_ascii=False, indent=2))
+                                   for d in store.documents() if (run := store.latest_build(d.document_key))],
+                          "graph": _sync_graph()}, ensure_ascii=False, indent=2))
+    elif args.cmd == "graph":
+        from rag.legal.graph.service import build_current, graph_status, open_store
+
+        if args.action == "check":
+            build, errors = build_current(_snapshots())
+            print(json.dumps({"errors": errors, "report": build.report}, ensure_ascii=False, indent=2))
+            return 1 if errors else 0
+        _legal_dir()                                    # nạp .env trước khi đọc LEGAL_GRAPH / NEO4J_*
+        store = open_store()
+        if store is None:
+            print("Đồ thị luật đang tắt: đặt LEGAL_GRAPH=1 và NEO4J_PASSWORD")
+            return 1
+        try:
+            if args.action == "status":
+                print(json.dumps(graph_status(_snapshots(), store), ensure_ascii=False, indent=2))
+                return 0
+            result = _sync_graph(store)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0 if result["status"] in ("published", "up_to_date") else 1
+        finally:
+            store.close()
     elif args.cmd == "show":
         svc = _service()
         for v in svc.store.provisions_as_of(args.key, args.as_of):

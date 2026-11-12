@@ -216,7 +216,14 @@ class LegalService:
             versions = _flag(versions, lambda pid: True, None, "effectivity.vbpl_partial_without_amendments")
         repealed = any(o.operation_type == "REPEAL_DOCUMENT" and o.review_status in ("auto_accepted", "approved")
                        and o.effective_from for o in live)
-        if (doc.vbpl_effective_to or "toàn bộ" in status) and not repealed:
+        if doc.vbpl_effective_to and "toàn bộ" in status and not repealed:
+            # vbpl khẳng định hết hiệu lực toàn bộ kèm ngày, kho chưa có văn bản thay thế: đóng theo metadata vbpl
+            # (không để điều khoản của văn bản đã hết hiệu lực vẫn "đang hiệu lực"), ghi rõ nguồn là metadata
+            day = doc.vbpl_effective_to
+            versions = [replace(v, valid_to=day, notes=v.notes + ("note:closed_by_vbpl_status",))
+                        if v.valid_to is None or v.valid_to > day else v
+                        for v in versions if v.valid_from < day]
+        elif (doc.vbpl_effective_to or "toàn bộ" in status) and not repealed:
             versions = _flag(versions, lambda pid: True, doc.vbpl_effective_to,
                              "effectivity.vbpl_effective_to_without_repeal")
         return versions

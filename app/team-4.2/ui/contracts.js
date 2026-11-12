@@ -176,18 +176,25 @@
   function cardHtml(turnId, c) {
     const parties = (c.facts && c.facts.parties) || [];
     const cov = c.coverage || {};
+    const parts = c.parts || [];
+    const warnings = (c.parse_report && c.parse_report.warnings) || [];
+    const graph = c.graph || {};
+    const graphNote = graph.enabled && !graph.published
+      ? `<div class="text-[12.5px]" style="color:#8a5a00">Đồ thị chưa cập nhật: ${esc(graph.error || (graph.problems || [])[0] || '')}</div>` : '';
     const partyBtn = (val, label) => `<button type="button" data-a="party" data-v="${esc(val)}"
         class="text-[12.5px] border rounded-full px-3 py-1 ${c.party === val ? 'bg-neutral-900 text-white border-neutral-900' : 'border-neutral-300 hover:bg-neutral-100'}">${esc(label)}</button>`;
     return `
       <div class="border border-neutral-200 rounded-2xl p-4 space-y-3 bg-white">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div class="min-w-0"><div class="text-[14.5px] font-semibold truncate">📎 ${esc(c.filename)}</div>
-            <div class="text-[12px] text-neutral-500">${esc((c.facts && c.facts.type) || 'chưa rõ loại')} · ${cov.reviewed}/${cov.total} điều khoản${cov.reviewed < cov.total ? ' (bản demo chỉ soát ' + cov.reviewed + ' đầu)' : ''} · ${c.persist ? 'Đã lưu' : 'Chỉ trong phiên này'}</div></div>
+            <div class="text-[12px] text-neutral-500">${esc((c.facts && c.facts.type) || 'chưa rõ loại')} · ${cov.reviewed}/${cov.total} điều khoản${cov.reviewed < cov.total ? ' (bản demo chỉ soát ' + cov.reviewed + ' đầu)' : ''} · ${c.persist ? 'Đã lưu' : 'Chỉ trong phiên này'}${parts.length > 1 ? ' · ' + (parts.length - 1) + ' phụ lục' : ''}</div></div>
           <div class="flex gap-2 text-[12.5px]">
             ${c.persist ? '' : '<button type="button" data-a="save" class="text-blue-600 hover:underline">Lưu hợp đồng này</button>'}
             <button type="button" data-a="remove" class="text-neutral-500 hover:text-red-700">Gỡ</button></div>
         </div>
         ${c.facts && c.facts.error ? `<div class="text-[12.5px]" style="color:#8a5a00">⚠ Chưa trích được thông tin nền: ${esc(c.facts.error)}</div>` : ''}
+        ${warnings.map(w => `<div class="text-[12.5px]" style="color:#8a5a00">⚠ ${esc(w)}</div>`).join('')}
+        ${graphNote}
         <div><div class="text-[12px] text-neutral-500 mb-1">Bạn là bên nào?</div>
           <div class="flex flex-wrap gap-1.5">${parties.map(p => partyBtn(p.role, 'Tôi là ' + p.role)).join('')}${partyBtn('neutral', 'Trung lập / tư vấn')}</div>
           ${c.party ? '' : '<div class="text-[11.5px] mt-1" style="color:#8a5a00">Chưa chọn bên — AI soát ở chế độ Trung lập.</div>'}</div>

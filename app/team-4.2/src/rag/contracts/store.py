@@ -1,6 +1,7 @@
 """Kho hợp đồng: bộ nhớ cho bản "Chỉ trong phiên", thư mục `<root>/<id>/` cho bản "Lưu lại".
 
 Bản trong phiên không bao giờ ghi đĩa; mất khi server khởi động lại (mức demo).
+contract.json "format": 2 có trang + nhật ký thao tác; không có "format" = bản Phần 4 (doc=None).
 """
 
 from __future__ import annotations
@@ -13,7 +14,12 @@ from dataclasses import asdict
 from datetime import date, datetime
 from pathlib import Path
 
+from rag.contracts.doc import PageText, PartSpec
+from rag.contracts.graph.oplog import OperationLog
 from rag.contracts.models import Contract, ContractUnit
+from rag.contracts.structure import parse_contract, to_contract_units
+
+FORMAT = 2
 
 _ID = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 
@@ -95,15 +101,27 @@ def _dump(c: Contract) -> dict:
         "created_at": c.created_at.isoformat(), "text": c.text, "units": [asdict(u) for u in c.units],
         "total_units": c.total_units, "pages": c.pages, "facts": c.facts, "party": c.party,
         "sign_date": c.sign_date.isoformat() if c.sign_date else None, "sign_date_source": c.sign_date_source,
-        "reports": c.reports,
+        "reports": c.reports, "format": FORMAT, "page_texts": [asdict(p) for p in c.page_texts],
+        "file_checksum": c.file_checksum, "operations": c.oplog.to_json(), "graph": c.graph, "builds": c.builds,
     }
 
 
 def _load(d: dict) -> Contract:
-    return Contract(
+    c = Contract(
         d["contract_id"], d["filename"], d.get("persist", True), datetime.fromisoformat(d["created_at"]),
         d["text"], [ContractUnit(**u) for u in d["units"]], d.get("total_units", len(d["units"])),
         d.get("pages") or [], d.get("facts") or {}, d.get("party"),
         date.fromisoformat(d["sign_date"]) if d.get("sign_date") else None, d.get("sign_date_source"),
         d.get("reports") or {},
     )
+    if d.get("format") == FORMAT:
+        c.page_texts = [PageText(**p) for p in d.get("page_texts") or []]
+        c.file_checksum = d.get("file_checksum")
+        c.oplog = OperationLog.from_json(c.contract_id, d.get("operations") or [])
+        c.graph, c.builds = d.get("graph") or {}, d.get("builds") or []
+        if c.page_texts:            # dựng lại doc từ trang + bố cục đang hiệu lực, không gọi Neo4j
+            layout = c.oplog.layout()
+            c.doc = parse_contract(c.page_texts, [PartSpec(**p) for p in layout] if layout else None)
+            c.units = to_contract_units(c.doc)
+            c.total_units = len(c.units)
+    return c

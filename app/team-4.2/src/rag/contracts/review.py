@@ -17,6 +17,7 @@ from typing import Any
 from rag.contracts.evidence import LawEvidence, LegacySearch, find_evidence, law_changes
 from rag.contracts.llm_json import ContractAIError, ask_json, quote_ok
 from rag.contracts.models import Contract
+from rag.contracts.parse import DEMO_MAX_UNITS
 from rag.quality.pii import mask_text
 
 GROUPS = ("illegal", "missing_required", "unfavorable", "ambiguous")
@@ -91,10 +92,16 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
+def _warnings(contract: Contract) -> list[str]:
+    """Cảnh báo chất lượng tách hợp đồng (rỗng với hợp đồng Phần 4 chưa có doc)."""
+    return list(contract.doc.report.warnings) if contract.doc is not None else []
+
+
 def _new_report(contract: Contract, op: str, coverage: dict | None = None, **extra) -> dict[str, Any]:
     rep = {"rid": uuid.uuid4().hex[:10], "op": op, "created_at": _now(), "party": contract.party or "neutral",
            "anchor": contract.sign_date.isoformat() if contract.sign_date else None,
-           "coverage": coverage or {"reviewed": len(contract.units), "total": contract.total_units}, **extra}
+           "coverage": coverage or {"reviewed": len(contract.units), "total": contract.total_units},
+           "warnings": _warnings(contract), **extra}
     contract.reports[rep["rid"]] = rep
     return rep
 
@@ -180,7 +187,7 @@ def _scope(ctx: ReviewContext, contract: Contract, unit_ids, topics):
         if not scope:
             raise ContractAIError("Không xác định được điều khoản thuộc chủ đề đã chọn — hãy chọn điều khoản cụ thể")
         return scope
-    return list(contract.units)
+    return contract.units[:DEMO_MAX_UNITS]          # soát toàn bộ: bản demo gửi LLM tối đa 30 đơn vị đầu
 
 
 def review(ctx: ReviewContext, contract: Contract, *, unit_ids=None, topics=None) -> dict[str, Any]:
@@ -252,7 +259,8 @@ def review(ctx: ReviewContext, contract: Contract, *, unit_ids=None, topics=None
 
     findings.sort(key=rank)
     op = "partial" if (unit_ids or topics) else "review"
-    coverage = {"reviewed": len(scope), "total": contract.total_units}
+    # hợp đồng mới: total_units == len(units); bản Phần 4 đã cắt units còn 30 nhưng total_units giữ tổng thật
+    coverage = {"reviewed": len(scope), "total": max(len(contract.units), contract.total_units)}
     return _new_report(contract, op, coverage=coverage, scope=[u.label for u in scope], topics=list(topics or []), findings=findings)
 
 
@@ -336,4 +344,5 @@ def answer(ctx: ReviewContext, contract: Contract, question: str, history: list[
             elif status == "cannot_conclude":
                 text = refusal_text(None) + related      # không nhắc lại kết luận pháp lý chưa kiểm chứng
     return {"answer": text, "legal_status": status, "units": units, "evidence": [e.to_dict() for e in used],
-            "anchor": contract.sign_date.isoformat() if contract.sign_date else None}
+            "anchor": contract.sign_date.isoformat() if contract.sign_date else None,
+            "warnings": _warnings(contract)}

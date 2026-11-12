@@ -409,6 +409,39 @@ contracts_api.CONFIG.ocr_factory = _make_upload_ocr
 contracts_api.CONFIG.agent_baseline = lambda: get_pipeline()[0]
 contracts_api.CONFIG.agent_config = lambda: AgentConfig.from_settings(get_pipeline()[1])
 
+_contract_graph = None
+_contract_graph_lock = threading.Lock()
+
+
+def _contract_graph_service():
+    """Dịch vụ đồ thị hợp đồng, tạo một lần ở lần gọi đầu (lazy: import server không cần Neo4j hay .env).
+    Cấu hình sai / Neo4j không chạy -> ghi log và chỉ tách hợp đồng, không ghi đồ thị."""
+    global _contract_graph
+    with _contract_graph_lock:
+        if _contract_graph is None:
+            from rag.contracts.graph.neo4j_store import ContractGraphStore, graph_config_from_env
+            from rag.contracts.graph.service import ContractGraphService
+
+            get_pipeline()                      # Settings.load() nạp .env trước khi đọc CONTRACT_GRAPH / NEO4J_*
+            try:
+                cfg = graph_config_from_env()
+            except ValueError as e:
+                log.error("Cấu hình đồ thị hợp đồng không hợp lệ: %s", e)
+                cfg = None
+            store = None
+            if cfg is not None:
+                try:
+                    store = ContractGraphStore(cfg)
+                    store.ensure_schema()
+                except Exception as e:  # noqa: BLE001 — GraphUnavailable, thiếu gói neo4j...
+                    log.warning("Đồ thị hợp đồng tắt: %s", e)
+                    store = None
+            _contract_graph = ContractGraphService(store)
+        return _contract_graph
+
+
+contracts_api.CONFIG.graph = _contract_graph_service
+
 
 def _legal_holder():
     """Gọi trong thread pool (không trên event loop): lần đầu dựng runtime BM25 đồng bộ (Dense nâng cấp sau trên luồng

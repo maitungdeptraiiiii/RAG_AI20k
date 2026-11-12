@@ -169,3 +169,16 @@ def test_queries(legal_store, graph_store):
     appendices = g.appendices(GUIDE)
     assert [(a["number"], a["kind"]) for a in appendices] == [("I", "list")] and "Phiên dịch" in appendices[0]["text"]
     assert g.status()["snapshot_id"] == "t-b"
+
+
+def test_neo4j_down_reports_unavailable_without_raising(legal_store):
+    pytest.importorskip("neo4j")
+    dead = LegalGraphStore(GraphConfig("bolt://127.0.0.1:1", "neo4j", "x", "neo4j"), name="test-legal")
+    try:
+        manager = FakeManager(legal_store, "t-a")
+        result = sync_legal_graph(manager, dead)
+        assert result["status"] == "unavailable" and result["snapshot_id"] == "t-a"
+        status = graph_status(manager, dead)
+        assert status["stale"] is True and "error" in status
+    finally:
+        dead.close()

@@ -422,7 +422,7 @@ def _contract_graph_service():
             from rag.contracts.graph.neo4j_store import ContractGraphStore, graph_config_from_env
             from rag.contracts.graph.service import ContractGraphService
 
-            get_pipeline()                      # Settings.load() nạp .env trước khi đọc CONTRACT_GRAPH / NEO4J_*
+            Settings.load()                     # chỉ nạp .env (không dựng pipeline) trước khi đọc CONTRACT_GRAPH / NEO4J_*
             try:
                 cfg = graph_config_from_env()
             except ValueError as e:

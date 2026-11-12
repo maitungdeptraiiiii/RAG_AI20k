@@ -80,6 +80,7 @@ def client(tmp_path, runtime):
     contracts_api.CONFIG.document_source = None
     contracts_api.CONFIG.agent_baseline = None
     contracts_api.CONFIG.agent_config = None
+    contracts_api.CONFIG.graph = None          # đồ thị của server dựng pipeline thật + nạp .env
     contracts_api.reset()
     return TestClient(Starlette(routes=contracts_api.routes))
 
@@ -267,3 +268,20 @@ def test_importing_server_does_not_load_env_into_process():
     before = dict(os.environ)
     _server()
     assert dict(os.environ) == before
+
+
+def test_server_graph_service_does_not_build_pipeline(monkeypatch):
+    server = _server()
+    loaded = []
+
+    def no_pipeline():
+        raise AssertionError("không được dựng pipeline chỉ để đọc cấu hình đồ thị")
+    monkeypatch.setattr(server, "get_pipeline", no_pipeline)
+    monkeypatch.setattr(server, "Settings", SimpleNamespace(load=lambda: loaded.append(1)))
+    monkeypatch.delenv("CONTRACT_GRAPH", raising=False)
+    svc = server._contract_graph_service()
+    assert svc.store is None and loaded == [1]
+
+
+def test_client_fixture_does_not_use_server_graph(client):
+    assert contracts_api.CONFIG.graph is None

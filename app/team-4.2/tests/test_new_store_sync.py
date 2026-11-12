@@ -60,7 +60,8 @@ def test_contract_think_uses_document_source_not_raw_old_store(tmp_path, monkeyp
 
     c = Contract("c1", "hd.txt", False, datetime(2026, 11, 11, tzinfo=timezone.utc), "Điều 1. A", split_units("Điều 1. A"), 1)
     contracts_api.reset()
-    contracts_api.CONFIG.root = tmp_path
+    monkeypatch.setattr(contracts_api.CONFIG, "root", tmp_path)
+    monkeypatch.setattr(contracts_api.CONFIG, "graph", None)   # không dùng đồ thị của server (nạp .env)
     contracts_api.store().add(c, original=b"x", suffix=".txt")
     seen = {}
     monkeypatch.setattr(av, "run_contract_agent", lambda cc, b, cfg, rt, chunks, search, q, h, stream=False:

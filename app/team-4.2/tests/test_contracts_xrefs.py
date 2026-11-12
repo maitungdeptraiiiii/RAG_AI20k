@@ -45,3 +45,25 @@ def test_appendix_scoping_point_and_dedup():
     assert ("p0.d4.k3", "điểm b", None, "missing") in got
     assert ("p0.d4.k3", "khoản 2", "p0.d4.k2", "internal") in got
     assert ("p0.d4.k2.b", "điểm đ khoản 2 Điều 4", None, "missing") in got
+
+
+def test_capital_khoan_and_lists():
+    units = [U("p0.d3", "article", "Điều 3."), U("p0.d3.k2", "clause", "2. Giá", "p0.d3"),
+             U("p0.d4", "article", "Điều 4."),
+             U("p0.d4.k1", "clause", "1. Khoản 2 Điều 3 áp dụng.", "p0.d4"),
+             U("p0.d5", "article", "Điều 5."), U("p0.d5.k1", "clause", "1. A", "p0.d5"),
+             U("p0.d5.k2", "clause", "2. B", "p0.d5"),
+             U("p0.d6", "article", "Điều 6."),
+             U("p0.d6.k1", "clause", "1. Xem khoản 1, 2 Điều 5.", "p0.d6"),
+             U("p0.d6.k2", "clause", "2. Xem khoản 1 và khoản 2 Điều 5.", "p0.d6"),
+             U("p0.d6.k3", "clause", "3. Xem khoản 1 và 2 Điều 5.", "p0.d6"),
+             U("p0.d6.k4", "clause", "4. Theo Điều 3, Điều 4 Luật Nhà ở.", "p0.d6")]
+    got = [(r.from_uid, r.to_uid, r.kind) for r in find_xrefs(units, PARTS[:1])]
+    assert ("p0.d4.k1", "p0.d3.k2", "internal") in got
+    assert ("p0.d4.k1", "p0.d3", "internal") not in got
+    for k in ("k1", "k2", "k3"):
+        assert (f"p0.d6.{k}", "p0.d5.k1", "internal") in got
+        assert (f"p0.d6.{k}", "p0.d5.k2", "internal") in got
+        assert not any(g[0] == f"p0.d6.{k}" and g[1] in ("p0.d6.k1", "p0.d6.k2") for g in got)
+    k4 = [g for g in got if g[0] == "p0.d6.k4"]
+    assert k4 and all(g[1] is None and g[2] == "external_law" for g in k4)

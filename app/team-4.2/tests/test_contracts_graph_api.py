@@ -375,3 +375,13 @@ def test_table_pages_do_not_trigger_page_warnings():
     body = "Điều %d. " + "chữ " * 300
     pages = [PageText(1, body % 1), PageText(2, body % 2), PageText(3, body % 3), PageText(2, "| a |", "TablePage")]
     assert parse_contract(pages).report.warn_pages == []
+
+
+def test_partial_review_capped_at_30_units(client):
+    SimpleLLM.SEEN.clear()
+    cid = upload(client, contract_text(40)).json()["contract_id"]
+    ids = [u["uid"] for u in contracts_api.card(contracts_api.get(cid))["units"]][:35]
+    rep = client.post(f"/api/contracts/{cid}/run", json={"op": "partial", "unit_ids": ids}).json()
+    assert SimpleLLM.SEEN["find"] == 30
+    assert rep["coverage"] == {"reviewed": 30, "total": 40, "requested": 35}
+    assert len(rep["scope"]) == 30

@@ -196,7 +196,8 @@ def _scope(ctx: ReviewContext, contract: Contract, unit_ids, topics):
 
 
 def review(ctx: ReviewContext, contract: Contract, *, unit_ids=None, topics=None) -> dict[str, Any]:
-    scope = _scope(ctx, contract, unit_ids, topics)
+    requested = _scope(ctx, contract, unit_ids, topics)
+    scope = llm_units(requested)              # soát một phần cũng chỉ gửi LLM tối đa 30 đơn vị
     party = contract.party or "neutral"
     data = ask_json(ctx.llm, FIND, {"party": party, "contract_type": contract.facts.get("type"),
                                     "parties": contract.facts.get("parties"), "units": _units_payload(scope)},
@@ -266,6 +267,8 @@ def review(ctx: ReviewContext, contract: Contract, *, unit_ids=None, topics=None
     op = "partial" if (unit_ids or topics) else "review"
     # hợp đồng mới: total_units == len(units); bản Phần 4 đã cắt units còn 30 nhưng total_units giữ tổng thật
     coverage = {"reviewed": len(scope), "total": max(len(contract.units), contract.total_units)}
+    if len(requested) > len(scope):           # chọn quá 30 đơn vị: ghi rõ số đã chọn
+        coverage["requested"] = len(requested)
     return _new_report(contract, op, coverage=coverage, scope=[u.label for u in scope], topics=list(topics or []), findings=findings)
 
 

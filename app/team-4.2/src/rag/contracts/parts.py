@@ -25,6 +25,12 @@ def _title_like(line: str) -> bool:
     return not (line.startswith("PHỤ LỤC") and rest[0].islower())
 
 
+def heading_number(title: str) -> int | None:
+    """Số phụ lục trong tiêu đề (số đầu tiên), None nếu không có."""
+    m = re.search(r"\d+", title)
+    return int(m.group()) if m else None
+
+
 def detect_parts(text: str) -> list[PartSpec]:
     """Luôn có p0 (main, start=0); mỗi tiêu đề phụ lục mở một phần mới."""
     lines: list[tuple[int, str]] = []
@@ -45,8 +51,7 @@ def detect_parts(text: str) -> list[PartSpec]:
                 continue
         else:
             continue
-        m = re.search(r"\d+", line)
-        number = int(m.group()) if m else None
+        number = heading_number(line)
         # mục lục: ngay sau dòng "MỤC LỤC", hoặc không số mà các dòng sau toàn ngắn
         prev = next((l.strip() for _, l in reversed(lines[:i]) if l.strip()), "")
         if _TOC_MARK.match(prev):

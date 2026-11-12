@@ -47,7 +47,7 @@ from rag.contracts.graph.service import ContractGraphService, GraphBusy
 from rag.contracts.llm_json import ContractAIError
 from rag.contracts.models import Contract
 from rag.contracts.parse import DEMO_MAX_UNITS
-from rag.contracts.parts import detect_parts
+from rag.contracts.parts import detect_parts, heading_number
 from rag.contracts.store import ContractStore
 from rag.contracts.structure import parse_contract, to_contract_units
 
@@ -324,8 +324,10 @@ def _layout_parts(text: str, raw) -> list[PartSpec]:
     starts = [s for s, _ in given]
     if any(not 0 < s < len(text) for s in starts) or len(set(starts)) != len(starts):
         raise ValueError(BAD_LAYOUT)
-    return [PartSpec("p0", "main", "", 0, None)] + [PartSpec(f"p{i}", "appendix", title, start, None)
-                                                    for i, (start, title) in enumerate(given, 1)]
+    # số phụ lục: theo tiêu đề như bộ tách, không có thì theo thứ tự (để "Phụ lục N" vẫn phân giải được)
+    return [PartSpec("p0", "main", "", 0, None)] + [
+        PartSpec(f"p{i}", "appendix", title, start, heading_number(title) or i)
+        for i, (start, title) in enumerate(given, 1)]
 
 
 def set_layout(cid: str, parts, by: str = USER) -> dict[str, Any]:

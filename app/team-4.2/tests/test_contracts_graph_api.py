@@ -290,3 +290,25 @@ def test_llm_payloads_capped_at_30_units(client):
     assert client.post(f"/api/contracts/{cid}/run", json={"op": "summary"}).status_code == 200
     contracts_api.chat_answer(cid, "Ký ngày nào?", [])
     assert SimpleLLM.SEEN["summary"] == 30 and SimpleLLM.SEEN["answer"] == 30
+
+
+APPENDIX_TEXT = ("Điều 1. A\nXem Phụ lục 1 và Phụ lục 2.\nĐiều 2. B\n\nPHỤ LỤC 01\nDanh mục tài sản kèm theo hợp đồng\n"
+                 "Điều 1. X\n\nPHỤ LỤC 02\nBiên bản bàn giao nhà và trang thiết bị\nĐiều 1. Y\n")
+
+
+def test_resubmitting_detected_layout_keeps_xrefs(client):
+    cid = upload(client, APPENDIX_TEXT).json()["contract_id"]
+    c = contracts_api.get(cid)
+    before = [(x.from_uid, x.to_uid, x.raw, x.kind) for x in c.doc.xrefs]
+    assert ("p0.d1", "p1.pre", "Phụ lục 1", "appendix") in before
+    parts = [{"start": p.start, "kind": "appendix", "title": p.title} for p in c.doc.parts[1:]]
+    r = client.post(f"/api/contracts/{cid}/layout", json={"parts": parts})
+    assert r.status_code == 200, r.text
+    c = contracts_api.get(cid)
+    assert [(x.from_uid, x.to_uid, x.raw, x.kind) for x in c.doc.xrefs] == before
+    assert [p.number for p in c.doc.parts] == [None, 1, 2]
+
+
+def test_layout_without_number_in_title_uses_position():
+    specs = contracts_api._layout_parts("x" * 50, [{"start": 30, "title": "Bản vẽ"}, {"start": 10, "title": "PHỤ LỤC 05"}])
+    assert [(p.part_id, p.number) for p in specs] == [("p0", None), ("p1", 5), ("p2", 2)]

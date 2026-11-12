@@ -12,6 +12,7 @@ from rag.contracts.graph.oplog import OperationLog
 from rag.contracts.structure import PARSER_VERSION, parse_contract
 from rag.quality.pii import MaskState, mask_text
 
+_INT64 = (-(2 ** 63), 2 ** 63 - 1)
 SCHEMA = json.loads(Path(__file__).with_name("schema.json").read_text(encoding="utf-8"))
 
 
@@ -86,6 +87,8 @@ def build_graph(contract_id: str, pages: list[PageText], oplog: OperationLog, *,
     for v in doc.values:
         props = {**common, "kind": v.kind, "raw": v.raw}
         for k, val in v.norm.items():
+            if isinstance(val, int) and not _INT64[0] <= val <= _INT64[1]:
+                val = str(val)  # Neo4j chỉ nhận số nguyên 64 bit
             props[f"norm_{k}" if k in ("kind", "raw") else k] = val
         nodes.append(GraphNode(f"{cid}:{v.vid}", "Value", props))
 
@@ -128,11 +131,16 @@ def validate(build: GraphBuild) -> list[str]:
         if not ok or n.props.get("contract_id") != cid:
             problems.append(f"nút {n.node_id}: không thuộc hợp đồng {cid}")
     state = MaskState(prefix="HD_")
-    for n in build.nodes:
-        for key in ("text", "title"):
-            val = n.props.get(key)
-            if isinstance(val, str) and mask_text(val, state=state).safe_findings:
-                problems.append(f"nút {n.node_id}: thuộc tính {key} còn PII")
+    owners = [(f"nút {n.node_id}", n.props) for n in build.nodes]
+    owners += [(f"cạnh {e.type} ({e.src} -> {e.dst})", e.props) for e in build.edges]
+    for who, props in owners:
+        for key, val in props.items():
+            strings = [val] if isinstance(val, str) else (
+                [x for x in val if isinstance(x, str)] if isinstance(val, (list, tuple)) else [])
+            if any(mask_text(x, state=state).safe_findings for x in strings):
+                problems.append(f"{who}: thuộc tính {key} còn PII")
+            if isinstance(val, int) and not isinstance(val, bool) and not _INT64[0] <= val <= _INT64[1]:
+                problems.append(f"{who}: thuộc tính {key} vượt số nguyên 64 bit")
     by_uid: dict[str, list[GraphNode]] = {}
     for n in build.nodes:
         if n.label == "Unit":

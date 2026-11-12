@@ -10,8 +10,9 @@ from rag.contracts.parts import detect_parts
 from rag.contracts.tree import parse_part
 from rag.contracts.values import extract_values
 from rag.contracts.xrefs import find_xrefs
+from rag.quality.pii import _spans as pii_spans
 
-PARSER_VERSION = "1"  # đổi khi đổi quy tắc tách — là đầu vào của bản dựng
+PARSER_VERSION = "2"  # đổi khi đổi quy tắc tách — là đầu vào của bản dựng
 
 _UNSTRUCTURED_LIMIT = 0.3
 _THIN_PAGE_RATIO = 0.25
@@ -19,13 +20,16 @@ _MIN_NUMBERED_PAGES = 3
 
 
 def _values(units: list[Unit]) -> list[Value]:
-    """Giá trị của từng đơn vị lá, vị trí tính trong văn bản đơn vị."""
+    """Giá trị của từng đơn vị lá, vị trí tính trong văn bản đơn vị; bỏ giá trị chạm vùng PII."""
     parents = {u.parent_uid for u in units if u.parent_uid}
     out: list[Value] = []
     for u in units:
         if u.uid in parents:
             continue
-        for i, v in enumerate(extract_values(u.text), 1):
+        pii = [(s, e) for s, e, _ in pii_spans(u.text)]
+        found = [v for v in extract_values(u.text)
+                 if all(v.end <= s or v.start >= e for s, e in pii)]
+        for i, v in enumerate(found, 1):
             out.append(Value(f"{u.uid}#v{i}", u.uid, v.kind, v.raw, v.norm, v.start, v.end))
     return out
 

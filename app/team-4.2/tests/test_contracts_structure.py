@@ -32,3 +32,11 @@ def test_values_attached_to_leaf_units():
     doc = parse_contract([PageText(1, "Điều 3. Đặt cọc\n1. Tiền cọc 90 triệu đồng.\n2. Hoàn trả trong 30 ngày.")])
     assert [(v.uid, v.kind) for v in doc.values] == [("p0.d3.k1", "money"), ("p0.d3.k2", "duration")]
     assert doc.values[0].vid == "p0.d3.k1#v1"
+
+
+def test_values_overlapping_pii_are_dropped():
+    from rag.contracts.values import extract_values
+    text = "Điều 1. Thanh toán\nChuyển vào số tài khoản 1234567890 đồng thời báo 30 ngày."
+    assert any(v.raw.startswith("1234567890") for v in extract_values(text))
+    doc = parse_contract([PageText(1, text)])
+    assert [(v.vid, v.raw) for v in doc.values] == [("p0.d1#v1", "30 ngày")]

@@ -44,3 +44,13 @@ def test_money_does_not_absorb_preceding_integer():
     assert kinds("Điều 5 200.000 đồng") == [("money", {"amount": 200000, "currency": "VND"})]
     assert kinds("Điều 5\n200.000 đồng") == [("money", {"amount": 200000, "currency": "VND"})]
     assert kinds("cọc 5 100 000 đồng") == [("money", {"amount": 5100000, "currency": "VND"})]
+
+
+def test_values_do_not_cross_newlines_or_take_id_numbers():
+    # số CCCD / điện thoại không thành thời hạn / tiền; không nối qua dòng
+    assert kinds("CCCD số: 001203004567 Ngày cấp: 12/03/2021") == [("date", {"iso": "2021-03-12"})]
+    assert kinds("Điện thoại: 0912345678\nNgày sinh: 01/02/1990") == [("date", {"iso": "1990-02-01"})]
+    assert kinds("mã 1234567 ngày") == []
+    assert kinds("số 0912345678 đồng") == []
+    assert kinds("5\nngày") == [] and kinds("30\nđồng") == [] and kinds("20\n%") == []
+    assert kinds("trong vòng 05 ngày làm việc") == [("duration", {"n": 5, "unit": "ngày"})]

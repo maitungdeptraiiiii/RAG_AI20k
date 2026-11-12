@@ -11,3 +11,22 @@ laws:
   - {type: "Bộ luật", number: "45/2019/QH14"}  # Bộ luật Lao động
   - {type: "Bộ luật", number: "92/2015/QH13"}  # Bộ luật Tố tụng dân sự
   - {type: "Bộ luật", number: "101/2015/QH13"} # Bộ luật Tố tụng hình sự
+  # --- Hợp đồng lao động (11/2026). Tầng 1: nguồn của rule kiểm tra; giữ cả bản cũ để áp luật theo ngày ký.
+  - {type: "Nghị định", number: "145/2020/NĐ-CP"}      # Hướng dẫn BLLĐ về điều kiện lao động, quan hệ lao động
+  - {type: "Thông tư", number: "10/2020/TT-BLĐTBXH"}   # Nội dung chủ yếu của HĐLĐ
+  - {type: "Nghị định", number: "293/2025/NĐ-CP"}      # Lương tối thiểu vùng từ 01/01/2026
+  - {type: "Nghị định", number: "74/2024/NĐ-CP"}       # Lương tối thiểu vùng 7/2024-12/2025
+  - {type: "Nghị định", number: "38/2022/NĐ-CP"}       # Lương tối thiểu vùng 7/2022-6/2024
+  - {type: "Luật", number: "41/2024/QH15"}             # Luật BHXH 2024 (từ 01/7/2025)
+  - {type: "Luật", number: "58/2014/QH13"}             # Luật BHXH 2014 (HĐ ký trước 01/7/2025)
+  - {type: "Nghị định", number: "158/2025/NĐ-CP"}      # BHXH bắt buộc, thay NĐ 115/2015
+  - {type: "Nghị định", number: "115/2015/NĐ-CP"}      # BHXH bắt buộc (HĐ ký trước 01/7/2025)
+  - {type: "Nghị định", number: "12/2022/NĐ-CP"}       # Xử phạt (trước NĐ 283/2026) VPHC lĩnh vực lao động, BHXH
+  - {type: "Nghị định", number: "283/2026/NĐ-CP"}      # Xử phạt VPHC lao động, BHXH (thay NĐ 12/2022)
+  # Tầng 2: nguồn tra cứu
+  - {type: "Luật", number: "74/2025/QH15"}             # Luật Việc làm 2025
+  - {type: "Luật", number: "25/2008/QH12"}             # Luật BHYT
+  - {type: "Luật", number: "51/2024/QH15"}             # Luật BHYT sửa đổi 2024
+  - {type: "Luật", number: "84/2015/QH13"}             # Luật An toàn, vệ sinh lao động
+  - {type: "Nghị định", number: "337/2025/NĐ-CP"}      # HĐLĐ điện tử
+  - {type: "Thông tư", number: "08/2026/TT-BNV"}       # Hướng dẫn NĐ 337/2025

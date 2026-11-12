@@ -141,7 +141,16 @@ def test_seeds_file_valid():
     assert seeds == [Seed("Luật", "31/2024/QH15"), Seed("Luật", "27/2023/QH15"), Seed("Luật", "29/2023/QH15"),
                      Seed("Bộ luật", "91/2015/QH13"), Seed("Bộ luật", "95/2015/QH13"),
                      Seed("Bộ luật", "100/2015/QH13"), Seed("Bộ luật", "45/2019/QH14"),
-                     Seed("Bộ luật", "92/2015/QH13"), Seed("Bộ luật", "101/2015/QH13")]
+                     Seed("Bộ luật", "92/2015/QH13"), Seed("Bộ luật", "101/2015/QH13"),
+                     # hợp đồng lao động: tầng 1 (nguồn rule, gồm bản cũ để áp theo ngày ký) + tầng 2 (tra cứu)
+                     Seed("Nghị định", "145/2020/NĐ-CP"), Seed("Thông tư", "10/2020/TT-BLĐTBXH"),
+                     Seed("Nghị định", "293/2025/NĐ-CP"), Seed("Nghị định", "74/2024/NĐ-CP"),
+                     Seed("Nghị định", "38/2022/NĐ-CP"), Seed("Luật", "41/2024/QH15"), Seed("Luật", "58/2014/QH13"),
+                     Seed("Nghị định", "158/2025/NĐ-CP"), Seed("Nghị định", "115/2015/NĐ-CP"),
+                     Seed("Nghị định", "12/2022/NĐ-CP"), Seed("Nghị định", "283/2026/NĐ-CP"),
+                     Seed("Luật", "74/2025/QH15"), Seed("Luật", "25/2008/QH12"),
+                     Seed("Luật", "51/2024/QH15"), Seed("Luật", "84/2015/QH13"),
+                     Seed("Nghị định", "337/2025/NĐ-CP"), Seed("Thông tư", "08/2026/TT-BNV")]
 
 
 def test_subordinate_documents_cannot_amend_a_law(tmp_path):

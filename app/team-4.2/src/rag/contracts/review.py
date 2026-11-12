@@ -97,11 +97,16 @@ def _warnings(contract: Contract) -> list[str]:
     return list(contract.doc.report.warnings) if contract.doc is not None else []
 
 
+def _build_id(contract: Contract) -> str | None:
+    """Bản dựng hiện tại của hợp đồng (None với bản Phần 4 chưa có đồ thị)."""
+    return (contract.graph or {}).get("build_id")
+
+
 def _new_report(contract: Contract, op: str, coverage: dict | None = None, **extra) -> dict[str, Any]:
     rep = {"rid": uuid.uuid4().hex[:10], "op": op, "created_at": _now(), "party": contract.party or "neutral",
            "anchor": contract.sign_date.isoformat() if contract.sign_date else None,
            "coverage": coverage or {"reviewed": len(contract.units), "total": contract.total_units},
-           "warnings": _warnings(contract), **extra}
+           "warnings": _warnings(contract), "build_id": _build_id(contract), **extra}
     contract.reports[rep["rid"]] = rep
     return rep
 
@@ -265,7 +270,10 @@ def review(ctx: ReviewContext, contract: Contract, *, unit_ids=None, topics=None
 
 
 def _latest(contract: Contract, ops: tuple[str, ...]) -> dict | None:
-    reps = [r for r in contract.reports.values() if r.get("op") in ops]
+    """Báo cáo mới nhất làm trên đúng bản dựng hiện tại (bỏ báo cáo pre_graph / bản dựng cũ)."""
+    current = _build_id(contract)
+    reps = [r for r in contract.reports.values()
+            if r.get("op") in ops and not r.get("pre_graph") and r.get("build_id") == current]
     return max(reps, key=lambda r: r["created_at"]) if reps else None
 
 

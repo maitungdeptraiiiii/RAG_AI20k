@@ -312,3 +312,29 @@ def test_resubmitting_detected_layout_keeps_xrefs(client):
 def test_layout_without_number_in_title_uses_position():
     specs = contracts_api._layout_parts("x" * 50, [{"start": 30, "title": "Bản vẽ"}, {"start": 10, "title": "PHỤ LỤC 05"}])
     assert [(p.part_id, p.number) for p in specs] == [("p0", None), ("p1", 5), ("p2", 2)]
+
+
+def test_redline_ignores_review_from_older_build(client):
+    text = contract_text(4)
+    cid = upload(client, text).json()["contract_id"]
+    old = client.post(f"/api/contracts/{cid}/run", json={"op": "review"}).json()
+    assert old["build_id"] == contracts_api.get(cid).graph["build_id"]
+    same = client.post(f"/api/contracts/{cid}/run", json={"op": "redline"}).json()
+    assert same["based_on"] == old["rid"]
+    r = client.post(f"/api/contracts/{cid}/layout",
+                    json={"parts": [{"start": text.index("Điều 3"), "kind": "appendix", "title": "Phụ lục"}]})
+    assert r.status_code == 200, r.text
+    for op in ("redline", "law_changes"):
+        rep = client.post(f"/api/contracts/{cid}/run", json={"op": op}).json()
+        c = contracts_api.get(cid)
+        assert rep["based_on"] != old["rid"]
+        assert c.reports[rep["based_on"]]["build_id"] == c.graph["build_id"] != old["build_id"]
+
+
+def test_pre_graph_review_is_not_reused(client):
+    cid = upload(client, contract_text(4)).json()["contract_id"]
+    c = contracts_api.get(cid)
+    c.reports["old"] = {"rid": "old", "op": "review", "created_at": "2999-01-01T00:00:00+00:00", "pre_graph": True,
+                        "build_id": c.graph["build_id"], "coverage": {"reviewed": 1, "total": 1}, "findings": []}
+    rep = client.post(f"/api/contracts/{cid}/run", json={"op": "redline"}).json()
+    assert rep["based_on"] != "old"

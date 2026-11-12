@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 import threading
+import time
 from contextlib import contextmanager
 from datetime import datetime
 
@@ -13,6 +14,9 @@ from rag.contracts.graph.oplog import OperationLog
 
 log = logging.getLogger(__name__)
 
+BACKOFF_S = 30.0
+BACKING_OFF = "Neo4j tạm không khả dụng — sẽ thử lại sau"
+
 
 class GraphBusy(RuntimeError):
     """Hợp đồng đang được thay đổi bởi người khác."""
@@ -22,8 +26,10 @@ class GraphBusy(RuntimeError):
 
 
 class ContractGraphService:
-    def __init__(self, store: ContractGraphStore | None):
+    def __init__(self, store: ContractGraphStore | None, clock=time.monotonic):
         self.store = store
+        self._clock = clock
+        self._down_until = 0.0     # Neo4j vừa sập: không thử công bố lại trước thời điểm này
         self._locks: dict[str, threading.Lock] = {}
         self._guard = threading.Lock()
 
@@ -50,10 +56,14 @@ class ContractGraphService:
                   "record": build.record()}
         if self.store is None or problems:
             return doc, status
+        if self._clock() < self._down_until:
+            status["error"] = BACKING_OFF
+            return doc, status
         try:
             self.store.publish(build)
             status["published"] = True
         except GraphUnavailable as exc:
+            self._down_until = self._clock() + BACKOFF_S
             status["error"] = str(exc)
         except Exception as exc:  # đồ thị không được làm hỏng API
             log.exception("Ghi đồ thị hợp đồng %s thất bại", contract_id)

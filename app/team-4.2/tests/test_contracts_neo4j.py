@@ -52,3 +52,21 @@ def test_publish_replaces_and_isolates(neo4j_store, build_for):
     ids = {r["id"] for r in rows}
     assert "cA:p0.d2@1" not in ids and not any(i.startswith("cB") for i in ids)
     assert neo4j_store.current_build_id("cB") is not None
+
+
+def test_driver_has_short_timeouts(monkeypatch):
+    import neo4j
+
+    seen = {}
+
+    class FakeDriver:
+        def close(self):
+            pass
+
+    def fake_driver(uri, **kw):
+        seen.update(kw, uri=uri)
+        return FakeDriver()
+    monkeypatch.setattr(neo4j.GraphDatabase, "driver", fake_driver)
+    ContractGraphStore(GraphConfig("bolt://127.0.0.1:7699", "neo4j", "pw", "neo4j"))
+    assert seen["max_transaction_retry_time"] <= 2
+    assert seen["connection_timeout"] <= 3 and seen["connection_acquisition_timeout"] <= 3

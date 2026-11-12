@@ -66,3 +66,29 @@ def test_second_writer_is_refused():
             pass
     with svc.writing("c1"):
         pass
+
+
+class Clock:
+    def __init__(self):
+        self.t = 1000.0
+
+    def __call__(self):
+        return self.t
+
+
+def test_store_down_backs_off_for_30_seconds():
+    store, clock = FakeStore(fail=True), Clock()
+    calls = []
+    orig = store.publish
+    store.publish = lambda b: (calls.append(b), orig(b))
+    svc = ContractGraphService(store, clock=clock)
+    _, st = run(svc)
+    assert len(calls) == 1 and st["error"] == "Không kết nối được Neo4j"
+    clock.t += 10
+    doc, st = run(svc)
+    assert len(calls) == 1 and doc.units
+    assert st["error"] == "Neo4j tạm không khả dụng — sẽ thử lại sau" and st["published"] is False
+    clock.t += 21
+    store.fail = False
+    _, st = run(svc)
+    assert len(calls) == 2 and st["published"] is True and st["error"] is None

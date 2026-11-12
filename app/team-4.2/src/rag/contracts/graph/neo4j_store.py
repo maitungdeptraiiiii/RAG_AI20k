@@ -48,7 +48,10 @@ class ContractGraphStore:
     def __init__(self, config: GraphConfig):
         from neo4j import GraphDatabase  # import muộn: extra [graph] có thể chưa cài
         self.config = config
-        self._driver = GraphDatabase.driver(config.uri, auth=(config.user, config.password))
+        # Neo4j sập: báo lỗi trong vài giây, không chờ ~44 s thử lại mặc định của driver
+        self._driver = GraphDatabase.driver(config.uri, auth=(config.user, config.password),
+                                            max_transaction_retry_time=2, connection_timeout=3,
+                                            connection_acquisition_timeout=3)
 
     def _session(self):
         return self._driver.session(database=self.config.database)

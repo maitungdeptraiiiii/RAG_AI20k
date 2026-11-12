@@ -92,3 +92,11 @@ def test_point_skip_limit_and_paragraph_ids():
     assert [x.uid for x in units if x.level == "point"] == ["p0.d1.k1.a", "p0.d1.k1.dd"]
     units, _, _ = parse("  Một.\n\n \nHai.\n")
     assert [(x.uid, x.number, x.text) for x in units] == [("p0.o1", "1", "Một."), ("p0.o2", "2", "Hai.")]
+
+
+def test_single_article_is_enough_for_dieu_style():
+    units, style, _ = parse("Điều 1. A")
+    assert style == "dieu" and [(u.uid, u.label) for u in units] == [("p0.d1", "Điều 1")]
+    units, style, _ = parse("HĐ\nĐiều 1. A\n1. Giá thuê 10 triệu.\n2. B")
+    assert style == "dieu"
+    assert [u.uid for u in units] == ["p0.pre", "p0.d1", "p0.d1.k1", "p0.d1.k2"]

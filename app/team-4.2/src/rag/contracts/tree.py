@@ -19,7 +19,7 @@ _LETTERS = "abcdđeghiklmnopqrstuvxy"
 _ROMAN_VALUES = {"I": 1, "V": 5, "X": 10, "L": 50, "C": 100}
 _STEP = 3          # số kế tiếp không vượt quá số trước + 3
 _LETTER_STEP = 4   # điểm bỏ qua tối đa 3 chữ
-_STYLES = ("dieu", "roman", "numeric")
+_STYLES = (("dieu", 1), ("roman", 2), ("numeric", 2))  # kiểu, số tiêu đề tối thiểu
 _DEPTH = {"article": 0, "clause": 1, "point": 2}
 
 
@@ -222,8 +222,8 @@ def _paragraph_units(a: Assembled, part: PartSpec, end: int, prefix: str) -> lis
 def parse_part(a: Assembled, part: PartSpec, end: int, label_prefix: str) -> tuple[list[Unit], str, list[str]]:
     """Trả (đơn vị theo thứ tự cây, kiểu đánh số, danh sách chỗ đứt số) của phần [part.start, end)."""
     lines = list(_lines(a, part.start, end))
-    for style in _STYLES:
+    for style, min_heads in _STYLES:
         sc = _scan(lines, part.part_id, style)
-        if sum(h.level == "article" for h in sc.heads) >= 2:
+        if sum(h.level == "article" for h in sc.heads) >= min_heads:
             return _tree_units(a, part, end, sc.heads, label_prefix), style, sc.gaps
     return _paragraph_units(a, part, end, label_prefix), "paragraph", []

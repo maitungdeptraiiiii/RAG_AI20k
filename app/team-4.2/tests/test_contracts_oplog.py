@@ -27,3 +27,19 @@ def test_rejected_and_pending_not_active_and_json_roundtrip():
     assert log.active() == [] and log.field("type") is None
     again = OperationLog.from_json("c1", log.to_json())
     assert again.all() == log.all()
+
+def test_supersede_is_all_or_nothing():
+    import pytest
+    log = OperationLog("c1")
+    m = machine_op("c1", "SET_FIELD", "type", {"value": "a"}, "llm", "auto_accepted", at=T)
+    h = human_op("c1", "SET_FIELD", "type", {"value": "b"}, "Tùng", at=T)
+    log.add(m)
+    log.add(h)
+    before = log.all()
+    with pytest.raises(ValueError):
+        log.supersede(m.op_id, h, "Tùng", "x", T)
+    with pytest.raises(ValueError):
+        log.supersede(h.op_id, h, "Tùng", "x", T)
+    with pytest.raises(KeyError):
+        log.supersede("nope", human_op("c1", "SET_FIELD", "type", {"value": "c"}, "Tùng", at=T), "Tùng", "x", T)
+    assert log.all() == before and log.field("type") == "b"

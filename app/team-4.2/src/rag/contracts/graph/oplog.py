@@ -94,6 +94,8 @@ class OperationLog:
         """Từ chối thao tác cũ và thêm thao tác mới thay thế."""
         if old_id not in self._index:
             raise KeyError(old_id)
+        if new_op.op_id in self._index:
+            raise ValueError(f"Mã thao tác đã tồn tại: {new_op.op_id}")
         self.set_review(old_id, "rejected", reviewer, note, at)
         self.add(dataclasses.replace(new_op, supersedes=old_id))
 

@@ -1,0 +1,11 @@
+{
+  "version": "1",
+  "nodes": ["Contract", "Part", "Unit", "Value"],
+  "relations": {
+    "HAS_PART": [["Contract"], ["Part"]],
+    "HAS_UNIT": [["Part"], ["Unit"]],
+    "CHILD_OF": [["Unit"], ["Unit"]],
+    "REFERS_TO": [["Unit"], ["Unit"]],
+    "HAS_VALUE": [["Unit"], ["Value"]]
+  }
+}

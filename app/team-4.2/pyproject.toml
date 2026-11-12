@@ -36,3 +36,6 @@ where = ["src"]
 testpaths = ["tests"]
 pythonpath = ["src", "."]
 asyncio_default_fixture_loop_scope = "function"
+
+[tool.setuptools.package-data]
+"rag.contracts.graph" = ["schema.json"]

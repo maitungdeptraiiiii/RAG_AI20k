@@ -17,6 +17,7 @@ PARSER_VERSION = "2"  # đổi khi đổi quy tắc tách — là đầu vào c�
 _UNSTRUCTURED_LIMIT = 0.3
 _THIN_PAGE_RATIO = 0.25
 _MIN_NUMBERED_PAGES = 3
+_MAX_PAGE_WARNINGS = 3
 
 
 def _values(units: list[Unit]) -> list[Value]:
@@ -56,7 +57,11 @@ def _report(a: Assembled, pages: list[PageText], units: list[Unit], styles: dict
     if ratio > _UNSTRUCTURED_LIMIT:
         warnings.append("Không nhận ra đánh số Điều / khoản cho phần lớn văn bản")
     warnings += [f"Đánh số không liền mạch: {g}" for g in gaps]
-    warnings += [f"Trang {n} có thể chứa nội dung chưa đọc được" for n in warn_pages]
+    if len(warn_pages) > _MAX_PAGE_WARNINGS:  # nhiều trang: gộp một dòng; danh sách đủ ở warn_pages
+        shown = ", ".join(str(n) for n in warn_pages[:_MAX_PAGE_WARNINGS])
+        warnings.append(f"Trang {shown}, … có thể chứa nội dung chưa đọc được")
+    else:
+        warnings += [f"Trang {n} có thể chứa nội dung chưa đọc được" for n in warn_pages]
     return ParseReport(styles, counts, gaps, ratio, warn_pages, warnings)
 
 

@@ -63,3 +63,12 @@ def test_article_lead_in_values_and_xrefs_are_kept():
     assert ("p0.d2.k2", "khoản 1 Điều này", "p0.d2.k1") in refs
     # khoản của điều không bị quét hai lần qua điều cha
     assert not any(x.from_uid == "p0.d2" and "Điều này" in x.raw for x in doc.xrefs)
+
+
+def test_many_thin_pages_collapse_into_one_warning():
+    body = "Điều %d. " + "chữ " * 300
+    pages = [PageText(i, body % i if i % 2 else "x") for i in range(1, 12)]
+    r = parse_contract(pages).report
+    assert r.warn_pages == [2, 4, 6, 8, 10]
+    page_lines = [w for w in r.warnings if w.startswith("Trang")]
+    assert page_lines == ["Trang 2, 4, 6, … có thể chứa nội dung chưa đọc được"]

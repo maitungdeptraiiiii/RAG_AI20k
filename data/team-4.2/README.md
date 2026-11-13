@@ -30,3 +30,17 @@ Clone về, điền `OPENAI_API_KEY` vào `app/team-4.2/.env` là chạy đượ
 gọi OpenAI để embed câu hỏi). Không cần ingest lại. Đổi `EMBED_MODEL`/`MAX_SYLLABLES` thì phải ingest lại
 vào `DATA_DIR` khác. `cache/` không commit (tự tạo khi chạy).
 
+## Kho luật có phiên bản (`rag.legal`) — dùng chung cả nhóm
+
+Kho luật (92 văn bản, snapshot `s20261112174549-ca73d5`) đóng gói ở `legal/corpus-bundle.tar.gz` (~10 MB) kèm
+`legal/corpus-manifest.json` (sha256 từng file). Mọi người dùng **cùng một snapshot** bằng:
+
+```
+python scripts/team-4.2/legal_corpus.py unpack     # giải nén vào app/team-4.2/data/team-4.2/legal/
+python scripts/team-4.2/legal_corpus.py verify     # kho local còn khớp manifest không
+```
+
+- Kho local đã khác bundle (vd. bạn crawl riêng) thì `unpack` dừng, không ghi đè; `--force` thay và đổi tên kho cũ thành `legal.bak-<giờ>`.
+- Bundle **không** có `vector/` (chỉ mục embedding): sau khi giải nén, dựng lại bằng `POST /api/legal/reindex` (cần khóa embed).
+- Người crawl thêm văn bản: chạy `python -m rag.legal crawl` rồi `python scripts/team-4.2/legal_corpus.py pack`, commit bundle + manifest. Không commit `raw/`, `snapshots/` trực tiếp.
+- Mỗi lần `pack` thêm ~10 MB vào lịch sử git: chỉ đóng gói khi nhóm cần đổi snapshot.

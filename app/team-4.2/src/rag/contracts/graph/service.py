@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from datetime import datetime
 
 from rag.contracts.doc import ContractDoc, PageText
-from rag.contracts.graph.build import build_graph
+from rag.contracts.graph.build import GraphBuild, build_graph
 from rag.contracts.graph.neo4j_store import ContractGraphStore, GraphUnavailable
 from rag.contracts.graph.oplog import OperationLog
 
@@ -48,6 +48,12 @@ class ContractGraphService:
     def rebuild(self, contract_id: str, pages: list[PageText], oplog: OperationLog, *,
                 file_checksum: str, now: datetime) -> tuple[ContractDoc, dict]:
         """Dựng lại đồ thị; luôn trả ContractDoc, đồ thị lỗi/tắt chỉ báo trong trạng thái."""
+        _, doc, status = self.build_and_publish(contract_id, pages, oplog, file_checksum=file_checksum, now=now)
+        return doc, status
+
+    def build_and_publish(self, contract_id: str, pages: list[PageText], oplog: OperationLog, *,
+                          file_checksum: str, now: datetime) -> tuple[GraphBuild, ContractDoc, dict]:
+        """Như `rebuild` nhưng trả cả bản dựng, để đọc lại bằng `open_view` khi chưa/không công bố được."""
         build, doc = build_graph(contract_id, pages, oplog,
                                  file_checksum=file_checksum, built_at=now)
         problems = list(build.problems)
@@ -55,10 +61,10 @@ class ContractGraphService:
                   "published": False, "problems": problems, "error": None,
                   "record": build.record()}
         if self.store is None or problems:
-            return doc, status
+            return build, doc, status
         if self._clock() < self._down_until:
             status["error"] = BACKING_OFF
-            return doc, status
+            return build, doc, status
         try:
             self.store.publish(build)
             status["published"] = True
@@ -68,4 +74,4 @@ class ContractGraphService:
         except Exception as exc:  # đồ thị không được làm hỏng API
             log.exception("Ghi đồ thị hợp đồng %s thất bại", contract_id)
             status["error"] = f"Lỗi khi ghi đồ thị: {type(exc).__name__}"
-        return doc, status
+        return build, doc, status

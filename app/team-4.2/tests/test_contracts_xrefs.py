@@ -67,3 +67,14 @@ def test_capital_khoan_and_lists():
         assert not any(g[0] == f"p0.d6.{k}" and g[1] in ("p0.d6.k1", "p0.d6.k2") for g in got)
     k4 = [g for g in got if g[0] == "p0.d6.k4"]
     assert k4 and all(g[1] is None and g[2] == "external_law" for g in k4)
+
+
+def test_appendix_ref_to_labor_contract_article_goes_to_main():
+    units = [U("p0.d2", "article", "Điều 2. Lương"),
+             U("p1.d1", "article", "Điều 1. Sửa đổi Điều 2 Hợp đồng lao động về lương căn bản; "
+                                   "theo Điều 2 của Phụ lục này; Điều 2 Hợp đồng đào tạo.", None, "p1"),
+             U("p1.d2", "article", "Điều 2. Hiệu lực", None, "p1")]
+    got = [(r.raw, r.to_uid) for r in find_xrefs(units, PARTS) if r.from_uid == "p1.d1"]
+    assert got[0] == ("Điều 2", "p0.d2")
+    assert ("Điều 2", "p1.d2") in got[1:]
+    assert got.count(("Điều 2", "p0.d2")) == 1

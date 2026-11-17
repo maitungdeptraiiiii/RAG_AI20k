@@ -56,3 +56,19 @@ def test_user_part_heading_sentence_is_kept():
     doc = parse_contract([PageText(1, text)], [PartSpec("p0", "main", "", 0, None),
                                                PartSpec("p1", "appendix", title, start, 1)])
     assert doc.unit("p1.pre") is not None and doc.unit("p1.pre").text == title
+
+
+def test_appendix_starts_at_letterhead_and_date():
+    text = ("Điều 1. Nội dung\nA\n<<PAGEBREAK>>\nCỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\n"
+            "Độc lập - Tự do - Hạnh phúc\nHà Nội, ngày 01 tháng 07 năm 2025\n"
+            "PHỤ LỤC HỢP ĐỒNG LAO ĐỘNG\nNội dung phụ lục dài hơn hai mươi ký tự\n")
+    parts = detect_parts(text)
+    assert len(parts) == 2
+    assert text[parts[1].start:].startswith("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM")
+    assert parts[1].title == "PHỤ LỤC HỢP ĐỒNG LAO ĐỘNG"
+
+
+def test_appendix_without_letterhead_unchanged():
+    text = "Điều 1. A\nB\n\nPhụ lục 1\nNội dung phụ lục dài hơn hai mươi ký tự\n"
+    parts = detect_parts(text)
+    assert text[parts[1].start:].startswith("Phụ lục 1")

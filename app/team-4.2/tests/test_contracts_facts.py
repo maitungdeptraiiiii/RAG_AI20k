@@ -109,3 +109,70 @@ def test_contract_pii_never_reaches_the_llm():
     sent = llm.calls[0][1]
     for raw in ("001085012345", "0912 345 678", "0451000123456", "lethihoa.demo@example.com"):
         assert raw not in sent
+
+
+def test_fact_batches_share_known_parties_in_document_order(monkeypatch):
+    import threading
+    import rag.contracts.facts as module
+    from rag.contracts.batches import Batch
+    from rag.contracts.models import ContractUnit
+
+    units = [ContractUnit("u1", "Điều 1", 'Alpha Holdings ("Alpha") signs the contract.'),
+             ContractUnit("u2", "Điều 2", "Alpha and Beta Services agree to perform.")]
+    c = Contract("c1", "hd.txt", False, datetime.now(timezone.utc),
+                 "\n".join(u.text for u in units), units, len(units))
+    monkeypatch.setenv("CONTRACT_BATCH_WORKERS", "4")
+    monkeypatch.setattr(module, "make_batches", lambda c: [Batch(i, (u,)) for i, u in enumerate(units)])
+    caller = threading.get_ident()
+
+    def reply(payload):
+        assert threading.get_ident() == caller
+        uid = payload["units"][0]["uid"]
+        if uid == "u1":
+            assert payload["known_parties"] == []
+            return {"parties": [{"name": "Alpha Holdings", "role": "Provider", "unit": uid,
+                                  "quote": units[0].text}]}
+        assert payload["known_parties"] == [{"name": "Alpha Holdings", "role": "Provider"}]
+        return {"parties": [{"name": "Alpha", "role": "Provider", "unit": uid, "quote": units[1].text},
+                            {"name": "Beta Services", "role": "Client", "unit": uid, "quote": units[1].text}]}
+
+    facts = extract_facts(FakeLLM(reply), c)
+    assert [p["name"] for p in facts["parties"]] == ["Alpha Holdings", "Beta Services"]
+    assert facts["coverage"] == {"read": 2, "total": 2}
+
+
+def test_fact_candidates_reject_quotes_from_another_batch(monkeypatch):
+    import rag.contracts.facts as module
+    from rag.contracts.batches import Batch
+    from rag.contracts.models import ContractUnit
+
+    units = [ContractUnit("u1", "Điều 1", "Signed on 2025-01-02."),
+             ContractUnit("u2", "Điều 2", "Signed on 2025-01-03.")]
+    c = Contract("c1", "hd.txt", False, datetime.now(timezone.utc),
+                 "\n".join(u.text for u in units), units, len(units))
+    monkeypatch.setattr(module, "make_batches", lambda c: [Batch(i, (u,)) for i, u in enumerate(units)])
+
+    def reply(payload):
+        if payload["units"][0]["uid"] == "u2":
+            return {}
+        return {"sign_date": [{"value": "2025-01-02", "unit": "u1", "quote": units[0].text},
+                              {"value": "2025-01-03", "unit": "u2", "quote": units[1].text}]}
+
+    facts = extract_facts(FakeLLM(reply), c)
+    assert [x["value"] for x in facts["candidates"]["sign_date"]] == ["2025-01-02"]
+    assert c.sign_date == date(2025, 1, 2)
+
+
+def test_multiple_signing_dates_require_verification():
+    from rag.contracts import verify
+    from rag.contracts.models import ContractUnit
+
+    unit = ContractUnit("u1", "Phần mở đầu", "Signed on 2025-01-02; countersigned on 2025-01-03.")
+    c = Contract("c1", "hd.txt", False, datetime.now(timezone.utc), unit.text, [unit], 1)
+    facts = extract_facts(FakeLLM(lambda p: {"sign_date": [
+        {"value": "2025-01-02", "unit": "u1", "quote": "Signed on 2025-01-02"},
+        {"value": "2025-01-03", "unit": "u1", "quote": "countersigned on 2025-01-03"}]}), c)
+    assert len(facts["candidates"]["sign_date"]) == 2
+    assert c.sign_date is None
+    signing = next(f for f in verify.summary(c)["fields"] if f["key"] == "sign_date")
+    assert signing["status"] == "conflict"

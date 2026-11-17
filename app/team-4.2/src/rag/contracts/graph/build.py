@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
 
+from rag.contracts.amendments import find_amendments
 from rag.contracts.doc import ContractDoc, PageText, PartSpec
 from rag.contracts.graph.oplog import OperationLog
 from rag.contracts.structure import PARSER_VERSION, parse_contract
@@ -40,12 +41,13 @@ class GraphBuild:
     nodes: tuple
     edges: tuple
     problems: tuple[str, ...] = ()
+    notes: tuple[str, ...] = ()           # vấn đề mềm, không chặn công bố
 
     def record(self) -> dict:
         """Bản ghi bản dựng (không gồm nút/cạnh)."""
         return {"build_id": self.build_id, "contract_id": self.contract_id,
                 "built_at": self.built_at.isoformat(), "inputs": self.inputs,
-                "problems": list(self.problems), "n_nodes": len(self.nodes),
+                "problems": list(self.problems), "notes": list(self.notes), "n_nodes": len(self.nodes),
                 "n_edges": len(self.edges)}
 
 
@@ -55,6 +57,19 @@ def _unresolved(doc: ContractDoc) -> dict[str, list[str]]:
         if x.kind in ("missing", "external_law") or (x.kind == "appendix" and x.to_uid is None):
             out.setdefault(x.from_uid, []).append(x.raw)
     return out
+
+
+def _mask_doc(doc: ContractDoc) -> tuple[MaskState, dict[str, str], dict[str, str]]:
+    """Che PII tiêu đề phần rồi văn bản đơn vị, đúng thứ tự: placeholder ổn định giữa các lần dựng."""
+    state = MaskState(prefix="HD_")
+    titles = {p.part_id: mask_text(p.title, state=state).masked_text for p in doc.parts}
+    texts = {u.uid: mask_text(u.text, state=state).masked_text for u in doc.units}
+    return state, titles, texts
+
+
+def graph_mask_state(doc: ContractDoc) -> MaskState:
+    """Bảng che PII mà đồ thị dùng cho `doc`: để mở che câu trả lời của agent (spec 2026-11-16 §5.7)."""
+    return _mask_doc(doc)[0]
 
 
 def build_graph(contract_id: str, pages: list[PageText], oplog: OperationLog, *,
@@ -68,9 +83,7 @@ def build_graph(contract_id: str, pages: list[PageText], oplog: OperationLog, *,
     cid = contract_id
     common = {"contract_id": cid, "build_id": build_id}
     sign_date = oplog.field("sign_date")
-    state = MaskState(prefix="HD_")
-    titles = {p.part_id: mask_text(p.title, state=state).masked_text for p in doc.parts}
-    texts = {u.uid: mask_text(u.text, state=state).masked_text for u in doc.units}
+    state, titles, texts = _mask_doc(doc)
     unresolved = _unresolved(doc)
 
     nodes = [GraphNode(cid, "Contract", {**common, "type": oplog.field("type"), "sign_date": sign_date})]
@@ -99,10 +112,69 @@ def build_graph(contract_id: str, pages: list[PageText], oplog: OperationLog, *,
     edges += [GraphEdge("REFERS_TO", nid[x.from_uid], nid[x.to_uid], {"raw": x.raw})
               for x in doc.xrefs if x.to_uid in nid and x.from_uid in nid]
     edges += [GraphEdge("HAS_VALUE", nid[v.uid], f"{cid}:{v.vid}", {}) for v in doc.values if v.uid in nid]
+    notes: list[str] = []
+    for a in find_amendments(doc):
+        if a.src_uid in nid and a.dst_uid in nid:
+            edges.append(GraphEdge("AMENDS", nid[a.src_uid], nid[a.dst_uid], {
+                "kind": a.kind, "valid_from": a.valid_from.isoformat() if a.valid_from else None,
+                "raw": mask_text(a.raw, state=state).masked_text}))
+            if a.valid_from is None:
+                notes.append(f"sửa đổi {a.src_uid} -> {a.dst_uid}: không rõ ngày hiệu lực")
+    _concept_layer(cid, common, oplog, nid, state, nodes, edges)
 
     build = GraphBuild(build_id, cid, built_at, inputs, tuple(nodes), tuple(edges))
     return GraphBuild(build_id, cid, built_at, inputs, build.nodes, build.edges,
-                      tuple(validate(build))), doc
+                      tuple(validate(build)), tuple(notes)), doc
+
+
+def _concept_layer(cid: str, common: dict, oplog: OperationLog, nid: dict[str, str], state: MaskState,
+                   nodes: list, edges: list) -> None:
+    """Nút Party / ConceptInstance từ các ASSERT đang hiệu lực (spec 2026-11-14-contract-concept-check §10)."""
+    asserts = [o for o in oplog.active() if o.op_type == "ASSERT"]
+    if not asserts:
+        return
+    absent = sorted({o.content["concept_id"] for o in asserts if o.content.get("kind") == "concept_absent"})
+    if absent:
+        nodes[0].props["absent_checked"] = absent
+    for o in asserts:
+        if o.content.get("kind") != "fact":
+            continue
+        fid = f"{cid}:fact:{o.op_id}"
+        nodes.append(GraphNode(fid, "ContractFact", {
+            **common, "name": o.content["name"], "value": o.content.get("value"), "unit": o.content.get("unit"),
+            "quote": mask_text(o.quote[0], state=state).masked_text if o.quote else "", "op_id": o.op_id,
+            "source": "contract"}))
+        edges.append(GraphEdge("HAS_FACT", cid, fid, {}))
+        if o.source_uid in nid:
+            edges.append(GraphEdge("EVIDENCE", fid, nid[o.source_uid], {}))
+    parties: dict[str, str] = {}
+    for o in asserts:
+        if o.content.get("kind") == "party" and o.content.get("role") not in parties:
+            pid = f"{cid}:party:{o.content['role']}"
+            parties[o.content["role"]] = pid
+            nodes.append(GraphNode(pid, "Party", {**common, "role": o.content["role"],
+                                                  "label": o.content.get("label", "")}))
+            edges.append(GraphEdge("HAS_PARTY", cid, pid, {}))
+    concepts = None
+    for o in asserts:
+        if o.content.get("kind") != "concept":
+            continue
+        if concepts is None:
+            from rag.bridge.catalog import load_catalog
+            concepts = load_catalog().concepts
+        node_id = f"{cid}:ci:{o.op_id}"
+        props = {**common, "concept_id": o.content["concept_id"], "op_id": o.op_id,
+                 "found_by": o.content.get("found_by", ""),
+                 "quote": mask_text(o.quote[0], state=state).masked_text if o.quote else ""}
+        for name, v in (o.content.get("slots") or {}).items():
+            props[f"slot_{name}"] = v.get("value")
+            props[f"slot_{name}_unit"] = v.get("unit")
+        nodes.append(GraphNode(node_id, "ConceptInstance", props))
+        if o.source_uid in nid:
+            edges.append(GraphEdge("ABOUT", node_id, nid[o.source_uid], {}))
+        concept = concepts.get(o.content["concept_id"])
+        if concept is not None and concept.holder in parties:
+            edges.append(GraphEdge("HOLDER", node_id, parties[concept.holder], {}))
 
 
 def _day(s, default: date) -> date:

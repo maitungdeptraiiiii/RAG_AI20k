@@ -21,7 +21,8 @@ _BARE_NUM_RE = re.compile(r"(?<![\wÀ-ỹ])(?<!khoản )(?<!Khoản )(\d+[a-z]?)
 _DIEU_LIST_LAW_RE = re.compile(
     r"(?P<items>Điều\s+\d+[a-z]?(?:\s*(?:,|và|hoặc)\s*Điều\s+\d+[a-z]?)+)"
     r"(?=\s*(?:(?:của|theo|tại)\s+)?(?:Bộ luật|Luật|Nghị định|Thông tư))")
-_BASE_CONTRACT_RE = re.compile(r"\s*(?:của\s+Hợp đồng|Hợp đồng\s+(?:gốc|số))")
+_BASE_CONTRACT_RE = re.compile(
+    r"\s*(?:của\s+)?(?:bản\s+)?Hợp\s+đồng(?:\s+lao\s+động|\s+gốc|\s+số)?(?!\s+(?:thử\s+việc|đào\s+tạo))\b")
 _LAW_START_RE = re.compile(r"\s*(?:(?:của|theo|tại)\s+)?(?:Bộ luật|Luật|Nghị định|Thông tư)")
 
 

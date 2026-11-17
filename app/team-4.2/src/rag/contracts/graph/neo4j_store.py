@@ -125,5 +125,25 @@ class ContractGraphStore:
                 return s.execute_read(lambda t: [r.data() for r in t.run(query, **params)])
         return self._guard(go)
 
+    def run_read(self, query: str, params: dict, *, timeout: float, max_rows: int) -> tuple[list[dict], bool]:
+        """Truy vấn chỉ đọc có thời hạn (giây) và giới hạn dòng: (dòng, có bị cắt không). Lỗi cú pháp / quá hạn của
+        Neo4j ném nguyên (`neo4j.exceptions.ClientError`…) để người gọi trả lại cho agent sửa."""
+        from neo4j import unit_of_work
+
+        @unit_of_work(timeout=timeout)
+        def tx(t):
+            rows, more = [], False
+            for r in t.run(query, **params):
+                if len(rows) >= max_rows:
+                    more = True
+                    break
+                rows.append(r.data())
+            return rows, more
+
+        def go():
+            with self._session() as s:
+                return s.execute_read(tx)
+        return self._guard(go)
+
     def close(self) -> None:
         self._driver.close()

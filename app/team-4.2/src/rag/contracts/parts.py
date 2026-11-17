@@ -9,6 +9,14 @@ _LOWER = re.compile(r"^Phụ lục\s+(số\s+)?\d+\b")
 _TOC_MARK = re.compile(r"^(MỤC LỤC|DANH MỤC)", re.IGNORECASE)
 _HEAD = re.compile(r"^(?:PHỤ LỤC|Phụ lục)(?:\s+(?:SỐ|số))?(?:\s*(?:\d+|[IVXLC]+)\b)?\s*[:.\-–—]?\s*(?P<rest>.*)$")
 _MAX_TITLE_WORDS = 8
+# khối đầu trang ngay trên tiêu đề phụ lục: quốc hiệu, tiêu ngữ, dòng kẻ, số văn bản, "Nơi, ngày … tháng … năm …"
+_LETTERHEAD = re.compile(
+    r"^(?:CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM"
+    r"|Độc lập\s*[-–]\s*Tự do\s*[-–]\s*Hạnh phúc"
+    r"|[-_=*.\s]+"
+    r"|Số\s*:.*"
+    r"|[^\d\n]{2,40},\s*ngày\s+\d{1,2}\s+tháng\s+\d{1,2}\s+năm\s+\d{4}.*)$",
+    re.IGNORECASE)
 
 
 def _title_like(line: str) -> bool:
@@ -60,5 +68,20 @@ def detect_parts(text: str) -> list[PartSpec]:
             nxt = [l.strip() for _, l in lines[i + 1:] if l.strip()][:3]
             if not any(len(l) > 20 for l in nxt):
                 continue
-        parts.append(PartSpec(f"p{len(parts)}", "appendix", line, off, number))
+        parts.append(PartSpec(f"p{len(parts)}", "appendix", line, _block_start(lines, i, parts[-1].start), number))
     return parts
+
+
+def _block_start(lines: list[tuple[int, str]], i: int, floor: int) -> int:
+    """Offset bắt đầu phần phụ lục: lùi qua dòng rỗng / khối đầu trang liền trên tiêu đề (dòng i), không qua `floor`."""
+    start = lines[i][0]
+    for off, raw in reversed(lines[:i]):
+        if off <= floor:
+            break
+        line = raw.strip()
+        if not line:
+            continue
+        if not _LETTERHEAD.match(line):
+            break
+        start = off
+    return start

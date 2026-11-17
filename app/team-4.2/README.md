@@ -18,8 +18,7 @@ condense/decomposition và các phương pháp retrieval đang cấu hình. `thi
 lập requirements → tìm kiếm/rerank → đánh giá phần thiếu → search/xref bổ sung → compose → verify.
 Mặc định tối đa 3 vòng, 8 search và 12 đích xref; state/ngân sách riêng theo request.
 SSE hiển thị tiến độ, chỉ phát đáp án sau kiểm chứng; có trạng thái partial/clarify/abstain/error.
-Không chọn ngày: Think dùng snapshot corpus. Chọn ngày: Think tìm trong kho luật có phiên bản,
-lọc theo các mốc, kiểm tra chuyển tiếp và hiển thị mức chắc chắn; không dùng corpus cũ làm fallback.
+V1 trả lời theo snapshot corpus, chưa xác nhận hiệu lực pháp luật hiện hành.
 Xem [hướng dẫn, cấu hình và giới hạn](docs/MULTIHOP_AGENT.md),
 [bản thiết kế](docs/plans/2026-11-10-multihop-agent-architecture.md).
 CLI: `python scripts/team-4.2/ask.py --think "Câu hỏi nhiều bước"`.

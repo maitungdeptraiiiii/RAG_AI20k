@@ -202,6 +202,20 @@ def test_redline_keeps_real_old_text():
     assert any(r["legal_note"] == "Chưa kiểm tra pháp lý" for r in rep["redlines"])
 
 
+def test_redline_rejects_old_text_joined_from_separate_passages():
+    c = contract(text="Điều 1. First literal clause. An omitted clause. Last literal clause.")
+    c.reports["base"] = {"rid": "base", "op": "review", "created_at": "2026-11-11T08:00:00+00:00",
+                         "coverage": {"reviewed": 1, "total": 1}, "findings": [
+                             {"id": "F1", "unit": c.units[0].uid, "unit_label": "Điều 1",
+                              "quote": "First literal clause.", "explanation": "Issue", "suggestion": "Change",
+                              "legal_status": "not_legal"}]}
+    llm = StageLLM({"redline": lambda p: {"redlines": [
+        {"finding_id": "F1", "old": "First literal clause.\nLast literal clause.",
+         "new": "Replacement", "reason": "Change"}]}})
+    rep = rv.redline(ctx(llm), c)
+    assert rep["redlines"][0]["old_ok"] is False
+
+
 def test_answer_without_versioned_support_adds_refusal():
     c = contract()
     llm = StageLLM({"answer": lambda p: {"answer": "Bên cho thuê được chấm dứt ngay.", "legal_conclusion": True,

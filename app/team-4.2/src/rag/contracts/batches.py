@@ -5,8 +5,10 @@ và nguyên văn các đơn vị lô dẫn chiếu tới — cả hai đánh d�
 """
 from __future__ import annotations
 
+import os
 import re
 from collections.abc import Callable, Sequence
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -117,17 +119,54 @@ def make_batches(contract: Contract, units: Sequence[ContractUnit] | None = None
     return out
 
 
-def run_batches(batches: Sequence[Batch], fn: Callable[[Batch], Any], *, retries: int = 1) -> BatchRun:
-    """Gọi `fn(batch)` cho từng lô; ContractAIError -> thử lại `retries` lần rồi ghi lô lỗi."""
-    run = BatchRun()
-    for b in batches:
+def batch_workers() -> int:
+    """Số lô gọi LLM song song: CONTRACT_BATCH_WORKERS (mặc định 4); giá trị hỏng hoặc <= 0 -> 1 (tuần tự)."""
+    raw = os.environ.get("CONTRACT_BATCH_WORKERS")
+    if raw is None or not raw.strip():
+        return 4
+    try:
+        n = int(raw)
+    except ValueError:
+        return 1
+    return n if n > 0 else 1
+
+
+_FAILED = object()
+
+
+def run_batches(batches: Sequence[Batch], fn: Callable[[Batch], Any], *, retries: int = 1, workers: int | None = None,
+                on_done: Callable[[int, int], None] | None = None) -> BatchRun:
+    """Gọi `fn(batch)` cho từng lô, song song tối đa `workers` luồng (None -> batch_workers()).
+    ContractAIError -> thử lại `retries` lần rồi ghi lô lỗi. Kết quả giữ thứ tự lô; on_done(xong, tổng) sau mỗi lô."""
+    def one(b):
         for attempt in range(retries + 1):
             try:
-                run.results.append((b, fn(b)))
-                break
+                return fn(b)
             except ContractAIError:
                 if attempt == retries:
-                    run.failed.append(b)
+                    return _FAILED
+
+    total = len(batches)
+    workers = batch_workers() if workers is None else max(1, workers)
+    out: list[Any] = [None] * total
+    if workers == 1 or total <= 1:
+        for i, b in enumerate(batches):
+            out[i] = one(b)
+            if on_done:
+                on_done(i + 1, total)
+    else:
+        with ThreadPoolExecutor(max_workers=min(workers, total)) as pool:
+            futures = {pool.submit(one, b): i for i, b in enumerate(batches)}
+            for done, fut in enumerate(as_completed(futures), 1):
+                out[futures[fut]] = fut.result()
+                if on_done:
+                    on_done(done, total)
+    run = BatchRun()
+    for b, r in zip(batches, out):
+        if r is _FAILED:
+            run.failed.append(b)
+        else:
+            run.results.append((b, r))
     return run
 
 
@@ -136,4 +175,4 @@ def unit_text(batch: Batch, uid: str) -> str:
     return "\n".join(u.text for u in batch.units if u.uid == uid)
 
 
-__all__ = ["BUDGET", "Batch", "BatchRun", "make_batches", "run_batches", "unit_text"]
+__all__ = ["BUDGET", "Batch", "BatchRun", "batch_workers", "make_batches", "run_batches", "unit_text"]

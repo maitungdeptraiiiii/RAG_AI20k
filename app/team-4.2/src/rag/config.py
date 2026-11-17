@@ -68,6 +68,10 @@ class Settings:
     llm_api_key: str | None = None
     llm_temperature: float | None = None  # None = không gửi tham số (gpt-6-luna chỉ nhận mặc định)
     condense_model: str = "gpt-4o-mini"   # Model nhẹ cho QueryCondenser gộp ngữ cảnh chat nhanh
+    # Bước gán khái niệm của soát HĐLĐ (rag.bridge.llm): id model OpenRouter, "app" = dùng LLM_MODEL ở trên
+    concept_tag_model: str = "anthropic/claude-haiku-5.5"
+    # Agent hỏi đáp trên đồ thị hợp đồng (scripts/ask_contract_graph.py): id model OpenRouter, "app" = LLM_MODEL
+    contract_agent_model: str = "app"
 
     # OCR (W02-02c): "none" | "gemini". Gemini gửi ẢNH ra ngoài (OpenRouter -> Google) trước khi
     # mask PII -> chỉ bật cho tài liệu công khai. Tesseract local làm tín hiệu chất lượng.

@@ -67,12 +67,36 @@ def ask_json(llm, system: str, payload: dict, state: MaskState) -> dict:
     return unmask_payload(_parse(raw), state)
 
 
+_FILLER = re.compile(r"[-_=*~]{2,}|[.…]{3,}|…")
+"""Chuỗi ký tự điền chỗ trống / kẻ dòng ("-------", "........", "____"): không mang nội dung, mô hình thường bỏ khi
+chép lại. Bỏ ở CẢ văn bản và câu trích trước khi so; mọi chữ và số vẫn phải khớp liền nhau."""
+
+
 def _norm(text: str) -> str:
     text = unicodedata.normalize("NFC", text or "")
     text = text.replace("“", '"').replace("”", '"').replace("’", "'")
-    return " ".join(text.split()).casefold()
+    return " ".join(_FILLER.sub(" ", text).split()).casefold()
 
 
-def quote_ok(source: str, quote: str) -> bool:
-    q = _norm(quote)
-    return bool(q) and q in _norm(source)
+_MIN_SEGMENT = 8
+
+
+def quote_ok(source: str, quote: str, *, multi: bool = True) -> bool:
+    """Câu trích có nguyên văn trong `source` không. `multi`: mô hình hay ghép vài dòng không liền nhau thành một câu
+    trích (khoản 1 + khoản 3) -> chấp nhận khi MỌI dòng (>= 8 ký tự) có nguyên văn trong nguồn và đúng thứ tự
+    (spec hợp đồng §7.3: trích dẫn nhiều đoạn). `multi=False`: bắt buộc liền mạch (đoạn cũ của đề xuất sửa)."""
+    q, src = _norm(quote), _norm(source)
+    if not q:
+        return False
+    if q in src:
+        return True
+    segments = [s for s in (_norm(x) for x in unicodedata.normalize("NFC", quote or "").split("\n")) if s]
+    if not multi or len(segments) < 2:
+        return False
+    pos = 0
+    for seg in segments:
+        at = src.find(seg, pos) if len(seg) >= _MIN_SEGMENT else -1
+        if at < 0:
+            return False
+        pos = at + len(seg)
+    return True

@@ -377,7 +377,7 @@ def redline(ctx: ReviewContext, contract: Contract) -> dict[str, Any]:
             continue
         f = by_id[r["finding_id"]]
         old = str(r.get("old") or "")
-        old_ok = quote_ok(contract.text, old)
+        old_ok = quote_ok(contract.text, old, multi=False)
         out.append({"finding_id": f["id"], "unit_label": f["unit_label"], "old": old, "old_ok": old_ok,
                     "new": str(r.get("new") or ""), "reason": str(r.get("reason") or ""),
                     "legal_note": "Chưa kiểm tra pháp lý" if f["legal_status"] in ("cannot_conclude", "blocked_no_date")

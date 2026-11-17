@@ -34,6 +34,21 @@ def test_quote_ok_ignores_whitespace_but_rejects_invented_text():
     assert not quote_ok(TEXT, "")
 
 
+def test_quote_segments_must_be_literal_and_in_source_order():
+    source = "First literal clause. An omitted clause. Last literal clause."
+    quote = "First literal clause.\nLast literal clause."
+    assert quote_ok(source, quote)
+    assert not quote_ok(source, quote, multi=False)
+    assert not quote_ok(source, "Last literal clause.\nFirst literal clause.")
+    assert not quote_ok(source, "First invented clause.\nLast literal clause.")
+
+
+def test_quote_can_omit_form_fillers_but_cannot_change_values():
+    source = "Salary: ........ 5.000.000 VND; duration: ____ 12 months."
+    assert quote_ok(source, "Salary: 5.000.000 VND; duration: 12 months.")
+    assert not quote_ok(source, "Salary: 6.000.000 VND; duration: 12 months.")
+
+
 def test_ask_json_masks_pii_going_out_and_unmasks_coming_back():
     state = new_mask_state()
     llm = FakeLLM(lambda p: {"echo": p["text"]})

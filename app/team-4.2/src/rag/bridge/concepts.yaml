@@ -1,0 +1,945 @@
+# Danh mục khái niệm hợp đồng lao động (tầng 1) - BẢN NHÁP 2, 2026-11-14
+#
+# Đây là khóa chung giữa đồ thị hợp đồng và đồ thị luật: hai bên gặp nhau ở `id` của khái niệm.
+# Thiết kế: docs/superpowers/specs/2026-11-14-legal-graph-concept-layer-design.md (phía luật)
+#           docs/superpowers/specs/2026-11-14-contract-concept-check-design.md (phía hợp đồng)
+# Bộ nạp và kiểm: src/rag/bridge/catalog.py (sai định dạng thì dừng, báo hết lỗi).
+#
+# AI LÀM GÌ
+#   A  (Tùng): viết khái niệm, `describe`, `phrasing`, `slots`, `rules`. Phía hợp đồng và rule engine đọc các trường này.
+#   LU (Huy):  rà và chốt `anchors` + `value_sources` của từng khái niệm, rồi dựng lớp Concept trong đồ thị luật.
+#              Đồ thị luật CHỈ đọc: roles, và với mỗi khái niệm: id, label, scope, phase, applies_to, anchors,
+#              value_sources. Các trường khác bỏ qua.
+#
+# VIỆC CỦA LU VỚI FILE NÀY
+#   1. Với từng khái niệm: neo đã đúng điều / khoản / điểm chưa? Thiếu ngoại lệ nào không?
+#      Sửa thẳng vào file. Neo nào không chắc thì thêm `note:` vào neo đó.
+#   2. Khái niệm nào cần giá trị từ văn bản dưới luật (lương vùng, tỉ lệ đóng bảo hiểm...) thì thêm `value_sources`.
+#   3. Không cần neo văn bản hướng dẫn (NĐ 145/2020, TT 10/2020): đồ thị tự tìm qua `guidance()`.
+#   4. Thấy thiếu khái niệm quan trọng thì thêm vào mục ĐỀ XUẤT ở cuối file, không tự thêm vào danh sách chính.
+#   5. Giá trị số trong `rules` chép từ BLLĐ 45/2019 bản gốc. Nếu văn bản sửa đổi đã đổi giá trị nào, ghi `note:`.
+#
+# ĐỊNH DẠNG
+#   pid neo:      <document_key>#d<điều>.k<khoản>.<điểm>   (theo rag.legal.keys.provision_id)
+#                 ví dụ bo-luat:45/2019/QH14#d35.k2.đ ; neo cả Điều thì chỉ ghi #d113
+#   role của neo: basis     = điều khoản đặt ra quyền / nghĩa vụ / ngưỡng
+#                 exception = điều khoản loại trừ hoặc ghi đè
+#   value_sources: document_key của văn bản chứa giá trị đổi theo thời kỳ (đồ thị chọn văn bản hiệu lực theo ngày)
+#   scope:        core (dùng để soát hợp đồng) | supporting (chỉ để giải thích) | out_of_scope
+#   phase:        P0 (làm ngay) | P1 (lao động nữ; bản đầu chỉ báo "có thể có quyền")
+#
+#   describe / phrasing: gửi cho LLM để nhận diện điều khoản. Không ghi ngưỡng luật vào đây.
+#   slots:        giá trị LLM phải trích khi gặp khái niệm. kind: duration | percent | money | bool | enum.
+#                 unit: day | workday | week | month | hour | minute | percent | vnd | count.
+#
+#   rules[].mode:        required  = hợp đồng phải ghi nội dung này
+#                        threshold = hợp đồng ghi con số, so với ngưỡng luật
+#                        prohibited= hợp đồng không được có điều khoản này
+#                        default   = luật tự áp dụng dù hợp đồng không ghi
+#   rules[].derogation:  floor     = được thỏa thuận có lợi hơn cho NLĐ
+#                        mandatory = không được thỏa thuận khác
+#                        default   = các bên được thỏa thuận khác
+#   rules[].on_silence:  missing_content = báo thiếu nội dung bắt buộc
+#                        hidden_right    = báo quyền mà hợp đồng không nhắc
+#                        none            = không báo gì
+#   law:          {tên: {value, unit}}; theo kỳ: {tên: {by: <dữ kiện>, unit, periods: [{valid_from, values, source}]}}
+#   cases[].when / applicability: {fact, op, value[, unit]}, lồng bằng all / any / not.
+#                 op thuộc eq | lte | gte | lt | gt | in | present | absent
+#   check: {fact, op, law: <tên giá trị luật>} hoặc {fact, op, value}; lồng bằng all.
+#          Thiếu dữ kiện thì kết quả là UNKNOWN, không FAIL.
+
+version: "0.2-draft"
+law_values_valid_from: "2021-01-01"   # ngày BLLĐ 45/2019 có hiệu lực; áp cho mọi giá trị không theo kỳ
+
+roles:
+  - {id: NLD,                     label: "Người lao động"}
+  - {id: NSDLD,                   label: "Người sử dụng lao động"}
+  - {id: NLD_nu,                  label: "Lao động nữ",                          subtype_of: NLD}
+  - {id: NLD_mang_thai,           label: "Lao động nữ mang thai",                subtype_of: NLD_nu}
+  - {id: NLD_nuoi_con_duoi_12t,   label: "Người lao động nuôi con dưới 12 tháng tuổi", subtype_of: NLD}
+  - {id: NLD_nghi_thai_san,       label: "Người lao động nghỉ thai sản",         subtype_of: NLD}
+
+concepts:
+
+  # ───────────── 1. NỘI DUNG BẮT BUỘC CỦA HỢP ĐỒNG (Đ21 k1) ─────────────
+
+  - id: content.party_info
+    label: Thông tin hai bên giao kết
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Tên, địa chỉ NSDLĐ và người ký thay; họ tên, ngày sinh, giới tính, nơi cư trú, số giấy tờ của NLĐ."
+    phrasing: ["Chúng tôi, một bên là", "đại diện", "Sinh ngày", "Số CCCD", "Địa chỉ thường trú"]
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d21.k1.a", role: basis}
+      - {pid: "bo-luat:45/2019/QH14#d21.k1.b", role: basis}
+    rules:
+      - {id: r1, mode: required, derogation: mandatory, on_silence: missing_content,
+         outcome: {legality: illegal, employee_impact: neutral}}
+
+  - id: content.job_and_workplace
+    label: Công việc và địa điểm làm việc
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản ghi công việc phải làm, chức danh, và nơi làm việc."
+    phrasing: ["Địa điểm làm việc", "Chức danh chuyên môn", "Công việc phải làm", "Bộ phận công tác"]
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d21.k1.c", role: basis}
+      - {pid: "bo-luat:45/2019/QH14#d28", role: basis}
+    rules:
+      - {id: r1, mode: required, derogation: mandatory, on_silence: missing_content,
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  - id: content.term
+    label: Loại và thời hạn hợp đồng
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản ghi hợp đồng không xác định thời hạn hay xác định thời hạn, ngày bắt đầu, ngày kết thúc."
+    phrasing: ["Loại hợp đồng lao động", "Thời hạn hợp đồng", "xác định thời hạn", "Từ ngày", "đến ngày"]
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d21.k1.d", role: basis}
+      - {pid: "bo-luat:45/2019/QH14#d20.k1", role: basis}
+      - {pid: "bo-luat:45/2019/QH14#d20.k2", role: basis, note: "số lần ký HĐ xác định thời hạn; chưa có rule"}
+    rules:
+      - {id: r1, mode: required, derogation: mandatory, on_silence: missing_content,
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+      - id: r2
+        mode: threshold
+        applicability: {fact: contract_kind, op: eq, value: xac_dinh_thoi_han}
+        law: {max_term: {value: 36, unit: month}}
+        check: {fact: term_months, op: lte, law: max_term}
+        derogation: mandatory
+        on_silence: none
+        outcome: {legality: illegal, employee_impact: unfavorable}
+
+  - id: content.wage_terms
+    label: Mức lương, hình thức trả, thời hạn trả, phụ cấp
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản ghi mức lương theo công việc hoặc chức danh, hình thức trả, kỳ trả lương, phụ cấp và khoản bổ sung."
+    phrasing: ["Mức lương chính", "Lương căn bản", "Phụ cấp", "Hình thức trả lương", "Thời hạn trả lương"]
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d21.k1.đ", role: basis}
+      - {pid: "bo-luat:45/2019/QH14#d90.k1", role: basis}
+    rules:
+      - {id: r1, mode: required, derogation: mandatory, on_silence: missing_content,
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  - id: content.raise_policy
+    label: Chế độ nâng bậc, nâng lương
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản về điều kiện, thời điểm xét nâng lương hoặc nâng bậc."
+    phrasing: ["Chế độ nâng bậc", "nâng lương", "xét tăng lương", "điều chỉnh lương"]
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d21.k1.e", role: basis}
+      - {pid: "bo-luat:45/2019/QH14#d103", role: basis}
+    rules:
+      - {id: r1, mode: required, derogation: mandatory, on_silence: missing_content,
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  - id: content.hours_rest
+    label: Thời giờ làm việc, thời giờ nghỉ ngơi
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản ghi giờ làm mỗi ngày, mỗi tuần, ca làm, ngày nghỉ."
+    phrasing: ["Thời giờ làm việc", "giờ/ngày", "giờ/tuần", "Thời giờ nghỉ ngơi", "ca làm việc"]
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d21.k1.g", role: basis}
+    rules:
+      - {id: r1, mode: required, derogation: mandatory, on_silence: missing_content,
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  - id: content.protective_equipment
+    label: Trang bị bảo hộ lao động
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản về việc cấp phát trang bị, phương tiện bảo hộ lao động."
+    phrasing: ["Phương tiện bảo hộ lao động", "trang bị bảo hộ", "được cấp phát", "đồ bảo hộ"]
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d21.k1.h", role: basis}
+    rules:
+      - {id: r1, mode: required, derogation: mandatory, on_silence: missing_content,
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  - id: content.insurance
+    label: Bảo hiểm xã hội, bảo hiểm y tế, bảo hiểm thất nghiệp
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản về việc tham gia và đóng BHXH, BHYT, BHTN; kể cả điều khoản thỏa thuận không đóng."
+    phrasing: ["Bảo hiểm xã hội", "bảo hiểm y tế", "bảo hiểm thất nghiệp", "BHXH", "trích đóng"]
+    slots:
+      waives_compulsory_insurance: {kind: bool, unit: null}
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d21.k1.i", role: basis}
+      - {pid: "bo-luat:45/2019/QH14#d168.k1", role: basis, note: "A chưa đối chiếu nguyên văn"}
+    value_sources:
+      - {document_key: "luat:41/2024/QH15", note: "Luật BHXH 2024, từ 01/7/2025; trước đó là luat:58/2014/QH13"}
+    rules:
+      - {id: r1, mode: required, derogation: mandatory, on_silence: missing_content,
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+      - {id: r2, mode: prohibited, derogation: mandatory, on_silence: none,
+         check: {fact: waives_compulsory_insurance, op: eq, value: false},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  - id: content.training
+    label: Đào tạo, bồi dưỡng, nâng cao trình độ
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản về đào tạo, bồi dưỡng kỹ năng nghề cho người lao động."
+    phrasing: ["Đào tạo", "bồi dưỡng", "nâng cao trình độ", "kỹ năng nghề"]
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d21.k1.k", role: basis}
+    rules:
+      - {id: r1, mode: required, derogation: mandatory, on_silence: missing_content,
+         outcome: {legality: illegal, employee_impact: neutral}}
+
+  # ───────────── 2. THỬ VIỆC (Đ24–27) ─────────────
+
+  - id: probation.duration
+    label: Thời gian thử việc tối đa
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản ghi thời gian thử việc (số ngày hoặc số tháng)."
+    phrasing: ["Thời gian thử việc", "thử việc trong", "thời hạn thử việc", "tháng thử việc"]
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d25", role: basis}
+      - {pid: "bo-luat:45/2019/QH14#d24.k3", role: exception, note: "HĐ dưới 01 tháng không được thử việc"}
+    rules:
+      - id: r1
+        mode: threshold
+        applicability: {fact: has_probation, op: eq, value: true}
+        cases:
+          - {when: {fact: job_level, op: eq, value: quan_ly_doanh_nghiep}, law: {max_probation: {value: 180, unit: day}}}
+          - {when: {fact: job_level, op: eq, value: cao_dang_tro_len},     law: {max_probation: {value: 60, unit: day}}}
+          - {when: {fact: job_level, op: eq, value: trung_cap_ky_thuat},   law: {max_probation: {value: 30, unit: day}}}
+          - {when: {fact: job_level, op: eq, value: cong_viec_khac},       law: {max_probation: {value: 6, unit: workday}}}
+        check: {fact: probation_length, op: lte, law: max_probation}
+        derogation: floor
+        on_silence: none
+        outcome: {legality: illegal, employee_impact: unfavorable}
+
+  - id: probation.once
+    label: Chỉ thử việc một lần cho một công việc
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản cho phép gia hạn thử việc, thử việc lần hai, hoặc kéo dài thử việc cho cùng công việc."
+    phrasing: ["gia hạn thử việc", "kéo dài thời gian thử việc", "thử việc lần", "thử việc thêm"]
+    slots:
+      allows_probation_extension: {kind: bool, unit: null}
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d25", role: basis, note: "nằm ở đoạn mở đầu của Điều; LU xem có pid riêng cho đoạn này không"}
+    rules:
+      - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
+         check: {fact: allows_probation_extension, op: eq, value: false},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  - id: probation.pay
+    label: Tiền lương thử việc tối thiểu
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản ghi mức lương hoặc tỉ lệ lương trong thời gian thử việc."
+    phrasing: ["lương thử việc", "trong thời gian thử việc được hưởng", "% mức lương", "lương trong thời gian thử việc"]
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d26", role: basis}
+    rules:
+      - id: r1
+        mode: threshold
+        applicability: {fact: has_probation, op: eq, value: true}
+        law: {min_probation_pay: {value: 85, unit: percent}}
+        check: {fact: probation_pay_pct, op: gte, law: min_probation_pay}
+        derogation: floor
+        on_silence: hidden_right
+        outcome: {legality: illegal, employee_impact: unfavorable}
+
+  - id: probation.cancel_no_notice
+    label: Hủy bỏ thử việc không cần báo trước, không bồi thường
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản buộc báo trước hoặc bồi thường khi chấm dứt trong thời gian thử việc."
+    phrasing: ["trong thời gian thử việc", "hủy bỏ thỏa thuận thử việc", "chấm dứt thử việc", "báo trước khi nghỉ thử việc"]
+    slots:
+      probation_requires_notice_or_compensation: {kind: bool, unit: null}
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d27.k2", role: basis}
+    rules:
+      - {id: r1, mode: default, derogation: mandatory, on_silence: hidden_right,
+         applicability: {fact: has_probation, op: eq, value: true},
+         check: {fact: probation_requires_notice_or_compensation, op: eq, value: false},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  # ───────────── 3. TIỀN LƯƠNG (Đ90–102) ─────────────
+
+  - id: wage.minimum_regional
+    label: Mức lương không thấp hơn lương tối thiểu vùng
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Mức lương theo công việc hoặc chức danh ghi trong hợp đồng (không tính phụ cấp)."
+    phrasing: ["Mức lương chính", "Lương căn bản", "lương cơ bản", "đồng/tháng"]
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d90.k2", role: basis}
+      - {pid: "bo-luat:45/2019/QH14#d91", role: basis}
+    value_sources:
+      - {document_key: "nghi-dinh:293/2025/NĐ-CP", note: "chuỗi 38/2022 → 74/2024 → 293/2025; vùng tra theo phụ lục địa bàn"}
+    rules:
+      - id: r1
+        mode: threshold
+        law:
+          min_wage:
+            by: wage_region
+            unit: vnd
+            periods:     # số do người viết nhớ; test đối chiếu lời văn nghị định khi kho luật được giải nén
+              - {valid_from: "2022-07-01", source: "nghi-dinh:38/2022/NĐ-CP",
+                 values: {I: 4680000, II: 4160000, III: 3640000, IV: 3250000}}
+              - {valid_from: "2024-07-01", source: "nghi-dinh:74/2024/NĐ-CP",
+                 values: {I: 4960000, II: 4410000, III: 3860000, IV: 3450000}}
+              - {valid_from: "2026-01-01", source: "nghi-dinh:293/2025/NĐ-CP",
+                 values: {I: 5310000, II: 4730000, III: 4140000, IV: 3700000}}
+        check: {fact: base_salary_vnd, op: gte, law: min_wage}
+        derogation: floor
+        on_silence: none
+        outcome: {legality: illegal, employee_impact: unfavorable}
+
+  - id: wage.pay_period
+    label: Kỳ hạn trả lương
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản ghi ngày trả lương, số lần trả trong tháng, hoặc cho phép trả chậm."
+    phrasing: ["Thời hạn trả lương", "trả lương vào ngày", "hàng tháng", "kỳ trả lương", "trả chậm"]
+    slots:
+      pay_frequency: {kind: enum, unit: null, options: [hang_thang, nua_thang, hang_tuan, hang_ngay, theo_gio, khac]}
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d97.k1", role: basis}
+      - {pid: "bo-luat:45/2019/QH14#d97.k2", role: basis}
+      - {pid: "bo-luat:45/2019/QH14#d97.k4", role: exception, note: "chậm trả do bất khả kháng, không quá 30 ngày"}
+      - {pid: "bo-luat:45/2019/QH14#d94.k1", role: basis}
+    rules:
+      - id: r1
+        mode: threshold
+        law: {allowed_pay_frequency: {value: [hang_thang, nua_thang, hang_tuan, hang_ngay, theo_gio], unit: null}}
+        check: {fact: pay_frequency, op: in, law: allowed_pay_frequency}
+        derogation: floor
+        on_silence: none
+        outcome: {legality: illegal, employee_impact: unfavorable}
+
+  - id: wage.overtime_pay
+    label: Tiền lương làm thêm giờ
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản ghi mức trả khi làm thêm giờ ngày thường, ngày nghỉ tuần, ngày lễ; hoặc ghi lương đã gồm làm thêm."
+    phrasing: ["làm thêm giờ", "tăng ca", "ngày nghỉ hằng tuần", "ngày lễ, tết", "lương làm thêm"]
+    slots:
+      ot_weekday_pct: {kind: percent, unit: percent}
+      ot_weekly_rest_pct: {kind: percent, unit: percent}
+      ot_holiday_pct: {kind: percent, unit: percent}
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d98.k1", role: basis}
+      - {pid: "bo-luat:45/2019/QH14#d98.k3", role: basis, note: "làm thêm giờ vào ban đêm: thêm 20%"}
+    rules:
+      - id: r1
+        mode: threshold
+        law:
+          min_ot_weekday: {value: 150, unit: percent}
+          min_ot_weekly_rest: {value: 200, unit: percent}
+          min_ot_holiday: {value: 300, unit: percent}
+        check:
+          all:
+            - {fact: ot_weekday_pct,     op: gte, law: min_ot_weekday}
+            - {fact: ot_weekly_rest_pct, op: gte, law: min_ot_weekly_rest}
+            - {fact: ot_holiday_pct,     op: gte, law: min_ot_holiday}
+        derogation: floor
+        on_silence: hidden_right
+        outcome: {legality: illegal, employee_impact: unfavorable}
+
+  - id: wage.night_pay
+    label: Tiền lương làm việc ban đêm
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản ghi mức trả thêm khi làm việc từ 22 giờ đến 06 giờ."
+    phrasing: ["làm việc vào ban đêm", "ca đêm", "phụ cấp ca đêm", "từ 22 giờ"]
+    slots:
+      night_extra_pct: {kind: percent, unit: percent}
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d98.k2", role: basis}
+      - {pid: "bo-luat:45/2019/QH14#d106", role: basis}
+    rules:
+      - id: r1
+        mode: threshold
+        law: {min_night_extra: {value: 30, unit: percent}}
+        check: {fact: night_extra_pct, op: gte, law: min_night_extra}
+        derogation: floor
+        on_silence: hidden_right
+        outcome: {legality: illegal, employee_impact: unfavorable}
+
+  - id: wage.deduction_limit
+    label: Giới hạn khấu trừ tiền lương
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản cho phép trừ lương: lý do được trừ và mức trừ mỗi tháng."
+    phrasing: ["khấu trừ lương", "trừ vào lương", "khấu trừ tiền lương", "trừ lương hàng tháng"]
+    slots:
+      deduction_pct: {kind: percent, unit: percent}
+      deducts_for_reason_other_than_damage: {kind: bool, unit: null}
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d102.k1", role: basis}
+      - {pid: "bo-luat:45/2019/QH14#d102.k3", role: basis}
+    rules:
+      - id: r1
+        mode: threshold
+        law: {max_deduction: {value: 30, unit: percent}}
+        check: {fact: deduction_pct, op: lte, law: max_deduction}
+        derogation: floor
+        on_silence: none
+        outcome: {legality: illegal, employee_impact: unfavorable}
+      - {id: r2, mode: prohibited, derogation: mandatory, on_silence: none,
+         check: {fact: deducts_for_reason_other_than_damage, op: eq, value: false},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  # ───────────── 4. THỜI GIỜ LÀM VIỆC, NGHỈ NGƠI (Đ105–115) ─────────────
+
+  - id: hours.normal
+    label: Thời giờ làm việc bình thường
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Số giờ làm việc mỗi ngày và mỗi tuần ghi trong hợp đồng."
+    phrasing: ["Thời giờ làm việc", "giờ/ngày", "giờ/tuần", "làm việc từ thứ"]
+    slots:
+      hours_per_day: {kind: duration, unit: hour}
+      hours_per_week: {kind: duration, unit: hour}
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d105.k1", role: basis}
+      - {pid: "bo-luat:45/2019/QH14#d105.k2", role: exception, note: "tính theo tuần: tối đa 10 giờ/ngày"}
+    rules:
+      - id: r1
+        mode: threshold
+        law:
+          max_hours_per_day: {value: 8, unit: hour}
+          max_hours_per_week: {value: 48, unit: hour}
+        check:
+          all:
+            - {fact: hours_per_day,  op: lte, law: max_hours_per_day}
+            - {fact: hours_per_week, op: lte, law: max_hours_per_week}
+        derogation: floor
+        on_silence: none
+        outcome: {legality: illegal, employee_impact: unfavorable}
+
+  - id: hours.overtime_limit
+    label: Điều kiện và giới hạn làm thêm giờ
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản buộc làm thêm giờ, cam kết làm thêm theo yêu cầu, hoặc ghi số giờ làm thêm tối đa."
+    phrasing: ["làm thêm giờ theo yêu cầu", "tăng ca", "số giờ làm thêm", "không được từ chối làm thêm"]
+    slots:
+      ot_hours_per_month: {kind: duration, unit: hour}
+      ot_hours_per_year: {kind: duration, unit: hour}
+      overtime_without_consent: {kind: bool, unit: null}
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d107.k2", role: basis}
+      - {pid: "bo-luat:45/2019/QH14#d107.k3", role: exception, note: "ngành được làm thêm tới 300 giờ/năm"}
+      - {pid: "bo-luat:45/2019/QH14#d108", role: exception, note: "trường hợp đặc biệt, NLĐ không được từ chối"}
+    rules:
+      - id: r1
+        mode: threshold
+        law:
+          max_ot_hours_per_month: {value: 40, unit: hour}
+          max_ot_hours_per_year: {value: 200, unit: hour}
+        check:
+          all:
+            - {fact: ot_hours_per_month, op: lte, law: max_ot_hours_per_month}
+            - {fact: ot_hours_per_year,  op: lte, law: max_ot_hours_per_year}
+        derogation: floor
+        on_silence: none
+        outcome: {legality: illegal, employee_impact: unfavorable}
+      - {id: r2, mode: prohibited, derogation: mandatory, on_silence: none,
+         check: {fact: overtime_without_consent, op: eq, value: false},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  - id: rest.weekly
+    label: Nghỉ hằng tuần
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản ghi ngày nghỉ hằng tuần hoặc số ngày nghỉ trong tháng."
+    phrasing: ["nghỉ hằng tuần", "nghỉ ngày Chủ nhật", "ngày nghỉ trong tuần", "nghỉ thứ Bảy"]
+    slots:
+      weekly_rest: {kind: duration, unit: hour}
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d111.k1", role: basis}
+    rules:
+      - id: r1
+        mode: threshold
+        law: {min_weekly_rest: {value: 24, unit: hour}}
+        check: {fact: weekly_rest, op: gte, law: min_weekly_rest}
+        derogation: floor
+        on_silence: hidden_right
+        outcome: {legality: illegal, employee_impact: unfavorable}
+
+  - id: rest.holidays
+    label: Nghỉ lễ, tết hưởng nguyên lương
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản về ngày nghỉ lễ, tết và việc trả lương cho các ngày đó."
+    phrasing: ["nghỉ lễ, tết", "ngày lễ", "Tết Âm lịch", "hưởng nguyên lương"]
+    slots:
+      paid_holidays: {kind: duration, unit: day}
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d112.k1", role: basis}
+    rules:
+      - id: r1
+        mode: default
+        law: {min_paid_holidays: {value: 11, unit: day}}
+        check: {fact: paid_holidays, op: gte, law: min_paid_holidays}
+        derogation: floor
+        on_silence: hidden_right
+        outcome: {legality: illegal, employee_impact: unfavorable}
+
+  - id: leave.annual
+    label: Nghỉ hằng năm hưởng nguyên lương
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản ghi số ngày phép năm."
+    phrasing: ["nghỉ phép năm", "nghỉ hằng năm", "ngày phép", "phép năm"]
+    slots:
+      annual_leave: {kind: duration, unit: day}   # quy ước: "ngày phép" trong hợp đồng đọc là ngày làm việc
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d113.k1", role: basis}
+      - {pid: "bo-luat:45/2019/QH14#d113.k2", role: basis, note: "chưa đủ 12 tháng: tính theo tỉ lệ"}
+      - {pid: "bo-luat:45/2019/QH14#d113.k3", role: basis, note: "thanh toán ngày phép chưa nghỉ khi thôi việc"}
+      - {pid: "bo-luat:45/2019/QH14#d114", role: basis, note: "cộng 01 ngày cho mỗi 05 năm"}
+    rules:
+      - id: r1
+        mode: threshold
+        cases:
+          - {when: {fact: work_condition, op: eq, value: binh_thuong},        law: {min_annual_leave: {value: 12, unit: day}}}
+          - {when: {fact: work_condition, op: eq, value: nang_nhoc_doc_hai},  law: {min_annual_leave: {value: 14, unit: day}}}
+          - {when: {fact: work_condition, op: eq, value: dac_biet_nang_nhoc}, law: {min_annual_leave: {value: 16, unit: day}}}
+        check: {fact: annual_leave, op: gte, law: min_annual_leave}
+        derogation: floor
+        on_silence: hidden_right
+        outcome: {legality: illegal, employee_impact: unfavorable}
+
+  - id: leave.personal_paid
+    label: Nghỉ việc riêng hưởng nguyên lương
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản về nghỉ khi kết hôn, con kết hôn, người thân mất."
+    phrasing: ["nghỉ việc riêng", "kết hôn được nghỉ", "nghỉ hiếu", "nghỉ hỷ"]
+    slots:
+      marriage_leave: {kind: duration, unit: day}
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d115.k1", role: basis, note: "A mới đối chiếu điểm a, b"}
+    rules:
+      - id: r1
+        mode: default
+        law: {min_marriage_leave: {value: 3, unit: day}}
+        check: {fact: marriage_leave, op: gte, law: min_marriage_leave}
+        derogation: floor
+        on_silence: hidden_right
+        outcome: {legality: illegal, employee_impact: unfavorable}
+
+  # ───────────── 5. CHẤM DỨT HỢP ĐỒNG (Đ35–48) ─────────────
+
+  - id: termination.employee_unilateral
+    label: NLĐ đơn phương chấm dứt hợp đồng
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản về việc NLĐ tự nghỉ việc: thời hạn báo trước, điều kiện được nghỉ, phạt khi nghỉ."
+    phrasing: ["đơn phương chấm dứt", "nghỉ việc phải báo trước", "xin thôi việc", "báo trước ít nhất"]
+    not_about:   # lần chạy thật 14/11: câu hoàn trả phí đào tạo bị gán vào đây
+      - {text: "NLĐ không tiếp tục làm việc sau đào tạo thì phải hoàn trả phí đào tạo", see: training.cost_repayment}
+      - {text: "cam kết phục vụ lâu dài, thời gian phải làm việc sau khi được cử đi đào tạo", see: training.cost_repayment}
+    slots:
+      employee_notice: {kind: duration, unit: day}
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d35.k1", role: basis}
+      - {pid: "bo-luat:45/2019/QH14#d35.k2", role: exception, note: "các trường hợp không cần báo trước, điểm a–g"}
+    rules:
+      - id: r1
+        mode: threshold
+        cases:
+          - {when: {fact: contract_kind, op: eq, value: khong_xac_dinh_thoi_han}, law: {notice: {value: 45, unit: day}}}
+          - {when: {all: [{fact: contract_kind, op: eq, value: xac_dinh_thoi_han},
+                          {fact: term_months, op: gte, value: 12, unit: month}]}, law: {notice: {value: 30, unit: day}}}
+          - {when: {all: [{fact: contract_kind, op: eq, value: xac_dinh_thoi_han},
+                          {fact: term_months, op: lt, value: 12, unit: month}]},  law: {notice: {value: 3, unit: workday}}}
+        check: {fact: employee_notice, op: lte, law: notice}   # HĐ đòi báo trước dài hơn luật là hạn chế quyền
+        derogation: floor
+        on_silence: hidden_right
+        outcome: {legality: unknown, employee_impact: unfavorable}   # cần người xem lại trước khi kết luận trái luật
+
+  - id: termination.employer_unilateral
+    label: NSDLĐ đơn phương chấm dứt hợp đồng
+    scope: core
+    phase: P0
+    holder: NSDLD
+    counterparty: NLD
+    applies_to: [NLD]
+    describe: "Điều khoản cho NSDLĐ quyền chấm dứt hợp đồng: căn cứ chấm dứt và thời hạn báo trước cho NLĐ."
+    phrasing: ["Người sử dụng lao động có quyền đơn phương chấm dứt", "Công ty có quyền chấm dứt", "báo trước cho người lao động", "cho thôi việc"]
+    slots:
+      employer_notice: {kind: duration, unit: day}
+      employer_termination_ground_outside_law: {kind: bool, unit: null}
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d36.k1", role: basis, note: "danh sách căn cứ là đóng"}
+      - {pid: "bo-luat:45/2019/QH14#d36.k2", role: basis, note: "thời hạn báo trước"}
+      - {pid: "bo-luat:45/2019/QH14#d36.k3", role: exception}
+      - {pid: "bo-luat:45/2019/QH14#d37", role: exception, note: "trường hợp NSDLĐ không được chấm dứt; A chưa đối chiếu"}
+    rules:
+      - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
+         check: {fact: employer_termination_ground_outside_law, op: eq, value: false},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+      - id: r2
+        mode: threshold
+        cases:
+          - {when: {fact: contract_kind, op: eq, value: khong_xac_dinh_thoi_han}, law: {notice: {value: 45, unit: day}}}
+          - {when: {all: [{fact: contract_kind, op: eq, value: xac_dinh_thoi_han},
+                          {fact: term_months, op: gte, value: 12, unit: month}]}, law: {notice: {value: 30, unit: day}}}
+          - {when: {all: [{fact: contract_kind, op: eq, value: xac_dinh_thoi_han},
+                          {fact: term_months, op: lt, value: 12, unit: month}]},  law: {notice: {value: 3, unit: workday}}}
+        check: {fact: employer_notice, op: gte, law: notice}
+        derogation: floor
+        on_silence: hidden_right
+        outcome: {legality: illegal, employee_impact: unfavorable}
+
+  - id: termination.severance
+    label: Trợ cấp thôi việc
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản về trợ cấp khi chấm dứt hợp đồng, kể cả điều khoản từ bỏ trợ cấp."
+    phrasing: ["trợ cấp thôi việc", "trợ cấp khi nghỉ việc", "không được hưởng trợ cấp", "nửa tháng tiền lương"]
+    slots:
+      waives_severance: {kind: bool, unit: null}
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d46.k1", role: basis, note: "chỉ áp dụng khi làm việc thường xuyên đủ 12 tháng"}
+      - {pid: "bo-luat:45/2019/QH14#d46.k2", role: basis, note: "trừ thời gian đã đóng BHTN"}
+      - {pid: "bo-luat:45/2019/QH14#d46.k3", role: basis}
+    rules:
+      - {id: r1, mode: default, derogation: floor, on_silence: hidden_right,
+         check: {fact: waives_severance, op: eq, value: false},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  - id: termination.settlement_deadline
+    label: Thời hạn thanh toán khi chấm dứt hợp đồng
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản về thời hạn thanh toán lương và các khoản khác, trả lại giấy tờ khi chấm dứt hợp đồng."
+    phrasing: ["thanh toán đầy đủ", "kể từ ngày chấm dứt hợp đồng", "quyết toán", "chốt sổ bảo hiểm"]
+    slots:
+      settlement_period: {kind: duration, unit: workday}
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d48.k1", role: basis, note: "ngoại lệ kéo dài tới 30 ngày nằm trong các điểm a–d"}
+    rules:
+      - id: r1
+        mode: threshold
+        law: {max_settlement: {value: 14, unit: workday}}
+        check: {fact: settlement_period, op: lte, law: max_settlement}
+        derogation: floor
+        on_silence: hidden_right
+        outcome: {legality: illegal, employee_impact: unfavorable}
+
+  # ───────────── 6. ĐIỀU KHOẢN BỊ CẤM VÀ ĐIỀU KIỆN HIỆU LỰC ─────────────
+
+  - id: prohibit.keep_documents
+    label: Cấm giữ bản chính giấy tờ, văn bằng của NLĐ
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản yêu cầu NLĐ nộp hoặc để công ty giữ bản chính CCCD, hộ chiếu, bằng cấp, chứng chỉ."
+    phrasing: ["nộp bản chính", "giữ bản gốc", "lưu giữ văn bằng", "nộp lại bằng tốt nghiệp"]
+    slots:
+      employer_keeps_original_documents: {kind: bool, unit: null}
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d17.k1", role: basis}
+    rules:
+      - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
+         check: {fact: employer_keeps_original_documents, op: eq, value: false},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  - id: prohibit.deposit
+    label: Cấm buộc đặt cọc, bảo đảm bằng tiền hoặc tài sản
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản yêu cầu NLĐ đặt cọc, ký quỹ, giữ lại lương để bảo đảm thực hiện hợp đồng."
+    phrasing: ["đặt cọc", "ký quỹ", "tiền bảo đảm", "giữ lại một phần lương"]
+    slots:
+      requires_deposit_or_security: {kind: bool, unit: null}
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d17.k2", role: basis}
+    rules:
+      - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
+         check: {fact: requires_deposit_or_security, op: eq, value: false},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  - id: prohibit.fine_instead_of_discipline
+    label: Cấm phạt tiền, cắt lương thay xử lý kỷ luật
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Điều khoản phạt tiền, trừ lương, cắt thưởng cố định khi NLĐ vi phạm nội quy."
+    phrasing: ["phạt tiền", "phạt vi phạm", "trừ lương khi vi phạm", "đi muộn bị trừ"]
+    slots:
+      fines_or_cuts_wage_as_discipline: {kind: bool, unit: null}
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d127.k2", role: basis}
+    rules:
+      - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
+         check: {fact: fines_or_cuts_wage_as_discipline, op: eq, value: false},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  - id: training.cost_repayment
+    label: Hoàn trả chi phí đào tạo
+    scope: core
+    phase: P0
+    holder: NSDLD
+    counterparty: NLD
+    applies_to: [NLD]
+    describe: "Điều khoản buộc NLĐ bồi hoàn chi phí đào tạo hoặc cam kết làm việc một thời gian sau đào tạo."
+    phrasing: ["hoàn trả chi phí đào tạo", "bồi hoàn", "cam kết làm việc sau đào tạo", "phí đào tạo"]
+    slots:
+      has_separate_training_contract: {kind: bool, unit: null}
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d62", role: basis, note: "A chưa đối chiếu nguyên văn; phải có hợp đồng đào tạo nghề riêng"}
+    rules:
+      - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
+         check: {fact: has_separate_training_contract, op: eq, value: true},
+         outcome: {legality: unknown, employee_impact: unfavorable}}
+
+  # ───────────── 7. P1: LAO ĐỘNG NỮ, THAI SẢN (Đ137–140) ─────────────
+  # Dữ kiện về tình trạng của NLĐ không có trong hợp đồng. Bản đầu: kết quả là "có thể có quyền", chưa hỏi người dùng.
+
+  - id: maternity.no_night_overtime_travel
+    label: Không làm đêm, làm thêm giờ, đi công tác xa khi mang thai hoặc nuôi con nhỏ
+    scope: core
+    phase: P1
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD_mang_thai, NLD_nuoi_con_duoi_12t]
+    describe: "Điều khoản buộc làm đêm, làm thêm giờ, đi công tác xa không có ngoại lệ cho lao động mang thai, nuôi con nhỏ."
+    phrasing: ["đi công tác", "làm ca đêm", "lao động nữ mang thai", "nuôi con dưới 12 tháng"]
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d137.k1", role: basis}
+    rules:
+      - id: r1
+        mode: prohibited
+        applicability:
+          any:
+            - {fact: pregnancy_month, op: gte, value: 7}     # từ tháng 06 nếu làm ở vùng cao, vùng sâu, vùng xa, biên giới, hải đảo
+            - {all: [{fact: child_under_12_months, op: eq, value: true},
+                     {fact: employee_consent, op: eq, value: false}]}
+        derogation: mandatory
+        on_silence: hidden_right
+        outcome: {legality: illegal, employee_impact: unfavorable}
+
+  - id: maternity.lighter_work
+    label: Chuyển việc nhẹ hơn hoặc giảm 01 giờ làm mỗi ngày khi mang thai
+    scope: core
+    phase: P1
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD_mang_thai]
+    describe: "Điều khoản về bố trí công việc cho lao động nữ mang thai làm việc nặng nhọc, độc hại."
+    phrasing: ["chuyển sang công việc nhẹ hơn", "giảm giờ làm", "lao động nữ mang thai", "công việc nặng nhọc"]
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d137.k2", role: basis}
+    rules:
+      - {id: r1, mode: default, derogation: mandatory, on_silence: hidden_right,
+         applicability: {all: [{fact: pregnant, op: eq, value: true},
+                               {fact: work_condition, op: in, value: [nang_nhoc_doc_hai, dac_biet_nang_nhoc]}]},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  - id: maternity.no_dismissal
+    label: Không bị sa thải, đơn phương chấm dứt vì kết hôn, mang thai, nghỉ thai sản, nuôi con nhỏ
+    scope: core
+    phase: P1
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD, NLD_mang_thai, NLD_nghi_thai_san, NLD_nuoi_con_duoi_12t]
+    describe: "Điều khoản cấm kết hôn, cấm mang thai trong một thời gian, hoặc cho phép chấm dứt hợp đồng vì các lý do đó."
+    phrasing: ["không được kết hôn", "không mang thai", "cam kết không sinh con", "chấm dứt hợp đồng khi mang thai"]
+    slots:
+      restricts_marriage_or_pregnancy: {kind: bool, unit: null}
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d137.k3", role: basis}
+    rules:
+      - {id: r1, mode: prohibited, derogation: mandatory, on_silence: hidden_right,
+         check: {fact: restricts_marriage_or_pregnancy, op: eq, value: false},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  - id: maternity.breaks
+    label: Nghỉ 30 phút mỗi ngày khi hành kinh, 60 phút mỗi ngày khi nuôi con dưới 12 tháng
+    scope: core
+    phase: P1
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD_nu, NLD_nuoi_con_duoi_12t]
+    describe: "Điều khoản về thời gian nghỉ trong giờ làm việc dành cho lao động nữ."
+    phrasing: ["thời gian hành kinh", "nghỉ 60 phút", "nuôi con nhỏ", "nghỉ cho con bú"]
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d137.k4", role: basis}
+    rules:
+      - {id: r1, mode: default, derogation: floor, on_silence: hidden_right,
+         applicability: {any: [{fact: employee_is_female, op: eq, value: true},
+                               {fact: child_under_12_months, op: eq, value: true}]},
+         law: {menstruation_break: {value: 30, unit: minute}, nursing_break: {value: 60, unit: minute}},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  - id: maternity.terminate_or_suspend
+    label: Lao động nữ mang thai đơn phương chấm dứt hoặc tạm hoãn hợp đồng
+    scope: core
+    phase: P1
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD_mang_thai]
+    describe: "Điều khoản về quyền nghỉ việc hoặc tạm hoãn hợp đồng khi tiếp tục làm việc ảnh hưởng xấu tới thai nhi."
+    phrasing: ["ảnh hưởng xấu tới thai nhi", "tạm hoãn hợp đồng", "xác nhận của cơ sở khám bệnh", "lao động nữ mang thai"]
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d138.k1", role: basis}
+      - {pid: "bo-luat:45/2019/QH14#d138.k2", role: basis}
+      - {pid: "bo-luat:45/2019/QH14#d35.k2.đ", role: basis, note: "không cần báo trước"}
+    rules:
+      - {id: r1, mode: default, derogation: mandatory, on_silence: hidden_right,
+         applicability: {all: [{fact: pregnant, op: eq, value: true},
+                               {fact: medical_certificate, op: eq, value: true}]},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  - id: maternity.leave
+    label: Nghỉ thai sản 06 tháng
+    scope: core
+    phase: P1
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD_mang_thai, NLD_nghi_thai_san]
+    describe: "Điều khoản ghi thời gian nghỉ thai sản, hoặc rút ngắn, từ bỏ thời gian nghỉ thai sản."
+    phrasing: ["nghỉ thai sản", "chế độ thai sản", "nghỉ sinh", "thời gian nghỉ sinh con"]
+    slots:
+      maternity_leave: {kind: duration, unit: month}
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d139.k1", role: basis}
+      - {pid: "bo-luat:45/2019/QH14#d139.k2", role: basis, note: "chế độ hưởng theo pháp luật BHXH"}
+    value_sources:
+      - {document_key: "luat:41/2024/QH15", note: "chế độ thai sản; trước 01/7/2025 là luat:58/2014/QH13"}
+    rules:
+      - id: r1
+        mode: threshold
+        applicability: {fact: pregnant, op: eq, value: true}
+        law: {min_maternity_leave: {value: 6, unit: month}}
+        check: {fact: maternity_leave, op: gte, law: min_maternity_leave}
+        derogation: floor
+        on_silence: hidden_right
+        outcome: {legality: illegal, employee_impact: unfavorable}
+
+  - id: maternity.job_guarantee
+    label: Bảo đảm việc làm cũ sau khi nghỉ thai sản
+    scope: core
+    phase: P1
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD_nghi_thai_san]
+    describe: "Điều khoản về vị trí công việc và mức lương khi quay lại làm việc sau thai sản."
+    phrasing: ["sau khi nghỉ thai sản", "trở lại làm việc", "bảo đảm việc làm cũ", "bố trí công việc khác"]
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d140", role: basis}
+    rules:
+      - {id: r1, mode: default, derogation: mandatory, on_silence: hidden_right,
+         applicability: {fact: pregnant, op: eq, value: true},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+# ───────────── ĐỀ XUẤT (LU ghi thêm ở đây, A xét rồi đưa lên danh sách chính) ─────────────
+# Ứng viên A đã biết nhưng chưa đưa vào bản đầu:
+#   - Chuyển NLĐ làm công việc khác so với hợp đồng (Đ29)
+#   - Tạm hoãn thực hiện hợp đồng (Đ30)
+#   - Hệ quả của chấm dứt trái pháp luật (Đ39–41)
+#   - Trợ cấp mất việc làm (Đ47)
+#   - Tiền lương ngừng việc (Đ99)
+#   - Nghỉ giữa giờ, nghỉ chuyển ca (Đ109–110)
+#   - Bồi thường thiệt hại, trách nhiệm vật chất (Đ129–130)
+#   - Bảo vệ bí mật kinh doanh, thỏa thuận không cạnh tranh (Đ21 k2)
+#   - Buộc làm việc để trả nợ (Đ17 k3)
+#   - Số lần ký hợp đồng xác định thời hạn (Đ20 k2)
+proposals: []

@@ -1,0 +1,26 @@
+# Nhãn tay cho data/team-4.2/contracts_demo/hdld_tvpl_2025_filled.* (gán 2026-11-14, cần A rà lại).
+# present: khái niệm mà hợp đồng NÓI TỚI, kèm nơi (nhãn đơn vị) và giá trị slot mong đợi.
+# ambiguous: khái niệm có thể coi là có hoặc không; không tính vào precision / recall.
+present:
+  content.party_info:            [{where: "Phần mở đầu"}]
+  content.job_and_workplace:     [{where: "Điều 1"}]
+  content.term:                  [{where: "Điều 1"}]
+  content.wage_terms:            [{where: "Điều 2"}]
+  wage.minimum_regional:         [{where: "Điều 2"}]
+  content.raise_policy:          [{where: "Điều 2"}]
+  wage.pay_period:               [{where: "Điều 2", slots: {pay_frequency: hang_thang}}]
+  content.hours_rest:            [{where: "Điều 3"}]
+  hours.normal:                  [{where: "Điều 3", slots: {hours_per_day: [8, hour], hours_per_week: [48, hour]}}]
+  rest.weekly:                   [{where: "Điều 3"}]
+  rest.holidays:                 [{where: "Điều 3"}]
+  leave.annual:                  [{where: "Điều 3", slots: {annual_leave: [12, day]}}]
+  content.insurance:             [{where: "Điều 3", slots: {waives_compulsory_insurance: false}}]
+  content.training:              [{where: "Điều 4"}]
+  training.cost_repayment:       [{where: "Điều 4"}]
+  probation.duration:            [{where: "Điều 6"}]
+  probation.pay:                 [{where: "Điều 6"}]
+  termination.employer_unilateral: [{where: "Điều 5"}]
+ambiguous:
+  - content.protective_equipment   # "Thiết bị và công cụ làm việc sẽ được Công ty cấp phát" (công cụ, không hẳn bảo hộ)
+  - wage.deduction_limit           # khấu trừ thuế TNCN, không phải khấu trừ bồi thường
+  - hours.overtime_limit           # "sẵn sàng chấp nhận mọi sự điều động" (điều động, không phải làm thêm giờ)

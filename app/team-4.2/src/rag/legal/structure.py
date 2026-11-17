@@ -107,6 +107,8 @@ def parse_structure(text: str, document_key: str) -> list[Provision]:
             headings[-1] = f"{headings[-1]} - {line}"
             pending_heading_title = None
         elif m_article:
+            if any(a.address.article == m_article.group(1) for a in articles):
+                break                              # Điều lặp số ngoài trích dẫn: biểu mẫu phụ lục, hết phần thân
             pending_heading_title = None
             article = _Unit(Address(m_article.group(1)), i, i)
             articles.append(article)

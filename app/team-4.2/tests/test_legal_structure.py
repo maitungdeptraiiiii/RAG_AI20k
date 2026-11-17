@@ -80,3 +80,22 @@ def test_quoted_block_is_not_structure(amend):
 def test_spans_cover_text(law_text, law):
     for p in law:
         assert law_text[p.span[0]:p.span[1]].strip() == p.text.strip(), p.provision_id
+
+
+def test_form_appendix_with_restarted_articles_ends_body():
+    """Nghị định kèm biểu mẫu (vd. NĐ 145/2020: mẫu HĐLĐ "Điều 1. Thời hạn hợp đồng" ...): Điều lặp số ngoài trích
+    dẫn là phần phụ lục, không phải điều khoản; trước đây làm trùng provision_id và hỏng dựng phiên bản."""
+    text = "\n".join([
+        "Điều 1. Phạm vi điều chỉnh", "Nghị định này quy định chi tiết.",
+        "Điều 2. Quyền và nghĩa vụ", "1. Quyền của người lao động.", "2. Nghĩa vụ của người lao động.",
+        "Nơi nhận:", "- Như trên;",
+        "Mẫu số 01", "HỢP ĐỒNG LAO ĐỘNG",
+        "Điều 1. Thời hạn hợp đồng", "- Hợp đồng lao động: ......",
+        "Điều 2. Công việc", "1. Quyền của người lao động:", "- Về tiền lương: .....",
+    ])
+    provs = parse_structure(text, "nghi-dinh:1/2020/NĐ-CP")
+    ids = [p.provision_id for p in provs]
+    assert len(ids) == len(set(ids))
+    assert [p.address.article for p in provs if p.kind == "article"] == ["1", "2"]
+    clauses = [p for p in provs if p.kind == "clause" and p.address.article == "2"]
+    assert [c.text for c in clauses] == ["1. Quyền của người lao động.", "2. Nghĩa vụ của người lao động.\nNơi nhận:\n- Như trên;\nMẫu số 01\nHỢP ĐỒNG LAO ĐỘNG"]

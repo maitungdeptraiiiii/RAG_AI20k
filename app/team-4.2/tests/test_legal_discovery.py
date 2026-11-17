@@ -63,6 +63,24 @@ def test_number_collision_filtered_by_type(tmp_path):
     assert fetch_document(FakeClient([resolution]), "Bộ luật", "91/2015/QH13", tmp_path, now=NOW) is None
 
 
+def test_saved_text_matches_checksum_and_is_never_overwritten(tmp_path):
+    import hashlib
+
+    from rag.legal.crawl import save_detail
+    from rag.legal.snapshots import SnapshotManager
+
+    old, _ = save_detail(ENTERPRISE, tmp_path / "raw", now=NOW)
+    new, _ = save_detail({**ENTERPRISE, "documentContent": {"content": html("Điều 1. Khác\nNội dung.")}},
+                         tmp_path / "raw", now=NOW)
+    for doc in (old, new):
+        assert hashlib.sha256(Path(doc.raw_text_path).read_bytes()).hexdigest() == doc.raw_checksum
+    assert old.raw_text_path != new.raw_text_path                    # bản cũ (snapshot cũ) vẫn nguyên
+    snaps = SnapshotManager(tmp_path / "legal")
+    res = snaps.write("cli:crawl", "t", lambda svc: svc.store.upsert_document(
+        save_detail(ENTERPRISE, snaps.legal_dir / "raw", now=NOW)[0]))   # validate: checksum file khớp
+    assert res.snapshot.status == "published"
+
+
 def test_amendment_confirmed_by_content(tmp_path):
     store = LegalStore(tmp_path / "c.sqlite")
     report = discover(FakeClient([ENTERPRISE, AMEND, FAKE_AMEND]), store, [Seed("Luật", "59/2020/QH14")],
@@ -121,7 +139,18 @@ def test_suspicious_partial_status(tmp_path):
 def test_seeds_file_valid():
     seeds = load_seeds(Path(__file__).parents[3] / "data" / "team-4.2" / "legal" / "seeds.yaml")
     assert seeds == [Seed("Luật", "31/2024/QH15"), Seed("Luật", "27/2023/QH15"), Seed("Luật", "29/2023/QH15"),
-                     Seed("Bộ luật", "91/2015/QH13")]
+                     Seed("Bộ luật", "91/2015/QH13"), Seed("Bộ luật", "95/2015/QH13"),
+                     Seed("Bộ luật", "100/2015/QH13"), Seed("Bộ luật", "45/2019/QH14"),
+                     Seed("Bộ luật", "92/2015/QH13"), Seed("Bộ luật", "101/2015/QH13"),
+                     # hợp đồng lao động: tầng 1 (nguồn rule, gồm bản cũ để áp theo ngày ký) + tầng 2 (tra cứu)
+                     Seed("Nghị định", "145/2020/NĐ-CP"), Seed("Thông tư", "10/2020/TT-BLĐTBXH"),
+                     Seed("Nghị định", "293/2025/NĐ-CP"), Seed("Nghị định", "74/2024/NĐ-CP"),
+                     Seed("Nghị định", "38/2022/NĐ-CP"), Seed("Luật", "41/2024/QH15"), Seed("Luật", "58/2014/QH13"),
+                     Seed("Nghị định", "158/2025/NĐ-CP"), Seed("Nghị định", "115/2015/NĐ-CP"),
+                     Seed("Nghị định", "12/2022/NĐ-CP"), Seed("Nghị định", "283/2026/NĐ-CP"),
+                     Seed("Luật", "74/2025/QH15"), Seed("Luật", "25/2008/QH12"),
+                     Seed("Luật", "51/2024/QH15"), Seed("Luật", "84/2015/QH13"),
+                     Seed("Nghị định", "337/2025/NĐ-CP"), Seed("Thông tư", "08/2026/TT-BNV")]
 
 
 def test_subordinate_documents_cannot_amend_a_law(tmp_path):
@@ -195,3 +224,20 @@ def test_partial_repeal_is_not_recorded_as_replacement(tmp_path):
     rels = [(r.source_key, r.target_key, r.relation) for r in store.relations("luat:65/2014/QH13")]
     assert rels == [("luat:9/2026/QH16", "luat:65/2014/QH13", "BAI_BO")]
     assert ("luat:65/2014/QH13", "THAY_THE") not in [(k, r) for k, r, _ in report.added]
+
+
+def test_decree_replaced_by_decree_is_fetched_with_its_own_type(tmp_path):
+    new = vb("40", "Nghị định", "293/2025/NĐ-CP", "Nghị định số 293/2025/NĐ-CP Quy định mức lương tối thiểu", "2025-11-10",
+             "Điều 1. Phạm vi\nNội dung.\nĐiều 2. Hiệu lực thi hành\n"
+             "1. Nghị định này có hiệu lực thi hành từ ngày 01 tháng 01 năm 2026.\n"
+             "2. Nghị định số 74/2024/NĐ-CP ngày 30 tháng 6 năm 2024 của Chính phủ quy định mức lương tối thiểu hết hiệu "
+             "lực kể từ ngày Nghị định này có hiệu lực thi hành.")
+    old = vb("41", "Nghị định", "74/2024/NĐ-CP", "Nghị định số 74/2024/NĐ-CP Quy định mức lương tối thiểu", "2024-06-30",
+             "Điều 1. Phạm vi\nNội dung.\nĐiều 2. Hiệu lực thi hành\nNghị định này có hiệu lực thi hành từ ngày 01 tháng 7 "
+             "năm 2024.", "Hết hiệu lực toàn bộ")
+    store = LegalStore(tmp_path / "legal.sqlite")
+    report = discover(FakeClient([new, old]), store, [Seed("Nghị định", "293/2025/NĐ-CP")], tmp_path / "raw", now=NOW)
+    assert store.document("nghi-dinh:74/2024/NĐ-CP") is not None
+    rels = [(r.source_key, r.relation, r.target_key) for r in store.relations("nghi-dinh:74/2024/NĐ-CP")]
+    assert rels == [("nghi-dinh:293/2025/NĐ-CP", "THAY_THE", "nghi-dinh:74/2024/NĐ-CP")]
+    assert ("nghi-dinh:74/2024/NĐ-CP", "THAY_THE", "hết hiệu lực: Nghị định số 74/2024/NĐ-CP") in report.added

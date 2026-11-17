@@ -1,8 +1,18 @@
-"""CLI kho luật: python -m rag.legal <crawl|build|show|report|fixture>. Dữ liệu ở DATA_DIR/legal/."""
+"""CLI kho luật: python -m rag.legal <crawl|build|show|report|fixture|graph>. Dữ liệu ở DATA_DIR/legal/.
+
+`crawl` / `build` ghi qua `SnapshotManager.write` (staging -> kiểm tra -> công bố nguyên khối) dưới cùng khoá ghi với
+server: đang có lần cập nhật khác (vd. server đang áp dụng một upload) -> thoát mã 2, không ghi gì. `show` / `report`
+đọc snapshot đang công bố. Server đang chạy KHÔNG tự chuyển chat sang snapshot do CLI công bố: nó thấy snapshot đó ở
+lần "Dựng lại chỉ mục" (POST /api/legal/reindex) hoặc lần ghi kế tiếp của server (upload / quyết định duyệt).
+
+`graph build|check|status`: đồ thị luật trong Neo4j (LEGAL_GRAPH=1, NEO4J_*), dựng từ snapshot đang công bố.
+`crawl` / `build` tự đồng bộ đồ thị sau khi công bố khi LEGAL_GRAPH=1; Neo4j sập chỉ in cảnh báo.
+"""
 
 from __future__ import annotations
 
 import argparse
+import getpass
 import json
 import logging
 import sys
@@ -19,11 +29,48 @@ def _legal_dir() -> Path:
     return Settings.load().data_dir / "legal"
 
 
-def _service():
-    from rag.legal.service import LegalService
-    from rag.legal.store import LegalStore
+LOCKED_MESSAGE = "Đang có lần cập nhật kho khác, thử lại sau"
 
-    return LegalService(LegalStore(_legal_dir() / "catalog.sqlite"))
+
+def _snapshots():
+    from rag.legal.snapshots import SnapshotManager
+
+    return SnapshotManager(_legal_dir())
+
+
+def _service():
+    """Service trên snapshot đang công bố (chỉ đọc)."""
+    from rag.legal.service import LegalService
+
+    return LegalService(_snapshots().store())
+
+
+def _sync_graph(store=None) -> dict:
+    """Đồng bộ đồ thị luật với snapshot đang công bố. Tắt / Neo4j sập: chỉ trả trạng thái."""
+    from rag.legal.graph.service import open_store, sync_legal_graph
+
+    _legal_dir()                                        # nạp .env
+    own = store is None
+    try:
+        store = store or open_store()
+    except ValueError as e:
+        return {"status": "disabled", "error": str(e)}
+    try:
+        result = sync_legal_graph(_snapshots(), store)
+    finally:
+        if own and store is not None:
+            store.close()
+    result.pop("errors", None) if result.get("status") != "invalid" else None
+    if "report" in result:
+        result["report"] = {k: result["report"][k] for k in ("nodes", "edges", "refs")}
+    return result
+
+
+def _user() -> str:
+    try:
+        return getpass.getuser()
+    except Exception:  # noqa: BLE001 - không có biến môi trường người dùng
+        return "cli"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -38,6 +85,8 @@ def main(argv: list[str] | None = None) -> int:
     show.add_argument("--as-of", required=True, type=date.fromisoformat)
     show.add_argument("--provision", help="vd. d60.k3")
     sub.add_parser("report", help="thống kê thao tác / phiên bản / mục duyệt")
+    graph = sub.add_parser("graph", help="đồ thị luật trong Neo4j: build (dựng + công bố), check (chỉ dựng), status")
+    graph.add_argument("action", choices=["build", "check", "status"])
     fixture = sub.add_parser("fixture", help="lưu text của văn bản (Luật) làm fixture test")
     fixture.add_argument("numbers", nargs="+")
     fixture.add_argument("--type", default="Luật")
@@ -47,18 +96,55 @@ def main(argv: list[str] | None = None) -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
 
+    from rag.legal.snapshots import WriteLockedError
+
+    try:
+        return _run(args)
+    except WriteLockedError:
+        print(LOCKED_MESSAGE)
+        return 2
+
+
+def _run(args: argparse.Namespace) -> int:
     if args.cmd == "crawl":
         from rag.ingest.vbpl import VbplClient
         from rag.legal.discovery import discover, load_seeds
 
-        svc = _service()
-        report = discover(VbplClient(), svc.store, load_seeds(args.seeds), _legal_dir() / "raw", max_depth=args.max_depth)
-        print(json.dumps({"added": report.added, "rejected": report.rejected, "suspicious": report.suspicious},
-                         ensure_ascii=False, indent=2))
+        client, seeds, raw = VbplClient(), load_seeds(args.seeds), _legal_dir() / "raw"
+        res = _snapshots().write("cli:crawl", _user(), lambda svc: discover(client, svc.store, seeds, raw,
+                                                                            max_depth=args.max_depth))
+        report = res.value
+        print(json.dumps({"snapshot_id": res.snapshot.snapshot_id, "added": report.added, "rejected": report.rejected,
+                          "suspicious": report.suspicious, "graph": _sync_graph()}, ensure_ascii=False, indent=2))
     elif args.cmd == "build":
-        runs = _service().build_all()
-        print(json.dumps([{"document": r.document_key, "build_id": r.build_id, "operations": len(r.operation_ids)}
-                          for r in runs], ensure_ascii=False, indent=2))
+        snapshots = _snapshots()
+        res = snapshots.write("cli:build", _user(), lambda svc: None)
+        store = snapshots.store(res.snapshot.snapshot_id)
+        print(json.dumps({"snapshot_id": res.snapshot.snapshot_id,
+                          "laws": [{"document": d.document_key, "build_id": run.build_id}
+                                   for d in store.documents() if (run := store.latest_build(d.document_key))],
+                          "graph": _sync_graph()}, ensure_ascii=False, indent=2))
+    elif args.cmd == "graph":
+        from rag.legal.graph.service import build_current, graph_status, open_store
+
+        if args.action == "check":
+            build, errors = build_current(_snapshots())
+            print(json.dumps({"errors": errors, "report": build.report}, ensure_ascii=False, indent=2))
+            return 1 if errors else 0
+        _legal_dir()                                    # nạp .env trước khi đọc LEGAL_GRAPH / NEO4J_*
+        store = open_store()
+        if store is None:
+            print("Đồ thị luật đang tắt: đặt LEGAL_GRAPH=1 và NEO4J_PASSWORD")
+            return 1
+        try:
+            if args.action == "status":
+                print(json.dumps(graph_status(_snapshots(), store), ensure_ascii=False, indent=2))
+                return 0
+            result = _sync_graph(store)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0 if result["status"] in ("published", "up_to_date") else 1
+        finally:
+            store.close()
     elif args.cmd == "show":
         svc = _service()
         for v in svc.store.provisions_as_of(args.key, args.as_of):
@@ -73,14 +159,20 @@ def main(argv: list[str] | None = None) -> int:
         rep["operations"] = {f"{p}/{r}": n for (p, r), n in rep["operations"].items()}
         print(json.dumps(rep, ensure_ascii=False, indent=2))
     elif args.cmd == "fixture":
+        import tempfile
+
         from rag.ingest.vbpl import VbplClient
-        from rag.legal.crawl import fetch_document
+        from rag.legal.crawl import fetch_document, raw_path_for
 
         client = VbplClient()
         args.out.mkdir(parents=True, exist_ok=True)
-        for number in args.numbers:
-            got = fetch_document(client, args.type, number, args.out)
-            print(f"{number}: {'ok ' + got[0].raw_text_path if got else 'không tìm thấy'}")
+        with tempfile.TemporaryDirectory() as tmp:          # fixture: một file phẳng <key>.txt như trước
+            for number in args.numbers:
+                got = fetch_document(client, args.type, number, Path(tmp))
+                if got:
+                    path = raw_path_for(args.out, got[0].document_key)
+                    path.write_text(got[1] + "\n", encoding="utf-8")
+                print(f"{number}: {'ok ' + str(path) if got else 'không tìm thấy'}")
     return 0
 
 

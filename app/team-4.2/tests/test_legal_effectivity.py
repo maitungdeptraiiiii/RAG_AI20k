@@ -150,3 +150,46 @@ def test_exception_clauses_of_one_article():
     info = _info("Điều 3. Hiệu lực thi hành\n1. Luật này có hiệu lực thi hành từ ngày 01 tháng 7 năm 2026.\n"
                  "2. Khoản 1 và khoản 4 Điều 2 của Luật này có hiệu lực thi hành từ ngày 01 tháng 01 năm 2027.")
     assert info.exceptions == ((Address("2", "1"), date(2027, 1, 1)), (Address("2", "4"), date(2027, 1, 1)))
+
+
+def test_decree_effectivity_and_repeal_of_decree():
+    info = _info(
+        "Điều 5. Hiệu lực và trách nhiệm thi hành\n"
+        "1. Nghị định này có hiệu lực thi hành từ ngày 01 tháng 01 năm 2026.\n"
+        "2. Nghị định số 74/2024/NĐ-CP ngày 30 tháng 6 năm 2024 của Chính phủ quy định mức lương tối thiểu đối với "
+        "người lao động làm việc theo hợp đồng lao động hết hiệu lực kể từ ngày Nghị định này có hiệu lực thi hành.\n",
+        "nghi-dinh:293/2025/NĐ-CP")
+    assert info.default_from == date(2026, 1, 1)
+    assert [(r.target_name, r.target_number, r.effective, r.units) for r in info.repeals] == [
+        ("Nghị định", "74/2024/NĐ-CP", date(2026, 1, 1), ())]
+
+
+def test_decree_repeal_with_explicit_date_and_circular_self():
+    info = _info(
+        "Điều 5. Hiệu lực thi hành\n"
+        "1. Thông tư này có hiệu lực thi hành kể từ ngày 01 tháng 7 năm 2026.\n"
+        "2. Thông tư số 10/2020/TT-BLĐTBXH ngày 12 tháng 11 năm 2020 hết hiệu lực kể từ ngày 01 tháng 7 năm 2026.\n",
+        "thong-tu:08/2026/TT-BNV")
+    assert info.default_from == date(2026, 7, 1)
+    assert [(r.target_name, r.target_number, r.effective) for r in info.repeals] == [
+        ("Thông tư", "10/2020/TT-BLĐTBXH", date(2026, 7, 1))]
+
+
+def test_repeal_list_form():
+    info = _info(
+        "Điều 44. Hiệu lực thi hành\n"
+        "1. Nghị định này có hiệu lực thi hành từ ngày 01 tháng 7 năm 2025.\n"
+        "2. Kể từ ngày Nghị định này có hiệu lực thi hành, các Nghị định của Chính phủ và các điều khoản sau đây "
+        "hết hiệu lực thi hành:\n"
+        "a) Nghị định số 115/2015/NĐ-CP ngày 11 tháng 11 năm 2015 của Chính phủ quy định chi tiết một số điều của "
+        "Luật Bảo hiểm xã hội về bảo hiểm xã hội bắt buộc;\n"
+        "b) Nghị định số 143/2018/NĐ-CP ngày 15 tháng 10 năm 2018 của Chính phủ quy định chi tiết Luật Bảo hiểm xã hội;\n"
+        "c) Khoản 2 Điều 3; các khoản 1, 3 Điều 7 và khoản 2 Điều 8 của Nghị định số 135/2020/NĐ-CP ngày 18 tháng 11 "
+        "năm 2020 của Chính phủ quy định về tuổi nghỉ hưu.\n"
+        "3. Bộ trưởng chịu trách nhiệm thi hành.\n",
+        "nghi-dinh:158/2025/NĐ-CP")
+    whole = [(r.target_number, r.effective) for r in info.repeals if not r.units]
+    assert whole == [("115/2015/NĐ-CP", date(2025, 7, 1)), ("143/2018/NĐ-CP", date(2025, 7, 1))]
+    partial = [r for r in info.repeals if r.units]
+    assert [r.target_number for r in partial] == ["135/2020/NĐ-CP"]
+    assert Address("3", "2") in partial[0].units and Address("8", "2") in partial[0].units

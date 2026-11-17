@@ -15,7 +15,8 @@ from typing import Any, get_args
 from rag.legal.builder import build_versions
 from rag.legal.directives import _target_law, parse_directives
 from rag.legal.effectivity import parse_effectivity
-from rag.legal.models import Address, AmendmentOperation, OperationType, BuildRun, Provision, ReviewDecision, ReviewItem
+from rag.legal.models import (Address, AmendmentOperation, BuildRun, LegalDocument, OperationType, Provision,
+                              ReviewDecision, ReviewItem)
 from rag.legal.operations import _label_ok, build_operations, repeal_operations
 from rag.legal.status import _finalize, _flag, demote_amended_directives
 from rag.legal.store import LegalStore, encode
@@ -58,7 +59,7 @@ def _address(value: Any) -> Address | None:
 
 
 class LegalService:
-    def __init__(self, store: LegalStore, *, now: Callable[[], datetime] = _now, code_version: str = "legal-v1") -> None:
+    def __init__(self, store: LegalStore, *, now: Callable[[], datetime] = _now, code_version: str = "legal-v3") -> None:
         self.store = store
         self.now = now
         self.code_version = code_version
@@ -137,21 +138,36 @@ class LegalService:
 
     # --- dựng ------------------------------------------------------------------------------
 
-    def build_law(self, key: str) -> BuildRun:
+    def _ops_for_build(self, key: str) -> tuple[LegalDocument, list[AmendmentOperation]]:
         doc = self.store.document(key)
         if doc is None:
             raise KeyError(key)
-        if doc.eff_status == "unverified_import":
-            raise ValueError("Imported snapshot needs reviewed applicability metadata before version building")
-        provisions = self.provisions_for(key)
-        effectivity = parse_effectivity(provisions)
         all_ops = self.store.operations()
         directive_articles: dict[str, set[str]] = {}
         for o in all_ops:
             if o.operation_type != "REPEAL_DOCUMENT" and o.source_address is not None:
                 directive_articles.setdefault(o.source_document_key, set()).add(o.source_address.article)
         all_ops = demote_amended_directives(all_ops, directive_articles=directive_articles)
-        ops = [self._repeal_on_current_date(o) for o in all_ops if o.target_document_key == key]
+        return doc, [self._repeal_on_current_date(o) for o in all_ops if o.target_document_key == key]
+
+    @staticmethod
+    def _inputs(doc: LegalDocument, ops: list[AmendmentOperation]) -> str:
+        extra = []
+        if not doc.source_verified:
+            extra.append("src:unverified")
+        if doc.metadata_conflicts:
+            extra.append("conflicts:" + "|".join(sorted(doc.metadata_conflicts)))
+        return _sha1(doc.raw_checksum, *sorted(f"{o.operation_id}:{o.review_status}:{o.effective_from}" for o in ops),
+                     *extra)
+
+    def build_inputs(self, key: str) -> str:
+        """`inputs_checksum` mà `build_law(key)` sẽ ghi nếu dựng lại ngay bây giờ (không ghi gì vào kho)."""
+        return self._inputs(*self._ops_for_build(key))
+
+    def build_law(self, key: str) -> BuildRun:
+        doc, ops = self._ops_for_build(key)
+        provisions = self.provisions_for(key)
+        effectivity = parse_effectivity(provisions)
         for o in ops:
             amended = [r for r in o.status_reasons if r.startswith("operation.source_amended")]
             if amended and o.reviewer is None:
@@ -164,10 +180,14 @@ class LegalService:
                 day = parse_effectivity(self.provisions_for(src)).default_from
                 if day is not None:
                     default_dates[src] = day
-        inputs = _sha1(doc.raw_checksum, *sorted(f"{o.operation_id}:{o.review_status}:{o.effective_from}" for o in ops))
-        build_id = _sha1(key, inputs)[:16]
+        inputs = self._inputs(doc, ops)
+        build_id = _sha1(key, inputs, self.code_version)[:16]
         versions = build_versions(doc, provisions, effectivity, ops, build_id=build_id, default_dates=default_dates)
         versions = self._flag_known_gaps(doc, ops, versions)
+        if not doc.source_verified:
+            versions = _flag(versions, lambda pid: True, None, "source.no_vbpl_metadata")
+        if doc.metadata_conflicts:
+            versions = _flag(versions, lambda pid: True, None, "source.inherited_metadata_conflict")
         versions = self._check_vbhn(key, versions)
         run = BuildRun(build_id, key, tuple(o.operation_id for o in ops), inputs, self.now(), self.code_version)
         self.store.save_build(run, versions)
@@ -196,7 +216,14 @@ class LegalService:
             versions = _flag(versions, lambda pid: True, None, "effectivity.vbpl_partial_without_amendments")
         repealed = any(o.operation_type == "REPEAL_DOCUMENT" and o.review_status in ("auto_accepted", "approved")
                        and o.effective_from for o in live)
-        if (doc.vbpl_effective_to or "toàn bộ" in status) and not repealed:
+        if doc.vbpl_effective_to and "toàn bộ" in status and not repealed:
+            # vbpl khẳng định hết hiệu lực toàn bộ kèm ngày, kho chưa có văn bản thay thế: đóng theo metadata vbpl
+            # (không để điều khoản của văn bản đã hết hiệu lực vẫn "đang hiệu lực"), ghi rõ nguồn là metadata
+            day = doc.vbpl_effective_to
+            versions = [replace(v, valid_to=day, notes=v.notes + ("note:closed_by_vbpl_status",))
+                        if v.valid_to is None or v.valid_to > day else v
+                        for v in versions if v.valid_from < day]
+        elif (doc.vbpl_effective_to or "toàn bộ" in status) and not repealed:
             versions = _flag(versions, lambda pid: True, doc.vbpl_effective_to,
                              "effectivity.vbpl_effective_to_without_repeal")
         return versions
@@ -228,6 +255,15 @@ class LegalService:
                 continue
             text = self.text_for(rel.source_key)
             cutoff = parse_consolidation_header(text).cutoff
+            info = parse_consolidation_header(text)
+            # A consolidation can reveal amendments the crawler/parser missed.
+            # Do not infer their contents or silently keep an unmodified version
+            # verified when a named amending source has no target operations.
+            for number, effective in info.included:
+                sources = {d.document_key for d in self.store.documents() if d.doc_number == number}
+                if not any(o.source_document_key in sources for o in self.store.operations(target_key=key)):
+                    versions = _flag(versions, lambda pid: True, effective,
+                                     f'operation.missing_consolidated_amendment:{number}')
             if cutoff is None:
                 versions = [replace(v, notes=v.notes + ("note:vbhn_cutoff_unknown",)) for v in versions]
                 continue
@@ -255,13 +291,21 @@ class LegalService:
                 and item.payload.get("built_excerpt") == mismatch.built_excerpt
                 and item.payload.get("vbhn_excerpt") == mismatch.vbhn_excerpt)
 
-    def build_all(self) -> list[BuildRun]:
-        docs = sorted((d for d in self.store.documents() if not d.is_consolidated and d.eff_status != "unverified_import"),
+    def build_all(self, progress: Callable[[str, int, int], None] | None = None) -> list[BuildRun]:
+        docs = sorted((d for d in self.store.documents() if not d.is_consolidated),
                       key=lambda d: (d.issued_on or date.min, d.document_key))
-        for d in docs:
+        n = len(docs)
+        for i, d in enumerate(docs, 1):
             self.plan_operations(d.document_key)
+            if progress:
+                progress("plan", i, n)
         # mới trước, cũ sau: ngày "hết hiệu lực" của luật cũ đọc từ bản dựng của luật mới (Điều hiệu lực đã sửa)
-        return [self.build_law(d.document_key) for d in reversed(docs)]
+        runs = []
+        for i, d in enumerate(reversed(docs), 1):
+            runs.append(self.build_law(d.document_key))
+            if progress:
+                progress("build", i, n)
+        return runs
 
     # --- duyệt ----------------------------------------------------------------------------
 

@@ -12,6 +12,7 @@ from typing import Any
 from rag.ingest.vbpl import metadata_from_detail, pick_detail
 from rag.legal.keys import document_key, normalize_number
 from rag.legal.models import LegalDocument
+from rag.legal.rawfiles import write_text
 from rag.legal.text import html_to_legal_text
 
 
@@ -53,9 +54,8 @@ def save_detail(detail: dict, raw_dir: Path, *, now: Callable[[], datetime] = _n
         return None
     meta = metadata_from_detail(detail)
     key = document_key(meta["doc_type"] or "Văn bản", meta["doc_number"] or str(detail.get("id")))
-    path = raw_path_for(raw_dir, key)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(text + "\n", encoding="utf-8")
+    # theo nội dung, đúng byte của text (checksum khớp file -> snapshot validate được), không ghi đè bản cũ
+    path, _ = write_text(raw_dir, key, text)
     return document_from_detail(detail, path, text, now=now, discovered_via=discovered_via), text
 
 

@@ -42,6 +42,8 @@ def test_bad_optional_assessment_actions_do_not_abort_good_evidence():
 
 def test_bad_quote_is_removed_but_independent_verified_claim_is_retained():
     def hook(stage, payload, result):
+        if stage == "PLAN":
+            result["requirements"][1]["depends_on"] = []
         if stage == "VERIFY":
             result["claims"][0]["evidence"][0]["quote"] = "KHẲNG ĐỊNH BỊA"
         return result
@@ -55,6 +57,19 @@ def test_bad_quote_is_removed_but_independent_verified_claim_is_retained():
     assert all("KHẲNG ĐỊNH BỊA" not in e.get("delta", "") for e in events)
     assert len(final["citations"]) == 1
     assert model.calls.count("COMPOSE") <= 2
+
+
+def test_claim_depending_on_rejected_premise_is_not_published():
+    def hook(stage, payload, result):
+        if stage == "VERIFY":
+            result["claims"][0]["evidence"][0]["quote"] = "KHẲNG ĐỊNH BỊA"
+        return result
+    agent, _ = build_agent(FixtureLLM(hook))
+    final = list(agent.ask_stream("Điều kiện và hồ sơ?"))[-1]
+    assert final["status"] == "abstain"
+    assert final["citations"] == []
+    assert "Hồ sơ cần có giấy B" not in final["answer"]
+    assert final["trace"]["agent"]["unresolved_requirements"] == ["R1", "R2"]
 
 
 def test_schema_repair_is_bounded_and_does_not_coerce_invalid_flags():

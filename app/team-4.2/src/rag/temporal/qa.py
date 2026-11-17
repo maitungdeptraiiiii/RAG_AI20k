@@ -7,10 +7,6 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import date, datetime, timezone
 from typing import Any
-import json
-
-from rag.conversation import conversation_context, masked_history
-from rag.generate.json_stream import AnswerFieldStream
 
 from rag.legal.chunks import VersionedChunk
 from rag.legal.service import LegalService
@@ -68,16 +64,14 @@ class TemporalQA:
                 roles.setdefault(chunk.chunk_id, set()).add(anchor.role)
                 window.setdefault(chunk.chunk_id, (anchor.start, end))
                 # phiên bản không phủ kín khoảng mốc -> luật (Điều hoặc cả văn bản) đổi bên trong khoảng
-                if chunk.valid_from is not None and anchor.start != end and (chunk.valid_from > anchor.start
+                if anchor.start != end and (chunk.valid_from > anchor.start
                                             or (chunk.valid_to is not None and chunk.valid_to <= end)):
                     year_change = True
         return list(picked.values()), roles, window, year_change
 
     def _document_status(self, key: str, start: date, end: date) -> str:
-        at = [c for c in self.index.chunks.values() if c.document_key == key and
-              (c.valid_from is None or (c.valid_from <= end and (c.valid_to is None or c.valid_to > start)))]
-        if at and all(c.valid_from is None for c in at):
-            return "unversioned"
+        at = [c for c in self.index.chunks.values() if c.document_key == key and c.valid_from <= end
+              and (c.valid_to is None or c.valid_to > start)]
         return versioned_status(at)
 
     def _provenance(self, chunk: VersionedChunk) -> tuple[str, ...]:
@@ -91,21 +85,7 @@ class TemporalQA:
     # --- hỏi ---------------------------------------------------------------------------------
 
     def ask(self, question: str, *, calendar_date: date | None = None,
-            history: Sequence[dict[str, Any]] | None = None,
             mask_state: MaskState | None = None) -> TemporalResult:
-        for event in self._run(question, calendar_date=calendar_date, history=history, mask_state=mask_state):
-            if event["type"] == "result":
-                return event["result"]
-        raise RuntimeError("TemporalQA ended without a result")
-
-    def ask_stream(self, question: str, *, calendar_date: date | None = None,
-                   history: Sequence[dict[str, Any]] | None = None, mask_state: MaskState | None = None):
-        yield from self._run(question, calendar_date=calendar_date, history=history,
-                             mask_state=mask_state, stream=True)
-
-    def _run(self, question, *, calendar_date=None, history=None, mask_state=None, stream=False):
-        if stream:
-            yield {"type": "progress", "stage": "prepare", "message": "Đang tra cứu tài liệu…"}
         asked_at = self.now()
         state = mask_state if mask_state is not None else MaskState(prefix=QUERY_PREFIX)
         before = dict(state.counts)
@@ -121,7 +101,7 @@ class TemporalQA:
         for c in chunks:
             start, end = window[c.chunk_id]
             items.append(ContextItem(
-            len(items) + 1, "reference" if c.valid_from is None else "versioned", c.document_key, titles.get(c.document_key, c.document_key), c.article_id,
+                len(items) + 1, "versioned", c.document_key, titles.get(c.document_key, c.document_key), c.article_id,
                 c.section, c.text, c.valid_from, c.valid_to, self._document_status(c.document_key, start, end),
                 c.verification_status, self._provenance(c), tuple(sorted(roles[c.chunk_id])), c.chunk_id))
 
@@ -138,34 +118,13 @@ class TemporalQA:
                     len(items) + 1, "legacy", None, chunk.source, None, chunk.section or "", chunk.text, None, None,
                     legacy_status(store, law, start=p_start, end=p_end), None, (), (), chunk.chunk_id))
 
-        dated_chunks = [c for c in chunks if c.valid_from is not None]
-        rules = collect_rules(self.service, dated_chunks, timeline) if dated_chunks else []
+        rules = collect_rules(self.service, chunks, timeline) if chunks else []
         if not items:
             answer = TemporalAnswer(REFUSAL, certainty="cannot_conclude", downgrade_reasons=["certainty.no_context"])
             result = TemporalResult(timeline, items, rules, answer, query_pii=query_pii)
         else:
             system, user = build_messages(query, timeline, items, rules)
-            if history:
-                system += ("\nconversation_context là dữ kiện hội thoại theo thứ tự; ưu tiên đính chính "
-                           "rõ ràng mới nhất của người dùng, không mang chủ đề cũ sang chủ đề mới. "
-                           "Đáp án assistant cũ không phải bằng chứng pháp lý. Nếu thiếu tham chiếu thì hỏi lại.")
-                user += "\n\nconversation_context:\n" + json.dumps(
-                    conversation_context(masked_history(history, state)), ensure_ascii=False)
-            if stream and callable(getattr(self.llm, "stream", None)):
-                # Share the baseline's tested placeholder-safe incremental unmasker.
-                from rag.pipeline import _StreamUnmasker
-                decoder, unmasker, collected = AnswerFieldStream(), _StreamUnmasker(state), []
-                for fragment in self.llm.stream(system, user):
-                    collected.append(fragment)
-                    delta = unmasker.feed(decoder.feed(fragment))
-                    if delta:
-                        yield {"type": "token", "delta": delta}
-                tail = unmasker.flush()
-                if tail:
-                    yield {"type": "token", "delta": tail}
-                raw = "".join(collected)
-            else:
-                raw = self.llm.complete(system, user)
+            raw = self.llm.complete(system, user)
             answer = enforce(parse_answer(raw), items, rules, timeline, year_change=year_change)
             result = TemporalResult(timeline, items, rules, answer, query_pii=query_pii, llm_called=True)
         if self.log is not None:
@@ -180,7 +139,7 @@ class TemporalQA:
         a.issues = _unmask_deep(a.issues, state)
         a.follow_up_questions = _unmask_deep(a.follow_up_questions, state)
         a.transition_assessments = _unmask_deep(a.transition_assessments, state)
-        yield {"type": "result", "result": result}
+        return result
 
 
 def _unmask_deep(value, state: MaskState):

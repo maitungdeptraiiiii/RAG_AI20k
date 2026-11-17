@@ -14,7 +14,6 @@ import re
 from typing import Any, Sequence
 
 from rag.schema import LLM, nfc
-from rag.conversation import conversation_context
 
 log = logging.getLogger("rag.condense")
 
@@ -24,17 +23,9 @@ Nhiệm vụ: Dựa vào [LỊCH SỬ TRAO ĐỔI], hãy viết lại [CÂU HỎ
 QUY TẮC BẮT BUỘC:
 1. KHÔNG TRẢ LỜI CÂU HỎI. Chỉ viết lại câu hỏi.
 2. KHÔNG PHÂN RÃ THÀNH NHIỀU CÂU. Đầu ra luôn luôn là MỘT câu hỏi duy nhất.
-3. KHÔI PHỤC CHỦ NGỮ / ĐẠI TỪ VÀ DỮ KIỆN LIÊN QUAN:
+3. CHỈ KHÔI PHỤC CHỦ NGỮ / ĐẠI TỪ:
    - Thay thế các đại từ chỉ định hoặc từ mơ hồ ("nó", "điều đó", "trường hợp này", "họ", "thời hạn này", "thế còn...") bằng thực thể/chủ đề đã được xác định trong lịch sử.
    - Giữ nguyên toàn bộ câu chữ, phong cách và dữ kiện gốc của câu hỏi mới.
-   - Khi hỏi tiếp cùng vụ việc, giữ các dữ kiện người dùng đã cung cấp có liên quan
-     (vai trò, điều kiện, ngày, phủ định); không chỉ thay tên chủ thể.
-   - Dữ kiện có turn_id và thứ tự. Khi người dùng đính chính rõ ràng, dùng nội dung
-     đính chính mới nhất, không gộp hai phiên bản mâu thuẫn. Nếu không rõ thì giữ sự
-     không chắc chắn để khâu sau hỏi lại. Đổi chủ đề thì không mang vụ việc cũ sang.
-   - assistant_context_unverified chỉ giúp hiểu tham chiếu như “mục 2” hoặc câu hỏi
-     đang chờ trả lời; không coi kết luận cũ là dữ kiện người dùng hay căn cứ pháp lý.
-   - Nếu context bị truncated và thiếu đối tượng tham chiếu, không tự đoán.
 4. KHÔNG TỰ BỔ SUNG KIẾN THỨC BÊN NGOÀI:
    - Không tự đoán số Điều, tên Luật, mức phạt nếu lịch sử và câu hỏi mới không có.
    - Không chuẩn hóa từ lóng hay phân tích pháp lý (việc đó do khâu sau xử lý).
@@ -61,7 +52,7 @@ CÂU HỎI MỚI: Nếu họ làm việc đó mà không báo trước thì bị
 @dataclass
 class QueryCondenser:
     llm: LLM
-    max_history_turns: int = 64
+    max_history_turns: int = 3
 
     def condense(self, query: str, history: Sequence[dict[str, Any]] | None = None) -> str:
         q = nfc(query).strip()
@@ -70,10 +61,27 @@ class QueryCondenser:
 
         # Lọc và định dạng lịch sử tinh gọn (chỉ lấy tối đa max_history_turns gần nhất)
         recent = history[-self.max_history_turns:]
-        context = conversation_context(recent)
-        if not context["user_statements"]:
+        history_lines: list[str] = []
+        for turn in recent:
+            if not isinstance(turn, dict):
+                continue
+            u_query = (turn.get("query") or "").strip()
+            b_answer = (turn.get("answer") or "").strip()
+            if u_query:
+                history_lines.append(f"User: {u_query}")
+            if b_answer:
+                # Chỉ lấy tối đa 150 ký tự đầu của câu trả lời để tiết kiệm token và tránh nhiễu
+                short_ans = " ".join(b_answer.split())[:150]
+                history_lines.append(f"Bot: {short_ans}")
+
+        if not history_lines:
             return q
-        user_content = json.dumps({"query": q, "conversation_context": context}, ensure_ascii=False)
+
+        user_content = (
+            f"[LỊCH SỬ TRAO ĐỔI]\n"
+            + "\n".join(history_lines)
+            + f"\n\n[CÂU HỎI MỚI]\n{q}"
+        )
 
         try:
             raw_reply = self.llm.complete(CONDENSE_SYSTEM_PROMPT, user_content)
@@ -86,9 +94,7 @@ class QueryCondenser:
             data = json.loads(clean_reply)
             if isinstance(data, dict) and "standalone_query" in data:
                 rewritten = nfc(str(data["standalone_query"])).strip()
-                original_numbers = set(re.findall(r"\d+(?:[.,/]\d+)*", q))
-                if rewritten and len(rewritten) <= 8000 and original_numbers.issubset(
-                        set(re.findall(r"\d+(?:[.,/]\d+)*", rewritten))):
+                if rewritten:
                     return rewritten
         except Exception as e:
             log.warning("Condense failed: %s; falling back to original query", e)

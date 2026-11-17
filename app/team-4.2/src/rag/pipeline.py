@@ -31,13 +31,12 @@ from typing import Any
 
 from rag.advanced.condense import QueryCondenser
 from rag.config import Settings
-from rag.conversation import conversation_context, masked_history
 from rag.generate.answer import answer_question, build_citations, build_prompt
 from rag.index.bm25_index import BM25Index
 from rag.index.embedder import EmbeddingCache, make_embedder
 from rag.index.store import ChunkStore
 from rag.index.vector_index import VectorIndex
-from rag.ingest.chunker import chunk_document
+from rag.ingest.chunker import chunk_document, chunk_fixed
 from rag.ingest.loaders import FlaggedPage, OCRPage, TablePage, load_source
 from rag.quality.issues import QualityIssue
 from rag.ingest.page_report import page_details, summarize_pages
@@ -246,6 +245,9 @@ def index_signature(settings: Settings, index_enhancers: Sequence[str]) -> dict[
         "embed_dim": settings.embed_dim,
         "max_syllables": settings.max_syllables,
         "index_enhancers": list(index_enhancers),
+        # chỉ ghi khi khác mặc định, để index cũ (structural) không bị coi là lệch cấu hình
+        **({"chunk_strategy": settings.chunk_strategy, "chunk_overlap": settings.chunk_overlap}
+           if settings.chunk_strategy != "structural" else {}),
     }
 
 
@@ -272,6 +274,8 @@ class RAGPipeline:
         *,
         top_k: int = 5,
         max_syllables: int = 300,
+        chunk_strategy: str = "structural",
+        chunk_overlap: int = 50,
         context: ContextConfig | None = None,
         index_enhancers: Sequence[Any] = (),
         loader: Callable[..., list[Page]] = load_source,
@@ -292,6 +296,7 @@ class RAGPipeline:
         self.llm = llm
         self.top_k = top_k
         self.max_syllables = max_syllables
+        self.chunk_strategy, self.chunk_overlap = chunk_strategy, chunk_overlap
         self.context_config = context or ContextConfig(fixed_k=top_k)
         self.index_enhancers = list(index_enhancers)
         self._loader = loader
@@ -344,7 +349,8 @@ class RAGPipeline:
         )
         return cls(
             ChunkStore(s.chunks_path), retriever, llm,
-            top_k=s.top_k, max_syllables=s.max_syllables, context=context,
+            top_k=s.top_k, max_syllables=s.max_syllables, chunk_strategy=s.chunk_strategy,
+            chunk_overlap=s.chunk_overlap, context=context,
             index_enhancers=index_enhancers, ocr=make_ocr_engine(s), extracted_dir=s.data_dir / "extracted",
             condenser=QueryCondenser(condenser_llm),
         )
@@ -423,7 +429,12 @@ class RAGPipeline:
             return report
         text_pages = [p for p in pages if not isinstance(p, TablePage)]
         tables = [p.table for p in pages if isinstance(p, TablePage) and p.table is not None]
-        chunks = chunk_document(text_pages, max_syllables=self.max_syllables) if text_pages else []
+        if not text_pages:
+            chunks = []
+        elif self.chunk_strategy == "fixed":
+            chunks = chunk_fixed(text_pages, max_syllables=self.max_syllables, overlap=self.chunk_overlap)
+        else:
+            chunks = chunk_document(text_pages, max_syllables=self.max_syllables)
         chunks += chunk_tables(tables, doc_id=report.doc_id, source=report.source,
                                start_index=len(chunks), max_syllables=self.max_syllables)
         if not chunks:
@@ -472,7 +483,7 @@ class RAGPipeline:
             return AskTrace(Answer.refusal(retrieval.hits), retrieval, selection, llm_called=False,
                             query_pii=query_pii, condensed_query=effective_query)
 
-        answer = answer_question(self._conversation_prompt(retrieval.query, history, state), selection.blocks, self.llm, retrieval.hits)
+        answer = answer_question(self._prompt_query(retrieval.query), selection.blocks, self.llm, retrieval.hits)
         # GUARDRAIL (sau LLM, TV5): loại [n] sai, không còn citation hợp lệ thì từ chối — chưa làm.
         if not answer.refused:
             answer.text = state.unmask(answer.text)   # sau LLM + cache: cache chỉ giữ bản đã che
@@ -510,16 +521,6 @@ class RAGPipeline:
     @staticmethod
     def _prompt_query(query: str) -> str:
         return query + PII_NOTE if f"[{QUERY_PREFIX}" in query else query
-
-    def _conversation_prompt(self, query, history, state):
-        prompt = self._prompt_query(query)
-        if history:
-            context = conversation_context(masked_history(history, state) if self.mask_queries else history)
-            prompt += ("\n\nNgữ cảnh hội thoại chỉ dùng để hiểu câu hỏi và dữ kiện người dùng; "
-                       "không phải tài liệu pháp lý. Ưu tiên đính chính rõ ràng mới nhất; bỏ chủ đề cũ "
-                       "khi đổi chủ đề. Không coi đáp án cũ là bằng chứng. Nếu thiếu tham chiếu thì hỏi lại.\n"
-                       + json.dumps(context, ensure_ascii=False))
-        return prompt
 
     def ask_stream(
         self,
@@ -578,7 +579,7 @@ class RAGPipeline:
             "condensed_query": effective_query,
         }
 
-        system, user = build_prompt(self._conversation_prompt(retrieval.query, history, state), selection.blocks)
+        system, user = build_prompt(self._prompt_query(retrieval.query), selection.blocks)
         collected: list[str] = []
         unmasker = _StreamUnmasker(state)
 

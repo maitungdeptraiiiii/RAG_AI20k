@@ -4,14 +4,12 @@ from __future__ import annotations
 
 import re
 import html
-import traceback
 from dataclasses import asdict, dataclass, field, replace
 from itertools import zip_longest
 from collections.abc import Iterator, Sequence
 from typing import Any
 
 from rag.advanced.condense import CONDENSE_SYSTEM_PROMPT
-from rag.conversation import conversation_context, normalize_history
 from rag.advanced.hyde import HydeRetriever
 from rag.agent import prompts
 from rag.agent.adapters import bounded_dense, bounded_reranker
@@ -23,35 +21,23 @@ from rag.agent.validation import (
     obj, parse_assessment, parse_claims, parse_plan, parse_verification, text,
 )
 from rag.pipeline import AskTrace, RAGPipeline
-from rag.quality.pii import mask_text
 from rag.retrieve.context import ContextSelection
 from rag.retrieve.hybrid import CorpusChangedError, RetrievalResult
 from rag.retrieve.merge import article_key
 from rag.schema import Answer, Citation, ContextBlock, Hit, nfc
 
 
-SCOPE_WARNING = "Cần đối chiếu thêm hiệu lực của các quy định trước khi áp dụng vào trường hợp cụ thể."
+SCOPE_WARNING = "Câu trả lời dựa trên tài liệu trong kho; chưa xác nhận hiệu lực pháp luật hiện hành."
 
 
 def _literal_label(value: str) -> str:
     return html.escape(value).replace("[", "&#91;").replace("!", "&#33;")
 
 
-def _unmask_display(value, state):
-    if isinstance(value, str):
-        return state.unmask(value)
-    if isinstance(value, list):
-        return [_unmask_display(item, state) for item in value]
-    if isinstance(value, dict):
-        return {key: _unmask_display(item, state) for key, item in value.items()}
-    return value
-
-
 @dataclass
 class AgentTrace(AskTrace):
     agent: dict[str, Any] = field(default_factory=dict)
     status: str = "abstain"
-    temporal: dict[str, Any] = field(default_factory=dict)
 
     def to_response(self, query: str) -> dict:
         blocks = {b.chunk.chunk_id: b for b in self.context.blocks}
@@ -60,18 +46,12 @@ class AgentTrace(AskTrace):
             "section": b.chunk.section or "Căn cứ pháp lý", "page": b.chunk.page_start,
             "score": None, "text": b.chunk.text,
         } for b in self.context.blocks]
-        source_metadata = self.temporal.get("_source_metadata", {})
-        for source in sources:
-            source.update(source_metadata.get(source["chunk_id"], {}))
         citations = [{
             **asdict(c), "section": blocks[c.chunk_id].chunk.section,
             "score": None, "text": blocks[c.chunk_id].chunk.text,
         } for c in self.answer.citations]
-        for citation in citations:
-            citation.update(source_metadata.get(citation["chunk_id"], {}))
-        result = {
+        return {
             "query": query, "answer": self.answer.text, "refused": self.answer.refused,
-            "query_pii": self.query_pii,
             "status": self.status, "citations": citations, "sources": sources,
             "trace": {
                 "condensed_query": self.condensed_query, "context_mode": self.context.mode,
@@ -80,28 +60,25 @@ class AgentTrace(AskTrace):
                 "agent": self.agent,
             },
         }
-        result.update({k: v for k, v in self.temporal.items() if not k.startswith("_")})
-        return result
 
 
 class AgentPipeline:
-    def __init__(self, baseline: RAGPipeline, config: AgentConfig | None = None, *, scope_factory=None):
+    def __init__(self, baseline: RAGPipeline, config: AgentConfig | None = None):
         self.baseline = baseline
         self.retriever = baseline.retriever
         self.config = config or AgentConfig()
-        self.scope_factory = scope_factory
 
-    def ask_debug(self, query: str, *, history: Sequence[dict[str, Any]] | None = None, mask_state=None) -> AgentTrace:
-        for event in self.run_events(query, history=history, mask_state=mask_state):
+    def ask_debug(self, query: str, *, history: Sequence[dict[str, Any]] | None = None) -> AgentTrace:
+        for event in self.run_events(query, history=history):
             if event["type"] == "result":
                 return event["result"]
         raise RuntimeError("Agent ended without a result")
 
-    def ask(self, query: str, *, history=None, mask_state=None) -> Answer:
-        return self.ask_debug(query, history=history, mask_state=mask_state).answer
+    def ask(self, query: str, *, history=None) -> Answer:
+        return self.ask_debug(query, history=history).answer
 
-    def ask_stream(self, query: str, *, history=None, mask_state=None) -> Iterator[dict]:
-        for event in self.run_events(query, history=history, mask_state=mask_state):
+    def ask_stream(self, query: str, *, history=None) -> Iterator[dict]:
+        for event in self.run_events(query, history=history):
             if event["type"] != "result":
                 yield event
                 continue
@@ -176,18 +153,14 @@ class AgentPipeline:
 
     @staticmethod
     def _payload(query, raw_query, history, state, bundle):
-        payload = {
+        return {
             "original_question": raw_query, "standalone_question": query,
-            "conversation_context": conversation_context(history),
-            "scope": "snapshot_only; temporal applicability unverified",
+            "history": history, "scope": "snapshot_only; temporal applicability unverified",
             "requirements": [asdict(r) for r in state.requirements],
             "excerpts": [{"id": eid, "source": chunk.source, "section": chunk.section,
                           "text": chunk.text, "truncated": chunk.text != state.evidence[eid].chunk.text}
                          for eid, chunk in bundle.items()],
         }
-        if state.scope is not None:
-            payload["scope"] = state.scope.payload(state, bundle)
-        return payload
 
     def _finish(self, query, state, budget, corpus, bundle, *, status, reason,
                 claims=(), quotes=None, coverage=None, clarification=None, verified=False):
@@ -212,8 +185,7 @@ class AgentPipeline:
             remaining = [r.question for r in state.requirements if not coverage.get(r.id, False)]
             if remaining:
                 content += "\n\nChưa đủ căn cứ để kết luận: " + "; ".join(_literal_label(q) for q in remaining)
-            if state.scope is None:
-                content += "\n\n" + SCOPE_WARNING
+            content += "\n\n" + SCOPE_WARNING
             answer = Answer(content, citations, False)
         elif status == "clarify":
             answer = Answer(_literal_label(clarification or "Bạn vui lòng làm rõ dữ kiện còn thiếu trong câu hỏi."), [], False)
@@ -228,9 +200,7 @@ class AgentPipeline:
                                     queries=list(state.searched), selection_policy="agent_evidence")
         answer.hits = retrieval.hits
         metadata = {
-            "version": prompts.PROMPT_VERSION,
-            "scope": "temporal" if state.scope is not None else "snapshot_only",
-            "scope_warning": state.scope.warning if state.scope is not None else SCOPE_WARNING,
+            "version": prompts.PROMPT_VERSION, "scope": "snapshot_only", "scope_warning": SCOPE_WARNING,
             "snapshot_id": corpus.id if corpus else None, "status": status, "stop_reason": reason,
             "verified": verified, "config": asdict(self.config), "budget": budget.summary(),
             "requirements": [asdict(r) for r in state.requirements],
@@ -241,64 +211,35 @@ class AgentPipeline:
                           "origins": [{k: v for k, v in origin.items() if k != "focus_text"} for origin in e.origins]}
                          for e in state.evidence.values()],
             "claims": [asdict(c) for c in claims], "verified_quotes": quotes, "events": list(state.events),
-            "failure_stage": state.events[-1]["stage"] if status == "error" and state.events else None,
         }
-        trace = AgentTrace(
-            answer=answer, retrieval=retrieval,
-            context=ContextSelection(blocks, "fixed" if blocks else "empty"),
-            llm_called=budget.model_calls > 0, condensed_query=query, agent=metadata, status=status,
-        )
-        if state.scope is not None:
-            state.scope.finalize(trace, ModelGateway(self.baseline.llm, budget), state, bundle)
-        return trace
+        return AgentTrace(answer=answer, retrieval=retrieval,
+                          context=ContextSelection(blocks, "fixed" if blocks else "empty"),
+                          llm_called=budget.model_calls > 0, condensed_query=query, agent=metadata, status=status)
 
-    def run_events(self, raw_query: str, *, history=None, mask_state=None) -> Iterator[dict]:
-        """Apply the integrated pipeline's PII policy before any agent LLM role.
-
-        Keep trace/cache masked; only unmask the final answer for its own session.
-        Condensation remains in the budgeted core and runs exactly once.
-        """
-        state = mask_state if mask_state is not None else self.baseline.new_query_mask_state()
-        query_pii = {}
-        if self.baseline.mask_queries:
-            before = dict(state.counts)
-            raw_query = mask_text(raw_query, state=state).masked_text
-            query_pii = {k: v - before.get(k, 0) for k, v in state.counts.items() if v - before.get(k, 0)}
-            history = [
-                {**turn, **{key: mask_text(str(turn.get(key) or ""), state=state).masked_text
-                            for key in ("query", "answer")}}
-                for turn in normalize_history(history)
-            ]
-        for event in self._run_masked_events(raw_query, history=history):
-            if event["type"] == "result":
-                trace = event["result"]
-                trace.query_pii = query_pii
-                if not trace.answer.refused:
-                    trace.answer.text = state.unmask(trace.answer.text)
-                for key in ("issues", "transition_assessments", "follow_up_questions"):
-                    if key in trace.temporal:
-                        trace.temporal[key] = _unmask_display(trace.temporal[key], state)
-            yield event
-
-    def _run_masked_events(self, raw_query: str, *, history=None) -> Iterator[dict]:
+    def run_events(self, raw_query: str, *, history=None) -> Iterator[dict]:
         state, budget = RunState(), Budget(self.config)
         gateway = ModelGateway(self.baseline.llm, budget)
         corpus, bundle, query = None, {}, nfc(raw_query).strip()
         if not query or len(query) > 8000:
             raise ValueError("Agent query must contain 1–8000 characters")
         # Retain context for reference resolution, never treat old answers as facts.
-        history = normalize_history(history)
-        conversation = conversation_context(history)
+        history = [{"query": str(h.get("query", ""))[:2000],
+                    "assistant_context_unverified": str(h.get("answer", ""))[:250]}
+                   for h in (history or [])[-3:] if isinstance(h, dict)]
         reason, repair_used = "max_rounds", False
         last_verified = None
-        assessment_repair_used = False
-        verification_schema_repair_used = False
         try:
+            revision, chunks = self.retriever.capture_snapshot()
+            corpus = CorpusSnapshot(revision, chunks)
+            if not chunks:
+                yield {"type": "result", "result": self._finish(
+                    query, state, budget, corpus, bundle, status="abstain", reason="empty_corpus")}
+                return
             yield self._event(state, "prepare", "Think · Đang xác định câu hỏi và phạm vi tài liệu…")
             if history:
                 condenser = ModelGateway(self.baseline.condenser.llm, budget, "condense")
                 data = condenser.json("condense", CONDENSE_SYSTEM_PROMPT + prompts.RULES,
-                                      {"query": query, "conversation_context": conversation}, reserve_calls=5)
+                                      {"query": query, "history": history}, reserve_calls=5)
                 obj(data, ("standalone_query",))
                 condensed = text(data["standalone_query"], 8000)
                 if set(re.findall(r"\d+(?:[.,/]\d+)*", query)).issubset(set(re.findall(r"\d+(?:[.,/]\d+)*", condensed))):
@@ -306,27 +247,9 @@ class AgentPipeline:
                 else:
                     # Preserves raw user numeric facts if condense dropped any, avoiding an abrupt crash.
                     query = query
-            retriever = self.retriever
-            if self.scope_factory is not None:
-                yield self._event(state, "scope", "Think · Đang chọn phiên bản luật theo mốc thời gian…")
-                state.scope = self.scope_factory(query, gateway)
-                state.scope.request_context = {"original_question": raw_query,
-                                               "conversation_context": conversation}
-                retriever = state.scope.retriever
-                corpus = state.scope.corpus
-                revision, chunks = retriever.capture_snapshot()
-            else:
-                revision, chunks = retriever.capture_snapshot()
-                corpus = CorpusSnapshot(revision, chunks)
-            if not chunks:
-                yield {"type": "result", "result": self._finish(
-                    query, state, budget, corpus, bundle, status="abstain", reason="empty_scope")}
-                return
             data = gateway.json("plan", prompts.PLAN, {
-                "original_question": raw_query, "standalone_question": query,
-                "conversation_context": conversation,
+                "original_question": raw_query, "standalone_question": query, "history": history,
                 "max_requirements": self.config.max_requirements,
-                **({"scope": state.scope.planning_payload()} if state.scope is not None else {}),
             })
             state.requirements, clarification = parse_plan(data, self.config.max_requirements)
             if clarification:
@@ -335,12 +258,12 @@ class AgentPipeline:
                     clarification=clarification)}
                 return
             yield self._event(state, "plan", f"Think · Đã xác định {len(state.requirements)} yêu cầu cần kiểm chứng.")
-            dense = retriever.arms["dense"]
+            dense = self.retriever.arms["dense"]
             if isinstance(dense, HydeRetriever):
                 dense = HydeRetriever(gateway, bounded_dense(dense.dense, budget), include_query=dense.include_query, fallback=False)
             else:
                 dense = bounded_dense(dense, budget)
-            reranker = bounded_reranker(retriever.reranker, budget)
+            reranker = bounded_reranker(self.retriever.reranker, budget)
             pending_queries = [("original", query), *[(r.id, r.question) for r in state.requirements[:self.config.initial_subqueries]]]
             pending_xrefs = []
             previous_supported = set()
@@ -365,11 +288,10 @@ class AgentPipeline:
                     state.searched.add(normalized)
                     budget.searches += 1
                     try:
-                        result = retriever.search_candidates(
-                            search_query, (min(self.config.initial_pool_size, max(self.config.candidates_per_search, retriever.rerank_n))
+                        result = self.retriever.search_candidates(
+                            search_query, (min(self.config.initial_pool_size, max(self.config.candidates_per_search, self.retriever.rerank_n))
                                            if rid == "original" and budget.rounds == 1 else self.config.candidates_per_search), revision=revision,
-                            chunks=chunks, mode=(state.scope.retrieval_mode if state.scope is not None else self.config.retrieval_mode),
-                            dense=dense, reranker=reranker,
+                            chunks=chunks, mode=self.config.retrieval_mode, dense=dense, reranker=reranker,
                         )
                         budget.check()
                         state.errors.update({f"r{budget.rounds}:q{budget.searches}:{k}": v for k, v in result.errors.items()})
@@ -425,21 +347,9 @@ class AgentPipeline:
                 payload = self._payload(query, raw_query, history, state, bundle)
                 payload.update(available_xrefs=[edge.to_dict() for _, edge in xrefs.values()],
                                followup_limit=self.config.followup_searches, searched_queries=sorted(state.searched))
-                assessment_warnings = []
-                try:
-                    data = gateway.json("assess", prompts.ASSESS, payload)
-                    state.assessments, next_queries, selected_xrefs = parse_assessment(
-                        data, state.requirements, bundle, xrefs, self.config.followup_searches, assessment_warnings)
-                except OutputError:
-                    if assessment_repair_used:
-                        raise
-                    assessment_repair_used = True
-                    data = gateway.json("assess_repair", prompts.ASSESS,
-                                        {**payload, "format_repair": "Return the exact schema. Every supported premise needs a literal source quote."})
-                    state.assessments, next_queries, selected_xrefs = parse_assessment(
-                        data, state.requirements, bundle, xrefs, self.config.followup_searches, assessment_warnings)
-                for warning in assessment_warnings:
-                    state.errors[warning] = "discarded"
+                data = gateway.json("assess", prompts.ASSESS, payload)
+                state.assessments, next_queries, selected_xrefs = parse_assessment(
+                    data, state.requirements, bundle, xrefs, self.config.followup_searches)
                 supported = {a.requirement_id for a in state.assessments if a.status == "supported"}
                 pending_queries = [(rid, q) for rid, q in next_queries if " ".join(nfc(q).casefold().split()) not in state.searched]
                 pending_xrefs = [xrefs[xid] for xid in selected_xrefs]
@@ -478,22 +388,10 @@ class AgentPipeline:
                     yield self._event(state, "verify", "Think · Đang kiểm chứng từng kết luận và trích dẫn…")
                     verification_payload = {**payload, "claims": [asdict(c) for c in claims],
                                             "followup_limit": self.config.followup_searches}
+                    report = gateway.json("verify", prompts.VERIFY, verification_payload, reserve_calls=0)
                     verification_warnings = []
-                    try:
-                        report = gateway.json("verify", prompts.VERIFY, verification_payload, reserve_calls=0)
-                        verdicts, coverage, quotes, verifier_queries = parse_verification(
-                            report, state.requirements, claims, bundle, self.config.followup_searches, verification_warnings,
-                            degrade_invalid_claims=True)
-                    except OutputError:
-                        if verification_schema_repair_used:
-                            raise
-                        verification_schema_repair_used = True
-                        report = gateway.json("verify_schema_repair", prompts.VERIFY,
-                                              {**verification_payload, "format_repair": "Use the exact schema, real booleans and every claim/requirement once. Supported claims require literal evidence. Never mark a claim supported just to fix format."},
-                                              reserve_calls=0)
-                        verdicts, coverage, quotes, verifier_queries = parse_verification(
-                            report, state.requirements, claims, bundle, self.config.followup_searches, verification_warnings,
-                            degrade_invalid_claims=True)
+                    verdicts, coverage, quotes, verifier_queries = parse_verification(
+                        report, state.requirements, claims, bundle, self.config.followup_searches, verification_warnings)
                     for warning in verification_warnings:
                         state.errors[warning] = "discarded"
                     facts_ok = report["facts_preserved"] and report["scope_respected"]
@@ -566,7 +464,5 @@ class AgentPipeline:
         except Exception as exc:
             # Do not expose SDK exception bodies/URLs/credentials to users.
             state.errors["agent"] = type(exc).__name__
-            frame = traceback.extract_tb(exc.__traceback__)[-1]
-            state.errors["location"] = f"{frame.name}:{frame.lineno}"
             yield {"type": "result", "result": self._finish(
                 query, state, budget, corpus, bundle, status="error", reason="tool_failure")}

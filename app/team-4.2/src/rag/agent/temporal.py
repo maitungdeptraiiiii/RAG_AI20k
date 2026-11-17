@@ -23,7 +23,7 @@ from rag.legal.store import encode
 from rag.legal.targets import law_name
 from rag.retrieve.hybrid import CorpusChangedError, HybridRetriever, RetrievalError, RetrievalResult
 from rag.retrieve.merge import article_key, merge_by_article
-from rag.schema import Answer, Chunk
+from rag.schema import Answer, Chunk, Citation, ContextBlock
 from rag.temporal.answer import ContextItem, TemporalAnswer, enforce
 from rag.temporal.index import ValidityFilteredArm
 from rag.temporal.qa import collect_rules
@@ -286,7 +286,7 @@ class TemporalScope:
     def _parse_review(self, data, claims, state, bundle, rules, numbered):
         obj(data, ("issues", "transition_assessments", "follow_up_questions"))
         known_anchors, known_rules = set(self.anchors), {r.rule_id for r in rules}
-        issues, seen = [], set()
+        issues, seen = {}, set()
         for row in items(data["issues"], len(claims)):
             obj(row, ("claim_index", "anchor_ids", "certainty", "limitation"))
             index = row["claim_index"]
@@ -304,11 +304,11 @@ class TemporalScope:
             limitation = row["limitation"]
             if not isinstance(limitation, str) or len(limitation) > 2000:
                 raise OutputError("Invalid temporal limitation")
-            issues.append({
+            issues[index] = {
                 "issue": claims[index]["text"], "anchor_ids": list(anchor_ids),
                 "anchor_role": ", ".join(dict.fromkeys(self.anchors[aid].role for aid in anchor_ids)),
                 "citations": [numbered[eid] for eid in eids], "certainty": certainty, "limitation": limitation,
-            })
+            }
         if seen != set(range(len(claims))):
             raise OutputError("Temporal review omitted claims")
         assessments, assessed = [], set()
@@ -330,7 +330,93 @@ class TemporalScope:
         if assessed != known_rules:
             raise OutputError("Temporal review omitted transition rules")
         questions = [text(value) for value in items(data["follow_up_questions"], 8)]
-        return issues, assessments, questions
+        return [issues[i] for i in range(len(claims))], assessments, questions
+
+    def _apply_review(self, trace, state, claims, numbered, issues, answer, rules, context_items, year_change):
+        """Gate individual conclusions and their dependents, not the entire answer."""
+        from rag.agent.orchestrator import _partition_claims, _literal_label
+
+        unresolved = {row["rule_id"]: row for row in answer.transition_assessments
+                      if row["assessment"] not in ("applicable", "not_applicable")}
+        unknown_dates = {aid for aid, anchor in self.anchors.items() if anchor.start is None}
+        blocked = set()
+        for i, (claim, issue) in enumerate(zip(claims, issues)):
+            documents = {self.metadata[state.evidence[eid].chunk.chunk_id]["document_key"]
+                         for eid in claim["evidence_ids"]}
+            if issue["certainty"] == "cannot_conclude" or unknown_dates.intersection(issue["anchor_ids"]):
+                blocked.add(i)
+            for rule in rules:
+                assessment = unresolved.get(rule.rule_id)
+                if assessment is not None and (
+                        documents.intersection({rule.old_law_key, rule.new_law_key, rule.source_document_key}) or
+                        set(issue["citations"]).intersection(assessment["citations"])):
+                    blocked.add(i)
+        keep, unavailable = _partition_claims(
+            state.requirements, [c["requirement_ids"] for c in claims],
+            trace.agent["unresolved_requirements"], blocked)
+        if len(keep) == len(claims):
+            trace.answer.text = answer.answer_markdown
+            if answer.certainty == "qualified":
+                trace.status = "partial"
+                trace.agent.update(status="partial", stop_reason="temporal_qualified")
+            return
+
+        used = list(dict.fromkeys(eid for i in keep for eid in claims[i]["evidence_ids"]))
+        by_chunk = {b.chunk.chunk_id: b for b in trace.context.blocks}
+        blocks = [ContextBlock(n, by_chunk[state.evidence[eid].chunk.chunk_id].chunk)
+                  for n, eid in enumerate(used, 1)]
+        new_numbers = dict(zip(used, range(1, len(used) + 1)))
+        remap = {numbered[eid]: new_numbers[eid] for eid in used}
+        quotes = trace.agent["verified_quotes"]
+        citations = []
+        for eid, block in zip(used, blocks):
+            quote = next((quotes[i][eid] for i in keep if eid in quotes[i]), None)
+            if not quote or quote not in block.chunk.text:
+                raise OutputError("Retained claim lacks a verified source span")
+            citations.append(Citation.from_block(block, quote=quote))
+        trace.context = replace(trace.context, blocks=blocks, mode="fixed" if blocks else "empty")
+        trace.agent.update(claims=[claims[i] for i in keep], verified_quotes={n: quotes[i] for n, i in enumerate(keep)},
+                           unresolved_requirements=[r.id for r in state.requirements if r.id in unavailable],
+                           temporal_claims_blocked=True,
+                           blocked_claim_indices=[i for i in range(len(claims)) if i not in keep])
+        trace.temporal["_source_metadata"] = {cid: meta for cid, meta in trace.temporal["_source_metadata"].items()
+                                               if cid in {b.chunk.chunk_id for b in blocks}}
+        trace.temporal["transition_assessments"] = [
+            {**row, "citations": [remap[n] for n in row["citations"] if n in remap]}
+            for row in answer.transition_assessments]
+        missing_dates = any(unknown_dates.intersection(issues[i]["anchor_ids"]) for i in blocked)
+        questions = list(answer.follow_up_questions)
+        if missing_dates and not questions:
+            questions.append("Bạn vui lòng cho biết ngày xảy ra sự kiện cần làm rõ.")
+        if not questions:
+            questions = list(dict.fromkeys(value for row in unresolved.values() for value in row.get("missing_information", [])))
+        trace.temporal["follow_up_questions"] = questions
+
+        if keep:
+            text = "Tôi mới xác minh được một phần câu hỏi:\n\n" + "\n\n".join(
+                claims[i]["text"] + " " + "".join(f"[{new_numbers[eid]}]" for eid in claims[i]["evidence_ids"])
+                for i in keep)
+            remaining = [r.question for r in state.requirements if r.id in unavailable]
+            if remaining:
+                text += "\n\nChưa tìm được đủ căn cứ để kết luận: " + "; ".join(_literal_label(q) for q in remaining)
+            kept_docs = {self.metadata[b.chunk.chunk_id]["document_key"] for b in blocks}
+            kept_rules = [r for r in rules if kept_docs.intersection({r.old_law_key, r.new_law_key, r.source_document_key})]
+            kept_issues = [{**issues[i], "citations": [remap[n] for n in issues[i]["citations"]]} for i in keep]
+            retained = enforce(TemporalAnswer(text, kept_issues, trace.temporal["transition_assessments"], questions),
+                               [replace(item, n=remap[item.n]) for item in context_items if item.n in remap],
+                               kept_rules, self.timeline, year_change=year_change)
+            trace.answer = Answer(retained.answer_markdown, citations, False, trace.answer.hits)
+            trace.temporal.update(issues=retained.issues, certainty=retained.certainty,
+                                  downgrade_reasons=[*retained.downgrade_reasons, "certainty.partial_temporal_coverage"])
+            trace.status = "partial"
+            trace.agent.update(status="partial", verified=True, stop_reason="partial_temporal_coverage")
+        else:
+            trace.status = "clarify" if questions else "abstain"
+            message = ("Tôi cần làm rõ thêm thông tin được hỏi bên dưới trước khi có thể kết luận." if questions else
+                       "Tôi chưa tìm được đủ căn cứ để kết luận cho câu hỏi này.")
+            trace.answer = Answer(message, [], False, trace.answer.hits)
+            trace.temporal.update(issues=[], certainty="cannot_conclude")
+            trace.agent.update(status=trace.status, verified=False, stop_reason="temporal_conditions_unresolved")
 
     def finalize(self, trace, gateway, state, bundle):
         timeline = encode(self.timeline)
@@ -384,25 +470,7 @@ class TemporalScope:
             trace.temporal.update(issues=answer.issues, transition_assessments=answer.transition_assessments,
                                   follow_up_questions=answer.follow_up_questions, certainty=answer.certainty,
                                   downgrade_reasons=answer.downgrade_reasons)
-            unresolved = any(row["assessment"] not in ("applicable", "not_applicable") for row in answer.transition_assessments)
-            unresolved_dates = any(a.start is None for a in self.anchors.values())
-            if unresolved_dates:
-                trace.temporal["follow_up_questions"] = [*answer.follow_up_questions,
-                    "Bạn vui lòng cho biết ngày cụ thể của các sự kiện còn chưa xác định được thời điểm."]
-            if unresolved or unresolved_dates or answer.certainty == "cannot_conclude":
-                trace.status = "clarify"
-                trace.answer = Answer("Tôi cần làm rõ thêm một số thông tin trước khi có thể kết luận. Bạn vui lòng bổ sung các thông tin được hỏi bên dưới.", [], False)
-                trace.agent.update(status=trace.status, verified=False, stop_reason="temporal_conditions_unresolved")
-                trace.agent["temporal_claims_blocked"] = True
-                trace.agent["unresolved_requirements"] = [r["id"] for r in trace.agent["requirements"]]
-                trace.temporal["certainty"] = "cannot_conclude"
-                trace.temporal["downgrade_reasons"] = list(dict.fromkeys([
-                    *answer.downgrade_reasons, "certainty.transition_unresolved" if unresolved else "certainty.missing_temporal_facts"]))
-            else:
-                trace.answer.text = answer.answer_markdown
-                if answer.certainty == "qualified":
-                    trace.status = "partial"
-                    trace.agent.update(status="partial", stop_reason="temporal_qualified")
+            self._apply_review(trace, state, claims, numbered, issues, answer, rules, context_items, year_change)
         except Exception as exc:
             trace.status = "error"
             trace.answer = Answer("Chưa thể kiểm chứng câu trả lời lúc này. Vui lòng thử lại.", [], False)

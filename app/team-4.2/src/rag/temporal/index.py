@@ -57,14 +57,20 @@ RetrieverFactory = Callable[[Any, Any], Any]      # (bm25_arm, dense_arm) -> Hyb
 class VersionedIndex:
     """`retriever_factory` (vd. `lambda b, d: make_hybrid_retriever(settings, llm, b, d)`): tìm bằng đúng
     HybridRetriever của pipeline chính trên các arm đã lọc hiệu lực. Không có: BM25 (+Dense) gộp RRF đơn giản.
-    `vector_dir`: lưu vector Dense bằng Qdrant trên đĩa (khởi động lại không phải embed lại)."""
+    `vector_dir`: lưu vector Dense bằng Qdrant trên đĩa (khởi động lại không phải embed lại).
+    `dense`: `VectorIndex` dùng chung giữa các snapshot (chỉ thêm theo `chunk_id`; mỗi `VersionedIndex` chỉ trả chunk
+    trong `chunks` của chính nó nên dùng chung an toàn); có thì `build()` dùng nó thay vì tự mở.
+    `snapshot_id`: snapshot kho mà chỉ mục này được dựng từ (cặp snapshot/chỉ mục của chat)."""
 
     def __init__(self, store: LegalStore, embedder: Any = None, *, retriever_factory: RetrieverFactory | None = None,
-                 vector_dir: Path | None = None) -> None:
+                 vector_dir: Path | None = None, dense: VectorIndex | None = None,
+                 snapshot_id: str | None = None) -> None:
         self.store = store
-        self.embedder = embedder
+        self.embedder = embedder if embedder is not None or dense is None else dense.embedder
         self.retriever_factory = retriever_factory
         self.vector_dir = vector_dir
+        self.dense = dense
+        self.snapshot_id = snapshot_id
         self._state = _State({}, {}, frozenset(), BM25Index(), None, {})
 
     @property
@@ -75,36 +81,16 @@ class VersionedIndex:
     def has_dense(self) -> bool:
         return self._state.dense is not None
 
-    def capture_state(self) -> _State:
-        """Pin the published generation; subsequent builds swap the whole state.
-
-        Consumers must not mutate its dictionaries or index backends.
-        """
-        return self._state
-
     def build(self) -> int:
         chunks: dict[str, VersionedChunk] = {}
         builds: dict[str, str] = {}
         skipped: set[str] = set()
         rows: list[Chunk] = []
-        snapshots = self.store.reference_snapshots()
         for doc in self.store.documents():
             if doc.is_consolidated:
                 continue
             run = self.store.latest_build(doc.document_key)
             if run is None:
-                snapshot = snapshots.get(doc.document_key)
-                if snapshot:
-                    build_id = "reference:" + snapshot["checksum"]
-                    builds[doc.document_key] = build_id
-                    for row in snapshot["chunks"]:
-                        cid = f"{build_id}:{row['chunk_id']}"
-                        vc = VersionedChunk(cid, doc.document_key, row["chunk_id"], row.get("section") or doc.title,
-                                            row["text"], None, None, "needs_review",
-                                            ("migration.applicability_unverified",), (), (), build_id)
-                        chunks[cid] = vc
-                        rows.append(Chunk(cid, doc.document_key, doc.title, row.get("page_start"),
-                                          row.get("page_end"), vc.section, vc.text))
                 continue
             try:
                 provisions = parse_structure(Path(doc.raw_text_path).read_text(encoding="utf-8"), doc.document_key)
@@ -114,7 +100,7 @@ class VersionedIndex:
                 skipped.add(doc.document_key)
                 continue
             builds[doc.document_key] = run.build_id
-            for vc in export_chunks(self.store, doc.document_key, build_id=run.build_id):
+            for vc in export_chunks(self.store, doc.document_key):
                 chunks[vc.chunk_id] = vc
                 rows.append(Chunk(vc.chunk_id, doc.document_key, doc.title, None, None, vc.section, vc.text))
         bm25 = BM25Index()
@@ -122,6 +108,7 @@ class VersionedIndex:
         dense = None
         if self.embedder is not None and rows:
             dense = (self._state.dense if self._state.dense is not None
+                     else self.dense if self.dense is not None
                      else VectorIndex.open_qdrant(self.vector_dir, self.embedder) if self.vector_dir is not None
                      else VectorIndex(self.embedder))
             dense.build(rows)               # chỉ embed chunk chưa có (cache embedding theo nội dung)
@@ -130,22 +117,18 @@ class VersionedIndex:
 
     def stale(self) -> bool:
         st = self._state
-        snapshots = self.store.reference_checksums()
         for doc in self.store.documents():
             if doc.is_consolidated or doc.document_key in st.skipped:
                 continue
             run = self.store.latest_build(doc.document_key)
             if run is not None and st.builds.get(doc.document_key) != run.build_id:
                 return True
-            if run is None and doc.document_key in snapshots and st.builds.get(doc.document_key) != (
-                    "reference:" + snapshots[doc.document_key]):
-                return True
         return False
 
     @staticmethod
     def _allowed(chunks: dict[str, VersionedChunk], start: date, end: date) -> set[str]:
         return {cid for cid, c in chunks.items()
-                if c.valid_from is None or (c.valid_from <= end and (c.valid_to is None or c.valid_to > start))}
+                if c.valid_from <= end and (c.valid_to is None or c.valid_to > start)}
 
     def search(self, query: str, start: date, end: date, k: int) -> list[tuple[VersionedChunk, float]]:
         st = self._state

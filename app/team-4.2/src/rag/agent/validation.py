@@ -145,29 +145,6 @@ def parse_quotes(value, bundle, allowed=None):
         raw_quote = text(row["quote"], 2000)
         span = find_soft_span(raw_quote, bundle[eid].text)
         if span is None:
-            # Legal sources are often quoted as selected numbered paragraphs.
-            # Accept only complete, literal source lines in their original order,
-            # and restore EVERY omitted line in the enclosing ORIGINAL interval.
-            # Never join fragments into a synthetic citation or fuzzy-match words.
-            parts = [line.strip() for line in raw_quote.splitlines() if line.strip()]
-            spans = []
-            source = bundle[eid].text
-            if 2 <= len(parts) <= 8 and all(len(part) >= 24 for part in parts):
-                for part in parts:
-                    found = find_soft_span(part, source)
-                    if found is None:
-                        break
-                    a, b = found
-                    line_start = source.rfind("\n", 0, a) + 1
-                    line_end = source.find("\n", b)
-                    line_end = len(source) if line_end == -1 else line_end
-                    if (source[line_start:a].strip() or source[b:line_end].strip() or
-                        (spans and a < spans[-1][1])):
-                        break
-                    spans.append(found)
-                if len(spans) == len(parts):
-                    span = (spans[0][0], spans[-1][1])
-        if span is None:
             raise OutputError("Quote is not an exact source span")
         start, end = span
         old_start, old_end = intervals.get(eid, (start, end))
@@ -184,15 +161,12 @@ def parse_quotes(value, bundle, allowed=None):
     return tuple(evidence_ids), quotes
 
 
-def parse_assessment(data, requirements, bundle, available_xrefs, limit, warnings=None):
+def parse_assessment(data, requirements, bundle, available_xrefs, limit):
     obj(data, ("assessments", "followup_queries", "xref_ids"))
     req_ids = {r.id for r in requirements}
     seen, assessments = set(), []
     statuses = {"supported", "partial", "missing", "conflicting", "missing_user_fact"}
     for row in items(data["assessments"], len(requirements)):
-        if isinstance(row, dict) and row.get("status") in {"missing", "missing_user_fact"} and set(row) == {
-                "requirement_id", "status", "reason"}:
-            row = {**row, "evidence": []}
         obj(row, ("requirement_id", "status", "evidence", "reason"))
         rid = row["requirement_id"]
         if not isinstance(rid, str) or rid not in req_ids or rid in seen:
@@ -206,20 +180,8 @@ def parse_assessment(data, requirements, bundle, available_xrefs, limit, warning
         assessments.append(Assessment(rid, row["status"], eids, text(row["reason"])))
     if seen != req_ids:
         raise OutputError("Assessments must cover every requirement")
-    try:
-        queries = parse_queries(data["followup_queries"], req_ids, limit)
-    except OutputError:
-        if warnings is None:
-            raise
-        warnings.append("invalid_assessor_followups_discarded")
-        queries = []
-    try:
-        xrefs = identifiers(data["xref_ids"], set(available_xrefs))
-    except OutputError:
-        if warnings is None:
-            raise
-        warnings.append("invalid_assessor_xrefs_discarded")
-        xrefs = ()
+    queries = parse_queries(data["followup_queries"], req_ids, limit)
+    xrefs = identifiers(data["xref_ids"], set(available_xrefs))
     return assessments, queries, xrefs
 
 
@@ -244,14 +206,16 @@ def parse_claims(data, requirements, bundle):
     return claims
 
 
-def parse_verification(data, requirements, claims, bundle, limit, warnings=None, *, degrade_invalid_claims=False):
+def parse_verification(data, requirements, claims, bundle, limit, warnings=None):
     obj(data, ("claims", "requirements", "facts_preserved", "scope_respected", "followup_queries"))
     for key in ("facts_preserved", "scope_respected"):
         if type(data[key]) is not bool:
             raise OutputError("Verification flags must be booleans")
     verdicts, quotes = {}, {}
     for row in items(data["claims"], len(claims)):
-        if isinstance(row, dict) and row.get("supported") is False and set(row) == {"index", "supported", "reason"}:
+        if isinstance(row, dict) and "evidence" not in row:
+            # mô hình đôi khi bỏ khoá "evidence" (thường ở khẳng định không được ủng hộ): coi là không có trích dẫn
+            # -> khẳng định không qua kiểm chứng; không bỏ cả câu trả lời vì một khoá thiếu
             row = {**row, "evidence": []}
         obj(row, ("index", "supported", "reason", "evidence"))
         idx = row["index"]
@@ -259,19 +223,7 @@ def parse_verification(data, requirements, claims, bundle, limit, warnings=None,
             raise OutputError("Invalid claim index")
         if type(row["supported"]) is not bool:
             raise OutputError("Claim verdict must be boolean")
-        text(row["reason"])
-        if not row["supported"]:
-            verdicts[idx], quotes[idx] = False, {}
-            continue
-        try:
-            eids, spans = parse_quotes(row["evidence"], bundle, claims[idx].evidence_ids)
-        except OutputError:
-            if not degrade_invalid_claims:
-                raise
-            verdicts[idx], quotes[idx] = False, {}
-            if warnings is not None:
-                warnings.append(f"claim_{idx}_evidence_rejected")
-            continue
+        eids, spans = parse_quotes(row["evidence"], bundle, claims[idx].evidence_ids)
         if row["supported"] and set(eids) != set(claims[idx].evidence_ids):
             verdicts[idx] = False
         else:

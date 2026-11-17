@@ -38,6 +38,65 @@ def _identity(doc_type: str, number: str, issuer: str | None) -> tuple[str, str,
     return doc_type.strip().casefold(), normalize_number(number), (issuer or "").strip().casefold()
 
 
+DOCUMENT_LABEL = "Tài liệu (không phải văn bản pháp luật)"
+"""Nhãn nguồn của kho cũ sau khi đồng bộ: kho cũ chỉ còn tài liệu thường, văn bản pháp luật ở kho có phiên bản."""
+
+
+def legacy_documents(docs, legacy: Mapping[str, LegacyLaw]) -> list:
+    """Tài liệu thường của kho cũ: bỏ các bộ luật trong legacy_map (đã chuyển sang kho có phiên bản)."""
+    return [d for d in docs if d.source not in legacy]
+
+
+def document_search(retriever, legacy: Mapping[str, LegacyLaw]):
+    """Tìm trong kho cũ nhưng chỉ trả tài liệu thường (bỏ chunk của các bộ luật trong legacy_map).
+    `retriever` có .retrieve(query, k) -> kết quả có .hits và .chunks (id -> Chunk)."""
+
+    def search(query: str, k: int) -> list:
+        if k < 1:
+            return []
+        result = retriever.retrieve(query, k * 3)
+        chunks = retriever.chunks
+        out = [chunks[h.chunk_id] for h in result.hits if h.chunk_id in chunks]
+        return [c for c in out if c.source not in legacy][:k]
+
+    return search
+
+
+_AMENDING_TITLE = re.compile(r"sửa\s+đổi", re.IGNORECASE)
+
+
+def legal_overview(store: LegalStore, today: date) -> list[dict]:
+    """Văn bản pháp luật trong kho có phiên bản kèm tình trạng tại `today`:
+    in_force | repealed | not_yet | amending (luật chỉ để sửa luật khác, kèm danh sách luật bị sửa) | unknown."""
+    in_force = {d.document_key for d in store.laws_in_force(today)}
+    ops = store.operations()
+    docs = {d.document_key: d for d in store.documents() if not d.is_consolidated}
+    amends: dict[str, set[str]] = {}
+    for o in ops:
+        if o.operation_type != "REPEAL_DOCUMENT" and o.target_document_key and o.source_document_key in docs:
+            amends.setdefault(o.source_document_key, set()).add(o.target_document_key)
+    repeals = [o for o in ops if o.operation_type == "REPEAL_DOCUMENT" and o.review_status != "rejected"]
+    rows = []
+    for key, d in docs.items():
+        replaced_by, targets = None, []
+        if key in amends and _AMENDING_TITLE.search(d.title):
+            status = "amending"
+            targets = [{"document_key": t, "title": docs[t].title} for t in sorted(amends[key]) if t in docs]
+        elif key in in_force:
+            status = "in_force"
+        else:
+            start = store.first_valid_from(key)
+            status = "unknown" if start is None else ("not_yet" if start > today else "repealed")
+            if status == "repealed":
+                repeal = next((o for o in repeals if o.target_document_key == key), None)
+                by = docs.get(repeal.source_document_key) if repeal else None
+                replaced_by = {"document_key": by.document_key, "title": by.title} if by else None
+        rows.append({"document_key": key, "title": d.title, "doc_type": d.doc_type, "doc_number": d.doc_number,
+                     "status_today": status, "replaced_by": replaced_by, "amends": targets})
+    order = {"in_force": 0, "not_yet": 1, "amending": 2, "repealed": 3, "unknown": 4}
+    return sorted(rows, key=lambda r: (order[r["status_today"]], r["title"]))
+
+
 def legacy_duplicates(store: LegalStore, legacy: Mapping[str, LegacyLaw]) -> set[str]:
     known = {_identity(d.doc_type, d.doc_number, d.issuer) for d in store.documents() if not d.is_consolidated}
     return {src for src, law in legacy.items() if _identity(law.doc_type, law.doc_number, law.issuer) in known}
@@ -83,5 +142,5 @@ def is_amendment_only(provisions: Sequence[Provision]) -> bool:
     return bool(directive) and all(t in directive or _EFFECT_TITLE.search(t) for t in titles)
 
 
-__all__ = ["DocumentStatus", "LegacyLaw", "is_amendment_only", "legacy_duplicates", "legacy_status",
+__all__ = ["DOCUMENT_LABEL", "DocumentStatus", "LegacyLaw", "document_search", "legacy_documents", "legal_overview", "is_amendment_only", "legacy_duplicates", "legacy_status",
            "load_legacy_map", "versioned_status"]

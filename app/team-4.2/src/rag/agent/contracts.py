@@ -6,7 +6,6 @@ import json
 import math
 import time
 import hashlib
-import re
 from dataclasses import dataclass, field, fields
 from typing import Any
 from threading import Lock
@@ -82,14 +81,13 @@ class Budget:
     calls: list[dict[str, Any]] = field(default_factory=list)
     service_requests: dict[str, int] = field(default_factory=dict)
     _lock: Any = field(default_factory=Lock, repr=False)
-    finalization_reserve: int = 0
 
     def check(self):
         if time.monotonic() - self.started >= self.config.deadline_s:
             raise BudgetExceeded("deadline_exceeded")
 
     def can_finalize_after_search(self) -> bool:
-        return self.model_calls + 5 + self.finalization_reserve <= self.config.max_model_calls
+        return self.model_calls + 5 <= self.config.max_model_calls
 
     def remaining_s(self):
         self.check()
@@ -132,8 +130,6 @@ class ModelGateway:
     def call(self, stage: str, system: str, user: str, *, reserve_calls: int = 4) -> str:
         b, c = self.budget, self.budget.config
         b.check()
-        if stage != "temporal_review":
-            reserve_calls += b.finalization_reserve
         if b.model_calls + 1 + reserve_calls > c.max_model_calls:
             raise BudgetExceeded("model_call_limit")
         if len(system) + len(user) > c.max_input_chars:
@@ -149,7 +145,6 @@ class ModelGateway:
                   "prompt_sha256": hashlib.sha256(system.encode("utf-8")).hexdigest(),
                   "input_sha256": hashlib.sha256(user.encode("utf-8")).hexdigest()}
         b.calls.append(record)
-        call_started = time.monotonic()
         try:
             bounded = getattr(self.llm, "complete_bounded", None)
             # An attempted provider call is still a request if it raises.
@@ -167,20 +162,15 @@ class ModelGateway:
             b.provider_requests -= int(result.cache_hit)
             b.input_tokens += result.input_tokens
             b.output_tokens += result.output_tokens
-            record.update(status="ok", cache_hit=result.cache_hit,
-                          elapsed_ms=round((time.monotonic() - call_started) * 1000, 2))
+            record.update(status="ok", cache_hit=result.cache_hit)
             b.check()
             return result.text
         except Exception as exc:
-            record.update(status="error", error=type(exc).__name__,
-                          elapsed_ms=round((time.monotonic() - call_started) * 1000, 2))
+            record.update(status="error", error=type(exc).__name__)
             raise
 
     def json(self, stage: str, system: str, payload: dict, *, reserve_calls: int = 4) -> dict:
         raw = self.call(stage, system, json.dumps(payload, ensure_ascii=False), reserve_calls=reserve_calls)
-        fence = re.fullmatch(r"\s*```(?:json)?\s*\n?(.*?)\n?```\s*", raw, re.S | re.I)
-        if fence:
-            raw = fence.group(1)
         try:
             data = json.loads(raw)
         except (TypeError, ValueError) as exc:
@@ -225,7 +215,6 @@ class Claim:
 
 @dataclass
 class RunState:
-    scope: Any = None
     requirements: list[Requirement] = field(default_factory=list)
     evidence: dict[str, Evidence] = field(default_factory=dict)
     by_unit: dict[tuple[str, ...], str] = field(default_factory=dict)

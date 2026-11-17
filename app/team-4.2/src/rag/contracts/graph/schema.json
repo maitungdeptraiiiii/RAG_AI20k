@@ -1,0 +1,17 @@
+{
+  "version": "3",
+  "nodes": ["Contract", "Part", "Unit", "Value", "Party", "ConceptInstance", "ContractFact"],
+  "relations": {
+    "HAS_PART": [["Contract"], ["Part"]],
+    "HAS_UNIT": [["Part"], ["Unit"]],
+    "CHILD_OF": [["Unit"], ["Unit"]],
+    "REFERS_TO": [["Unit"], ["Unit"]],
+    "HAS_VALUE": [["Unit"], ["Value"]],
+    "HAS_PARTY": [["Contract"], ["Party"]],
+    "ABOUT": [["ConceptInstance"], ["Unit"]],
+    "HOLDER": [["ConceptInstance"], ["Party"]],
+    "AMENDS": [["Unit"], ["Unit"]],
+    "HAS_FACT": [["Contract"], ["ContractFact"]],
+    "EVIDENCE": [["ContractFact"], ["Unit"]]
+  }
+}

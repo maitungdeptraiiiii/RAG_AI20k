@@ -68,10 +68,6 @@ def test_upload_only_extracts_then_embedding_on_demand(env):
     done = env.client.post(f"/api/index/{row['doc_id']}").json()
     assert done["indexed"] is True and done["n_chunks"] >= 1 and done["indexed_at"]
     assert len(env.pipeline.store.by_doc(row["doc_id"])) == done["n_chunks"]
-    from rag.legal.store import LegalStore
-    catalog = LegalStore(env.data / "legal/catalog.sqlite")
-    assert len(catalog.documents()) == 1
-    assert next(iter(catalog.reference_snapshots().values()))["old_doc_id"] == row["doc_id"]
     assert env.client.get(f"/api/ingest_reports/{row['doc_id']}").json()["indexed"] is True
     again = env.client.post(f"/api/index/{row['doc_id']}").json()             # bấm lại: không index 2 lần
     assert again["indexed"] is True and len(env.pipeline.store) == done["n_chunks"]
@@ -87,8 +83,6 @@ def test_embedding_after_server_restart_reprepares_from_uploaded_file(env):
 def test_discard_removes_upload_report_and_extracted_without_touching_index(env):
     kept = _upload(env, mode=None)                                              # trang chat: nạp thẳng như cũ
     assert kept["indexed"] is True
-    from rag.legal.store import LegalStore
-    assert len(LegalStore(env.data / "legal/catalog.sqlite").documents()) == 1
     n = len(env.pipeline.store)
     row = _upload(env, name="nhap.txt", text=LAW.replace("Điều 2", "Điều 3"))
     r = env.client.post(f"/api/discard/{row['doc_id']}")

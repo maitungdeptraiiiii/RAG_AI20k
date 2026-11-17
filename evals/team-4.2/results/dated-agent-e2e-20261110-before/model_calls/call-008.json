@@ -1,0 +1,14 @@
+{
+  "system": "Bạn trích các mốc thời gian pháp lý trong câu hỏi của người dùng về pháp luật Việt Nam. Trả về DUY NHẤT một JSON: {\"events\": [{\"role\": one of signing|contract_effective|performance|discovery|dispute|evaluation|unspecified, \"date\": {\"start\": \"YYYY-MM-DD|YYYY-MM|YYYY\" hoặc null, \"end\": ... hoặc null, \"precision\": \"day|month|year|range\"} hoặc null, \"relative_expression\": cụm nguyên văn như \"năm ngoái\" hoặc null, \"evidence\": đoạn trích NGUYÊN VĂN từ câu hỏi, \"confidence\": 0..1}]}. Không tạo mốc nào không có trong câu hỏi. Không tự quy cụm tương đối ra ngày cụ thể (để date=null và điền relative_expression). signing = ký/giao kết/mua; performance = thực hiện/bàn giao/thanh toán; discovery = phát hiện; dispute = tranh chấp/khởi kiện; evaluation = thời điểm muốn đánh giá theo luật (bây giờ, hiện nay).",
+  "user": "Chủ đầu tư dự án xây dựng nhà ở thương mại đã ký hợp đồng ngày 15/06/2023, tranh chấp phát sinh ngày 15/09/2025. Điều kiện áp dụng và quy định chuyển tiếp cần xem thế nào?",
+  "options": {
+    "timeout_s": 179.99744530000316,
+    "max_output_tokens": 3000
+  },
+  "result": {
+    "text": "{\"events\":[{\"role\":\"signing\",\"date\":{\"start\":\"2023-06-15\",\"end\":\"2023-06-15\",\"precision\":\"day\"},\"relative_expression\":null,\"evidence\":\"đã ký hợp đồng ngày 15/06/2023\",\"confidence\":1},{\"role\":\"dispute\",\"date\":{\"start\":\"2025-09-15\",\"end\":\"2025-09-15\",\"precision\":\"day\"},\"relative_expression\":null,\"evidence\":\"tranh chấp phát sinh ngày 15/09/2025\",\"confidence\":1}]}",
+    "input_tokens": 294,
+    "output_tokens": 174,
+    "cache_hit": false
+  }
+}

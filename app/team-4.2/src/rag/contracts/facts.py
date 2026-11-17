@@ -188,7 +188,9 @@ def extract_facts(llm, contract: Contract) -> dict:
                 _merge_party(parties, p | {"aliases": found} if found else p)
         return data
 
-    run = run_batches(make_batches(contract), read)
+    # Later batches depend on parties collected from earlier batches. Keep this
+    # extraction sequential even when independent tag/review batches run in parallel.
+    run = run_batches(make_batches(contract), read, workers=1)
     if not run.results:
         raise ContractAIError()
     _distinct_roles(parties)

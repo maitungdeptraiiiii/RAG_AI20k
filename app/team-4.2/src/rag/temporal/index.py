@@ -57,14 +57,20 @@ RetrieverFactory = Callable[[Any, Any], Any]      # (bm25_arm, dense_arm) -> Hyb
 class VersionedIndex:
     """`retriever_factory` (vd. `lambda b, d: make_hybrid_retriever(settings, llm, b, d)`): tìm bằng đúng
     HybridRetriever của pipeline chính trên các arm đã lọc hiệu lực. Không có: BM25 (+Dense) gộp RRF đơn giản.
-    `vector_dir`: lưu vector Dense bằng Qdrant trên đĩa (khởi động lại không phải embed lại)."""
+    `vector_dir`: lưu vector Dense bằng Qdrant trên đĩa (khởi động lại không phải embed lại).
+    `dense`: `VectorIndex` dùng chung giữa các snapshot (chỉ thêm theo `chunk_id`; mỗi `VersionedIndex` chỉ trả chunk
+    trong `chunks` của chính nó nên dùng chung an toàn); có thì `build()` dùng nó thay vì tự mở.
+    `snapshot_id`: snapshot kho mà chỉ mục này được dựng từ (cặp snapshot/chỉ mục của chat)."""
 
     def __init__(self, store: LegalStore, embedder: Any = None, *, retriever_factory: RetrieverFactory | None = None,
-                 vector_dir: Path | None = None) -> None:
+                 vector_dir: Path | None = None, dense: VectorIndex | None = None,
+                 snapshot_id: str | None = None) -> None:
         self.store = store
-        self.embedder = embedder
+        self.embedder = embedder if embedder is not None or dense is None else dense.embedder
         self.retriever_factory = retriever_factory
         self.vector_dir = vector_dir
+        self.dense = dense
+        self.snapshot_id = snapshot_id
         self._state = _State({}, {}, frozenset(), BM25Index(), None, {})
 
     @property
@@ -102,6 +108,7 @@ class VersionedIndex:
         dense = None
         if self.embedder is not None and rows:
             dense = (self._state.dense if self._state.dense is not None
+                     else self.dense if self.dense is not None
                      else VectorIndex.open_qdrant(self.vector_dir, self.embedder) if self.vector_dir is not None
                      else VectorIndex(self.embedder))
             dense.build(rows)               # chỉ embed chunk chưa có (cache embedding theo nội dung)

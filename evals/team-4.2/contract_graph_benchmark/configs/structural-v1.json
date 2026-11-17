@@ -1,0 +1,17 @@
+{
+  "system": "structural-anchors-v1",
+  "uri": "bolt://127.0.0.1:17687",
+  "namespace": "legal",
+  "snapshot_id": "s20261117024643-c06f0c",
+  "corpus_sha256": "09d697dc75e7bdc3ca0e5e8afd8caba062c393cd5b51fe7db36472ef3f965ed8",
+  "concept_catalog": "evals/team-4.2/contract_graph_benchmark/configs/structural-concepts-v1.json",
+  "concept_catalog_sha256": "ef3e42cdc171d8dc4d6d5fced14bd531201827a9499e8154bdfd3dbb2e3b100f",
+  "max_passages": 20,
+  "max_evidence_utf8_bytes": 16000,
+  "traversal": "anchors; active replacement-chain value sources; guidance; outgoing references one hop",
+  "ranking": "anchors > value_source > guidance > references; original source order",
+  "cache": "query result cache across cases within one pinned build",
+  "uses_contract_text": false,
+  "uses_llm_or_embeddings": false,
+  "anchor_status": "original draft; not modified against benchmark labels"
+}

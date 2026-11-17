@@ -365,9 +365,10 @@
               <button type="button" id="as-of-clear" class="text-neutral-400 hover:text-neutral-800 hidden" aria-label="Bỏ ngày đã chọn">✕</button>
               <span id="as-of-hint">để trống: tự nhận diện mốc trong câu hỏi, không có thì dùng luật hiện hành</span>
             </div>
+            <div id="contract-mode-bar" class="hidden flex flex-wrap items-center gap-1.5 px-3 pb-1.5"></div>
             <div id="chat-input-capsule" class="w-full bg-white rounded-full border border-neutral-300 shadow-[0_2px_14px_rgba(0,0,0,0.06)] focus-within:border-neutral-400 focus-within:shadow-[0_4px_20px_rgba(0,0,0,0.09)] p-2 pl-3.5 pr-2.5 flex items-center space-x-2 transition-all">
               <!-- Attach / Upload button (+) -->
-              <button onclick="toggleIngestModal(true)" class="p-1.5 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-full transition-colors flex-shrink-0" title="Nạp tài liệu mới">
+              <button onclick="ContractUI.openPlusMenu(event)" class="p-1.5 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 rounded-full transition-colors flex-shrink-0" title="Nạp tài liệu / đính kèm hợp đồng">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
@@ -821,6 +822,7 @@
       });
     });
 
+    let allLegalDocs = [];
     let allLoadedDocs = [];
 
     async function fetchAppInfo() {
@@ -830,12 +832,13 @@
         const data = await res.json();
         appConfig = data.settings || {};
         allLoadedDocs = data.docs || [];
+        allLegalDocs = data.legal_docs || [];
         const totalChunks = data.total_chunks || 0;
         const chunksEl = document.getElementById('cfg-chunks');
         if (chunksEl) chunksEl.textContent = totalChunks.toLocaleString() + ' chunks';
 
         // Render projects in sidebar and docs in modal
-        renderProjectsList(allLoadedDocs);
+        renderProjectsList(allLoadedDocs, allLegalDocs);
         renderDocsModal(allLoadedDocs);
       } catch (e) {
         console.warn('Fetch info error:', e);
@@ -847,18 +850,26 @@
       return typeof str === 'string' && (str.startsWith('http://') || str.startsWith('https://'));
     }
 
-    function renderProjectsList(docs) {
+    // Hai nhóm: "Văn bản pháp luật" (kho có phiên bản, data.legal_docs) và "Tài liệu thường" (kho cũ)
+    const LEGAL_STATUS = { in_force: ['Còn hiệu lực', '#006300'], repealed: ['Hết hiệu lực', '#b42318'],
+      not_yet: ['Chưa có hiệu lực', '#8a5a00'], amending: ['Luật sửa đổi', '#475467'], unknown: ['Chưa rõ', '#8a5a00'] };
+    function renderProjectsList(docs, legalDocs) {
+      docs = docs || []; legalDocs = legalDocs || [];
       const countEl = document.getElementById('projects-doc-count');
       const container = document.getElementById('projects-doc-list');
-      if (countEl) countEl.textContent = `${docs.length} văn bản`;
+      if (countEl) countEl.textContent = `${legalDocs.length + docs.length} văn bản`;
       if (!container) return;
-
-      if (!docs || docs.length === 0) {
-        container.innerHTML = '<div class="px-2.5 py-1 text-[12px] text-neutral-400 italic">Chưa có văn bản</div>';
-        return;
-      }
-
-      container.innerHTML = docs.map(d => {
+      const head = t => `<div class="px-2.5 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">${t}</div>`;
+      const legalHtml = legalDocs.length ? legalDocs.map(d => {
+        const st = LEGAL_STATUS[d.status_today] || ['', '#475467'];
+        const tip = d.replaced_by ? ` · thay bởi ${d.replaced_by.title}`
+          : (d.amends && d.amends.length ? ` · sửa: ${d.amends.map(t => t.title).join('; ')}` : '');
+        return `<div class="w-full flex items-center space-x-2 px-2.5 py-1.5 rounded-lg text-neutral-700 text-left" title="${escapeHtml(d.title + tip)}">
+            <span class="truncate flex-1 text-[13px]">${escapeHtml(d.title)}</span>
+            <span class="text-[10.5px] flex-shrink-0" style="color:${st[1]}">${st[0]}</span></div>`;
+      }).join('') : '<div class="px-2.5 py-1 text-[12px] text-neutral-400 italic">Kho luật chưa sẵn sàng</div>';
+      container.innerHTML = head('Văn bản pháp luật') + legalHtml + head('Tài liệu thường') + (docs.length ? '' :
+        '<div class="px-2.5 py-1 text-[12px] text-neutral-400 italic">Chưa có tài liệu</div>') + docs.map(d => {
         const cleanName = formatDocTitle(d.source);
         const isLink = isUrl(d.source);
         const href = isLink ? d.source : `/doc/${encodeURIComponent(d.source)}`;
@@ -961,6 +972,7 @@
 
     function resetToHero() {
       currentSessionId = null;
+      if (window.ContractUI) ContractUI.renderModeBar();
       setThinkEnabled(false);
       setChatInputPosition('hero');
       document.getElementById('hero-view').classList.remove('hidden');
@@ -1012,6 +1024,8 @@
     async function startQuery(rawQuery) {
       // Capture this turn's mode before any async work or later toggle changes.
       const requestThinkEnabled = thinkEnabled;
+      // Hỏi với hợp đồng (phần 4): chốt hợp đồng của lượt này trước mọi bước async
+      const requestContract = window.ContractUI ? ContractUI.requestContract() : null;
       // 1. Determine target session
       if (!currentSessionId) {
         const cleanTitle = rawQuery.length > 36 ? rawQuery.slice(0, 36) + '...' : rawQuery;
@@ -1048,6 +1062,8 @@
           turnId: msgId,
           query: rawQuery,
           think: requestThinkEnabled,
+          contract_id: requestContract ? requestContract.id : null,
+          contract_label: requestContract ? requestContract.label : null,
           data: null, // null means pending
           timestamp: Date.now(),
         });
@@ -1080,6 +1096,7 @@
             <!-- User Query Bubble -->
             <div class="flex justify-end w-full">
               <div class="bg-[#f4f4f4] text-[#0d0d0d] px-5 py-2.5 rounded-3xl max-w-[85%] text-[15px] leading-relaxed select-text shadow-subtle">
+                ${requestContract ? `<div class="text-[11.5px] text-neutral-500 mb-0.5">📎 Hỏi với hợp đồng: ${escapeHtml(requestContract.label)}</div>` : ''}
                 ${escapeHtml(rawQuery)}
               </div>
             </div>
@@ -1125,7 +1142,12 @@
         const response = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: rawQuery, history: historyPayload, stream: true, think: requestThinkEnabled }),
+          // session_id: server giữ bảng tra PII theo phiên để cùng một thông tin cá nhân
+          // luôn là cùng placeholder qua các lượt hỏi; history: server che PII rồi mới gộp lịch sử
+          body: JSON.stringify(Object.assign(
+            { query: rawQuery, session_id: targetSessionId, history: historyPayload, stream: true, think: requestThinkEnabled },
+            requestContract ? { contract_id: requestContract.id } : {},
+            document.getElementById('as-of-input').value ? { as_of: document.getElementById('as-of-input').value } : {})),
         });
 
         if (!response.ok) {
@@ -1404,6 +1426,7 @@
       const temporal = renderTemporalBlocks(data);
 
       contentBox.innerHTML = `
+        ${temporal.timeline}
         ${trace.agent ? `<div class="mb-3 text-[12px] font-medium ${data.status === 'answer' ? 'text-blue-600' : 'text-amber-700'}">Think · ${escapeHtml(agentStatusLabel(data.status))}</div>` : ''}
         <div id="${msgId}-text" class="chatgpt-prose select-text">
           ${formattedText}
@@ -1418,6 +1441,99 @@
 
       scrollToBottom();
     }
+
+    // ===== Hỏi đáp theo mốc thời gian (phần 2) =====
+    const ROLE_LABEL = { signing: 'Ký kết', contract_effective: 'Hợp đồng có hiệu lực', performance: 'Thực hiện',
+      discovery: 'Phát hiện', dispute: 'Tranh chấp', evaluation: 'Đánh giá', unspecified: 'Mốc' };
+    const SOURCE_LABEL = { calendar: 'ngày đã chọn', question: 'từ câu hỏi', default: 'mặc định hôm nay' };
+    const DOC_STATUS_LABEL = { verified: ['✓', 'Đã xác minh phiên bản', '#006300'],
+      partially_verified: ['◐', 'Xác minh một phần', '#8a5a00'], unversioned: ['?', 'Chưa xác định phiên bản', '#8a5a00'],
+      outdated: ['⊘', 'Không còn hiệu lực tại mốc', '#b42318'], unknown: ['?', 'Chưa đủ dữ liệu', '#8a5a00'] };
+    const ASSESS_LABEL = { not_applicable: 'Không áp dụng', potentially_applicable: 'Có thể áp dụng — cần xem xét',
+      applicable: 'Áp dụng (theo phân tích)', undetermined: 'Chưa xác định — thiếu dữ kiện' };
+    const WARN_LABEL = { 'timeline.default_today': 'Không thấy mốc thời gian trong câu hỏi — đang áp dụng pháp luật hiện hành.',
+      'timeline.llm_failed': 'Không phân tích được vai trò các mốc; đã dùng nhận diện theo quy tắc.',
+      'timeline.evidence_not_found': 'Đã bỏ một mốc không có căn cứ trong câu hỏi.' };
+    const fmtDay = d => d ? d.split('-').reverse().join('/') : '';
+
+    function anchorWhen(a) {
+      if (!a.start) return 'chưa xác định';
+      if (a.start === a.end) return fmtDay(a.start);
+      if (a.precision === 'year') return 'năm ' + a.start.slice(0, 4);
+      if (a.precision === 'month') return 'tháng ' + a.start.slice(5, 7) + '/' + a.start.slice(0, 4);
+      return fmtDay(a.start) + ' – ' + fmtDay(a.end);
+    }
+
+    function warningText(w) {
+      if (WARN_LABEL[w]) return WARN_LABEL[w];
+      if (w.startsWith('timeline.calendar_conflict')) return 'Câu hỏi nhắc một mốc khác ngày đã chọn — đang ưu tiên ngày đã chọn, xem lại nếu chưa đúng.';
+      if (w.startsWith('timeline.relative_unresolved')) return 'Chưa quy được "' + w.split(':').slice(1).join(':') + '" ra ngày cụ thể — hãy cho ngày rõ hơn.';
+      return w;
+    }
+
+    function docStatusBadge(status) {
+      const s = DOC_STATUS_LABEL[status];
+      if (!s) return '';
+      return `<span class="inline-flex items-center gap-1 text-[11px] font-medium" style="color:${s[2]}">${s[0]} ${escapeHtml(s[1])}</span>`;
+    }
+
+    function renderTemporalBlocks(data) {
+      const out = { timeline: '', certainty: '', transitions: '', followups: '' };
+      const tl = data.timeline;
+      if (tl && tl.anchors) {
+        const chips = tl.anchors.map(a => `
+          <span class="inline-flex flex-wrap items-baseline gap-1 border border-neutral-200 bg-neutral-50 rounded-lg px-2 py-1">
+            <span class="text-[11px] text-neutral-500">${escapeHtml(ROLE_LABEL[a.role] || a.role)}</span>
+            <span class="text-[12.5px] font-medium text-neutral-800">${escapeHtml(anchorWhen(a))}</span>
+            <span class="text-[10.5px] text-neutral-400">${escapeHtml(SOURCE_LABEL[a.source] || a.source)}</span>
+          </span>`).join('');
+        const warns = (tl.warnings || []).map(w => `<div class="text-[11.5px]" style="color:#8a5a00">⚠ ${escapeHtml(warningText(w))}</div>`).join('');
+        out.timeline = `<div class="mb-3 space-y-1.5"><div class="text-[11.5px] font-semibold text-neutral-500 uppercase tracking-wide">Mốc pháp lý đang sử dụng</div>
+          <div class="flex flex-wrap gap-1.5">${chips}</div>${warns}</div>`;
+      }
+      if (data.certainty && data.certainty !== 'firm') {
+        const text = data.certainty === 'cannot_conclude'
+          ? 'Chưa đủ căn cứ để kết luận.'
+          : 'Kết luận có điều kiện — phụ thuộc vào căn cứ chưa xác minh đầy đủ, quy định chuyển tiếp hoặc mốc thời gian chưa đủ cụ thể.';
+        out.certainty = `<div class="mt-3 text-[12.5px] rounded-lg px-3 py-2 border" style="border-color:#fab219;background:#fffaf0;color:#8a5a00">⚠ ${escapeHtml(text)}</div>`;
+      }
+      const rules = data.transition_rules || [];
+      if (rules.length) {
+        const assess = Object.fromEntries((data.transition_assessments || []).map(t => [t.rule_id, t]));
+        out.transitions = `<div class="mt-3 border border-neutral-200 rounded-lg p-3 space-y-2">
+          <div class="text-[12.5px] font-semibold text-neutral-800">Quy định chuyển tiếp cần xem xét</div>
+          ${rules.map(r => {
+            const a = assess[r.rule_id] || {};
+            const missing = (a.missing_information || []).length ? `<div class="text-[11.5px] text-neutral-600">Cần bổ sung: ${escapeHtml(a.missing_information.join('; '))}</div>` : '';
+            return `<div class="text-[12px]"><div><span class="font-medium">${escapeHtml(r.source_article)}</span> — ${escapeHtml(r.source_document_key)}
+              <span class="ml-1" style="color:${a.assessment === 'not_applicable' ? '#006300' : '#8a5a00'}">· ${escapeHtml(ASSESS_LABEL[a.assessment] || 'Chưa đánh giá')}</span></div>
+              <div class="text-neutral-500">${escapeHtml((r.excerpt || '').length > 220 ? r.excerpt.slice(0, 220) + '…' : (r.excerpt || ''))}</div>${missing}</div>`;
+          }).join('')}</div>`;
+      }
+      const fu = data.follow_up_questions || [];
+      if (fu.length) {
+        out.followups = `<div class="mt-3 flex flex-wrap gap-1.5">${fu.map(q =>
+          `<button type="button" class="followup-chip text-[12px] border border-neutral-300 rounded-full px-3 py-1 hover:bg-neutral-100" data-q="${escapeHtml(q)}">${escapeHtml(q)}</button>`).join('')}</div>`;
+      }
+      return out;
+    }
+
+    document.addEventListener('click', (e) => {
+      const chip = e.target.closest('.followup-chip');
+      if (!chip) return;
+      const input = document.getElementById('main-query-input');
+      input.value = chip.dataset.q;
+      input.focus();
+    });
+
+    (function initAsOf() {
+      const input = document.getElementById('as-of-input');
+      const clear = document.getElementById('as-of-clear');
+      if (!input || !clear) return;
+      const sync = () => clear.classList.toggle('hidden', !input.value);
+      input.addEventListener('change', sync);
+      clear.addEventListener('click', () => { input.value = ''; sync(); });
+    })();
 
     function agentStatusLabel(status) {
       return ({ answer: 'Đã kiểm chứng theo tài liệu', partial: 'Mới xác minh được một phần',
@@ -1746,13 +1862,21 @@
       document.getElementById('popover-article').textContent = secInfo.article;
       document.getElementById('popover-quote').textContent = `"${quoteText}"`;
       document.getElementById('popover-score').textContent = src.score != null ? `Độ khớp: p = ${src.score}` : 'Nguồn được trích dẫn';
-      document.getElementById('popover-page').textContent = src.page ? `Trang ${src.page}` : '';
+      document.getElementById('popover-page').innerHTML = src.store
+        ? (src.valid_from ? `Hiệu lực ${escapeHtml(fmtDay(src.valid_from))} → ${escapeHtml(src.valid_to ? fmtDay(src.valid_to) : 'nay')} · ` : 'Tài liệu (không phải văn bản pháp luật) · ')
+          + docStatusBadge(src.document_status)
+          + ((src.provenance || []).length ? ` · do ${escapeHtml(src.provenance.join(', '))} sửa` : '')
+        : (src.page ? `Trang ${src.page}` : '');
       document.getElementById('popover-view-btn').onclick = () => {
         hideCitePopover();
         openCanvas(chunkId, n);
       };
       const popTab = document.getElementById('popover-tab-btn');
-      if (popTab && src.source) {
+      // Nguồn luật có phiên bản / kho có phiên bản không có tệp để mở ("Luật có phiên bản: " là nhãn của Think)
+      const noFile = !src.source || src.store === 'versioned' || String(src.source).startsWith('Luật có phiên bản: ')
+        || String(src.source).startsWith('Hợp đồng: ');
+      if (popTab) popTab.classList.toggle('hidden', noFile);
+      if (popTab && src.source && !noFile) {
         const isLink = isUrl(src.source);
         popTab.href = isLink ? src.source : ('/doc/' + encodeURIComponent(src.source));
         const spanEl = popTab.querySelector('span');
@@ -1956,12 +2080,17 @@
 
       // Render each turn in this session sequentially
       (sess.turns || []).forEach(turn => {
+        if (turn.kind) {                       // thẻ hợp đồng / báo cáo (phần 4)
+          if (window.ContractUI) ContractUI.renderTurn(turn);
+          return;
+        }
         const msgId = turn.turnId || ('msg-' + (turn.timestamp || Date.now()));
         const isPending = (turn.data === null || turn.data === undefined);
         const turnHtml = `
           <div id="${msgId}-turn" class="space-y-6">
             <div class="flex justify-end w-full">
               <div class="bg-[#f4f4f4] text-[#0d0d0d] px-5 py-2.5 rounded-3xl max-w-[85%] text-[15px] leading-relaxed select-text shadow-subtle">
+                ${turn.contract_label ? `<div class="text-[11.5px] text-neutral-500 mb-0.5">📎 Hỏi với hợp đồng: ${escapeHtml(turn.contract_label)}</div>` : ''}
                 ${escapeHtml(turn.query)}
               </div>
             </div>
@@ -1988,6 +2117,7 @@
       updateSendButtonState();
       scrollToBottom();
       closeContextMenu();
+      if (window.ContractUI) ContractUI.onSessionLoaded(sess);
     }
 
     // ==================== CONTEXT MENU (CHUỘT PHẢI) LOGIC ====================
@@ -2029,6 +2159,7 @@
       closeContextMenu();
 
       activeQuerySessionIds.delete(targetId);
+      if (window.ContractUI) ContractUI.forgetSession(chatSessions.find(s => s.id === targetId));
       chatSessions = chatSessions.filter(s => s.id !== targetId);
       saveSessionsToStorage();
 
@@ -2302,5 +2433,6 @@
         .replace(/'/g, '&#039;');
     }
   </script>
+  <script src="/contracts.js"></script>
 </body>
 </html>

@@ -1,0 +1,190 @@
+[
+  {
+    "id": "before_change",
+    "http": 200,
+    "status": "error",
+    "certainty": "cannot_conclude",
+    "stop_reason": "OutputError",
+    "sources": 0,
+    "budget": {
+      "rounds": 1,
+      "searches": 3,
+      "xref_targets": 0,
+      "model_calls": 2,
+      "model_bytes": 34666,
+      "provider_requests": 2,
+      "cache_hits": 0,
+      "input_tokens": 8299,
+      "output_tokens": 2396,
+      "elapsed_s": 61.166,
+      "calls": [
+        {
+          "stage": "plan",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "4423d9f67b13a4b1f02db8eb6e269ac1127dd9c4c2d01438ba9c153067631dbe",
+          "input_sha256": "71b486230cec39454f5cf241277d9f5c753cb8e1246f4e88e558ce91cc97bab0",
+          "cache_hit": false
+        },
+        {
+          "stage": "assess",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "2f11fa000836b046f54e6e371367eb91160f341e4dad78f4b332c31b1a7be2c4",
+          "input_sha256": "3677c01318549c3b477b3dabbc1ce03db9fa95843a1bf0591618fd90661ab55a",
+          "cache_hit": false
+        }
+      ],
+      "service_requests": {
+        "rerank": 48
+      }
+    },
+    "problems": [
+      "agent_error"
+    ]
+  },
+  {
+    "id": "after_change",
+    "http": 200,
+    "status": "answer",
+    "certainty": "firm",
+    "stop_reason": "complete",
+    "sources": 2,
+    "budget": {
+      "rounds": 1,
+      "searches": 2,
+      "xref_targets": 0,
+      "model_calls": 5,
+      "model_bytes": 106947,
+      "provider_requests": 5,
+      "cache_hits": 0,
+      "input_tokens": 24969,
+      "output_tokens": 3983,
+      "elapsed_s": 69.258,
+      "calls": [
+        {
+          "stage": "plan",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "4423d9f67b13a4b1f02db8eb6e269ac1127dd9c4c2d01438ba9c153067631dbe",
+          "input_sha256": "de9b6a80b52fa38f1ec8c9624043011af789d96962909b9c300c060b1e41969b",
+          "cache_hit": false
+        },
+        {
+          "stage": "assess",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "2f11fa000836b046f54e6e371367eb91160f341e4dad78f4b332c31b1a7be2c4",
+          "input_sha256": "ba8b158f3b0039ed6c6ec8ce50a2b102c36fbd6772dfab73fa4d6c396e9ca082",
+          "cache_hit": false
+        },
+        {
+          "stage": "compose",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "b48673a3b16901dde9fb3a37c239d72e105c8f36ccdd19f90cfd1edd80148fda",
+          "input_sha256": "72f7d10fcc537875603984a3f682deb8bb82520f2297113ca5b09cf29f84afa8",
+          "cache_hit": false
+        },
+        {
+          "stage": "verify",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "349850d3d9ec34acc812d41457fb85258de264e7aced043acd4b5dc88b6e1473",
+          "input_sha256": "330b1f3ae1fe8d6818f9adc58751e85798b04c1f749e278f3f0706586075acce",
+          "cache_hit": false
+        },
+        {
+          "stage": "temporal_review",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "508317f51181509ebd08327190eb6749147f0eaccd200bd01e589441a32f006d",
+          "input_sha256": "06c282c5cc40fccb857fc9c31de21870bcd0d5653c4a8fd422e3d802cc6da75b",
+          "cache_hit": false
+        }
+      ],
+      "service_requests": {
+        "rerank": 48
+      }
+    },
+    "problems": []
+  },
+  {
+    "id": "multiple_anchors",
+    "http": 200,
+    "status": "clarify",
+    "certainty": "cannot_conclude",
+    "stop_reason": "missing_user_fact",
+    "sources": 0,
+    "budget": {
+      "rounds": 0,
+      "searches": 0,
+      "xref_targets": 0,
+      "model_calls": 2,
+      "model_bytes": 5307,
+      "provider_requests": 2,
+      "cache_hits": 0,
+      "input_tokens": 1158,
+      "output_tokens": 511,
+      "elapsed_s": 11.2,
+      "calls": [
+        {
+          "stage": "timeline",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "741e7d5f80ec8c00da1cceec6e4049629e8e9b5ecfb79971d6ab32be434b708c",
+          "input_sha256": "4f87ff8c9414ac3efdbbf3ea37f47233d4d917f6a67957a56af9af50507bd496",
+          "cache_hit": false
+        },
+        {
+          "stage": "plan",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "4423d9f67b13a4b1f02db8eb6e269ac1127dd9c4c2d01438ba9c153067631dbe",
+          "input_sha256": "d9c5cc4b320a47c9e7d2c40043606ddcd2096ebcad1a8785b45ee02ee58c7d32",
+          "cache_hit": false
+        }
+      ],
+      "service_requests": {}
+    },
+    "problems": []
+  },
+  {
+    "id": "no_version_at_date",
+    "http": 200,
+    "status": "abstain",
+    "certainty": "cannot_conclude",
+    "stop_reason": "empty_scope",
+    "sources": 0,
+    "budget": {
+      "rounds": 0,
+      "searches": 0,
+      "xref_targets": 0,
+      "model_calls": 0,
+      "model_bytes": 0,
+      "provider_requests": 0,
+      "cache_hits": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "elapsed_s": 0.005,
+      "calls": [],
+      "service_requests": {}
+    },
+    "problems": []
+  },
+  {
+    "id": "invalid_date",
+    "http": 400,
+    "problems": []
+  },
+  {
+    "id": "invalid_think",
+    "http": 400,
+    "problems": []
+  },
+  {
+    "id": "catalog_unavailable",
+    "http": 503,
+    "problems": []
+  }
+]

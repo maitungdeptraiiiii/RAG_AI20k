@@ -1,0 +1,188 @@
+{
+  "scope_version": "1.0-document-inventory",
+  "count": 26,
+  "documents": [
+    {
+      "document_key": "thong-tu:12/2025/TT-BNV",
+      "title": "Hướng dẫn Luật BHXH về BHXH bắt buộc",
+      "topic": "insurance_and_unemployment",
+      "use": "selected_provisions",
+      "metadata_evidence_url": "https://xaydungchinhsach.chinhphu.vn/toan-van-thong-tu-12-2025-tt-bnv-quy-dinh-chi-tiet-mot-so-dieu-cua-luat-bhxh-ve-bhxh-bat-buoc-11925070415595016.htm"
+    },
+    {
+      "document_key": "thong-tu:59/2015/TT-BLĐTBXH",
+      "title": "Hướng dẫn Luật BHXH về BHXH bắt buộc",
+      "topic": "insurance_and_unemployment",
+      "use": "selected_provisions",
+      "metadata_evidence_url": "https://congbao.chinhphu.vn/van-ban/thong-tu-so-59-2015-tt-bldtbxh-18869.htm"
+    },
+    {
+      "document_key": "thong-tu:06/2021/TT-BLĐTBXH",
+      "title": "Sửa đổi Thông tư 59/2015/TT-BLĐTBXH",
+      "topic": "insurance_and_unemployment",
+      "use": "provenance_only",
+      "metadata_evidence_url": "https://congbao.chinhphu.vn/van-ban/thong-tu-so-06-2021-tt-bldtbxh-34037.htm"
+    },
+    {
+      "document_key": "nghi-dinh:146/2018/NĐ-CP",
+      "title": "Hướng dẫn Luật Bảo hiểm y tế",
+      "topic": "insurance_and_unemployment",
+      "use": "selected_provisions",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?classid=1&docid=212238&pageid=27160&typegroupid=4"
+    },
+    {
+      "document_key": "nghi-dinh:75/2023/NĐ-CP",
+      "title": "Sửa đổi Nghị định 146/2018/NĐ-CP về BHYT",
+      "topic": "insurance_and_unemployment",
+      "use": "provenance_only",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?classid=1&docid=212238&pageid=27160&typegroupid=4"
+    },
+    {
+      "document_key": "nghi-dinh:02/2025/NĐ-CP",
+      "title": "Sửa đổi Nghị định 146/2018/NĐ-CP đã sửa bởi NĐ 75/2023",
+      "topic": "insurance_and_unemployment",
+      "use": "provenance_only",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?classid=1&docid=212238&pageid=27160&typegroupid=4"
+    },
+    {
+      "document_key": "nghi-dinh:58/2020/NĐ-CP",
+      "title": "Mức đóng Quỹ bảo hiểm tai nạn lao động, bệnh nghề nghiệp",
+      "topic": "working_conditions_and_special_categories",
+      "use": "selected_provisions",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?docid=200108&pageid=27160"
+    },
+    {
+      "document_key": "nghi-dinh:88/2020/NĐ-CP",
+      "title": "Bảo hiểm tai nạn lao động, bệnh nghề nghiệp bắt buộc",
+      "topic": "working_conditions_and_special_categories",
+      "use": "selected_provisions",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?docid=200622&pageid=27160"
+    },
+    {
+      "document_key": "thong-tu:28/2021/TT-BLĐTBXH",
+      "title": "Chế độ đối với người lao động bị tai nạn lao động, bệnh nghề nghiệp",
+      "topic": "working_conditions_and_special_categories",
+      "use": "selected_provisions",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?docid=205413&pageid=27160"
+    },
+    {
+      "document_key": "thong-tu:25/2025/TT-BNV",
+      "title": "Sửa khoản 2 Điều 5 Thông tư 28/2021/TT-BLĐTBXH",
+      "topic": "working_conditions_and_special_categories",
+      "use": "provenance_only",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?classid=1&docid=216423&orggroupid=4&pageid=27160"
+    },
+    {
+      "document_key": "nghi-dinh:38/2019/NĐ-CP",
+      "title": "Mức lương cơ sở đối với cán bộ, công chức, viên chức và lực lượng vũ trang",
+      "topic": "insurance_reference_values",
+      "use": "selected_provisions",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/default.aspx?docid=196996&pageid=27160"
+    },
+    {
+      "document_key": "nghi-dinh:24/2023/NĐ-CP",
+      "title": "Mức lương cơ sở đối với cán bộ, công chức, viên chức và lực lượng vũ trang",
+      "topic": "insurance_reference_values",
+      "use": "selected_provisions",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?classid=1&docid=207881&pageid=27160"
+    },
+    {
+      "document_key": "nghi-dinh:73/2024/NĐ-CP",
+      "title": "Mức lương cơ sở và chế độ tiền thưởng",
+      "topic": "insurance_reference_values",
+      "use": "selected_provisions",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?classid=1&docid=210537&pageid=27160&typegroupid=4"
+    },
+    {
+      "document_key": "nghi-dinh:161/2026/NĐ-CP",
+      "title": "Mức lương cơ sở và chế độ tiền thưởng",
+      "topic": "insurance_reference_values",
+      "use": "selected_provisions",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?classid=1&docid=218107&orggroupid=2&pageid=27160"
+    },
+    {
+      "document_key": "nghi-dinh:152/2020/NĐ-CP",
+      "title": "Người lao động nước ngoài làm việc tại Việt Nam và tuyển dụng, quản lý lao động Việt Nam cho tổ chức, cá nhân nước ngoài",
+      "topic": "working_conditions_and_special_categories",
+      "use": "selected_provisions",
+      "metadata_evidence_url": "https://xaydungchinhsach.chinhphu.vn/nghi-dinh-so-219-2025-nd-cp-quy-dinh-ve-nguoi-lao-dong-nuoc-ngoai-lam-viec-tai-viet-nam-11925080910491801.htm"
+    },
+    {
+      "document_key": "nghi-dinh:70/2023/NĐ-CP",
+      "title": "Sửa đổi Nghị định 152/2020/NĐ-CP",
+      "topic": "working_conditions_and_special_categories",
+      "use": "provenance_only",
+      "metadata_evidence_url": "https://xaydungchinhsach.chinhphu.vn/nghi-dinh-so-219-2025-nd-cp-quy-dinh-ve-nguoi-lao-dong-nuoc-ngoai-lam-viec-tai-viet-nam-11925080910491801.htm"
+    },
+    {
+      "document_key": "thong-tu:09/2020/TT-BLĐTBXH",
+      "title": "Hướng dẫn Bộ luật Lao động về lao động chưa thành niên",
+      "topic": "working_conditions_and_special_categories",
+      "use": "selected_provisions",
+      "metadata_evidence_url": "https://congbao.chinhphu.vn/van-ban/thong-tu-so-09-2020-tt-bldtbxh-33378.htm"
+    },
+    {
+      "document_key": "nghi-quyet:17/2022/UBTVQH15",
+      "title": "Số giờ làm thêm trong năm, tháng trong bối cảnh COVID-19 và phục hồi kinh tế",
+      "topic": "working_time_temporary_rules",
+      "use": "selected_provisions",
+      "metadata_evidence_url": "https://congbao.chinhphu.vn/van-ban/nghi-quyet-so-17-2022-ubtvqh15-36956/40162.htm"
+    },
+    {
+      "document_key": "luat:51/2005/QH11",
+      "title": "Luật Giao dịch điện tử",
+      "topic": "electronic_employment_contracts",
+      "use": "selected_provisions",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?docid=29675&pageid=27160"
+    },
+    {
+      "document_key": "nghi-dinh:130/2018/NĐ-CP",
+      "title": "Chữ ký số và dịch vụ chứng thực chữ ký số",
+      "topic": "electronic_employment_contracts",
+      "use": "selected_provisions",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?docid=194913&pageid=27160"
+    },
+    {
+      "document_key": "nghi-dinh:23/2025/NĐ-CP",
+      "title": "Chữ ký điện tử và dịch vụ tin cậy",
+      "topic": "electronic_employment_contracts",
+      "use": "selected_provisions",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?classid=1&docid=212829&orggroupid=2&pageid=27160"
+    },
+    {
+      "document_key": "luat:12/2012/QH13",
+      "title": "Luật Công đoàn",
+      "topic": "representation_and_contract_protection",
+      "use": "selected_provisions",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/default.aspx?docid=163545&pageid=27160"
+    },
+    {
+      "document_key": "luat:97/2025/QH15",
+      "title": "Sửa Luật Mặt trận Tổ quốc Việt Nam, Luật Công đoàn, Luật Thanh niên và Luật Thực hiện dân chủ ở cơ sở",
+      "topic": "representation_and_contract_protection",
+      "use": "provenance_only",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?classid=1&docid=214586&pageid=27160&typegroupid=3"
+    },
+    {
+      "document_key": "luat:59/2020/QH14",
+      "title": "Luật Doanh nghiệp",
+      "topic": "contract_capacity_definitions",
+      "use": "selected_provisions",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?classid=1&docid=200447&pageid=27160&typegroupi="
+    },
+    {
+      "document_key": "luat:76/2025/QH15",
+      "title": "Sửa đổi, bổ sung Luật Doanh nghiệp",
+      "topic": "contract_capacity_definitions",
+      "use": "provenance_only",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?classid=1&docid=214562&pageid=27160&typegroupid=3"
+    },
+    {
+      "document_key": "nghi-dinh:399/2026/NĐ-CP",
+      "title": "Mức lương tối thiểu đối với người lao động làm việc theo hợp đồng lao động",
+      "topic": "minimum_wage_history_and_annexes",
+      "use": "selected_provisions",
+      "metadata_evidence_url": "https://chinhphu.vn/?classid=1&docid=220166&pageid=27160"
+    }
+  ]
+}

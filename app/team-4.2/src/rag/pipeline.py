@@ -36,7 +36,7 @@ from rag.index.bm25_index import BM25Index
 from rag.index.embedder import EmbeddingCache, make_embedder
 from rag.index.store import ChunkStore
 from rag.index.vector_index import VectorIndex
-from rag.ingest.chunker import chunk_document
+from rag.ingest.chunker import chunk_document, chunk_fixed
 from rag.ingest.loaders import FlaggedPage, OCRPage, TablePage, load_source
 from rag.quality.issues import QualityIssue
 from rag.ingest.page_report import page_details, summarize_pages
@@ -245,6 +245,9 @@ def index_signature(settings: Settings, index_enhancers: Sequence[str]) -> dict[
         "embed_dim": settings.embed_dim,
         "max_syllables": settings.max_syllables,
         "index_enhancers": list(index_enhancers),
+        # chỉ ghi khi khác mặc định, để index cũ (structural) không bị coi là lệch cấu hình
+        **({"chunk_strategy": settings.chunk_strategy, "chunk_overlap": settings.chunk_overlap}
+           if settings.chunk_strategy != "structural" else {}),
     }
 
 
@@ -271,6 +274,8 @@ class RAGPipeline:
         *,
         top_k: int = 5,
         max_syllables: int = 300,
+        chunk_strategy: str = "structural",
+        chunk_overlap: int = 50,
         context: ContextConfig | None = None,
         index_enhancers: Sequence[Any] = (),
         loader: Callable[..., list[Page]] = load_source,
@@ -291,6 +296,7 @@ class RAGPipeline:
         self.llm = llm
         self.top_k = top_k
         self.max_syllables = max_syllables
+        self.chunk_strategy, self.chunk_overlap = chunk_strategy, chunk_overlap
         self.context_config = context or ContextConfig(fixed_k=top_k)
         self.index_enhancers = list(index_enhancers)
         self._loader = loader
@@ -343,7 +349,8 @@ class RAGPipeline:
         )
         return cls(
             ChunkStore(s.chunks_path), retriever, llm,
-            top_k=s.top_k, max_syllables=s.max_syllables, context=context,
+            top_k=s.top_k, max_syllables=s.max_syllables, chunk_strategy=s.chunk_strategy,
+            chunk_overlap=s.chunk_overlap, context=context,
             index_enhancers=index_enhancers, ocr=make_ocr_engine(s), extracted_dir=s.data_dir / "extracted",
             condenser=QueryCondenser(condenser_llm),
         )
@@ -422,7 +429,12 @@ class RAGPipeline:
             return report
         text_pages = [p for p in pages if not isinstance(p, TablePage)]
         tables = [p.table for p in pages if isinstance(p, TablePage) and p.table is not None]
-        chunks = chunk_document(text_pages, max_syllables=self.max_syllables) if text_pages else []
+        if not text_pages:
+            chunks = []
+        elif self.chunk_strategy == "fixed":
+            chunks = chunk_fixed(text_pages, max_syllables=self.max_syllables, overlap=self.chunk_overlap)
+        else:
+            chunks = chunk_document(text_pages, max_syllables=self.max_syllables)
         chunks += chunk_tables(tables, doc_id=report.doc_id, source=report.source,
                                start_index=len(chunks), max_syllables=self.max_syllables)
         if not chunks:

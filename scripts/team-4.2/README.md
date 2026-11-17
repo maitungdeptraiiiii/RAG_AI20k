@@ -8,6 +8,7 @@ Chạy tại gốc repo, sau khi `pip install -e "app/team-4.2[dev]"` và điề
 |---|---|
 | `crawl_vbpl.py` | Crawl văn bản pháp luật từ vbpl.vn theo số hiệu, `--id` hoặc `--list` vào `data/team-4.2/raw/vbpl/`: `<tên>.txt` + `<tên>.meta.json` + `manifest.json` có checksum (`python scripts/team-4.2/crawl_vbpl.py 36/2005/QH11`). Crawl lại báo `new` / `unchanged` / `updated` |
 | `ingest.py` | Ingest file PDF/TXT/MD, thư mục hoặc URL vào index (`python scripts/team-4.2/ingest.py data/team-4.2/raw/`) |
+| `legal_corpus.py` | Đóng gói / giải nén / kiểm tra kho luật có phiên bản để cả nhóm dùng cùng snapshot (`pack`, `unpack`, `verify`), xem `data/team-4.2/README.md` |
 | `ask.py` | Hỏi trên dòng lệnh: câu trả lời, citation và kết quả từng arm (`--mode bm25\|dense`, `--retrieve-only`) |
 
 Evaluation nằm ở `evals/team-4.2/runners/`.

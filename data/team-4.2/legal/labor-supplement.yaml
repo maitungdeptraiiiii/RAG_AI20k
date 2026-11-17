@@ -1,0 +1,34 @@
+# Additive input for the labor corpus; independent of bridge/concepts.yaml.
+laws:
+  - {type: Luật, number: 71/2025/QH15}
+  - {type: Luật, number: 113/2025/QH15}
+  - {type: Luật, number: 124/2025/QH15}
+  - {type: Luật, number: 73/2025/QH15}
+  - {type: Luật, number: 84/2025/QH15}
+  - {type: Luật, number: 142/2025/QH15}
+  - {type: Luật, number: 46/2014/QH13}
+  - {type: Luật, number: 20/2023/QH15}
+  - {type: Luật, number: 50/2024/QH15}
+  - {type: Nghị định, number: 35/2022/NĐ-CP}
+  - {type: Nghị định, number: 10/2024/NĐ-CP}
+  - {type: Nghị định, number: 129/2025/NĐ-CP}
+  - {type: Nghị định, number: 128/2025/NĐ-CP}
+  - {type: Nghị định, number: 188/2025/NĐ-CP}
+  - {type: Nghị định, number: 374/2025/NĐ-CP}
+  - {type: Nghị định, number: 219/2025/NĐ-CP}
+  - {type: Nghị định, number: 28/2015/NĐ-CP}
+  - {type: Nghị định, number: 61/2020/NĐ-CP}
+  - {type: Thông tư, number: 11/2020/TT-BLĐTBXH}
+  - {type: Thông tư, number: 19/2023/TT-BLĐTBXH}
+
+# Curated source metadata, not contract concepts or decision rules.
+# NĐ 128/2025 Điều 15 khoản 6 repeals the old geographic annex.
+attachment_validity:
+  "nghi-dinh:74/2024/NĐ-CP":
+    valid_from: "2024-07-01"
+    valid_to: "2025-07-01"
+    validity_source: "nghi-dinh:128/2025/NĐ-CP#d15.k6"
+  "nghi-dinh:128/2025/NĐ-CP":
+    valid_from: "2025-07-01"
+    valid_to: "2026-01-01"
+    validity_source: "nghi-dinh:293/2025/NĐ-CP#d5.k3"

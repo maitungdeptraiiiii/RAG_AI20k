@@ -20,6 +20,7 @@ dependencies = [
     "streamlit",
     "pandas",
     "pyyaml",            # rag.legal: seeds.yaml
+    "filelock",          # rag.legal.snapshots: khoá ghi kho luật
     "ragas",
 ]
 
@@ -27,6 +28,7 @@ dependencies = [
 jev = ["typesafe-sdk"]                 # RERANK_BACKEND=jev
 neural = ["torch", "transformers"]    # ADVANCED=splade / colbert
 dev = ["pytest", "pytest-asyncio"]   # tests/test_stream.py dùng @pytest.mark.asyncio
+graph = ["neo4j>=5.28,<6"]            # CONTRACT_GRAPH=1: ghi đồ thị hợp đồng vào Neo4j
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -35,3 +37,7 @@ where = ["src"]
 testpaths = ["tests"]
 pythonpath = ["src", "."]
 asyncio_default_fixture_loop_scope = "function"
+
+[tool.setuptools.package-data]
+"rag.contracts.graph" = ["schema.json"]
+"rag.legal.graph" = ["schema.json"]

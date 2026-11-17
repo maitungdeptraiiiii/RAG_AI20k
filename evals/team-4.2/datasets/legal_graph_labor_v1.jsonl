@@ -1,0 +1,28 @@
+{"id":"probation-duration","method":"text_at","pid":"bo-luat:45/2019/QH14#d25","day":"2025-03-01","in_force":true,"contains":["180","60","30"],"source":"https://congbao.chinhphu.vn/van-ban/nghi-quyet-so-45-2019-qh14-30232/29070.htm"}
+{"id":"probation-pay","method":"text_at","pid":"bo-luat:45/2019/QH14#d26","day":"2025-03-01","in_force":true,"contains":["85%"],"source":"BLLD 45/2019, Điều 26"}
+{"id":"employee-notice","method":"text_at","pid":"bo-luat:45/2019/QH14#d35.k1","day":"2025-03-01","in_force":true,"contains":["45 ngày"],"source":"BLLD 45/2019, Điều 35 khoản 1"}
+{"id":"employee-notice-exceptions","method":"text_at","pid":"bo-luat:45/2019/QH14#d35.k2","day":"2025-03-01","in_force":true,"contains":["không cần báo trước"],"source":"BLLD 45/2019, Điều 35 khoản 2"}
+{"id":"annual-leave-conditions","method":"text_at","pid":"bo-luat:45/2019/QH14#d113.k1","day":"2025-03-01","in_force":true,"contains":["12 ngày","14 ngày","16 ngày"],"source":"BLLD 45/2019, Điều 113 khoản 1"}
+{"id":"annual-leave-seniority","method":"text_at","pid":"bo-luat:45/2019/QH14#d114","day":"2025-03-01","in_force":true,"contains":["05 năm","01 ngày"],"source":"BLLD 45/2019, Điều 114"}
+{"id":"weekly-work-exception","method":"text_at","pid":"bo-luat:45/2019/QH14#d105.k2","day":"2025-03-01","in_force":true,"contains":["10 giờ","48 giờ"],"source":"BLLD 45/2019, Điều 105 khoản 2"}
+{"id":"overtime-limits","method":"text_at","pid":"bo-luat:45/2019/QH14#d107.k2","day":"2025-03-01","in_force":true,"contains":["40 giờ","200 giờ"],"source":"BLLD 45/2019, Điều 107 khoản 2"}
+{"id":"keep-original-documents","method":"text_at","pid":"bo-luat:45/2019/QH14#d17.k1","day":"2025-03-01","in_force":true,"contains":["bản chính"],"source":"BLLD 45/2019, Điều 17 khoản 1"}
+{"id":"before-code-effective","method":"text_at","pid":"bo-luat:45/2019/QH14#d25","day":"2020-12-31","in_force":false,"reason":"not_yet_in_force","source":"BLLD 45/2019, Điều 220"}
+{"id":"code-effective-boundary","method":"text_at","pid":"bo-luat:45/2019/QH14#d25","day":"2021-01-01","in_force":true,"source":"BLLD 45/2019, Điều 220"}
+{"id":"unknown-provision","method":"text_at","pid":"bo-luat:45/2019/QH14#d99999","day":"2026-01-01","in_force":false,"reason":"unknown_provision","source":"Negative identifier case"}
+{"id":"old-wage-last-day","method":"text_at","pid":"nghi-dinh:74/2024/NĐ-CP#d3","day":"2025-12-31","in_force":true,"source":"NĐ 293/2025, Điều 5 khoản 2"}
+{"id":"old-wage-expired","method":"text_at","pid":"nghi-dinh:74/2024/NĐ-CP#d3","day":"2026-01-01","in_force":false,"reason":"no_longer_in_force","source":"NĐ 293/2025, Điều 5 khoản 2"}
+{"id":"wage-chain-2024","method":"applicable","document_key":"nghi-dinh:293/2025/NĐ-CP","day":"2024-01-01","documents":["nghi-dinh:38/2022/NĐ-CP"],"source":"NĐ 38/2022, 74/2024 và 293/2025: điều hiệu lực"}
+{"id":"wage-chain-before-july-2024","method":"applicable","document_key":"nghi-dinh:293/2025/NĐ-CP","day":"2024-06-30","documents":["nghi-dinh:38/2022/NĐ-CP"],"source":"NĐ 74/2024, Điều 5"}
+{"id":"wage-chain-july-2024","method":"applicable","document_key":"nghi-dinh:293/2025/NĐ-CP","day":"2024-07-01","documents":["nghi-dinh:74/2024/NĐ-CP"],"source":"NĐ 74/2024, Điều 5"}
+{"id":"wage-chain-2025","method":"applicable","document_key":"nghi-dinh:293/2025/NĐ-CP","day":"2025-01-01","documents":["nghi-dinh:74/2024/NĐ-CP"],"source":"NĐ 74/2024, Điều 5"}
+{"id":"wage-chain-2026","method":"applicable","document_key":"nghi-dinh:38/2022/NĐ-CP","day":"2026-01-01","documents":["nghi-dinh:293/2025/NĐ-CP"],"source":"NĐ 293/2025, Điều 5"}
+{"id":"notice-ref-pregnancy","method":"references","pid":"bo-luat:45/2019/QH14#d35.k2","day":"2025-03-01","targets_include":["bo-luat:45/2019/QH14#d138.k1"],"source":"BLLD 45/2019, Điều 35 khoản 2 điểm đ"}
+{"id":"contract-guidance-scope","method":"guidance","pid":"bo-luat:45/2019/QH14#d21.k4","day":"2025-03-01","sources_include":["nghi-dinh:145/2020/NĐ-CP#d1.k2"],"source":"NĐ 145/2020, Điều 1 khoản 2; this checks scope discovery, not substantive completeness"}
+{"id":"wage-annex-2026","method":"appendices","document_key":"nghi-dinh:293/2025/NĐ-CP","day":"2026-02-01","min_count":1,"contains":["Hoàn Kiếm","Cà Mau"],"source":"https://xdcs.cdnchinhphu.vn/446259493575335936/2025/11/10/293-2025-nd-cp-10112025-4-signed-17627702819891838494117.pdf"}
+{"id":"wage-annex-2024","method":"appendices","document_key":"nghi-dinh:74/2024/NĐ-CP","day":"2024-08-01","min_count":1,"contains":["Gia Lâm"],"source":"NĐ 74/2024, phụ lục đăng toàn văn trên Cổng Chính phủ"}
+{"id":"old-geographic-annex-repealed","method":"appendices","document_key":"nghi-dinh:74/2024/NĐ-CP","day":"2025-07-01","max_count":0,"source":"NĐ 128/2025, Điều 15 khoản 6"}
+{"id":"occupations-original-annex","method":"appendices","document_key":"thong-tu:11/2020/TT-BLĐTBXH","day":"2025-01-01","min_count":1,"contains":["KHAI THÁC KHOÁNG SẢN"],"source":"https://congbaocdn.chinhphu.vn/CongBaoCP/CongBao/2021/2/33182/34670-1-301-302.pdf"}
+{"id":"occupations-supplement-annex","method":"appendices","document_key":"thong-tu:19/2023/TT-BLĐTBXH","day":"2025-01-01","min_count":1,"contains":["XÂY DỰNG"],"source":"https://congbaocdn.chinhphu.vn/CongBaoCP/VanBan/2023/12/41242/48815-1-2024301-30219-2023-tt-bldtbxh.pdf"}
+{"id":"geographic-annex-mid-2025","method":"appendices","document_key":"nghi-dinh:128/2025/NĐ-CP","day":"2025-08-01","min_count":1,"contains":["Cam Đường"],"source":"NĐ 128/2025, Phụ lục I; bản đăng trên Cổng Chính phủ"}
+{"id":"geographic-annex-2025-repealed","method":"appendices","document_key":"nghi-dinh:128/2025/NĐ-CP","day":"2026-01-01","max_count":0,"source":"NĐ 293/2025, Điều 5 khoản 3"}

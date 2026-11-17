@@ -1,0 +1,778 @@
+{
+  "version": "structural-anchors-v2",
+  "source": {
+    "filename": "concepts.yaml",
+    "catalog_version": "0.1-draft",
+    "sha256": "10358ffc63922d384d2350f016f163860c6ae79b329955cb9f0b111b7269feda",
+    "origin": "User-provided design catalog dated 2026-11-14; predates benchmark authoring. Anchors copied without gold-based edits."
+  },
+  "concepts": [
+    {
+      "id": "content.party_info",
+      "label": "Thông tin hai bên giao kết",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d21.k1.a",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d21.k1.b",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "content.job_and_workplace",
+      "label": "Công việc và địa điểm làm việc",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d21.k1.c",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d28",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "content.term",
+      "label": "Loại và thời hạn hợp đồng",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d21.k1.d",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d20.k1",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d20.k2",
+          "role": "basis",
+          "note": "số lần ký HĐ xác định thời hạn; chưa có rule"
+        }
+      ]
+    },
+    {
+      "id": "content.wage_terms",
+      "label": "Mức lương, hình thức trả, thời hạn trả, phụ cấp",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d21.k1.đ",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d90.k1",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d96",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "content.raise_policy",
+      "label": "Chế độ nâng bậc, nâng lương",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d21.k1.e",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d103",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "content.hours_rest",
+      "label": "Thời giờ làm việc, thời giờ nghỉ ngơi",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d21.k1.g",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d109",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "content.protective_equipment",
+      "label": "Trang bị bảo hộ lao động",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d21.k1.h",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "content.insurance",
+      "label": "Bảo hiểm xã hội, bảo hiểm y tế, bảo hiểm thất nghiệp",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d21.k1.i",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d168.k1",
+          "role": "basis",
+          "note": "A chưa đối chiếu nguyên văn"
+        }
+      ],
+      "value_sources": [
+        {
+          "document_key": "luat:41/2024/QH15",
+          "note": "Luật BHXH 2024, từ 01/7/2025; trước đó là luat:58/2014/QH13"
+        }
+      ]
+    },
+    {
+      "id": "content.training",
+      "label": "Đào tạo, bồi dưỡng, nâng cao trình độ",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d21.k1.k",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "probation.duration",
+      "label": "Thời gian thử việc tối đa",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d25",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d24.k3",
+          "role": "exception",
+          "note": "HĐ dưới 01 tháng không được thử việc"
+        }
+      ]
+    },
+    {
+      "id": "probation.once",
+      "label": "Chỉ thử việc một lần cho một công việc",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d25",
+          "role": "basis",
+          "note": "nằm ở đoạn mở đầu của Điều; LU xem có pid riêng cho đoạn này không"
+        }
+      ]
+    },
+    {
+      "id": "probation.pay",
+      "label": "Tiền lương thử việc tối thiểu",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d26",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "probation.cancel_no_notice",
+      "label": "Hủy bỏ thử việc không cần báo trước, không bồi thường",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d27.k2",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "wage.minimum_regional",
+      "label": "Mức lương không thấp hơn lương tối thiểu vùng",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d90.k2",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d91",
+          "role": "basis"
+        }
+      ],
+      "value_sources": [
+        {
+          "document_key": "nghi-dinh:293/2025/NĐ-CP",
+          "note": "chuỗi 38/2022 → 74/2024 → 293/2025; vùng tra theo phụ lục địa bàn"
+        }
+      ]
+    },
+    {
+      "id": "wage.pay_period",
+      "label": "Kỳ hạn trả lương",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d97.k1",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d97.k2",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d97.k4",
+          "role": "exception",
+          "note": "chậm trả do bất khả kháng, không quá 30 ngày"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d94.k1",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "wage.overtime_pay",
+      "label": "Tiền lương làm thêm giờ",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d98.k1",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d98.k3",
+          "role": "basis",
+          "note": "làm thêm giờ vào ban đêm: thêm 20%"
+        }
+      ]
+    },
+    {
+      "id": "wage.night_pay",
+      "label": "Tiền lương làm việc ban đêm",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d98",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d106",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "wage.deduction_limit",
+      "label": "Giới hạn khấu trừ tiền lương",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d102.k1",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d102.k3",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "hours.normal",
+      "label": "Thời giờ làm việc bình thường",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d105.k1",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d105.k2",
+          "role": "exception",
+          "note": "tính theo tuần: tối đa 10 giờ/ngày"
+        }
+      ]
+    },
+    {
+      "id": "hours.overtime_limit",
+      "label": "Điều kiện và giới hạn làm thêm giờ",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d107.k2",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d107.k3",
+          "role": "exception",
+          "note": "ngành được làm thêm tới 300 giờ/năm"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d108",
+          "role": "exception",
+          "note": "trường hợp đặc biệt, NLĐ không được từ chối"
+        }
+      ]
+    },
+    {
+      "id": "rest.weekly",
+      "label": "Nghỉ hằng tuần",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d111.k1",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "rest.holidays",
+      "label": "Nghỉ lễ, tết hưởng nguyên lương",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d112.k1",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "leave.annual",
+      "label": "Nghỉ hằng năm hưởng nguyên lương",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d113.k1",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d113.k2",
+          "role": "basis",
+          "note": "chưa đủ 12 tháng: tính theo tỉ lệ"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d113.k3",
+          "role": "basis",
+          "note": "thanh toán ngày phép chưa nghỉ khi thôi việc"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d114",
+          "role": "basis",
+          "note": "cộng 01 ngày cho mỗi 05 năm"
+        }
+      ]
+    },
+    {
+      "id": "leave.personal_paid",
+      "label": "Nghỉ việc riêng hưởng nguyên lương",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d115.k1",
+          "role": "basis",
+          "note": "A mới đối chiếu điểm a, b"
+        }
+      ]
+    },
+    {
+      "id": "termination.employee_unilateral",
+      "label": "NLĐ đơn phương chấm dứt hợp đồng",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d35.k1",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d35.k2",
+          "role": "exception",
+          "note": "các trường hợp không cần báo trước, điểm a–g"
+        }
+      ]
+    },
+    {
+      "id": "termination.employer_unilateral",
+      "label": "NSDLĐ đơn phương chấm dứt hợp đồng",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d36.k1",
+          "role": "basis",
+          "note": "danh sách căn cứ là đóng"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d36.k2",
+          "role": "basis",
+          "note": "thời hạn báo trước"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d36.k3",
+          "role": "exception"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d37",
+          "role": "exception",
+          "note": "trường hợp NSDLĐ không được chấm dứt; A chưa đối chiếu"
+        }
+      ]
+    },
+    {
+      "id": "termination.severance",
+      "label": "Trợ cấp thôi việc",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d46.k1",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d46.k2",
+          "role": "basis",
+          "note": "trừ thời gian đã đóng BHTN"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d46.k3",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "termination.settlement_deadline",
+      "label": "Thời hạn thanh toán khi chấm dứt hợp đồng",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d48.k1",
+          "role": "basis",
+          "note": "ngoại lệ kéo dài tới 30 ngày nằm trong các điểm a–d"
+        }
+      ]
+    },
+    {
+      "id": "prohibit.keep_documents",
+      "label": "Cấm giữ bản chính giấy tờ, văn bằng của NLĐ",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d17.k1",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "prohibit.deposit",
+      "label": "Cấm buộc đặt cọc, bảo đảm bằng tiền hoặc tài sản",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d17.k2",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "prohibit.fine_instead_of_discipline",
+      "label": "Cấm phạt tiền, cắt lương thay xử lý kỷ luật",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d127.k2",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "training.cost_repayment",
+      "label": "Hoàn trả chi phí đào tạo",
+      "scope": "core",
+      "phase": "P0",
+      "applies_to": [
+        "NLD"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d62",
+          "role": "basis",
+          "note": "A chưa đối chiếu nguyên văn; phải có hợp đồng đào tạo nghề riêng"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d40.k3",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "maternity.no_night_overtime_travel",
+      "label": "Không làm đêm, làm thêm giờ, đi công tác xa khi mang thai hoặc nuôi con nhỏ",
+      "scope": "core",
+      "phase": "P1",
+      "applies_to": [
+        "NLD_mang_thai",
+        "NLD_nuoi_con_duoi_12t"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d137.k1",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "maternity.lighter_work",
+      "label": "Chuyển việc nhẹ hơn hoặc giảm 01 giờ làm mỗi ngày khi mang thai",
+      "scope": "core",
+      "phase": "P1",
+      "applies_to": [
+        "NLD_mang_thai"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d137.k2",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "maternity.no_dismissal",
+      "label": "Không bị sa thải, đơn phương chấm dứt vì kết hôn, mang thai, nghỉ thai sản, nuôi con nhỏ",
+      "scope": "core",
+      "phase": "P1",
+      "applies_to": [
+        "NLD",
+        "NLD_mang_thai",
+        "NLD_nghi_thai_san",
+        "NLD_nuoi_con_duoi_12t"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d137.k3",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "maternity.breaks",
+      "label": "Nghỉ 30 phút mỗi ngày khi hành kinh, 60 phút mỗi ngày khi nuôi con dưới 12 tháng",
+      "scope": "core",
+      "phase": "P1",
+      "applies_to": [
+        "NLD_nu",
+        "NLD_nuoi_con_duoi_12t"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d137.k4",
+          "role": "basis"
+        },
+        {
+          "pid": "nghi-dinh:145/2020/NĐ-CP#d80.k4",
+          "role": "basis"
+        }
+      ]
+    },
+    {
+      "id": "maternity.terminate_or_suspend",
+      "label": "Lao động nữ mang thai đơn phương chấm dứt hoặc tạm hoãn hợp đồng",
+      "scope": "core",
+      "phase": "P1",
+      "applies_to": [
+        "NLD_mang_thai"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d138.k1",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d138.k2",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d35.k2.đ",
+          "role": "basis",
+          "note": "không cần báo trước"
+        }
+      ]
+    },
+    {
+      "id": "maternity.leave",
+      "label": "Nghỉ thai sản 06 tháng",
+      "scope": "core",
+      "phase": "P1",
+      "applies_to": [
+        "NLD_mang_thai",
+        "NLD_nghi_thai_san"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d139.k1",
+          "role": "basis"
+        },
+        {
+          "pid": "bo-luat:45/2019/QH14#d139.k2",
+          "role": "basis",
+          "note": "chế độ hưởng theo pháp luật BHXH"
+        }
+      ],
+      "value_sources": [
+        {
+          "document_key": "luat:41/2024/QH15",
+          "note": "chế độ thai sản; trước 01/7/2025 là luat:58/2014/QH13"
+        }
+      ]
+    },
+    {
+      "id": "maternity.job_guarantee",
+      "label": "Bảo đảm việc làm cũ sau khi nghỉ thai sản",
+      "scope": "core",
+      "phase": "P1",
+      "applies_to": [
+        "NLD_nghi_thai_san"
+      ],
+      "anchors": [
+        {
+          "pid": "bo-luat:45/2019/QH14#d140",
+          "role": "basis"
+        }
+      ]
+    }
+  ]
+}

@@ -18,7 +18,7 @@ from rag.legal.structure import ARTICLE_RE, parse_structure
 
 _NUMBER = r"(\d+/\d{4}/[A-Z0-9Đ]+)"
 _TARGET = re.compile(r"((?:Bộ\s+luật|Luật)\s+(?!số\b)[^,\n]+?)\s+số\s+" + _NUMBER)
-_INCLUDED = re.compile(r"(?:Bộ\s+luật|Luật|Nghị\s+quyết)\s+số\s+" + _NUMBER)
+_INCLUDED = re.compile(r"(?:Bộ\s+luật|Luật|Nghị\s+quyết)(?:\s+[^,;\n]{1,100}?)?\s+số\s+" + _NUMBER)
 _EFFECTIVE = re.compile(r"có\s+hiệu\s+lực(?:\s+thi\s+hành)?(?:\s+kể)?\s+từ\s+(?:ngày\s+)?"
                         r"(ngày\s+\d{1,2}\s+tháng\s+\d{1,2}\s+năm\s+\d{4}|\d{1,2}\s*/\s*\d{1,2}\s*/\s*\d{4})", re.IGNORECASE)
 _EXCERPT = 200

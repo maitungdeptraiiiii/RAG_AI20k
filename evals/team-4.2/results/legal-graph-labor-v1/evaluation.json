@@ -1,0 +1,739 @@
+{
+  "benchmark": "legal-graph-labor-v1",
+  "snapshot_id": "s20261117024643-c06f0c",
+  "dataset_sha256": "c585be0d8f6068fb5c810c922b97be49a8feb2f0c385477a37d7e96793709627",
+  "evaluated_at": "2026-11-17T02:49:47.053413+00:00",
+  "build_id": "12622da3d53bc9ed",
+  "validation_errors": [],
+  "graph": {
+    "build_id": "12622da3d53bc9ed",
+    "snapshot_id": "s20261117024643-c06f0c",
+    "graph_version": "2",
+    "nodes": {
+      "Appendix": 39,
+      "LawDoc": 114,
+      "Provision": 56792,
+      "ProvisionVersion": 72088
+    },
+    "edges": {
+      "AMENDS": 48,
+      "BASED_ON": 70,
+      "CHANGED_BY": 3142,
+      "CHILD_OF": 47690,
+      "CONSOLIDATES": 2,
+      "GUIDES": 34,
+      "HAS_APPENDIX": 39,
+      "HAS_PROVISION": 9102,
+      "HAS_VERSION": 72088,
+      "REFERS_TO": 17927,
+      "REPEALS": 72,
+      "REPLACES": 54
+    },
+    "refs": {
+      "kind:cite": 17854,
+      "kind:details": 73,
+      "refs": 12957,
+      "resolved": 17927,
+      "resolved_external": 2147,
+      "skipped_in_amending_document": 1911,
+      "unresolved:doc_not_in_store": 1007,
+      "unresolved:provision_not_found": 1069
+    },
+    "missing_documents": [
+      [
+        "Nghị định số 131/2021/NĐ-CP thực hiện như sau:",
+        36
+      ],
+      [
+        "Nghị định số 131/2021/NĐ-CP.",
+        24
+      ],
+      [
+        "Luật Người lao động Việt Nam đi làm việc ở nước ngoài theo hợp đồ",
+        18
+      ],
+      [
+        "Luật giáo dục.",
+        12
+      ],
+      [
+        "Nghị định số 131/2021/NĐ-CP gửi Sở Nội vụ theo quy định.",
+        12
+      ],
+      [
+        "Nghị định số 131/2021/NĐ-CP như sau:",
+        12
+      ],
+      [
+        "Nghị định số 152/2020/NĐ-CP được sửa đổi, bổ sung tại Nghị định số 70/",
+        8
+      ],
+      [
+        "Luật Xây dựng số 50/2014/QH13 đã được sửa đổi, bổ sung một số điề",
+        6
+      ],
+      [
+        "Luật số 90/2015/QH13, Luật số 03/2016/QH14, Luật số 04/2017/QH14,",
+        6
+      ],
+      [
+        "Luật số 03/2016/QH14, Luật số 04/2017/QH14, Luật số 28/2018/QH14",
+        6
+      ],
+      [
+        "Luật số 04/2017/QH14, Luật số 28/2018/QH14 và Luật số 42/2019/QH1",
+        6
+      ],
+      [
+        "Luật Công nghệ cao.",
+        6
+      ],
+      [
+        "Luật Xử lý vi phạm hành chính.",
+        6
+      ],
+      [
+        "Luật số 72/2020/QH14, Luật số 03/2022/QH15, Luật số 05/2022/QH15,",
+        5
+      ],
+      [
+        "Nghị quyết số 132/2020/QH14 của Quốc hội thí điểm một số chính sách để",
+        5
+      ],
+      [
+        "Nghị định số 93/2019/NĐ-CP ngày 25 tháng 11 năm 2019 của Chính phủ về",
+        5
+      ],
+      [
+        "Nghị định số 152/2020/NĐ-CP ngày 30 tháng 12 năm 2020 của Chính phủ qu",
+        5
+      ],
+      [
+        "Luật Thi hành án dân sự số 26/2008/QH12 đã được sửa đổi, bổ sung",
+        4
+      ],
+      [
+        "Luật Giao dịch điện tử số 51/2005/QH11 và các văn bản quy phạm ph",
+        4
+      ],
+      [
+        "Luật số 05/2022/QH15, Luật số 08/2022/QH15, Luật số 09/2022/QH15,",
+        4
+      ],
+      [
+        "Luật số 28/2023/QH15",
+        4
+      ],
+      [
+        "Luật Quy hoạch đô thị số 30/2009/QH12 đã được sửa đổi, bổ sung mộ",
+        4
+      ],
+      [
+        "Luật xử lý vi phạm hành chính;",
+        4
+      ],
+      [
+        "Luật Đầu tư số 67/2014/QH13 đã được sửa đổi, bổ sung một số điều",
+        4
+      ],
+      [
+        "Luật Hôn nhân và gia đình năm 2014; văn bản xác nhận thời điểm gi",
+        4
+      ]
+    ],
+    "problems": []
+  },
+  "build_seconds": 48.93395559999999,
+  "cases": [
+    {
+      "id": "probation-duration",
+      "method": "text_at",
+      "source": "https://congbao.chinhphu.vn/van-ban/nghi-quyet-so-45-2019-qh14-30232/29070.htm",
+      "latency_ms": 143.24329999999463,
+      "passed": true,
+      "checks": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "verification_statuses": [
+        "verified"
+      ],
+      "observed": {
+        "in_force": true,
+        "reason": null,
+        "text_excerpt": "Điều 25. Thời gian thử việc\nThời gian thử việc do hai bên thỏa thuận căn cứ vào tính chất và mức độ phức tạp của công việc nhưng chỉ được thử việc một lần đối với một công việc và bảo đảm điều kiện sau đây:\n1. Không quá 180 ngày đối với côn",
+        "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=139264",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "probation-pay",
+      "method": "text_at",
+      "source": "BLLD 45/2019, Điều 26",
+      "latency_ms": 15.655400000014197,
+      "passed": true,
+      "checks": [
+        true,
+        true,
+        true
+      ],
+      "verification_statuses": [
+        "verified"
+      ],
+      "observed": {
+        "in_force": true,
+        "reason": null,
+        "text_excerpt": "Điều 26. Tiền lương thử việc\nTiền lương của người lao động trong thời gian thử việc do hai bên thỏa thuận nhưng ít nhất phải bằng 85% mức lương của công việc đó.",
+        "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=139264",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "employee-notice",
+      "method": "text_at",
+      "source": "BLLD 45/2019, Điều 35 khoản 1",
+      "latency_ms": 20.023099999889382,
+      "passed": true,
+      "checks": [
+        true,
+        true,
+        true
+      ],
+      "verification_statuses": [
+        "verified"
+      ],
+      "observed": {
+        "in_force": true,
+        "reason": null,
+        "text_excerpt": "1. Người lao động có quyền đơn phương chấm dứt hợp đồng lao động nhưng phải báo trước cho người sử dụng lao động như sau:\na) Ít nhất 45 ngày nếu làm việc theo hợp đồng lao động không xác định thời hạn;\nb) Ít nhất 30 ngày nếu làm việc theo h",
+        "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=139264",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "employee-notice-exceptions",
+      "method": "text_at",
+      "source": "BLLD 45/2019, Điều 35 khoản 2",
+      "latency_ms": 18.011299999898256,
+      "passed": true,
+      "checks": [
+        true,
+        true,
+        true
+      ],
+      "verification_statuses": [
+        "verified"
+      ],
+      "observed": {
+        "in_force": true,
+        "reason": null,
+        "text_excerpt": "2. Người lao động có quyền đơn phương chấm dứt hợp đồng lao động không cần báo trước trong trường hợp sau đây:\na) Không được bố trí theo đúng công việc, địa điểm làm việc hoặc không được bảo đảm điều kiện làm việc theo thỏa thuận, trừ trườn",
+        "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=139264",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "annual-leave-conditions",
+      "method": "text_at",
+      "source": "BLLD 45/2019, Điều 113 khoản 1",
+      "latency_ms": 17.990199999985634,
+      "passed": true,
+      "checks": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "verification_statuses": [
+        "verified"
+      ],
+      "observed": {
+        "in_force": true,
+        "reason": null,
+        "text_excerpt": "1. Người lao động làm việc đủ 12 tháng cho một người sử dụng lao động thì được nghỉ hằng năm, hưởng nguyên lương theo hợp đồng lao động như sau:\na) 12 ngày làm việc đối với người làm công việc trong điều kiện bình thường;\nb) 14 ngày làm việ",
+        "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=139264",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "annual-leave-seniority",
+      "method": "text_at",
+      "source": "BLLD 45/2019, Điều 114",
+      "latency_ms": 18.3067000000392,
+      "passed": true,
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "verification_statuses": [
+        "verified"
+      ],
+      "observed": {
+        "in_force": true,
+        "reason": null,
+        "text_excerpt": "Điều 114. Ngày nghỉ hằng năm tăng thêm theo thâm niên làm việc\nCứ đủ 05 năm làm việc cho một người sử dụng lao động thì số ngày nghỉ hằng năm của người lao động theo quy định tại khoản 1 Điều 113 của Bộ luật này được tăng thêm tương ứng 01 ",
+        "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=139264",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "weekly-work-exception",
+      "method": "text_at",
+      "source": "BLLD 45/2019, Điều 105 khoản 2",
+      "latency_ms": 19.27930000010747,
+      "passed": true,
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "verification_statuses": [
+        "verified"
+      ],
+      "observed": {
+        "in_force": true,
+        "reason": null,
+        "text_excerpt": "2. Người sử dụng lao động có quyền quy định thời giờ làm việc theo ngày hoặc tuần nhưng phải thông báo cho người lao động biết; trường hợp theo tuần thì thời giờ làm việc bình thường không quá 10 giờ trong 01 ngày và không quá 48 giờ trong ",
+        "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=139264",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "overtime-limits",
+      "method": "text_at",
+      "source": "BLLD 45/2019, Điều 107 khoản 2",
+      "latency_ms": 19.163599999956205,
+      "passed": true,
+      "checks": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "verification_statuses": [
+        "verified"
+      ],
+      "observed": {
+        "in_force": true,
+        "reason": null,
+        "text_excerpt": "2. Người sử dụng lao động được sử dụng người lao động làm thêm giờ khi đáp ứng đầy đủ các yêu cầu sau đây:\na) Phải được sự đồng ý của người lao động;\nb) Bảo đảm số giờ làm thêm của người lao động không quá 50% số giờ làm việc bình thường tr",
+        "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=139264",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "keep-original-documents",
+      "method": "text_at",
+      "source": "BLLD 45/2019, Điều 17 khoản 1",
+      "latency_ms": 16.59090000021024,
+      "passed": true,
+      "checks": [
+        true,
+        true,
+        true
+      ],
+      "verification_statuses": [
+        "verified"
+      ],
+      "observed": {
+        "in_force": true,
+        "reason": null,
+        "text_excerpt": "1. Giữ bản chính giấy tờ tùy thân, văn bằng, chứng chỉ của người lao động.",
+        "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=139264",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "before-code-effective",
+      "method": "text_at",
+      "source": "BLLD 45/2019, Điều 220",
+      "latency_ms": 16.501099999914004,
+      "passed": true,
+      "checks": [
+        true,
+        true
+      ],
+      "verification_statuses": [],
+      "observed": {
+        "in_force": false,
+        "reason": "not_yet_in_force",
+        "text_excerpt": "",
+        "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=139264",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "code-effective-boundary",
+      "method": "text_at",
+      "source": "BLLD 45/2019, Điều 220",
+      "latency_ms": 25.973300000032395,
+      "passed": true,
+      "checks": [
+        true,
+        true
+      ],
+      "verification_statuses": [
+        "verified"
+      ],
+      "observed": {
+        "in_force": true,
+        "reason": null,
+        "text_excerpt": "Điều 25. Thời gian thử việc\nThời gian thử việc do hai bên thỏa thuận căn cứ vào tính chất và mức độ phức tạp của công việc nhưng chỉ được thử việc một lần đối với một công việc và bảo đảm điều kiện sau đây:\n1. Không quá 180 ngày đối với côn",
+        "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=139264",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "unknown-provision",
+      "method": "text_at",
+      "source": "Negative identifier case",
+      "latency_ms": 10.484000000133165,
+      "passed": true,
+      "checks": [
+        true,
+        true
+      ],
+      "verification_statuses": [],
+      "observed": {
+        "in_force": false,
+        "reason": "unknown_provision",
+        "text_excerpt": "",
+        "source_url": null,
+        "verification_status": null
+      }
+    },
+    {
+      "id": "old-wage-last-day",
+      "method": "text_at",
+      "source": "NĐ 293/2025, Điều 5 khoản 2",
+      "latency_ms": 13.782799999944473,
+      "passed": true,
+      "checks": [
+        true,
+        true
+      ],
+      "verification_statuses": [
+        "verified"
+      ],
+      "observed": {
+        "in_force": true,
+        "reason": null,
+        "text_excerpt": "Điều 3. Mức lương tối thiểu\n1. Quy định mức lương tối thiểu tháng và mức lương tối thiểu giờ đối với người lao động làm việc cho người sử dụng lao động theo vùng như sau:\nVùng\nMức lương tối thiểu tháng (Đơn vị: đồng/tháng)\nMức lương tối thi",
+        "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=168670",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "old-wage-expired",
+      "method": "text_at",
+      "source": "NĐ 293/2025, Điều 5 khoản 2",
+      "latency_ms": 16.055199999982506,
+      "passed": true,
+      "checks": [
+        true,
+        true
+      ],
+      "verification_statuses": [],
+      "observed": {
+        "in_force": false,
+        "reason": "no_longer_in_force",
+        "text_excerpt": "",
+        "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=168670",
+        "verification_status": "verified"
+      }
+    },
+    {
+      "id": "wage-chain-2024",
+      "method": "applicable",
+      "source": "NĐ 38/2022, 74/2024 và 293/2025: điều hiệu lực",
+      "latency_ms": 144.67060000015408,
+      "passed": true,
+      "checks": [
+        true
+      ],
+      "verification_statuses": [],
+      "observed": [
+        {
+          "document": {
+            "doc_number": "38/2022/NĐ-CP",
+            "title": "Nghị định số 38/2022/NĐ-CP Quy định mức lương tối thiểu đối với người lao động làm việc theo hợp đồng lao động",
+            "effective_from": "2022-07-01",
+            "eff_status": "Hết hiệu lực toàn bộ",
+            "doc_type": "Nghị định",
+            "effective_to": "2024-07-01",
+            "issued_on": "2022-06-12",
+            "document_key": "nghi-dinh:38/2022/NĐ-CP"
+          }
+        }
+      ]
+    },
+    {
+      "id": "wage-chain-before-july-2024",
+      "method": "applicable",
+      "source": "NĐ 74/2024, Điều 5",
+      "latency_ms": 13.58580000010079,
+      "passed": true,
+      "checks": [
+        true
+      ],
+      "verification_statuses": [],
+      "observed": [
+        {
+          "document": {
+            "doc_number": "38/2022/NĐ-CP",
+            "title": "Nghị định số 38/2022/NĐ-CP Quy định mức lương tối thiểu đối với người lao động làm việc theo hợp đồng lao động",
+            "effective_from": "2022-07-01",
+            "eff_status": "Hết hiệu lực toàn bộ",
+            "doc_type": "Nghị định",
+            "effective_to": "2024-07-01",
+            "issued_on": "2022-06-12",
+            "document_key": "nghi-dinh:38/2022/NĐ-CP"
+          }
+        }
+      ]
+    },
+    {
+      "id": "wage-chain-july-2024",
+      "method": "applicable",
+      "source": "NĐ 74/2024, Điều 5",
+      "latency_ms": 11.094299999967916,
+      "passed": true,
+      "checks": [
+        true
+      ],
+      "verification_statuses": [],
+      "observed": [
+        {
+          "document": {
+            "doc_number": "74/2024/NĐ-CP",
+            "title": "Nghị định số 74/2024/NĐ-CP Quy định mức lương tối thiểu đối với người lao động làm việc theo hợp đồng lao động.",
+            "effective_from": "2024-07-01",
+            "eff_status": "Hết hiệu lực toàn bộ",
+            "doc_type": "Nghị định",
+            "effective_to": "2026-01-01",
+            "issued_on": "2024-06-30",
+            "document_key": "nghi-dinh:74/2024/NĐ-CP"
+          }
+        }
+      ]
+    },
+    {
+      "id": "wage-chain-2025",
+      "method": "applicable",
+      "source": "NĐ 74/2024, Điều 5",
+      "latency_ms": 11.928699999998571,
+      "passed": true,
+      "checks": [
+        true
+      ],
+      "verification_statuses": [],
+      "observed": [
+        {
+          "document": {
+            "doc_number": "74/2024/NĐ-CP",
+            "title": "Nghị định số 74/2024/NĐ-CP Quy định mức lương tối thiểu đối với người lao động làm việc theo hợp đồng lao động.",
+            "effective_from": "2024-07-01",
+            "eff_status": "Hết hiệu lực toàn bộ",
+            "doc_type": "Nghị định",
+            "effective_to": "2026-01-01",
+            "issued_on": "2024-06-30",
+            "document_key": "nghi-dinh:74/2024/NĐ-CP"
+          }
+        }
+      ]
+    },
+    {
+      "id": "wage-chain-2026",
+      "method": "applicable",
+      "source": "NĐ 293/2025, Điều 5",
+      "latency_ms": 10.840400000006412,
+      "passed": true,
+      "checks": [
+        true
+      ],
+      "verification_statuses": [],
+      "observed": [
+        {
+          "document": {
+            "doc_number": "293/2025/NĐ-CP",
+            "title": "Nghị định số 293/2025/NĐ-CP Quy định mức lương tối thiểu đối với người lao động làm việc theo hợp đồng lao động",
+            "effective_from": "2026-01-01",
+            "eff_status": "Còn hiệu lực",
+            "doc_type": "Nghị định",
+            "effective_to": null,
+            "issued_on": "2025-11-10",
+            "document_key": "nghi-dinh:293/2025/NĐ-CP"
+          }
+        }
+      ]
+    },
+    {
+      "id": "notice-ref-pregnancy",
+      "method": "references",
+      "source": "BLLD 45/2019, Điều 35 khoản 2 điểm đ",
+      "latency_ms": 199.2211000001589,
+      "passed": true,
+      "checks": [
+        true
+      ],
+      "verification_statuses": [],
+      "observed": {
+        "count": 5
+      }
+    },
+    {
+      "id": "contract-guidance-scope",
+      "method": "guidance",
+      "source": "NĐ 145/2020, Điều 1 khoản 2; this checks scope discovery, not substantive completeness",
+      "latency_ms": 19764.52129999984,
+      "passed": true,
+      "checks": [
+        true
+      ],
+      "verification_statuses": [],
+      "observed": {
+        "count": 1
+      }
+    },
+    {
+      "id": "wage-annex-2026",
+      "method": "appendices",
+      "source": "https://xdcs.cdnchinhphu.vn/446259493575335936/2025/11/10/293-2025-nd-cp-10112025-4-signed-17627702819891838494117.pdf",
+      "latency_ms": 179.28110000002562,
+      "passed": true,
+      "checks": [
+        true,
+        true,
+        true
+      ],
+      "verification_statuses": [
+        "needs_review"
+      ],
+      "observed": {
+        "count": 1
+      }
+    },
+    {
+      "id": "wage-annex-2024",
+      "method": "appendices",
+      "source": "NĐ 74/2024, phụ lục đăng toàn văn trên Cổng Chính phủ",
+      "latency_ms": 14.283100000056947,
+      "passed": true,
+      "checks": [
+        true,
+        true
+      ],
+      "verification_statuses": [
+        "needs_review"
+      ],
+      "observed": {
+        "count": 1
+      }
+    },
+    {
+      "id": "old-geographic-annex-repealed",
+      "method": "appendices",
+      "source": "NĐ 128/2025, Điều 15 khoản 6",
+      "latency_ms": 13.460699999995995,
+      "passed": true,
+      "checks": [
+        true
+      ],
+      "verification_statuses": [],
+      "observed": {
+        "count": 0
+      }
+    },
+    {
+      "id": "occupations-original-annex",
+      "method": "appendices",
+      "source": "https://congbaocdn.chinhphu.vn/CongBaoCP/CongBao/2021/2/33182/34670-1-301-302.pdf",
+      "latency_ms": 29.434999999921274,
+      "passed": true,
+      "checks": [
+        true,
+        true
+      ],
+      "verification_statuses": [
+        "needs_review"
+      ],
+      "observed": {
+        "count": 1
+      }
+    },
+    {
+      "id": "occupations-supplement-annex",
+      "method": "appendices",
+      "source": "https://congbaocdn.chinhphu.vn/CongBaoCP/VanBan/2023/12/41242/48815-1-2024301-30219-2023-tt-bldtbxh.pdf",
+      "latency_ms": 12.650699999994686,
+      "passed": true,
+      "checks": [
+        true,
+        true
+      ],
+      "verification_statuses": [
+        "verified",
+        "needs_review"
+      ],
+      "observed": {
+        "count": 2
+      }
+    },
+    {
+      "id": "geographic-annex-mid-2025",
+      "method": "appendices",
+      "source": "NĐ 128/2025, Phụ lục I; bản đăng trên Cổng Chính phủ",
+      "latency_ms": 14.568600000075094,
+      "passed": true,
+      "checks": [
+        true,
+        true
+      ],
+      "verification_statuses": [
+        "needs_review",
+        "needs_review"
+      ],
+      "observed": {
+        "count": 2
+      }
+    },
+    {
+      "id": "geographic-annex-2025-repealed",
+      "method": "appendices",
+      "source": "NĐ 293/2025, Điều 5 khoản 3",
+      "latency_ms": 10.696099999904618,
+      "passed": true,
+      "checks": [
+        true
+      ],
+      "verification_statuses": [],
+      "observed": {
+        "count": 0
+      }
+    }
+  ],
+  "limits": [
+    "Curated regression cases; not exhaustive legal coverage.",
+    "Passing retrieval does not verify a needs_review/conflicted source.",
+    "Latency is a single local run, not a load benchmark."
+  ],
+  "summary": {
+    "total": 28,
+    "passed": 28,
+    "failed": 0,
+    "verification_statuses": {
+      "verified": 12,
+      "needs_review": 6
+    },
+    "p50_ms": 16.59090000021024,
+    "p95_ms": 199.2211000001589,
+    "mode": "neo4j_api"
+  }
+}

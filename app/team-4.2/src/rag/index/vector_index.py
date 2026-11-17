@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import math
+import threading
 import uuid
 from collections.abc import Iterable, Sequence
 from pathlib import Path
@@ -57,7 +58,8 @@ class InMemoryVectorStore:
 
     def query(self, vector: Sequence[float], k: int) -> list[tuple[str, float]]:
         q = self._unit(vector)
-        scored = [(cid, sum(a * b for a, b in zip(q, v))) for cid, v in self._vecs.items()]
+        items = list(self._vecs.items())      # bản sao: upsert đồng thời không làm hỏng vòng lặp
+        scored = [(cid, sum(a * b for a, b in zip(q, v))) for cid, v in items]
         scored.sort(key=lambda x: (-x[1], x[0]))
         return scored[:k]
 
@@ -133,6 +135,10 @@ class QdrantVectorStore:
 
 
 class VectorIndex:
+    """An toàn khi dùng chung giữa nhiều luồng (vd. một vector store cho nhiều `VersionedIndex` theo snapshot: chat
+    tìm trên chỉ mục cũ trong lúc luồng ghi dựng chỉ mục mới): mọi thao tác với store đi qua một khoá; embedding
+    (chậm) nằm ngoài khoá nên tìm kiếm không phải chờ embed xong."""
+
     arm = "dense"
 
     def __init__(
@@ -146,6 +152,7 @@ class VectorIndex:
         self.embedder = embedder
         self.store = store if store is not None else InMemoryVectorStore()
         self.batch_size = batch_size
+        self._lock = threading.RLock()
         if meta_path is not None:
             self._check_meta(Path(meta_path))
 
@@ -176,7 +183,8 @@ class VectorIndex:
         self._check_meta_file(path, self.embedder)
 
     def __len__(self) -> int:
-        return self.store.count()
+        with self._lock:
+            return self.store.count()
 
     def build(self, chunks: Iterable[Chunk]) -> int:
         """Embed + lưu các chunk chưa có trong index. Trả số chunk mới được thêm."""
@@ -185,27 +193,28 @@ class VectorIndex:
             unique.setdefault(c.chunk_id, c)
         ids = list(unique)
         existing: set[str] = set()
-        for start in range(0, len(ids), self.batch_size):
-            existing |= self.store.has(ids[start : start + self.batch_size])
+        with self._lock:
+            for start in range(0, len(ids), self.batch_size):
+                existing |= self.store.has(ids[start : start + self.batch_size])
         new = [unique[c] for c in ids if c not in existing]
 
         for start in range(0, len(new), self.batch_size):
             batch = new[start : start + self.batch_size]
             vectors = self.embedder.embed([c.index_text for c in batch])   # gồm bối cảnh nếu có
-            self.store.upsert([c.chunk_id for c in batch], vectors)
+            with self._lock:
+                self.store.upsert([c.chunk_id for c in batch], vectors)
         return len(new)
 
     def search(self, query: str, k: int) -> list[Hit]:
         if k < 1:
             raise ValueError(f"k phải >= 1, nhận {k}")
         q = nfc(query).strip()
-        if not q or self.store.count() == 0:
+        if not q or len(self) == 0:
             return []
         vector = embed_queries(self.embedder, [q])[0]    # Jina: task retrieval.query
-        return [
-            Hit(cid, score, rank, "dense")
-            for rank, (cid, score) in enumerate(self.store.query(vector, k), start=1)
-        ]
+        with self._lock:
+            found = self.store.query(vector, k)
+        return [Hit(cid, score, rank, "dense") for rank, (cid, score) in enumerate(found, start=1)]
 
 
 __all__ = [

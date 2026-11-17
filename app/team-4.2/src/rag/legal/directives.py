@@ -299,23 +299,32 @@ def _assign_content(targets: list[_Target], content: str) -> list[tuple[str | No
 
 _LAW_SUFFIX = re.compile(r"\s+(?:đã\s+được\s+sửa\s+đổi|được\s+(?:sửa\s+đổi|bổ\s+sung|bãi\s+bỏ)|như\s+sau|\(sau\s+đây)",
                          re.IGNORECASE)
+_LEGAL_KIND = r"(?:Bộ\s+luật|Luật|Nghị\s+định|Thông\s+tư|Nghị\s+quyết|Pháp\s+lệnh)"
 _PASSIVE = re.compile(
-    r"^(?P<addr>(?:(?:điểm|khoản|điều)\s+\S+\s*)+?)(?:của\s+(?:Bộ\s+luật|Luật)\s+.+?\s+)?được\s+"
+    r"^(?P<addr>(?:(?:điểm|khoản|điều)\s+\S+\s*)+?)(?:của\s+" + _LEGAL_KIND + r"\s+.+?\s+)?được\s+"
     r"(?P<act>sửa\s+đổi(?:\s*,\s*bổ\s+sung)?|bổ\s+sung|bãi\s+bỏ)(?:\s+như\s+sau)?\s*:?\s*$", re.IGNORECASE)
 
 
 def _target_law(title: str) -> tuple[str | None, str | None]:
     """Luật đích nêu trong câu: "... của Luật Nhà ở số 65/2014/QH13 [đã được sửa đổi ... theo Luật số ...] như sau:"."""
-    hits = [m for m in re.finditer(r"của\s+(?:Bộ\s+luật|Luật)\s+", title)]
+    hits = [m for m in re.finditer(r"của\s+" + _LEGAL_KIND + r"\s+", title, re.IGNORECASE)]
+    if not hits:
+        action = _ACTION.search(title)
+        if action:
+            # Decree headings often omit "của": "Sửa đổi ... Nghị định số ...".
+            tail = title[action.end():]
+            hit = list(re.finditer(_LEGAL_KIND + r"\s+", tail, re.IGNORECASE))
+            if hit:
+                return _target_law("của " + tail[hit[-1].start():])
     for m in reversed(hits):
         name = _LAW_SUFFIX.split(title[m.start() + 4:], maxsplit=1)[0].strip().rstrip(".;:,")
-        if re.match(r"^(?:Bộ\s+luật|Luật)\s+này\b", name, re.IGNORECASE):
+        if re.match(r"^" + _LEGAL_KIND + r"\s+này\b", name, re.IGNORECASE):
             continue
-        num = re.match(r"^(.*?)\s+số\s+(\d+/\d{4}/[A-Z0-9Đ]+)\b", name)
+        num = re.match(r"^(.*?)\s+số\s+(\d+/\d{4}/[A-Z0-9Đ]+(?:-[A-Z0-9Đ]+)*)\b", name)
         if not num:
             return name, None
         bare = num.group(1).strip()
-        return (None if bare.casefold() in ("luật", "bộ luật") else bare), num.group(2)
+        return (None if re.fullmatch(_LEGAL_KIND, bare, re.IGNORECASE) else bare), num.group(2)
     return None, None
 
 
@@ -327,7 +336,11 @@ def _activate(header: str) -> str:
 
 def _header_and_content(text: str) -> tuple[str, str]:
     lines = text.split("\n")
-    return _LABEL.sub("", lines[0]).strip(), "\n".join(lines[1:])
+    first = _LABEL.sub("", lines[0]).strip()
+    inline = re.search(r'như\s+sau\s*:\s*(?=[“"])', first, re.IGNORECASE)
+    if inline:
+        return first[:inline.end()].strip(), '\n'.join([first[inline.end():], *lines[1:]])
+    return first, "\n".join(lines[1:])
 
 
 def parse_directives(provisions: Sequence[Provision], *,

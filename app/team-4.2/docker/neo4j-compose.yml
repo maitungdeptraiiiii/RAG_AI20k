@@ -1,0 +1,11 @@
+services:
+  neo4j:
+    image: neo4j:5.26.0-community
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:?đặt NEO4J_PASSWORD}
+    volumes:
+      - ../../../data/team-4.2/neo4j/data:/data
+      - ../../../data/team-4.2/neo4j/logs:/logs

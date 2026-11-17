@@ -72,6 +72,12 @@ def _classify(item: dict, base: LegalDocument) -> str | None:
     return None
 
 
+def _repealed_kind(name: str) -> str:
+    """Loại của văn bản bị thay thế, theo chính câu chữ "… số N hết hiệu lực" (Nghị định thay Nghị định, …)."""
+    low = name.casefold()
+    return next((k for k in ("Bộ luật", "Nghị định", "Thông tư") if low.startswith(k.casefold())), "Luật")
+
+
 def _confirm(relation: str, text: str, key: str, title: str, base: LegalDocument) -> str | None:
     """Bằng chứng câu chữ nếu nội dung xác nhận quan hệ, None nếu không."""
     provisions = parse_structure(text, key)
@@ -169,7 +175,7 @@ def discover(client: Any, store: LegalStore, seeds: Sequence[Seed], raw_dir: Pat
             for rep in parse_effectivity(parse_structure(text_of(base), key)).repeals:
                 if not rep.target_number:
                     continue
-                kind = "Bộ luật" if rep.target_name.casefold().startswith("bộ luật") else "Luật"
+                kind = _repealed_kind(rep.target_name)
                 old_key = document_key(kind, rep.target_number)
                 if store.document(old_key) is None:
                     got = fetch_document(client, kind, rep.target_number, raw_dir, now=now,
@@ -178,8 +184,8 @@ def discover(client: Any, store: LegalStore, seeds: Sequence[Seed], raw_dir: Pat
                         report.rejected.append((f"{rep.target_name} số {rep.target_number}", "discovery.not_found"))
                         continue
                     remember(*got)
-                relation = "BAI_BO" if rep.units else "THAY_THE"     # bãi bỏ một phần ≠ thay thế cả luật
-                evidence = f"hết hiệu lực: {rep.target_name} số {rep.target_number}"
+                relation = "BAI_BO" if rep.units or rep.partial else "THAY_THE"
+                evidence = f"{'bãi bỏ một phần' if rep.units or rep.partial else 'hết hiệu lực'}: {rep.target_name} số {rep.target_number}"
                 store.add_relation(DocumentRelation(key, old_key, relation, evidence, "confirmed"))
                 report.added.append((old_key, relation, evidence))
                 queue.append((old_key, depth + 1))
@@ -191,7 +197,9 @@ def discover(client: Any, store: LegalStore, seeds: Sequence[Seed], raw_dir: Pat
 
         # ứng viên theo tiêu đề: tìm theo tên và theo số hiệu
         candidates: dict[str, dict] = {}
-        for keyword in dict.fromkeys([_display_name(base.title), base.doc_number]):
+        # văn bản dưới luật: tên hiển thị chỉ là "Nghị định" / "Thông tư" -> chỉ tìm theo số hiệu
+        subordinate = base.doc_type.casefold() not in _LAW_MAKERS
+        for keyword in dict.fromkeys([base.doc_number] if subordinate else [_display_name(base.title), base.doc_number]):
             for page in range(1, max_pages + 1):
                 items = client.list_page(page, page_size, keyword=keyword).get("items") or []
                 for item in items:

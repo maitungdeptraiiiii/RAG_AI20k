@@ -212,8 +212,9 @@ class AgentPipeline:
                          for e in state.evidence.values()],
             "claims": [asdict(c) for c in claims], "verified_quotes": quotes, "events": list(state.events),
         }
-        return AgentTrace(answer, retrieval, ContextSelection(blocks, "fixed" if blocks else "empty"),
-                          budget.model_calls > 0, query, metadata, status)
+        return AgentTrace(answer=answer, retrieval=retrieval,
+                          context=ContextSelection(blocks, "fixed" if blocks else "empty"),
+                          llm_called=budget.model_calls > 0, condensed_query=query, agent=metadata, status=status)
 
     def run_events(self, raw_query: str, *, history=None) -> Iterator[dict]:
         state, budget = RunState(), Budget(self.config)

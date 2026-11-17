@@ -194,3 +194,20 @@ def test_draft_reference_uses_gold_pages_only():
     assert "8 giờ" in user and "12 ngày" not in user          # chỉ text trang gold
     assert draft_reference(_q("q2", None, "out_of_scope"), p.store, llm) is None
     assert draft_reference(_q("q3", 9), p.store, llm) is None  # gold không khớp chunk nào
+
+
+def test_ingest_with_fixed_chunk_strategy_ignores_articles():
+    p = _pipeline(chunk_strategy="fixed", chunk_overlap=2, max_syllables=8)
+    p.ingest("luat_ld.pdf")
+    chunks = p.store.all()
+    assert chunks and all(c.section is None for c in chunks)
+    assert all(len(c.text.split()) <= 8 for c in chunks)
+
+
+def test_index_signature_records_fixed_strategy_only():
+    from dataclasses import replace
+    from rag.pipeline import index_signature
+    base = Settings()
+    assert "chunk_strategy" not in index_signature(base, [])
+    sig = index_signature(replace(base, chunk_strategy="fixed"), [])
+    assert sig["chunk_strategy"] == "fixed" and sig["chunk_overlap"] == 50

@@ -205,8 +205,18 @@ def test_vbpl_partial_status_without_amendments_and_effto_without_repeal(tmp_pat
     assert {v.verification_status for v in store.versions(base.document_key)} == {"needs_review"}
     store.upsert_document(replace(base, eff_status="Hết hiệu lực toàn bộ", vbpl_effective_to=date(2023, 1, 1)))
     LegalService(store, now=lambda: NOW).build_all()
-    reasons = {r for v in store.versions(base.document_key) for r in v.status_reasons}
-    assert "effectivity.vbpl_effective_to_without_repeal" in reasons
+    # vbpl ghi "hết hiệu lực toàn bộ" kèm ngày, kho không có văn bản thay thế: đóng phiên bản theo ngày của vbpl
+    versions = store.versions(base.document_key)
+    assert versions and {v.valid_to for v in versions} == {date(2023, 1, 1)}
+    assert all("note:closed_by_vbpl_status" in v.notes for v in versions)
+    assert store.provisions_as_of(base.document_key, date(2024, 1, 1)) == []
+    assert "effectivity.vbpl_effective_to_without_repeal" not in {r for v in versions for r in v.status_reasons}
+    # có ngày hết hiệu lực nhưng vbpl không ghi "toàn bộ": vẫn chỉ gắn cờ, không tự đóng
+    store.upsert_document(replace(base, eff_status="Còn hiệu lực", vbpl_effective_to=date(2023, 1, 1)))
+    LegalService(store, now=lambda: NOW).build_all()
+    versions = store.versions(base.document_key)
+    assert "effectivity.vbpl_effective_to_without_repeal" in {r for v in versions for r in v.status_reasons}
+    assert any(v.valid_to is None for v in versions)
 
 
 def test_stale_out_of_corpus_review_items_are_closed_by_system(service):

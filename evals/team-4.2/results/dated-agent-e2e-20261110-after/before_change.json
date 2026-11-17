@@ -1,0 +1,2153 @@
+{
+  "request": {
+    "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+    "as_of": "2021-06-15",
+    "stream": false,
+    "think": true,
+    "session_id": "dated-e2e-before_change"
+  },
+  "response": {
+    "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+    "answer": "Kết luận có điều kiện theo các mốc thời gian đã xác định:\n\nTôi mới xác minh được một phần câu hỏi:\n\nTheo các trích đoạn áp dụng tại mốc 15/6/2021, chủ đầu tư dự án xây dựng nhà ở thương mại phải là doanh nghiệp hoặc hợp tác xã được thành lập và hoạt động theo pháp luật Việt Nam, đồng thời có chức năng kinh doanh bất động sản. [1]\n\nChủ đầu tư phải có vốn pháp định theo quy định về kinh doanh bất động sản và vốn ký quỹ cho từng dự án theo pháp luật về đầu tư. Trích đoạn về điều kiện kinh doanh bất động sản nêu mức vốn pháp định không thấp hơn 20 tỷ đồng, trừ trường hợp được dẫn chiếu tại khoản 2 Điều 10. [1][2]\n\nChủ đầu tư có trách nhiệm bảo đảm năng lực tài chính để thực hiện dự án; các trích đoạn được cung cấp không nêu tiêu chí cụ thể để đánh giá năng lực tài chính này. [3]\n\nViệc lựa chọn chủ đầu tư được thực hiện bằng một trong các hình thức: đấu giá quyền sử dụng đất; đấu thầu dự án có sử dụng đất; hoặc chỉ định chủ đầu tư nếu nhà đầu tư đáp ứng điều kiện tại Điều 21 và có quyền sử dụng đất hợp pháp theo khoản 1 hoặc khoản 4 Điều 23. [1][4][5]\n\nCác hình thức quyền sử dụng đất được dẫn chiếu cho trường hợp chỉ định là sử dụng diện tích đất ở thuộc quyền sử dụng hợp pháp để xây dựng nhà ở thương mại, hoặc nhận chuyển quyền sử dụng đất ở theo pháp luật về đất đai để xây dựng nhà ở thương mại. [5]\n\nCơ quan quản lý nhà ở cấp tỉnh báo cáo Ủy ban nhân dân cấp tỉnh quyết định việc lựa chọn; với dự án quy mô lớn hoặc liên quan đến nhiều tỉnh, thành phố theo quy định của Chính phủ, phải báo cáo cơ quan có thẩm quyền được dẫn chiếu quyết định trước khi lựa chọn. Các trích đoạn không nêu trình tự chi tiết đấu giá, đấu thầu hoặc tiêu chí xác định dự án quy mô lớn. [4]\n\nChưa đủ căn cứ để kết luận: Theo quy định áp dụng tại mốc 15/6/2021, tổ chức hoặc cá nhân cần đáp ứng những điều kiện gì về tư cách pháp lý, năng lực kinh doanh bất động sản và năng lực tài chính để được làm chủ đầu tư dự án xây dựng nhà ở thương mại?; Theo quy định áp dụng tại mốc 15/6/2021, việc lựa chọn hoặc công nhận chủ đầu tư dự án xây dựng nhà ở thương mại được thực hiện theo những hình thức, thủ tục nào và có yêu cầu gì liên quan đến quyền sử dụng đất?\n\nCăn cứ được lọc theo mốc đã chọn 2021-06-15 và các mốc sự kiện trong câu hỏi; xem trạng thái xác minh của từng nguồn.",
+    "refused": false,
+    "query_pii": {},
+    "status": "partial",
+    "citations": [
+      {
+        "n": 1,
+        "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d21:2020-01-01:0",
+        "source": "luat:65/2014/QH13",
+        "page": null,
+        "quote": "1. Doanh nghiệp, hợp tác xã được thành lập và hoạt động theo quy định của pháp luật Việt Nam.\n2. Có vốn pháp định theo quy định của pháp luật kinh doanh bất động sản và có vốn ký quỹ để thực hiện đối với từng dự án theo quy định của pháp luật về đầu tư.\n3. Có chức năng kinh doanh bất động sản theo quy định của pháp luật",
+        "section": "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương III - PHÁT TRIỂN NHÀ Ở > Mục 2 - PHÁT TRIỂN NHÀ Ở THƯƠNG MẠI THEO DỰ ÁN > Điều 21. Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại",
+        "score": null,
+        "text": "Điều 21. Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại\n1. Doanh nghiệp, hợp tác xã được thành lập và hoạt động theo quy định của pháp luật Việt Nam.\n2. Có vốn pháp định theo quy định của pháp luật kinh doanh bất động sản và có vốn ký quỹ để thực hiện đối với từng dự án theo quy định của pháp luật về đầu tư.\n3. Có chức năng kinh doanh bất động sản theo quy định của pháp luật.",
+        "store": "versioned",
+        "title": "Luật Nhà ở số 65/2014/QH13",
+        "article_id": "luat:65/2014/QH13#d21",
+        "valid_from": "2020-01-01",
+        "valid_to": "2024-08-01",
+        "provision_status": "needs_review",
+        "provenance": [],
+        "anchor_ids": [
+          "T1"
+        ],
+        "anchor_roles": [
+          "unspecified"
+        ],
+        "document_status": "partially_verified"
+      },
+      {
+        "n": 2,
+        "chunk_id": "4ade96c67b178ead:luat:66/2014/QH13#d10:2020-01-01:0",
+        "source": "luat:66/2014/QH13",
+        "page": null,
+        "quote": "1. Tổ chức, cá nhân kinh doanh bất động sản phải thành lập doanh nghiệp hoặc hợp tác xã (sau đây gọi chung là doanh nghiệp) và có vốn pháp định không được thấp hơn 20 tỷ đồng, trừ trường hợp quy định tại khoản 2 Điều này.",
+        "section": "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương II - KINH DOANH BẤT ĐỘNG SẢN CÓ SẴN > Mục 1 - QUY ĐỊNH CHUNG > Điều 10. Điều kiện của tổ chức, cá nhân kinh doanh bất động sản",
+        "score": null,
+        "text": "Điều 10. Điều kiện của tổ chức, cá nhân kinh doanh bất động sản\n1. Tổ chức, cá nhân kinh doanh bất động sản phải thành lập doanh nghiệp hoặc hợp tác xã (sau đây gọi chung là doanh nghiệp) và có vốn pháp định không được thấp hơn 20 tỷ đồng, trừ trường hợp quy định tại khoản 2 Điều này.\n2. Tổ chức, hộ gia đình, cá nhân bán, chuyển nhượng, cho thuê, cho thuê mua bất động sản quy mô nhỏ, không thường xuyên thì không phải thành lập doanh nghiệp nhưng phải kê khai nộp thuế theo quy định của pháp luật.\n3. Chính phủ quy định chi tiết Điều này.",
+        "store": "versioned",
+        "title": "Luật Kinh doanh bất động sản số 66/2014/QH13",
+        "article_id": "luat:66/2014/QH13#d10",
+        "valid_from": "2020-01-01",
+        "valid_to": "2024-08-01",
+        "provision_status": "needs_review",
+        "provenance": [],
+        "anchor_ids": [
+          "T1"
+        ],
+        "anchor_roles": [
+          "unspecified"
+        ],
+        "document_status": "partially_verified"
+      },
+      {
+        "n": 3,
+        "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d26:2020-01-01:0",
+        "source": "luat:65/2014/QH13",
+        "page": null,
+        "quote": "2. Ký quỹ để thực hiện dự án theo quy định của pháp luật về đầu tư; đóng tiền bảo lãnh giao dịch nhà ở theo quy định của pháp luật về kinh doanh bất động sản; bảo đảm năng lực tài chính để thực hiện dự án theo quy định của pháp luật.",
+        "section": "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương III - PHÁT TRIỂN NHÀ Ở > Mục 2 - PHÁT TRIỂN NHÀ Ở THƯƠNG MẠI THEO DỰ ÁN > Điều 26. Trách nhiệm của chủ đầu tư dự án xây dựng nhà ở thương mại",
+        "score": null,
+        "text": "Điều 26. Trách nhiệm của chủ đầu tư dự án xây dựng nhà ở thương mại\n1. Lập, thẩm định, phê duyệt và triển khai thực hiện dự án theo đúng quy định của Luật này và pháp luật về xây dựng.\n2. Ký quỹ để thực hiện dự án theo quy định của pháp luật về đầu tư; đóng tiền bảo lãnh giao dịch nhà ở theo quy định của pháp luật về kinh doanh bất động sản; bảo đảm năng lực tài chính để thực hiện dự án theo quy định của pháp luật.\n3. Xây dựng nhà ở và các công trình hạ tầng kỹ thuật, hạ tầng xã hội trong dự án theo đúng quy hoạch chi tiết, nội dung quyết định chủ trương đầu tư dự án của cơ quan nhà nước có thẩm quyền, tuân thủ thiết kế, tiêu chuẩn diện tích nhà ở và tiến độ của dự án đã được phê duyệt.\n4. Dành diện tích đất ở đã đầu tư xây dựng hạ tầng kỹ thuật trong dự án để xây dựng nhà ở xã hội theo quy định của pháp luật về nhà ở.\n5. Công khai trên trang thông tin điện tử và tại trụ sở Ban quản lý dự án của mình các thông tin quy định tại điểm b khoản 5 Điều 19 của Luật này; báo cáo tình hình triển khai, kết quả thực hiện dự án theo định kỳ và khi kết thúc dự án theo quy định của pháp luật về nhà ở và pháp luật về kinh doanh bất động sản.\nĐiều 26. Trách nhiệm của chủ đầu tư dự án xây dựng",
+        "store": "versioned",
+        "title": "Luật Nhà ở số 65/2014/QH13",
+        "article_id": "luat:65/2014/QH13#d26",
+        "valid_from": "2020-01-01",
+        "valid_to": "2024-08-01",
+        "provision_status": "needs_review",
+        "provenance": [],
+        "anchor_ids": [
+          "T1"
+        ],
+        "anchor_roles": [
+          "unspecified"
+        ],
+        "document_status": "partially_verified"
+      },
+      {
+        "n": 4,
+        "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d22:2020-01-01:0",
+        "source": "luat:65/2014/QH13",
+        "page": null,
+        "quote": "2. Việc lựa chọn chủ đầu tư dự án xây dựng nhà ở thương mại được thực hiện thông qua các hình thức sau đây:\na) Đấu giá quyền sử dụng đất theo quy định của pháp luật về đất đai;\nb) Đấu thầu dự án có sử dụng đất;\nc) Chỉ định chủ đầu tư trong trường hợp nhà đầu tư có đủ điều kiện quy định tại Điều 21 của Luật này, có quyền sử dụng đất hợp pháp theo quy định tại khoản 1 và khoản 4 Điều 23 của Luật này.",
+        "section": "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương III - PHÁT TRIỂN NHÀ Ở > Mục 2 - PHÁT TRIỂN NHÀ Ở THƯƠNG MẠI THEO DỰ ÁN > Điều 22. Dự án đầu tư xây dựng nhà ở thương mại và lựa chọn chủ đầu tư dự án",
+        "score": null,
+        "text": "Điều 22. Dự án đầu tư xây dựng nhà ở thương mại và lựa chọn chủ đầu tư dự án\n1. Dự án đầu tư xây dựng nhà ở thương mại phải được lập, thẩm định, phê duyệt và triển khai thực hiện theo quy định của Luật này và pháp luật về xây dựng.\n2. Việc lựa chọn chủ đầu tư dự án xây dựng nhà ở thương mại được thực hiện thông qua các hình thức sau đây:\na) Đấu giá quyền sử dụng đất theo quy định của pháp luật về đất đai;\nb) Đấu thầu dự án có sử dụng đất;\nc) Chỉ định chủ đầu tư trong trường hợp nhà đầu tư có đủ điều kiện quy định tại Điều 21 của Luật này, có quyền sử dụng đất hợp pháp theo quy định tại khoản 1 và khoản 4 Điều 23 của Luật này.\n3. Việc lựa chọn chủ đầu tư dự án xây dựng nhà ở thương mại do cơ quan quản lý nhà ở cấp tỉnh báo cáo Ủy ban nhân dân cấp tỉnh quyết định; trường hợp dự án có quy mô lớn hoặc có liên quan đến nhiều tỉnh, thành phố trực thuộc trung ương theo quy định của Chính phủ thì phải báo cáo cơ quan có thẩm quyền theo quy định tại khoản 2 Điều 170 của Luật này quyết định trước khi thực hiện lựa chọn chủ đầu tư.",
+        "store": "versioned",
+        "title": "Luật Nhà ở số 65/2014/QH13",
+        "article_id": "luat:65/2014/QH13#d22",
+        "valid_from": "2020-01-01",
+        "valid_to": "2024-08-01",
+        "provision_status": "needs_review",
+        "provenance": [],
+        "anchor_ids": [
+          "T1"
+        ],
+        "anchor_roles": [
+          "unspecified"
+        ],
+        "document_status": "partially_verified"
+      },
+      {
+        "n": 5,
+        "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d23:2020-01-01:0",
+        "source": "luat:65/2014/QH13",
+        "page": null,
+        "quote": "1. Sử dụng diện tích đất ở thuộc quyền sử dụng hợp pháp để xây dựng nhà ở thương mại.\n2. Được Nhà nước giao đất để xây dựng nhà ở cho thuê, cho thuê mua, để bán.\n3. Được Nhà nước cho thuê đất để xây dựng nhà ở cho thuê.\n4. Nhận chuyển quyền sử dụng đất ở theo quy định của pháp luật về đất đai để xây dựng nhà ở thương mại",
+        "section": "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương III - PHÁT TRIỂN NHÀ Ở > Mục 2 - PHÁT TRIỂN NHÀ Ở THƯƠNG MẠI THEO DỰ ÁN > Điều 23. Hình thức sử dụng đất để thực hiện dự án đầu tư xây dựng nhà ở thương mại",
+        "score": null,
+        "text": "Điều 23. Hình thức sử dụng đất để thực hiện dự án đầu tư xây dựng nhà ở thương mại\n1. Sử dụng diện tích đất ở thuộc quyền sử dụng hợp pháp để xây dựng nhà ở thương mại.\n2. Được Nhà nước giao đất để xây dựng nhà ở cho thuê, cho thuê mua, để bán.\n3. Được Nhà nước cho thuê đất để xây dựng nhà ở cho thuê.\n4. Nhận chuyển quyền sử dụng đất ở theo quy định của pháp luật về đất đai để xây dựng nhà ở thương mại.",
+        "store": "versioned",
+        "title": "Luật Nhà ở số 65/2014/QH13",
+        "article_id": "luat:65/2014/QH13#d23",
+        "valid_from": "2020-01-01",
+        "valid_to": "2022-03-01",
+        "provision_status": "needs_review",
+        "provenance": [],
+        "anchor_ids": [
+          "T1"
+        ],
+        "anchor_roles": [
+          "unspecified"
+        ],
+        "document_status": "partially_verified"
+      }
+    ],
+    "sources": [
+      {
+        "n": 1,
+        "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d21:2020-01-01:0",
+        "source": "luat:65/2014/QH13",
+        "section": "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương III - PHÁT TRIỂN NHÀ Ở > Mục 2 - PHÁT TRIỂN NHÀ Ở THƯƠNG MẠI THEO DỰ ÁN > Điều 21. Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại",
+        "page": null,
+        "score": null,
+        "text": "Điều 21. Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại\n1. Doanh nghiệp, hợp tác xã được thành lập và hoạt động theo quy định của pháp luật Việt Nam.\n2. Có vốn pháp định theo quy định của pháp luật kinh doanh bất động sản và có vốn ký quỹ để thực hiện đối với từng dự án theo quy định của pháp luật về đầu tư.\n3. Có chức năng kinh doanh bất động sản theo quy định của pháp luật.",
+        "store": "versioned",
+        "title": "Luật Nhà ở số 65/2014/QH13",
+        "article_id": "luat:65/2014/QH13#d21",
+        "valid_from": "2020-01-01",
+        "valid_to": "2024-08-01",
+        "provision_status": "needs_review",
+        "provenance": [],
+        "anchor_ids": [
+          "T1"
+        ],
+        "anchor_roles": [
+          "unspecified"
+        ],
+        "document_status": "partially_verified"
+      },
+      {
+        "n": 2,
+        "chunk_id": "4ade96c67b178ead:luat:66/2014/QH13#d10:2020-01-01:0",
+        "source": "luat:66/2014/QH13",
+        "section": "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương II - KINH DOANH BẤT ĐỘNG SẢN CÓ SẴN > Mục 1 - QUY ĐỊNH CHUNG > Điều 10. Điều kiện của tổ chức, cá nhân kinh doanh bất động sản",
+        "page": null,
+        "score": null,
+        "text": "Điều 10. Điều kiện của tổ chức, cá nhân kinh doanh bất động sản\n1. Tổ chức, cá nhân kinh doanh bất động sản phải thành lập doanh nghiệp hoặc hợp tác xã (sau đây gọi chung là doanh nghiệp) và có vốn pháp định không được thấp hơn 20 tỷ đồng, trừ trường hợp quy định tại khoản 2 Điều này.\n2. Tổ chức, hộ gia đình, cá nhân bán, chuyển nhượng, cho thuê, cho thuê mua bất động sản quy mô nhỏ, không thường xuyên thì không phải thành lập doanh nghiệp nhưng phải kê khai nộp thuế theo quy định của pháp luật.\n3. Chính phủ quy định chi tiết Điều này.",
+        "store": "versioned",
+        "title": "Luật Kinh doanh bất động sản số 66/2014/QH13",
+        "article_id": "luat:66/2014/QH13#d10",
+        "valid_from": "2020-01-01",
+        "valid_to": "2024-08-01",
+        "provision_status": "needs_review",
+        "provenance": [],
+        "anchor_ids": [
+          "T1"
+        ],
+        "anchor_roles": [
+          "unspecified"
+        ],
+        "document_status": "partially_verified"
+      },
+      {
+        "n": 3,
+        "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d26:2020-01-01:0",
+        "source": "luat:65/2014/QH13",
+        "section": "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương III - PHÁT TRIỂN NHÀ Ở > Mục 2 - PHÁT TRIỂN NHÀ Ở THƯƠNG MẠI THEO DỰ ÁN > Điều 26. Trách nhiệm của chủ đầu tư dự án xây dựng nhà ở thương mại",
+        "page": null,
+        "score": null,
+        "text": "Điều 26. Trách nhiệm của chủ đầu tư dự án xây dựng nhà ở thương mại\n1. Lập, thẩm định, phê duyệt và triển khai thực hiện dự án theo đúng quy định của Luật này và pháp luật về xây dựng.\n2. Ký quỹ để thực hiện dự án theo quy định của pháp luật về đầu tư; đóng tiền bảo lãnh giao dịch nhà ở theo quy định của pháp luật về kinh doanh bất động sản; bảo đảm năng lực tài chính để thực hiện dự án theo quy định của pháp luật.\n3. Xây dựng nhà ở và các công trình hạ tầng kỹ thuật, hạ tầng xã hội trong dự án theo đúng quy hoạch chi tiết, nội dung quyết định chủ trương đầu tư dự án của cơ quan nhà nước có thẩm quyền, tuân thủ thiết kế, tiêu chuẩn diện tích nhà ở và tiến độ của dự án đã được phê duyệt.\n4. Dành diện tích đất ở đã đầu tư xây dựng hạ tầng kỹ thuật trong dự án để xây dựng nhà ở xã hội theo quy định của pháp luật về nhà ở.\n5. Công khai trên trang thông tin điện tử và tại trụ sở Ban quản lý dự án của mình các thông tin quy định tại điểm b khoản 5 Điều 19 của Luật này; báo cáo tình hình triển khai, kết quả thực hiện dự án theo định kỳ và khi kết thúc dự án theo quy định của pháp luật về nhà ở và pháp luật về kinh doanh bất động sản.\nĐiều 26. Trách nhiệm của chủ đầu tư dự án xây dựng",
+        "store": "versioned",
+        "title": "Luật Nhà ở số 65/2014/QH13",
+        "article_id": "luat:65/2014/QH13#d26",
+        "valid_from": "2020-01-01",
+        "valid_to": "2024-08-01",
+        "provision_status": "needs_review",
+        "provenance": [],
+        "anchor_ids": [
+          "T1"
+        ],
+        "anchor_roles": [
+          "unspecified"
+        ],
+        "document_status": "partially_verified"
+      },
+      {
+        "n": 4,
+        "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d22:2020-01-01:0",
+        "source": "luat:65/2014/QH13",
+        "section": "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương III - PHÁT TRIỂN NHÀ Ở > Mục 2 - PHÁT TRIỂN NHÀ Ở THƯƠNG MẠI THEO DỰ ÁN > Điều 22. Dự án đầu tư xây dựng nhà ở thương mại và lựa chọn chủ đầu tư dự án",
+        "page": null,
+        "score": null,
+        "text": "Điều 22. Dự án đầu tư xây dựng nhà ở thương mại và lựa chọn chủ đầu tư dự án\n1. Dự án đầu tư xây dựng nhà ở thương mại phải được lập, thẩm định, phê duyệt và triển khai thực hiện theo quy định của Luật này và pháp luật về xây dựng.\n2. Việc lựa chọn chủ đầu tư dự án xây dựng nhà ở thương mại được thực hiện thông qua các hình thức sau đây:\na) Đấu giá quyền sử dụng đất theo quy định của pháp luật về đất đai;\nb) Đấu thầu dự án có sử dụng đất;\nc) Chỉ định chủ đầu tư trong trường hợp nhà đầu tư có đủ điều kiện quy định tại Điều 21 của Luật này, có quyền sử dụng đất hợp pháp theo quy định tại khoản 1 và khoản 4 Điều 23 của Luật này.\n3. Việc lựa chọn chủ đầu tư dự án xây dựng nhà ở thương mại do cơ quan quản lý nhà ở cấp tỉnh báo cáo Ủy ban nhân dân cấp tỉnh quyết định; trường hợp dự án có quy mô lớn hoặc có liên quan đến nhiều tỉnh, thành phố trực thuộc trung ương theo quy định của Chính phủ thì phải báo cáo cơ quan có thẩm quyền theo quy định tại khoản 2 Điều 170 của Luật này quyết định trước khi thực hiện lựa chọn chủ đầu tư.",
+        "store": "versioned",
+        "title": "Luật Nhà ở số 65/2014/QH13",
+        "article_id": "luat:65/2014/QH13#d22",
+        "valid_from": "2020-01-01",
+        "valid_to": "2024-08-01",
+        "provision_status": "needs_review",
+        "provenance": [],
+        "anchor_ids": [
+          "T1"
+        ],
+        "anchor_roles": [
+          "unspecified"
+        ],
+        "document_status": "partially_verified"
+      },
+      {
+        "n": 5,
+        "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d23:2020-01-01:0",
+        "source": "luat:65/2014/QH13",
+        "section": "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương III - PHÁT TRIỂN NHÀ Ở > Mục 2 - PHÁT TRIỂN NHÀ Ở THƯƠNG MẠI THEO DỰ ÁN > Điều 23. Hình thức sử dụng đất để thực hiện dự án đầu tư xây dựng nhà ở thương mại",
+        "page": null,
+        "score": null,
+        "text": "Điều 23. Hình thức sử dụng đất để thực hiện dự án đầu tư xây dựng nhà ở thương mại\n1. Sử dụng diện tích đất ở thuộc quyền sử dụng hợp pháp để xây dựng nhà ở thương mại.\n2. Được Nhà nước giao đất để xây dựng nhà ở cho thuê, cho thuê mua, để bán.\n3. Được Nhà nước cho thuê đất để xây dựng nhà ở cho thuê.\n4. Nhận chuyển quyền sử dụng đất ở theo quy định của pháp luật về đất đai để xây dựng nhà ở thương mại.",
+        "store": "versioned",
+        "title": "Luật Nhà ở số 65/2014/QH13",
+        "article_id": "luat:65/2014/QH13#d23",
+        "valid_from": "2020-01-01",
+        "valid_to": "2022-03-01",
+        "provision_status": "needs_review",
+        "provenance": [],
+        "anchor_ids": [
+          "T1"
+        ],
+        "anchor_roles": [
+          "unspecified"
+        ],
+        "document_status": "partially_verified"
+      }
+    ],
+    "trace": {
+      "condensed_query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+      "context_mode": "fixed",
+      "n_context_blocks": 5,
+      "reranked": false,
+      "errors": {},
+      "arms": {},
+      "final_hits": [],
+      "agent": {
+        "version": "multihop-v1",
+        "scope": "temporal",
+        "scope_warning": "Căn cứ được lọc theo mốc đã chọn 2021-06-15 và các mốc sự kiện trong câu hỏi; xem trạng thái xác minh của từng nguồn.",
+        "snapshot_id": "3375d55697ca9dc1ec739130538ae428c12c683990e96966b091d56526eb1c21",
+        "status": "partial",
+        "stop_reason": "temporal_qualified",
+        "verified": true,
+        "config": {
+          "max_rounds": 3,
+          "max_searches": 8,
+          "initial_subqueries": 3,
+          "followup_searches": 2,
+          "candidates_per_search": 10,
+          "initial_pool_size": 30,
+          "new_units_per_round": 10,
+          "max_units": 50,
+          "max_xref_depth": 2,
+          "xrefs_per_round": 6,
+          "max_xref_targets": 12,
+          "max_requirements": 8,
+          "max_model_calls": 24,
+          "max_service_requests": 240,
+          "max_model_bytes": 600000,
+          "max_input_chars": 60000,
+          "max_output_tokens": 3000,
+          "deadline_s": 180.0,
+          "retrieval_mode": "dense"
+        },
+        "budget": {
+          "rounds": 3,
+          "searches": 6,
+          "xref_targets": 1,
+          "model_calls": 9,
+          "model_bytes": 229659,
+          "provider_requests": 7,
+          "cache_hits": 2,
+          "input_tokens": 42979,
+          "output_tokens": 12573,
+          "elapsed_s": 166.085,
+          "calls": [
+            {
+              "stage": "plan",
+              "model": "gpt-6-luna",
+              "status": "ok",
+              "prompt_sha256": "4423d9f67b13a4b1f02db8eb6e269ac1127dd9c4c2d01438ba9c153067631dbe",
+              "input_sha256": "71b486230cec39454f5cf241277d9f5c753cb8e1246f4e88e558ce91cc97bab0",
+              "cache_hit": true
+            },
+            {
+              "stage": "assess",
+              "model": "gpt-6-luna",
+              "status": "ok",
+              "prompt_sha256": "2f11fa000836b046f54e6e371367eb91160f341e4dad78f4b332c31b1a7be2c4",
+              "input_sha256": "3677c01318549c3b477b3dabbc1ce03db9fa95843a1bf0591618fd90661ab55a",
+              "cache_hit": true
+            },
+            {
+              "stage": "assess",
+              "model": "gpt-6-luna",
+              "status": "ok",
+              "prompt_sha256": "2f11fa000836b046f54e6e371367eb91160f341e4dad78f4b332c31b1a7be2c4",
+              "input_sha256": "1dc30bd88f94121c0726b9d9ce06bfdfbff7f60b2940911f23cdfff0def70e2e",
+              "cache_hit": false
+            },
+            {
+              "stage": "assess",
+              "model": "gpt-6-luna",
+              "status": "ok",
+              "prompt_sha256": "2f11fa000836b046f54e6e371367eb91160f341e4dad78f4b332c31b1a7be2c4",
+              "input_sha256": "f6214a7568f84c1fa75716dd5c13395a7873ab92b7d4a99c9c13a4585f449596",
+              "cache_hit": false
+            },
+            {
+              "stage": "compose",
+              "model": "gpt-6-luna",
+              "status": "ok",
+              "prompt_sha256": "b48673a3b16901dde9fb3a37c239d72e105c8f36ccdd19f90cfd1edd80148fda",
+              "input_sha256": "4deb31608190fd1c18d97b814c383f97962cc30e8d7a406a3dba7753638ac761",
+              "cache_hit": false
+            },
+            {
+              "stage": "verify",
+              "model": "gpt-6-luna",
+              "status": "ok",
+              "prompt_sha256": "349850d3d9ec34acc812d41457fb85258de264e7aced043acd4b5dc88b6e1473",
+              "input_sha256": "b0c292e468b542c1a284dccee8898328a70c104b5654a5dd0b9375f755e7e68a",
+              "cache_hit": false
+            },
+            {
+              "stage": "repair",
+              "model": "gpt-6-luna",
+              "status": "ok",
+              "prompt_sha256": "b48673a3b16901dde9fb3a37c239d72e105c8f36ccdd19f90cfd1edd80148fda",
+              "input_sha256": "fccb183248bf7b52aab7166f1215abcb7afa3a1502101571a091f7817e3ad484",
+              "cache_hit": false
+            },
+            {
+              "stage": "verify",
+              "model": "gpt-6-luna",
+              "status": "ok",
+              "prompt_sha256": "349850d3d9ec34acc812d41457fb85258de264e7aced043acd4b5dc88b6e1473",
+              "input_sha256": "18fefda8873f2947927d85124771f4f1187d47e6fdafd4885643d10e82f26d5c",
+              "cache_hit": false
+            },
+            {
+              "stage": "temporal_review",
+              "model": "gpt-6-luna",
+              "status": "ok",
+              "prompt_sha256": "508317f51181509ebd08327190eb6749147f0eaccd200bd01e589441a32f006d",
+              "input_sha256": "b131ea113ac76e4911ed11c7c14120f5fb869c650adb190d33371b568bc54734",
+              "cache_hit": false
+            }
+          ],
+          "service_requests": {
+            "rerank": 40
+          }
+        },
+        "requirements": [
+          {
+            "id": "R1",
+            "question": "Theo quy định áp dụng tại mốc 15/6/2021, tổ chức hoặc cá nhân cần đáp ứng những điều kiện gì về tư cách pháp lý, năng lực kinh doanh bất động sản và năng lực tài chính để được làm chủ đầu tư dự án xây dựng nhà ở thương mại?",
+            "depends_on": []
+          },
+          {
+            "id": "R2",
+            "question": "Theo quy định áp dụng tại mốc 15/6/2021, việc lựa chọn hoặc công nhận chủ đầu tư dự án xây dựng nhà ở thương mại được thực hiện theo những hình thức, thủ tục nào và có yêu cầu gì liên quan đến quyền sử dụng đất?",
+            "depends_on": []
+          }
+        ],
+        "assessments": [
+          {
+            "requirement_id": "R1",
+            "status": "partial",
+            "evidence_ids": [
+              "E1",
+              "E32",
+              "E6"
+            ],
+            "reason": "Excerpts nêu tư cách doanh nghiệp/hợp tác xã, chức năng kinh doanh bất động sản, vốn pháp định, ký quỹ từng dự án và yêu cầu bảo đảm năng lực tài chính. Chưa có tiêu chí cụ thể để đánh giá năng lực tài chính hoặc chi tiết mức, cách thực hiện ký quỹ; nguồn cũng được đánh dấu partially_verified/needs_review."
+          },
+          {
+            "requirement_id": "R2",
+            "status": "partial",
+            "evidence_ids": [
+              "E2",
+              "E8"
+            ],
+            "reason": "Có căn cứ về các hình thức lựa chọn, cơ quan quyết định và các hình thức sử dụng đất; nhưng excerpt không nêu trình tự chi tiết đấu giá/đấu thầu, tiêu chí xác định dự án quy mô lớn hoặc nội dung đầy đủ của điều kiện quyền sử dụng đất được dẫn chiếu. Nguồn được đánh dấu partially_verified/needs_review."
+          }
+        ],
+        "unresolved_requirements": [
+          "R1",
+          "R2"
+        ],
+        "evidence": [
+          {
+            "id": "E1",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d21:2020-01-01:0"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương III - PHÁT TRIỂN NHÀ Ở > Mục 2 - PHÁT TRIỂN NHÀ Ở THƯƠNG MẠI THEO DỰ ÁN > Điều 21. Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 1,
+                "score": 0.96,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d21:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 1,
+                "score": 0.96,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d21:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R1",
+                "query": "Theo quy định áp dụng tại mốc 15/6/2021, tổ chức hoặc cá nhân cần đáp ứng những điều kiện gì về tư cách pháp lý, năng lực kinh doanh bất động sản và năng lực tài chính để được làm chủ đầu tư dự án xây dựng nhà ở thương mại?",
+                "rank": 1,
+                "score": 0.92,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d21:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R1",
+                "query": "Theo quy định áp dụng ngày 15/6/2021, pháp luật về kinh doanh bất động sản và pháp luật về đầu tư quy định cụ thể thế nào về vốn pháp định và vốn ký quỹ đối với doanh nghiệp, hợp tác xã làm chủ đầu tư dự án xây dựng nhà ở thương mại?",
+                "rank": 1,
+                "score": 0.78,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d21:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E2",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d22:2020-01-01:0"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương III - PHÁT TRIỂN NHÀ Ở > Mục 2 - PHÁT TRIỂN NHÀ Ở THƯƠNG MẠI THEO DỰ ÁN > Điều 22. Dự án đầu tư xây dựng nhà ở thương mại và lựa chọn chủ đầu tư dự án"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 2,
+                "score": 0.77,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d22:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo quy định áp dụng tại mốc 15/6/2021, việc lựa chọn hoặc công nhận chủ đầu tư dự án xây dựng nhà ở thương mại được thực hiện theo những hình thức, thủ tục nào và có yêu cầu gì liên quan đến quyền sử dụng đất?",
+                "rank": 1,
+                "score": 0.93,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d22:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 2,
+                "score": 0.77,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d22:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo Điều 22 và Điều 170 Luật Nhà ở áp dụng ngày 15/6/2021, dự án nhà ở thương mại quy mô lớn hoặc liên quan nhiều tỉnh phải trình cơ quan nào quyết định trước khi lựa chọn chủ đầu tư; thủ tục lựa chọn qua đấu giá quyền sử dụng đất và đấu thầu dự án có sử dụng đất được quy định cụ thể ra sao?",
+                "rank": 1,
+                "score": 0.88,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d22:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo quy định áp dụng ngày 15/6/2021, trình tự lựa chọn chủ đầu tư dự án xây dựng nhà ở thương mại qua đấu giá quyền sử dụng đất và đấu thầu dự án có sử dụng đất được thực hiện thế nào, và tiêu chí nào xác định dự án phải trình cơ quan có thẩm quyền quyết định trước khi lựa chọn?",
+                "rank": 1,
+                "score": 0.88,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d22:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E3",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d19:2020-01-01:0",
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d19:2020-01-01:1",
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d19:2020-01-01:2"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương III - PHÁT TRIỂN NHÀ Ở > Mục 1 - QUY ĐỊNH CHUNG VỀ PHÁT TRIỂN NHÀ Ở > Điều 19. Yêu cầu đối với dự án đầu tư xây dựng nhà ở"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 3,
+                "score": 0.72,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d19:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 3,
+                "score": 0.72,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d19:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo Điều 22 và Điều 170 Luật Nhà ở áp dụng ngày 15/6/2021, dự án nhà ở thương mại quy mô lớn hoặc liên quan nhiều tỉnh phải trình cơ quan nào quyết định trước khi lựa chọn chủ đầu tư; thủ tục lựa chọn qua đấu giá quyền sử dụng đất và đấu thầu dự án có sử dụng đất được quy định cụ thể ra sao?",
+                "rank": 2,
+                "score": 0.25,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d19:2020-01-01:1"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo quy định áp dụng ngày 15/6/2021, trình tự lựa chọn chủ đầu tư dự án xây dựng nhà ở thương mại qua đấu giá quyền sử dụng đất và đấu thầu dự án có sử dụng đất được thực hiện thế nào, và tiêu chí nào xác định dự án phải trình cơ quan có thẩm quyền quyết định trước khi lựa chọn?",
+                "rank": 2,
+                "score": 0.4,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d19:2020-01-01:1"
+              }
+            ]
+          },
+          {
+            "id": "E4",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d149:2020-01-01:0"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương VIII - GIAO DỊCH VỀ NHÀ Ở > Mục 8: THẾ CHẤP NHÀ Ở > Điều 149. Xử lý tài sản nhà ở, dự án đầu tư xây dựng nhà ở thế chấp"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 4,
+                "score": 0.7,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d149:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 4,
+                "score": 0.7,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d149:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R1",
+                "query": "Theo quy định áp dụng tại mốc 15/6/2021, tổ chức hoặc cá nhân cần đáp ứng những điều kiện gì về tư cách pháp lý, năng lực kinh doanh bất động sản và năng lực tài chính để được làm chủ đầu tư dự án xây dựng nhà ở thương mại?",
+                "rank": 5,
+                "score": 0.52,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d149:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R1",
+                "query": "Theo quy định áp dụng ngày 15/6/2021, pháp luật về kinh doanh bất động sản và pháp luật về đầu tư quy định cụ thể thế nào về vốn pháp định và vốn ký quỹ đối với doanh nghiệp, hợp tác xã làm chủ đầu tư dự án xây dựng nhà ở thương mại?",
+                "rank": 5,
+                "score": 0.11,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d149:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E5",
+            "chunk_ids": [
+              "4ade96c67b178ead:luat:66/2014/QH13#d79:2020-01-01:0",
+              "4ade96c67b178ead:luat:66/2014/QH13#d79:2020-01-01:1"
+            ],
+            "unit_key": [
+              "article",
+              "luat:66/2014/QH13|4ade96c67b178ead|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương V - QUẢN LÝ NHÀ NƯỚC VỀ KINH DOANH BẤT ĐỘNG SẢN > Điều 79. Xử lý vi phạm"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 5,
+                "score": 0.7,
+                "score_type": "rerank",
+                "chunk_id": "4ade96c67b178ead:luat:66/2014/QH13#d79:2020-01-01:1"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo quy định áp dụng tại mốc 15/6/2021, việc lựa chọn hoặc công nhận chủ đầu tư dự án xây dựng nhà ở thương mại được thực hiện theo những hình thức, thủ tục nào và có yêu cầu gì liên quan đến quyền sử dụng đất?",
+                "rank": 4,
+                "score": 0.38,
+                "score_type": "rerank",
+                "chunk_id": "4ade96c67b178ead:luat:66/2014/QH13#d79:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 5,
+                "score": 0.7,
+                "score_type": "rerank",
+                "chunk_id": "4ade96c67b178ead:luat:66/2014/QH13#d79:2020-01-01:1"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R1",
+                "query": "Theo quy định áp dụng tại mốc 15/6/2021, tổ chức hoặc cá nhân cần đáp ứng những điều kiện gì về tư cách pháp lý, năng lực kinh doanh bất động sản và năng lực tài chính để được làm chủ đầu tư dự án xây dựng nhà ở thương mại?",
+                "rank": 9,
+                "score": 0.08,
+                "score_type": "rerank",
+                "chunk_id": "4ade96c67b178ead:luat:66/2014/QH13#d79:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo quy định áp dụng ngày 15/6/2021, trình tự lựa chọn chủ đầu tư dự án xây dựng nhà ở thương mại qua đấu giá quyền sử dụng đất và đấu thầu dự án có sử dụng đất được thực hiện thế nào, và tiêu chí nào xác định dự án phải trình cơ quan có thẩm quyền quyết định trước khi lựa chọn?",
+                "rank": 7,
+                "score": 0.11,
+                "score_type": "rerank",
+                "chunk_id": "4ade96c67b178ead:luat:66/2014/QH13#d79:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E6",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d26:2020-01-01:0",
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d26:2020-01-01:1",
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d26:2020-01-01:2"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương III - PHÁT TRIỂN NHÀ Ở > Mục 2 - PHÁT TRIỂN NHÀ Ở THƯƠNG MẠI THEO DỰ ÁN > Điều 26. Trách nhiệm của chủ đầu tư dự án xây dựng nhà ở thương mại"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 6,
+                "score": 0.66,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d26:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R1",
+                "query": "Theo quy định áp dụng tại mốc 15/6/2021, tổ chức hoặc cá nhân cần đáp ứng những điều kiện gì về tư cách pháp lý, năng lực kinh doanh bất động sản và năng lực tài chính để được làm chủ đầu tư dự án xây dựng nhà ở thương mại?",
+                "rank": 2,
+                "score": 0.74,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d26:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 6,
+                "score": 0.66,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d26:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo quy định áp dụng tại mốc 15/6/2021, việc lựa chọn hoặc công nhận chủ đầu tư dự án xây dựng nhà ở thương mại được thực hiện theo những hình thức, thủ tục nào và có yêu cầu gì liên quan đến quyền sử dụng đất?",
+                "rank": 9,
+                "score": 0.12,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d26:2020-01-01:1"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo Điều 22 và Điều 170 Luật Nhà ở áp dụng ngày 15/6/2021, dự án nhà ở thương mại quy mô lớn hoặc liên quan nhiều tỉnh phải trình cơ quan nào quyết định trước khi lựa chọn chủ đầu tư; thủ tục lựa chọn qua đấu giá quyền sử dụng đất và đấu thầu dự án có sử dụng đất được quy định cụ thể ra sao?",
+                "rank": 7,
+                "score": 0.05,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d26:2020-01-01:1"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R1",
+                "query": "Theo quy định áp dụng ngày 15/6/2021, pháp luật về kinh doanh bất động sản và pháp luật về đầu tư quy định cụ thể thế nào về vốn pháp định và vốn ký quỹ đối với doanh nghiệp, hợp tác xã làm chủ đầu tư dự án xây dựng nhà ở thương mại?",
+                "rank": 2,
+                "score": 0.67,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d26:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo quy định áp dụng ngày 15/6/2021, trình tự lựa chọn chủ đầu tư dự án xây dựng nhà ở thương mại qua đấu giá quyền sử dụng đất và đấu thầu dự án có sử dụng đất được thực hiện thế nào, và tiêu chí nào xác định dự án phải trình cơ quan có thẩm quyền quyết định trước khi lựa chọn?",
+                "rank": 9,
+                "score": 0.07,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d26:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E7",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d24:2020-01-01:0"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương III - PHÁT TRIỂN NHÀ Ở > Mục 2 - PHÁT TRIỂN NHÀ Ở THƯƠNG MẠI THEO DỰ ÁN > Điều 24. Loại nhà và tiêu chuẩn diện tích nhà ở thương mại"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 7,
+                "score": 0.61,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d24:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 7,
+                "score": 0.61,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d24:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo quy định áp dụng ngày 15/6/2021, trình tự lựa chọn chủ đầu tư dự án xây dựng nhà ở thương mại qua đấu giá quyền sử dụng đất và đấu thầu dự án có sử dụng đất được thực hiện thế nào, và tiêu chí nào xác định dự án phải trình cơ quan có thẩm quyền quyết định trước khi lựa chọn?",
+                "rank": 8,
+                "score": 0.07,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d24:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E8",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d23:2020-01-01:0"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2022-03-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương III - PHÁT TRIỂN NHÀ Ở > Mục 2 - PHÁT TRIỂN NHÀ Ở THƯƠNG MẠI THEO DỰ ÁN > Điều 23. Hình thức sử dụng đất để thực hiện dự án đầu tư xây dựng nhà ở thương mại"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 8,
+                "score": 0.6,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d23:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 8,
+                "score": 0.6,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d23:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E9",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d16:2020-01-01:0"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương III - PHÁT TRIỂN NHÀ Ở > Mục 1 - QUY ĐỊNH CHUNG VỀ PHÁT TRIỂN NHÀ Ở > Điều 16. Xác định quỹ đất cho phát triển nhà ở"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 9,
+                "score": 0.59,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d16:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 9,
+                "score": 0.59,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d16:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E10",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d57:2020-01-01:0",
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d57:2020-01-01:1"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương IV - CHÍNH SÁCH VỀ NHÀ Ở XÃ HỘI > Mục 2 - CHÍNH SÁCH PHÁT TRIỂN VÀ QUẢN LÝ NHÀ Ở XÃ HỘI > Điều 57. Chủ đầu tư dự án xây dựng nhà ở xã hội"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 10,
+                "score": 0.51,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d57:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo quy định áp dụng tại mốc 15/6/2021, việc lựa chọn hoặc công nhận chủ đầu tư dự án xây dựng nhà ở thương mại được thực hiện theo những hình thức, thủ tục nào và có yêu cầu gì liên quan đến quyền sử dụng đất?",
+                "rank": 2,
+                "score": 0.66,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d57:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R1",
+                "query": "Theo quy định áp dụng tại mốc 15/6/2021, tổ chức hoặc cá nhân cần đáp ứng những điều kiện gì về tư cách pháp lý, năng lực kinh doanh bất động sản và năng lực tài chính để được làm chủ đầu tư dự án xây dựng nhà ở thương mại?",
+                "rank": 8,
+                "score": 0.19,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d57:2020-01-01:1"
+              },
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 10,
+                "score": 0.51,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d57:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo Điều 22 và Điều 170 Luật Nhà ở áp dụng ngày 15/6/2021, dự án nhà ở thương mại quy mô lớn hoặc liên quan nhiều tỉnh phải trình cơ quan nào quyết định trước khi lựa chọn chủ đầu tư; thủ tục lựa chọn qua đấu giá quyền sử dụng đất và đấu thầu dự án có sử dụng đất được quy định cụ thể ra sao?",
+                "rank": 4,
+                "score": 0.14,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d57:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo quy định áp dụng ngày 15/6/2021, trình tự lựa chọn chủ đầu tư dự án xây dựng nhà ở thương mại qua đấu giá quyền sử dụng đất và đấu thầu dự án có sử dụng đất được thực hiện thế nào, và tiêu chí nào xác định dự án phải trình cơ quan có thẩm quyền quyết định trước khi lựa chọn?",
+                "rank": 3,
+                "score": 0.27,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d57:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R1",
+                "query": "Theo quy định áp dụng ngày 15/6/2021, pháp luật về kinh doanh bất động sản và pháp luật về đầu tư quy định cụ thể thế nào về vốn pháp định và vốn ký quỹ đối với doanh nghiệp, hợp tác xã làm chủ đầu tư dự án xây dựng nhà ở thương mại?",
+                "rank": 7,
+                "score": 0.07,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d57:2020-01-01:1"
+              }
+            ]
+          },
+          {
+            "id": "E11",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d150:2020-01-01:0"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương VIII - GIAO DỊCH VỀ NHÀ Ở > Mục 9: GÓP VỐN BẰNG NHÀ Ở > Điều 150. Điều kiện, thủ tục góp vốn bằng nhà ở"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 11,
+                "score": 0.49,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d150:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 11,
+                "score": 0.49,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d150:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E12",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d159:2020-01-01:0"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương IX - QUYỀN SỞ HỮU NHÀ Ở TẠI VIỆT NAM > Điều 159. Đối tượng được sở hữu nhà ở và hình thức sở hữu nhà ở tại Việt Nam của tổ chức, cá nhân nước ngoài"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 12,
+                "score": 0.49,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d159:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 12,
+                "score": 0.49,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d159:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E13",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d8:2020-01-01:0"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương II - SỞ HỮU NHÀ Ở > Điều 8. Điều kiện được công nhận quyền sở hữu nhà ở"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 13,
+                "score": 0.45,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d8:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 13,
+                "score": 0.45,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d8:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R1",
+                "query": "Theo quy định áp dụng ngày 15/6/2021, pháp luật về kinh doanh bất động sản và pháp luật về đầu tư quy định cụ thể thế nào về vốn pháp định và vốn ký quỹ đối với doanh nghiệp, hợp tác xã làm chủ đầu tư dự án xây dựng nhà ở thương mại?",
+                "rank": 9,
+                "score": 0.06,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d8:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E14",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d35:2020-01-01:0",
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d35:2020-01-01:1"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương III - PHÁT TRIỂN NHÀ Ở > Mục 4 - PHÁT TRIỂN NHÀ Ở ĐỂ PHỤC VỤ TÁI ĐỊNH CƯ > Điều 35. Nguyên tắc phát triển nhà ở để phục vụ tái định cư"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 14,
+                "score": 0.44,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d35:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 14,
+                "score": 0.44,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d35:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E15",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d148:2020-01-01:0",
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d148:2020-01-01:1"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương VIII - GIAO DỊCH VỀ NHÀ Ở > Mục 8: THẾ CHẤP NHÀ Ở > Điều 148. Điều kiện thế chấp dự án đầu tư xây dựng nhà ở và thế chấp nhà ở hình thành trong tương lai"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 15,
+                "score": 0.43,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d148:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 15,
+                "score": 0.43,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d148:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E16",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d119:2020-01-01:0",
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d119:2020-01-01:1"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương VIII - GIAO DỊCH VỀ NHÀ Ở > Mục 1 - QUY ĐỊNH CHUNG VỀ CÁC GIAO DỊCH VỀ NHÀ Ở > Điều 119. Điều kiện của các bên tham gia giao dịch về nhà ở"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 16,
+                "score": 0.33,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d119:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R1",
+                "query": "Theo quy định áp dụng tại mốc 15/6/2021, tổ chức hoặc cá nhân cần đáp ứng những điều kiện gì về tư cách pháp lý, năng lực kinh doanh bất động sản và năng lực tài chính để được làm chủ đầu tư dự án xây dựng nhà ở thương mại?",
+                "rank": 4,
+                "score": 0.53,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d119:2020-01-01:1"
+              },
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 16,
+                "score": 0.33,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d119:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E17",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d114:2020-01-01:0",
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d114:2020-01-01:1"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương VII - QUẢN LÝ, SỬ DỤNG NHÀ CHUNG CƯ > Mục 2 - PHÁ DỠ NHÀ CHUNG CƯ ĐỂ CẢI TẠO, > Điều 114. Chủ đầu tư dự án cải tạo, xây dựng lại nhà chung cư"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 17,
+                "score": 0.29,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d114:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo quy định áp dụng tại mốc 15/6/2021, việc lựa chọn hoặc công nhận chủ đầu tư dự án xây dựng nhà ở thương mại được thực hiện theo những hình thức, thủ tục nào và có yêu cầu gì liên quan đến quyền sử dụng đất?",
+                "rank": 6,
+                "score": 0.22,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d114:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 17,
+                "score": 0.29,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d114:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo Điều 22 và Điều 170 Luật Nhà ở áp dụng ngày 15/6/2021, dự án nhà ở thương mại quy mô lớn hoặc liên quan nhiều tỉnh phải trình cơ quan nào quyết định trước khi lựa chọn chủ đầu tư; thủ tục lựa chọn qua đấu giá quyền sử dụng đất và đấu thầu dự án có sử dụng đất được quy định cụ thể ra sao?",
+                "rank": 5,
+                "score": 0.13,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d114:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo quy định áp dụng ngày 15/6/2021, trình tự lựa chọn chủ đầu tư dự án xây dựng nhà ở thương mại qua đấu giá quyền sử dụng đất và đấu thầu dự án có sử dụng đất được thực hiện thế nào, và tiêu chí nào xác định dự án phải trình cơ quan có thẩm quyền quyết định trước khi lựa chọn?",
+                "rank": 6,
+                "score": 0.13,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d114:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R1",
+                "query": "Theo quy định áp dụng ngày 15/6/2021, pháp luật về kinh doanh bất động sản và pháp luật về đầu tư quy định cụ thể thế nào về vốn pháp định và vốn ký quỹ đối với doanh nghiệp, hợp tác xã làm chủ đầu tư dự án xây dựng nhà ở thương mại?",
+                "rank": 8,
+                "score": 0.07,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d114:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E18",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d118:2020-01-01:0",
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d118:2020-01-01:1"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương VIII - GIAO DỊCH VỀ NHÀ Ở > Mục 1 - QUY ĐỊNH CHUNG VỀ CÁC GIAO DỊCH VỀ NHÀ Ở > Điều 118. Điều kiện của nhà ở tham gia giao dịch"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 18,
+                "score": 0.24,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d118:2020-01-01:1"
+              },
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 18,
+                "score": 0.24,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d118:2020-01-01:1"
+              }
+            ]
+          },
+          {
+            "id": "E19",
+            "chunk_ids": [
+              "718511f0f6152540:luat:45/2013/QH13#d110:2018-01-01:0"
+            ],
+            "unit_key": [
+              "article",
+              "luat:45/2013/QH13|718511f0f6152540|2018-01-01|2024-08-01",
+              "Chương I - QUY ĐỊNH CHUNG > Chương VIII - TÀI CHÍNH VỀ ĐẤT ĐAI, GIÁ ĐẤT VÀ ĐẤU GIÁ QUYỀN SỬ DỤNG ĐẤT > Mục 1 - TÀI CHÍNH VỀ ĐẤT ĐAI > Điều 110. Miễn, giảm tiền sử dụng đất, tiền thuê đất"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 19,
+                "score": 0.22,
+                "score_type": "rerank",
+                "chunk_id": "718511f0f6152540:luat:45/2013/QH13#d110:2018-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 19,
+                "score": 0.22,
+                "score_type": "rerank",
+                "chunk_id": "718511f0f6152540:luat:45/2013/QH13#d110:2018-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E20",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d28:2020-01-01:0",
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d28:2020-01-01:1"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương III - PHÁT TRIỂN NHÀ Ở > Mục 3 - PHÁT TRIỂN NHÀ Ở CÔNG VỤ > Điều 28. Dự án đầu tư xây dựng nhà ở công vụ và lựa chọn chủ đầu tư dự án"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 20,
+                "score": 0.12,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d28:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo quy định áp dụng tại mốc 15/6/2021, việc lựa chọn hoặc công nhận chủ đầu tư dự án xây dựng nhà ở thương mại được thực hiện theo những hình thức, thủ tục nào và có yêu cầu gì liên quan đến quyền sử dụng đất?",
+                "rank": 8,
+                "score": 0.18,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d28:2020-01-01:1"
+              },
+              {
+                "type": "search",
+                "requirement_id": "original",
+                "query": "Điều kiện làm chủ đầu tư dự án xây dựng nhà ở thương mại là gì?",
+                "rank": 20,
+                "score": 0.12,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d28:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo Điều 22 và Điều 170 Luật Nhà ở áp dụng ngày 15/6/2021, dự án nhà ở thương mại quy mô lớn hoặc liên quan nhiều tỉnh phải trình cơ quan nào quyết định trước khi lựa chọn chủ đầu tư; thủ tục lựa chọn qua đấu giá quyền sử dụng đất và đấu thầu dự án có sử dụng đất được quy định cụ thể ra sao?",
+                "rank": 3,
+                "score": 0.16,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d28:2020-01-01:1"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo quy định áp dụng ngày 15/6/2021, trình tự lựa chọn chủ đầu tư dự án xây dựng nhà ở thương mại qua đấu giá quyền sử dụng đất và đấu thầu dự án có sử dụng đất được thực hiện thế nào, và tiêu chí nào xác định dự án phải trình cơ quan có thẩm quyền quyết định trước khi lựa chọn?",
+                "rank": 4,
+                "score": 0.19,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d28:2020-01-01:1"
+              }
+            ]
+          },
+          {
+            "id": "E21",
+            "chunk_ids": [
+              "4ade96c67b178ead:luat:66/2014/QH13#d49:2020-01-01:0"
+            ],
+            "unit_key": [
+              "article",
+              "luat:66/2014/QH13|4ade96c67b178ead|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương II - KINH DOANH BẤT ĐỘNG SẢN CÓ SẴN > Mục 6. CHUYỂN NHƯỢNG TOÀN BỘ HOẶC MỘT PHẦN DỰ ÁN BẤT ĐỘNG SẢN > Điều 49. Điều kiện chuyển nhượng toàn bộ hoặc một phần dự án bất động sản"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "R1",
+                "query": "Theo quy định áp dụng tại mốc 15/6/2021, tổ chức hoặc cá nhân cần đáp ứng những điều kiện gì về tư cách pháp lý, năng lực kinh doanh bất động sản và năng lực tài chính để được làm chủ đầu tư dự án xây dựng nhà ở thương mại?",
+                "rank": 3,
+                "score": 0.74,
+                "score_type": "rerank",
+                "chunk_id": "4ade96c67b178ead:luat:66/2014/QH13#d49:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E22",
+            "chunk_ids": [
+              "4ade96c67b178ead:luat:66/2014/QH13#d52:2020-01-01:0",
+              "4ade96c67b178ead:luat:66/2014/QH13#d52:2020-01-01:1"
+            ],
+            "unit_key": [
+              "article",
+              "luat:66/2014/QH13|4ade96c67b178ead|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương II - KINH DOANH BẤT ĐỘNG SẢN CÓ SẴN > Mục 6. CHUYỂN NHƯỢNG TOÀN BỘ HOẶC MỘT PHẦN DỰ ÁN BẤT ĐỘNG SẢN > Điều 52. Quyền và nghĩa vụ của các bên trong chuyển nhượng toàn bộ hoặc một phần dự án bất động sản"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo quy định áp dụng tại mốc 15/6/2021, việc lựa chọn hoặc công nhận chủ đầu tư dự án xây dựng nhà ở thương mại được thực hiện theo những hình thức, thủ tục nào và có yêu cầu gì liên quan đến quyền sử dụng đất?",
+                "rank": 3,
+                "score": 0.62,
+                "score_type": "rerank",
+                "chunk_id": "4ade96c67b178ead:luat:66/2014/QH13#d52:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E23",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d25:2020-01-01:0"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương III - PHÁT TRIỂN NHÀ Ở > Mục 2 - PHÁT TRIỂN NHÀ Ở THƯƠNG MẠI THEO DỰ ÁN > Điều 25. Quyền của chủ đầu tư dự án xây dựng nhà ở thương mại"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo quy định áp dụng tại mốc 15/6/2021, việc lựa chọn hoặc công nhận chủ đầu tư dự án xây dựng nhà ở thương mại được thực hiện theo những hình thức, thủ tục nào và có yêu cầu gì liên quan đến quyền sử dụng đất?",
+                "rank": 5,
+                "score": 0.33,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d25:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo Điều 22 và Điều 170 Luật Nhà ở áp dụng ngày 15/6/2021, dự án nhà ở thương mại quy mô lớn hoặc liên quan nhiều tỉnh phải trình cơ quan nào quyết định trước khi lựa chọn chủ đầu tư; thủ tục lựa chọn qua đấu giá quyền sử dụng đất và đấu thầu dự án có sử dụng đất được quy định cụ thể ra sao?",
+                "rank": 9,
+                "score": 0.05,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d25:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R1",
+                "query": "Theo quy định áp dụng ngày 15/6/2021, pháp luật về kinh doanh bất động sản và pháp luật về đầu tư quy định cụ thể thế nào về vốn pháp định và vốn ký quỹ đối với doanh nghiệp, hợp tác xã làm chủ đầu tư dự án xây dựng nhà ở thương mại?",
+                "rank": 6,
+                "score": 0.1,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d25:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E24",
+            "chunk_ids": [
+              "718511f0f6152540:luat:45/2013/QH13#d189:2018-01-01:0"
+            ],
+            "unit_key": [
+              "article",
+              "luat:45/2013/QH13|718511f0f6152540|2018-01-01|2024-08-01",
+              "Chương I - QUY ĐỊNH CHUNG > Chương XI - QUYỀN VÀ NGHĨA VỤ CỦA NGƯỜI SỬ DỤNG ĐẤT > Mục 5 - ĐIỀU KIỆN THỰC HIỆN CÁC QUYỀN CỦA NGƯỜI SỬ DỤNG ĐẤT > Điều 189. Điều kiện bán, mua tài sản gắn liền với đất được Nhà nước cho thuê thu tiền thuê đất hàng năm"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "R1",
+                "query": "Theo quy định áp dụng tại mốc 15/6/2021, tổ chức hoặc cá nhân cần đáp ứng những điều kiện gì về tư cách pháp lý, năng lực kinh doanh bất động sản và năng lực tài chính để được làm chủ đầu tư dự án xây dựng nhà ở thương mại?",
+                "rank": 6,
+                "score": 0.5,
+                "score_type": "rerank",
+                "chunk_id": "718511f0f6152540:luat:45/2013/QH13#d189:2018-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E25",
+            "chunk_ids": [
+              "4ade96c67b178ead:luat:66/2014/QH13#d56:2020-01-01:0"
+            ],
+            "unit_key": [
+              "article",
+              "luat:66/2014/QH13|4ade96c67b178ead|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương III - KINH DOANH BẤT ĐỘNG SẢN HÌNH THÀNH TRONG TƯƠNG LAI > Điều 56. Bảo lãnh trong bán, cho thuê mua nhà ở hình thành trong tương lai"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "R1",
+                "query": "Theo quy định áp dụng tại mốc 15/6/2021, tổ chức hoặc cá nhân cần đáp ứng những điều kiện gì về tư cách pháp lý, năng lực kinh doanh bất động sản và năng lực tài chính để được làm chủ đầu tư dự án xây dựng nhà ở thương mại?",
+                "rank": 7,
+                "score": 0.36,
+                "score_type": "rerank",
+                "chunk_id": "4ade96c67b178ead:luat:66/2014/QH13#d56:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E26",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d38:2020-01-01:0"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương III - PHÁT TRIỂN NHÀ Ở > Mục 4 - PHÁT TRIỂN NHÀ Ở ĐỂ PHỤC VỤ TÁI ĐỊNH CƯ > Điều 38. Dự án đầu tư xây dựng nhà ở để phục vụ tái định cư và việc lựa chọn chủ đầu tư dự án"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo quy định áp dụng tại mốc 15/6/2021, việc lựa chọn hoặc công nhận chủ đầu tư dự án xây dựng nhà ở thương mại được thực hiện theo những hình thức, thủ tục nào và có yêu cầu gì liên quan đến quyền sử dụng đất?",
+                "rank": 7,
+                "score": 0.18,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d38:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo Điều 22 và Điều 170 Luật Nhà ở áp dụng ngày 15/6/2021, dự án nhà ở thương mại quy mô lớn hoặc liên quan nhiều tỉnh phải trình cơ quan nào quyết định trước khi lựa chọn chủ đầu tư; thủ tục lựa chọn qua đấu giá quyền sử dụng đất và đấu thầu dự án có sử dụng đất được quy định cụ thể ra sao?",
+                "rank": 6,
+                "score": 0.1,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d38:2020-01-01:0"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo quy định áp dụng ngày 15/6/2021, trình tự lựa chọn chủ đầu tư dự án xây dựng nhà ở thương mại qua đấu giá quyền sử dụng đất và đấu thầu dự án có sử dụng đất được thực hiện thế nào, và tiêu chí nào xác định dự án phải trình cơ quan có thẩm quyền quyết định trước khi lựa chọn?",
+                "rank": 5,
+                "score": 0.16,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d38:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E27",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d45:2020-01-01:0"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương III - PHÁT TRIỂN NHÀ Ở > Mục 5: PHÁT TRIỂN NHÀ Ở CỦA HỘ GIA ĐÌNH, CÁ NHÂN > Điều 45. Phương thức phát triển nhà ở của hộ gia đình, cá nhân"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "R1",
+                "query": "Theo quy định áp dụng tại mốc 15/6/2021, tổ chức hoặc cá nhân cần đáp ứng những điều kiện gì về tư cách pháp lý, năng lực kinh doanh bất động sản và năng lực tài chính để được làm chủ đầu tư dự án xây dựng nhà ở thương mại?",
+                "rank": 10,
+                "score": 0.06,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d45:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E28",
+            "chunk_ids": [
+              "4ade96c67b178ead:luat:66/2014/QH13#d59:2020-01-01:0"
+            ],
+            "unit_key": [
+              "article",
+              "luat:66/2014/QH13|4ade96c67b178ead|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương III - KINH DOANH BẤT ĐỘNG SẢN HÌNH THÀNH TRONG TƯƠNG LAI > Điều 59. Chuyển nhượng hợp đồng mua bán, thuê mua nhà ở hình thành trong tương lai"
+            ],
+            "round": 1,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo quy định áp dụng tại mốc 15/6/2021, việc lựa chọn hoặc công nhận chủ đầu tư dự án xây dựng nhà ở thương mại được thực hiện theo những hình thức, thủ tục nào và có yêu cầu gì liên quan đến quyền sử dụng đất?",
+                "rank": 10,
+                "score": 0.09,
+                "score_type": "rerank",
+                "chunk_id": "4ade96c67b178ead:luat:66/2014/QH13#d59:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E29",
+            "chunk_ids": [
+              "718511f0f6152540:luat:45/2013/QH13#d114:2018-01-01:0",
+              "718511f0f6152540:luat:45/2013/QH13#d114:2018-01-01:1",
+              "718511f0f6152540:luat:45/2013/QH13#d114:2018-01-01:2"
+            ],
+            "unit_key": [
+              "article",
+              "luat:45/2013/QH13|718511f0f6152540|2018-01-01|2024-08-01",
+              "Chương I - QUY ĐỊNH CHUNG > Chương VIII - TÀI CHÍNH VỀ ĐẤT ĐAI, GIÁ ĐẤT VÀ ĐẤU GIÁ QUYỀN SỬ DỤNG ĐẤT > Mục 2 - GIÁ ĐẤT > Điều 114. Bảng giá đất và giá đất cụ thể"
+            ],
+            "round": 2,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo Điều 22 và Điều 170 Luật Nhà ở áp dụng ngày 15/6/2021, dự án nhà ở thương mại quy mô lớn hoặc liên quan nhiều tỉnh phải trình cơ quan nào quyết định trước khi lựa chọn chủ đầu tư; thủ tục lựa chọn qua đấu giá quyền sử dụng đất và đấu thầu dự án có sử dụng đất được quy định cụ thể ra sao?",
+                "rank": 8,
+                "score": 0.05,
+                "score_type": "rerank",
+                "chunk_id": "718511f0f6152540:luat:45/2013/QH13#d114:2018-01-01:1"
+              }
+            ]
+          },
+          {
+            "id": "E30",
+            "chunk_ids": [
+              "718511f0f6152540:luat:45/2013/QH13#d210:2018-01-01:0",
+              "718511f0f6152540:luat:45/2013/QH13#d210:2018-01-01:1",
+              "718511f0f6152540:luat:45/2013/QH13#d210:2018-01-01:2"
+            ],
+            "unit_key": [
+              "article",
+              "luat:45/2013/QH13|718511f0f6152540|2018-01-01|2024-08-01",
+              "Chương I - QUY ĐỊNH CHUNG > Chương XIV - ĐIỀU KHOẢN THI HÀNH > Điều 210. Điều khoản chuyển tiếp"
+            ],
+            "round": 2,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo Điều 22 và Điều 170 Luật Nhà ở áp dụng ngày 15/6/2021, dự án nhà ở thương mại quy mô lớn hoặc liên quan nhiều tỉnh phải trình cơ quan nào quyết định trước khi lựa chọn chủ đầu tư; thủ tục lựa chọn qua đấu giá quyền sử dụng đất và đấu thầu dự án có sử dụng đất được quy định cụ thể ra sao?",
+                "rank": 10,
+                "score": 0.05,
+                "score_type": "rerank",
+                "chunk_id": "718511f0f6152540:luat:45/2013/QH13#d210:2018-01-01:1"
+              },
+              {
+                "type": "search",
+                "requirement_id": "R2",
+                "query": "Theo quy định áp dụng ngày 15/6/2021, trình tự lựa chọn chủ đầu tư dự án xây dựng nhà ở thương mại qua đấu giá quyền sử dụng đất và đấu thầu dự án có sử dụng đất được thực hiện thế nào, và tiêu chí nào xác định dự án phải trình cơ quan có thẩm quyền quyết định trước khi lựa chọn?",
+                "rank": 10,
+                "score": 0.05,
+                "score_type": "rerank",
+                "chunk_id": "718511f0f6152540:luat:45/2013/QH13#d210:2018-01-01:1"
+              }
+            ]
+          },
+          {
+            "id": "E31",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d170:2020-01-01:0"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương XI - QUẢN LÝ NHÀ NƯỚC VỀ NHÀ Ở > Điều 170. Quyết định chủ trương đầu tư dự án xây dựng nhà ở"
+            ],
+            "round": 2,
+            "xref_depth": 1,
+            "origins": [
+              {
+                "type": "xref",
+                "from_evidence": "E2",
+                "id": "Xcd97388e3d4e8fc3",
+                "source_chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d22:2020-01-01:0",
+                "start": 963,
+                "end": 1035,
+                "quote": "Điều 170 của Luật này quyết định trước khi thực hiện lựa chọn chủ đầu tư",
+                "target": [
+                  "article",
+                  "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+                  "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương XI - QUẢN LÝ NHÀ NƯỚC VỀ NHÀ Ở > Điều 170. Quyết định chủ trương đầu tư dự án xây dựng nhà ở"
+                ],
+                "status": "resolved"
+              }
+            ]
+          },
+          {
+            "id": "E32",
+            "chunk_ids": [
+              "4ade96c67b178ead:luat:66/2014/QH13#d10:2020-01-01:0"
+            ],
+            "unit_key": [
+              "article",
+              "luat:66/2014/QH13|4ade96c67b178ead|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương II - KINH DOANH BẤT ĐỘNG SẢN CÓ SẴN > Mục 1 - QUY ĐỊNH CHUNG > Điều 10. Điều kiện của tổ chức, cá nhân kinh doanh bất động sản"
+            ],
+            "round": 3,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "R1",
+                "query": "Theo quy định áp dụng ngày 15/6/2021, pháp luật về kinh doanh bất động sản và pháp luật về đầu tư quy định cụ thể thế nào về vốn pháp định và vốn ký quỹ đối với doanh nghiệp, hợp tác xã làm chủ đầu tư dự án xây dựng nhà ở thương mại?",
+                "rank": 3,
+                "score": 0.63,
+                "score_type": "rerank",
+                "chunk_id": "4ade96c67b178ead:luat:66/2014/QH13#d10:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E33",
+            "chunk_ids": [
+              "d6e9089cc6c2d6ee:luat:65/2014/QH13#d1:2020-01-01:0"
+            ],
+            "unit_key": [
+              "article",
+              "luat:65/2014/QH13|d6e9089cc6c2d6ee|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Điều 1. Phạm vi điều chỉnh"
+            ],
+            "round": 3,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "R1",
+                "query": "Theo quy định áp dụng ngày 15/6/2021, pháp luật về kinh doanh bất động sản và pháp luật về đầu tư quy định cụ thể thế nào về vốn pháp định và vốn ký quỹ đối với doanh nghiệp, hợp tác xã làm chủ đầu tư dự án xây dựng nhà ở thương mại?",
+                "rank": 4,
+                "score": 0.11,
+                "score_type": "rerank",
+                "chunk_id": "d6e9089cc6c2d6ee:luat:65/2014/QH13#d1:2020-01-01:0"
+              }
+            ]
+          },
+          {
+            "id": "E34",
+            "chunk_ids": [
+              "4ade96c67b178ead:luat:66/2014/QH13#d14:2020-01-01:0"
+            ],
+            "unit_key": [
+              "article",
+              "luat:66/2014/QH13|4ade96c67b178ead|2020-01-01|2024-08-01",
+              "Chương I - NHỮNG QUY ĐỊNH CHUNG > Chương II - KINH DOANH BẤT ĐỘNG SẢN CÓ SẴN > Mục 1 - QUY ĐỊNH CHUNG > Điều 14. Đối tượng được mua, nhận chuyển nhượng, thuê, thuê mua bất động sản của doanh nghiệp kinh doanh bất động sản"
+            ],
+            "round": 3,
+            "xref_depth": 0,
+            "origins": [
+              {
+                "type": "search",
+                "requirement_id": "R1",
+                "query": "Theo quy định áp dụng ngày 15/6/2021, pháp luật về kinh doanh bất động sản và pháp luật về đầu tư quy định cụ thể thế nào về vốn pháp định và vốn ký quỹ đối với doanh nghiệp, hợp tác xã làm chủ đầu tư dự án xây dựng nhà ở thương mại?",
+                "rank": 10,
+                "score": 0.05,
+                "score_type": "rerank",
+                "chunk_id": "4ade96c67b178ead:luat:66/2014/QH13#d14:2020-01-01:0"
+              }
+            ]
+          }
+        ],
+        "claims": [
+          {
+            "text": "Theo các trích đoạn áp dụng tại mốc 15/6/2021, chủ đầu tư dự án xây dựng nhà ở thương mại phải là doanh nghiệp hoặc hợp tác xã được thành lập và hoạt động theo pháp luật Việt Nam, đồng thời có chức năng kinh doanh bất động sản.",
+            "evidence_ids": [
+              "E1"
+            ],
+            "requirement_ids": [
+              "R1"
+            ]
+          },
+          {
+            "text": "Chủ đầu tư phải có vốn pháp định theo quy định về kinh doanh bất động sản và vốn ký quỹ cho từng dự án theo pháp luật về đầu tư. Trích đoạn về điều kiện kinh doanh bất động sản nêu mức vốn pháp định không thấp hơn 20 tỷ đồng, trừ trường hợp được dẫn chiếu tại khoản 2 Điều 10.",
+            "evidence_ids": [
+              "E1",
+              "E32"
+            ],
+            "requirement_ids": [
+              "R1"
+            ]
+          },
+          {
+            "text": "Chủ đầu tư có trách nhiệm bảo đảm năng lực tài chính để thực hiện dự án; các trích đoạn được cung cấp không nêu tiêu chí cụ thể để đánh giá năng lực tài chính này.",
+            "evidence_ids": [
+              "E6"
+            ],
+            "requirement_ids": [
+              "R1"
+            ]
+          },
+          {
+            "text": "Việc lựa chọn chủ đầu tư được thực hiện bằng một trong các hình thức: đấu giá quyền sử dụng đất; đấu thầu dự án có sử dụng đất; hoặc chỉ định chủ đầu tư nếu nhà đầu tư đáp ứng điều kiện tại Điều 21 và có quyền sử dụng đất hợp pháp theo khoản 1 hoặc khoản 4 Điều 23.",
+            "evidence_ids": [
+              "E1",
+              "E2",
+              "E8"
+            ],
+            "requirement_ids": [
+              "R2"
+            ]
+          },
+          {
+            "text": "Các hình thức quyền sử dụng đất được dẫn chiếu cho trường hợp chỉ định là sử dụng diện tích đất ở thuộc quyền sử dụng hợp pháp để xây dựng nhà ở thương mại, hoặc nhận chuyển quyền sử dụng đất ở theo pháp luật về đất đai để xây dựng nhà ở thương mại.",
+            "evidence_ids": [
+              "E8"
+            ],
+            "requirement_ids": [
+              "R2"
+            ]
+          },
+          {
+            "text": "Cơ quan quản lý nhà ở cấp tỉnh báo cáo Ủy ban nhân dân cấp tỉnh quyết định việc lựa chọn; với dự án quy mô lớn hoặc liên quan đến nhiều tỉnh, thành phố theo quy định của Chính phủ, phải báo cáo cơ quan có thẩm quyền được dẫn chiếu quyết định trước khi lựa chọn. Các trích đoạn không nêu trình tự chi tiết đấu giá, đấu thầu hoặc tiêu chí xác định dự án quy mô lớn.",
+            "evidence_ids": [
+              "E2"
+            ],
+            "requirement_ids": [
+              "R2"
+            ]
+          }
+        ],
+        "verified_quotes": {
+          "0": {
+            "E1": "1. Doanh nghiệp, hợp tác xã được thành lập và hoạt động theo quy định của pháp luật Việt Nam.\n2. Có vốn pháp định theo quy định của pháp luật kinh doanh bất động sản và có vốn ký quỹ để thực hiện đối với từng dự án theo quy định của pháp luật về đầu tư.\n3. Có chức năng kinh doanh bất động sản theo quy định của pháp luật"
+          },
+          "1": {
+            "E1": "2. Có vốn pháp định theo quy định của pháp luật kinh doanh bất động sản và có vốn ký quỹ để thực hiện đối với từng dự án theo quy định của pháp luật về đầu tư.",
+            "E32": "1. Tổ chức, cá nhân kinh doanh bất động sản phải thành lập doanh nghiệp hoặc hợp tác xã (sau đây gọi chung là doanh nghiệp) và có vốn pháp định không được thấp hơn 20 tỷ đồng, trừ trường hợp quy định tại khoản 2 Điều này."
+          },
+          "2": {
+            "E6": "2. Ký quỹ để thực hiện dự án theo quy định của pháp luật về đầu tư; đóng tiền bảo lãnh giao dịch nhà ở theo quy định của pháp luật về kinh doanh bất động sản; bảo đảm năng lực tài chính để thực hiện dự án theo quy định của pháp luật."
+          },
+          "3": {
+            "E1": "1. Doanh nghiệp, hợp tác xã được thành lập và hoạt động theo quy định của pháp luật Việt Nam.\n2. Có vốn pháp định theo quy định của pháp luật kinh doanh bất động sản và có vốn ký quỹ để thực hiện đối với từng dự án theo quy định của pháp luật về đầu tư.\n3. Có chức năng kinh doanh bất động sản theo quy định của pháp luật.",
+            "E2": "2. Việc lựa chọn chủ đầu tư dự án xây dựng nhà ở thương mại được thực hiện thông qua các hình thức sau đây:\na) Đấu giá quyền sử dụng đất theo quy định của pháp luật về đất đai;\nb) Đấu thầu dự án có sử dụng đất;\nc) Chỉ định chủ đầu tư trong trường hợp nhà đầu tư có đủ điều kiện quy định tại Điều 21 của Luật này, có quyền sử dụng đất hợp pháp theo quy định tại khoản 1 và khoản 4 Điều 23 của Luật này.",
+            "E8": "1. Sử dụng diện tích đất ở thuộc quyền sử dụng hợp pháp để xây dựng nhà ở thương mại.\n2. Được Nhà nước giao đất để xây dựng nhà ở cho thuê, cho thuê mua, để bán.\n3. Được Nhà nước cho thuê đất để xây dựng nhà ở cho thuê.\n4. Nhận chuyển quyền sử dụng đất ở theo quy định của pháp luật về đất đai để xây dựng nhà ở thương mại"
+          },
+          "4": {
+            "E8": "1. Sử dụng diện tích đất ở thuộc quyền sử dụng hợp pháp để xây dựng nhà ở thương mại.\n2. Được Nhà nước giao đất để xây dựng nhà ở cho thuê, cho thuê mua, để bán.\n3. Được Nhà nước cho thuê đất để xây dựng nhà ở cho thuê.\n4. Nhận chuyển quyền sử dụng đất ở theo quy định của pháp luật về đất đai để xây dựng nhà ở thương mại"
+          },
+          "5": {
+            "E2": "3. Việc lựa chọn chủ đầu tư dự án xây dựng nhà ở thương mại do cơ quan quản lý nhà ở cấp tỉnh báo cáo Ủy ban nhân dân cấp tỉnh quyết định; trường hợp dự án có quy mô lớn hoặc có liên quan đến nhiều tỉnh, thành phố trực thuộc trung ương theo quy định của Chính phủ thì phải báo cáo cơ quan có thẩm quyền theo quy định tại khoản 2 Điều 170 của Luật này quyết định trước khi thực hiện lựa chọn"
+          }
+        },
+        "events": [
+          {
+            "type": "progress",
+            "stage": "prepare",
+            "message": "Think · Đang xác định câu hỏi và phạm vi tài liệu…",
+            "sequence": 1
+          },
+          {
+            "type": "progress",
+            "stage": "scope",
+            "message": "Think · Đang chọn phiên bản luật theo mốc thời gian…",
+            "sequence": 2
+          },
+          {
+            "type": "progress",
+            "stage": "plan",
+            "message": "Think · Đã xác định 2 yêu cầu cần kiểm chứng.",
+            "sequence": 3
+          },
+          {
+            "type": "progress",
+            "stage": "retrieve",
+            "message": "Think · Vòng 1/3: đang tìm bằng chứng…",
+            "sequence": 4,
+            "round": 1
+          },
+          {
+            "type": "progress",
+            "stage": "coverage",
+            "message": "Think · Có căn cứ cho 1/2 yêu cầu.",
+            "sequence": 5,
+            "supported": 1,
+            "total": 2
+          },
+          {
+            "type": "progress",
+            "stage": "retrieve",
+            "message": "Think · Vòng 2/3: đang tìm bằng chứng…",
+            "sequence": 6,
+            "round": 2
+          },
+          {
+            "type": "progress",
+            "stage": "coverage",
+            "message": "Think · Có căn cứ cho 0/2 yêu cầu.",
+            "sequence": 7,
+            "supported": 0,
+            "total": 2
+          },
+          {
+            "type": "progress",
+            "stage": "retrieve",
+            "message": "Think · Vòng 3/3: đang tìm bằng chứng…",
+            "sequence": 8,
+            "round": 3
+          },
+          {
+            "type": "progress",
+            "stage": "coverage",
+            "message": "Think · Có căn cứ cho 0/2 yêu cầu.",
+            "sequence": 9,
+            "supported": 0,
+            "total": 2
+          },
+          {
+            "type": "progress",
+            "stage": "compose",
+            "message": "Think · Đang tổng hợp câu trả lời từ bằng chứng…",
+            "sequence": 10
+          },
+          {
+            "type": "progress",
+            "stage": "verify",
+            "message": "Think · Đang kiểm chứng từng kết luận và trích dẫn…",
+            "sequence": 11
+          },
+          {
+            "type": "progress",
+            "stage": "verify",
+            "message": "Think · Đang kiểm chứng từng kết luận và trích dẫn…",
+            "sequence": 12
+          }
+        ]
+      }
+    },
+    "as_of": "2021-06-15",
+    "timeline": {
+      "anchors": [
+        {
+          "role": "unspecified",
+          "start": "2021-06-15",
+          "end": "2021-06-15",
+          "precision": "day",
+          "source": "calendar",
+          "evidence": null,
+          "relative_expression": null,
+          "confidence": 1.0,
+          "matched_text": null
+        }
+      ],
+      "primary": {
+        "role": "unspecified",
+        "start": "2021-06-15",
+        "end": "2021-06-15",
+        "precision": "day",
+        "source": "calendar",
+        "evidence": null,
+        "relative_expression": null,
+        "confidence": 1.0,
+        "matched_text": null
+      },
+      "warnings": [],
+      "asked_at": "2026-11-10T09:45:52.158876+00:00"
+    },
+    "issues": [
+      {
+        "issue": "Theo các trích đoạn áp dụng tại mốc 15/6/2021, chủ đầu tư dự án xây dựng nhà ở thương mại phải là doanh nghiệp hoặc hợp tác xã được thành lập và hoạt động theo pháp luật Việt Nam, đồng thời có chức năng kinh doanh bất động sản.",
+        "anchor_ids": [
+          "T1"
+        ],
+        "anchor_role": "unspecified",
+        "citations": [
+          1
+        ],
+        "certainty": "qualified",
+        "limitation": "E1 nêu các điều kiện này và được ghi nhận áp dụng tại mốc 15/6/2021, nhưng nguồn được đánh dấu partially_verified và needs_review nên chưa đủ căn cứ để kết luận chắc chắn."
+      },
+      {
+        "issue": "Chủ đầu tư phải có vốn pháp định theo quy định về kinh doanh bất động sản và vốn ký quỹ cho từng dự án theo pháp luật về đầu tư. Trích đoạn về điều kiện kinh doanh bất động sản nêu mức vốn pháp định không thấp hơn 20 tỷ đồng, trừ trường hợp được dẫn chiếu tại khoản 2 Điều 10.",
+        "anchor_ids": [
+          "T1"
+        ],
+        "anchor_role": "unspecified",
+        "citations": [
+          1,
+          2
+        ],
+        "certainty": "qualified",
+        "limitation": "E1 và E32 hỗ trợ yêu cầu về vốn pháp định, vốn ký quỹ và mức 20 tỷ đồng kèm ngoại lệ tại khoản 2 Điều 10. Tuy nhiên, trích đoạn không làm rõ việc áp dụng ngoại lệ cho một trường hợp cụ thể; nguồn cũng được đánh dấu partially_verified và needs_review."
+      },
+      {
+        "issue": "Chủ đầu tư có trách nhiệm bảo đảm năng lực tài chính để thực hiện dự án; các trích đoạn được cung cấp không nêu tiêu chí cụ thể để đánh giá năng lực tài chính này.",
+        "anchor_ids": [
+          "T1"
+        ],
+        "anchor_role": "unspecified",
+        "citations": [
+          3
+        ],
+        "certainty": "qualified",
+        "limitation": "E6 nêu trách nhiệm bảo đảm năng lực tài chính nhưng không đưa ra tiêu chí cụ thể trong trích đoạn; nguồn được đánh dấu partially_verified và needs_review."
+      },
+      {
+        "issue": "Việc lựa chọn chủ đầu tư được thực hiện bằng một trong các hình thức: đấu giá quyền sử dụng đất; đấu thầu dự án có sử dụng đất; hoặc chỉ định chủ đầu tư nếu nhà đầu tư đáp ứng điều kiện tại Điều 21 và có quyền sử dụng đất hợp pháp theo khoản 1 hoặc khoản 4 Điều 23.",
+        "anchor_ids": [
+          "T1"
+        ],
+        "anchor_role": "unspecified",
+        "citations": [
+          1,
+          4,
+          5
+        ],
+        "certainty": "qualified",
+        "limitation": "E2 hỗ trợ các hình thức lựa chọn và điều kiện chỉ định, nhưng câu chữ trong E2 dẫn chiếu khoản 1 và khoản 4 Điều 23, trong khi claim diễn đạt là khoản 1 hoặc khoản 4. Nguồn cũng được đánh dấu partially_verified và needs_review."
+      },
+      {
+        "issue": "Các hình thức quyền sử dụng đất được dẫn chiếu cho trường hợp chỉ định là sử dụng diện tích đất ở thuộc quyền sử dụng hợp pháp để xây dựng nhà ở thương mại, hoặc nhận chuyển quyền sử dụng đất ở theo pháp luật về đất đai để xây dựng nhà ở thương mại.",
+        "anchor_ids": [
+          "T1"
+        ],
+        "anchor_role": "unspecified",
+        "citations": [
+          5
+        ],
+        "certainty": "qualified",
+        "limitation": "E8 nêu hai hình thức sử dụng đất được mô tả, nhưng E2 dẫn chiếu khoản 1 và khoản 4 Điều 23 bằng từ “và”; cần xác minh cách diễn đạt quan hệ giữa hai khoản. E8 được đánh dấu partially_verified và needs_review."
+      },
+      {
+        "issue": "Cơ quan quản lý nhà ở cấp tỉnh báo cáo Ủy ban nhân dân cấp tỉnh quyết định việc lựa chọn; với dự án quy mô lớn hoặc liên quan đến nhiều tỉnh, thành phố theo quy định của Chính phủ, phải báo cáo cơ quan có thẩm quyền được dẫn chiếu quyết định trước khi lựa chọn. Các trích đoạn không nêu trình tự chi tiết đấu giá, đấu thầu hoặc tiêu chí xác định dự án quy mô lớn.",
+        "anchor_ids": [
+          "T1"
+        ],
+        "anchor_role": "unspecified",
+        "citations": [
+          4
+        ],
+        "certainty": "qualified",
+        "limitation": "E2 hỗ trợ nội dung về cơ quan báo cáo, cơ quan quyết định và việc trích đoạn không nêu trình tự, tiêu chí chi tiết; tuy nhiên nguồn được đánh dấu partially_verified và needs_review."
+      }
+    ],
+    "transition_assessments": [],
+    "transition_rules": [],
+    "follow_up_questions": [
+      "Bạn đang hỏi điều kiện pháp lý chung hay áp dụng cho một doanh nghiệp, dự án cụ thể cần xem xét ngoại lệ tại khoản 2 Điều 10?",
+      "Nếu cần xác định hình thức lựa chọn cho một dự án cụ thể, dự án dự kiến theo hình thức đấu giá, đấu thầu hay chỉ định, và có thuộc trường hợp quy mô lớn hoặc liên quan nhiều tỉnh không?"
+    ],
+    "certainty": "qualified",
+    "downgrade_reasons": [],
+    "log_id": "2054a3c602de42de"
+  },
+  "events": [],
+  "outcome": {
+    "id": "before_change",
+    "http": 200,
+    "status": "partial",
+    "certainty": "qualified",
+    "stop_reason": "temporal_qualified",
+    "sources": 5,
+    "budget": {
+      "rounds": 3,
+      "searches": 6,
+      "xref_targets": 1,
+      "model_calls": 9,
+      "model_bytes": 229659,
+      "provider_requests": 7,
+      "cache_hits": 2,
+      "input_tokens": 42979,
+      "output_tokens": 12573,
+      "elapsed_s": 166.085,
+      "calls": [
+        {
+          "stage": "plan",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "4423d9f67b13a4b1f02db8eb6e269ac1127dd9c4c2d01438ba9c153067631dbe",
+          "input_sha256": "71b486230cec39454f5cf241277d9f5c753cb8e1246f4e88e558ce91cc97bab0",
+          "cache_hit": true
+        },
+        {
+          "stage": "assess",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "2f11fa000836b046f54e6e371367eb91160f341e4dad78f4b332c31b1a7be2c4",
+          "input_sha256": "3677c01318549c3b477b3dabbc1ce03db9fa95843a1bf0591618fd90661ab55a",
+          "cache_hit": true
+        },
+        {
+          "stage": "assess",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "2f11fa000836b046f54e6e371367eb91160f341e4dad78f4b332c31b1a7be2c4",
+          "input_sha256": "1dc30bd88f94121c0726b9d9ce06bfdfbff7f60b2940911f23cdfff0def70e2e",
+          "cache_hit": false
+        },
+        {
+          "stage": "assess",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "2f11fa000836b046f54e6e371367eb91160f341e4dad78f4b332c31b1a7be2c4",
+          "input_sha256": "f6214a7568f84c1fa75716dd5c13395a7873ab92b7d4a99c9c13a4585f449596",
+          "cache_hit": false
+        },
+        {
+          "stage": "compose",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "b48673a3b16901dde9fb3a37c239d72e105c8f36ccdd19f90cfd1edd80148fda",
+          "input_sha256": "4deb31608190fd1c18d97b814c383f97962cc30e8d7a406a3dba7753638ac761",
+          "cache_hit": false
+        },
+        {
+          "stage": "verify",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "349850d3d9ec34acc812d41457fb85258de264e7aced043acd4b5dc88b6e1473",
+          "input_sha256": "b0c292e468b542c1a284dccee8898328a70c104b5654a5dd0b9375f755e7e68a",
+          "cache_hit": false
+        },
+        {
+          "stage": "repair",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "b48673a3b16901dde9fb3a37c239d72e105c8f36ccdd19f90cfd1edd80148fda",
+          "input_sha256": "fccb183248bf7b52aab7166f1215abcb7afa3a1502101571a091f7817e3ad484",
+          "cache_hit": false
+        },
+        {
+          "stage": "verify",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "349850d3d9ec34acc812d41457fb85258de264e7aced043acd4b5dc88b6e1473",
+          "input_sha256": "18fefda8873f2947927d85124771f4f1187d47e6fdafd4885643d10e82f26d5c",
+          "cache_hit": false
+        },
+        {
+          "stage": "temporal_review",
+          "model": "gpt-6-luna",
+          "status": "ok",
+          "prompt_sha256": "508317f51181509ebd08327190eb6749147f0eaccd200bd01e589441a32f006d",
+          "input_sha256": "b131ea113ac76e4911ed11c7c14120f5fb869c650adb190d33371b568bc54734",
+          "cache_hit": false
+        }
+      ],
+      "service_requests": {
+        "rerank": 40
+      }
+    },
+    "problems": []
+  }
+}

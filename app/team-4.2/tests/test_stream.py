@@ -120,6 +120,15 @@ async def test_server_handle_chat_backward_compat_and_stream(monkeypatch):
 
     pipeline = _build_test_pipeline()
     monkeypatch.setattr(server_module, "get_pipeline", lambda: (pipeline, MagicMock()))
+    # Test này kiểm tra lớp vận chuyển (JSON vs SSE); trả lời luật nay đi qua kho có phiên bản, ở đây thay bằng
+    # pipeline test để giữ đúng mục đích kiểm tra định dạng phản hồi.
+    monkeypatch.setattr(server_module, "_sync_chat",
+                        lambda q, as_of, m, h=None: server_module._sync_ask(q, pipeline, m, h))
+
+    def old_stream(q, as_of, m, h=None):
+        for event in pipeline.ask_stream(q, history=h, mask_state=m):
+            yield server_module._sse(event)
+    monkeypatch.setattr(server_module, "_sync_stream", old_stream)
 
     # 1. Non-streaming (stream: false hoặc không truyền) -> JSONResponse
     req_json = Request({

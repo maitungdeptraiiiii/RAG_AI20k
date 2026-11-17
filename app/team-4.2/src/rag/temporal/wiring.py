@@ -27,8 +27,10 @@ def legal_vector_dir(settings: Settings) -> Path:
 
 
 def make_versioned_index(settings: Settings, llm: Any, store: LegalStore, *, embedder: Any = None,
-                         vector_dir: Path | None = None, reranker: Any = None) -> VersionedIndex:
-    """`embedder=None`: chỉ BM25 (vẫn qua HybridRetriever + rerank). Reranker dùng chung giữa các lần tìm."""
+                         vector_dir: Path | None = None, reranker: Any = None, dense: Any = None,
+                         snapshot_id: str | None = None) -> VersionedIndex:
+    """`embedder=None` và `dense=None`: chỉ BM25 (vẫn qua HybridRetriever + rerank). Reranker dùng chung giữa các lần
+    tìm. `dense`: `VectorIndex` dùng chung giữa các snapshot (mở một lần); `snapshot_id`: snapshot kho của chỉ mục."""
     from rag.pipeline import make_hybrid_retriever
     from rag.retrieve.rerank import make_reranker
 
@@ -38,7 +40,8 @@ def make_versioned_index(settings: Settings, llm: Any, store: LegalStore, *, emb
     def factory(bm25, dense):
         return make_hybrid_retriever(settings, llm, bm25, dense, reranker=reranker)
 
-    return VersionedIndex(store, embedder, retriever_factory=factory, vector_dir=vector_dir)
+    return VersionedIndex(store, embedder, retriever_factory=factory, vector_dir=vector_dir, dense=dense,
+                          snapshot_id=snapshot_id)
 
 
 __all__ = ["legal_embedder", "legal_vector_dir", "make_versioned_index"]

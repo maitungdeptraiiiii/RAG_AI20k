@@ -1,0 +1,63 @@
+{
+  "benchmark": "contract-evidence-v1.0-draft",
+  "snapshot_id": "s20261117024643-c06f0c",
+  "source_bundle_sha256": "ec1a2bb4cee9e624b0eb2a95e04ada97312551a867a334eb6cf2527b92cce4b5",
+  "seed_sha256": "fd1d02e6922b0f434855268f8b4b5eb4c1f97f49e9b3fc40170694ece6c98dc2",
+  "files": {
+    "corpus.generated.jsonl": "09d697dc75e7bdc3ca0e5e8afd8caba062c393cd5b51fe7db36472ef3f965ed8",
+    "inputs.jsonl": "311bbfaa680c85b56316a87401c330d7bc54b49f0e19d5981976305eab46cedb",
+    "gold.jsonl": "aeac62aa1b05ad44c9ef5014fbd475828347b90dab802632e6c067520630a633"
+  },
+  "corpus_documents": [
+    "bo-luat:45/2019/QH14",
+    "nghi-dinh:145/2020/NĐ-CP",
+    "thong-tu:10/2020/TT-BLĐTBXH",
+    "nghi-dinh:38/2022/NĐ-CP",
+    "nghi-dinh:74/2024/NĐ-CP",
+    "nghi-dinh:293/2025/NĐ-CP"
+  ],
+  "counts": {
+    "cases": 74,
+    "families": 34,
+    "passages": 1115,
+    "splits": {
+      "dev": 22,
+      "test": 52
+    }
+  },
+  "policy": {
+    "max_evidence_utf8_bytes": 16000,
+    "max_passages": 20,
+    "required_span_coverage": 1.0,
+    "date_intervals": "[from,to)",
+    "track": "contract_text+provided_concepts+context",
+    "primary_metric": "complete_evidence_pass_rate",
+    "review_required_for_certified_score": true
+  },
+  "source_documents": {
+    "bo-luat:45/2019/QH14": {
+      "raw_checksum": "4beba62bc99ab6343b62c2173ab2853b5b178176e2babd73a854ab71b8d80abc",
+      "source_verified": true
+    },
+    "nghi-dinh:145/2020/NĐ-CP": {
+      "raw_checksum": "4cbbd1d84326dbb5cce77dc8bf76be2f90d7f04d1e914192993bed03a4715679",
+      "source_verified": true
+    },
+    "thong-tu:10/2020/TT-BLĐTBXH": {
+      "raw_checksum": "69a52dc54d8743a6171f8e5adeaad27f0e0bbdbce97f6a10804ccc6221ad5695",
+      "source_verified": true
+    },
+    "nghi-dinh:38/2022/NĐ-CP": {
+      "raw_checksum": "4db3d0a6306b488cd855e9f457595d59012b1a4e654bb4006581935e3d09dda8",
+      "source_verified": true
+    },
+    "nghi-dinh:74/2024/NĐ-CP": {
+      "raw_checksum": "3615bbe0d55a27e5ec9f0c5ad69fed78203fe25f2d377a20ce6b470f84ce3b8d",
+      "source_verified": true
+    },
+    "nghi-dinh:293/2025/NĐ-CP": {
+      "raw_checksum": "ba71fc23d2544bd33b43a199f22ae286421ff31885d39835e3a1af0a9fc3a92a",
+      "source_verified": true
+    }
+  }
+}

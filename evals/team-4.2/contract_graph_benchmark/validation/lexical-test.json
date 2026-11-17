@@ -1,0 +1,1298 @@
+{
+  "benchmark": "contract-evidence-v1.0-draft",
+  "manifest_sha256": "ea8a583d41e5ec18635c302ce10665739f14d214793dfd36f7dc62ff7b24621e",
+  "run_sha256": "5948019f0bc825ead3a9c6fde11f8fb19430f12f3cebbfa33559158a5630abe7",
+  "predictions_sha256": "305eb0bea708087d6a42370e8de7d5b87fa7cd47e31429f755d082d68b8ae7d5",
+  "run_metadata": {
+    "predictions_file": "predictions.jsonl"
+  },
+  "system": "lexical-tfidf",
+  "config": {
+    "seed": 0,
+    "query_fields": [
+      "contract_text",
+      "concepts.description"
+    ],
+    "date_filter": true,
+    "decision_policy": "always_ready",
+    "reads_gold_for_retrieval": false
+  },
+  "split": "test",
+  "score_status": "provisional_pending_independent_review",
+  "human_reviewed_cases": 0,
+  "summary": {
+    "total": 52,
+    "passed": 43,
+    "pass_rate": 0.8269230769230769,
+    "family_macro_pass_rate": 0.8043478260869565,
+    "family_bootstrap_95ci": [
+      0.6304347826086957,
+      0.9565217391304348
+    ],
+    "ready_case_retrieval_pass_rate": 0.86,
+    "evidence_group_recall": 0.9366666666666666,
+    "temporal_error_cases": 0,
+    "p50_ms": 5.62139999988176,
+    "p95_ms": 7.549800000106188,
+    "latency_sample_count": 52
+  },
+  "by_category": {
+    "condition": {
+      "total": 6,
+      "passed": 6
+    },
+    "cross_article": {
+      "total": 6,
+      "passed": 4
+    },
+    "cross_document": {
+      "total": 6,
+      "passed": 5
+    },
+    "exception": {
+      "total": 6,
+      "passed": 4
+    },
+    "multiple_evidence": {
+      "total": 10,
+      "passed": 8
+    },
+    "out_of_scope": {
+      "total": 2,
+      "passed": 0
+    },
+    "single_rule": {
+      "total": 6,
+      "passed": 6
+    },
+    "temporal_boundary": {
+      "total": 10,
+      "passed": 10
+    }
+  },
+  "cases": [
+    {
+      "id": "ce1-009-01",
+      "family_id": "ce1-f009",
+      "split": "test",
+      "category": "multiple_evidence",
+      "decision": "ready",
+      "latency_ms": 5.98760000002585,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15968,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-009-02",
+      "family_id": "ce1-f009",
+      "split": "test",
+      "category": "multiple_evidence",
+      "decision": "ready",
+      "latency_ms": 5.466799999794603,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15969,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-010-01",
+      "family_id": "ce1-f010",
+      "split": "test",
+      "category": "single_rule",
+      "decision": "ready",
+      "latency_ms": 5.033800000092015,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15976,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-010-02",
+      "family_id": "ce1-f010",
+      "split": "test",
+      "category": "single_rule",
+      "decision": "ready",
+      "latency_ms": 6.547800000134885,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15981,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 17,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-011-01",
+      "family_id": "ce1-f011",
+      "split": "test",
+      "category": "exception",
+      "decision": "ready",
+      "latency_ms": 5.954600000222854,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15950,
+      "temporal_errors": 0,
+      "complete_at_rank": 2,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 17,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-011-02",
+      "family_id": "ce1-f011",
+      "split": "test",
+      "category": "exception",
+      "decision": "ready",
+      "latency_ms": 9.448799999972834,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15988,
+      "temporal_errors": 0,
+      "complete_at_rank": 2,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 18,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-012-01",
+      "family_id": "ce1-f012",
+      "split": "test",
+      "category": "single_rule",
+      "decision": "ready",
+      "latency_ms": 6.703100000322593,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15872,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 18,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-012-02",
+      "family_id": "ce1-f012",
+      "split": "test",
+      "category": "single_rule",
+      "decision": "ready",
+      "latency_ms": 5.6136999996851955,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15988,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 18,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-013-01",
+      "family_id": "ce1-f013",
+      "split": "test",
+      "category": "multiple_evidence",
+      "decision": "ready",
+      "latency_ms": 4.474900000332127,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15967,
+      "temporal_errors": 0,
+      "complete_at_rank": 2,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-013-02",
+      "family_id": "ce1-f013",
+      "split": "test",
+      "category": "multiple_evidence",
+      "decision": "ready",
+      "latency_ms": 4.3528999999580265,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15895,
+      "temporal_errors": 0,
+      "complete_at_rank": 4,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-014-01",
+      "family_id": "ce1-f014",
+      "split": "test",
+      "category": "multiple_evidence",
+      "decision": "ready",
+      "latency_ms": 5.038499999955093,
+      "passed": false,
+      "retrieval_passed": false,
+      "errors": [
+        "missing_required_evidence"
+      ],
+      "coverage": 0.6666666666666666,
+      "evidence_bytes": 15893,
+      "temporal_errors": 0,
+      "complete_at_rank": null,
+      "recalled_at": {
+        "5": 0.6666666666666666,
+        "10": 0.6666666666666666
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-014-02",
+      "family_id": "ce1-f014",
+      "split": "test",
+      "category": "multiple_evidence",
+      "decision": "ready",
+      "latency_ms": 4.994500000066182,
+      "passed": false,
+      "retrieval_passed": false,
+      "errors": [
+        "missing_required_evidence"
+      ],
+      "coverage": 0.6666666666666666,
+      "evidence_bytes": 15954,
+      "temporal_errors": 0,
+      "complete_at_rank": null,
+      "recalled_at": {
+        "5": 0.6666666666666666,
+        "10": 0.6666666666666666
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-017-01",
+      "family_id": "ce1-f017",
+      "split": "test",
+      "category": "multiple_evidence",
+      "decision": "ready",
+      "latency_ms": 6.008500000007189,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15916,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 15,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-017-02",
+      "family_id": "ce1-f017",
+      "split": "test",
+      "category": "multiple_evidence",
+      "decision": "ready",
+      "latency_ms": 6.48540000020148,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15995,
+      "temporal_errors": 0,
+      "complete_at_rank": 4,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 17,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-018-01",
+      "family_id": "ce1-f018",
+      "split": "test",
+      "category": "exception",
+      "decision": "ready",
+      "latency_ms": 5.105100000037055,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15962,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-018-02",
+      "family_id": "ce1-f018",
+      "split": "test",
+      "category": "exception",
+      "decision": "ready",
+      "latency_ms": 4.659499999888794,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15908,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-019-01",
+      "family_id": "ce1-f019",
+      "split": "test",
+      "category": "multiple_evidence",
+      "decision": "ready",
+      "latency_ms": 4.056199999922683,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15984,
+      "temporal_errors": 0,
+      "complete_at_rank": 2,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 18,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-019-02",
+      "family_id": "ce1-f019",
+      "split": "test",
+      "category": "multiple_evidence",
+      "decision": "ready",
+      "latency_ms": 4.755500000101165,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15867,
+      "temporal_errors": 0,
+      "complete_at_rank": 2,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 17,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-020-01",
+      "family_id": "ce1-f020",
+      "split": "test",
+      "category": "cross_article",
+      "decision": "ready",
+      "latency_ms": 6.008000000292668,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15998,
+      "temporal_errors": 0,
+      "complete_at_rank": 4,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 17,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-020-02",
+      "family_id": "ce1-f020",
+      "split": "test",
+      "category": "cross_article",
+      "decision": "ready",
+      "latency_ms": 7.086699999945267,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15985,
+      "temporal_errors": 0,
+      "complete_at_rank": 8,
+      "recalled_at": {
+        "5": 0.6666666666666666,
+        "10": 1.0
+      },
+      "retrieved_count": 17,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-021-01",
+      "family_id": "ce1-f021",
+      "split": "test",
+      "category": "cross_document",
+      "decision": "ready",
+      "latency_ms": 5.153099999915867,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15937,
+      "temporal_errors": 0,
+      "complete_at_rank": 2,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 15,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-021-02",
+      "family_id": "ce1-f021",
+      "split": "test",
+      "category": "cross_document",
+      "decision": "ready",
+      "latency_ms": 4.853499999626365,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15942,
+      "temporal_errors": 0,
+      "complete_at_rank": 2,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-022-01",
+      "family_id": "ce1-f022",
+      "split": "test",
+      "category": "cross_document",
+      "decision": "ready",
+      "latency_ms": 5.819200000132696,
+      "passed": false,
+      "retrieval_passed": false,
+      "errors": [
+        "missing_required_evidence"
+      ],
+      "coverage": 0.5,
+      "evidence_bytes": 15993,
+      "temporal_errors": 0,
+      "complete_at_rank": null,
+      "recalled_at": {
+        "5": 0.5,
+        "10": 0.5
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-022-02",
+      "family_id": "ce1-f022",
+      "split": "test",
+      "category": "cross_document",
+      "decision": "ready",
+      "latency_ms": 5.673399999977846,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15997,
+      "temporal_errors": 0,
+      "complete_at_rank": 13,
+      "recalled_at": {
+        "5": 0.0,
+        "10": 0.5
+      },
+      "retrieved_count": 18,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-023-01",
+      "family_id": "ce1-f023",
+      "split": "test",
+      "category": "condition",
+      "decision": "ready",
+      "latency_ms": 6.374400000368041,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15976,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-023-02",
+      "family_id": "ce1-f023",
+      "split": "test",
+      "category": "condition",
+      "decision": "ready",
+      "latency_ms": 6.2994999998409185,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15897,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 15,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-024-01",
+      "family_id": "ce1-f024",
+      "split": "test",
+      "category": "exception",
+      "decision": "ready",
+      "latency_ms": 6.121699999766861,
+      "passed": false,
+      "retrieval_passed": false,
+      "errors": [
+        "missing_required_evidence"
+      ],
+      "coverage": 0.3333333333333333,
+      "evidence_bytes": 15939,
+      "temporal_errors": 0,
+      "complete_at_rank": null,
+      "recalled_at": {
+        "5": 0.3333333333333333,
+        "10": 0.3333333333333333
+      },
+      "retrieved_count": 15,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-024-02",
+      "family_id": "ce1-f024",
+      "split": "test",
+      "category": "exception",
+      "decision": "ready",
+      "latency_ms": 5.629100000078324,
+      "passed": false,
+      "retrieval_passed": false,
+      "errors": [
+        "missing_required_evidence"
+      ],
+      "coverage": 0.3333333333333333,
+      "evidence_bytes": 15969,
+      "temporal_errors": 0,
+      "complete_at_rank": null,
+      "recalled_at": {
+        "5": 0.3333333333333333,
+        "10": 0.3333333333333333
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-025-01",
+      "family_id": "ce1-f025",
+      "split": "test",
+      "category": "cross_article",
+      "decision": "ready",
+      "latency_ms": 5.976400000236026,
+      "passed": false,
+      "retrieval_passed": false,
+      "errors": [
+        "missing_required_evidence"
+      ],
+      "coverage": 0.6666666666666666,
+      "evidence_bytes": 15898,
+      "temporal_errors": 0,
+      "complete_at_rank": null,
+      "recalled_at": {
+        "5": 0.6666666666666666,
+        "10": 0.6666666666666666
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-025-02",
+      "family_id": "ce1-f025",
+      "split": "test",
+      "category": "cross_article",
+      "decision": "ready",
+      "latency_ms": 5.968099999790866,
+      "passed": false,
+      "retrieval_passed": false,
+      "errors": [
+        "missing_required_evidence"
+      ],
+      "coverage": 0.6666666666666666,
+      "evidence_bytes": 15880,
+      "temporal_errors": 0,
+      "complete_at_rank": null,
+      "recalled_at": {
+        "5": 0.6666666666666666,
+        "10": 0.6666666666666666
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-026-01",
+      "family_id": "ce1-f026",
+      "split": "test",
+      "category": "condition",
+      "decision": "ready",
+      "latency_ms": 4.916599999887694,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15918,
+      "temporal_errors": 0,
+      "complete_at_rank": 2,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 15,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-026-02",
+      "family_id": "ce1-f026",
+      "split": "test",
+      "category": "condition",
+      "decision": "ready",
+      "latency_ms": 5.318299999998999,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15948,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 15,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-027-01",
+      "family_id": "ce1-f027",
+      "split": "test",
+      "category": "condition",
+      "decision": "ready",
+      "latency_ms": 4.8309999997400155,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15912,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-027-02",
+      "family_id": "ce1-f027",
+      "split": "test",
+      "category": "condition",
+      "decision": "ready",
+      "latency_ms": 5.379199999879347,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15989,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-028-01",
+      "family_id": "ce1-f028",
+      "split": "test",
+      "category": "cross_document",
+      "decision": "ready",
+      "latency_ms": 4.549000000224623,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15989,
+      "temporal_errors": 0,
+      "complete_at_rank": 2,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-028-02",
+      "family_id": "ce1-f028",
+      "split": "test",
+      "category": "cross_document",
+      "decision": "ready",
+      "latency_ms": 5.099200000131532,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15997,
+      "temporal_errors": 0,
+      "complete_at_rank": 2,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 17,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-029-01",
+      "family_id": "ce1-f029",
+      "split": "test",
+      "category": "single_rule",
+      "decision": "ready",
+      "latency_ms": 4.205700000056822,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15993,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-029-02",
+      "family_id": "ce1-f029",
+      "split": "test",
+      "category": "single_rule",
+      "decision": "ready",
+      "latency_ms": 4.383299999972223,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15944,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-030-01",
+      "family_id": "ce1-f030",
+      "split": "test",
+      "category": "cross_article",
+      "decision": "ready",
+      "latency_ms": 7.634999999936554,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15952,
+      "temporal_errors": 0,
+      "complete_at_rank": 6,
+      "recalled_at": {
+        "5": 0.5,
+        "10": 1.0
+      },
+      "retrieved_count": 17,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-030-02",
+      "family_id": "ce1-f030",
+      "split": "test",
+      "category": "cross_article",
+      "decision": "ready",
+      "latency_ms": 5.716799999845534,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15990,
+      "temporal_errors": 0,
+      "complete_at_rank": 7,
+      "recalled_at": {
+        "5": 0.5,
+        "10": 1.0
+      },
+      "retrieved_count": 18,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-031-01",
+      "family_id": "ce1-f031",
+      "split": "test",
+      "category": "temporal_boundary",
+      "decision": "ready",
+      "latency_ms": 7.549800000106188,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15976,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 17,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-031-02",
+      "family_id": "ce1-f031",
+      "split": "test",
+      "category": "temporal_boundary",
+      "decision": "ready",
+      "latency_ms": 6.366800000250805,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15972,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 17,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-031-03",
+      "family_id": "ce1-f031",
+      "split": "test",
+      "category": "temporal_boundary",
+      "decision": "ready",
+      "latency_ms": 5.454099999951723,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15972,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 17,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-031-04",
+      "family_id": "ce1-f031",
+      "split": "test",
+      "category": "temporal_boundary",
+      "decision": "ready",
+      "latency_ms": 6.953999999950611,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15867,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-033-01",
+      "family_id": "ce1-f033",
+      "split": "test",
+      "category": "temporal_boundary",
+      "decision": "ready",
+      "latency_ms": 6.915399999797955,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15972,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-033-02",
+      "family_id": "ce1-f033",
+      "split": "test",
+      "category": "temporal_boundary",
+      "decision": "ready",
+      "latency_ms": 5.183900000247377,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15997,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 17,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-033-03",
+      "family_id": "ce1-f033",
+      "split": "test",
+      "category": "temporal_boundary",
+      "decision": "ready",
+      "latency_ms": 6.352699999752076,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15956,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-033-04",
+      "family_id": "ce1-f033",
+      "split": "test",
+      "category": "temporal_boundary",
+      "decision": "ready",
+      "latency_ms": 6.442299999889656,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15967,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-033-05",
+      "family_id": "ce1-f033",
+      "split": "test",
+      "category": "temporal_boundary",
+      "decision": "ready",
+      "latency_ms": 4.371699999865086,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15987,
+      "temporal_errors": 0,
+      "complete_at_rank": 1,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 17,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-033-06",
+      "family_id": "ce1-f033",
+      "split": "test",
+      "category": "temporal_boundary",
+      "decision": "ready",
+      "latency_ms": 4.124100000353792,
+      "passed": true,
+      "retrieval_passed": true,
+      "errors": [],
+      "coverage": 1.0,
+      "evidence_bytes": 15988,
+      "temporal_errors": 0,
+      "complete_at_rank": 2,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-034-01",
+      "family_id": "ce1-f034",
+      "split": "test",
+      "category": "out_of_scope",
+      "decision": "out_of_scope",
+      "latency_ms": 6.376400000135618,
+      "passed": false,
+      "retrieval_passed": false,
+      "errors": [
+        "wrong_decision",
+        "out_of_scope_must_abstain"
+      ],
+      "coverage": 1.0,
+      "evidence_bytes": 15993,
+      "temporal_errors": 0,
+      "complete_at_rank": null,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    },
+    {
+      "id": "ce1-034-02",
+      "family_id": "ce1-f034",
+      "split": "test",
+      "category": "out_of_scope",
+      "decision": "out_of_scope",
+      "latency_ms": 5.338599999959115,
+      "passed": false,
+      "retrieval_passed": false,
+      "errors": [
+        "wrong_decision",
+        "out_of_scope_must_abstain"
+      ],
+      "coverage": 1.0,
+      "evidence_bytes": 15987,
+      "temporal_errors": 0,
+      "complete_at_rank": null,
+      "recalled_at": {
+        "5": 1.0,
+        "10": 1.0
+      },
+      "retrieved_count": 16,
+      "source_statuses": [
+        "needs_review"
+      ]
+    }
+  ],
+  "limits": [
+    "Synthetic contract clauses, not independently labeled real contracts.",
+    "Gold quotes cross-checked against original corpus text; legal completeness awaits independent review.",
+    "Qrels are minimal required evidence groups, not exhaustive relevance labels.",
+    "No answer-generation, violation-classification or bridge evaluation.",
+    "Source timing and unresolved legal-source quality remain explicit."
+  ]
+}

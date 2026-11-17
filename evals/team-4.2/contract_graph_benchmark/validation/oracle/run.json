@@ -1,0 +1,9 @@
+{
+  "system": "oracle-harness-only",
+  "config": {
+    "reads_gold": true,
+    "not_a_model_score": true
+  },
+  "manifest_sha256": "ea8a583d41e5ec18635c302ce10665739f14d214793dfd36f7dc62ff7b24621e",
+  "predictions_file": "predictions.jsonl"
+}

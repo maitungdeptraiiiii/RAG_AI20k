@@ -1,0 +1,7 @@
+{
+  "system": "structural-anchors-v1",
+  "execution_status": "not_executed",
+  "score": null,
+  "reason": "Automatic approval review could not complete because the account reached its usage limit. The Neo4j benchmark command was not executed; this was not a determination that the action was unsafe.",
+  "offline_validation": "See tests/test_structural_benchmark_adapter.py and tests/test_contract_graph_benchmark.py. Offline checks are not a real Neo4j benchmark result."
+}

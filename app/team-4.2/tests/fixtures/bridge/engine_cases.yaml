@@ -1,0 +1,179 @@
+# Bảng ca kiểm cho rule engine: mỗi rule của concepts.yaml có ít nhất 3 ca.
+# facts: {tên: [giá trị, đơn vị]} ; "CONFLICT" = hai nguồn mâu thuẫn. day mặc định 2025-03-01.
+# present: khái niệm có ASSERT trong hợp đồng hay không.
+
+# ── nội dung bắt buộc ──
+- {concept: content.party_info, rule: r1, present: true, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: content.party_info, rule: r1, present: false, facts: {}, expect: {status: FAIL, finding: missing_content}}
+- {concept: content.party_info, rule: r1, present: false, facts: {contract_kind: [xac_dinh_thoi_han]}, expect: {status: FAIL, finding: missing_content}}
+- {concept: content.job_and_workplace, rule: r1, present: true, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: content.job_and_workplace, rule: r1, present: false, facts: {}, expect: {status: FAIL, finding: missing_content}}
+- {concept: content.job_and_workplace, rule: r1, present: false, facts: {has_probation: [true]}, expect: {status: FAIL, finding: missing_content}}
+- {concept: content.term, rule: r1, present: true, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: content.term, rule: r1, present: false, facts: {}, expect: {status: FAIL, finding: missing_content}}
+- {concept: content.term, rule: r1, present: true, facts: {contract_kind: [khong_xac_dinh_thoi_han]}, expect: {status: PASS, finding: ok}}
+- {concept: content.term, rule: r2, present: true, facts: {contract_kind: [xac_dinh_thoi_han], term_months: [24, month]}, expect: {status: PASS, finding: ok}}
+- {concept: content.term, rule: r2, present: true, facts: {contract_kind: [xac_dinh_thoi_han], term_months: [48, month]}, expect: {status: FAIL, finding: violation}}
+- {concept: content.term, rule: r2, present: true, facts: {contract_kind: [khong_xac_dinh_thoi_han]}, expect: {status: NOT_APPLICABLE, finding: ok}}
+- {concept: content.term, rule: r2, present: false, facts: {contract_kind: [xac_dinh_thoi_han], term_months: [48, month]}, expect: {status: FAIL, finding: violation}}
+- {concept: content.wage_terms, rule: r1, present: true, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: content.wage_terms, rule: r1, present: false, facts: {}, expect: {status: FAIL, finding: missing_content}}
+- {concept: content.wage_terms, rule: r1, present: false, facts: {base_salary_vnd: [15000000, vnd]}, expect: {status: FAIL, finding: missing_content}}
+- {concept: content.raise_policy, rule: r1, present: true, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: content.raise_policy, rule: r1, present: false, facts: {}, expect: {status: FAIL, finding: missing_content}}
+- {concept: content.raise_policy, rule: r1, present: false, facts: {job_level: [cao_dang_tro_len]}, expect: {status: FAIL, finding: missing_content}}
+- {concept: content.hours_rest, rule: r1, present: true, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: content.hours_rest, rule: r1, present: false, facts: {}, expect: {status: FAIL, finding: missing_content}}
+- {concept: content.hours_rest, rule: r1, present: true, facts: {hours_per_day: [8, hour]}, expect: {status: PASS, finding: ok}}
+- {concept: content.protective_equipment, rule: r1, present: true, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: content.protective_equipment, rule: r1, present: false, facts: {}, expect: {status: FAIL, finding: missing_content}}
+- {concept: content.protective_equipment, rule: r1, present: false, facts: {contract_kind: [xac_dinh_thoi_han]}, expect: {status: FAIL, finding: missing_content}}
+- {concept: content.insurance, rule: r1, present: true, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: content.insurance, rule: r1, present: false, facts: {}, expect: {status: FAIL, finding: missing_content}}
+- {concept: content.insurance, rule: r1, present: true, facts: {waives_compulsory_insurance: [true]}, expect: {status: PASS, finding: ok}}
+- {concept: content.insurance, rule: r2, present: true, facts: {waives_compulsory_insurance: [false]}, expect: {status: PASS, finding: ok}}
+- {concept: content.insurance, rule: r2, present: true, facts: {waives_compulsory_insurance: [true]}, expect: {status: FAIL, finding: violation}}
+- {concept: content.insurance, rule: r2, present: false, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: content.insurance, rule: r2, present: false, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: content.training, rule: r1, present: true, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: content.training, rule: r1, present: false, facts: {}, expect: {status: FAIL, finding: missing_content}}
+- {concept: content.training, rule: r1, present: false, facts: {has_probation: [false]}, expect: {status: FAIL, finding: missing_content}}
+
+# ── thử việc ──
+- {concept: probation.duration, rule: r1, present: true, facts: {has_probation: [true], job_level: [cao_dang_tro_len], probation_length: [60, day]}, expect: {status: PASS, finding: ok}}
+- {concept: probation.duration, rule: r1, present: true, facts: {has_probation: [true], job_level: [cao_dang_tro_len], probation_length: [90, day]}, expect: {status: FAIL, finding: violation}}
+- {concept: probation.duration, rule: r1, present: true, facts: {has_probation: [true], job_level: [cao_dang_tro_len], probation_length: [2, month]}, expect: {status: PASS, finding: ok}}
+- {concept: probation.duration, rule: r1, present: true, facts: {has_probation: [true], job_level: [cong_viec_khac], probation_length: [6, day]}, expect: {status: UNKNOWN, finding: needs_facts}}
+- {concept: probation.duration, rule: r1, present: true, facts: {has_probation: [true], probation_length: [90, day]}, expect: {status: UNKNOWN, finding: needs_facts}}
+- {concept: probation.duration, rule: r1, present: false, facts: {has_probation: [false]}, expect: {status: NOT_APPLICABLE, finding: ok}}
+- {concept: probation.duration, rule: r1, present: false, facts: {has_probation: [true], job_level: [trung_cap_ky_thuat], probation_length: [45, day]}, expect: {status: FAIL, finding: violation}}
+- {concept: probation.once, rule: r1, present: true, facts: {allows_probation_extension: [false]}, expect: {status: PASS, finding: ok}}
+- {concept: probation.once, rule: r1, present: true, facts: {allows_probation_extension: [true]}, expect: {status: FAIL, finding: violation}}
+- {concept: probation.once, rule: r1, present: false, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: probation.pay, rule: r1, present: true, facts: {has_probation: [true], probation_pay_pct: [85, percent]}, expect: {status: PASS, finding: ok}}
+- {concept: probation.pay, rule: r1, present: true, facts: {has_probation: [true], probation_pay_pct: [70, percent]}, expect: {status: FAIL, finding: violation}}
+- {concept: probation.pay, rule: r1, present: false, facts: {has_probation: [true]}, expect: {status: PASS, finding: hidden_right}}
+- {concept: probation.pay, rule: r1, present: false, facts: {}, expect: {status: UNKNOWN, finding: possible_right}}
+- {concept: probation.pay, rule: r1, present: false, facts: {has_probation: [false]}, expect: {status: NOT_APPLICABLE, finding: ok}}
+- {concept: probation.cancel_no_notice, rule: r1, present: true, facts: {has_probation: [true], probation_requires_notice_or_compensation: [false]}, expect: {status: PASS, finding: ok}}
+- {concept: probation.cancel_no_notice, rule: r1, present: true, facts: {has_probation: [true], probation_requires_notice_or_compensation: [true]}, expect: {status: FAIL, finding: violation}}
+- {concept: probation.cancel_no_notice, rule: r1, present: false, facts: {has_probation: [true]}, expect: {status: PASS, finding: hidden_right}}
+- {concept: probation.cancel_no_notice, rule: r1, present: false, facts: {}, expect: {status: UNKNOWN, finding: possible_right}}
+
+# ── tiền lương ──
+- {concept: wage.minimum_regional, rule: r1, present: true, facts: {base_salary_vnd: [6000000, vnd], wage_region: [I]}, expect: {status: PASS, finding: ok}}
+- {concept: wage.minimum_regional, rule: r1, present: true, facts: {base_salary_vnd: [4000000, vnd], wage_region: [I]}, expect: {status: FAIL, finding: violation}}
+- {concept: wage.minimum_regional, rule: r1, present: true, facts: {base_salary_vnd: [4000000, vnd]}, expect: {status: UNKNOWN, finding: needs_facts}}
+- {concept: wage.minimum_regional, rule: r1, present: true, facts: {base_salary_vnd: CONFLICT, wage_region: [I]}, expect: {status: UNKNOWN, finding: conflict}}
+- {concept: wage.minimum_regional, rule: r1, present: false, facts: {base_salary_vnd: [4000000, vnd], wage_region: [IV]}, day: "2026-02-01", expect: {status: PASS, finding: ok}}
+- {concept: wage.pay_period, rule: r1, present: true, facts: {pay_frequency: [hang_thang]}, expect: {status: PASS, finding: ok}}
+- {concept: wage.pay_period, rule: r1, present: true, facts: {pay_frequency: [khac]}, expect: {status: FAIL, finding: violation}}
+- {concept: wage.pay_period, rule: r1, present: true, facts: {}, expect: {status: UNKNOWN, finding: needs_facts}}
+- {concept: wage.overtime_pay, rule: r1, present: true, facts: {ot_weekday_pct: [150, percent], ot_weekly_rest_pct: [200, percent], ot_holiday_pct: [300, percent]}, expect: {status: PASS, finding: ok}}
+- {concept: wage.overtime_pay, rule: r1, present: true, facts: {ot_weekday_pct: [120, percent], ot_weekly_rest_pct: [200, percent], ot_holiday_pct: [300, percent]}, expect: {status: FAIL, finding: violation}}
+- {concept: wage.overtime_pay, rule: r1, present: false, facts: {}, expect: {status: PASS, finding: hidden_right}}
+- {concept: wage.overtime_pay, rule: r1, present: true, facts: {ot_weekday_pct: [150, percent]}, expect: {status: UNKNOWN, finding: needs_facts}}
+- {concept: wage.night_pay, rule: r1, present: true, facts: {night_extra_pct: [30, percent]}, expect: {status: PASS, finding: ok}}
+- {concept: wage.night_pay, rule: r1, present: true, facts: {night_extra_pct: [20, percent]}, expect: {status: FAIL, finding: violation}}
+- {concept: wage.night_pay, rule: r1, present: false, facts: {}, expect: {status: PASS, finding: hidden_right}}
+- {concept: wage.deduction_limit, rule: r1, present: true, facts: {deduction_pct: [20, percent]}, expect: {status: PASS, finding: ok}}
+- {concept: wage.deduction_limit, rule: r1, present: true, facts: {deduction_pct: [50, percent]}, expect: {status: FAIL, finding: violation}}
+- {concept: wage.deduction_limit, rule: r1, present: false, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: wage.deduction_limit, rule: r2, present: true, facts: {deducts_for_reason_other_than_damage: [false]}, expect: {status: PASS, finding: ok}}
+- {concept: wage.deduction_limit, rule: r2, present: true, facts: {deducts_for_reason_other_than_damage: [true]}, expect: {status: FAIL, finding: violation}}
+- {concept: wage.deduction_limit, rule: r2, present: true, facts: {}, expect: {status: PASS, finding: ok}}
+
+# ── thời giờ làm việc, nghỉ ngơi ──
+- {concept: hours.normal, rule: r1, present: true, facts: {hours_per_day: [8, hour], hours_per_week: [48, hour]}, expect: {status: PASS, finding: ok}}
+- {concept: hours.normal, rule: r1, present: true, facts: {hours_per_day: [9, hour], hours_per_week: [54, hour]}, expect: {status: FAIL, finding: violation}}
+- {concept: hours.normal, rule: r1, present: true, facts: {hours_per_day: [8, hour]}, expect: {status: UNKNOWN, finding: needs_facts}}
+- {concept: hours.overtime_limit, rule: r1, present: true, facts: {ot_hours_per_month: [30, hour], ot_hours_per_year: [200, hour]}, expect: {status: PASS, finding: ok}}
+- {concept: hours.overtime_limit, rule: r1, present: true, facts: {ot_hours_per_month: [50, hour], ot_hours_per_year: [200, hour]}, expect: {status: FAIL, finding: violation}}
+- {concept: hours.overtime_limit, rule: r1, present: false, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: hours.overtime_limit, rule: r2, present: true, facts: {overtime_without_consent: [false]}, expect: {status: PASS, finding: ok}}
+- {concept: hours.overtime_limit, rule: r2, present: true, facts: {overtime_without_consent: [true]}, expect: {status: FAIL, finding: violation}}
+- {concept: hours.overtime_limit, rule: r2, present: false, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: rest.weekly, rule: r1, present: true, facts: {weekly_rest: [24, hour]}, expect: {status: PASS, finding: ok}}
+- {concept: rest.weekly, rule: r1, present: true, facts: {weekly_rest: [1, day]}, expect: {status: PASS, finding: ok}}
+- {concept: rest.weekly, rule: r1, present: true, facts: {weekly_rest: [12, hour]}, expect: {status: FAIL, finding: violation}}
+- {concept: rest.weekly, rule: r1, present: false, facts: {}, expect: {status: PASS, finding: hidden_right}}
+- {concept: rest.holidays, rule: r1, present: true, facts: {paid_holidays: [11, day]}, expect: {status: PASS, finding: ok}}
+- {concept: rest.holidays, rule: r1, present: true, facts: {paid_holidays: [10, day]}, expect: {status: FAIL, finding: violation}}
+- {concept: rest.holidays, rule: r1, present: false, facts: {}, expect: {status: PASS, finding: hidden_right}}
+- {concept: leave.annual, rule: r1, present: true, facts: {work_condition: [binh_thuong], annual_leave: [15, day]}, expect: {status: PASS, finding: ok}}
+- {concept: leave.annual, rule: r1, present: true, facts: {work_condition: [binh_thuong], annual_leave: [8, day]}, expect: {status: FAIL, finding: violation}}
+- {concept: leave.annual, rule: r1, present: true, facts: {annual_leave: [8, day]}, expect: {status: UNKNOWN, finding: needs_facts}}
+- {concept: leave.annual, rule: r1, present: false, facts: {work_condition: [binh_thuong]}, expect: {status: PASS, finding: hidden_right}}
+- {concept: leave.annual, rule: r1, present: true, facts: {work_condition: [nang_nhoc_doc_hai], annual_leave: [12, day]}, expect: {status: FAIL, finding: violation}}
+- {concept: leave.annual, rule: r1, present: true, facts: {work_condition: [binh_thuong], annual_leave: CONFLICT}, expect: {status: UNKNOWN, finding: conflict}}
+- {concept: leave.personal_paid, rule: r1, present: true, facts: {marriage_leave: [3, day]}, expect: {status: PASS, finding: ok}}
+- {concept: leave.personal_paid, rule: r1, present: true, facts: {marriage_leave: [1, day]}, expect: {status: FAIL, finding: violation}}
+- {concept: leave.personal_paid, rule: r1, present: false, facts: {}, expect: {status: PASS, finding: hidden_right}}
+
+# ── chấm dứt ──
+- {concept: termination.employee_unilateral, rule: r1, present: true, facts: {contract_kind: [khong_xac_dinh_thoi_han], employee_notice: [45, day]}, expect: {status: PASS, finding: ok}}
+- {concept: termination.employee_unilateral, rule: r1, present: true, facts: {contract_kind: [xac_dinh_thoi_han], term_months: [24, month], employee_notice: [60, day]}, expect: {status: FAIL, finding: violation}}
+- {concept: termination.employee_unilateral, rule: r1, present: true, facts: {contract_kind: [xac_dinh_thoi_han], term_months: [6, month], employee_notice: [3, day]}, expect: {status: UNKNOWN, finding: needs_facts}}
+- {concept: termination.employee_unilateral, rule: r1, present: false, facts: {contract_kind: [khong_xac_dinh_thoi_han]}, expect: {status: PASS, finding: hidden_right}}
+- {concept: termination.employer_unilateral, rule: r1, present: true, facts: {employer_termination_ground_outside_law: [false]}, expect: {status: PASS, finding: ok}}
+- {concept: termination.employer_unilateral, rule: r1, present: true, facts: {employer_termination_ground_outside_law: [true]}, expect: {status: FAIL, finding: violation}}
+- {concept: termination.employer_unilateral, rule: r1, present: false, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: termination.employer_unilateral, rule: r2, present: true, facts: {contract_kind: [khong_xac_dinh_thoi_han], employer_notice: [45, day]}, expect: {status: PASS, finding: ok}}
+- {concept: termination.employer_unilateral, rule: r2, present: true, facts: {contract_kind: [khong_xac_dinh_thoi_han], employer_notice: [30, day]}, expect: {status: FAIL, finding: violation}}
+- {concept: termination.employer_unilateral, rule: r2, present: false, facts: {contract_kind: [khong_xac_dinh_thoi_han]}, expect: {status: PASS, finding: hidden_right}}
+- {concept: termination.severance, rule: r1, present: true, facts: {waives_severance: [false]}, expect: {status: PASS, finding: ok}}
+- {concept: termination.severance, rule: r1, present: true, facts: {waives_severance: [true]}, expect: {status: FAIL, finding: violation}}
+- {concept: termination.severance, rule: r1, present: false, facts: {}, expect: {status: PASS, finding: hidden_right}}
+- {concept: termination.settlement_deadline, rule: r1, present: true, facts: {settlement_period: [14, workday]}, expect: {status: PASS, finding: ok}}
+- {concept: termination.settlement_deadline, rule: r1, present: true, facts: {settlement_period: [30, workday]}, expect: {status: FAIL, finding: violation}}
+- {concept: termination.settlement_deadline, rule: r1, present: true, facts: {settlement_period: [7, day]}, expect: {status: UNKNOWN, finding: needs_facts}}
+- {concept: termination.settlement_deadline, rule: r1, present: false, facts: {}, expect: {status: PASS, finding: hidden_right}}
+
+# ── điều cấm, điều kiện hiệu lực ──
+- {concept: prohibit.keep_documents, rule: r1, present: true, facts: {employer_keeps_original_documents: [false]}, expect: {status: PASS, finding: ok}}
+- {concept: prohibit.keep_documents, rule: r1, present: true, facts: {employer_keeps_original_documents: [true]}, expect: {status: FAIL, finding: violation}}
+- {concept: prohibit.keep_documents, rule: r1, present: false, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: prohibit.deposit, rule: r1, present: true, facts: {requires_deposit_or_security: [false]}, expect: {status: PASS, finding: ok}}
+- {concept: prohibit.deposit, rule: r1, present: true, facts: {requires_deposit_or_security: [true]}, expect: {status: FAIL, finding: violation}}
+- {concept: prohibit.deposit, rule: r1, present: false, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: prohibit.fine_instead_of_discipline, rule: r1, present: true, facts: {fines_or_cuts_wage_as_discipline: [false]}, expect: {status: PASS, finding: ok}}
+- {concept: prohibit.fine_instead_of_discipline, rule: r1, present: true, facts: {fines_or_cuts_wage_as_discipline: [true]}, expect: {status: FAIL, finding: violation}}
+- {concept: prohibit.fine_instead_of_discipline, rule: r1, present: false, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: training.cost_repayment, rule: r1, present: true, facts: {has_separate_training_contract: [true]}, expect: {status: PASS, finding: ok}}
+- {concept: training.cost_repayment, rule: r1, present: true, facts: {has_separate_training_contract: [false]}, expect: {status: FAIL, finding: violation}}
+- {concept: training.cost_repayment, rule: r1, present: false, facts: {}, expect: {status: PASS, finding: ok}}
+
+# ── P1 lao động nữ, thai sản ──
+- {concept: maternity.no_night_overtime_travel, rule: r1, present: false, facts: {}, expect: {status: UNKNOWN, finding: possible_right}}
+- {concept: maternity.no_night_overtime_travel, rule: r1, present: false, facts: {pregnancy_month: [8]}, expect: {status: PASS, finding: hidden_right}}
+- {concept: maternity.no_night_overtime_travel, rule: r1, present: false, facts: {pregnancy_month: [3], child_under_12_months: [false]}, expect: {status: NOT_APPLICABLE, finding: ok}}
+- {concept: maternity.no_night_overtime_travel, rule: r1, present: true, facts: {pregnancy_month: [8]}, expect: {status: UNKNOWN, finding: needs_facts}}
+- {concept: maternity.lighter_work, rule: r1, present: false, facts: {}, expect: {status: UNKNOWN, finding: possible_right}}
+- {concept: maternity.lighter_work, rule: r1, present: false, facts: {pregnant: [true], work_condition: [nang_nhoc_doc_hai]}, expect: {status: PASS, finding: hidden_right}}
+- {concept: maternity.lighter_work, rule: r1, present: false, facts: {pregnant: [false]}, expect: {status: NOT_APPLICABLE, finding: ok}}
+- {concept: maternity.no_dismissal, rule: r1, present: true, facts: {restricts_marriage_or_pregnancy: [false]}, expect: {status: PASS, finding: ok}}
+- {concept: maternity.no_dismissal, rule: r1, present: true, facts: {restricts_marriage_or_pregnancy: [true]}, expect: {status: FAIL, finding: violation}}
+- {concept: maternity.no_dismissal, rule: r1, present: false, facts: {}, expect: {status: PASS, finding: hidden_right}}
+- {concept: maternity.breaks, rule: r1, present: false, facts: {}, expect: {status: UNKNOWN, finding: possible_right}}
+- {concept: maternity.breaks, rule: r1, present: false, facts: {employee_is_female: [true]}, expect: {status: PASS, finding: hidden_right}}
+- {concept: maternity.breaks, rule: r1, present: true, facts: {employee_is_female: [true]}, expect: {status: PASS, finding: ok}}
+- {concept: maternity.breaks, rule: r1, present: false, facts: {employee_is_female: [false], child_under_12_months: [false]}, expect: {status: NOT_APPLICABLE, finding: ok}}
+- {concept: maternity.terminate_or_suspend, rule: r1, present: false, facts: {}, expect: {status: UNKNOWN, finding: possible_right}}
+- {concept: maternity.terminate_or_suspend, rule: r1, present: false, facts: {pregnant: [true], medical_certificate: [true]}, expect: {status: PASS, finding: hidden_right}}
+- {concept: maternity.terminate_or_suspend, rule: r1, present: false, facts: {pregnant: [false]}, expect: {status: NOT_APPLICABLE, finding: ok}}
+- {concept: maternity.leave, rule: r1, present: false, facts: {}, expect: {status: UNKNOWN, finding: possible_right}}
+- {concept: maternity.leave, rule: r1, present: false, facts: {pregnant: [true]}, expect: {status: PASS, finding: hidden_right}}
+- {concept: maternity.leave, rule: r1, present: true, facts: {pregnant: [true], maternity_leave: [4, month]}, expect: {status: FAIL, finding: violation}}
+- {concept: maternity.leave, rule: r1, present: true, facts: {maternity_leave: [4, month]}, expect: {status: UNKNOWN, finding: needs_facts}}
+- {concept: maternity.job_guarantee, rule: r1, present: false, facts: {}, expect: {status: UNKNOWN, finding: possible_right}}
+- {concept: maternity.job_guarantee, rule: r1, present: false, facts: {pregnant: [true]}, expect: {status: PASS, finding: hidden_right}}
+- {concept: maternity.job_guarantee, rule: r1, present: false, facts: {pregnant: [false]}, expect: {status: NOT_APPLICABLE, finding: ok}}
+
+# ── khái niệm có mặt nhưng slot hạn chế (kiểm "= false") không được điền: hợp đồng không nói tới hạn chế -> đạt
+#    (lần chạy thật 14/11: "theo quy định của pháp luật" ra "cần thêm dữ kiện"). Kiểm "= true" vẫn cần dữ kiện.
+- {concept: content.insurance, rule: r2, present: true, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: termination.employer_unilateral, rule: r1, present: true, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: termination.severance, rule: r1, present: true, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: maternity.no_dismissal, rule: r1, present: true, facts: {}, expect: {status: PASS, finding: ok}}
+- {concept: content.insurance, rule: r2, present: true, facts: {waives_compulsory_insurance: CONFLICT}, expect: {status: UNKNOWN, finding: conflict}}
+- {concept: training.cost_repayment, rule: r1, present: true, facts: {}, expect: {status: UNKNOWN, finding: needs_facts}}

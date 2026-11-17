@@ -1,0 +1,1295 @@
+{
+  "scope_id": "labor-contract-v1",
+  "scope_version": "1.0-document-inventory",
+  "status": "document_list_finalized_metadata_review_only_not_applied",
+  "review_cutoff": "2026-11-17",
+  "review_method": "Document identity/title/scope and amendment/replacement relationships. Detailed per-document reading and provision selection deferred at user request.",
+  "snapshot_id": "s20261117024643-c06f0c",
+  "history_from": "2021-01-01",
+  "counts": {
+    "selected_documents": 69,
+    "from_existing_114": 43,
+    "additional_to_fetch": 0,
+    "not_selected_from_existing_114": 71,
+    "selected_provisions": 50,
+    "provenance_only": 17,
+    "cross_check_only": 2,
+    "additional_downloaded_staged": 26
+  },
+  "coverage_status": "document_inventory_ready_for_scoped_build_not_legal_completeness_certification",
+  "final_document_count": 69,
+  "documents": [
+    {
+      "document_key": "bo-luat:45/2019/QH14",
+      "title": "Bộ Luật lao động số 45/2019/QH14",
+      "topic": "contract_core",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "4beba62bc99ab6343b62c2173ab2853b5b178176e2babd73a854ab71b8d80abc",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=139264"
+    },
+    {
+      "document_key": "nghi-dinh:145/2020/NĐ-CP",
+      "title": "Nghị định số 145/2020/NĐ-CP Quy định chi tiết và hướng dẫn thi hành một số điều của Bộ luật Lao động về điều kiện lao động và quan hệ lao động",
+      "topic": "contract_core",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "4cbbd1d84326dbb5cce77dc8bf76be2f90d7f04d1e914192993bed03a4715679",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=152668"
+    },
+    {
+      "document_key": "thong-tu:10/2020/TT-BLĐTBXH",
+      "title": "Thông tư số 10/2020/TT-BLĐTBXH Quy định chi tiết và hướng dẫn thi hành một số điều, khoản sau đây của Bộ luật Lao động về nội dung của Hợp đồng lao động, hội đồng thương lượng tập thể và nghề, công việc có ảnh hưởng xấu tới chức năng sinh sản, nuôi con",
+      "topic": "contract_core",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "69a52dc54d8743a6171f8e5adeaad27f0e0bbdbce97f6a10804ccc6221ad5695",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=146696"
+    },
+    {
+      "document_key": "nghi-dinh:90/2019/NĐ-CP",
+      "title": "Nghị định số 90/2019/NĐ-CP Quy định mức lương tối thiểu vùng đối với người lao động làm việc theo hợp đồng lao động",
+      "topic": "minimum_wage_history_and_annexes",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "7ed18511717f587e41202fab5ab107f2dc40413e6a372309fab6edea0b7bacf3",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=139094"
+    },
+    {
+      "document_key": "nghi-dinh:38/2022/NĐ-CP",
+      "title": "Nghị định số 38/2022/NĐ-CP Quy định mức lương tối thiểu đối với người lao động làm việc theo hợp đồng lao động",
+      "topic": "minimum_wage_history_and_annexes",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "4db3d0a6306b488cd855e9f457595d59012b1a4e654bb4006581935e3d09dda8",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=154245"
+    },
+    {
+      "document_key": "nghi-dinh:74/2024/NĐ-CP",
+      "title": "Nghị định số 74/2024/NĐ-CP Quy định mức lương tối thiểu đối với người lao động làm việc theo hợp đồng lao động.",
+      "topic": "minimum_wage_history_and_annexes",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "3615bbe0d55a27e5ec9f0c5ad69fed78203fe25f2d377a20ce6b470f84ce3b8d",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=168670"
+    },
+    {
+      "document_key": "nghi-dinh:293/2025/NĐ-CP",
+      "title": "Nghị định số 293/2025/NĐ-CP Quy định mức lương tối thiểu đối với người lao động làm việc theo hợp đồng lao động",
+      "topic": "minimum_wage_history_and_annexes",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "ba71fc23d2544bd33b43a199f22ae286421ff31885d39835e3a1af0a9fc3a92a",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=183939"
+    },
+    {
+      "document_key": "nghi-dinh:128/2025/NĐ-CP",
+      "title": "Nghị định số 128/2025/NĐ-CP Quy định về phân quyền, phân cấp trong quản lý nhà nước lĩnh vực nội vụ",
+      "topic": "minimum_wage_history_and_annexes",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "15f47a2527b3e7656edabf5d0913e779403f4e0f8421a4a4f91c9902977836c1",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=178260"
+    },
+    {
+      "document_key": "luat:58/2014/QH13",
+      "title": "Luật Bảo hiểm xã hội số 58/2014/QH13",
+      "topic": "insurance_and_unemployment",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "5343c8a3b8b02c1728c672670cc1d0db32b069889b6ad21cb2147a88b383d581",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=46744"
+    },
+    {
+      "document_key": "luat:41/2024/QH15",
+      "title": "Luật Bảo hiểm xã hội số 41/2024/QH15",
+      "topic": "insurance_and_unemployment",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "68f3a4d56f5b27433a86d9b9128f625fab1efff0d323f1ddecdeed5b234f80bc",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=175027"
+    },
+    {
+      "document_key": "luat:25/2008/QH12",
+      "title": "Luật Bảo hiểm y tế số 25/2008/QH12",
+      "topic": "insurance_and_unemployment",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "d3df8ae6d0654f32e2793270a5b93b1d7d5e6a377f6224d1b7b48d698fc25025",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=12326"
+    },
+    {
+      "document_key": "luat:46/2014/QH13",
+      "title": "Luật Sửa đổi, bổ sung một số điều của Luật Bảo hiểm y tế số 46/2014/QH13",
+      "topic": "insurance_and_unemployment",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "7a30bc89f7b244f1452eac9c1ad4d9a24c61b536d63bf3f3c1a117c4d4ce4eec",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=36793"
+    },
+    {
+      "document_key": "luat:51/2024/QH15",
+      "title": "Luật Bảo hiểm y tế sửa đổi 2024 số Luật số 51/2024/QH15",
+      "topic": "insurance_and_unemployment",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "f0e54073976a04384016293fbbe72d89f088eead468fd02ddef2bcfe956ae0c2",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=172923"
+    },
+    {
+      "document_key": "luat:38/2013/QH13",
+      "title": "Luật Việc làm số 38/2013/QH13",
+      "topic": "insurance_and_unemployment",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "b4107e6927297c2cfba9b563230a2a93bad7b57081962b72e7656a4d0d65893f",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=32912"
+    },
+    {
+      "document_key": "luat:74/2025/QH15",
+      "title": "Luật Việc làm số 74/2025/QH15",
+      "topic": "insurance_and_unemployment",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "0c90a0ec9b213230a8ee83aa7ef92f223748124e8fe6faad5f64216cea411d26",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=179273"
+    },
+    {
+      "document_key": "nghi-dinh:115/2015/NĐ-CP",
+      "title": "Nghị định số 115/2015/NĐ-CP Quy định chi tiết một số điều của Luật Bảo hiểm xã hội về bảo hiểm xã hội bắt buộc",
+      "topic": "insurance_and_unemployment",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "7a6f2a2838255107670a2eb337dc1c070c854dda9f52a77b3511535f947eea8b",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=94953"
+    },
+    {
+      "document_key": "nghi-dinh:158/2025/NĐ-CP",
+      "title": "Nghị định số 158/2025/NĐ-CP Quy định chi tiết và hướng dẫn thi hành một số điều của Luật Bảo hiểm xã hội về bảo hiểm xã hội bắt buộc",
+      "topic": "insurance_and_unemployment",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "d2dd9976ffa5702f5f03103685e11e9295576aa81253e14e5abf63ec577f245e",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=178757"
+    },
+    {
+      "document_key": "nghi-dinh:143/2018/NĐ-CP",
+      "title": "Nghị định số 143/2018/NĐ-CP Quy định chi tiết Luật bảo hiểm xã hội và Luật an toàn, vệ sinh lao động về bảo hiểm xã hội bắt buộc đối với người lao động là công dân nước ngoài làm việc tại Việt Nam",
+      "topic": "insurance_and_unemployment",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "adede3e932d57ce6fddbd4025541bb084e12d9447d6e9cce97935dc5bbcc42dc",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=131592"
+    },
+    {
+      "document_key": "nghi-dinh:188/2025/NĐ-CP",
+      "title": "Nghị định số 188/2025/NĐ-CP hướng dẫn Luật Bảo hiểm y tế",
+      "topic": "insurance_and_unemployment",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "93d2034b17692385f1fedb1e30720ee09d82e4ea39e225865f458e397a1fec78",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=179711"
+    },
+    {
+      "document_key": "nghi-dinh:28/2015/NĐ-CP",
+      "title": "Nghị định số 28/2015/NĐ-CP Quy định chi tiết thi hành một số điều của Luật Việc làm về bảo hiểm thất nghiệp",
+      "topic": "insurance_and_unemployment",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "d49f85f342aa8bc766ba399ea7cf0a870622a4445caa458157233f2f3b24f4cd",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=55726"
+    },
+    {
+      "document_key": "nghi-dinh:61/2020/NĐ-CP",
+      "title": "Nghị định số 61/2020/NĐ-CP Sửa đổi, bổ sung một số điều của Nghị định số 28/2015/NĐ-CP ngày 12 tháng 3 năm 2015 của Chính phủ quy định chi tiết thi hành một số điều của Luật Việc làm về bảo hiểm thất nghiệp",
+      "topic": "insurance_and_unemployment",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "f36e49b48094fd8bae33ca13704cc202eecaafb24b5614727b00e6a723b1c8ff",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=142819"
+    },
+    {
+      "document_key": "nghi-dinh:374/2025/NĐ-CP",
+      "title": "Nghị định số 374/2025/NĐ-CP Quy định chi tiết một số điều của Luật Việc làm về bảo hiểm thất nghiệp",
+      "topic": "insurance_and_unemployment",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "5136f9d43fdd54eb9593b8cb87bafea0131504d5c04bf50420fffe027f28e63f",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=186281"
+    },
+    {
+      "document_key": "luat:84/2015/QH13",
+      "title": "Luật An toàn, vệ sinh lao động số 84/2015/QH13",
+      "topic": "working_conditions_and_special_categories",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "ff77a86187d3d7797d9686995e422395e8ec5e5b9d61a91f7da937cb6dbe2c26",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=70811"
+    },
+    {
+      "document_key": "nghi-dinh:135/2020/NĐ-CP",
+      "title": "Nghị định số 135/2020/NĐ-CP Quy định về tuổi nghỉ hưu",
+      "topic": "working_conditions_and_special_categories",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "7277750460b4ad7ff0804350442ccae0d911c43a4816a906686935f2381e20bc",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=152734"
+    },
+    {
+      "document_key": "thong-tu:11/2020/TT-BLĐTBXH",
+      "title": "Thông tư số 11/2020/TT-BLĐTBXH Ban hành danh mục nghề, công việc nặng nhọc, độc hại, nguy hiểm và nghề, công việc đặc biệt nặng nhọc, độc hại, nguy hiểm",
+      "topic": "working_conditions_and_special_categories",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "4e849dc0c056a479b1df623cd218b64e2ed529632954525a43cf5de20876d5ff",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=146697"
+    },
+    {
+      "document_key": "thong-tu:19/2023/TT-BLĐTBXH",
+      "title": "Thông tư số 19/2023/TT-BLĐTBXH Ban hành bổ sung Danh mục nghề, công việc nặng nhọc, độc hại, nguy hiểm và nghề, công việc đặc biệt nặng nhọc, độc hại, nguy hiểm",
+      "topic": "working_conditions_and_special_categories",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "014a9318de135029f35b76759e0c298bf621746bddacb2def2505a93c24905b7",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=167035"
+    },
+    {
+      "document_key": "nghi-dinh:219/2025/NĐ-CP",
+      "title": "Nghị định số 219/2025/NĐ-CP Quy định về người lao động nước ngoài làm việc tại Việt Nam",
+      "topic": "working_conditions_and_special_categories",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "950eae7e659b47164d80b4fce156e007c3f561d64e27aa48bdf43169c7d47437",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=180273"
+    },
+    {
+      "document_key": "luat:20/2023/QH15",
+      "title": "Luật Giao dịch điện tử số 20/2023/QH15",
+      "topic": "electronic_employment_contracts",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "3073d5ee017868ef7465d3f7459dc44cf173c7a983c42451e0d2b2e7604aaf7f",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=165913"
+    },
+    {
+      "document_key": "nghi-dinh:337/2025/NĐ-CP",
+      "title": "Nghị định số 337/2025/NĐ-CP Quy định về hợp đồng lao động điện tử",
+      "topic": "electronic_employment_contracts",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "805e64711533b25836f15bd9aa7473d308f12d8e3697610ba4fee3d55d8d2799",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=185561"
+    },
+    {
+      "document_key": "thong-tu:08/2026/TT-BNV",
+      "title": "Thông tư số 08/2026/TT-BNV Quy định chi tiết và hướng dẫn thi hành một số điều của Nghị định số 337/2025/NĐ-CP ngày 24 tháng 12 năm 2025 của Chính phủ quy định về hợp đồng lao động điện tử",
+      "topic": "electronic_employment_contracts",
+      "use": "selected_provisions",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "0557bd4bf0e12dc4e8d72ad0043c802063cd72ad15d058480f88189e6e9db684",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=05612000-7a11-11f1-bd03-856520a73b9d"
+    },
+    {
+      "document_key": "nghi-quyet:44/2026/NQ-CP",
+      "title": "Nghị quyết số 44/2026/NQ-CP về triển khai hợp đồng lao động điện tử",
+      "topic": "electronic_employment_contracts",
+      "use": "provenance_only",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "5b1ebe81b928ef384dcfc7e5eb99c0187b9f3d4d8285900ad2a71c4bd6e68186",
+      "availability": "in_existing_114",
+      "rationale": "Triển khai hợp đồng điện tử; giữ bối cảnh thực thi, không coi toàn bộ nghị quyết là căn cứ điều khoản.",
+      "source_url": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/11/44_2026_nq-cp_30102026_1-signed.signed.pdf"
+    },
+    {
+      "document_key": "luat:71/2025/QH15",
+      "title": "Luật Công nghiệp công nghệ số số 71/2025/QH15",
+      "topic": "amendment_evidence",
+      "use": "provenance_only",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "f91200b1fcba278b9b0d2661c1c4d293d67d44e9e656d5ddf9a2699ae56d7eac",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=179989"
+    },
+    {
+      "document_key": "luat:113/2025/QH15",
+      "title": "LUẬT DÂN SỐ SỐ 113/2025/QH15",
+      "topic": "amendment_evidence",
+      "use": "provenance_only",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "9631fef03b63694d257238d58830b223248f901ef13529fc65466a3782a2ec1c",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=6fa2fd20-597e-11f1-add2-7717d93a2118"
+    },
+    {
+      "document_key": "luat:124/2025/QH15",
+      "title": "Luật Giáo dục nghề nghiệp số 124/2025/QH15",
+      "topic": "amendment_evidence",
+      "use": "provenance_only",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "6185708bf9eeecab0876586979497d65b97a832d1d3ec05d26710b6e2348a357",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=187742"
+    },
+    {
+      "document_key": "luat:73/2025/QH15",
+      "title": "Luật NHÀ GIÁO số 73/2025/QH15",
+      "topic": "amendment_evidence",
+      "use": "provenance_only",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "7bdc0a5da0119387420e1a4bae881d2b4be4ff287dd888120ac640d8850c439e",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=477bf390-cec9-11f1-91b6-996025b40c83"
+    },
+    {
+      "document_key": "luat:84/2025/QH15",
+      "title": "Luật Thanh tra số 84/2025/QH15",
+      "topic": "amendment_evidence",
+      "use": "provenance_only",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "ab81a97170fe5037ceb703e166467ade82afba62e2e4144b114d48bafa612643",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=178964"
+    },
+    {
+      "document_key": "luat:142/2025/QH15",
+      "title": "Luật Phục hồi, phá sản số 142/2025/QH15",
+      "topic": "amendment_evidence",
+      "use": "provenance_only",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "e5f86a636b031e95eaf1c8c567326d9b116f1220bd10fa81d6b355dd742c7027",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=187584"
+    },
+    {
+      "document_key": "vbhn:18/VBHN-VPQH",
+      "title": "Văn bản hợp nhất Bộ luật Lao động số 18/VBHN-VPQH năm 2026",
+      "topic": "consolidation_cross_check",
+      "use": "cross_check_only",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "d967dd283e138a63b39e5e1f1fffb90995ae3a46e9cfb4b609b075c241b130b9",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://congbao.cdnchinhphu.vn/180507251028987904/2026/3/5/cong-bao-so-131-ngay-28-02-47030_1772690728_signed.pdf"
+    },
+    {
+      "document_key": "vbhn:19/VBHN-VPQH",
+      "title": "Văn bản hợp nhất số 19/VBHN-VPQH 2026, hợp nhất Luật Bảo hiểm xã hội số 41/2024/QH15",
+      "topic": "consolidation_cross_check",
+      "use": "cross_check_only",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "f29280a34975f66a24d86118347bec79a6773363a4ad73d520391aa7046a4432",
+      "availability": "in_existing_114",
+      "rationale": "Chỉ nội dung phục vụ nhóm vấn đề đã khai báo, kèm lịch sử và chuyển tiếp liên quan.",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=ff9cd9e0-97aa-11f1-a50f-4bcbcb89bfc0"
+    },
+    {
+      "document_key": "nghi-dinh:35/2022/NĐ-CP",
+      "title": "Nghị định số 35/2022/NĐ-CP Quy định về quản lý khu công nghiệp và khu kinh tế",
+      "topic": "contract_core",
+      "use": "provenance_only",
+      "rationale": "Nguồn sửa đổi NĐ 145; không index toàn bộ quản lý khu công nghiệp.",
+      "metadata_evidence_url": "https://vbpl.moj.gov.vn/bokehoachvadautu/Pages/vbpq-thuoctinh.aspx?ItemID=152668",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "9ceae4f2151c4fc373106ecea8a05f8878d2efc69d4c840166033a9ed03b8fbd",
+      "availability": "in_existing_114",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=158798"
+    },
+    {
+      "document_key": "nghi-dinh:10/2024/NĐ-CP",
+      "title": "Nghị định số 10/2024/NĐ-CP Quy định về khu công nghệ cao",
+      "topic": "contract_core",
+      "use": "provenance_only",
+      "rationale": "Nguồn sửa đổi NĐ 145; chỉ các thay đổi tác động phạm vi đã chọn.",
+      "metadata_evidence_url": "https://vbpl.moj.gov.vn/bokehoachvadautu/Pages/vbpq-thuoctinh.aspx?ItemID=152668",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "ed4e4ebb47f506fbd2440146aeebab9fd31ce3aecfa49b9a253f0684b5b28bad",
+      "availability": "in_existing_114",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=165573"
+    },
+    {
+      "document_key": "nghi-dinh:129/2025/NĐ-CP",
+      "title": "Nghị định số 129/2025/NĐ-CP Quy định về phân định thẩm quyền của chính quyền địa phương 02 cấp trong lĩnh vực quản lý nhà nước của Bộ Nội vụ",
+      "topic": "contract_core",
+      "use": "provenance_only",
+      "rationale": "Nguồn sửa đổi/phân định thẩm quyền liên quan NĐ 145 và lao động.",
+      "metadata_evidence_url": "https://congbao.chinhphu.vn/tai-ve-van-ban-so-129-2025-nd-cp-45076-56755?format=pdf",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "621ded295e24f57102457c6eaf914d7785d0323bc7ff168e862155f53979e202",
+      "availability": "in_existing_114",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=178294"
+    },
+    {
+      "document_key": "thong-tu:12/2025/TT-BNV",
+      "title": "Hướng dẫn Luật BHXH về BHXH bắt buộc",
+      "topic": "insurance_and_unemployment",
+      "use": "selected_provisions",
+      "rationale": "Đối tượng, tiền lương đóng và quyền lợi ốm đau/thai sản liên quan hợp đồng.",
+      "metadata_evidence_url": "https://xaydungchinhsach.chinhphu.vn/toan-van-thong-tu-12-2025-tt-bnv-quy-dinh-chi-tiet-mot-so-dieu-cua-luat-bhxh-ve-bhxh-bat-buoc-11925070415595016.htm",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "1b9cc7fc0ed900e63192fccdf665c00e3814bcffc2b9a2bca1d201c8a060966f",
+      "downloaded_text_path": "raw/thong-tu_12_2025_TT-BNV/1b9cc7fc0ed900e63192fccdf665c00e3814bcffc2b9a2bca1d201c8a060966f.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "thong-tu:59/2015/TT-BLĐTBXH",
+      "title": "Hướng dẫn Luật BHXH về BHXH bắt buộc",
+      "topic": "insurance_and_unemployment",
+      "use": "selected_provisions",
+      "rationale": "Hướng dẫn cho giai đoạn lịch sử trước luật mới; không lấy nghiệp vụ hưu trí toàn diện.",
+      "metadata_evidence_url": "https://congbao.chinhphu.vn/van-ban/thong-tu-so-59-2015-tt-bldtbxh-18869.htm",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "c7d6aabc4a08d7ab89cdd6b31ab40e72373b6bc3bb6f3bd980a37b94c17f6a80",
+      "downloaded_text_path": "raw/thong-tu_59_2015_TT-BL_TBXH/c7d6aabc4a08d7ab89cdd6b31ab40e72373b6bc3bb6f3bd980a37b94c17f6a80.txt",
+      "download_review_status": "needs_review_pdf_extraction"
+    },
+    {
+      "document_key": "thong-tu:06/2021/TT-BLĐTBXH",
+      "title": "Sửa đổi Thông tư 59/2015/TT-BLĐTBXH",
+      "topic": "insurance_and_unemployment",
+      "use": "provenance_only",
+      "rationale": "Lịch sử hướng dẫn BHXH, đặc biệt tiền lương làm căn cứ đóng.",
+      "metadata_evidence_url": "https://congbao.chinhphu.vn/van-ban/thong-tu-so-06-2021-tt-bldtbxh-34037.htm",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "4f7e356cfc18c5c2e768e7c1fd7a0e9de15b3e889f9808b464d5915ca44e6c98",
+      "downloaded_text_path": "raw/thong-tu_06_2021_TT-BL_TBXH/4f7e356cfc18c5c2e768e7c1fd7a0e9de15b3e889f9808b464d5915ca44e6c98.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "nghi-dinh:146/2018/NĐ-CP",
+      "title": "Hướng dẫn Luật Bảo hiểm y tế",
+      "topic": "insurance_and_unemployment",
+      "use": "selected_provisions",
+      "rationale": "Đối tượng, mức đóng và trách nhiệm gắn quan hệ lao động ở giai đoạn lịch sử.",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?classid=1&docid=212238&pageid=27160&typegroupid=4",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "0effe8b8b67d30215bd9e278de8a91d5f17f09255be423b5d527aed5e779c5f4",
+      "downloaded_text_path": "raw/nghi-dinh_146_2018_N_-CP/0effe8b8b67d30215bd9e278de8a91d5f17f09255be423b5d527aed5e779c5f4.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "nghi-dinh:75/2023/NĐ-CP",
+      "title": "Sửa đổi Nghị định 146/2018/NĐ-CP về BHYT",
+      "topic": "insurance_and_unemployment",
+      "use": "provenance_only",
+      "rationale": "Nguồn sửa đổi hướng dẫn BHYT lịch sử.",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?classid=1&docid=212238&pageid=27160&typegroupid=4",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "7c429c985590ad184396561f75f354c6ffd059f2da5f6ae2d27d69ef398b9553",
+      "downloaded_text_path": "raw/nghi-dinh_75_2023_N_-CP/7c429c985590ad184396561f75f354c6ffd059f2da5f6ae2d27d69ef398b9553.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "nghi-dinh:02/2025/NĐ-CP",
+      "title": "Sửa đổi Nghị định 146/2018/NĐ-CP đã sửa bởi NĐ 75/2023",
+      "topic": "insurance_and_unemployment",
+      "use": "provenance_only",
+      "rationale": "Giữ nguồn sửa đổi để xử lý đúng các phần phụ thuộc; không index nghiệp vụ khám chữa bệnh toàn diện.",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?classid=1&docid=212238&pageid=27160&typegroupid=4",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "c2af8e17c075a1d1dde879f08c191652579677967b39a98f102b83f113f96e47",
+      "downloaded_text_path": "raw/nghi-dinh_02_2025_N_-CP/c2af8e17c075a1d1dde879f08c191652579677967b39a98f102b83f113f96e47.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "nghi-dinh:58/2020/NĐ-CP",
+      "title": "Mức đóng Quỹ bảo hiểm tai nạn lao động, bệnh nghề nghiệp",
+      "topic": "working_conditions_and_special_categories",
+      "use": "selected_provisions",
+      "rationale": "Nghĩa vụ đóng bảo hiểm tai nạn lao động, bệnh nghề nghiệp.",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?docid=200108&pageid=27160",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "3519b618906a899cce97b3d290f6ce62298680f6f7b093f177f0e26faba0c1a4",
+      "downloaded_text_path": "raw/nghi-dinh_58_2020_N_-CP/3519b618906a899cce97b3d290f6ce62298680f6f7b093f177f0e26faba0c1a4.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "nghi-dinh:88/2020/NĐ-CP",
+      "title": "Bảo hiểm tai nạn lao động, bệnh nghề nghiệp bắt buộc",
+      "topic": "working_conditions_and_special_categories",
+      "use": "selected_provisions",
+      "rationale": "Quyền và nghĩa vụ liên quan tai nạn lao động; không lấy toàn bộ nghiệp vụ quỹ.",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?docid=200622&pageid=27160",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "1ade4ee8e1323386a04286ab7a1d0b6480f296c75ca2dc0258caa25efa6cf0ad",
+      "downloaded_text_path": "raw/nghi-dinh_88_2020_N_-CP/1ade4ee8e1323386a04286ab7a1d0b6480f296c75ca2dc0258caa25efa6cf0ad.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "thong-tu:28/2021/TT-BLĐTBXH",
+      "title": "Chế độ đối với người lao động bị tai nạn lao động, bệnh nghề nghiệp",
+      "topic": "working_conditions_and_special_categories",
+      "use": "selected_provisions",
+      "rationale": "Quyền/nghĩa vụ bồi thường, trợ cấp gắn với quan hệ lao động.",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?docid=205413&pageid=27160",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "7df4db56dba87e424d6b1e91103a92f5c8dbfd32b5a9999fac119c16725fbfe2",
+      "downloaded_text_path": "raw/thong-tu_28_2021_TT-BL_TBXH/7df4db56dba87e424d6b1e91103a92f5c8dbfd32b5a9999fac119c16725fbfe2.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "thong-tu:25/2025/TT-BNV",
+      "title": "Sửa khoản 2 Điều 5 Thông tư 28/2021/TT-BLĐTBXH",
+      "topic": "working_conditions_and_special_categories",
+      "use": "provenance_only",
+      "rationale": "Nguồn sửa đổi hướng dẫn tai nạn lao động, bệnh nghề nghiệp.",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?classid=1&docid=216423&orggroupid=4&pageid=27160",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "c32f58fd0fcd9e6a6aa5066ac34dd1a518cac5fe4327d8b24f419ae986c41753",
+      "downloaded_text_path": "raw/thong-tu_25_2025_TT-BNV/c32f58fd0fcd9e6a6aa5066ac34dd1a518cac5fe4327d8b24f419ae986c41753.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "nghi-dinh:38/2019/NĐ-CP",
+      "title": "Mức lương cơ sở đối với cán bộ, công chức, viên chức và lực lượng vũ trang",
+      "topic": "insurance_reference_values",
+      "use": "selected_provisions",
+      "rationale": "Chỉ giá trị lương cơ sở được pháp luật bảo hiểm tham chiếu; không mở scope lương công chức.",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/default.aspx?docid=196996&pageid=27160",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "e72d2e6764b64a45156dd0cfebe47263c49e9ff6576906f5e13b19cdd2a0c7f5",
+      "downloaded_text_path": "raw/nghi-dinh_38_2019_N_-CP/e72d2e6764b64a45156dd0cfebe47263c49e9ff6576906f5e13b19cdd2a0c7f5.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "nghi-dinh:24/2023/NĐ-CP",
+      "title": "Mức lương cơ sở đối với cán bộ, công chức, viên chức và lực lượng vũ trang",
+      "topic": "insurance_reference_values",
+      "use": "selected_provisions",
+      "rationale": "Giá trị tham chiếu bảo hiểm theo thời kỳ, không phải lương tối thiểu vùng.",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?classid=1&docid=207881&pageid=27160",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "34fb77b7139ab2751a59b50c1ed9d76f44cae855d66d17aa38b3a2926ec6e221",
+      "downloaded_text_path": "raw/nghi-dinh_24_2023_N_-CP/34fb77b7139ab2751a59b50c1ed9d76f44cae855d66d17aa38b3a2926ec6e221.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "nghi-dinh:73/2024/NĐ-CP",
+      "title": "Mức lương cơ sở và chế độ tiền thưởng",
+      "topic": "insurance_reference_values",
+      "use": "selected_provisions",
+      "rationale": "Chỉ giá trị tham chiếu cho các quy định bảo hiểm trong scope.",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?classid=1&docid=210537&pageid=27160&typegroupid=4",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "79695f25b8a8ac7b5f9145b7153e66e2c0ee94001bb59c632b13e66981b1f355",
+      "downloaded_text_path": "raw/nghi-dinh_73_2024_N_-CP/79695f25b8a8ac7b5f9145b7153e66e2c0ee94001bb59c632b13e66981b1f355.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "nghi-dinh:161/2026/NĐ-CP",
+      "title": "Mức lương cơ sở và chế độ tiền thưởng",
+      "topic": "insurance_reference_values",
+      "use": "selected_provisions",
+      "rationale": "Nguồn giá trị mới năm 2026 để tránh dùng nhầm giá trị cũ.",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?classid=1&docid=218107&orggroupid=2&pageid=27160",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "4bdd9a4b526ad0af4f5abaec1230a14948ab07ffef31c96e2c00440d376d3be7",
+      "downloaded_text_path": "raw/nghi-dinh_161_2026_N_-CP/4bdd9a4b526ad0af4f5abaec1230a14948ab07ffef31c96e2c00440d376d3be7.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "nghi-dinh:152/2020/NĐ-CP",
+      "title": "Người lao động nước ngoài làm việc tại Việt Nam và tuyển dụng, quản lý lao động Việt Nam cho tổ chức, cá nhân nước ngoài",
+      "topic": "working_conditions_and_special_categories",
+      "use": "selected_provisions",
+      "rationale": "Lịch sử quy định liên quan hợp đồng với lao động nước ngoài từ 2021.",
+      "metadata_evidence_url": "https://xaydungchinhsach.chinhphu.vn/nghi-dinh-so-219-2025-nd-cp-quy-dinh-ve-nguoi-lao-dong-nuoc-ngoai-lam-viec-tai-viet-nam-11925080910491801.htm",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "9bb4e7b913b6735b37628653e7ebd9f3df6a6b551f90ee99a7c479de62b9b247",
+      "downloaded_text_path": "raw/nghi-dinh_152_2020_N_-CP/9bb4e7b913b6735b37628653e7ebd9f3df6a6b551f90ee99a7c479de62b9b247.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "nghi-dinh:70/2023/NĐ-CP",
+      "title": "Sửa đổi Nghị định 152/2020/NĐ-CP",
+      "topic": "working_conditions_and_special_categories",
+      "use": "provenance_only",
+      "rationale": "Lịch sử sửa đổi lao động nước ngoài trước NĐ 219/2025.",
+      "metadata_evidence_url": "https://xaydungchinhsach.chinhphu.vn/nghi-dinh-so-219-2025-nd-cp-quy-dinh-ve-nguoi-lao-dong-nuoc-ngoai-lam-viec-tai-viet-nam-11925080910491801.htm",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "ba6cbbb26af98017b74efd94ce70c7bb990e2b53bf29db7b3f7d1eee251ee906",
+      "downloaded_text_path": "raw/nghi-dinh_70_2023_N_-CP/ba6cbbb26af98017b74efd94ce70c7bb990e2b53bf29db7b3f7d1eee251ee906.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "thong-tu:09/2020/TT-BLĐTBXH",
+      "title": "Hướng dẫn Bộ luật Lao động về lao động chưa thành niên",
+      "topic": "working_conditions_and_special_categories",
+      "use": "selected_provisions",
+      "rationale": "Điều kiện giao kết và giới hạn làm việc của người chưa thành niên.",
+      "metadata_evidence_url": "https://congbao.chinhphu.vn/van-ban/thong-tu-so-09-2020-tt-bldtbxh-33378.htm",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "dfc81f508dc1077669eaf7dc2fbd115a3ae066e5fb5bab740ec63ca1d59e53e3",
+      "downloaded_text_path": "raw/thong-tu_09_2020_TT-BL_TBXH/dfc81f508dc1077669eaf7dc2fbd115a3ae066e5fb5bab740ec63ca1d59e53e3.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "nghi-quyet:17/2022/UBTVQH15",
+      "title": "Số giờ làm thêm trong năm, tháng trong bối cảnh COVID-19 và phục hồi kinh tế",
+      "topic": "working_time_temporary_rules",
+      "use": "selected_provisions",
+      "rationale": "Ngoại lệ thời giờ làm thêm trong giai đoạn lịch sử; không áp ngưỡng chung cho mọi năm.",
+      "metadata_evidence_url": "https://congbao.chinhphu.vn/van-ban/nghi-quyet-so-17-2022-ubtvqh15-36956/40162.htm",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "d6b36b8407158909b3a5e192018b124b8abbbfdb8ab3192ee0060c4b74e7f44a",
+      "downloaded_text_path": "raw/nghi-quyet_17_2022_UBTVQH15/d6b36b8407158909b3a5e192018b124b8abbbfdb8ab3192ee0060c4b74e7f44a.txt",
+      "download_review_status": "needs_review_pdf_extraction"
+    },
+    {
+      "document_key": "luat:51/2005/QH11",
+      "title": "Luật Giao dịch điện tử",
+      "topic": "electronic_employment_contracts",
+      "use": "selected_provisions",
+      "rationale": "Giá trị pháp lý giao dịch/thông điệp/chữ ký điện tử cho giai đoạn lịch sử.",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?docid=29675&pageid=27160",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "4a0b89ee62a4bfefb24b97846d4328c84ceab160c13f46c2bc0881402083f8ea",
+      "downloaded_text_path": "raw/luat_51_2005_QH11/4a0b89ee62a4bfefb24b97846d4328c84ceab160c13f46c2bc0881402083f8ea.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "nghi-dinh:130/2018/NĐ-CP",
+      "title": "Chữ ký số và dịch vụ chứng thực chữ ký số",
+      "topic": "electronic_employment_contracts",
+      "use": "selected_provisions",
+      "rationale": "Căn cứ chữ ký số của hợp đồng điện tử trong giai đoạn lịch sử.",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?docid=194913&pageid=27160",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "418738d810ec96d81a6ee80dbbd262732314df39fafced3c441491ef5b542a3b",
+      "downloaded_text_path": "raw/nghi-dinh_130_2018_N_-CP/418738d810ec96d81a6ee80dbbd262732314df39fafced3c441491ef5b542a3b.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "nghi-dinh:23/2025/NĐ-CP",
+      "title": "Chữ ký điện tử và dịch vụ tin cậy",
+      "topic": "electronic_employment_contracts",
+      "use": "selected_provisions",
+      "rationale": "Căn cứ chữ ký điện tử áp dụng cho hình thức hợp đồng; loại quản trị nhà cung cấp dịch vụ.",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?classid=1&docid=212829&orggroupid=2&pageid=27160",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "e9d770ff2d06acfa77e84038dea9186efcb9ab6adeb8f2b240743eb2309a0806",
+      "downloaded_text_path": "raw/nghi-dinh_23_2025_N_-CP/e9d770ff2d06acfa77e84038dea9186efcb9ab6adeb8f2b240743eb2309a0806.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "luat:12/2012/QH13",
+      "title": "Luật Công đoàn",
+      "topic": "representation_and_contract_protection",
+      "use": "selected_provisions",
+      "rationale": "Đại diện và bảo vệ người lao động trong giai đoạn lịch sử; loại tài chính/tổ chức toàn diện.",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/default.aspx?docid=163545&pageid=27160",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "16e88773021508cff267ea0636f12af56e547840f3b4781a764be7dcba60a0d9",
+      "downloaded_text_path": "raw/luat_12_2012_QH13/16e88773021508cff267ea0636f12af56e547840f3b4781a764be7dcba60a0d9.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "luat:50/2024/QH15",
+      "title": "Luật Công đoàn số 50/2024/QH15",
+      "topic": "representation_and_contract_protection",
+      "use": "selected_provisions",
+      "rationale": "Quyền đại diện, bảo vệ và quan hệ với xử lý/chấm dứt hợp đồng.",
+      "metadata_evidence_url": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2025/8/90-vbhn-vpqh.pdf",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": "227256cd5cdeb6bd47db2f344ec181c996a92eb9013664aa78a30e38c3458cee",
+      "availability": "in_existing_114",
+      "source_url": "https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID=172553"
+    },
+    {
+      "document_key": "luat:97/2025/QH15",
+      "title": "Sửa Luật Mặt trận Tổ quốc Việt Nam, Luật Công đoàn, Luật Thanh niên và Luật Thực hiện dân chủ ở cơ sở",
+      "topic": "representation_and_contract_protection",
+      "use": "provenance_only",
+      "rationale": "Chỉ sửa đổi tác động các phần công đoàn được chọn.",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?classid=1&docid=214586&pageid=27160&typegroupid=3",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "e2b657f4dcec094d9352b4df8126605c696559f4a74dd3ed8925434342b16f44",
+      "downloaded_text_path": "raw/luat_97_2025_QH15/e2b657f4dcec094d9352b4df8126605c696559f4a74dd3ed8925434342b16f44.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "luat:59/2020/QH14",
+      "title": "Luật Doanh nghiệp",
+      "topic": "contract_capacity_definitions",
+      "use": "selected_provisions",
+      "rationale": "Chỉ định nghĩa người quản lý và đại diện liên quan thẩm quyền giao kết/thử việc.",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?classid=1&docid=200447&pageid=27160&typegroupi=",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "05ee9f362b24c7ff33b305aae7753893c6d452410e8c64ff263931fc54e76305",
+      "downloaded_text_path": "raw/luat_59_2020_QH14/05ee9f362b24c7ff33b305aae7753893c6d452410e8c64ff263931fc54e76305.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "luat:76/2025/QH15",
+      "title": "Sửa đổi, bổ sung Luật Doanh nghiệp",
+      "topic": "contract_capacity_definitions",
+      "use": "provenance_only",
+      "rationale": "Nguồn sửa đổi để đối chiếu định nghĩa/thẩm quyền, không nhập toàn luật doanh nghiệp.",
+      "metadata_evidence_url": "https://vanban.chinhphu.vn/?classid=1&docid=214562&pageid=27160&typegroupid=3",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "b8dd0cc3bbdc5e99d34ec120f6b6f038f401b4c78d84ad24d8b3d8be83c646b0",
+      "downloaded_text_path": "raw/luat_76_2025_QH15/b8dd0cc3bbdc5e99d34ec120f6b6f038f401b4c78d84ad24d8b3d8be83c646b0.txt",
+      "download_review_status": "downloaded_not_legally_reviewed"
+    },
+    {
+      "document_key": "nghi-dinh:399/2026/NĐ-CP",
+      "title": "Mức lương tối thiểu đối với người lao động làm việc theo hợp đồng lao động",
+      "topic": "minimum_wage_history_and_annexes",
+      "use": "selected_provisions",
+      "rationale": "Đã ban hành 02/11/2026; chỉ áp dụng từ 01/01/2027, giữ như bản tương lai ở cutoff.",
+      "metadata_evidence_url": "https://chinhphu.vn/?classid=1&docid=220166&pageid=27160",
+      "evidence_kind": "official_metadata_or_relationship_reference",
+      "unit_selection_status": "deferred_by_user_metadata_only_review",
+      "unit_selectors": null,
+      "raw_checksum": null,
+      "availability": "downloaded_staged_not_imported",
+      "known_issued_on": "2026-11-02",
+      "known_effective_from": "2027-01-01",
+      "as_of_cutoff": "published_not_yet_effective",
+      "download_receipt": "data/team-4.2/legal/labor-scope-download-report.json",
+      "downloaded_text_sha256": "46a934f129d60c40dee882d72c6cfa7716f98592e0b640955e2da78b0425e63d",
+      "downloaded_text_path": "raw/nghi-dinh_399_2026_N_-CP/46a934f129d60c40dee882d72c6cfa7716f98592e0b640955e2da78b0425e63d.txt",
+      "download_review_status": "needs_review_pdf_extraction"
+    }
+  ],
+  "excluded_from_this_profile": [
+    "Hình sự, bất động sản, tố tụng toàn diện và thủ tục xử phạt",
+    "Công vụ/quân đội và chế độ lương khu vực công (trừ giá trị lương cơ sở được luật bảo hiểm tham chiếu)",
+    "Đưa người Việt Nam ra nước ngoài làm việc",
+    "Chế độ chuyên ngành hàng hải/hàng không và các ngành cần profile riêng",
+    "Thủ tục chi trả/quản lý quỹ BHXH/BHYT và lương hưu toàn diện",
+    "Gói trợ cấp, hỗ trợ và miễn/giảm đặc biệt do dịch COVID-19, ngoài ngoại lệ giờ làm thêm được liệt kê; cần profile bổ sung nếu đánh giá các chính sách này"
+  ],
+  "limits": [
+    "Only the document list is finalized. Article/clause/point/annex selectors, full-text authenticity, applicability and version reconstruction have not been certified by this metadata review.",
+    "No corpus deletion, import, Neo4j rebuild or bridge/Contract Graph change was performed.",
+    "Known conflicting source identifiers in 113/2025 and existing needs_review/conflicted flags must be retained.",
+    "Published future-effective documents must not enter an earlier-date projection.",
+    "Not a guarantee that all possible employment-contract cases or all laws through the cutoff are covered.",
+    "All 26 additional sources are downloaded to staging and packaged separately; importing them into a corpus snapshot and rebuilding the graph remain separate steps."
+  ],
+  "not_selected_documents": [
+    {
+      "document_key": "bo-luat:10/2012/QH13",
+      "title": "Bộ luật Lao động số 10/2012/QH13"
+    },
+    {
+      "document_key": "bo-luat:100/2015/QH13",
+      "title": "Bộ luật Hình sự số 100/2015/QH13"
+    },
+    {
+      "document_key": "bo-luat:101/2015/QH13",
+      "title": "Bộ luật Tố tụng hình sự số 101/2015/QH13"
+    },
+    {
+      "document_key": "bo-luat:15/1999/QH10",
+      "title": "Bộ luật Hình sự số 15/1999/QH10"
+    },
+    {
+      "document_key": "bo-luat:19/2003/QH11",
+      "title": "Bộ luật Tố tụng hình sự số 19/2003/QH11"
+    },
+    {
+      "document_key": "bo-luat:24/2004/QH11",
+      "title": "Bộ luật Tố tụng dân sự số 24/2004/QH11"
+    },
+    {
+      "document_key": "bo-luat:33/2005/QH11",
+      "title": "Bộ luật Dân sự số 33/2005/QH11"
+    },
+    {
+      "document_key": "bo-luat:91/2015/QH13",
+      "title": "Bộ luật Dân sự số 91/2015/QH13"
+    },
+    {
+      "document_key": "bo-luat:92/2015/QH13",
+      "title": "Bộ luật Tố tụng dân sự số 92/2015/QH13"
+    },
+    {
+      "document_key": "bo-luat:95/2015/QH13",
+      "title": "Bộ luật Hàng hải số 95/2015/QH13"
+    },
+    {
+      "document_key": "luat:02/2021/QH15",
+      "title": "Luật sửa đổi, bổ sung một số điều của Bộ luật Tố tụng hình sự số 02/2021/QH15"
+    },
+    {
+      "document_key": "luat:03/2022/QH15",
+      "title": "Luật sửa đổi, bổ sung một số điều của Luật Đầu tư công, Luật Đầu tư theo phương thức đối tác công tư, Luật Đầu tư, Luật Nhà ở, Luật Đấu thầu, Luật Điện lực, Luật Doanh nghiệp, Luật Thuế tiêu thụ đặc biệt và Luật Thi hành án dân sự. số 03/2022/QH15"
+    },
+    {
+      "document_key": "luat:12/2017/QH14",
+      "title": "Luật Sửa đổi, bổ sung một số điều của Bộ luật Hình sự số 100/2015/QH13 số 12/2017/QH14"
+    },
+    {
+      "document_key": "luat:13/2003/QH11",
+      "title": "Luật Đất đai số 13/2003/QH11"
+    },
+    {
+      "document_key": "luat:27/2023/QH15",
+      "title": "Luật Nhà ở số 27/2023/QH15"
+    },
+    {
+      "document_key": "luat:29/2023/QH15",
+      "title": "Luật Kinh doanh bất động sản số 29/2023/QH15"
+    },
+    {
+      "document_key": "luat:31/2024/QH15",
+      "title": "Luật Đất đai số 31/2024/QH15"
+    },
+    {
+      "document_key": "luat:34/2009/QH12",
+      "title": "Luật Sửa đổi, bổ sung Điều 126 của Luật Nhà ở và Điều 121 của Luật Đất đai số 34/2009/QH12"
+    },
+    {
+      "document_key": "luat:35/2018/QH14",
+      "title": "Luật Sửa đổi, bổ sung một số điều của 37 luật có liên quan đến quy hoạch số 35/2018/QH14"
+    },
+    {
+      "document_key": "luat:37/2009/QH12",
+      "title": "Luật Sửa đổi, bổ sung một số điều của Bộ luật Hình sự số 37/2009/QH12"
+    },
+    {
+      "document_key": "luat:38/2009/QH12",
+      "title": "Luật Sửa đổi, bổ sung một số điều của các luật liên quan đến đầu tư xây dựng cơ bản số 38/2009/QH12"
+    },
+    {
+      "document_key": "luat:40/2019/QH14",
+      "title": "Luật Kiến trúc số 40/2019/QH14"
+    },
+    {
+      "document_key": "luat:43/2024/QH15",
+      "title": "Luật Sửa đổi, bổ sung một số điều của Luật Đất đai số 31/2024/QH15, Luật Nhà ở số 27/2023/QH15, Luật Kinh doanh bất động sản số 29/2023/QH15 và Luật Các tổ chức tín dụng số 32/2024/QH15 số 43/2024/QH15"
+    },
+    {
+      "document_key": "luat:45/2013/QH13",
+      "title": "Luật Đất đai số 45/2013/QH13"
+    },
+    {
+      "document_key": "luat:56/2005/QH11",
+      "title": "Luật Nhà ở số 56/2005/QH11"
+    },
+    {
+      "document_key": "luat:61/2020/QH14",
+      "title": "Luật đầu tư số 61/2020/QH14"
+    },
+    {
+      "document_key": "luat:62/2020/QH14",
+      "title": "Luật sửa đổi, bổ sung một số điều của Luật Xây dựng số 62/2020/QH14"
+    },
+    {
+      "document_key": "luat:63/2006/QH11",
+      "title": "Luật Kinh doanh bất động sản số 63/2006/QH11"
+    },
+    {
+      "document_key": "luat:64/2020/QH14",
+      "title": "Luật đầu tư theo phương thức đối tác công tư số 64/2020/QH14"
+    },
+    {
+      "document_key": "luat:65/2014/QH13",
+      "title": "Luật Nhà ở số 65/2014/QH13"
+    },
+    {
+      "document_key": "luat:66/2014/QH13",
+      "title": "Luật Kinh doanh bất động sản số 66/2014/QH13"
+    },
+    {
+      "document_key": "luat:71/2006/QH11",
+      "title": "Luật Bảo hiểm xã hội số 71/2006/QH11"
+    },
+    {
+      "document_key": "luat:76/2006/QH11",
+      "title": "Luật Dạy nghề số 76/2006/QH11"
+    },
+    {
+      "document_key": "luat:85/2025/QH15",
+      "title": "Luật sửa đổi, bổ sung một số điều của Bộ luật Tố tụng dân sự, Luật Tố tụng hành chính, Luật Tư pháp người chưa thành niên, Luật Phá sản và Luật Hòa giải, đối thoại tại Tòa án số 85/2025/QH15"
+    },
+    {
+      "document_key": "luat:86/2025/QH15",
+      "title": "Luật Sửa đổi, bổ sung một số điều của Bộ Luật hình sự số 86/2025/QH15"
+    },
+    {
+      "document_key": "luat:99/2025/QH15",
+      "title": "Luật sửa đổi, bổ sung một số điều của Bộ luật Tố tụng hình sự số 99/2025/QH15"
+    },
+    {
+      "document_key": "nghi-dinh:03/2014/NĐ-CP",
+      "title": "Nghị định số 03/2014/NĐ-CP Quy định chi tiết thi hành một số điều của Bộ luật Lao động về việc làm"
+    },
+    {
+      "document_key": "nghi-dinh:05/2015/NĐ-CP",
+      "title": "Nghị định số 05/2015/NĐ-CP Quy định chi tiết và hướng dẫn thi hành một số nội dung của Bộ luật Lao động"
+    },
+    {
+      "document_key": "nghi-dinh:109/2002/NĐ-CP",
+      "title": "Nghị định số 109/2002/NĐ-CP Sửa đổi, bổ sung một số điều của Nghị định số 195/CP ngày 31 tháng 12 năm 1994 của Chính phủ quy định chi tiết và hướng dẫn thi hành một số điều của Bộ luật Lao động về thời giờ làm việc, thời giờ nghỉ ngơi"
+    },
+    {
+      "document_key": "nghi-dinh:12/2008/NĐ-CP",
+      "title": "Nghị định số 12/2008/NĐ-CP Quy định chi tiết và hướng dẫn thi hành Điều 176 của Bộ luật Lao động về hoãn hoặc ngừng đình công và giải quyết quyền lợi của tập thể lao động"
+    },
+    {
+      "document_key": "nghi-dinh:12/2022/NĐ-CP",
+      "title": "Nghị định số 12/2022/NĐ-CP Quy định xử phạt vi phạm hành chính trong lĩnh vực lao động, bảo hiểm xã hội, người lao động Việt Nam đi làm việc ở nước ngoài theo hợp đồng"
+    },
+    {
+      "document_key": "nghi-dinh:121/2018/NĐ-CP",
+      "title": "Nghị định số 121/2018/NĐ-CP Sửa đổi, bổ sung một số điều của Nghị định số 49/2013/NĐ-CP ngày 14/5/2013 của Chính Phủ quy định chi tiết thi hành một số điều của Bộ luật Lao động về tiền lương"
+    },
+    {
+      "document_key": "nghi-dinh:122/2007/NĐ-CP",
+      "title": "Nghị định số 122/2007/NĐ-CP Quy định Danh mục doanh nghiệp không được đình công và việc giải quyết yêu cầu của tập thể lao động ở doanh nghiệp không được đình công"
+    },
+    {
+      "document_key": "nghi-dinh:133/2007/NĐ-CP",
+      "title": "Nghị định số 133/2007/NĐ-CP Quy định chi tiết và hướng dẫn thi hành một số điều của Luật sửa đổi, bổ sung một số điều của Bộ luật lao động về giải quyết tranh chấp lao động"
+    },
+    {
+      "document_key": "nghi-dinh:134/2015/NĐ-CP",
+      "title": "Nghị định số 134/2015/NĐ-CP Quy định chi tiết một số điều của luật bảo hiểm xã hội về bảo hiểm xã hội tự nguyện"
+    },
+    {
+      "document_key": "nghi-dinh:148/2018/NĐ-CP",
+      "title": "Nghị định số 148/2018/NĐ-CP Sửa đổi, bổ sung một số điều của Nghị định số 05/2015/NĐ-CP ngày 12/01/2015 của Chính phủ quy định chi tiết và hướng dẫn thi hành một số nội dung của Bộ luật lao động"
+    },
+    {
+      "document_key": "nghi-dinh:149/2018/NĐ-CP",
+      "title": "Nghị định số 149/2018/NĐ-CP Quy định chi tiết khoản 3 Điều 63 của Bộ luật lao động về thực hiện quy chế dân chủ ở cơ sở tại nơi làm việc"
+    },
+    {
+      "document_key": "nghi-dinh:157/2018/NĐ-CP",
+      "title": "Nghị định số 157/2018/NĐ-CP Quy định mức lương tối thiểu vùng đối với người lao động làm việc theo hợp đồng lao động"
+    },
+    {
+      "document_key": "nghi-dinh:205/2004/NĐ-CP",
+      "title": "Nghị định số 205/2004/NĐ-CP Quy định hệ thống thang lương, bảng lương và chế độ phụ cấp lương trong các công ty Nhà nước"
+    },
+    {
+      "document_key": "nghi-dinh:27/2014/NĐ-CP",
+      "title": "Nghị định số 27/2014/NĐ-CP Quy định chi tiết thi hành một số điều của Bộ luật Lao động về lao động là người giúp việc gia đình"
+    },
+    {
+      "document_key": "nghi-dinh:28/2011/NĐ-CP",
+      "title": "Nghị định số 28/2011/NĐ-CP Sửa đổi, bổ sung Danh mục doanh nghiệp không được đình công ban hành kèm theo Nghị định số 122/2007/NĐ-CP ngày 27 tháng 7 năm2007 của Chính phủ quy định Danh mục doanh nghiệp không được đình công và việc giải quyết yêu cầu của tập thể lao động ở doanh nghiệp không được đình công"
+    },
+    {
+      "document_key": "nghi-dinh:28/2020/NĐ-CP",
+      "title": "Nghị định số 28/2020/NĐ-CP Quy định xử phạt vi phạm hành chính trong lĩnh vực lao động, bảo hiểm xã hội, đưa người lao động Việt Nam đi làm việc ở nước ngoài theo hợp đồng"
+    },
+    {
+      "document_key": "nghi-dinh:283/2026/NĐ-CP",
+      "title": "Nghị định số 283/2026/NĐ-CP Quy định xử phạt vi phạm hành chính trong lĩnh vực lao động, bảo hiểm xã hội, người lao động Việt Nam đi làm việc ở nước ngoài theo hợp đồng"
+    },
+    {
+      "document_key": "nghi-dinh:29/2019/NĐ-CP",
+      "title": "Nghị định số 29/2019/NĐ-CP Quy định chi tiết thi hành Khoản 3 Điều 54 Bộ luật lao động về việc cấp phép hoạt động cho thuê lại lao động, việc ký quỹ và danh mục công việc được thực hiện cho thuê lại lao động"
+    },
+    {
+      "document_key": "nghi-dinh:33/2016/NĐ-CP",
+      "title": "Nghị định số 33/2016/NĐ-CP Quy định chi tiết và hướng dẫn thi hành một số điều của Luật Bảo hiểm xã hội về bảo hiểm xã hội bắt buộc đối với quân nhân, công an nhân dân và người làm công tác cơ yếu hưởng lương như đối với quân nhân"
+    },
+    {
+      "document_key": "nghi-dinh:39/2003/NĐ-CP",
+      "title": "Nghị định số 39/2003/NĐ-CP Quy định chi tiết và hướng dẫn thi hành một số điều của Bộ luật Lao động về việc làm"
+    },
+    {
+      "document_key": "nghi-dinh:41/2013/NĐ-CP",
+      "title": "Nghị định số 41/2013/NĐ-CP Quy định chi tiết thi hành Điều 220 của Bộ luật Lao động về danh mục đơn vị sử dụng lao động không được đình công và giải quyết yêu cầu của tập thể lao động ở đơn vị sử dụng lao động không được đình công"
+    },
+    {
+      "document_key": "nghi-dinh:44/2013/NĐ-CP",
+      "title": "Nghị định số 44/2013/NĐ-CP Quy định chi tiết thi hành một số điều của Bộ luật Lao động về hợp đồng lao động"
+    },
+    {
+      "document_key": "nghi-dinh:45/2013/NĐ-CP",
+      "title": "Nghị định số 45/2013/NĐ-CP Quy định chi tiết một số điều của Bộ luật Lao động về thời giờ làm việc, thời giờ nghỉ ngơi và an toàn lao động, vệ sinh lao động"
+    },
+    {
+      "document_key": "nghi-dinh:46/2013/NĐ-CP",
+      "title": "Nghị định số 46/2013/NĐ-CP Hướng dẫn Bộ luật Lao động về tranh chấp lao động"
+    },
+    {
+      "document_key": "nghi-dinh:49/2013/NĐ-CP",
+      "title": "Nghị định số 49/2013/NĐ-CP Hướng dẫn Bộ luật Lao động về tiền lương"
+    },
+    {
+      "document_key": "nghi-dinh:60/2013/NĐ-CP",
+      "title": "Nghị định số 60/2013/NĐ-CP Quy định chi tiết khoản 3 Điều 63 của Bộ luật Lao động về thực hiện Quy chế dân chủ ở cơ sở tại nơi làm việc"
+    },
+    {
+      "document_key": "nghi-dinh:68/2008/NĐ-CP",
+      "title": "Nghị định số 68/2008/NĐ-CP Quy định điều kiện, thủ tục thành lập, tổ chức, hoạt động và giải thể cơ sở bảo trợ xã hội"
+    },
+    {
+      "document_key": "nghi-dinh:81/2012/NĐ-CP",
+      "title": "Nghị định số 81/2012/NĐ-CP Sửa đổi, bổ sung một số điều của Nghị định số 68/2008/NĐ-CP ngày 30 tháng 5 năm 2008 của Chính phủ quy định điều kiện, thủ tục thành lập, tổ chức, hoạt động và giải thể cơ sở bảo trợ xã hội và Nghị định số 109/2002/NĐ-CP ngày 27 tháng 12 năm 2002 của Chính phủ sửa đổi, bổ sung một số điều của Nghị định số 195/CP ngày 31 tháng 12 năm 1994 quy định chi tiết và hướng dẫn thi hành một số điều của Bộ luật Lao động về thời giờ làm việc, thời gian nghỉ ngơi"
+    },
+    {
+      "document_key": "nghi-dinh:85/2015/NĐ-CP",
+      "title": "Nghị định số 85/2015/NĐ-CP Quy định chi tiết một số điều của Bộ luật Lao động về \nchính sách đối với lao động nữ"
+    },
+    {
+      "document_key": "nghi-dinh:88/2015/NĐ-CP",
+      "title": "Nghị định số 88/2015/NĐ-CP Sửa đổi, bổ sung một số điều của Nghị định số 95/2013/NĐ-CP ngày 22 tháng 8 năm 2013 \ncủa Chính phủ quy định xử phạt vi phạm hành chính trong lĩnh vực lao động,  bảo hiểm \nxã hội, đưa người lao động Việt Nam đi làm việc ở nước ngoài theo hợp đồng"
+    },
+    {
+      "document_key": "nghi-dinh:95/2013/NĐ-CP",
+      "title": "Nghị định số 95/2013/NĐ-CP Quy định xử phạt vi phạm hành chính trong lĩnh vực lao động, bảo hiểm xã hội, đưa người lao động Việt Nam đi làm việc ở nước ngoài theo hợp đồng"
+    },
+    {
+      "document_key": "thong-tu:19/2003/TT-BLĐTBXH",
+      "title": "Thông tư số 19/2003/TT-BLĐTBXH Hướng dẫn thi hành một số điều của Nghị định số 41/CP ngày 06 tháng 7 năm 1995 của Chính phủ quy định chi tiết và hướng dẫn một số điều của Bộ Luật Lao động về kỷ luật lao động và trách nhiệm vật chất đã được sửa đổi, bổ sung tại Nghị định số 33/2003/NĐ-CP ngày 02 tháng 04 năm 2003 của Chính phủ"
+    },
+    {
+      "document_key": "thong-tu:26/2013/TT-BLĐTBXH",
+      "title": "Thông tư số 26/2013/TT-BLĐTBXH Ban hành Danh mục công việc không được sử dụng lao động nữ"
+    },
+    {
+      "document_key": "thong-tu:40/2014/TT-NHNN",
+      "title": "Thông tư số 40/2014/TT-NHNN Hướng dẫn việc ký quỹ và quản lý tiền ký quỹ của doanh nghiệp cho thuê lại lao động"
+    },
+    {
+      "document_key": "thong-tu:47/2015/TT-BLĐTBXH",
+      "title": "Thông tư số 47/2015/TT-BLĐTBXH Hướng dẫn thực hiện một số điều về hợp đồng lao động, kỷ luật lao động, trách nhiệm vật chất của Nghị định số 05/2015/NĐ-CP ngày 12 tháng 01 năm 2015 của Chính phủ quy định chi tiết và hướng dẫn thi hành một số nội dung của Bộ luật lao động"
+    }
+  ],
+  "download_status": "26_of_26_downloaded_staged_not_imported"
+}

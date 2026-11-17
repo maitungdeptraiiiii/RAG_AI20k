@@ -15,12 +15,13 @@ from pathlib import Path
 from rag.legal.graph.appendix import split_appendices
 from rag.legal.graph.refs import DocIndex, find_refs, ref_kind, resolve
 from rag.legal.graph.relations import doc_relations
+from rag.legal.effectivity import parse_effectivity
 from rag.legal.keys import parse_provision_id, provision_id, unit_sort_key
 from rag.legal.models import Address, LegalDocument, ProvisionVersion
 from rag.legal.store import LegalStore
 from rag.legal.structure import parse_structure
 
-GRAPH_VERSION = "1"
+GRAPH_VERSION = "2"
 SCHEMA = json.loads(Path(__file__).with_name("schema.json").read_text(encoding="utf-8"))
 _STRUCTURAL = ("article", "clause", "point")
 _DOC_RELATIONS = {"SUA_DOI_BO_SUNG": "AMENDS", "THAY_THE": "REPLACES", "BAI_BO": "REPEALS", "HOP_NHAT": "CONSOLIDATES"}
@@ -149,14 +150,49 @@ def build_legal_graph(store: LegalStore, snapshot_id: str, *,
             "doc_type": d.doc_type, "doc_number": d.doc_number, "title": d.title, "issuer": d.issuer,
             "issued_on": _iso(d.issued_on), "effective_from": _iso(d.vbpl_effective_from or (min(starts) if starts else None)),
             "effective_to": _iso(d.vbpl_effective_to or closed), "eff_status": d.eff_status,
-            "is_consolidated": d.is_consolidated, "body_end_offset": body_end})
+            "is_consolidated": d.is_consolidated, "body_end_offset": body_end,
+            "raw_checksum": d.raw_checksum, "raw_text_path": d.raw_text_path,
+            "source_url": d.field_sources.get("raw_text", {}).get("detail") or
+                (f"https://vbpl.vn/TW/Pages/vbpq-toanvan.aspx?ItemID={d.vbpl_id}" if d.vbpl_id else None),
+            "text_source": d.text_source, "source_verified": d.source_verified,
+            "fetched_at": d.fetched_at.isoformat(),
+            "appendix_status": "found" if parts else "not_assessed"})
         appendix_ids[key] = {}
         for n, part in enumerate(parts, 1):
             aid = f"{key}#pl{n}"
             node(aid, "Appendix", {"document_key": key, "number": part.number, "title": part.title, "kind": part.kind,
-                                   "text": part.text, "span_start": part.span[0], "span_end": part.span[1]})
+                                   "text": part.text, "span_start": part.span[0], "span_end": part.span[1],
+                                   "source_url": nodes[key].props.get('source_url'), "raw_checksum": d.raw_checksum,
+                                   "verification_status": "verified" if d.source_verified else "needs_review",
+                                   "valid_from": _iso(d.vbpl_effective_from), "valid_to": _iso(d.vbpl_effective_to)})
             edge("HAS_APPENDIX", key, aid)
             appendix_ids[key].setdefault(part.number.upper(), aid)
+        for tag, source in sorted(d.field_sources.items()):
+            if not tag.startswith('attachment:'):
+                continue
+            path = Path(source['path'])
+            attachment_text = path.read_text(encoding='utf-8')
+            checksum = hashlib.sha256(attachment_text.encode('utf-8')).hexdigest()
+            if checksum != source['checksum']:
+                problems.append(f'attachment_checksum_mismatch:{key}:{tag}')
+                continue
+            _, attached = split_appendices(attachment_text, standalone=True)
+            if not attached:
+                problems.append(f'attachment_no_appendix:{key}:{tag}')
+            for n, part in enumerate(attached, 1):
+                aid = f'{key}#attachment:{checksum[:16]}#pl{n}'
+                node(aid, 'Appendix', {'document_key': key, 'number': part.number, 'title': part.title,
+                    'kind': part.kind, 'text': part.text, 'span_start': part.span[0], 'span_end': part.span[1],
+                    'source_url': source['detail'], 'raw_checksum': checksum,
+                    'artifact_checksum': source.get('artifact_checksum'),
+                    'verification_status': source.get('verification_status', 'needs_review'),
+                    'valid_from': source.get('valid_from', _iso(d.vbpl_effective_from)),
+                    'valid_to': source.get('valid_to', _iso(d.vbpl_effective_to)),
+                    'validity_source': source.get('validity_source')})
+                edge('HAS_APPENDIX', key, aid)
+                appendix_ids[key].setdefault(part.number.upper(), aid)
+            if attached:
+                nodes[key].props['appendix_status'] = 'found'
 
     for d in docs:                                           # điều khoản và phiên bản
         key = d.document_key
@@ -189,16 +225,41 @@ def build_legal_graph(store: LegalStore, snapshot_id: str, *,
         for r in store.relations(key):
             typ = _DOC_RELATIONS.get(r.relation)
             if typ and r.source_key == key and r.status == "confirmed" and r.target_key in keys:
-                edge(typ, key, r.target_key, {"evidence": r.evidence})
+                props = {"evidence": r.evidence}
+                if typ == 'REPEALS':
+                    statements = [s for s in parse_effectivity(parse_structure(texts[key], key)).repeals
+                                  if s.target_number == r.target_key.partition(':')[2]]
+                    props['scope'] = ('partial' if any(s.units or s.partial for s in statements)
+                                      else 'full' if statements else 'unknown')
+                    props['target_units'] = sorted({provision_id(r.target_key, a,
+                        'point' if a.point else 'clause' if a.clause else 'article')
+                        for s in statements for a in s.units})
+                edge(typ, key, r.target_key, props)
         for typ, target, evidence in doc_relations(d, texts[key], index):
             edge(typ, key, target, {"evidence": evidence})
             if typ == "GUIDES":
                 guides.setdefault(key, []).append(target)
 
+    # Imported sources can already have parsed operations without having gone
+    # through discovery. Preserve their evidenced document relationships too.
+    for op in store.operations():
+        if op.source_document_key not in keys or op.target_document_key not in keys:
+            continue
+        if op.parse_status != 'exact' or op.review_status == 'rejected':
+            continue
+        typ = 'REPEALS' if op.operation_type.startswith(('DELETE_', 'REPEAL_')) else 'AMENDS'
+        if op.operation_type == 'UNSUPPORTED':
+            continue
+        edge(typ, op.source_document_key, op.target_document_key, {
+            'evidence': op.source_locator, 'scope': 'full' if op.operation_type == 'REPEAL_DOCUMENT' else 'partial',
+            'verification_status': op.review_status, 'effective_from': _iso(op.effective_from)})
+
     # văn bản sửa đổi: "Sửa đổi khoản 1 Điều 176 như sau:" nhắc điều khoản của luật ĐÍCH, không phải của chính nó;
     # quan hệ đó đã có ở CHANGED_BY, nên dẫn chiếu trống tên văn bản trong các văn bản này không được giải
     amending = {d.document_key for d in docs if _AMENDING_TITLE.search(d.title)} | {
         r.source_key for d in docs for r in store.relations(d.document_key) if r.relation == "SUA_DOI_BO_SUNG"}
+    amending |= {o.source_document_key for o in store.operations() if o.target_document_key in keys
+                 and o.operation_type != 'REPEAL_DOCUMENT' and o.parse_status == 'exact'}
     stats: Counter = Counter()
     missing_docs: Counter = Counter()
     for d in docs:                                           # phiên bản, CHANGED_BY, REFERS_TO
@@ -232,7 +293,10 @@ def build_legal_graph(store: LegalStore, snapshot_id: str, *,
                     stats["resolved_external"] += res.doc_key != key
                     kind = ref_kind(ref, res.doc_key, own, guided_keys=guided, in_scope_article=in_scope)
                     stats[f"kind:{kind}"] += 1
-                    edge("REFERS_TO", vid, res.target, {"raw": ref.raw, "offset": ref.offset, "kind": kind}, key=(kind,))
+                    edge("REFERS_TO", vid, res.target, {"raw": ref.raw, "offset": ref.offset, "kind": kind,
+                         "guidance_scope": ("scope" if in_scope else "substantive_candidate") if kind == "details" else "none",
+                         "extraction_method": "pattern"},
+                         key=(kind, ref.offset))
             title = lead = None
             if v.kind == "article":
                 title = _at(extras.get(provision_id(key, Address(a.article, part="title"), "article_title"), []), v.valid_from)
@@ -258,7 +322,8 @@ def build_legal_graph(store: LegalStore, snapshot_id: str, *,
                 if target is None:
                     stats["changed_by_skipped"] += 1
                     continue
-                edge("CHANGED_BY", vid, target, {"operation_id": op_id, "operation_type": op.operation_type}, key=(op_id,))
+                edge("CHANGED_BY", vid, target, {"operation_id": op_id, "operation_type": op.operation_type,
+                     "effective_from": _iso(op.effective_from), "source_locator": op.source_locator}, key=(op_id,))
 
     node_list = tuple(sorted(nodes.values(), key=lambda n: n.node_id))
     edge_list = tuple(sorted(edges.values(), key=lambda e: (e.type, e.src, e.dst, json.dumps(e.props, sort_keys=True, ensure_ascii=False))))
@@ -289,7 +354,12 @@ def validate(build: LegalGraphBuild, store: LegalStore) -> list[str]:
             errors.append(f"unknown_relation:{e.type}")
         if e.src not in by_id or e.dst not in by_id:
             errors.append(f"dangling_edge:{e.type}:{e.src}->{e.dst}")
-        elif e.type == "REFERS_TO":
+            continue
+        allowed = SCHEMA.get('endpoints', {}).get(e.type)
+        if allowed and (by_id[e.src].label not in allowed[0] or by_id[e.dst].label not in allowed[1]):
+            errors.append(f'invalid_endpoints:{e.type}:{e.src}->{e.dst}')
+            continue
+        if e.type == "REFERS_TO":
             text = by_id[e.src].props.get("text", "")
             if text[e.props["offset"]:e.props["offset"] + len(e.props["raw"])] != e.props["raw"]:
                 errors.append(f"ref_raw_mismatch:{e.src}@{e.props['offset']}")
@@ -297,6 +367,10 @@ def validate(build: LegalGraphBuild, store: LegalStore) -> list[str]:
     per_doc: Counter = Counter()
     for n in build.nodes:
         if n.label == "ProvisionVersion":
+            if n.props.get('valid_to') is not None and n.props['valid_to'] <= n.props['valid_from']:
+                errors.append(f'invalid_interval:{n.node_id}')
+            if n.props.get('verification_status') not in ('verified', 'needs_review', 'conflicted'):
+                errors.append(f'invalid_verification_status:{n.node_id}')
             spans.setdefault(n.props["provision_id"], []).append((n.props["valid_from"], n.props.get("valid_to")))
             per_doc[n.props["document_key"]] += 1
     for pid, items in spans.items():

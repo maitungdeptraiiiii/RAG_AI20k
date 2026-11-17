@@ -59,7 +59,7 @@ def _address(value: Any) -> Address | None:
 
 
 class LegalService:
-    def __init__(self, store: LegalStore, *, now: Callable[[], datetime] = _now, code_version: str = "legal-v1") -> None:
+    def __init__(self, store: LegalStore, *, now: Callable[[], datetime] = _now, code_version: str = "legal-v3") -> None:
         self.store = store
         self.now = now
         self.code_version = code_version
@@ -181,7 +181,7 @@ class LegalService:
                 if day is not None:
                     default_dates[src] = day
         inputs = self._inputs(doc, ops)
-        build_id = _sha1(key, inputs)[:16]
+        build_id = _sha1(key, inputs, self.code_version)[:16]
         versions = build_versions(doc, provisions, effectivity, ops, build_id=build_id, default_dates=default_dates)
         versions = self._flag_known_gaps(doc, ops, versions)
         if not doc.source_verified:
@@ -255,6 +255,15 @@ class LegalService:
                 continue
             text = self.text_for(rel.source_key)
             cutoff = parse_consolidation_header(text).cutoff
+            info = parse_consolidation_header(text)
+            # A consolidation can reveal amendments the crawler/parser missed.
+            # Do not infer their contents or silently keep an unmodified version
+            # verified when a named amending source has no target operations.
+            for number, effective in info.included:
+                sources = {d.document_key for d in self.store.documents() if d.doc_number == number}
+                if not any(o.source_document_key in sources for o in self.store.operations(target_key=key)):
+                    versions = _flag(versions, lambda pid: True, effective,
+                                     f'operation.missing_consolidated_amendment:{number}')
             if cutoff is None:
                 versions = [replace(v, notes=v.notes + ("note:vbhn_cutoff_unknown",)) for v in versions]
                 continue

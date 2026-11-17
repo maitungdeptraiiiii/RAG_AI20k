@@ -128,7 +128,9 @@ def test_publish_switches_pointer_and_survives_interruption(legal_store, graph_s
 
     graph_store.publish(b)                                              # dọn phần dở dang rồi công bố lại
     assert graph_store.current()["snapshot_id"] == "t-b"
-    assert graph_store.run(count) == [{"b": b.build_id, "c": len(b.nodes)}]
+    assert {row['b']: row['c'] for row in graph_store.run(count)} == {
+        a.build_id: len(a.nodes), b.build_id: len(b.nodes)}
+    assert LegalGraph(graph_store, build_id=a.build_id).text_at(f'{CODE}#d25.k1', date(2025, 3, 1))['in_force']
     manager = FakeManager(legal_store, "t-b")
     assert sync_legal_graph(manager, graph_store)["status"] == "up_to_date"
     assert graph_status(manager, graph_store)["stale"] is False
@@ -182,3 +184,43 @@ def test_neo4j_down_reports_unavailable_without_raising(legal_store):
         assert status["stale"] is True and "error" in status
     finally:
         dead.close()
+
+
+def test_reference_target_effectivity_and_scope(legal_store, graph_store):
+    build = build_legal_graph(legal_store, 'target-expired')
+    nodes = tuple(replace(n, props=n.props | {'valid_to': '2024-01-01'})
+                  if n.node_id == f'{CODE}#d21@2021-01-01' else n for n in build.nodes)
+    graph_store.publish(replace(build, nodes=nodes))
+    g = LegalGraph(graph_store).pinned()
+    refs = g.references(f'{CODE}#d25', date(2025, 3, 1))
+    target = next(r for r in refs if r['target'] == f'{CODE}#d21')
+    assert target['target_in_force'] is False and target['target_text'] is None
+    assert g.guidance(f'{CODE}#d21.k4', date(2025, 3, 1))[0]['guidance_scope'] == 'scope'
+
+
+def test_same_build_is_isolated_between_namespaces(legal_store, graph_store):
+    other = LegalGraphStore(graph_store.config, name='test-legal-other')
+    try:
+        build = build_legal_graph(legal_store, 'same-build-two-namespaces')
+        graph_store.publish(build)
+        other.publish(build)
+        a = LegalGraph(graph_store).text_at(f'{CODE}#d25.k1', date(2025, 3, 1))
+        b = LegalGraph(other).text_at(f'{CODE}#d25.k1', date(2025, 3, 1))
+        assert a['in_force'] and b['in_force'] and a['text'] == b['text']
+    finally:
+        other.clear()
+        other.close()
+
+
+def test_second_publisher_cannot_replace_a_build_in_progress(legal_store, graph_store):
+    from rag.legal.graph.neo4j_store import GraphPublicationBusy
+    other = LegalGraphStore(graph_store.config, name=graph_store.name)
+    a, b = (build_legal_graph(legal_store, s) for s in ('lease-a', 'lease-b'))
+    def competing_publish():
+        with pytest.raises(GraphPublicationBusy):
+            other.publish(b)
+    try:
+        graph_store.publish(a, before_switch=competing_publish)
+        assert graph_store.current()['current_build'] == a.build_id
+    finally:
+        other.close()

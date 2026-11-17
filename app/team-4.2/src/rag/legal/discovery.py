@@ -184,8 +184,8 @@ def discover(client: Any, store: LegalStore, seeds: Sequence[Seed], raw_dir: Pat
                         report.rejected.append((f"{rep.target_name} số {rep.target_number}", "discovery.not_found"))
                         continue
                     remember(*got)
-                relation = "BAI_BO" if rep.units else "THAY_THE"     # bãi bỏ một phần ≠ thay thế cả luật
-                evidence = f"hết hiệu lực: {rep.target_name} số {rep.target_number}"
+                relation = "BAI_BO" if rep.units or rep.partial else "THAY_THE"
+                evidence = f"{'bãi bỏ một phần' if rep.units or rep.partial else 'hết hiệu lực'}: {rep.target_name} số {rep.target_number}"
                 store.add_relation(DocumentRelation(key, old_key, relation, evidence, "confirmed"))
                 report.added.append((old_key, relation, evidence))
                 queue.append((old_key, depth + 1))

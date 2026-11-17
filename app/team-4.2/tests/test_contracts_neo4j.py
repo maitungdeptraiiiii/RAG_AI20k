@@ -55,7 +55,7 @@ def test_publish_replaces_and_isolates(neo4j_store, build_for):
 
 
 def test_driver_has_short_timeouts(monkeypatch):
-    import neo4j
+    neo4j = pytest.importorskip("neo4j")
 
     seen = {}
 

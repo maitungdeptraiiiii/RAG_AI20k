@@ -116,4 +116,4 @@ def test_default_doc_build_id_matches_old_formula(svc_with_doc):
     run = _build(svc)
     doc = svc.store.document(KEY)
     inputs = _sha1(doc.raw_checksum)
-    assert run.inputs_checksum == inputs and run.build_id == _sha1(KEY, inputs)[:16]
+    assert run.inputs_checksum == inputs and run.build_id == _sha1(KEY, inputs, svc.code_version)[:16]

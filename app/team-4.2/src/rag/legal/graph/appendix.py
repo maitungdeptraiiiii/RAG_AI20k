@@ -13,7 +13,7 @@ from rag.legal.structure import ARTICLE_RE
 _SIGNATURE = re.compile(r"^(?:Nơi\s+nhận\s*:|TM\.\s|KT\.\s|TUQ\.\s|BỘ\s+TRƯỞNG\b|THỦ\s+TƯỚNG\b|CHỦ\s+TỊCH\s+QUỐC\s+HỘI\b|"
                         r"CHỦ\s+TỊCH\s+NƯỚC\b|CHÁNH\s+ÁN\b|VIỆN\s+TRƯỞNG\b)")
 _APPENDIX_HEAD = re.compile(r"^(?:PHỤ\s+LỤC|Phụ\s+lục)(?:\s+(?:số\s+)?(?P<number>[IVXLC]+|\d+))?\s*[.:]?\s*(?P<rest>.*)$")
-_FLAT_HEAD = re.compile(r"^(?:(?:MẪU|Mẫu)\s+(?:số\s+)?(?P<number>\d+\S*)|DANH\s+MỤC\b)")
+_FLAT_HEAD = re.compile(r"^(?:(?:MẪU|Mẫu)\s+(?:số\s+)?(?P<number>\d+\S*)|(?:BỔ\s+SUNG\s+)?DANH\s+MỤC\b)", re.IGNORECASE)
 _BLANKS = re.compile(r"\.{5,}|…{3,}")
 
 
@@ -35,7 +35,7 @@ def _kind(title: str, body: str) -> str:
     return "other"
 
 
-def split_appendices(text: str) -> tuple[int | None, list[AppendixPart]]:
+def split_appendices(text: str, *, standalone: bool = False) -> tuple[int | None, list[AppendixPart]]:
     """(vị trí kết thúc phần thân, các phụ lục). Vị trí là None khi văn bản không có khối chữ ký / phần sau thân."""
     text = unicodedata.normalize("NFC", text)
     lines = text.split("\n")
@@ -56,6 +56,9 @@ def split_appendices(text: str) -> tuple[int | None, list[AppendixPart]]:
         elif seen and _SIGNATURE.match(line):
             body_end = i
             break
+    if body_end is None and standalone:
+        body_end = next((i for i, line in enumerate(lines)
+                         if _APPENDIX_HEAD.match(line.strip()) or _FLAT_HEAD.match(line.strip())), None)
     if body_end is None:
         return None, []
     heads: list[tuple[int, str]] = []                 # (dòng, số)

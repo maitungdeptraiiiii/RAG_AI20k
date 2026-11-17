@@ -1,0 +1,17 @@
+{
+  "system": "structural-anchors-v2",
+  "uri": "bolt://127.0.0.1:17687",
+  "namespace": "legal",
+  "snapshot_id": "s20261117024643-c06f0c",
+  "corpus_sha256": "09d697dc75e7bdc3ca0e5e8afd8caba062c393cd5b51fe7db36472ef3f965ed8",
+  "concept_catalog": "evals/team-4.2/contract_graph_benchmark/configs/structural-concepts-v2.json",
+  "concept_catalog_sha256": "57e9a18ef651620c02abddf041859d63397aec82dc810048637f1b1a8ac46cf4",
+  "max_passages": 20,
+  "max_evidence_utf8_bytes": 16000,
+  "traversal": "anchors; active replacement-chain value sources; guidance; outgoing references one hop",
+  "ranking": "anchors > value_source > guidance > references; original source order",
+  "cache": "query result cache across cases within one pinned build",
+  "uses_contract_text": false,
+  "uses_llm_or_embeddings": false,
+  "anchor_status": "v2: added d96, d40.k3, d109, expanded d98, added nd145#d80; plus incoming guidance references"
+}

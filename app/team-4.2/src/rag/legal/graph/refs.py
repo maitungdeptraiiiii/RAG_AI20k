@@ -36,6 +36,7 @@ _APPENDIX = re.compile(r"(?<![\w])Phụ\s+lục(?:\s+(?:số\s+)?(?P<number>[IVX
                        rf"(?:{_KINDS})\s+này)", re.IGNORECASE)
 _SPLIT = re.compile(r"\s*(?:,|và|hoặc)\s*(?:điểm\s+|khoản\s+|Điều\s+)?", re.IGNORECASE)
 _DETAIL_CUE = re.compile(r"quy\s+định\s+chi\s+tiết|hướng\s+dẫn", re.IGNORECASE)
+_ARTICLE_RANGE = re.compile(r"\btừ[ \t]+Điều[ \t]+(?P<first>\d+[a-zđ]?)[ \t]+đến[ \t]+(?:hết[ \t]+)?Điều[ \t]+(?P<last>\d+[a-zđ]?)\b", re.IGNORECASE)
 
 
 @dataclass(frozen=True)
@@ -47,6 +48,7 @@ class Ref:
     doc_kind: str | None = None             # loại văn bản đích nêu sau địa chỉ
     doc_tail: str = ""                      # phần chữ sau loại văn bản (tên luật / "này" / "số N ...")
     appendix: str | None = None             # số phụ lục ("" nếu không ghi số)
+    problem: str | None = None
 
 
 @dataclass(frozen=True)
@@ -89,7 +91,20 @@ def find_refs(text: str) -> list[Ref]:
     text = unicodedata.normalize("NFC", text)
     out: list[Ref] = []
     taken: list[tuple[int, int]] = []
+    ranges = []
+    for m in _ARTICLE_RANGE.finditer(text):
+        first, last = m.group('first'), m.group('last')
+        good = first.isdigit() and last.isdigit() and 0 <= int(last) - int(first) < 100
+        addresses = tuple(Address(str(i)) for i in range(int(first), int(last) + 1)) if good else ()
+        d = _DOC_AFTER.match(text, m.end())
+        out.append(Ref(m.group(), m.start(), addresses,
+                       doc_kind=_norm(d.group('kind')) if d else None,
+                       doc_tail=d.group('tail') if d else '', problem=None if good else 'unsupported_range'))
+        ranges.append((m.start(), m.end()))
+        taken.append((m.start(), d.start('tail') if d else m.end()))
     for m in _ADDRESS.finditer(text):
+        if any(a <= m.start() < b for a, b in ranges):
+            continue
         bare = not m.group("pts") and not m.group("cls")
         if bare and (m.group("this_art") or m.group("this_cl")):
             continue                                  # "Điều này" đứng riêng: không trỏ đi đâu
@@ -165,6 +180,8 @@ def resolve(ref: Ref, *, source_key: str, source_address: Address, valid_from: d
             provision_ids: set[str] | frozenset[str], appendices: dict[str, dict[str, str]] | None = None,
             guided_key: str | None = None, in_scope_article: bool = False) -> list[Resolved]:
     """Nút đích của từng địa chỉ trong `ref` theo năm quy tắc ở spec §5.2."""
+    if ref.problem:
+        return [Resolved(None, ref.problem)]
     if ref.appendix is not None:
         mine = (appendices or {}).get(source_key, {})
         target = mine.get(ref.appendix) or (next(iter(mine.values())) if not ref.appendix and len(mine) == 1 else None)

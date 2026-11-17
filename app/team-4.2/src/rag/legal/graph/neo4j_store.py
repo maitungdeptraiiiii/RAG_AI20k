@@ -1,8 +1,12 @@
-"""Ghi đồ thị luật vào Neo4j. Công bố bằng con trỏ: ghi build mới theo lô -> đổi `LGMeta.current_build` -> xóa
-build cũ. Mọi truy vấn lọc theo `current_build`, nên người đọc không bao giờ thấy đồ thị dở dang."""
+"""Publish a validated build by pointer under a renewable namespace writer lease.
+
+Old builds remain available to pinned readers. Removal is explicit offline
+maintenance, never part of the pointer switch.
+"""
 from __future__ import annotations
 
 import os
+import uuid
 from collections import defaultdict
 from collections.abc import Callable, Mapping
 from datetime import datetime, timezone
@@ -12,6 +16,10 @@ from rag.legal.graph.build import SCHEMA, LegalGraphBuild
 
 _LABELS = frozenset(SCHEMA["nodes"])
 _TYPES = frozenset(SCHEMA["relations"])
+
+
+class GraphPublicationBusy(RuntimeError):
+    """Another publisher holds this namespace's renewable lease."""
 
 
 def legal_graph_config_from_env(env: Mapping[str, str] = os.environ) -> GraphConfig | None:
@@ -69,6 +77,8 @@ class LegalGraphStore:
         for q in ("CREATE INDEX lgnode_id IF NOT EXISTS FOR (n:LGNode) ON (n.node_id, n.build_id)",
                   "CREATE INDEX lgnode_build IF NOT EXISTS FOR (n:LGNode) ON (n.build_id)",
                   "CREATE INDEX lgversion_pid IF NOT EXISTS FOR (n:ProvisionVersion) ON (n.provision_id, n.build_id)",
+                  "CREATE CONSTRAINT lgnode_identity IF NOT EXISTS FOR (n:LGNode) REQUIRE (n.graph, n.build_id, n.node_id) IS UNIQUE",
+                  "CREATE INDEX lgprovision_lookup IF NOT EXISTS FOR (n:Provision) ON (n.graph, n.build_id, n.node_id)",
                   "CREATE CONSTRAINT lgmeta_id IF NOT EXISTS FOR (m:LGMeta) REQUIRE m.id IS UNIQUE"):
             def go(q=q):
                 with self._session() as s:
@@ -88,6 +98,36 @@ class LegalGraphStore:
 
     def publish(self, build: LegalGraphBuild, *, batch: int = 2000,
                 before_switch: Callable[[], None] | None = None) -> None:
+        self.ensure_schema()
+        token = uuid.uuid4().hex
+        def acquire():
+            with self._session() as session:
+                return session.execute_write(lambda tx: list(tx.run(
+                    "MERGE (m:LGMeta {id: $graph}) "
+                    "SET m.lock_version = coalesce(m.lock_version, 0) + 1 "
+                    "WITH m WHERE m.publisher IS NULL OR m.lease_until < datetime() "
+                    "SET m.publisher = $token, m.lease_until = datetime() + duration('PT10M') "
+                    "RETURN m.id AS id", graph=self.name, token=token)))
+        if not self._guard(acquire):
+            raise GraphPublicationBusy(f'Graph {self.name} đang được công bố')
+        try:
+            self._publish(build, token=token, batch=batch, before_switch=before_switch)
+        finally:
+            self._write("MATCH (m:LGMeta {id: $graph}) WHERE m.publisher = $token "
+                        "REMOVE m.publisher, m.lease_until", graph=self.name, token=token)
+
+    def _renew(self, token: str) -> None:
+        def go():
+            with self._session() as session:
+                return session.execute_write(lambda tx: list(tx.run(
+                    "MATCH (m:LGMeta {id: $graph}) WHERE m.publisher = $token "
+                    "SET m.lease_until = datetime() + duration('PT10M') RETURN m.id AS id",
+                    graph=self.name, token=token)))
+        if not self._guard(go):
+            raise GraphPublicationBusy('Mất quyền công bố graph')
+
+    def _publish(self, build: LegalGraphBuild, *, token: str, batch: int = 2000,
+                before_switch: Callable[[], None] | None = None) -> None:
         """Ghi build rồi đổi con trỏ. Lỗi trước bước đổi con trỏ: build cũ vẫn là build đang công bố.
         `before_switch` chỉ dùng cho kiểm thử (mô phỏng bị ngắt giữa chừng)."""
         bid = build.build_id
@@ -104,25 +144,29 @@ class LegalGraphStore:
         self._delete_build("n.build_id = $bid", bid=bid)   # dọn phần dở dang của một lần ghi trước bị ngắt
         for label, rows in by_label.items():
             for chunk in _batches(rows, batch):
+                self._renew(token)
                 self._write(f"UNWIND $rows AS r CREATE (n:LGNode:{label}) SET n = r.props, n.node_id = r.node_id, "
                             "n.graph = $graph", rows=chunk, graph=self.name)
         for typ, rows in by_type.items():
             for chunk in _batches(rows, batch):
-                self._write("UNWIND $rows AS r MATCH (a:LGNode {node_id: r.src, build_id: $bid}) "
-                            "MATCH (b:LGNode {node_id: r.dst, build_id: $bid}) "
-                            f"CREATE (a)-[e:{typ}]->(b) SET e = r.props", rows=chunk, bid=bid)
+                self._renew(token)
+                self._write("UNWIND $rows AS r MATCH (a:LGNode {node_id: r.src, build_id: $bid, graph: $graph}) "
+                            "MATCH (b:LGNode {node_id: r.dst, build_id: $bid, graph: $graph}) "
+                            f"CREATE (a)-[e:{typ}]->(b) SET e = r.props", rows=chunk, bid=bid, graph=self.name)
         if before_switch:
             before_switch()
+        self._renew(token)
         self._write("MERGE (m:LGMeta {id: $graph}) SET m.current_build = $bid, m.snapshot_id = $sid, "
                     "m.published_at = $at, m.n_nodes = $nn, m.n_edges = $ne",
                     bid=bid, sid=build.snapshot_id, at=datetime.now(timezone.utc).isoformat(),
                     nn=len(build.nodes), ne=len(build.edges), graph=self.name)
-        self._delete_build("n.build_id <> $bid", bid=bid)
+        # Do not delete old builds here: in-flight pinned readers still need them.
+        # clear() remains the explicit offline maintenance operation.
 
     def current(self) -> dict | None:
         """Con trỏ đang công bố: current_build, snapshot_id, published_at, n_nodes, n_edges. None nếu chưa có."""
         rows = self.run("MATCH (m:LGMeta {id: $graph}) RETURN properties(m) AS p", graph=self.name)
-        return rows[0]["p"] if rows else None
+        return rows[0]["p"] if rows and rows[0]['p'].get('current_build') else None
 
     def run(self, query: str, **params) -> list[dict]:
         """Truy vấn chỉ đọc."""
@@ -140,4 +184,4 @@ class LegalGraphStore:
         self._driver.close()
 
 
-__all__ = ["GraphUnavailable", "LegalGraphStore", "legal_graph_config_from_env"]
+__all__ = ["GraphUnavailable", "GraphPublicationBusy", "LegalGraphStore", "legal_graph_config_from_env"]

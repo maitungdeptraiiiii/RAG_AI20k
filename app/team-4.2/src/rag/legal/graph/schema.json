@@ -1,5 +1,19 @@
 {
-  "version": "1",
+  "version": "2",
   "nodes": ["LawDoc", "Provision", "ProvisionVersion", "Appendix"],
-  "relations": ["HAS_PROVISION", "CHILD_OF", "HAS_VERSION", "HAS_APPENDIX", "AMENDS", "REPLACES", "REPEALS", "CONSOLIDATES", "GUIDES", "BASED_ON", "REFERS_TO", "CHANGED_BY"]
+  "relations": ["HAS_PROVISION", "CHILD_OF", "HAS_VERSION", "HAS_APPENDIX", "AMENDS", "REPLACES", "REPEALS", "CONSOLIDATES", "GUIDES", "BASED_ON", "REFERS_TO", "CHANGED_BY"],
+  "endpoints": {
+    "HAS_PROVISION": [["LawDoc"], ["Provision"]],
+    "CHILD_OF": [["Provision"], ["Provision"]],
+    "HAS_VERSION": [["Provision"], ["ProvisionVersion"]],
+    "HAS_APPENDIX": [["LawDoc"], ["Appendix"]],
+    "REFERS_TO": [["ProvisionVersion"], ["Provision", "LawDoc", "Appendix"]],
+    "CHANGED_BY": [["ProvisionVersion"], ["Provision"]],
+    "AMENDS": [["LawDoc"], ["LawDoc"]],
+    "REPLACES": [["LawDoc"], ["LawDoc"]],
+    "REPEALS": [["LawDoc"], ["LawDoc"]],
+    "CONSOLIDATES": [["LawDoc"], ["LawDoc"]],
+    "GUIDES": [["LawDoc"], ["LawDoc"]],
+    "BASED_ON": [["LawDoc"], ["LawDoc"]]
+  }
 }

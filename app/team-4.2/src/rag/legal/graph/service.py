@@ -5,16 +5,16 @@ from __future__ import annotations
 import logging
 
 from rag.legal.graph.build import LegalGraphBuild, build_legal_graph, graph_build_id, validate
-from rag.legal.graph.neo4j_store import GraphUnavailable, LegalGraphStore, legal_graph_config_from_env
+from rag.legal.graph.neo4j_store import GraphUnavailable, GraphPublicationBusy, LegalGraphStore, legal_graph_config_from_env
 
 log = logging.getLogger(__name__)
 
 
-def build_current(manager) -> tuple[LegalGraphBuild, list[str]]:
+def build_current(manager, snapshot_id: str | None = None) -> tuple[LegalGraphBuild, list[str]]:
     """(bản dựng từ snapshot đang công bố, lỗi kiểm tra). Không ghi gì."""
-    snapshot = manager.current()
-    store = manager.store(snapshot.snapshot_id)
-    build = build_legal_graph(store, snapshot.snapshot_id)
+    snapshot_id = snapshot_id or manager.current().snapshot_id
+    store = manager.store(snapshot_id)
+    build = build_legal_graph(store, snapshot_id)
     return build, validate(build, store)
 
 
@@ -51,12 +51,14 @@ def sync_legal_graph(manager, store: LegalGraphStore | None) -> dict:
         meta = store.current()
         if meta and meta.get("current_build") == graph_build_id(snapshot_id):
             return {"status": "up_to_date", "snapshot_id": snapshot_id, "build_id": meta["current_build"]}
-        build, errors = build_current(manager)
+        build, errors = build_current(manager, snapshot_id)
         if errors:
             log.error("Đồ thị luật không hợp lệ, không công bố: %s", errors[:5])
             return {"status": "invalid", "snapshot_id": snapshot_id, "errors": errors, "report": build.report}
         store.publish(build)
         return {"status": "published", "snapshot_id": snapshot_id, "build_id": build.build_id, "report": build.report}
+    except GraphPublicationBusy as e:
+        return {"status": "busy", "snapshot_id": snapshot_id, "error": str(e)}
     except GraphUnavailable as e:
         log.warning("Đồ thị luật chưa cập nhật (snapshot %s): %s", snapshot_id, e)
         return {"status": "unavailable", "snapshot_id": snapshot_id, "error": str(e)}

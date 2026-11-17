@@ -53,7 +53,10 @@ def _tree(provisions: Sequence[Provision]) -> dict[str, _Article]:
     for art in (p for p in provisions if p.kind == "article"):
         lines = art.text.split("\n")
         clauses = [p for p in by_parent.get(art.provision_id, []) if p.kind == "clause"]
-        first = lines.index(clauses[0].text.split("\n")[0], 1) if clauses else len(lines)
+        # Structure parsing strips outer indentation; PDF text often retains it
+        # on the parent article. Locate the same line without changing its text.
+        first = next(i for i in range(1, len(lines))
+                     if lines[i].strip() == clauses[0].text.split('\n')[0].strip()) if clauses else len(lines)
         node = _Article(lines[0], titles.get(art.address.article, ""), lines[1:first])
         for cl in clauses:
             kids = by_parent.get(cl.provision_id, [])
@@ -256,6 +259,10 @@ def _build(document: LegalDocument, provisions: Sequence[Provision], effectivity
                     reasons = opened[pid].reasons
                     close(pid, day)
                     opened[pid] = _Open(kind, text, day, touching, reasons)
+                elif touching:
+                    # A no-op amendment is still evidence. Keep the content interval,
+                    # retain the operation; its effective date is stored on CHANGED_BY.
+                    opened[pid].ops = tuple(dict.fromkeys((*opened[pid].ops, *touching)))
             elif pid in starts:
                 start, reasons = starts[pid]
                 if start == day or (start < day and touching):

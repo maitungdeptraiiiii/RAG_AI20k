@@ -42,7 +42,7 @@ _AMENDED_BY = re.compile(r"(?:đã\s+)?được\s+sửa\s+đổi(?:\s*,\s*bổ\s
 _LIST_LEAD = re.compile(r"sau\s+đây\s+hết\s+hiệu\s+lực(?:\s+thi\s+hành)?\s*:\s*$", re.IGNORECASE)
 _LIST_ITEM = re.compile(r"^[a-zđ]\)\s+")
 _PARENTHETICAL = re.compile(r"\(sau\s+đây[^)]*\)", re.IGNORECASE)
-_PARTIAL = re.compile(r"(?:điều|khoản|điểm|chương|mục|phần)\s+\S+(?:\s+\S+){0,8}\s+của\s*$", re.IGNORECASE)
+_PARTIAL = re.compile(r"(?:điều|khoản|điểm|chương|mục|phần|phụ\s+lục)\s+\S+(?:\s+\S+){0,8}\s+(?:của|ban\s+hành\s+kèm\s+theo)\s*$", re.IGNORECASE)
 _HANDLED = ("effectivity.transition", "effectivity.unit_exception", "effectivity.multiple_dates",
             "effectivity.date_mismatch")
 
@@ -56,6 +56,7 @@ class RepealStatement:
     span: tuple[int, int]
     units: tuple[Address, ...] = ()          # khác rỗng: chỉ các đơn vị này hết hiệu lực (bãi bỏ một phần)
     amended_by: tuple[str, ...] = ()         # "đã được sửa đổi, bổ sung theo Luật số ..." (luật sửa đổi đã biết)
+    partial: bool = False                  # includes appendices / scopes not representable as Address
 
 
 @dataclass(frozen=True)
@@ -166,12 +167,11 @@ def parse_effectivity(provisions: Sequence[Provision]) -> EffectivityInfo:
             offset = where.find(t.group(0))
             start = eff.span[0] + base + max(offset, 0)
             units: tuple[Address, ...] = ()
-            if _PARTIAL.search(subject[:t.start()]):
+            partial = bool(_PARTIAL.search(subject[:t.start()]))
+            if partial:
                 units = tuple(units_of(subject[prev_end:t.start()]))   # "khoản 3 Điều 248 của Luật X": bãi bỏ một phần
-                if not units:
-                    continue
             repeals.append(RepealStatement(re.sub(r"\s+", " ", name), t.group(3), effective, has_exc,
-                                           (start, start + len(t.group(0))), units, () if units else amended_by))
+                                           (start, start + len(t.group(0))), units, () if partial else amended_by, partial))
             prev_end = t.end()
 
     def effective_of(sentence: str) -> date | None:

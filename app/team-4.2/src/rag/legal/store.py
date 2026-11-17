@@ -7,6 +7,7 @@ import json
 import sqlite3
 import types
 import typing
+from functools import lru_cache
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from datetime import date, datetime
@@ -18,6 +19,13 @@ from rag.legal.models import (AmendmentOperation, BuildRun, DocumentRelation, Le
 from rag.legal.targets import law_name
 
 T = TypeVar("T")
+
+
+@lru_cache(maxsize=None)
+def _model_hints(model: type) -> dict:
+    # Model annotations are immutable. Resolving them for every row dominates
+    # reading tens of thousands of provision versions during a graph build.
+    return typing.get_type_hints(model)
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS documents (document_key TEXT PRIMARY KEY, payload TEXT NOT NULL);
@@ -70,7 +78,7 @@ def decode(tp: Any, value: Any) -> Any:
     if tp is date:
         return date.fromisoformat(value)
     if dataclasses.is_dataclass(tp):
-        hints = typing.get_type_hints(tp)
+        hints = _model_hints(tp)
         return tp(**{f.name: decode(hints[f.name], value.get(f.name)) for f in dataclasses.fields(tp) if f.name in value})
     return value
 

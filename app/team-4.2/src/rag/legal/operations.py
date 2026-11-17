@@ -134,10 +134,11 @@ def repeal_operations(source: LegalDocument, effectivity: EffectivityInfo, *,
             base.append("operation.no_effective_date")
         if rep.has_exception:
             base.append("note:transition_exception")
-        targets = [(_DELETE_KIND[_kind(u)], u) for u in rep.units] if rep.units else [("REPEAL_DOCUMENT", None)]
+        targets = [(_DELETE_KIND[_kind(u)], u) for u in rep.units] if rep.units else [
+            ("UNSUPPORTED" if rep.partial else "REPEAL_DOCUMENT", None)]
         for op_type, target in targets:
             reasons = list(base)
-            if rep.units:
+            if rep.units or rep.partial:
                 reasons.append("operation.partial_repeal")       # bãi bỏ một phần: cần người xác nhận phạm vi
             else:
                 reasons += [f"note:amended_by:{n}" for n in rep.amended_by]
@@ -148,7 +149,7 @@ def repeal_operations(source: LegalDocument, effectivity: EffectivityInfo, *,
                 source_locator=f"Điều {effectivity.article}", source_address=Address(effectivity.article or "0"),
                 source_span=rep.span, sequence=sequence, target_document_key=key, target_law_name=rep.target_name,
                 operation_type=op_type, target=target, anchor=None, new_text=None, old_phrase=None,  # type: ignore[arg-type]
-                effective_from=rep.effective, parse_status="exact",
+                effective_from=rep.effective, parse_status="unsupported" if op_type == "UNSUPPORTED" else "exact",
                 review_status="pending" if blocking else "auto_accepted", status_reasons=tuple(reasons)))
             sequence += 1
     return out

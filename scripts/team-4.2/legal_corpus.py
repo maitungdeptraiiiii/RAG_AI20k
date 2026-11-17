@@ -40,7 +40,8 @@ def _sha(path: Path) -> str:
 
 def _files(base: Path) -> list[Path]:
     current = (base / "CURRENT").read_text(encoding="utf-8").strip()
-    include = [base / "raw", base / "CURRENT", base / "snapshots" / "index.sqlite", base / "snapshots" / current]
+    include = [base / "raw", base / "attachments", base / "supplements", base / "CURRENT",
+               base / "snapshots" / "index.sqlite", base / "snapshots" / current]
     out: list[Path] = []
     for p in include:
         if p.is_file():

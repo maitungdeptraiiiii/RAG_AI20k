@@ -1,0 +1,1472 @@
+{
+  "version": "contract-evidence-v1.0-draft",
+  "corpus_documents": [
+    "bo-luat:45/2019/QH14",
+    "nghi-dinh:145/2020/NĐ-CP",
+    "thong-tu:10/2020/TT-BLĐTBXH",
+    "nghi-dinh:38/2022/NĐ-CP",
+    "nghi-dinh:74/2024/NĐ-CP",
+    "nghi-dinh:293/2025/NĐ-CP"
+  ],
+  "families": [
+    {
+      "family_id": "probation-pay",
+      "split": "dev",
+      "category": "single_rule",
+      "concepts": [
+        {
+          "id": "probation.pay",
+          "description": "Tiền lương trong thời gian thử việc."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d26",
+            "quote": "Tiền lương của người lao động trong thời gian thử việc do hai bên thỏa thuận nhưng ít nhất phải bằng 85% mức lương của công việc đó."
+          }
+        ]
+      ],
+      "rationale": "Retrieve the full probation-pay floor; do not infer legality as part of this benchmark.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Trong hai tháng thử việc, người lao động nhận 70% mức lương của công việc."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Lương chính thức là 12 triệu đồng/tháng. Giai đoạn đánh giá ban đầu được trả 10,2 triệu đồng/tháng."
+        }
+      ]
+    },
+    {
+      "family_id": "probation-duration",
+      "split": "dev",
+      "category": "condition",
+      "concepts": [
+        {
+          "id": "probation.duration",
+          "description": "Thời hạn thử việc theo yêu cầu trình độ của công việc."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d25",
+            "quote": "Thời gian thử việc do hai bên thỏa thuận căn cứ vào tính chất và mức độ phức tạp của công việc nhưng chỉ được thử việc một lần đối với một công việc và bảo đảm điều kiện sau đây:"
+          }
+        ],
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d25",
+            "quote": "2. Không quá 60 ngày đối với công việc có chức danh nghề nghiệp cần trình độ chuyên môn, kỹ thuật từ cao đẳng trở lên;"
+          }
+        ]
+      ],
+      "rationale": "Need the applicability lead-in and the relevant education tier.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Vị trí kế toán yêu cầu trình độ cao đẳng. Thời gian thử việc là 90 ngày."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Ứng viên làm công việc yêu cầu bằng đại học trải qua thời gian đánh giá trước tuyển dụng kéo dài 60 ngày."
+        }
+      ]
+    },
+    {
+      "family_id": "probation-repeat",
+      "split": "dev",
+      "category": "single_rule",
+      "concepts": [
+        {
+          "id": "probation.once",
+          "description": "Số lần thử việc đối với cùng một công việc."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d25",
+            "quote": "Thời gian thử việc do hai bên thỏa thuận căn cứ vào tính chất và mức độ phức tạp của công việc nhưng chỉ được thử việc một lần đối với một công việc và bảo đảm điều kiện sau đây:"
+          }
+        ]
+      ],
+      "rationale": "Same-work restriction rather than pay or termination notice.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Sau khi thử việc xong, công ty được yêu cầu thử việc lần hai ở chính vị trí này."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Mỗi công việc chỉ có một đợt thử việc, không tổ chức lại đợt đánh giá thử việc cho cùng công việc."
+        }
+      ]
+    },
+    {
+      "family_id": "short-contract",
+      "split": "dev",
+      "category": "exception",
+      "concepts": [
+        {
+          "id": "probation.duration",
+          "description": "Điều kiện áp dụng thử việc với hợp đồng ngắn hạn."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d24",
+            "quote": "3. Không áp dụng thử việc đối với người lao động giao kết hợp đồng lao động có thời hạn dưới 01 tháng."
+          }
+        ]
+      ],
+      "rationale": "The short-contract exclusion must not be replaced by a generic six-day limit.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Hợp đồng thời hạn 20 ngày, trong đó có 06 ngày thử việc."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Hai bên giao kết hợp đồng 25 ngày và thực hiện công việc ngay, không có giai đoạn thử việc."
+        }
+      ]
+    },
+    {
+      "family_id": "probation-cancel",
+      "split": "dev",
+      "category": "single_rule",
+      "concepts": [
+        {
+          "id": "probation.cancel_no_notice",
+          "description": "Hủy bỏ thỏa thuận trong thời gian thử việc."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d27",
+            "quote": "2. Trong thời gian thử việc, mỗi bên có quyền hủy bỏ hợp đồng thử việc hoặc hợp đồng lao động đã giao kết mà không cần báo trước và không phải bồi thường."
+          }
+        ]
+      ],
+      "rationale": "Probation cancellation must not be confused with regular unilateral termination.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Trong thời gian thử việc, bên muốn nghỉ phải báo trước 30 ngày và bồi thường một tháng lương."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Khi vẫn đang thử việc, mỗi bên có thể dừng thỏa thuận ngay mà không trả tiền bồi thường."
+        }
+      ]
+    },
+    {
+      "family_id": "keep-originals",
+      "split": "dev",
+      "category": "prohibition",
+      "concepts": [
+        {
+          "id": "prohibit.keep_documents",
+          "description": "Giữ bản chính giấy tờ của người lao động."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d17",
+            "quote": "1. Giữ bản chính giấy tờ tùy thân, văn bằng, chứng chỉ của người lao động."
+          }
+        ]
+      ],
+      "rationale": "Evidence is the exact prohibited conduct, not a broad contract heading.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Công ty giữ bản gốc căn cước và bằng đại học đến khi người lao động nghỉ việc."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Người lao động xuất trình bản chính bằng cấp để đối chiếu và nhận lại ngay; hồ sơ lưu bản sao."
+        }
+      ]
+    },
+    {
+      "family_id": "deposit",
+      "split": "dev",
+      "category": "prohibition",
+      "concepts": [
+        {
+          "id": "prohibit.deposit",
+          "description": "Đặt cọc hoặc bảo đảm để thực hiện hợp đồng lao động."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d17",
+            "quote": "2. Yêu cầu người lao động phải thực hiện biện pháp bảo đảm bằng tiền hoặc tài sản khác cho việc thực hiện hợp đồng lao động."
+          }
+        ]
+      ],
+      "rationale": "Distinguish a recruitment security deposit from a lawful wage deduction.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Trước ngày nhận việc, nhân viên nộp 20 triệu đồng bảo đảm thực hiện hợp đồng."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Doanh nghiệp không thu tiền thế chân hoặc yêu cầu tài sản bảo đảm khi tuyển dụng."
+        }
+      ]
+    },
+    {
+      "family_id": "disciplinary-fine",
+      "split": "dev",
+      "category": "prohibition",
+      "concepts": [
+        {
+          "id": "prohibit.fine_instead_of_discipline",
+          "description": "Phạt tiền hoặc cắt lương để xử lý kỷ luật."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d127",
+            "quote": "2. Phạt tiền, cắt lương thay việc xử lý kỷ luật lao động."
+          }
+        ]
+      ],
+      "rationale": "Disciplinary fines and compensation deductions have different legal bases.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Đi muộn mỗi lần bị phạt 200.000 đồng, trừ trực tiếp vào tiền lương."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Vi phạm nội quy được xử lý theo thủ tục kỷ luật, không áp dụng tiền phạt."
+        }
+      ]
+    },
+    {
+      "family_id": "wage-deduction",
+      "split": "test",
+      "category": "multiple_evidence",
+      "concepts": [
+        {
+          "id": "wage.deduction_limit",
+          "description": "Căn cứ và mức giới hạn khấu trừ tiền lương."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d102",
+            "quote": "1. Người sử dụng lao động chỉ được khấu trừ tiền lương của người lao động để bồi thường thiệt hại do làm hư hỏng dụng cụ, thiết bị, tài sản của người sử dụng lao động theo quy định tại Điều 129 của Bộ luật này."
+          }
+        ],
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d102",
+            "quote": "3. Mức khấu trừ tiền lương hằng tháng không được quá 30% tiền lương thực trả hằng tháng của người lao động sau khi trích nộp các khoản bảo hiểm xã hội bắt buộc, bảo hiểm y tế, bảo hiểm thất nghiệp, thuế thu nhập cá nhân."
+          }
+        ]
+      ],
+      "rationale": "Requires both the deduction purpose and its net-wage cap; this case does not adjudicate liability.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Công ty được khấu trừ 50% lương thực trả sau bảo hiểm và thuế mỗi tháng để bồi thường thiết bị bị làm hỏng."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Nếu làm hư hỏng tài sản và phát sinh trách nhiệm bồi thường, mức trừ hằng tháng tối đa 30% tiền lương sau các khoản bảo hiểm bắt buộc và thuế."
+        }
+      ]
+    },
+    {
+      "family_id": "monthly-pay",
+      "split": "test",
+      "category": "single_rule",
+      "concepts": [
+        {
+          "id": "wage.pay_period",
+          "description": "Kỳ hạn trả lương cho người hưởng lương tháng."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d97",
+            "quote": "2. Người lao động hưởng lương theo tháng được trả một tháng một lần hoặc nửa tháng một lần. Thời điểm trả lương do hai bên thỏa thuận và phải được ấn định vào một thời điểm có tính chu kỳ."
+          }
+        ]
+      ],
+      "rationale": "Retrieve monthly-pay frequency rather than hourly-pay rules.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Lương tháng được cộng dồn và thanh toán ba tháng một lần."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Tiền lương tháng được trả định kỳ vào ngày 05 của tháng kế tiếp."
+        }
+      ]
+    },
+    {
+      "family_id": "late-pay",
+      "split": "test",
+      "category": "exception",
+      "concepts": [
+        {
+          "id": "wage.pay_period",
+          "description": "Chậm trả lương vì bất khả kháng và nghĩa vụ đền bù."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d97",
+            "quote": "4. Trường hợp vì lý do bất khả kháng mà người sử dụng lao động đã tìm mọi biện pháp khắc phục nhưng không thể trả lương đúng hạn thì không được chậm quá 30 ngày; nếu trả lương chậm từ 15 ngày trở lên thì người sử dụng lao động phải đền bù cho người lao động một khoản tiền ít nhất bằng số tiền lãi của số tiền trả chậm tính theo lãi suất huy động tiền gửi có kỳ hạn 01 tháng do ngân hàng nơi người sử dụng lao động mở tài khoản trả lương cho người lao động công bố tại thời điểm trả lương."
+          }
+        ]
+      ],
+      "rationale": "Need the force-majeure condition, duration cap and compensation trigger together.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Do bất khả kháng sau khi đã tìm mọi biện pháp khắc phục, công ty được chậm lương 45 ngày và không đền bù."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Phụ lục cho phép hoãn lương khi bất khả kháng nhưng không quá 30 ngày; hoãn từ 15 ngày phải đền bù theo mức luật định."
+        }
+      ]
+    },
+    {
+      "family_id": "bank-fees",
+      "split": "test",
+      "category": "single_rule",
+      "concepts": [
+        {
+          "id": "content.wage_terms",
+          "description": "Chi phí khi trả tiền lương qua tài khoản ngân hàng."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d96",
+            "quote": "Trường hợp trả lương qua tài khoản cá nhân của người lao động được mở tại ngân hàng thì người sử dụng lao động phải trả các loại phí liên quan đến việc mở tài khoản và chuyển tiền lương."
+          }
+        ]
+      ],
+      "rationale": "Separate transfer-fee allocation from salary amount.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Người lao động chịu phí mở tài khoản và phí chuyển lương hằng tháng."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Lương chuyển khoản; doanh nghiệp thanh toán phí mở tài khoản nhận lương và phí chuyển tiền lương."
+        }
+      ]
+    },
+    {
+      "family_id": "overtime-pay",
+      "split": "test",
+      "category": "multiple_evidence",
+      "concepts": [
+        {
+          "id": "wage.overtime_pay",
+          "description": "Tiền lương làm thêm giờ theo loại ngày."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d98",
+            "quote": "a) Vào ngày thường, ít nhất bằng 150%;"
+          }
+        ],
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d98",
+            "quote": "b) Vào ngày nghỉ hằng tuần, ít nhất bằng 200%;"
+          }
+        ],
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d98",
+            "quote": "c) Vào ngày nghỉ lễ, tết, ngày nghỉ có hưởng lương, ít nhất bằng 300% chưa kể tiền lương ngày lễ, tết, ngày nghỉ có hưởng lương đối với người lao động hưởng lương ngày."
+          }
+        ]
+      ],
+      "rationale": "All three day types must be retrieved, not only the normal-day percentage.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Tất cả giờ làm thêm, kể cả chủ nhật và ngày lễ, đều được trả bằng 150% đơn giá giờ làm bình thường."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Làm thêm ngày thường hưởng ít nhất 150%, ngày nghỉ tuần 200%, ngày lễ 300% chưa kể tiền lương ngày lễ theo diện áp dụng."
+        }
+      ]
+    },
+    {
+      "family_id": "night-overtime",
+      "split": "test",
+      "category": "multiple_evidence",
+      "concepts": [
+        {
+          "id": "wage.night_pay",
+          "description": "Các thành phần tiền lương khi làm thêm vào ban đêm."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d98",
+            "quote": "a) Vào ngày thường, ít nhất bằng 150%;"
+          }
+        ],
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d98",
+            "quote": "2. Người lao động làm việc vào ban đêm thì được trả thêm ít nhất bằng 30% tiền lương tính theo đơn giá tiền lương hoặc tiền lương thực trả theo công việc của ngày làm việc bình thường."
+          }
+        ],
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d98",
+            "quote": "3. Người lao động làm thêm giờ vào ban đêm thì ngoài việc trả lương theo quy định tại khoản 1 và khoản 2 Điều này, người lao động còn được trả thêm 20% tiền lương tính theo đơn giá tiền lương hoặc tiền lương theo công việc làm vào ban ngày của ngày làm việc bình thường hoặc của ngày nghỉ hằng tuần hoặc của ngày nghỉ lễ, tết."
+          }
+        ]
+      ],
+      "rationale": "Requires the combined components; matching the word night alone is insufficient.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Làm thêm vào ban đêm của ngày thường chỉ được hưởng thêm 30%, không có khoản làm thêm khác."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Tiền làm thêm ban đêm ngày thường gồm tiền làm thêm, khoản tăng thêm ban đêm và khoản bổ sung cho làm thêm ban đêm."
+        }
+      ]
+    },
+    {
+      "family_id": "daily-hours",
+      "split": "dev",
+      "category": "condition",
+      "concepts": [
+        {
+          "id": "hours.normal",
+          "description": "Giới hạn giờ làm việc bình thường khi tổ chức theo ngày."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d105",
+            "quote": "1. Thời giờ làm việc bình thường không quá 08 giờ trong 01 ngày và không quá 48 giờ trong 01 tuần."
+          }
+        ]
+      ],
+      "rationale": "Daily organization is explicit; do not silently use weekly-organization exception.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Chế độ làm việc theo ngày: 10 giờ/ngày, 05 ngày/tuần, không tính là làm thêm."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Thời gian làm việc bình thường theo ngày là 08 giờ, 06 ngày mỗi tuần."
+        }
+      ]
+    },
+    {
+      "family_id": "weekly-hours",
+      "split": "dev",
+      "category": "condition",
+      "concepts": [
+        {
+          "id": "hours.normal",
+          "description": "Giới hạn giờ làm việc khi tổ chức theo tuần và nghĩa vụ thông báo."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d105",
+            "quote": "2. Người sử dụng lao động có quyền quy định thời giờ làm việc theo ngày hoặc tuần nhưng phải thông báo cho người lao động biết; trường hợp theo tuần thì thời giờ làm việc bình thường không quá 10 giờ trong 01 ngày và không quá 48 giờ trong 01 tuần."
+          }
+        ]
+      ],
+      "rationale": "The weekly exception needs both daily and weekly limits.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Công ty thông báo áp dụng lịch theo tuần: 10 giờ/ngày trong bốn ngày và 8 giờ ngày thứ năm."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Lịch theo tuần được thông báo trước gồm 11 giờ mỗi ngày trong 04 ngày làm việc."
+        }
+      ]
+    },
+    {
+      "family_id": "overtime-consent",
+      "split": "test",
+      "category": "multiple_evidence",
+      "concepts": [
+        {
+          "id": "hours.overtime_limit",
+          "description": "Điều kiện đồng ý và giới hạn làm thêm thông thường."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d107",
+            "quote": "a) Phải được sự đồng ý của người lao động;"
+          }
+        ],
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d107",
+            "quote": "b) Bảo đảm số giờ làm thêm của người lao động không quá 50% số giờ làm việc bình thường trong 01 ngày; trường hợp áp dụng quy định thời giờ làm việc bình thường theo tuần thì tổng số giờ làm việc bình thường và số giờ làm thêm không quá 12 giờ trong 01 ngày; không quá 40 giờ trong 01 tháng;"
+          }
+        ],
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d107",
+            "quote": "c) Bảo đảm số giờ làm thêm của người lao động không quá 200 giờ trong 01 năm, trừ trường hợp quy định tại khoản 3 Điều này."
+          }
+        ]
+      ],
+      "rationale": "Requires consent plus day/month/year caps; emergency exceptions are outside these stated facts.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Người lao động bắt buộc tăng ca khi công ty yêu cầu, tối đa 60 giờ/tháng và 200 giờ/năm; không thuộc tình huống khẩn cấp."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Tăng ca cần được người lao động đồng ý và tuân thủ giới hạn theo ngày, tháng, năm; cơ sở thuộc chế độ thông thường."
+        }
+      ]
+    },
+    {
+      "family_id": "weekly-rest",
+      "split": "test",
+      "category": "exception",
+      "concepts": [
+        {
+          "id": "rest.weekly",
+          "description": "Nghỉ hằng tuần và ngoại lệ do chu kỳ lao động."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d111",
+            "quote": "1. Mỗi tuần, người lao động được nghỉ ít nhất 24 giờ liên tục. Trong trường hợp đặc biệt do chu kỳ lao động không thể nghỉ hằng tuần thì người sử dụng lao động có trách nhiệm bảo đảm cho người lao động được nghỉ tính bình quân 01 tháng ít nhất 04 ngày."
+          }
+        ]
+      ],
+      "rationale": "Both ordinary rule and cycle-based exception must be visible.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Theo chu kỳ sản xuất đặc biệt không thể bố trí nghỉ mỗi tuần, nhân viên chỉ được nghỉ bình quân 02 ngày/tháng."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Mỗi tuần bố trí ít nhất 24 giờ nghỉ liên tục; lịch cụ thể được thông báo trong nội quy."
+        }
+      ]
+    },
+    {
+      "family_id": "shift-break",
+      "split": "test",
+      "category": "multiple_evidence",
+      "concepts": [
+        {
+          "id": "content.hours_rest",
+          "description": "Nghỉ giữa giờ khi làm ca liên tục."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d109",
+            "quote": "1. Người lao động làm việc theo thời giờ làm việc quy định tại Điều 105 của Bộ luật này từ 06 giờ trở lên trong một ngày thì được nghỉ giữa giờ ít nhất 30 phút liên tục, làm việc ban đêm thì được nghỉ giữa giờ ít nhất 45 phút liên tục."
+          }
+        ],
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d109",
+            "quote": "Trường hợp người lao động làm việc theo ca liên tục từ 06 giờ trở lên thì thời gian nghỉ giữa giờ được tính vào giờ làm việc."
+          }
+        ]
+      ],
+      "rationale": "Retrieve minimum break duration and whether continuous-shift breaks count as working time.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Ca đêm liên tục dài 08 giờ, nghỉ giữa ca 20 phút và không tính vào giờ làm."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Ca ngày liên tục 08 giờ có ít nhất 30 phút nghỉ giữa giờ được tính vào thời gian làm việc."
+        }
+      ]
+    },
+    {
+      "family_id": "annual-seniority",
+      "split": "test",
+      "category": "cross_article",
+      "concepts": [
+        {
+          "id": "leave.annual",
+          "description": "Nghỉ hằng năm và ngày tăng thêm theo thâm niên."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d113",
+            "quote": "1. Người lao động làm việc đủ 12 tháng cho một người sử dụng lao động thì được nghỉ hằng năm, hưởng nguyên lương theo hợp đồng lao động như sau:"
+          }
+        ],
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d113",
+            "quote": "a) 12 ngày làm việc đối với người làm công việc trong điều kiện bình thường;"
+          }
+        ],
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d114",
+            "quote": "Cứ đủ 05 năm làm việc cho một người sử dụng lao động thì số ngày nghỉ hằng năm của người lao động theo quy định tại khoản 1 Điều 113 của Bộ luật này được tăng thêm tương ứng 01 ngày."
+          }
+        ]
+      ],
+      "rationale": "Finding only annual-leave base days misses the seniority addition.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Nhân viên làm công việc bình thường, đã đủ 05 năm tại công ty, được nghỉ phép năm cố định 12 ngày."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Với công việc bình thường và đủ 05 năm làm tại cùng doanh nghiệp, số ngày phép năm là 13 ngày hưởng nguyên lương."
+        }
+      ]
+    },
+    {
+      "family_id": "annual-prorata",
+      "split": "test",
+      "category": "cross_document",
+      "concepts": [
+        {
+          "id": "leave.annual",
+          "description": "Tính nghỉ hằng năm khi chưa làm đủ năm."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d113",
+            "quote": "2. Người lao động làm việc chưa đủ 12 tháng cho một người sử dụng lao động thì số ngày nghỉ hằng năm theo tỷ lệ tương ứng với số tháng làm việc."
+          }
+        ],
+        [
+          {
+            "pid": "nghi-dinh:145/2020/NĐ-CP#d66",
+            "quote": "1. Số ngày nghỉ hằng năm của người lao động làm việc chưa đủ 12 tháng theo quy định tại khoản 2 Điều 113 của Bộ luật Lao động được tính như sau: lấy số ngày nghỉ hàng năm cộng với số ngày được nghỉ tăng thêm theo thâm niên (nếu có), chia cho 12 tháng, nhân với số tháng làm việc thực tế trong năm để tính thành số ngày được nghỉ hằng năm."
+          }
+        ]
+      ],
+      "rationale": "Need both Labor Code entitlement and the implementing calculation, not a scope-only decree citation.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Người làm công việc bình thường mới làm đủ 06 tháng không có phép năm vì chưa đủ một năm làm việc."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Nhân viên công việc bình thường đã làm đủ 06 tháng được tính phép theo tỷ lệ số tháng làm việc thực tế."
+        }
+      ]
+    },
+    {
+      "family_id": "annual-payout",
+      "split": "test",
+      "category": "cross_document",
+      "concepts": [
+        {
+          "id": "leave.annual",
+          "description": "Thanh toán phép chưa nghỉ khi thôi việc và tiền lương làm căn cứ."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d113",
+            "quote": "3. Trường hợp do thôi việc, bị mất việc làm mà chưa nghỉ hằng năm hoặc chưa nghỉ hết số ngày nghỉ hằng năm thì được người sử dụng lao động thanh toán tiền lương cho những ngày chưa nghỉ."
+          }
+        ],
+        [
+          {
+            "pid": "nghi-dinh:145/2020/NĐ-CP#d67",
+            "quote": "3. Tiền lương làm căn cứ trả cho người lao động những ngày chưa nghỉ hằng năm hoặc chưa nghỉ hết số ngày nghỉ hằng năm theo khoản 3 Điều 113 của Bộ luật Lao động là tiền lương theo hợp đồng lao động của tháng trước liền kề tháng người lao động thôi việc, bị mất việc làm."
+          }
+        ]
+      ],
+      "rationale": "Need the termination entitlement and the exact wage base.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Khi thôi việc, ngày phép chưa dùng tự động hết giá trị và không được quy đổi thành tiền."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Khi thôi việc, phép chưa nghỉ được thanh toán theo tiền lương hợp đồng của tháng trước liền kề tháng thôi việc."
+        }
+      ]
+    },
+    {
+      "family_id": "personal-leave",
+      "split": "test",
+      "category": "condition",
+      "concepts": [
+        {
+          "id": "leave.personal_paid",
+          "description": "Nghỉ việc riêng có hưởng lương khi kết hôn."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d115",
+            "quote": "1. Người lao động được nghỉ việc riêng mà vẫn hưởng nguyên lương và phải thông báo với người sử dụng lao động trong trường hợp sau đây:"
+          }
+        ],
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d115",
+            "quote": "a) Kết hôn: nghỉ 03 ngày;"
+          }
+        ]
+      ],
+      "rationale": "The paid-leave lead-in matters; a bare number is insufficient.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Người lao động kết hôn được nghỉ 01 ngày không lương dù đã báo cho công ty."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Khi bản thân kết hôn, nhân viên thông báo cho công ty và được nghỉ 03 ngày hưởng nguyên lương."
+        }
+      ]
+    },
+    {
+      "family_id": "employee-notice",
+      "split": "test",
+      "category": "exception",
+      "concepts": [
+        {
+          "id": "termination.employee_unilateral",
+          "description": "Báo trước khi người lao động chấm dứt hợp đồng và ngoại lệ."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d35",
+            "quote": "a) Ít nhất 45 ngày nếu làm việc theo hợp đồng lao động không xác định thời hạn;"
+          }
+        ],
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d35",
+            "quote": "b) Không được trả đủ lương hoặc trả lương không đúng thời hạn, trừ trường hợp quy định tại khoản 4 Điều 97 của Bộ luật này;"
+          }
+        ],
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d97",
+            "quote": "4. Trường hợp vì lý do bất khả kháng mà người sử dụng lao động đã tìm mọi biện pháp khắc phục nhưng không thể trả lương đúng hạn thì không được chậm quá 30 ngày; nếu trả lương chậm từ 15 ngày trở lên thì người sử dụng lao động phải đền bù cho người lao động một khoản tiền ít nhất bằng số tiền lãi của số tiền trả chậm tính theo lãi suất huy động tiền gửi có kỳ hạn 01 tháng do ngân hàng nơi người sử dụng lao động mở tài khoản trả lương cho người lao động công bố tại thời điểm trả lương."
+          }
+        ]
+      ],
+      "rationale": "Retrieve ordinary notice, unpaid-wage exception and its force-majeure carve-out; three linked provisions.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Hợp đồng không xác định thời hạn buộc người lao động báo trước 90 ngày trong mọi trường hợp, kể cả công ty cố ý không trả lương."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Hợp đồng không xác định thời hạn quy định báo trước 45 ngày khi nghỉ thông thường, đồng thời bảo lưu quyền nghỉ không báo trước khi bị nợ lương theo luật."
+        }
+      ]
+    },
+    {
+      "family_id": "pregnancy-exit",
+      "split": "test",
+      "category": "cross_article",
+      "concepts": [
+        {
+          "id": "maternity.terminate_or_suspend",
+          "description": "Nghỉ việc do tiếp tục làm việc ảnh hưởng xấu tới thai nhi."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d35",
+            "quote": "đ) Lao động nữ mang thai phải nghỉ việc theo quy định tại khoản 1 Điều 138 của Bộ luật này;"
+          }
+        ],
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d138",
+            "quote": "1. Lao động nữ mang thai nếu có xác nhận của cơ sở khám bệnh, chữa bệnh có thẩm quyền về việc tiếp tục làm việc sẽ ảnh hưởng xấu tới thai nhi thì có quyền đơn phương chấm dứt hợp đồng lao động hoặc tạm hoãn thực hiện hợp đồng lao động."
+          }
+        ],
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d138",
+            "quote": "Trường hợp đơn phương chấm dứt hợp đồng lao động hoặc tạm hoãn thực hiện hợp đồng lao động thì phải thông báo cho người sử dụng lao động kèm theo xác nhận của cơ sở khám bệnh, chữa bệnh có thẩm quyền về việc tiếp tục làm việc sẽ ảnh hưởng xấu tới thai nhi."
+          }
+        ]
+      ],
+      "rationale": "Requires the cross-reference, medical condition and notification evidence.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Dù có xác nhận y tế rằng công việc ảnh hưởng xấu tới thai nhi, lao động nữ vẫn phải báo trước 45 ngày mới được nghỉ."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Khi có xác nhận y tế hợp lệ về ảnh hưởng xấu tới thai nhi, lao động nữ thông báo kèm xác nhận để thực hiện quyền nghỉ theo luật."
+        }
+      ]
+    },
+    {
+      "family_id": "settlement",
+      "split": "test",
+      "category": "condition",
+      "concepts": [
+        {
+          "id": "termination.settlement_deadline",
+          "description": "Thời hạn thanh toán quyền lợi sau chấm dứt hợp đồng."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d48",
+            "quote": "1. Trong thời hạn 14 ngày làm việc kể từ ngày chấm dứt hợp đồng lao động, hai bên có trách nhiệm thanh toán đầy đủ các khoản tiền có liên quan đến quyền lợi của mỗi bên, trừ trường hợp sau đây có thể kéo dài nhưng không được quá 30 ngày:"
+          }
+        ]
+      ],
+      "rationale": "Ordinary conditions are stated; extension applicability is not being adjudicated.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Sau khi chấm dứt trong điều kiện thông thường, công ty thanh toán các khoản liên quan sau 60 ngày."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Trong điều kiện thông thường, hai bên thanh toán đầy đủ quyền lợi trong 14 ngày làm việc từ khi chấm dứt hợp đồng."
+        }
+      ]
+    },
+    {
+      "family_id": "maternity-night",
+      "split": "test",
+      "category": "condition",
+      "concepts": [
+        {
+          "id": "maternity.no_night_overtime_travel",
+          "description": "Hạn chế làm đêm, làm thêm và công tác xa khi mang thai."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d137",
+            "quote": "1. Người sử dụng lao động không được sử dụng người lao động làm việc ban đêm, làm thêm giờ và đi công tác xa trong trường hợp sau đây:"
+          }
+        ],
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d137",
+            "quote": "a) Mang thai từ tháng thứ 07 hoặc từ tháng thứ 06 nếu làm việc ở vùng cao, vùng sâu, vùng xa, biên giới, hải đảo;"
+          }
+        ]
+      ],
+      "rationale": "Retrieve the pregnancy threshold and prohibited assignments together.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Nhân viên mang thai tháng thứ 07 vẫn phải làm ca đêm theo lịch bắt buộc."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Từ tháng thứ 07 của thai kỳ, người lao động không bị bố trí làm đêm, tăng ca hoặc công tác xa."
+        }
+      ]
+    },
+    {
+      "family_id": "maternity-break",
+      "split": "test",
+      "category": "cross_document",
+      "concepts": [
+        {
+          "id": "maternity.breaks",
+          "description": "Nghỉ trong giờ làm khi nuôi con dưới mười hai tháng tuổi."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d137",
+            "quote": "4. Lao động nữ trong thời gian hành kinh được nghỉ mỗi ngày 30 phút, trong thời gian nuôi con dưới 12 tháng tuổi được nghỉ mỗi ngày 60 phút trong thời gian làm việc. Thời gian nghỉ vẫn được hưởng đủ tiền lương theo hợp đồng lao động."
+          }
+        ],
+        [
+          {
+            "pid": "nghi-dinh:145/2020/NĐ-CP#d80",
+            "quote": "a) Lao động nữ trong thời gian nuôi con dưới 12 tháng tuổi có quyền được nghỉ mỗi ngày 60 phút trong thời gian làm việc để cho con bú, vắt, trữ sữa, nghỉ ngơi. Thời gian nghỉ vẫn được hưởng đủ tiền lương theo hợp đồng lao động;"
+          }
+        ]
+      ],
+      "rationale": "Must find both primary and implementing text, rather than unrelated maternity-leave duration.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Lao động nữ đang nuôi con 08 tháng tuổi được nghỉ 30 phút/ngày, số phút nghỉ bị trừ lương."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Người lao động nữ nuôi con dưới một tuổi được nghỉ mỗi ngày 60 phút trong giờ làm và vẫn hưởng đủ lương."
+        }
+      ]
+    },
+    {
+      "family_id": "return-job",
+      "split": "test",
+      "category": "single_rule",
+      "concepts": [
+        {
+          "id": "maternity.job_guarantee",
+          "description": "Bảo đảm việc làm khi trở lại sau nghỉ thai sản."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d140",
+            "quote": "Lao động được bảo đảm việc làm cũ khi trở lại làm việc sau khi nghỉ hết thời gian theo quy định tại các khoản 1, 3 và 5 Điều 139 của Bộ luật này mà không bị cắt giảm tiền lương và quyền, lợi ích so với trước khi nghỉ thai sản; trường hợp việc làm cũ không còn thì người sử dụng lao động phải bố trí việc làm khác cho họ với mức lương không thấp hơn mức lương trước khi nghỉ thai sản."
+          }
+        ]
+      ],
+      "rationale": "The fallback job and wage protection must both be present.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Sau nghỉ thai sản, nếu vị trí cũ không còn, công ty chuyển nhân viên sang việc mới với lương bằng 80% trước khi nghỉ."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Khi quay lại sau nghỉ thai sản, nhân viên được giữ việc cũ; nếu việc đó không còn thì bố trí việc khác với lương không thấp hơn trước nghỉ."
+        }
+      ]
+    },
+    {
+      "family_id": "training-costs",
+      "split": "test",
+      "category": "cross_article",
+      "concepts": [
+        {
+          "id": "training.cost_repayment",
+          "description": "Chi phí đào tạo và nghĩa vụ hoàn trả khi nghỉ trái pháp luật."
+        }
+      ],
+      "context": {
+        "assessment_date": "2025-03-01",
+        "date_role": "performance_date",
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract"
+      },
+      "evidence": [
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d40",
+            "quote": "3. Phải hoàn trả cho người sử dụng lao động chi phí đào tạo quy định tại Điều 62 của Bộ luật này."
+          }
+        ],
+        [
+          {
+            "pid": "bo-luat:45/2019/QH14#d62",
+            "quote": "d) Chi phí đào tạo và trách nhiệm hoàn trả chi phí đào tạo;"
+          }
+        ]
+      ],
+      "rationale": "A deliberately narrow evidence requirement about cross-reference and agreed repayment terms, not an exhaustive training-cost dispute analysis.",
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Điều 5: Người lao động được doanh nghiệp tài trợ đào tạo theo hợp đồng đào tạo riêng. Điều 9: Nếu đơn phương chấm dứt trái pháp luật, người lao động không có nghĩa vụ hoàn trả bất kỳ chi phí đào tạo nào."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Phụ lục đào tạo quy định chi phí và trách nhiệm hoàn trả; nếu người lao động đơn phương chấm dứt trái pháp luật thì xử lý khoản đào tạo theo quy định pháp luật."
+        }
+      ]
+    },
+    {
+      "family_id": "minimum-wage-time",
+      "split": "test",
+      "category": "temporal_boundary",
+      "concepts": [
+        {
+          "id": "wage.minimum_regional",
+          "description": "Mức lương tối thiểu tháng theo vùng và thời điểm."
+        }
+      ],
+      "context": {
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract",
+        "date_role": "performance_date"
+      },
+      "variants": [
+        {
+          "id": "2024-before",
+          "contract_text": "Mức lương theo công việc cho lao động làm đủ giờ bình thường tại cơ sở thuộc vùng I là 4.800.000 đồng/tháng. Cần xác định căn cứ mức tối thiểu tháng tại thời điểm thực hiện.",
+          "context": {
+            "assessment_date": "2024-06-30",
+            "minimum_wage_region": "I",
+            "pay_basis": "monthly"
+          },
+          "evidence": [
+            [
+              {
+                "pid": "nghi-dinh:38/2022/NĐ-CP#d3",
+                "quote": "4.680.000"
+              }
+            ]
+          ]
+        },
+        {
+          "id": "2024-start",
+          "contract_text": "Mức lương theo công việc cho lao động làm đủ giờ bình thường tại cơ sở thuộc vùng I là 4.800.000 đồng/tháng. Cần xác định căn cứ mức tối thiểu tháng tại thời điểm thực hiện.",
+          "context": {
+            "assessment_date": "2024-07-01",
+            "minimum_wage_region": "I",
+            "pay_basis": "monthly"
+          },
+          "evidence": [
+            [
+              {
+                "pid": "nghi-dinh:74/2024/NĐ-CP#d3",
+                "quote": "4.960.000"
+              }
+            ]
+          ]
+        },
+        {
+          "id": "2025-end",
+          "contract_text": "Mức lương theo công việc cho lao động làm đủ giờ bình thường tại cơ sở thuộc vùng I là 4.800.000 đồng/tháng. Cần xác định căn cứ mức tối thiểu tháng tại thời điểm thực hiện.",
+          "context": {
+            "assessment_date": "2025-12-31",
+            "minimum_wage_region": "I",
+            "pay_basis": "monthly"
+          },
+          "evidence": [
+            [
+              {
+                "pid": "nghi-dinh:74/2024/NĐ-CP#d3",
+                "quote": "4.960.000"
+              }
+            ]
+          ]
+        },
+        {
+          "id": "2026-start",
+          "contract_text": "Mức lương theo công việc cho lao động làm đủ giờ bình thường tại cơ sở thuộc vùng I là 4.800.000 đồng/tháng. Cần xác định căn cứ mức tối thiểu tháng tại thời điểm thực hiện.",
+          "context": {
+            "assessment_date": "2026-01-01",
+            "minimum_wage_region": "I",
+            "pay_basis": "monthly"
+          },
+          "evidence": [
+            [
+              {
+                "pid": "nghi-dinh:293/2025/NĐ-CP#d3",
+                "quote": "5.310.000"
+              }
+            ]
+          ]
+        }
+      ],
+      "rationale": "Region I is supplied as a fact; administrative-region mapping is not tested. The numeric quote tests the correctly dated wage table, not complete legal reasoning."
+    },
+    {
+      "family_id": "missing-assessment-date",
+      "split": "dev",
+      "category": "insufficient_context",
+      "concepts": [
+        {
+          "id": "wage.minimum_regional",
+          "description": "Mức lương tối thiểu tháng theo vùng và thời điểm."
+        }
+      ],
+      "context": {
+        "jurisdiction": "VN",
+        "minimum_wage_region": "I"
+      },
+      "decision": "insufficient_context",
+      "required_context": [
+        "assessment_date"
+      ],
+      "evidence": [],
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Lương theo công việc là 4,8 triệu đồng/tháng cho lao động vùng I; hồ sơ không ghi thời điểm thực hiện hoặc thời điểm cần kiểm tra."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Phụ lục lương vùng I để trống ngày có hiệu lực và không có ngày áp dụng để đánh giá."
+        }
+      ],
+      "rationale": "No default to today: a time-sensitive wage case needs an assessment date."
+    },
+    {
+      "family_id": "regional-wage-boundaries",
+      "split": "test",
+      "category": "temporal_boundary",
+      "concepts": [
+        {
+          "id": "wage.minimum_regional",
+          "description": "Mức lương tối thiểu tháng theo vùng tại thời điểm thực hiện hợp đồng."
+        }
+      ],
+      "context": {
+        "jurisdiction": "VN",
+        "employment_regime": "labor_contract",
+        "date_role": "wage_period_date",
+        "wage_region": "I",
+        "region_assignment": "provided_as_fixture_not_inferred_from_address"
+      },
+      "variants": [
+        {
+          "id": "2024-06-30",
+          "contract_text": "Lương theo công việc cho lao động hưởng lương tháng vùng I là 4,7 triệu đồng; kiểm tra kỳ lương cuối tháng 6 năm 2024.",
+          "context": {
+            "assessment_date": "2024-06-30"
+          },
+          "evidence": [
+            [
+              {
+                "pid": "nghi-dinh:38/2022/NĐ-CP#d3",
+                "quote": "Vùng I\n4.680.000\n22.500"
+              }
+            ]
+          ]
+        },
+        {
+          "id": "2024-07-01",
+          "contract_text": "Điều khoản lương theo công việc vùng I vẫn là 4,7 triệu đồng cho kỳ lương bắt đầu tháng 7 năm 2024.",
+          "context": {
+            "assessment_date": "2024-07-01"
+          },
+          "evidence": [
+            [
+              {
+                "pid": "nghi-dinh:74/2024/NĐ-CP#d3",
+                "quote": "Vùng I\n4.960.000\n23.800"
+              }
+            ]
+          ]
+        },
+        {
+          "id": "2025-06-30",
+          "contract_text": "Mức lương theo công việc tháng của lao động vùng I là 5 triệu đồng vào cuối tháng 6 năm 2025.",
+          "context": {
+            "assessment_date": "2025-06-30"
+          },
+          "evidence": [
+            [
+              {
+                "pid": "nghi-dinh:74/2024/NĐ-CP#d3",
+                "quote": "Vùng I\n4.960.000\n23.800"
+              }
+            ]
+          ]
+        },
+        {
+          "id": "2025-07-01",
+          "contract_text": "Sau thay đổi địa giới tháng 7 năm 2025, địa bàn làm việc đã được xác định thuộc vùng I; lương theo công việc là 5 triệu đồng/tháng.",
+          "context": {
+            "assessment_date": "2025-07-01"
+          },
+          "evidence": [
+            [
+              {
+                "pid": "nghi-dinh:74/2024/NĐ-CP#d3",
+                "quote": "Vùng I\n4.960.000\n23.800"
+              }
+            ]
+          ]
+        },
+        {
+          "id": "2025-12-31",
+          "contract_text": "Mức lương theo công việc vùng I là 5 triệu đồng/tháng, kiểm tra kỳ lương ngày cuối năm 2025.",
+          "context": {
+            "assessment_date": "2025-12-31"
+          },
+          "evidence": [
+            [
+              {
+                "pid": "nghi-dinh:74/2024/NĐ-CP#d3",
+                "quote": "Vùng I\n4.960.000\n23.800"
+              }
+            ]
+          ]
+        },
+        {
+          "id": "2026-01-01",
+          "contract_text": "Công ty tiếp tục trả lương theo công việc vùng I là 5 triệu đồng/tháng từ đầu năm 2026.",
+          "context": {
+            "assessment_date": "2026-01-01"
+          },
+          "evidence": [
+            [
+              {
+                "pid": "nghi-dinh:293/2025/NĐ-CP#d3",
+                "quote": "Vùng I\n5.310.000\n25.500"
+              }
+            ]
+          ]
+        }
+      ],
+      "rationale": "Known region I: retrieve the correct table row across decree boundaries. Geographic classification and overall wage compliance are separate tasks."
+    },
+    {
+      "family_id": "outside-employment",
+      "split": "test",
+      "category": "out_of_scope",
+      "concepts": [],
+      "context": {
+        "jurisdiction": "VN",
+        "assessment_date": "2025-03-01",
+        "contract_type": "residential_lease"
+      },
+      "decision": "out_of_scope",
+      "evidence": [],
+      "variants": [
+        {
+          "id": "v1",
+          "contract_text": "Bên thuê căn hộ đặt cọc hai tháng tiền thuê; đây là hợp đồng thuê nhà ở, không có quan hệ lao động."
+        },
+        {
+          "id": "v2",
+          "contract_text": "Bên cho thuê nhà giữ khoản bảo đảm thanh toán tiền thuê. Các bên xác nhận giao dịch chỉ là thuê nhà, không phải tuyển dụng."
+        }
+      ],
+      "rationale": "Security-deposit keyword is a hard negative for employment-deposit retrieval."
+    }
+  ]
+}

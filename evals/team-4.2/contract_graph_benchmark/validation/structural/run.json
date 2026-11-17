@@ -1,0 +1,46 @@
+{
+  "system": "structural-anchors-v1",
+  "config": {
+    "system": "structural-anchors-v1",
+    "uri": "bolt://127.0.0.1:17687",
+    "namespace": "legal",
+    "snapshot_id": "s20261117024643-c06f0c",
+    "corpus_sha256": "09d697dc75e7bdc3ca0e5e8afd8caba062c393cd5b51fe7db36472ef3f965ed8",
+    "concept_catalog": "evals/team-4.2/contract_graph_benchmark/configs/structural-concepts-v1.json",
+    "concept_catalog_sha256": "ef3e42cdc171d8dc4d6d5fced14bd531201827a9499e8154bdfd3dbb2e3b100f",
+    "max_passages": 20,
+    "max_evidence_utf8_bytes": 16000,
+    "traversal": "anchors; active replacement-chain value sources; guidance; outgoing references one hop",
+    "ranking": "anchors > value_source > guidance > references; original source order",
+    "cache": "query result cache across cases within one pinned build",
+    "uses_contract_text": false,
+    "uses_llm_or_embeddings": false,
+    "anchor_status": "original draft; not modified against benchmark labels"
+  },
+  "manifest_sha256": "ea8a583d41e5ec18635c302ce10665739f14d214793dfd36f7dc62ff7b24621e",
+  "predictions_file": "predictions.jsonl",
+  "adapter_sha256": "8343c7c5c8ab444de12485163756f27e38103167dce27b215728cb78d541e575",
+  "adapter_metadata": {
+    "graph_build_id": "12622da3d53bc9ed",
+    "snapshot_id": "s20261117024643-c06f0c",
+    "concept_catalog_sha256": "ef3e42cdc171d8dc4d6d5fced14bd531201827a9499e8154bdfd3dbb2e3b100f",
+    "corpus_sha256": "09d697dc75e7bdc3ca0e5e8afd8caba062c393cd5b51fe7db36472ef3f965ed8",
+    "read_only": true,
+    "cache_entries": 152,
+    "cache_hits": 226,
+    "timing_note": "Sequential run; deterministic graph-query cache shared across cases.",
+    "catalog_origin": "Original user-provided 2026-11-14 concepts.yaml, unchanged anchor projection."
+  },
+  "python_version": "3.13.15",
+  "setup_seconds": 0.9850815999998304,
+  "split": "test",
+  "policy": {
+    "max_evidence_utf8_bytes": 16000,
+    "max_passages": 20,
+    "required_span_coverage": 1.0,
+    "date_intervals": "[from,to)",
+    "track": "contract_text+provided_concepts+context",
+    "primary_metric": "complete_evidence_pass_rate",
+    "review_required_for_certified_score": true
+  }
+}

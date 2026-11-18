@@ -224,10 +224,13 @@ export function DualGraphCanvas({
     [visibleLegalNodes]
   );
 
-  // Spotlight Concept in Step 3 (latest detected), Step 5 (currently querying), Step 7 (currently comparing)
+  // Spotlight Concept in Step 3 (clause -> concept emergence), Step 5 (querying), Step 7 (comparing)
   const activeStepConceptId = useMemo(() => {
-    if (currentStepIndex === 2 && visibleConcepts.length > 0) {
-      return visibleConcepts[visibleConcepts.length - 1].id;
+    if (currentStepIndex === 2) {
+      if (choreography.activeQueryConceptIndex !== null) {
+        return scenario.concepts[choreography.activeQueryConceptIndex]?.id ?? null;
+      }
+      return visibleConcepts.at(-1)?.id ?? null;
     }
     if (currentStepIndex === 4 && choreography.activeQueryConceptIndex !== null) {
       return scenario.concepts[choreography.activeQueryConceptIndex]?.id ?? null;
@@ -341,11 +344,11 @@ export function DualGraphCanvas({
           stroke: isHighlighted
             ? '#1E3A5F'
             : targetNode.kind === 'section'
-            ? '#D8A3B1'
-            : '#CBD5E1',
-          strokeWidth: isHighlighted ? 1.8 : 1.25,
+            ? '#BE123C'
+            : '#64748B',
+          strokeWidth: isHighlighted ? 1.9 : 1.4,
           dashed: false,
-          opacity: isHighlighted ? 1 : 0.85,
+          opacity: isHighlighted ? 1 : 0.78,
           active: isHighlighted || currentStepIndex === 0,
           dimmed: hasSelectedTrace && !isHighlighted,
         });
@@ -388,7 +391,9 @@ export function DualGraphCanvas({
       )} ${Math.round(yStart)}, ${Math.round(ctrlX)} ${Math.round(yEnd)}, ${Math.round(
         xEnd
       )} ${Math.round(yEnd)}`;
-      const conciseLabel = edge.label.replace(/^Sửa đổi\s*·\s*HL\s*/i, 'Sửa · ');
+      const conciseLabel = isAmendment
+        ? edge.label.replace(/^Sửa đổi\s*·\s*HL\s*/i, 'Sửa · ')
+        : 'Dẫn chiếu';
       const labelWidth = Math.max(54, Math.round(conciseLabel.length * 4.8 + 14));
       const centeredX = Math.round((gutterLeft + gutterRight - labelWidth) / 2);
 
@@ -398,14 +403,14 @@ export function DualGraphCanvas({
         stroke: isAmendment
           ? active
             ? '#881337'
-            : '#E5B4C2'
+            : '#BE123C'
           : active
           ? '#B45309'
-          : '#E5CE9A',
-        strokeWidth: isAmendment ? (isRelationPhaseMatch ? 2.4 : 1.9) : active ? 1.25 : 0.95,
+          : '#D97706',
+        strokeWidth: isAmendment ? (isRelationPhaseMatch ? 2.4 : 2.0) : active ? 1.7 : 1.35,
         dashed: !isAmendment,
         subtleDash: !isAmendment && !active,
-        opacity: isAmendment ? 0.95 : active ? 0.9 : 0.45,
+        opacity: isAmendment ? 0.96 : active ? 0.95 : 0.76,
         active,
         label:
           isAmendment || (currentStepIndex === 3 && active) ? conciseLabel : undefined,
@@ -446,11 +451,11 @@ export function DualGraphCanvas({
         nextPaths.push({
           id: `link_${cnId}_${concept.id}`,
           d,
-          stroke: isResolved ? st.accentHex : '#94A3B8',
-          strokeWidth: isTraceActive ? 1.9 : isResolved ? 1.4 : 1.15,
-          dashed: isDottedStream || (hasSelectedTrace && !isTraceActive),
-          subtleDash: isDottedStream,
-          opacity: isTraceActive ? 1 : isDottedStream ? 0.52 : 0.72,
+          stroke: isTraceActive ? '#1E3A5F' : isResolved ? st.accentHex : '#475569',
+          strokeWidth: isTraceActive ? 2.2 : isResolved ? 1.65 : 1.5,
+          dashed: isDottedStream && !isTraceActive || (hasSelectedTrace && !isTraceActive),
+          subtleDash: isDottedStream && !isTraceActive,
+          opacity: isTraceActive ? 1 : isDottedStream ? 0.8 : 0.88,
           active: isTraceActive || currentStepIndex === 2,
           dimmed: hasSelectedTrace && !isTraceActive,
         });
@@ -496,11 +501,11 @@ export function DualGraphCanvas({
         nextPaths.push({
           id: `concept_to_cloud_${concept.id}`,
           d,
-          stroke: isTraceActive ? '#1E3A5F' : '#94A3B8',
-          strokeWidth: isTraceActive ? 1.85 : 1.15,
+          stroke: isTraceActive ? '#1E3A5F' : '#475569',
+          strokeWidth: isTraceActive ? 2.1 : 1.5,
           dashed: !isTraceActive || isQueryingNow,
           subtleDash: !isTraceActive && !isQueryingNow,
-          opacity: isQueuedInStep5 ? 0.2 : isTraceActive ? 0.95 : 0.48,
+          opacity: isQueuedInStep5 ? 0.34 : isTraceActive ? 1 : 0.78,
           active: !isQueuedInStep5,
           dimmed: hasSelectedTrace && !trace.conceptIds.has(concept.id),
         });
@@ -539,14 +544,14 @@ export function DualGraphCanvas({
             id: `cloud_to_${ln.id}`,
             d,
             stroke: isTraceActive
-              ? '#166534'
+              ? '#15803D'
               : isDimmedByVersion
-              ? '#CBD5E1'
-              : '#166534',
-            strokeWidth: isTraceActive ? 1.85 : isPending ? 1.1 : 1.35,
+              ? '#94A3B8'
+              : '#15803D',
+            strokeWidth: isTraceActive ? 2.1 : isPending ? 1.25 : 1.65,
             dashed: isPending || (hasSelectedTrace && !trace.legalNodeIds.has(ln.id)),
             subtleDash: isPending,
-            opacity: isDimmedByVersion ? 0.25 : isTraceActive ? 1 : 0.78,
+            opacity: isDimmedByVersion ? 0.35 : isTraceActive ? 1 : 0.88,
             active: !isDimmedByVersion,
             dimmed: (hasSelectedTrace && !trace.legalNodeIds.has(ln.id)) || isDimmedByVersion,
           });
@@ -596,11 +601,11 @@ export function DualGraphCanvas({
         nextPaths.push({
           id: edge.id,
           d,
-          stroke: active ? '#166534' : edge.isQueried ? '#9AC3A9' : '#E7E5E4',
-          strokeWidth: active ? 1.85 : 1.1,
+          stroke: active ? '#15803D' : '#0F766E',
+          strokeWidth: active ? 2.0 : 1.45,
           dashed: edge.kind === 'guides' || edge.kind === 'replaces',
           subtleDash: !active,
-          opacity: active ? 1 : 0.5,
+          opacity: active ? 1 : 0.74,
           active,
           label: canPlaceLabel ? edge.label : undefined,
           labelX: Math.round(Math.max(xStart, xEnd) + 6),
@@ -718,6 +723,7 @@ export function DualGraphCanvas({
     isCenteredStage,
     isCloudSplit,
     paths.length,
+    scenario.activeUnitIds,
     scenario.contractEdges,
     scenario.findings,
     scenario.legalEdges,
@@ -770,13 +776,43 @@ export function DualGraphCanvas({
       Boolean(amendedDetail) &&
       (currentStepIndex > 3 ||
         (currentStepIndex === 3 && choreography.activeRelationPhase !== 'internal_ref'));
+    const isUnitBeingTagged = Boolean(
+      currentStepIndex === 2 &&
+        node.clauseId &&
+        scenario.activeUnitIds?.some(
+          (uid) => uid === node.clauseId || uid.startsWith(`${node.clauseId}.`)
+        )
+    );
+    const spotlightConcept =
+      activeStepConceptId !== null
+        ? scenario.concepts.find((c) => c.id === activeStepConceptId) ?? null
+        : null;
+    const isSpotlightSourceClause = Boolean(
+      currentStepIndex === 2 &&
+        spotlightConcept &&
+        (spotlightConcept.contractNodeIds.includes(node.id) ||
+          node.conceptIds.includes(spotlightConcept.id))
+    );
+    const isExaminedInStep3 = isSpotlightSourceClause || isUnitBeingTagged;
+    const hasActiveStep3Examination =
+      currentStepIndex === 2 &&
+      (Boolean(scenario.activeUnitIds?.length) || spotlightConcept !== null);
+
+    const isRefHighlightedInStep4 =
+      currentStepIndex === 3 &&
+      choreography.activeRelationPhase === 'internal_ref' &&
+      scenario.contractEdges.some(
+        (e) => e.kind === 'internal_ref' && (e.from === node.id || e.to === node.id)
+      );
+
     const isStepHighlighted =
       (currentStepIndex === 3 &&
-        ((choreography.activeRelationPhase === 'internal_ref' &&
-          node.id === 'cn_cl_3') ||
+        (isRefHighlightedInStep4 ||
           (choreography.activeRelationPhase !== 'internal_ref' &&
             (isAddendum || Boolean(amendedDetail))))) ||
-      (activeStepConceptId !== null &&
+      isExaminedInStep3 ||
+      (currentStepIndex !== 2 &&
+        activeStepConceptId !== null &&
         node.conceptIds.includes(activeStepConceptId));
     const is7Matched = Boolean(
       node.clauseId &&
@@ -787,13 +823,16 @@ export function DualGraphCanvas({
     const isHighlighted =
       trace.contractNodeIds.has(node.id) || isStepHighlighted || is7Matched;
     const dimmed =
-      hasSelectedTrace &&
-      trace.contractNodeIds.size > 0 &&
-      !trace.contractNodeIds.has(node.id);
+      (hasSelectedTrace &&
+        trace.contractNodeIds.size > 0 &&
+        !trace.contractNodeIds.has(node.id)) ||
+      (hasActiveStep3Examination && !isExaminedInStep3);
 
     const cardBg =
       showAmendmentTransform && currentStepIndex === 3
         ? 'bg-[#FBE6EC] ring-1 ring-inset ring-[#9F1239]/55'
+        : isExaminedInStep3
+        ? 'bg-[#DCE9F7] ring-2 ring-[#1E3A5F] shadow-sm'
         : isHighlighted
         ? 'bg-[#E5EEF7] ring-1 ring-inset ring-[#1E3A5F]/55'
         : isAddendum
@@ -805,6 +844,8 @@ export function DualGraphCanvas({
     const leftStripeColor =
       showAmendmentTransform && currentStepIndex === 3
         ? 'bg-[#881337]'
+        : isExaminedInStep3
+        ? 'bg-[#1E3A5F]'
         : isAddendum
         ? 'bg-[#9F1239]'
         : isRoot
@@ -818,14 +859,14 @@ export function DualGraphCanvas({
           nodeRefs.current[node.id] = el;
         }}
         initial={{ opacity: 0.88, x: 0 }}
-        animate={{ opacity: dimmed ? 0.42 : 1, x: 0 }}
-        transition={{ duration: 0.25 }}
+        animate={{ opacity: dimmed ? (hasActiveStep3Examination && !isExaminedInStep3 ? 0.62 : 0.42) : 1, x: 0 }}
+        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
       >
         <button
           type="button"
           onClick={() => handleOpenMajorNodeInspector(node.id, node.clauseId)}
           title={`${node.label}${node.sublabel ? ` — ${node.sublabel}` : ''}`}
-          className={`chamfer-tr w-full h-[46px] text-left relative pl-2.5 pr-2 py-1 flex flex-col justify-center transition-colors cursor-pointer ${cardBg}`}
+          className={`chamfer-tr w-full h-[46px] text-left relative pl-2.5 pr-2 py-1 flex flex-col justify-center transition-all duration-300 cursor-pointer ${cardBg}`}
         >
           <span
             aria-hidden="true"
@@ -833,8 +874,14 @@ export function DualGraphCanvas({
           />
 
           <div className="flex items-center justify-between gap-1.5 min-w-0">
-            <span className="text-[11.5px] font-semibold text-stone-900 truncate">
-              {node.label}
+            <span className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-stone-900 truncate min-w-0">
+              {isExaminedInStep3 && (
+                <span
+                  className="w-1.5 h-1.5 rounded-full bg-[#1E3A5F] animate-pulse shrink-0"
+                  aria-hidden="true"
+                />
+              )}
+              <span className="truncate">{node.label}</span>
             </span>
             <div className="flex items-center gap-1 shrink-0">
               {factsConfirmed &&
@@ -919,41 +966,26 @@ export function DualGraphCanvas({
             })}
           </div>
         ) : (
-          <div className="flex flex-wrap items-center gap-4 text-[11px] text-stone-600">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-stone-600">
             <span className="inline-flex items-center gap-1.5">
-              <span
-                className="w-3 h-2.5 chamfer-tr bg-[#1E3A5F] inline-block"
-                aria-hidden="true"
-              />
-              Hồ sơ nguồn
+              <span className="w-4 h-[2px] bg-[#64748B] inline-block" aria-hidden="true" />
+              Cấu trúc HĐ
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span
-                className="w-3 h-2.5 chamfer-tr bg-[#FEF9E7] border border-[#CA8A04] inline-block"
-                aria-hidden="true"
-              />
-              Contract Graph
+              <span className="w-4 h-[2.5px] bg-[#881337] inline-block" aria-hidden="true" />
+              Sửa đổi (AMENDS)
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span
-                className="w-3.5 h-2.5 rounded-full bg-[#EFF2F7] border border-[#94A3B8] inline-block"
-                aria-hidden="true"
-              />
-              Concept Cầu nối
+              <span className="w-4 border-t-[1.5px] border-dashed border-[#D97706] inline-block" aria-hidden="true" />
+              Dẫn chiếu
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span
-                className="w-2.5 h-2.5 rounded-full bg-stone-500 inline-block"
-                aria-hidden="true"
-              />
-              Đám mây sàng lọc
+              <span className="w-4 h-[2px] bg-[#1E3A5F] inline-block" aria-hidden="true" />
+              Gắn Concept / Sàng lọc
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span
-                className="w-3 h-2.5 chamfer-tr bg-[#F2F7F4] border border-[#166534] inline-block"
-                aria-hidden="true"
-              />
-              Legal Graph
+              <span className="w-4 h-[2px] bg-[#15803D] inline-block" aria-hidden="true" />
+              Căn cứ hiệu lực
             </span>
           </div>
         )}
@@ -1224,25 +1256,25 @@ export function DualGraphCanvas({
                               }}
                               type="button"
                               onClick={() => onSelectConcept(concept.id)}
-                              initial={{ opacity: 0, scale: 0.72, x: -16 }}
+                              initial={{ opacity: 0, scale: 0.92, x: -20 }}
                               animate={{
                                 opacity: dimmed ? 0.42 : 1,
                                 scale: isQueryingNow ? 1.02 : 1,
                                 x: 0,
                               }}
+                              onAnimationComplete={measureAndBuildPaths}
                               transition={{
-                                type: 'spring',
-                                stiffness: 360,
-                                damping: 23,
+                                duration: 0.42,
+                                ease: [0.22, 1, 0.36, 1],
                               }}
                               title={`${concept.label} — ${st.label}`}
                               aria-label={`${concept.label}: ${st.label}`}
-                              className={`w-full h-[32px] text-left px-2.5 rounded-full border transition-colors duration-200 cursor-pointer flex items-center justify-between gap-1.5 ${
+                              className={`w-full h-[32px] text-left px-2.5 rounded-full border transition-colors duration-250 cursor-pointer flex items-center justify-between gap-1.5 ${
                                 isHighlighted
-                                  ? 'bg-[#E5ECF4] border-[#1E3A5F]'
+                                  ? 'bg-[#DCE9F7] border-[#1E3A5F] shadow-2xs'
                                   : currentStepIndex === 2
                                   ? 'bg-[#F4F6F9] border-[#94A3B8] hover:border-[#1E3A5F]'
-                                  : 'bg-[#F4F6F9] border-[#E2E8F0] hover:bg-[#EBEEF4] hover:border-[#94A3B8]'
+                                  : 'bg-[#F4F6F9] border-[#CBD5E1] hover:bg-[#EBEEF4] hover:border-[#94A3B8]'
                               }`}
                             >
                               <div className="flex items-center gap-1.5 min-w-0">
@@ -1468,16 +1500,16 @@ export function DualGraphCanvas({
                               ref={(el) => {
                                 nodeRefs.current[ln.id] = el;
                               }}
-                              initial={{ opacity: 0, scale: 0.62, x: -24 }}
+                              initial={{ opacity: 0, scale: 0.92, x: -12 }}
                               animate={{
                                 opacity: isDimmedByVersion ? 0.42 : dimmedByTrace ? 0.42 : 1,
                                 scale: 1,
                                 x: 0,
                               }}
+                              onAnimationComplete={measureAndBuildPaths}
                               transition={{
-                                type: 'spring',
-                                stiffness: 330,
-                                damping: 23,
+                                duration: 0.38,
+                                ease: [0.22, 1, 0.36, 1],
                               }}
                             >
                               <button

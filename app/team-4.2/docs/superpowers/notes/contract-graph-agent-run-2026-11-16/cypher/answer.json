@@ -1,0 +1,45 @@
+{
+  "question": "Hợp đồng có bao nhiêu điều khoản, những điều khoản nào bị phụ lục sửa đổi và từ ngày nào?",
+  "answer": "Đếm các đơn vị được đánh số là Điều, khoản hoặc mục trong hợp đồng và hai phụ lục, không tính phần mở đầu, có 22 điều khoản. Theo dữ liệu đồ thị, Phụ lục 2 — Mục 1 sửa đổi Điều 2, có hiệu lực từ ngày 01/07/2025.",
+  "confidence": "answer",
+  "path": [
+    {
+      "node_id": "ANlI8FDVG13zVp8nauoJU25e:p2.d1@1",
+      "node_type": "Unit",
+      "label": "Phụ lục 2 — Mục 1",
+      "text": "1. Nội dung thay đổi:\nSửa đổi Điều 2 Hợp đồng lao động về lương căn bản: Lương căn bản của Người lao động được điều chỉnh từ 15.000.000 đồng/tháng lên 17.000.00"
+    },
+    {
+      "node_id": "ANlI8FDVG13zVp8nauoJU25e:p0.d2@1",
+      "node_type": "Unit",
+      "label": "Điều 2",
+      "text": "Điều 2: Lương, phụ cấp, các khoản bổ sung khác\nLương căn bản:\n15.000.000 đồng/tháng\nPhụ cấp:\n1.000.000 đồng/tháng\nCác khoản bổ sung khác: tùy quy định cụ thể củ"
+    }
+  ],
+  "law": [],
+  "warnings": [],
+  "stats": {
+    "steps": 1,
+    "llm_calls": 2,
+    "backend": "neo4j",
+    "seconds": 28.3,
+    "agent_model": "gpt-6-luna",
+    "check": {
+      "llm_calls": 11,
+      "seconds": 0.9,
+      "graph_backend": "neo4j",
+      "build_id": "beafb837e78d6"
+    }
+  },
+  "trace": [
+    {
+      "thought": "Câu hỏi cần đếm các điều khoản và liệt kê các liên kết AMENDS cùng ngày hiệu lực; dùng truy vấn tổng hợp trên đồ thị hợp đồng, đồng thời trả về node_id để xác định đường dẫn.",
+      "tool": "cypher_query",
+      "args": {
+        "query": "MATCH (c:Contract {contract_id: $cid})-[:HAS_PART]->(p:Part)-[:HAS_UNIT]->(u:Unit) WHERE NOT u.label CONTAINS 'mở đầu' WITH c, collect(DISTINCT u) AS units MATCH (c)-[:HAS_PART]->(p2:Part)-[:HAS_UNIT]->(src:Unit)-[a:AMENDS]->(dst:Unit) RETURN size(units) AS clause_count, [u IN units | {node_id: u.node_id, label: u.label}] AS clauses, collect({source_id: src.node_id, source_label: src.label, target_id: dst.node_id, target_label: dst.label, valid_from: a.valid_from}) AS amendments"
+      },
+      "result": "{\"rows\": [{\"clause_count\": 22, \"clauses\": [{\"label\": \"Phụ lục 2 — Mục 2\", \"node_id\": \"ANlI8FDVG13zVp8nauoJU25e:p2.d2@1\"}, {\"label\": \"Phụ lục 2 — Mục 1\", \"node_id\": \"ANlI8FDVG13zVp8nauoJU25e:p2.d1@1\"}, {\"label\": \"Phụ lục 1 — khoản 1 Điều 1\", \"node_id\": \"ANlI8FDVG13zVp8nauoJU25e:p1.d1.k1@1\"}, {\"label\"…",
+      "ms": 94
+    }
+  ]
+}

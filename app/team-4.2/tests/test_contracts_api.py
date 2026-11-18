@@ -308,3 +308,251 @@ def test_server_graph_service_does_not_build_pipeline(monkeypatch):
 
 def test_client_fixture_does_not_use_server_graph(client):
     assert contracts_api.CONFIG.graph is None
+
+
+# --- concept-check ---------------------------------------------------------------------------
+
+def _stub_check(monkeypatch, seen):
+    from datetime import date as _d
+    from rag.bridge.check import CheckReport
+
+    def fake(llm, contract, **kw):
+        seen.update(kw)
+        return CheckReport(contract.contract_id, _d(2026, 11, 11), "v", [], {}, [], ["w"], {})
+    monkeypatch.setattr(contracts_api, "check_contract", fake)
+    contracts_api.CONFIG.tag_llm = lambda model, temp: None
+    contracts_api.CONFIG.legal_graph = lambda: None
+
+
+def test_concept_check_returns_report_and_markdown(client, monkeypatch):
+    seen = {}
+    _stub_check(monkeypatch, seen)
+    cid = upload(client).json()["contract_id"]
+    r = client.post(f"/api/contracts/{cid}/concept-check", json={"user_facts": {"wage_region": "I"}})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["report"]["contract_id"] == cid
+    assert body["report"]["warnings"] == ["w"]
+    assert isinstance(body["markdown"], str)
+    assert body["labels"] == {}
+    assert seen["user_facts"] == {"wage_region": "I"}
+
+
+def test_concept_check_unknown_fact_is_400(client):
+    contracts_api.CONFIG.tag_llm = lambda model, temp: None
+    contracts_api.CONFIG.legal_graph = lambda: None
+    cid = upload(client).json()["contract_id"]
+    r = client.post(f"/api/contracts/{cid}/concept-check", json={"user_facts": {"abc": 1}})
+    assert r.status_code == 400
+
+
+def test_concept_check_gone_is_404(client):
+    r = client.post("/api/contracts/nope/concept-check", json={})
+    assert r.status_code == 404
+    assert r.json()["error"] == contracts_api.GONE
+
+
+def test_concept_check_rebuilds_graph(client, monkeypatch):
+    _stub_check(monkeypatch, {})
+    calls = []
+    monkeypatch.setattr(contracts_api, "_rebuild", lambda c, now: calls.append(c.contract_id))
+    cid = upload(client).json()["contract_id"]
+    calls.clear()
+    assert client.post(f"/api/contracts/{cid}/concept-check", json={}).status_code == 200
+    assert calls == [cid]
+
+
+def test_concept_check_result_is_saved_and_viewable_again(client, monkeypatch):
+    _stub_check(monkeypatch, {})
+    cid = upload(client).json()["contract_id"]
+    assert client.get(f"/api/contracts/{cid}").json()["last_check"] is None
+    assert client.get(f"/api/contracts/{cid}/concept-check/last").status_code == 400     # chưa kiểm tra
+    ran = client.post(f"/api/contracts/{cid}/concept-check", json={}).json()
+    card = client.get(f"/api/contracts/{cid}").json()
+    assert card["last_check"]["stale"] is False and card["last_check"]["checked_at"]
+    saved = client.get(f"/api/contracts/{cid}/concept-check/last")
+    assert saved.status_code == 200
+    body = saved.json()
+    assert body["report"] == ran["report"] and body["views"] == ran["views"] and body["markdown"] == ran["markdown"]
+    assert body["stale"] is False and body["checked_at"] == card["last_check"]["checked_at"]
+
+
+def test_saved_concept_check_is_stale_after_facts_change(client, monkeypatch):
+    _stub_check(monkeypatch, {})
+    cid = upload(client).json()["contract_id"]
+    client.post(f"/api/contracts/{cid}/concept-check", json={})
+    c = contracts_api.store().get(cid)
+    c.facts = {**c.facts, "__changed__": {"value": 1}}
+    contracts_api.store().update(c)
+    assert client.get(f"/api/contracts/{cid}/concept-check/last").json()["stale"] is True
+    assert client.get(f"/api/contracts/{cid}").json()["last_check"]["stale"] is True
+
+
+def test_last_concept_check_gone_is_404(client):
+    assert client.get("/api/contracts/nope/concept-check/last").status_code == 404
+
+
+def _sse_events(text):
+    return [json.loads(line[len("data: "):]) for line in text.splitlines() if line.startswith("data: ")]
+
+
+def test_stream_emits_events_then_done(client, monkeypatch):
+    from datetime import date as _d
+    from rag.bridge.check import CheckReport
+
+    def fake(llm, contract, on_event=None, **kw):
+        on_event({"type": "stage", "stage": "facts", "status": "start"})
+        on_event({"type": "progress", "stage": "tag", "done": 1, "total": 2})
+        on_event({"type": "partial", "results": []})
+        return CheckReport(contract.contract_id, _d(2026, 11, 11), "v", [], {}, [], [], {})
+    monkeypatch.setattr(contracts_api, "check_contract", fake)
+    contracts_api.CONFIG.tag_llm = lambda model, temp: None
+    contracts_api.CONFIG.legal_graph = lambda: None
+    cid = upload(client).json()["contract_id"]
+    r = client.post(f"/api/contracts/{cid}/concept-check/stream", json={})
+    assert r.status_code == 200 and r.headers["content-type"].startswith("text/event-stream")
+    events = _sse_events(r.text)
+    assert [e["type"] for e in events] == ["stage", "progress", "partial", "done"]
+    assert events[2]["views"] == []
+    assert events[-1]["report"]["contract_id"] == cid and "views" in events[-1] and "markdown" in events[-1]
+
+
+def test_stream_unknown_fact_error_event(client):
+    contracts_api.CONFIG.tag_llm = lambda model, temp: None
+    contracts_api.CONFIG.legal_graph = lambda: None
+    cid = upload(client).json()["contract_id"]
+    events = _sse_events(client.post(f"/api/contracts/{cid}/concept-check/stream",
+                                     json={"user_facts": {"abc": 1}}).text)
+    assert events[-1]["type"] == "error" and events[-1]["status"] == 400
+
+
+def test_stream_gone(client):
+    events = _sse_events(client.post("/api/contracts/nope/concept-check/stream", json={}).text)
+    assert events == [{"type": "error", "error": contracts_api.GONE, "status": 404}]
+
+
+class _FakeAgent:
+    def __init__(self, law=()):
+        self.law, self.seen = list(law), {}
+
+    def ask(self, question, history=None, on_step=None):
+        from rag.contracts.graph.agent import GraphAnswer
+        self.seen.update(question=question, history=history)
+        on_step({"type": "step", "n": 1, "tool": "find_concept", "thought": "t", "args": {}, "result": "{}"})
+        return GraphAnswer("Đáp", [{"node_id": "n1", "label": "Điều 1"}], self.law, "answer", ["w"], [], {"steps": 1})
+
+
+class _ConceptPathAgent:
+    """Đường đi đi qua một nút Khái niệm; agent có gọi check_concept cho khái niệm đó."""
+    def ask(self, question, history=None, on_step=None):
+        from rag.contracts.graph.agent import GraphAnswer
+        path = [{"node_id": "ci", "node_type": "ConceptInstance", "label": "probation.pay", "concept_id": "probation.pay"},
+                {"node_id": "u6", "node_type": "Unit", "label": "Điều 6",
+                 "edge": {"verified": True, "rel": "ABOUT", "dir": "out", "props": {}}}]
+        trace = [{"tool": "check_concept", "args": {"concept_id": "probation.pay"}, "error": None}]
+        unused = [{"node_id": "ci2", "node_type": "ConceptInstance", "label": "x", "concept_id": "probation.duration"}]
+        return GraphAnswer("Đáp", path, [], "answer", [], trace, {"steps": 1}, unused)
+
+
+def test_ask_path_links_concept_to_law_graph(client, monkeypatch):
+    class Legal:
+        def text_at(self, pid, day):
+            return {"in_force": True, "text": "Lời văn " + pid, "citation": {"label": pid.split("#")[1], "doc_title": "BLLĐ"}}
+    _stub_agent(monkeypatch, _ConceptPathAgent(), legal=Legal())
+    cid = upload(client).json()["contract_id"]
+    done = _sse_events(client.post(f"/api/contracts/{cid}/ask/stream", json={"question": "q"}).text)[-1]
+    ci, unit = done["path"]
+    concept = contracts_api.load_catalog().concepts["probation.pay"]
+    assert ci["concept_label"] == concept.label
+    assert [l["pid"] for l in ci["law_links"]] == [a["pid"] for a in concept.anchors]
+    assert all(l["read_by_agent"] and l["in_force"] for l in ci["law_links"])
+    assert "law_links" not in unit and unit["edge"]["rel"] == "ABOUT"
+    assert done["seen_unused"][0]["concept_label"] == contracts_api.load_catalog().concepts["probation.duration"].label
+
+
+def _stub_agent(monkeypatch, agent, legal=None):
+    from datetime import date as _d
+    contracts_api.CONFIG.legal_graph = lambda: legal
+    monkeypatch.setattr(contracts_api, "_open_agent", lambda c, catalog, legal_, facts: (agent, _d(2025, 1, 2), []))
+
+
+def test_ask_stream_steps_then_done(client, monkeypatch):
+    agent = _FakeAgent()
+    _stub_agent(monkeypatch, agent)
+    cid = upload(client).json()["contract_id"]
+    hist = [{"query": "a", "answer": "b"}]
+    r = client.post(f"/api/contracts/{cid}/ask/stream", json={"question": " Hỏi? ", "history": hist})
+    assert r.status_code == 200 and r.headers["content-type"].startswith("text/event-stream")
+    events = _sse_events(r.text)
+    assert [e["type"] for e in events] == ["step", "done"]
+    done = events[-1]
+    assert done["answer"] == "Đáp" and done["confidence"] == "answer" and done["path"][0]["label"] == "Điều 1"
+    assert done["warnings"] == ["w"] and agent.seen == {"question": "Hỏi?", "history": hist}
+
+
+def test_ask_law_without_legal_graph(client, monkeypatch):
+    _stub_agent(monkeypatch, _FakeAgent(law=["bo-luat:45/2019/QH14#d26"]))
+    cid = upload(client).json()["contract_id"]
+    done = _sse_events(client.post(f"/api/contracts/{cid}/ask/stream", json={"question": "q"}).text)[-1]
+    assert done["law"] == [{"pid": "bo-luat:45/2019/QH14#d26", "citation": None, "text": None, "in_force": None,
+                            "source_url": None, "valid_from": None, "valid_to": None, "note": None}]
+
+
+def test_ask_law_with_legal_graph(client, monkeypatch):
+    class Legal:
+        def text_at(self, pid, day):
+            return {"in_force": True, "text": "Lời văn", "citation": {
+                "label": "điều 26", "doc_title": "BLLĐ", "source_url": "https://vbpl.vn/x", "valid_from": "2021-01-01"}}
+    _stub_agent(monkeypatch, _FakeAgent(law=["p1"]), legal=Legal())
+    cid = upload(client).json()["contract_id"]
+    done = _sse_events(client.post(f"/api/contracts/{cid}/ask/stream", json={"question": "q"}).text)[-1]
+    assert done["law"] == [{"pid": "p1", "citation": "Điều 26 — BLLĐ", "text": "Lời văn", "in_force": True,
+                            "source_url": "https://vbpl.vn/x", "valid_from": "2021-01-01", "valid_to": None, "note": None}]
+
+
+def test_ask_without_concept_check_is_409(client):
+    contracts_api.CONFIG.legal_graph = lambda: None
+    cid = upload(client).json()["contract_id"]
+    events = _sse_events(client.post(f"/api/contracts/{cid}/ask/stream", json={"question": "q"}).text)
+    assert events == [{"type": "error", "error": contracts_api.NEEDS_CHECK, "status": 409}]
+
+
+def test_ask_empty_question_is_400(client, monkeypatch):
+    _stub_agent(monkeypatch, _FakeAgent())
+    cid = upload(client).json()["contract_id"]
+    events = _sse_events(client.post(f"/api/contracts/{cid}/ask/stream", json={"question": "  "}).text)
+    assert events[-1]["type"] == "error" and events[-1]["status"] == 400
+
+
+def test_ask_gone(client):
+    events = _sse_events(client.post("/api/contracts/nope/ask/stream", json={"question": "q"}).text)
+    assert events == [{"type": "error", "error": contracts_api.GONE, "status": 404}]
+
+
+def test_ask_law_includes_anchors_of_checked_concepts(client, monkeypatch):
+    from rag.bridge.catalog import load_catalog
+    from rag.contracts.graph.agent import GraphAnswer
+
+    class Agent:
+        def ask(self, question, history=None, on_step=None):
+            trace = [{"tool": "check_concept", "args": {"concept_id": "probation.pay"}, "result": "{}"},
+                     {"tool": "check_concept", "args": {"concept_id": "probation.pay"}, "result": '{"error": "x"}'}]
+            return GraphAnswer("Đúng luật", [], ["extra"], "answer", [], trace, {})
+    _stub_agent(monkeypatch, Agent())
+    want = [a["pid"] for a in load_catalog().concepts["probation.pay"].anchors]
+    cid = upload(client).json()["contract_id"]
+    done = _sse_events(client.post(f"/api/contracts/{cid}/ask/stream", json={"question": "q"}).text)[-1]
+    assert want and [x["pid"] for x in done["law"]] == ["extra", *want]
+
+
+def test_card_counts_concepts(client):
+    from datetime import datetime, timezone
+    from rag.contracts.graph.oplog import machine_op
+    cid = upload(client).json()["contract_id"]
+    assert client.get(f"/api/contracts/{cid}").json()["concepts"] == 0
+    c = contracts_api.get(cid)
+    at = datetime(2026, 11, 17, tzinfo=timezone.utc)
+    for concept, uid in (("probation.pay", "u1"), ("probation.pay", "u2"), ("work.hours", "u1")):
+        c.oplog.add(machine_op(cid, "ASSERT", f"concept:{concept}", {"kind": "concept", "concept_id": concept,
+                               "slots": {}}, "llm", "auto_accepted", source_uid=uid, at=at))
+    assert client.get(f"/api/contracts/{cid}").json()["concepts"] == 2

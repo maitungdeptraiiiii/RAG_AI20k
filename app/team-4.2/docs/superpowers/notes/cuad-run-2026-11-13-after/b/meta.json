@@ -1,0 +1,8 @@
+{
+ "model": "gpt-6-luna",
+ "temperature": null,
+ "seed": 20261113,
+ "n": 30,
+ "dataset": "CUAD_v1 (aok_v1.0)",
+ "at": "2026-11-13T10:42:34.733940+00:00"
+}

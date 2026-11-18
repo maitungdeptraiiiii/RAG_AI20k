@@ -103,6 +103,7 @@ def _dump(c: Contract) -> dict:
         "sign_date": c.sign_date.isoformat() if c.sign_date else None, "sign_date_source": c.sign_date_source,
         "reports": c.reports, "format": FORMAT, "page_texts": [asdict(p) for p in c.page_texts],
         "file_checksum": c.file_checksum, "operations": c.oplog.to_json(), "graph": c.graph, "builds": c.builds,
+        "concept_check": c.concept_check,
     }
 
 
@@ -119,6 +120,7 @@ def _load(d: dict) -> Contract:
         c.file_checksum = d.get("file_checksum")
         c.oplog = OperationLog.from_json(c.contract_id, d.get("operations") or [])
         c.graph, c.builds = d.get("graph") or {}, d.get("builds") or []
+        c.concept_check = d.get("concept_check")
         if c.page_texts:            # dựng lại doc từ trang + bố cục đang hiệu lực, không gọi Neo4j
             layout = c.oplog.layout()
             c.doc = parse_contract(c.page_texts, [PartSpec(**p) for p in layout] if layout else None)

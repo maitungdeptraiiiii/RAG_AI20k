@@ -1,0 +1,109 @@
+{
+  "question": "Lúc thử việc tôi được trả bao nhiêu tiền mỗi tháng, mức đó có đúng luật không và căn cứ điều luật nào?",
+  "answer": "Trong thời gian thử việc, hợp đồng quy định hưởng 85% mức lương căn bản tại Điều 2. Lương căn bản là 15.000.000 đồng/tháng, nên lương thử việc là 12.750.000 đồng/tháng; phụ cấp 1.000.000 đồng/tháng được ghi riêng. Mức 85% đạt mức tối thiểu theo Điều 26 Bộ luật Lao động 2019, quy định lương thử việc ít nhất bằng 85% mức lương của công việc đó.",
+  "confidence": "answer",
+  "path": [
+    {
+      "node_id": "cSVPn9Tj9OUh-5rI_MlqnI5Z:ci:o8c2230de49d9",
+      "node_type": "ConceptInstance",
+      "label": "probation.pay",
+      "text": "Trong thời gian thử việc, Người lao động hưởng 85% mức lương căn bản quy định tại Điều 2."
+    },
+    {
+      "node_id": "cSVPn9Tj9OUh-5rI_MlqnI5Z:p0.d6@1",
+      "node_type": "Unit",
+      "label": "Điều 6",
+      "text": "Điều 6: Những thỏa thuận khác\n- Thời gian thử việc: 02 tháng, từ ngày 02/01/2025 đến ngày 01/03/2025. Trong thời gian thử việc, Người lao động hưởng 85% mức lươ"
+    },
+    {
+      "node_id": "cSVPn9Tj9OUh-5rI_MlqnI5Z:p0.d2@1",
+      "node_type": "Unit",
+      "label": "Điều 2",
+      "text": "Điều 2: Lương, phụ cấp, các khoản bổ sung khác\nLương căn bản:\n15.000.000 đồng/tháng\nPhụ cấp:\n1.000.000 đồng/tháng\nCác khoản bổ sung khác: tùy quy định cụ thể củ"
+    },
+    {
+      "node_id": "cSVPn9Tj9OUh-5rI_MlqnI5Z:p0.d2#v1",
+      "node_type": "Value",
+      "label": "",
+      "text": ""
+    }
+  ],
+  "law": [
+    "bo-luat:45/2019/QH14#d26"
+  ],
+  "warnings": [],
+  "stats": {
+    "steps": 6,
+    "llm_calls": 7,
+    "backend": "neo4j",
+    "seconds": 38.3,
+    "agent_model": "gpt-6-luna",
+    "check": {
+      "llm_calls": 11,
+      "seconds": 1.4,
+      "graph_backend": "neo4j",
+      "build_id": "b08ade683c6da"
+    }
+  },
+  "trace": [
+    {
+      "thought": "Cần đọc điều khoản thử việc trong hợp đồng để xác định mức lương ghi nhận.",
+      "tool": "find_concept",
+      "args": {
+        "concept_id": "probation.pay"
+      },
+      "result": "{\"concept_id\": \"probation.pay\", \"label\": \"Tiền lương thử việc tối thiểu\", \"instances\": [{\"node_id\": \"cSVPn9Tj9OUh-5rI_MlqnI5Z:ci:o8c2230de49d9\", \"about\": \"cSVPn9Tj9OUh-5rI_MlqnI5Z:p0.d6@1\", \"quote\": \"Trong thời gian thử việc, Người lao động hưởng 85% mức lương căn bản quy định tại Điều 2.\", \"slots\":…",
+      "ms": 16
+    },
+    {
+      "thought": "Điều 6 ghi lương thử việc bằng 85% lương căn bản tại Điều 2. Cần đọc Điều 2 và kiểm tra mức thử việc theo căn cứ pháp luật trước khi kết luận.",
+      "tool": "expand",
+      "args": {
+        "node_id": "cSVPn9Tj9OUh-5rI_MlqnI5Z:p0.d2@1",
+        "direction": "out"
+      },
+      "result": "{\"hops\": [{\"rel\": \"HAS_VALUE\", \"dir\": \"out\", \"props\": {}, \"node\": {\"node_id\": \"cSVPn9Tj9OUh-5rI_MlqnI5Z:p0.d2#v1\", \"node_type\": \"Value\", \"amount\": 15000000, \"raw\": \"15.000.000 đồng\", \"kind\": \"money\", \"currency\": \"VND\"}}, {\"rel\": \"HAS_VALUE\", \"dir\": \"out\", \"props\": {}, \"node\": {\"node_id\": \"cSVPn9Tj9O…",
+      "ms": 78
+    },
+    {
+      "thought": "Đã biết thử việc hưởng 85% mức lương căn bản tại Điều 2, nhưng Điều 2 có hai giá trị tiền và cần xác định giá trị nào là lương căn bản trước khi tính mức tháng; đồng thời phải kiểm tra pháp lý khái niệm tiền lương thử việc.",
+      "tool": "find_units",
+      "args": {
+        "label": "Điều 2"
+      },
+      "result": "{\"units\": [{\"node_id\": \"cSVPn9Tj9OUh-5rI_MlqnI5Z:p0.d2@1\", \"node_type\": \"Unit\", \"uid\": \"p0.d2\", \"part_id\": \"p0\", \"text\": \"Điều 2: Lương, phụ cấp, các khoản bổ sung khác\\nLương căn bản:\\n15.000.000 đồng/tháng\\nPhụ cấp:\\n1.000.000 đồng/tháng\\nCác khoản bổ sung khác: tùy quy định cụ thể của Công ty\\n- …",
+      "ms": 0
+    },
+    {
+      "thought": "Điều 6 quy định thử việc hưởng 85% lương căn bản; Điều 2 xác định lương căn bản là 15.000.000 đồng/tháng, không phải khoản phụ cấp 1.000.000 đồng. Mức thử việc tính ra 12.750.000 đồng/tháng. Cần chạy kiểm tra pháp lý cho khái niệm tiền lương thử việc trước khi kết luận đúng luật.",
+      "tool": "check_concept",
+      "args": {
+        "concept_id": "probation.pay"
+      },
+      "result": "{\"concept_id\": \"probation.pay\", \"label\": \"Tiền lương thử việc tối thiểu\", \"day\": \"2021-01-01\", \"results\": [{\"rule_id\": \"r1\", \"status\": \"PASS\", \"finding\": \"ok\", \"law_values\": {\"min_probation_pay\": {\"value\": 85, \"unit\": \"percent\"}}, \"facts_used\": {\"has_probation\": {\"value\": true, \"unit\": null}, \"proba…",
+      "ms": 281
+    },
+    {
+      "thought": "Kiểm tra cho thấy mức thử việc đạt ngưỡng tối thiểu; cần lấy căn cứ luật được neo với khái niệm này để nêu điều luật chính xác.",
+      "tool": "concept_basis",
+      "args": {
+        "concept_id": "probation.pay"
+      },
+      "result": "{\"concept_id\": \"probation.pay\", \"day\": \"2021-01-01\", \"anchors\": [{\"pid\": \"bo-luat:45/2019/QH14#d26\", \"role\": \"basis\", \"note\": null, \"provision\": {\"in_force\": true, \"text\": \"Điều 26. Tiền lương thử việc\\nTiền lương của người lao động trong thời gian thử việc do hai bên thỏa thuận nhưng ít nhất phải b…",
+      "ms": 47
+    },
+    {
+      "thought": "Đã xác định mức lương căn bản và phần trăm thử việc, cùng kết quả kiểm tra pháp lý. Cần xác nhận cạnh dẫn chiếu từ Điều 6 đến Điều 2 để tạo đường dẫn đồ thị hợp lệ.",
+      "tool": "expand",
+      "args": {
+        "node_id": "cSVPn9Tj9OUh-5rI_MlqnI5Z:p0.d6@1",
+        "direction": "out",
+        "rel_types": [
+          "REFERS_TO"
+        ]
+      },
+      "result": "{\"hops\": [{\"rel\": \"REFERS_TO\", \"dir\": \"out\", \"props\": {\"raw\": \"Điều 2\"}, \"node\": {\"node_id\": \"cSVPn9Tj9OUh-5rI_MlqnI5Z:p0.d2@1\", \"node_type\": \"Unit\", \"uid\": \"p0.d2\", \"part_id\": \"p0\", \"text\": \"Điều 2: Lương, phụ cấp, các khoản bổ sung khác\\nLương căn bản:\\n15.000.000 đồng/tháng\\nPhụ cấp:\\n1.000.000 đ…",
+      "ms": 16
+    }
+  ]
+}

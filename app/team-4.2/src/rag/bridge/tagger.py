@@ -111,7 +111,7 @@ def assert_op(contract: Contract, checked: dict, catalog: Catalog, *, at: dateti
 
 
 def tag_contract(llm, contract: Contract, catalog: Catalog, *, at: datetime, model: str | None = None,
-                 on_progress=None) -> TagRun:
+                 on_progress=None, on_event=None) -> TagRun:
     """on_progress(xong, tổng): gọi sau mỗi lô."""
     concepts = catalog_payload(catalog)
     run = TagRun()
@@ -120,7 +120,20 @@ def tag_contract(llm, contract: Contract, catalog: Catalog, *, at: datetime, mod
     def read(batch: Batch) -> dict:
         payload = {"units": batch.payload_units(), "context": list(batch.context),
                    "references": list(batch.references), "concepts": concepts}
-        return ask_json(llm, TAG_PROMPT, payload, contract.mask_state)
+        if on_event:
+            on_event({"type": "tag_batch", "status": "start", "batch": batch.index, "uids": batch.uids})
+        data = ask_json(llm, TAG_PROMPT, payload, contract.mask_state)
+        if on_event:
+            for item in data.get("items", []) if isinstance(data.get("items"), list) else []:
+                checked, reason = check_item(contract, batch.uids, item, catalog)
+                if checked is not None:
+                    op = assert_op(contract, checked, catalog, at=at, found_by="tagger", model=model,
+                                   prompt_version=TAG_PROMPT_VERSION)
+                    on_event({"type": "concept", "concept_id": checked["concept_id"],
+                              "label": catalog.concepts[checked["concept_id"]].label,
+                              "uid": checked["uid"], "quote": checked["quote"], "op": dataclasses.asdict(op)})
+            on_event({"type": "tag_batch", "status": "done", "batch": batch.index, "uids": batch.uids})
+        return data
 
     batches = run_batches(make_batches(contract, budget=BATCH_BUDGET), read, on_done=on_progress)
     run.warnings += batches.warnings()

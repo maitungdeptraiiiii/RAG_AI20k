@@ -119,7 +119,7 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
     warnings: list[str] = []
     stage("facts", "start")
     if not contract.facts:
-        extract_facts(llm, contract)
+        extract_facts(llm, contract, **({"on_event": emit} if on_event else {}))
     stage("facts", "done")
     warnings += list(contract.facts.get("warnings") or [])
 
@@ -133,7 +133,7 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
     stage("tag", "start")
     tag = tag_contract(tagger, contract, catalog, at=at, model=tag_model,
                        on_progress=lambda done, total: emit({"type": "progress", "stage": "tag", "done": done,
-                                                             "total": total}))
+                                                             "total": total}), **({"on_event": emit} if on_event else {}))
     stage("tag", "done")
     warnings += tag.warnings
     _add_ops(contract, tag.ops)
@@ -142,6 +142,17 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
         view, build_id, graph_warnings, _ = contract_view(contract, graph, at)
         factset, fact_warnings = factset_from_graph(view, day=day, sign_date=contract.sign_date)
         results = evaluate(catalog, {**factset.facts, **user}, set(factset.present), factset.evidence, day)
+        if on_event:
+            nodes = [n for label in ("Contract", "Part", "Unit", "Value", "Party", "ContractFact", "ConceptInstance")
+                     for n in view.find(label)]
+            edges = {}
+            for node in nodes:
+                for hop in view.neighbors(node["node_id"], direction="out"):
+                    key = (hop["rel"], node["node_id"], hop["node"]["node_id"])
+                    edges[key] = {"type": key[0], "src": key[1], "dst": key[2], "props": hop["props"]}
+            emit({"type": "graph", "build_id": build_id, "nodes": nodes, "edges": list(edges.values())})
+            for result in results:
+                emit({"type": "evaluation", "result": asdict(result)})
         return view, build_id, factset, results, graph_warnings + fact_warnings
 
     stage("evaluate", "start")
@@ -151,7 +162,7 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
     todo = needs_recheck(results, factset)
     if todo:
         stage("recheck", "start")
-        _add_ops(contract, recheck(llm, contract, catalog, todo, at=at, model=model))
+        _add_ops(contract, recheck(llm, contract, catalog, todo, at=at, model=model, **({"on_event": emit} if on_event else {})))
         view, build_id, factset, results, graph_warnings = read_graph()
         stage("recheck", "done")
     warnings += graph_warnings

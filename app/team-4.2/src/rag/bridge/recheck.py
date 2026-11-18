@@ -46,11 +46,14 @@ def _search(contract: Contract, query: str, k: int) -> list[str]:
 
 
 def recheck(llm, contract: Contract, catalog: Catalog, concept_ids: list[str], *, at: datetime, k: int = 5,
-            model: str | None = None) -> list[GraphOperation]:
+            model: str | None = None, on_event=None) -> list[GraphOperation]:
     ops: list[GraphOperation] = []
     for cid in concept_ids:
         concept = catalog.concepts[cid]
         uids = _search(contract, concept.label + " " + " ".join(concept.phrasing), k)
+        if on_event:
+            on_event({"type": "recheck", "status": "start", "concept_id": cid,
+                      "label": concept.label, "uids": uids})
         found: list[GraphOperation] = []
         if uids:
             payload = {"units": [{"uid": u, "label": contract.unit(u).label, "text": contract.unit(u).text}
@@ -59,6 +62,8 @@ def recheck(llm, contract: Contract, catalog: Catalog, concept_ids: list[str], *
             try:
                 data = ask_json(llm, RECHECK_PROMPT, payload, contract.mask_state)
             except ContractAIError:
+                if on_event:
+                    on_event({"type": "recheck", "status": "error", "concept_id": cid, "uids": uids})
                 continue                       # không kiểm được: không ghi "vắng mặt"
             for it in data.get("items") if isinstance(data.get("items"), list) else []:
                 checked, _ = check_item(contract, uids, it, catalog)
@@ -73,6 +78,9 @@ def recheck(llm, contract: Contract, catalog: Catalog, concept_ids: list[str], *
             ops.append(machine_op(contract.contract_id, "ASSERT", cid,
                                   {"kind": "concept_absent", "concept_id": cid, "searched_uids": uids,
                                    "catalog_version": catalog.version}, "llm", "auto_accepted", at=at))
+        if on_event:
+            on_event({"type": "recheck", "status": "done", "concept_id": cid, "label": concept.label,
+                      "uids": uids, "found": bool(found)})
     return ops
 
 

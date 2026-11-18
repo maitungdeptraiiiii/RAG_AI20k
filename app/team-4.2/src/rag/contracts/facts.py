@@ -176,16 +176,20 @@ def _items(raw: Any) -> list:
     return raw if isinstance(raw, list) else [raw]
 
 
-def extract_facts(llm, contract: Contract) -> dict:
+def extract_facts(llm, contract: Contract, *, on_event=None) -> dict:
     specs = {s["key"]: s for s in all_specs()}
     parties: list[dict] = []
 
     def read(batch: Batch) -> dict:
+        if on_event:
+            on_event({"type": "fact_batch", "status": "start", "uids": batch.uids, "batch": batch.index})
         data = ask_json(llm, FACTS_PROMPT, _payload(batch, parties), contract.mask_state)
         for p in (_checked(contract, x, batch) for x in data.get("parties") or []):
             if p and p.get("role"):
                 found = _text_aliases(contract, p)
                 _merge_party(parties, p | {"aliases": found} if found else p)
+        if on_event:
+            on_event({"type": "fact_batch", "status": "done", "uids": batch.uids, "batch": batch.index})
         return data
 
     # Later batches depend on parties collected from earlier batches. Keep this

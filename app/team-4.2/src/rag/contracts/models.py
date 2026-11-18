@@ -48,6 +48,7 @@ class Contract:
     doc: ContractDoc | None = field(default=None, repr=False)   # dẫn xuất, không lưu
     graph: dict[str, Any] = field(default_factory=dict)          # trạng thái bản dựng gần nhất
     builds: list[dict[str, Any]] = field(default_factory=list)   # bản ghi các bản dựng, mới nhất cuối
+    concept_check: dict[str, Any] | None = None                  # kết quả Kiểm tra concept gần nhất, để xem lại
 
     def __post_init__(self) -> None:
         if self.oplog is None:

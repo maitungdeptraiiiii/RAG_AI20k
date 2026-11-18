@@ -329,3 +329,127 @@ def test_api_gate_answers_and_questions(client):
     assert again["findings"] == [] and again["questions"] == []
     llm_payloads = contracts_api.get(cid).facts["questions"]
     assert len(llm_payloads) == 1                                            # không nhân bản câu hỏi
+
+
+# --- sửa sau lần đo CUAD 1 (notes/2026-11-13-cuad-facts-benchmark.md) ------------------------------
+
+JV = ("JOINT VENTURE AGREEMENT\nAlpha Holdings, Inc. (\"Alpha\") and Beta Tech, Inc. (\"Beta\"), dated as of March 1, 2020.\n"
+      "Điều 1. Scope\nAlpha and Beta form a joint venture. Beta shall fund it.\n"
+      "Điều 2. Term\nThe term of this Agreement is five years. The license granted to Alpha is perpetual.\n"
+      "Điều 3. Signatures\nALPHA HOLDINGS, INC. Date: 3/1/2020 BETA TECH, INC. Date: 3/4/2020\n")
+
+
+def jv_reply(system, p):
+    labels = [u["label"] for u in p["units"]]
+    uid_of = {u["label"]: u["uid"] for u in p["units"]}
+    out = {"type": "Joint venture agreement", "parties": [], "fields": {}}
+    if "Phần mở đầu" in labels:
+        pre = uid_of["Phần mở đầu"]
+        out["parties"] = [{"name": 'Alpha Holdings, Inc. ("Alpha")', "role": "Bên liên doanh", "unit": pre,
+                           "quote": "Alpha Holdings, Inc."},
+                          {"name": "Beta Tech, Inc.", "role": "Bên liên doanh", "unit": pre, "quote": "Beta Tech, Inc."}]
+        out["sign_date"] = {"value": "2020-03-01", "unit": pre, "quote": "dated as of March 1, 2020"}
+    else:                                   # lô sau: trích lại bên từ ngữ cảnh + gọi bên bằng bí danh
+        first = p["units"][0]["uid"]
+        out["parties"] = [{"name": "ALPHA HOLDINGS, INC.", "role": "Bên góp vốn", "unit": "p0.pre", "quote": "Alpha Holdings, Inc."},
+                          {"name": "Beta", "role": "Bên tài trợ", "unit": first, "quote": "Beta"}]
+    if "Điều 3" in labels:
+        out["sign_date"] = [{"value": "2020-03-01", "unit": uid_of["Điều 3"], "quote": "Date: 3/1/2020"},
+                            {"value": "2020-03-04", "unit": uid_of["Điều 3"], "quote": "Date: 3/4/2020"}]
+        out["parties"].append({"name": "Alpha Holdings, Inc.", "role": "Company", "unit": uid_of["Điều 3"],
+                               "quote": "ALPHA HOLDINGS, INC."})
+    return out
+
+
+def test_parties_merge_by_name_not_role():
+    for budget in (None, 150):
+        c = extract(make(JV, cid=f"jv{budget}"), budget=budget, llm=ScriptLLM(jv_reply))
+        names = [p["name"] for p in c.facts["parties"]]
+        assert names == ['Alpha Holdings, Inc. ("Alpha")', "Beta Tech, Inc."], (budget, names)   # cùng vai trò vẫn đủ hai bên
+        roles = [p["role"] for p in c.facts["parties"]]
+        assert len(set(roles)) == 2 and all(r.startswith("Bên liên doanh — ") for r in roles)      # vai trò trùng: phân biệt bằng tên
+        assert [o["value"] for o in verify.party_options(c)][:2] == roles
+
+
+def test_later_batches_receive_known_parties():
+    llm = ScriptLLM(jv_reply)
+    extract(make(JV, cid="jv-known"), budget=150, llm=llm)
+    payloads = [p for _, p in llm.calls]
+    assert len(payloads) > 1 and payloads[0]["known_parties"] == []
+    assert [k["name"] for k in payloads[-1]["known_parties"]] == ['Alpha Holdings, Inc. ("Alpha")', "Beta Tech, Inc."]
+
+
+def test_alias_used_as_name_is_merged_or_dropped():
+    from rag.contracts.facts import _merge_party
+    parties = [{"name": "iPayment, Inc.", "role": "ISO"}, {"name": "First Data Corp", "role": "FDMS / SERVICERS"},
+               {"name": "Wells Fargo Bank, N.A.", "role": "Bank / SERVICERS"}]
+    for extra in ({"name": "ISO", "role": "Tổ chức bán hàng"},          # bí danh của đúng một bên -> gộp
+                  {"name": "SERVICERS", "role": "Bên cung cấp dịch vụ"},  # nhãn chung của hai bên -> bỏ
+                  {"name": "IPAYMENT, INC.", "role": "Bên ISO"}):         # cùng tên, khác hoa thường -> gộp
+        _merge_party(parties, extra)
+    assert [p["name"] for p in parties] == ["iPayment, Inc.", "First Data Corp", "Wells Fargo Bank, N.A."]
+    _merge_party(parties, {"name": "Nantz Communications, Inc.", "role": "Nantz Communications"})
+    _merge_party(parties, {"name": "James W. Nantz III", "role": "Nantz"})   # tên là tập con token của bên khác: KHÔNG gộp
+    assert [p["name"] for p in parties][-2:] == ["Nantz Communications, Inc.", "James W. Nantz III"]
+
+
+def test_several_sign_dates_become_a_conflict_not_a_silent_pick():
+    c = extract(make(JV, cid="jv-date"), budget=150, llm=ScriptLLM(jv_reply))
+    assert [x["value"] for x in c.facts["candidates"]["sign_date"]] == ["2020-03-01", "2020-03-04"]
+    assert c.sign_date is None                                    # không tự chọn khi có hơn một ngày
+    assert row(c, "sign_date")["status"] == "conflict"
+    single = extract(make(JV, cid="jv-one"), llm=ScriptLLM(lambda s, p: jv_reply(s, p) | {"sign_date": {
+        "value": "2020-03-01", "unit": p["units"][0]["uid"], "quote": "dated as of March 1, 2020"}}))
+    assert single.sign_date == date(2020, 3, 1)
+
+
+def test_quote_check_ignores_filler_runs_but_not_content():
+    from rag.contracts.llm_json import quote_ok
+    src = 'Mail                 ------- Boxes Etc. USA, Inc. ("MBE"). Lương: .......... đồng. Ký ngày .... tháng .... năm 2025'
+    assert quote_ok(src, 'Mail Boxes Etc. USA, Inc. ("MBE")')
+    assert quote_ok(src, "Lương: đồng") and quote_ok(src, "Lương: .......... đồng")
+    assert not quote_ok(src, "Ký ngày 05 tháng 3 năm 2025")       # điền chỗ trống = bịa
+    assert not quote_ok(src, "Mail Boxes ... Lương")              # rút gọn bằng "..." không được chấp nhận
+    assert not quote_ok(src, "------")
+    assert quote_ok("thời hạn 12-18 tháng, v.v. theo Điều 3", "12-18 tháng, v.v.")   # gạch nối / chấm đơn giữ nguyên
+
+
+def test_quote_may_join_several_lines_in_order():
+    from rag.contracts.llm_json import quote_ok
+    src = "Điều 5. Tiền lương\n1. Lương cơ bản: 15.000.000 đồng/tháng.\n2. Phụ cấp ăn trưa: 800.000 đồng/tháng.\n3. Lương được trả bằng chuyển khoản."
+    joined = "1. Lương cơ bản: 15.000.000 đồng/tháng.\n3. Lương được trả bằng chuyển khoản."
+    assert quote_ok(src, joined)                                               # bỏ qua khoản 2, hai đoạn đều nguyên văn
+    assert not quote_ok(src, joined, multi=False)                              # chế độ liền mạch (đề xuất sửa)
+    assert not quote_ok(src, "3. Lương được trả bằng chuyển khoản.\n1. Lương cơ bản: 15.000.000 đồng/tháng.")   # sai thứ tự
+    assert not quote_ok(src, "1. Lương cơ bản: 15.000.000 đồng/tháng.\n3. Lương được trả bằng tiền mặt.")       # một đoạn bịa
+    assert not quote_ok(src, "1. Lương cơ bản: 15.000.000 đồng/tháng.\nvà")    # đoạn quá ngắn không tính là bằng chứng
+
+
+def test_values_are_only_taken_from_units_of_the_batch():
+    c = make()
+    d2, d4 = uid(c, "Điều 2"), uid(c, "Điều 4")
+
+    def reply(system, p):
+        own = [u["uid"] for u in p["units"]]
+        out = {"type": "Hợp đồng lao động", "parties": [], "fields": {}}
+        if d4 in own and d2 not in own:        # lô sau trích chức danh từ Điều 2 (chỉ là ngữ cảnh / tham khảo của nó)
+            out["fields"]["job_title"] = {"value": "Nhân viên công nghệ thông tin", "unit": d2, "quote": "Nhân viên IT"}
+        if d2 in own:
+            out["fields"]["job_title"] = {"value": "Nhân viên IT", "unit": d2, "quote": "Nhân viên IT"}
+        return out
+
+    extract(c, budget=120, llm=ScriptLLM(reply))
+    assert [x["value"] for x in c.facts["candidates"]["job_title"]] == ["Nhân viên IT"]     # không có "mâu thuẫn" giả
+
+
+def test_text_aliases_only_take_defined_short_names():
+    from rag.contracts.facts import _text_aliases
+    text = ('HPIL ENERGYTECH Inc. (USA) and Beta Tech, Inc., a Nevada corporation ("Beta" or the "Supplier").\n'
+            "Công ty TNHH Sao Mai (sau đây gọi là Bên A) và Ông Trần Văn Bình (Bên B) cùng Bà Lê Thu (CCCD 0123).\n")
+    c = make(text, cid="alias")
+    u = c.units[0].uid
+    alias = lambda name: _text_aliases(c, {"name": name, "unit": u})   # noqa: E731
+    assert alias("HPIL ENERGYTECH Inc.") == []                        # "(USA)" là chú thích
+    assert alias("Beta Tech, Inc.") == ["Beta", "Supplier"]
+    assert alias("Công ty TNHH Sao Mai") == ["Bên A"] and alias("Ông Trần Văn Bình") == ["Bên B"]
+    assert alias("Bà Lê Thu") == [] and alias("Không có trong văn bản") == []

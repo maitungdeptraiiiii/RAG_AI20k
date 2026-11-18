@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 import pytest
 
 from rag.bridge.catalog import CONTRACT_FACTS, USER_FACTS, load_catalog
-from rag.bridge.view import FACT_LABELS, VERDICTS, format_value, result_views
+from rag.bridge.view import FACT_LABELS, VERDICTS, format_value, law_entry, result_views
 from rag.contracts.models import Contract, ContractUnit
 
 CAT = load_catalog()
@@ -49,13 +49,15 @@ def test_view_for_hidden_right():
     assert v["holder"] == "Người lao động"
     assert v["verdict"] == VERDICTS["hidden_right"]
     assert v["contract"] == []
-    assert v["law"] == [{"pid": PID, "citation": provision["citation"], "text": provision["text"], "in_force": True}]
+    assert v["law"] == [{"pid": PID, "citation": provision["citation"], "text": provision["text"], "in_force": True,
+                         "source_url": None, "valid_from": None, "valid_to": None, "note": None}]
 
 
 def test_view_without_legal_graph():
     basis = {"probation.cancel_no_notice": {"anchors": [{"pid": PID, "role": "basis", "provision": None}]}}
     [out] = result_views([_result()], CAT, _contract(), basis)
-    assert out["view"]["law"] == [{"pid": PID, "citation": None, "text": None, "in_force": None}]
+    assert out["view"]["law"] == [{"pid": PID, "citation": None, "text": None, "in_force": None,
+                                   "source_url": None, "valid_from": None, "valid_to": None, "note": None}]
 
 
 def test_view_contract_quotes_and_law_values():
@@ -81,3 +83,19 @@ def test_citation_from_legal_graph_dict():
         "in_force": True, "text": "2. Trong thời gian thử việc…", "citation": cite}}]}}
     [out] = result_views([_result()], CAT, _contract(), basis)
     assert out["view"]["law"][0]["citation"] == "Khoản 2 Điều 27 — Bộ Luật lao động số 45/2019/QH14"
+
+
+def test_law_entry_carries_source_and_validity():
+    cite = {"label": "điều 98", "doc_title": "Bộ luật Lao động", "source_url": "https://vbpl.vn/x",
+            "valid_from": "2021-01-01", "valid_to": None}
+    e = law_entry(PID, {"in_force": True, "text": "t", "citation": cite})
+    assert (e["source_url"], e["valid_from"], e["valid_to"], e["note"]) == ("https://vbpl.vn/x", "2021-01-01", None, None)
+
+
+def test_law_entry_explains_why_not_in_force():
+    e = law_entry(PID, {"in_force": False, "reason": "no_longer_in_force", "until": "2025-07-01"})
+    assert e["in_force"] is False and e["note"] == "Đã hết hiệu lực ở ngày áp luật (đến 2025-07-01)"
+    e = law_entry(PID, {"in_force": None, "reason": "overlapping_versions", "provision_id": PID})
+    assert e["in_force"] is None and "chồng nhau" in e["note"]
+    e = law_entry(PID, {"in_force": False, "reason": "no_version_at_date"})
+    assert "không có phiên bản" in e["note"]

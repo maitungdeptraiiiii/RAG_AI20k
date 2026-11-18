@@ -113,3 +113,18 @@ def test_chat_page_has_contract_hooks_and_script(client):
     for needle in ("/api/contracts", "Hỏi tự do", "Hỏi với hợp đồng", "Đính kèm hợp đồng để soát", "Tải Word",
                    "Tải PDF", "Đã soát", "hết phiên", "Trung lập", "/upload"):
         assert needle in body, needle
+
+
+def test_contracts_page_served(client):
+    r = client.get("/contracts")
+    assert r.status_code == 200 and 'id="step-1"' in r.text
+    js = client.get("/contract_page.js")
+    assert js.status_code == 200 and "javascript" in js.headers["content-type"]
+
+
+def test_contract_ask_page_served(client):
+    r = client.get("/contracts/ask")
+    assert r.status_code == 200 and "contract_ask.js" in r.text and "contract_qa.js" in r.text
+    for path in ("/contract_ask.js", "/contract_qa.js"):
+        js = client.get(path)
+        assert js.status_code == 200 and "javascript" in js.headers["content-type"], path

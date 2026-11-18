@@ -9,6 +9,8 @@ Quy tắc:
 
 from __future__ import annotations
 
+import re
+import unicodedata
 import uuid
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
@@ -134,11 +136,33 @@ def _law_titles(runtime) -> list[str]:
         return []
 
 
+_LAW_NUMBER = re.compile(r"(?<!\d)(\d+/(?:19|20)\d{2})(?!\d)")
+_LAW_YEAR = re.compile(r"(?<![\d/])((?:19|20)\d{2})(?![\d/])")
+
+
+def _law_name(text: str) -> tuple[str, str | None]:
+    """(tên gốc chuẩn hóa, năm) của tên luật: phần trước năm / "số" / số hiệu; năm lấy từ chữ hoặc từ số hiệu."""
+    t = " ".join(unicodedata.normalize("NFC", text).casefold().split())
+    num = _LAW_NUMBER.search(t)
+    year = _LAW_YEAR.search(t)
+    cut = min([m.start() for m in (num, year, re.search(r"\bsố\b", t)) if m] or [len(t)])
+    return t[:cut].strip(" ,.-"), (year.group(1) if year else num.group(1).split("/")[1] if num else None)
+
+
 def _in_store(law: str | None, titles: list[str]) -> bool:
-    if not law:
+    """Tên luật LLM viết ("Bộ luật Lao động 2019", "BLLĐ 45/2019/QH14") có trong kho không: khớp số hiệu nếu có,
+    không thì khớp tên gốc và năm."""
+    if not law or not law.strip():
         return False
-    needle = law.casefold().strip()
-    return any(needle in t.casefold() for t in titles)
+    num = _LAW_NUMBER.search(law)
+    if num:
+        return any(num.group(1) in _LAW_NUMBER.findall(t) for t in titles)
+    name, year = _law_name(law)
+    for t in titles:
+        t_name, t_year = _law_name(t)
+        if name and name == t_name and (year is None or year == t_year):
+            return True
+    return False
 
 
 def _verify(ctx: ReviewContext, contract: Contract, items: list[dict]) -> dict[str, list[str]]:
@@ -377,7 +401,7 @@ def redline(ctx: ReviewContext, contract: Contract) -> dict[str, Any]:
             continue
         f = by_id[r["finding_id"]]
         old = str(r.get("old") or "")
-        old_ok = quote_ok(contract.text, old, multi=False)
+        old_ok = quote_ok(contract.text, old, multi=False)      # đoạn cũ phải liền mạch thì mới thay thế được
         out.append({"finding_id": f["id"], "unit_label": f["unit_label"], "old": old, "old_ok": old_ok,
                     "new": str(r.get("new") or ""), "reason": str(r.get("reason") or ""),
                     "legal_note": "Chưa kiểm tra pháp lý" if f["legal_status"] in ("cannot_conclude", "blocked_no_date")

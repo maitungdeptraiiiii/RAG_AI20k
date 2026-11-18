@@ -10,6 +10,7 @@ Endpoints:
     GET  /upload     -> Trang nạp tài liệu + báo cáo chi tiết sau OCR (upload.html)
     GET  /api/ingest_reports            -> Danh sách báo cáo ingest đã lưu (tóm tắt)
     GET  /api/ingest_reports/{doc_id}   -> Báo cáo chi tiết: từng trang, độ tin cậy OCR, độ đầy đủ
+    GET  /contracts  -> Trang soát hợp đồng từng bước: nạp, dữ kiện, soát (contracts.html)
     GET  /review     -> Trang duyệt kho luật có phiên bản (review.html)
     GET  /api/legal/reviews?status=open|resolved|all     -> Danh sách mục cần duyệt
     GET  /api/legal/reviews/{review_id}                  -> Chi tiết: chỉ dẫn gốc, thao tác, trước/sau
@@ -72,6 +73,11 @@ UPLOAD_HTML_PATH = UI_DIR / "upload.html"
 UPLOAD_LEGAL_JS_PATH = UI_DIR / "upload_legal.js"
 CONTRACTS_JS_PATH = UI_DIR / "contracts.js"
 REVIEW_HTML_PATH = UI_DIR / "review.html"
+CONTRACTS_HTML_PATH = UI_DIR / "contracts.html"
+CONTRACT_PAGE_JS_PATH = UI_DIR / "contract_page.js"
+CONTRACT_ASK_HTML_PATH = UI_DIR / "contract_ask.html"
+CONTRACT_ASK_JS_PATH = UI_DIR / "contract_ask.js"
+CONTRACT_QA_JS_PATH = UI_DIR / "contract_qa.js"
 
 _pipeline: RAGPipeline | None = None
 _settings: Settings | None = None
@@ -1372,6 +1378,36 @@ async def handle_review_page(request: Request) -> HTMLResponse:
     return HTMLResponse(REVIEW_HTML_PATH.read_text(encoding="utf-8"))
 
 
+async def handle_contracts_page(request: Request) -> HTMLResponse:
+    if not CONTRACTS_HTML_PATH.exists():
+        return HTMLResponse("<h1>contracts.html chưa được tạo</h1>", status_code=404)
+    return HTMLResponse(CONTRACTS_HTML_PATH.read_text(encoding="utf-8"))
+
+
+def _js(path: Path) -> Response:
+    if not path.exists():
+        return Response("", status_code=404)
+    return Response(path.read_text(encoding="utf-8"), media_type="text/javascript", headers={"Cache-Control": "no-cache"})
+
+
+async def handle_contract_page_js(request: Request) -> Response:
+    return _js(CONTRACT_PAGE_JS_PATH)
+
+
+async def handle_contract_ask_page(request: Request) -> HTMLResponse:
+    if not CONTRACT_ASK_HTML_PATH.exists():
+        return HTMLResponse("<h1>contract_ask.html chưa được tạo</h1>", status_code=404)
+    return HTMLResponse(CONTRACT_ASK_HTML_PATH.read_text(encoding="utf-8"))
+
+
+async def handle_contract_ask_js(request: Request) -> Response:
+    return _js(CONTRACT_ASK_JS_PATH)
+
+
+async def handle_contract_qa_js(request: Request) -> Response:
+    return _js(CONTRACT_QA_JS_PATH)
+
+
 routes = [
     Route("/api/index/{doc_id}", handle_index_doc, methods=["POST"]),
     Route("/api/discard/{doc_id}", handle_discard_doc, methods=["POST"]),
@@ -1383,6 +1419,11 @@ routes = [
     Route("/upload_legal.js", handle_upload_legal_js, methods=["GET"]),
     Route("/contracts.js", handle_contracts_js, methods=["GET"]),
     Route("/review", handle_review_page, methods=["GET"]),
+    Route("/contracts", handle_contracts_page, methods=["GET"]),
+    Route("/contract_page.js", handle_contract_page_js, methods=["GET"]),
+    Route("/contracts/ask", handle_contract_ask_page, methods=["GET"]),
+    Route("/contract_ask.js", handle_contract_ask_js, methods=["GET"]),
+    Route("/contract_qa.js", handle_contract_qa_js, methods=["GET"]),
     Route("/api/legal/reviews", handle_list_reviews, methods=["GET"]),
     Route("/api/legal/reviews/{review_id:path}/decision", legal_api.handle_review_decision, methods=["POST"]),
     Route("/api/legal/reviews/{review_id:path}", handle_review_detail, methods=["GET"]),

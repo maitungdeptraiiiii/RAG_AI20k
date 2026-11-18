@@ -22,6 +22,9 @@ khóa ghi của hợp đồng; đồ thị lỗi chỉ báo trong thẻ (card["g
 from __future__ import annotations
 
 import asyncio
+import json
+import queue
+import threading
 import copy
 import hashlib
 import logging
@@ -38,9 +41,13 @@ from types import SimpleNamespace
 from typing import Any
 
 from starlette.requests import Request
-from starlette.responses import JSONResponse, Response
+from starlette.responses import JSONResponse, Response, StreamingResponse
 from starlette.routing import Route
 
+from rag.bridge.basis import AnchorLawBasis
+from rag.bridge.catalog import load_catalog
+from rag.bridge.check import check_contract, report_json, report_markdown
+from rag.bridge.view import result_views
 from rag.contracts import review as rv
 from rag.contracts.doc import PageText, PartSpec, assemble
 from rag.contracts.export import report_docx, report_pdf
@@ -84,6 +91,8 @@ CONFIG = SimpleNamespace(
     agent_config=None,         # () -> AgentConfig
     document_source=None,      # () -> (chunk_id -> Chunk, tìm(q, k) -> [Hit]) tài liệu thường cho agent
     graph=None,                # () -> ContractGraphService; None -> chỉ tách, không ghi Neo4j
+    tag_llm=None,              # (model, temp) -> LLM gán khái niệm | None (dùng LLM của app); None -> _default_tag_llm
+    legal_graph=None,          # () -> LegalGraph | None; None -> _default_legal_graph
 )
 _store: ContractStore | None = None
 _no_graph = ContractGraphService(None)
@@ -128,7 +137,11 @@ def card(c: Contract) -> dict[str, Any]:
             "graph": {"enabled": bool(g.get("enabled")), "published": bool(g.get("published")),
                       "build_id": g.get("build_id"), "error": g.get("error"),
                       "problems": list(g.get("problems") or [])},
-            "verification": verify.summary(c)}
+            "verification": verify.summary(c),
+            "last_check": ({"checked_at": c.concept_check["checked_at"],
+                            "stale": c.concept_check.get("facts_sig") != _facts_sig(c)} if c.concept_check else None),
+            "concepts": len({(o.content or {}).get("concept_id") for o in c.oplog.active()
+                             if (o.content or {}).get("kind") == "concept"})}
 
 
 def _now() -> datetime:
@@ -375,6 +388,217 @@ def run(cid: str, op: str, unit_ids=None, topics=None) -> dict[str, Any]:
     return rep
 
 
+def _default_legal_graph():
+    try:
+        from rag.legal.graph.query import LegalGraph
+        from rag.legal.graph.service import open_store
+        store_ = open_store()                # None khi LEGAL_GRAPH != "1"
+        return LegalGraph(store_) if store_ is not None else None
+    except Exception as exc:  # noqa: BLE001 — không có đồ thị luật vẫn chạy được
+        log.warning("Không mở được đồ thị luật: %s", exc)
+        return None
+
+
+def _default_tag_llm(model: str | None, temp: float | None):
+    """Không model: CONCEPT_TAG_MODEL (có cache). "app": LLM của app. Id khác: model đó qua OpenRouter, không cache."""
+    from rag.bridge.llm import OPENROUTER_URL, concept_tag_llm
+    from rag.config import Settings
+    from rag.generate.llm import LLMCache, OpenAIChatLLM
+    s = Settings.load()
+    if not model:
+        return concept_tag_llm(s, cache=LLMCache(s.cache_dir / "concept_tag_llm.sqlite"))
+    if model == "app":
+        return None
+    if not s.openrouter_api_key:
+        raise ValueError("Thiếu OPENROUTER_API_KEY")
+    return OpenAIChatLLM(model, temperature=temp, base_url=OPENROUTER_URL, api_key=s.openrouter_api_key, cache=None)
+
+
+def concept_check(cid: str, user_facts: dict | None = None, *, tag_model: str | None = None,
+                  tag_temp: float | None = None, on_event=None) -> dict[str, Any]:
+    """Soát hợp đồng theo danh mục khái niệm; dựng lại đồ thị để có Party / ConceptInstance vừa gán.
+    on_event nhận sự kiện tiến trình của check_contract; sự kiện `partial` được thêm `views` để trang vẽ."""
+    c = get(cid)
+    llm = CONFIG.llm_factory()
+    catalog = load_catalog()
+    now = _now()
+    tag_llm = (CONFIG.tag_llm or _default_tag_llm)(tag_model, tag_temp)
+    legal_graph = (CONFIG.legal_graph or _default_legal_graph)()
+
+    def relay(event: dict) -> None:
+        if on_event is None:
+            return
+        if event.get("type") == "partial":
+            event = {**event, "views": result_views(event["results"], catalog, c, {})}
+        on_event(event)
+
+    report = check_contract(llm, c, catalog=catalog, basis=AnchorLawBasis(catalog, legal_graph), at=now,
+                            model=getattr(llm, "model_id", None), tag_llm=tag_llm,
+                            tag_model=getattr(tag_llm, "model_id", None), user_facts=user_facts, graph=_graph(),
+                            on_event=relay)
+    with _graph().writing(c.contract_id):
+        _rebuild(c, now)
+    g = c.graph or {}
+    labels = {x.concept_id: catalog.concepts[x.concept_id].label for x in report.results}
+    js = report_json(report)
+    out = {"report": js, "markdown": report_markdown(report, catalog), "labels": labels,
+           "graph": {k: g.get(k) for k in ("enabled", "published", "error")},
+           "views": result_views(js["results"], catalog, c, report.basis)}
+    # Lưu để xem lại không phải chạy lại (tốn LLM); facts_sig cho biết dữ kiện đã đổi sau lần kiểm tra này chưa.
+    c.concept_check = {"checked_at": now.isoformat(), "facts_sig": _facts_sig(c), "result": out}
+    store().update(c)
+    return out
+
+
+def _facts_sig(c: Contract) -> str:
+    import hashlib
+    return hashlib.sha256(json.dumps(c.facts, sort_keys=True, ensure_ascii=False, default=str).encode()).hexdigest()[:16]
+
+
+def last_concept_check(cid: str) -> dict[str, Any]:
+    """Kết quả Kiểm tra concept gần nhất đã lưu; ValueError khi hợp đồng chưa được kiểm tra."""
+    c = get(cid)
+    saved = c.concept_check
+    if not saved:
+        raise ValueError("Hợp đồng này chưa có kết quả Kiểm tra concept")
+    return {**saved["result"], "checked_at": saved["checked_at"], "stale": saved.get("facts_sig") != _facts_sig(c)}
+
+
+NEEDS_CHECK = "Hãy chạy Kiểm tra concept trước khi hỏi"
+
+
+class NeedsConceptCheck(Exception):
+    """Đồ thị chưa có khái niệm đã gán: agent không có điểm bắt đầu."""
+
+
+def _open_agent(c: Contract, catalog, legal, user_facts: dict | None):
+    """Mở đồ thị đã dựng (Neo4j nếu có, không thì bộ nhớ) và tạo GraphAgent -> (agent, ngày soát, cảnh báo).
+    Không soát lại: dùng khái niệm Kiểm tra concept đã gán vào oplog."""
+    from rag.bridge.check import contract_view, user_fact_set
+    from rag.contracts.graph.agent import GraphAgent, agent_context
+    from rag.contracts.graph.build import graph_mask_state
+    from rag.contracts.graph.tools import make_tools
+    facts = user_fact_set(user_facts)
+    view, _, warnings, doc = contract_view(c, _graph(), _now())
+    if not view.find("ConceptInstance"):
+        raise NeedsConceptCheck()
+    day = c.sign_date or catalog.law_values_valid_from
+    tools = make_tools(view, catalog=catalog, day=day, sign_date=c.sign_date, legal=legal, user_facts=facts)
+    agent = GraphAgent(CONFIG.llm_factory(), tools, view, mask=graph_mask_state(doc),
+                       context=agent_context(view, catalog, sign_date=c.sign_date))
+    return agent, day, warnings
+
+
+def contract_ask(cid: str, question: str, history: list | None = None, user_facts: dict | None = None, *,
+                 on_event=None) -> dict[str, Any]:
+    """Hỏi về hợp đồng bằng agent trên đồ thị (spec 2026-11-17-contract-page-graph-qa); on_event nhận từng bước."""
+    from rag.bridge.view import law_entry
+    question = str(question or "").strip()
+    if not question:
+        raise ValueError("Câu hỏi không được rỗng")
+    c = get(cid)
+    catalog = load_catalog()
+    legal = (CONFIG.legal_graph or _default_legal_graph)()
+    agent, day, warnings = _open_agent(c, catalog, legal, user_facts)
+    a = agent.ask(question, history=history if isinstance(history, list) else None, on_step=on_event)
+    pids = list(dict.fromkeys(a.law))
+    for t in a.trace:              # kết luận qua check_concept -> căn cứ là neo luật của khái niệm đó trong danh mục
+        concept = catalog.concepts.get((t.get("args") or {}).get("concept_id"))
+        if t.get("tool") == "check_concept" and concept and not str(t.get("result", "")).startswith('{"error"'):
+            pids += [x["pid"] for x in concept.anchors if x.get("pid") and x["pid"] not in pids]
+    law = []
+    for pid in pids:
+        p = None
+        if legal is not None:
+            try:
+                p = legal.text_at(pid, day)
+            except Exception:  # noqa: BLE001 — pid không có / đồ thị luật lỗi: vẫn hiện pid
+                p = None
+        law.append(law_entry(pid, p))
+    return {"answer": a.answer, "confidence": a.confidence, "path": _path_view(a, catalog, legal, day), "law": law,
+            "seen_unused": [_label_concept(n, catalog) for n in a.seen_unused],
+            "warnings": warnings + a.warnings, "trace": a.trace, "stats": a.stats}
+
+
+def _label_concept(node: dict, catalog) -> dict:
+    """ConceptInstance: thêm nhãn tiếng Việt của khái niệm (thay vì mã như content.wage_terms)."""
+    concept = catalog.concepts.get(node.get("concept_id") or "")
+    return {**node, "concept_label": concept.label} if concept else node
+
+
+def _path_view(a, catalog, legal, day) -> list[dict]:
+    """Đường đi của agent, mỗi nút Khái niệm nối sang graph luật qua neo của khái niệm trong danh mục.
+    `law_links[].read_by_agent`: agent có thật sự gọi công cụ luật / check_concept cho neo này trong lượt hay không."""
+    from rag.bridge.view import law_entry
+    read_pids = {str((t.get("args") or {}).get("pid")) for t in a.trace
+                 if str(t.get("tool", "")).startswith("law_") and not t.get("error")}
+    checked = {str((t.get("args") or {}).get("concept_id")) for t in a.trace
+               if t.get("tool") in ("check_concept", "concept_basis") and not t.get("error")}
+    out = []
+    for node in a.path:
+        node = _label_concept(node, catalog)
+        concept = catalog.concepts.get(node.get("concept_id") or "")
+        if concept is not None:
+            links = []
+            for anchor in concept.anchors:
+                p = None
+                if legal is not None:
+                    try:
+                        p = legal.text_at(anchor["pid"], day)
+                    except Exception:  # noqa: BLE001 — đồ thị luật lỗi: vẫn hiện pid
+                        p = None
+                links.append({**law_entry(anchor["pid"], p), "role": anchor.get("role"),
+                              "read_by_agent": anchor["pid"] in read_pids or concept.id in checked})
+            node = {**node, "law_links": links}
+        out.append(node)
+    return out
+
+
+def _error_status(exc: Exception) -> tuple[str, int]:
+    """Cùng cách ánh xạ lỗi như _call, cho luồng stream."""
+    if isinstance(exc, KeyError):
+        return GONE, 404
+    if isinstance(exc, NeedsConceptCheck):
+        return NEEDS_CHECK, 409
+    if isinstance(exc, GraphBusy):
+        return str(exc), 409
+    if isinstance(exc, ContractAIError):
+        return str(exc), 502
+    if isinstance(exc, ValueError):
+        return str(exc), 400
+    log.error("Kiểm tra concept thất bại", exc_info=exc)
+    return FAILED, 500
+
+
+_END = object()
+
+
+def _events(fn, name: str) -> "queue.Queue":
+    """Chạy fn(on_event) trong luồng nền; trả hàng đợi sự kiện, kết thúc bằng `done` / `error` rồi _END.
+    Hàng đợi không giới hạn: client đóng giữa chừng thì luồng vẫn chạy hết, không bị chặn."""
+    q: queue.Queue = queue.Queue()
+
+    def work():
+        try:
+            q.put({"type": "done", **fn(q.put)})
+        except Exception as exc:  # noqa: BLE001 — mọi lỗi thành sự kiện error cho trang
+            msg, status = _error_status(exc)
+            q.put({"type": "error", "error": msg, "status": status})
+        finally:
+            q.put(_END)
+    threading.Thread(target=work, daemon=True, name=name).start()
+    return q
+
+
+def concept_check_events(cid: str, user_facts: dict | None = None) -> "queue.Queue":
+    return _events(lambda emit: concept_check(cid, user_facts, on_event=emit), f"concept-check-{cid}")
+
+
+def contract_ask_events(cid: str, question: str, history: list | None = None,
+                        user_facts: dict | None = None) -> "queue.Queue":
+    return _events(lambda emit: contract_ask(cid, question, history, user_facts, on_event=emit), f"ask-{cid}")
+
+
 def chat_answer(cid: str, question: str, history: list[dict]) -> dict[str, Any]:
     """Hỏi với hợp đồng (không Think) — dạng trả về giống /api/chat để UI hiển thị chung."""
     c = get(cid)
@@ -570,6 +794,42 @@ async def handle_run(request: Request) -> Response:
     return await _call(run, request.path_params["cid"], str(body.get("op") or ""), unit_ids, topics)
 
 
+async def handle_concept_check(request: Request) -> Response:
+    body = await _json(request)
+    facts = body.get("user_facts")
+    return await _call(concept_check, request.path_params["cid"], facts if isinstance(facts, dict) else {})
+
+
+async def handle_concept_check_last(request: Request) -> Response:
+    return await _call(last_concept_check, request.path_params["cid"])
+
+
+async def handle_concept_check_stream(request: Request) -> Response:
+    body = await _json(request)
+    facts = body.get("user_facts")
+    return _sse_queue(concept_check_events(request.path_params["cid"], facts if isinstance(facts, dict) else {}))
+
+
+async def handle_ask_stream(request: Request) -> Response:
+    body = await _json(request)
+    facts = body.get("user_facts")
+    return _sse_queue(contract_ask_events(request.path_params["cid"], str(body.get("question") or ""),
+                                          body.get("history"), facts if isinstance(facts, dict) else {}))
+
+
+def _sse_queue(q: "queue.Queue") -> Response:
+    loop = asyncio.get_running_loop()
+
+    async def events():
+        while True:
+            event = await loop.run_in_executor(None, q.get)
+            if event is _END:
+                return
+            yield f"data: {json.dumps(event, ensure_ascii=False, default=str)}\n\n"
+    return StreamingResponse(events(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
 async def handle_download(request: Request) -> Response:
     fmt = request.path_params["fmt"]
     if fmt not in ("docx", "pdf"):
@@ -588,5 +848,9 @@ routes = [
     Route("/api/contracts/{cid}/layout", handle_layout, methods=["POST"]),
     Route("/api/contracts/{cid}/facts", handle_facts, methods=["POST"]),
     Route("/api/contracts/{cid}/run", handle_run, methods=["POST"]),
+    Route("/api/contracts/{cid}/concept-check", handle_concept_check, methods=["POST"]),
+    Route("/api/contracts/{cid}/concept-check/last", handle_concept_check_last, methods=["GET"]),
+    Route("/api/contracts/{cid}/concept-check/stream", handle_concept_check_stream, methods=["POST"]),
+    Route("/api/contracts/{cid}/ask/stream", handle_ask_stream, methods=["POST"]),
     Route("/api/contracts/{cid}/reports/{rid}.{fmt}", handle_download, methods=["GET"]),
 ]

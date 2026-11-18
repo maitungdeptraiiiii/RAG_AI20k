@@ -1,0 +1,66 @@
+{
+  "question": "Lúc thử việc tôi được trả bao nhiêu?",
+  "answer": "Trong thời gian thử việc từ ngày 02/01/2025 đến 01/03/2025, bạn được hưởng 85% mức lương căn bản 15.000.000 đồng/tháng, tức **12.750.000 đồng/tháng**. Phụ lục điều chỉnh lương lên 17.000.000 đồng/tháng có hiệu lực từ 01/07/2025, sau thời gian thử việc.",
+  "confidence": "answer",
+  "path": [
+    {
+      "node_id": "3jH6r3bB3Szi2XBhy9OmkSi3:p0.d6@1",
+      "node_type": "Unit",
+      "label": "Điều 6",
+      "text": "Điều 6: Những thỏa thuận khác\n- Thời gian thử việc: 02 tháng, từ ngày 02/01/2025 đến ngày 01/03/2025. Trong thời gian thử việc, Người lao động hưởng 85% mức lươ"
+    },
+    {
+      "node_id": "3jH6r3bB3Szi2XBhy9OmkSi3:p0.d2@1",
+      "node_type": "Unit",
+      "label": "Điều 2",
+      "text": "Điều 2: Lương, phụ cấp, các khoản bổ sung khác\nLương căn bản:\n15.000.000 đồng/tháng\nPhụ cấp:\n1.000.000 đồng/tháng\nCác khoản bổ sung khác: tùy quy định cụ thể củ"
+    },
+    {
+      "node_id": "3jH6r3bB3Szi2XBhy9OmkSi3:p0.d2#v1",
+      "node_type": "Value",
+      "label": "",
+      "text": ""
+    }
+  ],
+  "law": [],
+  "warnings": [],
+  "stats": {
+    "steps": 2,
+    "llm_calls": 3,
+    "backend": "memory",
+    "seconds": 15.6,
+    "agent_model": "gpt-6-luna",
+    "check": {
+      "llm_calls": 11,
+      "seconds": 57.5,
+      "graph_backend": "memory",
+      "build_id": "b2de5d84a261e"
+    }
+  },
+  "trace": [
+    {
+      "thought": "Tìm khái niệm tiền lương thử việc trong hợp đồng để xem mức cụ thể được ghi ở điều khoản nào.",
+      "tool": "find_concept",
+      "args": {
+        "concept_id": "probation.pay"
+      },
+      "result": "{\"concept_id\": \"probation.pay\", \"label\": \"Tiền lương thử việc tối thiểu\", \"instances\": [{\"node_id\": \"3jH6r3bB3Szi2XBhy9OmkSi3:ci:off4702cca756\", \"about\": \"3jH6r3bB3Szi2XBhy9OmkSi3:p0.d6@1\", \"quote\": \"Trong thời gian thử việc, Người lao động hưởng 85% mức lương căn bản quy định tại Điều 2.\", \"slots\":…",
+      "ms": 16
+    },
+    {
+      "thought": "Điều khoản thử việc quy định mức hưởng là 85% lương căn bản tại Điều 2. Cần xem Điều 2 và các sửa đổi để xác định số tiền cụ thể.",
+      "tool": "expand",
+      "args": {
+        "node_id": "3jH6r3bB3Szi2XBhy9OmkSi3:p0.d2@1",
+        "rel_types": [
+          "HAS_VALUE",
+          "REFERS_TO",
+          "AMENDS"
+        ],
+        "direction": "both"
+      },
+      "result": "{\"hops\": [{\"rel\": \"AMENDS\", \"dir\": \"in\", \"props\": {\"kind\": \"modify\", \"valid_from\": \"2025-07-01\", \"raw\": \"Sửa đổi Điều 2 Hợp đồng lao động về lương căn bản: Lương căn bản của Người lao động được điều chỉnh từ 15.000.000 đồng/tháng lên 17.000.000 đồng/tháng.\"}, \"node\": {\"node_id\": \"3jH6r3bB3Szi2XBhy9O…",
+      "ms": 0
+    }
+  ]
+}

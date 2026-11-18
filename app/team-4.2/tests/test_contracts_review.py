@@ -226,3 +226,14 @@ def test_answer_without_versioned_support_adds_refusal():
     assert out["legal_status"] == "conditional"
     out2 = rv.answer(ctx(llm, None, None), c, "Bên cho thuê có được chấm dứt không?", [])
     assert out2["legal_status"] == "cannot_conclude" and "chưa thể kết luận" in out2["answer"]
+
+
+def test_in_store_common_names():
+    from rag.contracts.review import _in_store
+    titles = ["Bộ Luật lao động số 45/2019/QH14", "Nghị định 145/2020/NĐ-CP quy định chi tiết Bộ luật Lao động"]
+    assert _in_store("Bộ luật Lao động 2019", titles)
+    assert _in_store("BLLĐ 45/2019/QH14", titles)
+    assert _in_store("Nghị định 145/2020", titles)
+    assert not _in_store("Bộ luật Lao động 2012", titles)
+    assert not _in_store("Luật Việc làm", titles)
+    assert not _in_store(None, titles)

@@ -57,10 +57,24 @@ Dữ liệu, evaluation, thí nghiệm, scripts và báo cáo nằm ở thư m�
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
-pip install -e "app/team-4.2[dev]"          # thêm [jev] nếu dùng reranker Jev
+pip install -e "app/team-4.2[dev,jev,graph]"   # jev: reranker (RERANK_BACKEND=jev); graph: đồ thị hợp đồng (CONTRACT_GRAPH=1)
 cp app/team-4.2/.env.example app/team-4.2/.env   # điền key, KHÔNG commit .env
 pytest app/team-4.2/tests -v
 ```
+
+Thiếu `[jev]` thì log báo `Reranker jev lỗi, dùng none: No module named 'typesafe_sdk'` và tra luật chạy không rerank.
+Thiếu `[graph]` hoặc Neo4j không chạy thì log báo `Đồ thị hợp đồng tắt` và hợp đồng chỉ được tách, không ghi đồ thị.
+
+Neo4j cho đồ thị hợp đồng (cần Docker Desktop đang chạy; `NEO4J_PASSWORD` lấy từ `.env`):
+
+```bash
+cd app/team-4.2
+set -a; . <(grep -E '^NEO4J_(USER|PASSWORD)=' .env | sed 's/[[:space:]]*#.*$//'); set +a
+docker compose -f docker/neo4j-compose.yml up -d     # trình duyệt đồ thị: http://localhost:7474
+```
+
+Lưu ý: `uv run` trong `app/team-4.2` dùng môi trường riêng `app/team-4.2/.venv`, không phải `.venv` ở gốc repo. Dùng
+`uv sync --extra dev --extra jev --extra graph --inexact` để môi trường đó có đủ các extra.
 
 Các lệnh (tại gốc repo, sau khi điền `.env`):
 

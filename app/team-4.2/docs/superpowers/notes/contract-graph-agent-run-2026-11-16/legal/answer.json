@@ -1,0 +1,54 @@
+{
+  "question": "Lương thử việc trong hợp đồng có đúng luật không?",
+  "answer": "Có. Hợp đồng quy định lương thử việc bằng 85% mức lương căn bản tại Điều 2; mức này đạt ngưỡng tối thiểu 85% theo kết quả kiểm tra tại ngày 01/01/2021.",
+  "confidence": "answer",
+  "path": [
+    {
+      "node_id": "_6610T78L6jIKs8tnWT4nmWf:ci:o9c506ca09d75",
+      "node_type": "ConceptInstance",
+      "label": "probation.pay",
+      "text": "Trong thời gian thử việc, Người lao động hưởng 85% mức lương căn bản quy định tại Điều 2."
+    },
+    {
+      "node_id": "_6610T78L6jIKs8tnWT4nmWf:p0.d6@1",
+      "node_type": "Unit",
+      "label": "Điều 6",
+      "text": "Điều 6: Những thỏa thuận khác\n- Thời gian thử việc: 02 tháng, từ ngày 02/01/2025 đến ngày 01/03/2025. Trong thời gian thử việc, Người lao động hưởng 85% mức lươ"
+    }
+  ],
+  "law": [],
+  "warnings": [],
+  "stats": {
+    "steps": 2,
+    "llm_calls": 3,
+    "backend": "memory",
+    "seconds": 13.5,
+    "agent_model": "gpt-6-luna",
+    "check": {
+      "llm_calls": 11,
+      "seconds": 0.5,
+      "graph_backend": "memory",
+      "build_id": "b8cae51bd626c"
+    }
+  },
+  "trace": [
+    {
+      "thought": "Cần xác định điều khoản về tiền lương thử việc trong hợp đồng trước khi kiểm tra tính phù hợp pháp luật.",
+      "tool": "find_concept",
+      "args": {
+        "concept_id": "probation.pay"
+      },
+      "result": "{\"concept_id\": \"probation.pay\", \"label\": \"Tiền lương thử việc tối thiểu\", \"instances\": [{\"node_id\": \"_6610T78L6jIKs8tnWT4nmWf:ci:o9c506ca09d75\", \"about\": \"_6610T78L6jIKs8tnWT4nmWf:p0.d6@1\", \"quote\": \"Trong thời gian thử việc, Người lao động hưởng 85% mức lương căn bản quy định tại Điều 2.\", \"slots\":…",
+      "ms": 0
+    },
+    {
+      "thought": "Đã xác định mức lương thử việc được ghi là 85% mức lương căn bản tại Điều 2; cần chạy kiểm luật cho khái niệm tiền lương thử việc tối thiểu để kết luận.",
+      "tool": "check_concept",
+      "args": {
+        "concept_id": "probation.pay"
+      },
+      "result": "{\"concept_id\": \"probation.pay\", \"label\": \"Tiền lương thử việc tối thiểu\", \"day\": \"2021-01-01\", \"results\": [{\"rule_id\": \"r1\", \"status\": \"PASS\", \"finding\": \"ok\", \"law_values\": {\"min_probation_pay\": {\"value\": 85, \"unit\": \"percent\"}}, \"facts_used\": {\"has_probation\": {\"value\": true, \"unit\": null}, \"proba…",
+      "ms": 0
+    }
+  ]
+}

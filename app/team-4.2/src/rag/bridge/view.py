@@ -79,6 +79,31 @@ def citation_text(cite) -> str | None:
     return " — ".join(x for x in (label, title) if x) or cite.get("provision_id")
 
 
+_NOT_IN_FORCE = {
+    "not_yet_in_force": "Chưa có hiệu lực ở ngày áp luật",
+    "no_longer_in_force": "Đã hết hiệu lực ở ngày áp luật",
+    "no_version_at_date": "Đồ thị luật không có phiên bản hiệu lực ở ngày áp luật",
+    "overlapping_versions": "Đồ thị luật có nhiều phiên bản chồng nhau ở ngày áp luật — cần rà soát nguồn",
+    "unknown_provision": "Đồ thị luật không có điều này",
+}
+
+
+def law_entry(pid: str, provision: dict | None) -> dict:
+    """Một căn cứ luật để vẽ: kết quả `LegalGraph.text_at` -> trích dẫn, lời văn, hiệu lực, nguồn gốc và ghi chú.
+    `in_force`: True / False / None (None: chưa có đồ thị, hoặc đồ thị không xác định được); `note` chỉ có khi không True."""
+    p = provision or {}
+    cite = p.get("citation") if isinstance(p.get("citation"), dict) else {}
+    note = None
+    if p and p.get("in_force") is not True:
+        note = _NOT_IN_FORCE.get(p.get("reason") or "", "Không xác định được hiệu lực ở ngày áp luật")
+        when = p.get("from") or p.get("until")
+        if when and p.get("reason") in ("not_yet_in_force", "no_longer_in_force"):
+            note += f" ({'từ' if p.get('from') else 'đến'} {when})"
+    return {"pid": pid, "citation": citation_text(p.get("citation")), "text": p.get("text"),
+            "in_force": p.get("in_force"), "source_url": cite.get("source_url"),
+            "valid_from": cite.get("valid_from"), "valid_to": cite.get("valid_to"), "note": note}
+
+
 def result_views(results: list[dict], catalog: Catalog, contract: Contract, basis: dict[str, dict]) -> list[dict]:
     """Mỗi kết quả (dạng report_json()["results"]) cộng khóa `view` để trang vẽ."""
     labels = {u.uid: u.label for u in contract.units}
@@ -89,9 +114,7 @@ def result_views(results: list[dict], catalog: Catalog, contract: Contract, basi
         anchors = (basis.get(r["concept_id"]) or {}).get("anchors") or []
         law = []
         for a in anchors:
-            p = a.get("provision") or {}
-            law.append({"pid": a["pid"], "citation": citation_text(p.get("citation")), "text": p.get("text"),
-                        "in_force": p.get("in_force")})
+            law.append(law_entry(a["pid"], a.get("provision")))
         view = {
             "title": concept.label if concept else r["concept_id"],
             "meaning": concept.describe if concept else "",
@@ -107,4 +130,4 @@ def result_views(results: list[dict], catalog: Catalog, contract: Contract, basi
     return out
 
 
-__all__ = ["FACT_LABELS", "VERDICTS", "citation_text", "format_value", "result_views"]
+__all__ = ["FACT_LABELS", "VERDICTS", "citation_text", "format_value", "law_entry", "result_views"]

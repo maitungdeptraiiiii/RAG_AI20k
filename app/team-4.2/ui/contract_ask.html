@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hỏi đáp hợp đồng — Just-ice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --surface: #ffffff; --page: #ffffff; --ink: #0d0d0d; --ink-2: #525252; --hairline: #e5e5e5;
+      --good-text: #006300; --warning-text: #8a5a00; --critical-text: #b42318;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--page); color: var(--ink); font-size: 14px; }
+    .chip { border: 1px solid var(--hairline); border-radius: 999px; padding: 2px 9px; font-size: 11.5px; color: var(--ink-2); background: var(--surface); }
+    .field-label { font-size: 11.5px; color: #737373; }
+    details[open] > summary .chev { transform: rotate(90deg); }
+    .chev { display: inline-block; transition: transform .15s; }
+    summary::-webkit-details-marker { display: none; }
+    .spin { display: inline-block; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .item { width: 100%; text-align: left; border-radius: 12px; padding: 8px 10px; }
+    .item:hover { background: #f5f5f5; }
+    .item.on { background: #f0f0f0; }
+    .sample { border: 1px solid var(--hairline); border-radius: 14px; padding: 10px 12px; text-align: left; font-size: 13.5px; }
+    .sample:hover { background: #fafafa; border-color: #d4d4d4; }
+    #q { border: 0; outline: none; resize: none; background: transparent; }
+  </style>
+</head>
+<body class="h-full flex flex-col">
+  <header class="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-neutral-200">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 h-14 flex items-center gap-3">
+      <a href="/" class="flex items-center gap-1.5 text-[13px] text-neutral-600 hover:text-black rounded-lg px-2 py-1 hover:bg-neutral-100 flex-shrink-0">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        <span>Quay lại chat</span>
+      </a>
+      <h1 class="text-[15px] font-semibold truncate">Hỏi đáp hợp đồng (đồ thị)</h1>
+      <a href="/contracts" class="ml-auto text-[13px] text-neutral-600 hover:text-black rounded-lg px-2 py-1 hover:bg-neutral-100 flex-shrink-0">Soát hợp đồng →</a>
+    </div>
+  </header>
+
+  <div class="flex-1 min-h-0 w-full max-w-[1200px] mx-auto md:grid md:grid-cols-[280px_1fr]">
+    <aside class="border-b md:border-b-0 md:border-r border-neutral-200 p-3 md:overflow-y-auto">
+      <div class="text-[12px] font-medium text-neutral-500 px-1 mb-2">Hợp đồng trên trình duyệt này</div>
+      <div id="list" class="space-y-1"></div>
+    </aside>
+    <main class="min-h-0 flex flex-col">
+      <div id="notice" class="hidden mx-4 mt-3 text-[13px] rounded-xl px-3 py-2" style="background:#fff7e6;color:var(--warning-text)"></div>
+      <div id="chat-head" class="px-4 sm:px-6 pt-4"></div>
+      <div id="turns" class="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-5"></div>
+      <div class="px-4 sm:px-6 pb-4">
+        <div class="w-full bg-white rounded-full border border-neutral-300 shadow-[0_2px_14px_rgba(0,0,0,0.06)] focus-within:border-neutral-400 p-2 pl-4 pr-2 flex items-center gap-2">
+          <textarea id="q" rows="1" class="flex-1 min-w-0 max-h-[160px] text-[15px] py-1.5 leading-relaxed" placeholder="Hỏi về hợp đồng này…"></textarea>
+          <button type="button" id="send" class="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center disabled:opacity-30 flex-shrink-0" aria-label="Gửi câu hỏi">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m-6 6l6-6 6 6"/></svg>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/contract_qa.js"></script>
+  <script src="/contract_ask.js"></script>
+</body>
+</html>

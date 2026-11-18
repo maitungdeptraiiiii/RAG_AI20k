@@ -53,9 +53,9 @@ export default function App() {
       last = now;
       setStepElapsedMs((prev) => {
         const next = prev + delta;
-        if (next >= 4500) {
+        if (next >= 6500) {
           window.clearInterval(timer);
-          return 4500;
+          return 6500;
         }
         return next;
       });
@@ -65,6 +65,7 @@ export default function App() {
   const input = useRef<HTMLInputElement>(null),
     operation = useRef(false),
     analyzingRef = useRef(false),
+    firstConceptAtRef = useRef<number | null>(null),
     mounted = useRef(true);
   const details = useRef<HTMLDivElement>(null);
   const current = useRef<AnalysisScenario | null>(null);
@@ -75,14 +76,25 @@ export default function App() {
   }
   function receive(e: any) {
     if (!mounted.current) return;
+    const prevConcepts = current.current?.concepts.length || 0;
     update((s) => applyEvent(s, e));
+    const nextConcepts = current.current?.concepts.length || 0;
+    if (
+      analyzingRef.current &&
+      firstConceptAtRef.current === null &&
+      prevConcepts === 0 &&
+      nextConcepts > 0
+    ) {
+      firstConceptAtRef.current = performance.now();
+      setReplayNonce((n) => n + 1);
+    }
     if (e.card) {
       setCard(e.card);
       sessionStorage.setItem("contract-studio-cid", e.card.contract_id);
     }
     setStep((prev) => {
       const target = stepFor(e, prev);
-      return analyzingRef.current ? Math.min(3, Math.max(2, target)) : target;
+      return analyzingRef.current ? 2 : target;
     });
     const i = stepFor(e, -1);
     if (i >= 0) {
@@ -203,6 +215,7 @@ export default function App() {
     if (!targetCard || operation.current) return;
     operation.current = true;
     analyzingRef.current = true;
+    firstConceptAtRef.current = null;
     setBusy(true);
     setError("");
     setSelected(null);
@@ -237,6 +250,30 @@ export default function App() {
       if (!mounted.current) return;
       analyzingRef.current = false;
 
+      // Chờ nhịp chiếu sáng từng Điều khoản -> xuất hiện từng Concept tương ứng (640ms/concept)
+      const totalConcepts = current.current?.concepts.length || 0;
+      if (totalConcepts > 0) {
+        if (firstConceptAtRef.current === null) {
+          firstConceptAtRef.current = performance.now();
+          setReplayNonce((n) => n + 1);
+        }
+        const elapsed = performance.now() - firstConceptAtRef.current;
+        const neededMs = totalConcepts * 640 + 280;
+        const remainingMs = Math.max(0, neededMs - elapsed);
+        if (remainingMs > 0) {
+          await new Promise((r) => setTimeout(r, remainingMs));
+          if (!mounted.current) return;
+        }
+      }
+
+      // Bước 4: Làm sáng dẫn chiếu & sửa đổi trong Contract Graph
+      setStep(3);
+      setReplayNonce((n) => n + 1);
+      setStages((p) => ({ ...p, 2: "done", 3: "running" }));
+      setMessage("Đang đọc quan hệ dẫn chiếu & sửa đổi trong Contract Graph...");
+      await new Promise((r) => setTimeout(r, 1700));
+      if (!mounted.current) return;
+
       // Bước 5: Tập hợp đám mây hạt ở tâm (Legal Graph chưa mở)
       setStep(4);
       setReplayNonce((n) => n + 1);
@@ -250,7 +287,7 @@ export default function App() {
       setReplayNonce((n) => n + 1);
       setStages((p) => ({ ...p, 4: "done", 5: "running" }));
       setMessage("Đang lọc hiệu lực theo ngày ký & tách cụm kết quả...");
-      await new Promise((r) => setTimeout(r, 3600));
+      await new Promise((r) => setTimeout(r, 5400));
       if (!mounted.current) return;
 
       // Bước 7 -> 9: Đối chiếu Legal Graph & tổng hợp báo cáo sau Legal Graph (kích hoạt LLM viết báo cáo)

@@ -590,8 +590,15 @@ export function applyEvent(s: AnalysisScenario, e: any): AnalysisScenario {
           (cn.clauseId === e.uid || e.uid.startsWith(cn.clauseId + ".")),
       )
       .map((cn) => cn.id);
+    const matchSet = new Set(matchingIds);
     s = {
       ...s,
+      activeConceptId: e.concept_id,
+      contractNodes: s.contractNodes.map((cn) =>
+        matchSet.has(cn.id)
+          ? { ...cn, conceptIds: [...new Set([...cn.conceptIds, e.concept_id])] }
+          : cn,
+      ),
       concepts: upsertInPlace(s.concepts, {
         id: e.concept_id,
         label: e.label,
@@ -714,7 +721,7 @@ export function particlesFor(s: AnalysisScenario): ScreeningParticle[] {
     const filteredAtMs =
       c.decision === "pending"
         ? Infinity
-        : Math.round(650 + (filterOrder / Math.max(1, count - 1)) * 2320);
+        : Math.round(650 + (filterOrder / Math.max(1, count - 1)) * 1750);
 
     return {
       id: c.id,
@@ -780,13 +787,23 @@ export function choreographyFor(
       : totalFacts;
 
   let visibleConceptCount = 0;
+  let activeQueryConceptIndex: number | null = s.activeConceptId
+    ? s.concepts.findIndex((c) => c.id === s.activeConceptId)
+    : null;
+
   if (step === 2) {
-    visibleConceptCount = s.isBusy
-      ? totalConcepts
-      : Math.min(
-          totalConcepts,
-          Math.max(1, Math.floor((elapsedMs + 200) / 480)),
-        );
+    const SLOT_MS = 640;
+    const PREPARE_MS = 240;
+    if (totalConcepts > 0) {
+      visibleConceptCount = Math.min(
+        totalConcepts,
+        elapsedMs < PREPARE_MS
+          ? 0
+          : Math.floor((elapsedMs - PREPARE_MS) / SLOT_MS) + 1,
+      );
+      const curIdx = Math.floor(elapsedMs / SLOT_MS);
+      activeQueryConceptIndex = curIdx < totalConcepts ? curIdx : null;
+    }
   } else if (step > 2) {
     visibleConceptCount = totalConcepts;
   }
@@ -796,9 +813,6 @@ export function choreographyFor(
 
   let discoveredParticleCount = 0;
   let allParticlesDiscovered = false;
-  let activeQueryConceptIndex: number | null = s.activeConceptId
-    ? s.concepts.findIndex((c) => c.id === s.activeConceptId)
-    : null;
 
   const pts = particlesFor(s);
   if (step === 4) {
@@ -837,13 +851,13 @@ export function choreographyFor(
     }
     filteringComplete =
       s.legalNodes.length > 0 &&
-      elapsedMs >= 3050 &&
+      elapsedMs >= 2450 &&
       filteredParticleCount >= pts.length;
     if (filteringComplete) {
-      const legalElapsed = Math.max(0, elapsedMs - 3100);
+      const legalElapsed = Math.max(0, elapsedMs - 2550);
       visibleLegalCount = Math.min(
         totalLegal,
-        Math.max(1, Math.floor(legalElapsed / 170) + 1),
+        Math.max(1, Math.floor(legalElapsed / 420) + 1),
       );
     }
   } else if (step > 5) {

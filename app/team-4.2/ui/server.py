@@ -62,6 +62,7 @@ from rag.agent import AgentConfig, AgentPipeline
 
 import contracts_api
 import legal_api
+import contract_studio
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("rag.ui.server")
@@ -1436,6 +1437,7 @@ routes = [
     Route("/doc/{filename:path}", handle_view_doc, methods=["GET"]),
     *legal_api.routes,
     *contracts_api.routes,
+    *contract_studio.routes,
 ]
 
 middleware = [

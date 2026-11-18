@@ -248,15 +248,28 @@ def _change(c: Contract, apply) -> None:
 
 # --- đồng bộ (chạy ngoài event loop) -------------------------------------------------------------
 
-def create(data: bytes, filename: str, persist: bool) -> dict[str, Any]:
+def create(data: bytes, filename: str, persist: bool, *, on_event=None) -> dict[str, Any]:
+    emit = on_event or (lambda event: None)
+    emit({"type": "stage", "stage": "read", "status": "start"})
     pages, texts = _load_pages(data, filename)
+    emit({"type": "document", "pages": [{"page": t.page, "text": t.text} for t in texts]})
     now = _now()
     c = Contract(secrets.token_urlsafe(18), Path(filename).name, persist, now, "", [], 0)
     _set_pages(c, data, pages, texts)
     c.oplog.add(_layout_op(c, now))
     c.units = to_contract_units(parse_contract(c.page_texts, [PartSpec(**p) for p in c.oplog.layout()]))
+    emit({"type": "structure", "units": [{"uid": u.uid, "label": u.label, "text": u.text, "page": u.page} for u in c.units]})
+    if on_event:
+        from rag.contracts.graph.build import build_graph
+        built, _ = build_graph(c.contract_id, c.page_texts, c.oplog,
+                               file_checksum=c.file_checksum or "", built_at=now)
+        emit({"type": "graph", "phase": "read", "build_id": built.build_id,
+              "nodes": [{"node_id": n.node_id, "node_type": n.label, **n.props} for n in built.nodes],
+              "edges": [asdict(e) for e in built.edges]})
     try:
-        extract_facts(CONFIG.llm_factory(), c)
+        emit({"type": "stage", "stage": "facts", "status": "start"})
+        extract_facts(CONFIG.llm_factory(), c, **({"on_event": emit} if on_event else {}))
+        emit({"type": "stage", "stage": "facts", "status": "done"})
     except ContractAIError as e:
         c.facts = {"type": "chưa rõ", "parties": [], "error": str(e)}
     kind = c.facts.get("type")
@@ -269,6 +282,7 @@ def create(data: bytes, filename: str, persist: bool) -> dict[str, Any]:
     with _graph().writing(c.contract_id):
         _rebuild(c, now)
     store().add(c, original=data, suffix=Path(filename).suffix.lower())
+    emit({"type": "stage", "stage": "read", "status": "done"})
     return card(c)
 
 
@@ -432,7 +446,7 @@ def concept_check(cid: str, user_facts: dict | None = None, *, tag_model: str | 
             event = {**event, "views": result_views(event["results"], catalog, c, {})}
         on_event(event)
 
-    report = check_contract(llm, c, catalog=catalog, basis=AnchorLawBasis(catalog, legal_graph), at=now,
+    report = check_contract(llm, c, catalog=catalog, basis=AnchorLawBasis(catalog, legal_graph, on_event=relay if on_event else None), at=now,
                             model=getattr(llm, "model_id", None), tag_llm=tag_llm,
                             tag_model=getattr(tag_llm, "model_id", None), user_facts=user_facts, graph=_graph(),
                             on_event=relay)
@@ -564,6 +578,8 @@ def _error_status(exc: Exception) -> tuple[str, int]:
         return str(exc), 409
     if isinstance(exc, ContractAIError):
         return str(exc), 502
+    if isinstance(exc, verify.NeedsVerification):
+        return str(exc), 409
     if isinstance(exc, ValueError):
         return str(exc), 400
     log.error("Kiểm tra concept thất bại", exc_info=exc)

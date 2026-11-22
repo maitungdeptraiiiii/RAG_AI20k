@@ -1,14 +1,37 @@
-# Gói hợp đồng vay tài sản (BLDS 91/2015/QH13 Đ463–471). Thừa kế đơn vị, dữ kiện và finding của civil_general.
+# Gói hợp đồng vay tài sản (BLDS 91/2015/QH13 Đ463–471; BLDS 33/2005/QH11 Đ476 cho hợp đồng xác lập trước 2017;
+# Nghị quyết 01/2019/NQ-HĐTP; Luật Các TCTD 32/2024/QH15 Đ100). Thừa kế đơn vị, dữ kiện và finding của civil_general.
+# Bản liệt kê có trích dẫn: docs/rule_inventory/civil_loan.yaml.
 id: civil_loan
-version: "0.1"
+version: "0.2"
 extends: [civil_general]
 document_kinds: [loan_contract]
 document_labels: {loan_contract: "hợp đồng vay tài sản"}   # tên loại văn bản trong prompt
-units: []
-conversions: {}
-document_facts: {}
+
+# Đơn vị dùng ở dữ kiện cấp hợp đồng của gói này (quy đổi giống hệt civil_general, gộp không xung đột).
+units: [hour, month, vnd]
+conversions:
+  hour:  {base: hour, factor: 1}
+  month: {base: hour, factor: 720}
+
+# Dữ kiện cấp hợp đồng: "value" (giá trị hợp đồng) và "term" (thời hạn) là trường trích chung của facts.py.
+document_facts:
+  loan_amount_vnd: {unit: vnd, from: value, parse: money}
+  loan_term_months: {unit: month, from: term, parse: duration_to_unit}
+  has_interest:
+    unit: null
+    from: loan_interest
+    parse: contains                      # cụm "không lãi" phải đứng trước cụm "lãi" chung
+    contains: [["không có lãi", khong_lai], ["không lãi", khong_lai], ["không tính lãi", khong_lai],
+               ["miễn lãi", khong_lai], ["lãi suất", co_lai], ["có lãi", co_lai], ["%", co_lai]]
+
+# Trường LLM cần trích thêm cho hợp đồng vay.
+extract_fields:
+  - {key: loan_interest, label: "Khoản vay có lãi hay không lãi", kind: text,
+     hint: "chép câu nói về lãi của khoản vay (vd. \"lãi suất 1%/tháng\", \"không tính lãi\")"}
+
 user_facts: []
 findings: []
 # Loại khái niệm (spec §5.5): khái niệm khai `kind` phải có slot thuộc các loại này. Không ép tên slot (tên là khóa dữ kiện).
 concept_kinds:
   rate_cap: {slot_kinds: [percent]}
+  termination: {slot_kinds: [bool]}

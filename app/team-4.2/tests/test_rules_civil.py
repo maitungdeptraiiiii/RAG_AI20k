@@ -35,7 +35,8 @@ def test_civil_loan_extends_civil_general_and_loads_both_concept_sets():
 
 def test_civil_and_labor_load_together_without_clashes():
     both = load_packs(["labor", "civil_loan"])
-    assert len(both.concepts) == 39 + 2 and both.context.units.convert(1, "month", "day") == 30
+    civil = load_packs(["civil_loan"]).concepts
+    assert len(both.concepts) == 39 + len(civil) and both.context.units.convert(1, "month", "day") == 30
     assert both.context.units.convert(24, "percent_per_month", "percent_per_year") == 288
 
 
@@ -89,7 +90,16 @@ def test_civil_rules_pinned_by_law_text():
                    "phải thông báo ngay cho bên kia biết về việc chấm dứt hợp đồng"):
         assert phrase in text, phrase
     rules = {f"{c.id}/{r.id}": r for c in LOAN.concepts.values() for r in c.rules}
-    assert rules["loan.interest_cap/r1"].law["max_interest"] == {"value": 20, "unit": "percent_per_year"}
+    periods = rules["loan.interest_cap/r1"].law["max_interest"]["periods"]
+    assert [(p["valid_from"], p["value"]) for p in periods] == [("2010-12-01", 13.5), ("2017-01-01", 20)]
+    from legal_corpus import law_text
+    nq = law_text("nghi-quyet:01/2019/NQ-HĐTP")
+    if nq is not None:
+        assert "tương ứng với mức 150% lãi suất cơ bản là 13,5%/năm" in nq
+        assert "không được vượt quá 150% mức lãi suất quy định tại khoản 1 Điều 468" in nq
+    old = law_text("bo-luat:33/2005/QH11")
+    if old is not None:
+        assert "không được vượt quá 150% của lãi suất cơ bản" in old
 
 
 # ── `kind` của concept (spec §5.5): concept phải có slot thuộc các loại mà kind yêu cầu (không ép tên slot: tên là khóa dữ kiện) ──
@@ -143,3 +153,75 @@ def test_check_contract_with_packs_labor_matches_default():
     a = check_contract(ScriptLLM(), contract(), at=AT)
     b = check_contract(ScriptLLM(), contract(), at=AT, packs=["labor"])
     assert [(r.concept_id, r.rule_id, r.status) for r in a.results] == [(r.concept_id, r.rule_id, r.status) for r in b.results]
+
+
+# ── Gói vay đầy đủ hơn (23/11): BLDS 2005/2015, NQ 01/2019/NQ-HĐTP, Luật Các TCTD 2024 ──
+def _loan(facts, present, day=DAY):
+    out = {}
+    for kind in ("reference", "network"):
+        s = evaluator_for(LOAN, kind).session(day=day, facts=facts, present=set(present), evidence={})
+        out[kind] = {f"{r.concept_id}/{r.rule_id}": r for r in s.results()}
+    assert out["reference"] == out["network"]
+    return out["reference"]
+
+
+@pytest.mark.parametrize("day,rate,status", [
+    (date(2016, 6, 1), 12, "PASS"), (date(2016, 6, 1), 15, "FAIL"),           # BLDS 2005: 150% × 9% = 13,5%/năm
+    (date(2017, 1, 1), 15, "PASS"), (date(2017, 1, 1), 24, "FAIL"),           # BLDS 2015: 20%/năm
+    (date(2009, 6, 1), 30, "UNKNOWN")])                                        # trước 01/12/2010: chưa có giá trị
+def test_interest_cap_depends_on_sign_date(day, rate, status):
+    r = _loan({"interest_rate": Fact(rate, "percent_per_year"), "special_law_applies": Fact(False)},
+              ["loan.interest_cap"], day)["loan.interest_cap/r1"]
+    assert r.status == status
+
+
+@pytest.mark.parametrize("rate,status", [(27, "PASS"), (30, "PASS"), (36, "FAIL")])
+def test_overdue_principal_interest_cap_150_percent_of_468(rate, status):
+    r = _loan({"overdue_rate": Fact(rate, "percent_per_year")}, ["loan.overdue_interest_cap"])
+    assert r["loan.overdue_interest_cap/r1"].status == status
+
+
+@pytest.mark.parametrize("rate,status", [(10, "PASS"), (24, "FAIL")])
+def test_late_payment_interest_cap_art_357(rate, status):
+    r = _loan({"late_interest_rate": Fact(rate, "percent_per_year")}, ["loan.late_interest_cap"])
+    assert r["loan.late_interest_cap/r1"].status == status
+
+
+def test_lender_early_recall_prohibited_unless_tied_to_misuse():
+    bad = _loan({"lender_may_recall_early_without_consent": Fact(True), "recall_only_on_misuse": Fact(False)},
+                ["loan.lender_early_recall"])
+    assert bad["loan.lender_early_recall/r1"].status == "FAIL"
+    ok = _loan({"lender_may_recall_early_without_consent": Fact(True), "recall_only_on_misuse": Fact(True)},
+               ["loan.lender_early_recall"])
+    assert ok["loan.lender_early_recall/r1"].status == "NOT_APPLICABLE"
+    unknown = _loan({"lender_may_recall_early_without_consent": Fact(True)}, ["loan.lender_early_recall"])
+    assert unknown["loan.lender_early_recall/r1"].status == "UNKNOWN"
+    assert _loan({}, ["loan.lender_early_recall"])["loan.lender_early_recall/r1"].status == "PASS"   # không có hạn chế
+
+
+def test_borrower_may_repay_interest_free_term_loan_any_time():
+    barred = {"borrower_barred_from_early_repayment": Fact(True)}
+    r = _loan({**barred, "has_interest": Fact("khong_lai")}, ["loan.borrower_early_repayment"])
+    assert r["loan.borrower_early_repayment/r1"].status == "FAIL"
+    r = _loan({**barred, "has_interest": Fact("co_lai")}, ["loan.borrower_early_repayment"])
+    assert r["loan.borrower_early_repayment/r1"].status == "NOT_APPLICABLE"
+    r = _loan(barred, ["loan.borrower_early_repayment"])
+    assert r["loan.borrower_early_repayment/r1"].status == "UNKNOWN"
+
+
+def test_loan_document_facts_from_extraction():
+    from rag.bridge.facts_map import contract_facts
+    facts = {"candidates": {
+        "value": [{"value": "100.000.000 đồng", "unit": "p0.d1", "quote": "vay 100.000.000 đồng"}],
+        "term": [{"value": "12 tháng", "unit": "p0.d2", "quote": "thời hạn vay 12 tháng"}],
+        "loan_interest": [{"value": "Khoản vay không có lãi", "unit": "p0.d3", "quote": "không có lãi"}]}}
+    out = contract_facts(facts, sign_date=None, ctx=LOAN.context)
+    assert (out["loan_amount_vnd"].value, out["loan_amount_vnd"].unit) == (100000000, "vnd")
+    assert (out["loan_term_months"].value, out["loan_term_months"].unit) == (12, "month")
+    assert out["has_interest"].value == "khong_lai"
+    assert "loan_interest" in {f["key"] for f in LOAN.context.extract_fields}
+
+
+def test_loan_pack_has_at_least_five_concepts_with_rules():
+    loan_only = {cid: c for cid, c in LOAN.concepts.items() if cid.startswith("loan.")}
+    assert len(loan_only) >= 5 and all(c.rules for c in loan_only.values())

@@ -1,6 +1,8 @@
 # Bản liệt kê rule hợp đồng vay tài sản (phần Tuấn, T3; BLDS 91/2015/QH13 Đ463–471, Đ357).
 # Người soạn: Claude theo yêu cầu của Tùng — CẦN TÙNG DUYỆT (xem đầu labor_w04.yaml). Quote kiểm bằng tests/test_rule_inventory.py.
 # Quan hệ với Luật các tổ chức tín dụng: chỉ ghi nhận là ngoại lệ (Đ468.1 "trừ trường hợp luật khác có liên quan quy định khác").
+# Bổ sung 23/11 (văn bản tải thêm qua scripts/team-4.2/fetch_loan_scope.py): Luật Các TCTD 32/2024/QH15 Đ100;
+# Nghị quyết 01/2019/NQ-HĐTP (hướng dẫn lãi, lãi suất); BLDS 2005 Đ476 cho hợp đồng xác lập trước 01/01/2017.
 
 - id: civil_loan.interest_cap
   source:
@@ -18,6 +20,12 @@
     - pid: "bo-luat:91/2015/QH13#d468.k1"
       quote: "trừ trường hợp luật khác có liên quan quy định khác"
       condition: "Giao dịch chịu luật chuyên ngành quy định khác (vd. cho vay của tổ chức tín dụng)"
+    - pid: "luat:32/2024/QH15#d100.k2"
+      quote: "Tổ chức tín dụng và khách hàng có quyền thỏa thuận về lãi suất, phí cấp tín dụng trong hoạt động ngân hàng của tổ chức tín dụng theo quy định của pháp luật về các tổ chức tín dụng."
+      condition: "Bên cho vay là tổ chức tín dụng (hợp đồng tín dụng)"
+    - pid: "nghi-quyet:01/2019/NQ-HĐTP#d7.k2"
+      quote: "Tòa án áp dụng quy định của Luật Các tổ chức tín dụng, văn bản quy phạm pháp luật quy định chi tiết, hướng dẫn áp dụng Luật Các tổ chức tín dụng để giải quyết mà không áp dụng quy định về giới hạn lãi suất của Bộ luật Dân sự năm 2005, Bộ luật Dân sự năm 2015 để xác định lãi, lãi suất."
+      condition: "Hợp đồng tín dụng: không áp trần lãi của BLDS"
   conclusion: "Lãi suất thỏa thuận vượt 20%/năm: phần vượt không có hiệu lực (xem civil_loan.excess_interest_void)"
   on_silence: none
   derived_from: []
@@ -28,6 +36,7 @@
     - {facts: {interest_rate: 24}, expected: UNKNOWN, why: "chưa biết có luật chuyên ngành áp dụng không"}
   open_questions:
     - "Đ468.1 cho phép UBTVQH điều chỉnh mức 20%; kho chưa có nghị quyết điều chỉnh nào."
+    - "Hợp đồng xác lập trước 01/01/2017: xem civil_loan.interest_cap_blds2005 (trần 150% lãi suất cơ bản)."
 
 - id: civil_loan.excess_interest_void
   source:
@@ -154,7 +163,7 @@
     - pid: "bo-luat:91/2015/QH13#d466.k5.b"
       quote: "trừ trường hợp có thoả thuận khác"
       condition: "Hợp đồng có thỏa thuận khác về lãi nợ gốc quá hạn"
-  conclusion: "Không thỏa thuận: lãi nợ gốc quá hạn = 150% lãi vay"
+  conclusion: "Không thỏa thuận: lãi nợ gốc quá hạn = 150% lãi vay; mức thỏa thuận có trần riêng (civil_loan.overdue_principal_cap)"
   on_silence: default_applies
   derived_from: []
   yaml_rule: "chưa có"
@@ -162,8 +171,7 @@
     - {facts: {interest_rate: 12, overdue_principal_rate: 18}, expected: PASS}
     - {facts: {interest_rate: 12, overdue_principal_rate: 18, agreed_otherwise: false, applied_rate: 24}, expected: FAIL}
     - {facts: {interest_rate: 12}, expected: UNKNOWN, why: "hợp đồng không nói: mức mặc định 18%/năm, chưa có dữ kiện áp dụng"}
-  open_questions:
-    - "150% × lãi vay có thể vượt 20%/năm (vd. lãi 15% → 22,5%): Đ466.5.b có bị chặn bởi trần Đ468.1 không? Văn bản không nói rõ."
+  open_questions: []          # câu hỏi "150% có bị chặn bởi trần 20% không" đã có trả lời ở NQ 01/2019 Đ5.2.c: trần riêng 30%/năm
 
 - id: civil_loan.early_repayment_interest_loan
   source:
@@ -257,3 +265,79 @@
     - {facts: {interest_rate: 30}, expected: FAIL}
     - {facts: {}, expected: UNKNOWN, why: "không có dữ kiện lãi"}
   open_questions: []
+
+- id: civil_loan.interest_cap_blds2005
+  source:
+    pid: "bo-luat:33/2005/QH11#d476.k1"
+    quote: "Lãi suất vay do các bên thoả thuận nhưng không được vượt quá 150% của lãi suất cơ bản do Ngân hàng Nhà nước công bố đối với loại cho vay tương ứng."
+  type: threshold
+  kind: rate_cap
+  derogation: ceiling
+  applies_when: "Hợp đồng vay không phải hợp đồng tín dụng, xác lập trước 01/01/2017"
+  facts_needed:
+    - {name: interest_rate, kind: percent, unit: percent_per_year, from: contract}
+    - {name: sign_date, kind: date, from: contract}
+  threshold: {value: 13.5, unit: percent_per_year, note: "150% × lãi suất cơ bản 9%/năm (QĐ 2868/QĐ-NHNN, áp dụng từ 01/12/2010) theo ví dụ 1 Đ2 NQ 01/2019"}
+  exceptions:
+    - pid: "nghi-quyet:01/2019/NQ-HĐTP#d2.k1"
+      quote: "quy định mức lãi suất cơ bản là 9%/năm, tương ứng với mức 150% lãi suất cơ bản là 13,5%/năm"
+      condition: "Nguồn của con số 13,5%/năm (lãi suất cơ bản 9%/năm theo QĐ 2868/QĐ-NHNN)"
+  conclusion: "Hợp đồng vay xác lập trước 01/01/2017 với lãi vượt 150% lãi suất cơ bản là vượt trần BLDS 2005"
+  on_silence: none
+  derived_from: []
+  yaml_rule: "loan.interest_cap/r1 (giá trị luật theo kỳ: từ 01/12/2010 13,5; từ 01/01/2017 20)"
+  examples:
+    - {facts: {interest_rate: 12, sign_date: "2016-06-01"}, expected: PASS}
+    - {facts: {interest_rate: 15, sign_date: "2016-06-01"}, expected: FAIL}
+    - {facts: {interest_rate: 15, sign_date: "2009-06-01"}, expected: UNKNOWN, why: "trước 01/12/2010 lãi suất cơ bản khác, chưa có trong gói"}
+  open_questions:
+    - "QĐ 2868/QĐ-NHNN không có trong kho; con số 9%/năm lấy từ ví dụ của NQ 01/2019. Trước 01/12/2010 chưa có giá trị."
+    - "NQ 01/2019 Đ2.1: hợp đồng xác lập trước 2017 nhưng đang thực hiện, lãi phù hợp BLDS 2015 thì phần thời gian từ 01/01/2017 áp BLDS 2015. Engine soát theo ngày ký, chưa chia theo khoảng thời gian thực hiện."
+
+- id: civil_loan.overdue_principal_cap
+  source:
+    pid: "nghi-quyet:01/2019/NQ-HĐTP#d5.k2.c"
+    quote: "Mức lãi suất trên nợ gốc quá hạn do các bên thỏa thuận không được vượt quá 150% mức lãi suất quy định tại khoản 1 Điều 468 Bộ luật Dân sự năm 2015."
+  type: threshold
+  kind: rate_cap
+  derogation: ceiling
+  applies_when: "Hợp đồng vay có thỏa thuận lãi trên nợ gốc quá hạn (áp BLDS 2015)"
+  facts_needed:
+    - {name: overdue_rate, kind: percent, unit: percent_per_year, from: contract}
+  threshold: {value: 30, unit: percent_per_year, note: "150% × 20%/năm"}
+  exceptions: []
+  conclusion: "Lãi trên nợ gốc quá hạn thỏa thuận vượt 30%/năm: phần vượt không có hiệu lực (NQ 01/2019 Đ9)"
+  on_silence: none
+  derived_from: [civil_loan.overdue_principal_150]
+  yaml_rule: loan.overdue_interest_cap/r1
+  examples:
+    - {facts: {overdue_rate: 27}, expected: PASS}
+    - {facts: {overdue_rate: 36}, expected: FAIL}
+    - {facts: {overdue_rate: 3}, expected: UNKNOWN, why: "không ghi theo tháng hay theo năm"}
+  open_questions: []
+
+- id: civil_loan.lender_early_recall
+  source:
+    pid: "bo-luat:91/2015/QH13#d465.k3"
+    quote: "Không được yêu cầu bên vay trả lại tài sản trước thời hạn, trừ trường hợp quy định tại Điều 470 của Bộ luật này hoặc luật khác có liên quan quy định khác."
+  type: prohibited
+  kind: termination
+  derogation: mandatory
+  applies_when: "Hợp đồng vay có kỳ hạn có điều khoản cho bên cho vay đòi lại trước hạn"
+  facts_needed:
+    - {name: lender_may_recall_early_without_consent, kind: bool, from: contract}
+    - {name: recall_only_on_misuse, kind: bool, from: contract, note: "điều khoản đòi trước hạn chỉ khi dùng sai mục đích sau khi đã nhắc"}
+  exceptions:
+    - pid: "bo-luat:91/2015/QH13#d467"
+      quote: "Bên cho vay có quyền kiểm tra việc sử dụng tài sản và có quyền đòi lại tài sản vay trước thời hạn nếu đã nhắc nhở mà bên vay vẫn sử dụng tài sản trái mục đích."
+      condition: "Điều khoản đòi trước hạn gắn với việc dùng sai mục đích sau khi đã nhắc"
+  conclusion: "Điều khoản cho bên cho vay đòi trước hạn tùy ý là trái Đ465.3 (trừ trường hợp Đ467, Đ470)"
+  on_silence: none
+  derived_from: []
+  yaml_rule: "loan.lender_early_recall/r1 (+ r1_misuse)"
+  examples:
+    - {facts: {lender_may_recall_early_without_consent: false}, expected: PASS}
+    - {facts: {lender_may_recall_early_without_consent: true, recall_only_on_misuse: false}, expected: FAIL}
+    - {facts: {lender_may_recall_early_without_consent: true}, expected: UNKNOWN, why: "chưa biết điều khoản có gắn với dùng sai mục đích không"}
+  open_questions:
+    - "Trùng nội dung với civil_loan.lender_no_early_demand (mục cũ); giữ mục này làm nguồn của rule, mục cũ để tham chiếu."

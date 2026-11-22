@@ -1,32 +1,143 @@
-version: "0.1"
-law_values_valid_from: "2017-01-01"
+# Khái niệm hợp đồng vay tài sản. Nguồn và trích dẫn: docs/rule_inventory/civil_loan.yaml.
+version: "0.2"
+law_values_valid_from: "2010-12-01"
 roles:
   - {id: BEN_CHO_VAY, label: "Bên cho vay"}
   - {id: BEN_VAY, label: "Bên vay"}
 concepts:
   - id: loan.interest_cap
     kind: rate_cap
-    label: Lãi suất vay không vượt quá 20%/năm
+    label: Lãi suất vay không vượt trần
     scope: core
     phase: P0
-    holder: BEN_CHO_VAY
-    counterparty: BEN_VAY
+    holder: BEN_VAY
+    counterparty: BEN_CHO_VAY
     applies_to: [BEN_VAY]
     describe: "Điều khoản ghi lãi suất của khoản vay (theo năm hoặc theo tháng)."
     phrasing: ["lãi suất", "lãi suất vay", "%/năm", "%/tháng", "tiền lãi"]
     slots:
       interest_rate: {kind: percent, unit: percent_per_year}
     anchors:
-      - {pid: "bo-luat:91/2015/QH13#d468.k1", role: basis, note: "lãi suất thỏa thuận không vượt quá 20%/năm; phần vượt không có hiệu lực"}
+      - {pid: "bo-luat:91/2015/QH13#d468.k1", role: basis, note: "từ 01/01/2017: không vượt quá 20%/năm; phần vượt không có hiệu lực"}
+      - {pid: "bo-luat:33/2005/QH11#d476.k1", role: basis, note: "trước 01/01/2017: không vượt quá 150% lãi suất cơ bản"}
+      - {pid: "nghi-quyet:01/2019/NQ-HĐTP#d2.k1", role: basis, note: "lãi suất cơ bản 9%/năm (QĐ 2868/QĐ-NHNN) -> 13,5%/năm"}
+      - {pid: "luat:32/2024/QH15#d100.k2", role: exception, note: "tổ chức tín dụng thỏa thuận lãi suất theo luật các TCTD"}
+      - {pid: "nghi-quyet:01/2019/NQ-HĐTP#d7.k2", role: exception, note: "hợp đồng tín dụng không áp giới hạn lãi suất của BLDS"}
     rules:
-      # Đ468.1: không vượt quá 20%/năm của khoản tiền vay, trừ trường hợp luật khác có liên quan quy định khác.
+      # Trần theo ngày ký (ngày soát của check_contract): BLDS 2005 Đ476 rồi BLDS 2015 Đ468.1.
       - id: r1
         mode: threshold
-        law: {max_interest: {value: 20, unit: percent_per_year}}
+        law:
+          max_interest:
+            unit: percent_per_year
+            periods:
+              - {valid_from: "2010-12-01", value: 13.5, source: "bo-luat:33/2005/QH11#d476.k1"}
+              - {valid_from: "2017-01-01", value: 20, source: "bo-luat:91/2015/QH13#d468.k1"}
         check: {fact: interest_rate, op: lte, law: max_interest}
         derogation: mandatory
         on_silence: none
         outcome: {legality: illegal, employee_impact: unfavorable}
+      # Đ468.1 "trừ trường hợp luật khác có liên quan quy định khác" (vd. Luật Các TCTD Đ100.2).
       - {id: r1_special_law, mode: required, derogation: mandatory, on_silence: none, exception_of: loan.interest_cap/r1,
          applicability: {fact: special_law_applies, op: eq, value: true},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  - id: loan.overdue_interest_cap
+    kind: rate_cap
+    label: Lãi trên nợ gốc quá hạn không vượt 150% trần lãi
+    scope: core
+    phase: P0
+    holder: BEN_VAY
+    counterparty: BEN_CHO_VAY
+    applies_to: [BEN_VAY]
+    describe: "Điều khoản ghi lãi suất áp cho nợ gốc quá hạn (chậm trả nợ gốc)."
+    phrasing: ["nợ quá hạn", "lãi quá hạn", "chậm trả nợ gốc", "lãi suất quá hạn"]
+    slots:
+      overdue_rate: {kind: percent, unit: percent_per_year}
+    anchors:
+      - {pid: "nghi-quyet:01/2019/NQ-HĐTP#d5.k2.c", role: basis, note: "không vượt quá 150% mức Đ468.1 BLDS 2015 (30%/năm)"}
+      - {pid: "bo-luat:91/2015/QH13#d466.k5.b", role: basis, note: "không thỏa thuận: 150% lãi vay"}
+    rules:
+      - id: r1
+        mode: threshold
+        law:
+          max_overdue:
+            unit: percent_per_year
+            periods: [{valid_from: "2017-01-01", value: 30, source: "nghi-quyet:01/2019/NQ-HĐTP#d5.k2.c"}]
+        check: {fact: overdue_rate, op: lte, law: max_overdue}
+        derogation: mandatory
+        on_silence: none
+        outcome: {legality: illegal, employee_impact: unfavorable}
+
+  - id: loan.late_interest_cap
+    kind: rate_cap
+    label: Lãi chậm trả không vượt trần lãi
+    scope: core
+    phase: P0
+    holder: BEN_VAY
+    counterparty: BEN_CHO_VAY
+    applies_to: [BEN_VAY]
+    describe: "Điều khoản ghi lãi phải trả khi chậm trả tiền (chậm trả lãi hoặc khoản tiền đến hạn)."
+    phrasing: ["chậm trả", "lãi chậm trả", "lãi trên nợ lãi", "chậm thanh toán"]
+    slots:
+      late_interest_rate: {kind: percent, unit: percent_per_year}
+    anchors:
+      - {pid: "bo-luat:91/2015/QH13#d357.k2", role: basis, note: "không vượt quá mức Đ468.1; không thỏa thuận thì theo Đ468.2"}
+      - {pid: "nghi-quyet:01/2019/NQ-HĐTP#d5.k2.b", role: basis, note: "lãi trên nợ lãi theo Đ468.2, trừ thỏa thuận khác"}
+    rules:
+      - id: r1
+        mode: threshold
+        law:
+          max_late:
+            unit: percent_per_year
+            periods: [{valid_from: "2017-01-01", value: 20, source: "bo-luat:91/2015/QH13#d357.k2"}]
+        check: {fact: late_interest_rate, op: lte, law: max_late}
+        derogation: mandatory
+        on_silence: none
+        outcome: {legality: illegal, employee_impact: unfavorable}
+
+  - id: loan.lender_early_recall
+    kind: termination
+    label: Bên cho vay không được đòi trước hạn tùy ý
+    scope: core
+    phase: P0
+    holder: BEN_VAY
+    counterparty: BEN_CHO_VAY
+    applies_to: [BEN_VAY]
+    describe: "Điều khoản cho bên cho vay đòi lại tiền vay trước thời hạn."
+    phrasing: ["đòi lại trước hạn", "thu hồi nợ trước hạn", "yêu cầu trả trước hạn", "thu hồi khoản vay"]
+    slots:
+      lender_may_recall_early_without_consent: {kind: bool, unit: null}
+      recall_only_on_misuse: {kind: bool, unit: null}
+    anchors:
+      - {pid: "bo-luat:91/2015/QH13#d465.k3", role: basis}
+      - {pid: "bo-luat:91/2015/QH13#d470.k1", role: basis, note: "vay có kỳ hạn không lãi: chỉ đòi trước hạn nếu bên vay đồng ý"}
+      - {pid: "bo-luat:91/2015/QH13#d467", role: exception, note: "đòi trước hạn khi dùng sai mục đích sau khi đã nhắc"}
+    rules:
+      - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
+         check: {fact: lender_may_recall_early_without_consent, op: eq, value: false},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+      - {id: r1_misuse, mode: required, derogation: mandatory, on_silence: none, exception_of: loan.lender_early_recall/r1,
+         applicability: {fact: recall_only_on_misuse, op: eq, value: true},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  - id: loan.borrower_early_repayment
+    kind: termination
+    label: Bên vay được trả trước hạn khoản vay không lãi
+    scope: core
+    phase: P0
+    holder: BEN_VAY
+    counterparty: BEN_CHO_VAY
+    applies_to: [BEN_VAY]
+    describe: "Điều khoản cấm hoặc hạn chế bên vay trả nợ trước thời hạn."
+    phrasing: ["trả nợ trước hạn", "trả trước hạn", "không được trả trước", "tất toán trước hạn"]
+    slots:
+      borrower_barred_from_early_repayment: {kind: bool, unit: null}
+    anchors:
+      - {pid: "bo-luat:91/2015/QH13#d470.k1", role: basis, note: "vay có kỳ hạn không lãi: bên vay trả lại bất cứ lúc nào, báo trước hợp lý"}
+      - {pid: "bo-luat:91/2015/QH13#d470.k2", role: basis, note: "vay có lãi: được trả trước, trả đủ lãi theo kỳ hạn trừ thỏa thuận khác"}
+    rules:
+      - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
+         applicability: {fact: has_interest, op: eq, value: khong_lai},
+         check: {fact: borrower_barred_from_early_repayment, op: eq, value: false},
          outcome: {legality: illegal, employee_impact: unfavorable}}

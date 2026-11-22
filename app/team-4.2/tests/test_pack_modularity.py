@@ -225,7 +225,7 @@ def test_loan_contract_graph_links_holder_to_pack_party():
     assert parties == {"BEN_CHO_VAY", "BEN_VAY"}
     ci = next(n for n in view.find("ConceptInstance") if n["concept_id"] == "loan.interest_cap")
     holders = [h["node"]["role"] for h in view.neighbors(ci["node_id"], rel_types=["HOLDER"], direction="out")]
-    assert holders == ["BEN_CHO_VAY"]
+    assert holders == ["BEN_VAY"]                    # trần lãi bảo vệ bên vay (sửa 23/11: bản đầu gán nhầm bên cho vay)
 
 
 # ── D32: chọn gói theo loại hợp đồng ──
@@ -255,6 +255,8 @@ def test_kind_selects_the_pack_and_conflicts_with_explicit_packs():
     llm = cases.ScriptedLoanLLM()
     report = check_contract(llm, cases.loan_contract(), at=cases.AT, document_kind="loan_contract",
                             user_facts={"special_law_applies": False})
-    assert {r.concept_id for r in report.results} == {"loan.interest_cap", "civil.unilateral_termination"}
+    concepts = {r.concept_id for r in report.results}
+    assert {"loan.interest_cap", "civil.unilateral_termination"} <= concepts
+    assert all(c.startswith(("loan.", "civil.")) for c in concepts)          # không có khái niệm gói labor
     with pytest.raises(ValueError):
         check_contract(llm, cases.loan_contract(), at=cases.AT, document_kind="loan_contract", packs=["labor"])

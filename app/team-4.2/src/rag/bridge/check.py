@@ -13,7 +13,7 @@ from datetime import date, datetime
 
 from rag.bridge.basis import AnchorLawBasis, LawBasis
 from rag.bridge.catalog import CONTRACT_FACTS, USER_FACTS, Catalog, load_catalog
-from rag.bridge.engine import Fact, Facts, RuleResult, evaluate
+from rag.bridge.engine import Fact, Facts, RuleResult
 from rag.bridge.facts_map import fact_ops, party_ops
 from rag.bridge.graph_facts import factset_from_graph
 from rag.bridge.recheck import needs_recheck, recheck
@@ -23,6 +23,7 @@ from rag.contracts.doc import ContractDoc
 from rag.contracts.graph.build import build_graph
 from rag.contracts.graph.view import ContractGraphView, open_view
 from rag.contracts.models import Contract
+from rag.rules.evaluator import default_kind, evaluator_for
 
 _ORDER = ("violation", "missing_content", "hidden_right", "conflict", "possible_right", "needs_facts")
 _TITLES = {
@@ -100,9 +101,10 @@ def contract_view(contract: Contract, graph, at: datetime) -> tuple[ContractGrap
 
 def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, basis: LawBasis | None = None,
                    at: datetime, model: str | None = None, tag_llm=None, tag_model: str | None = None,
-                   user_facts: dict | None = None, graph=None,
+                   user_facts: dict | None = None, graph=None, evaluator: str | None = None,
                    on_event: Callable[[dict], None] | None = None) -> CheckReport:
     """tag_llm / tag_model: model riêng cho bước gán khái niệm (so model); None -> dùng llm / model.
+    evaluator: "reference" | "network"; None -> RAG_RULE_EVALUATOR (spec 2026-11-22-rete-rule-engine-design §7).
     graph: ContractGraphService để công bố và đọc từ Neo4j; None -> đọc bản dựng trong bộ nhớ.
     on_event: nhận sự kiện tiến trình {type: stage|progress|partial, ...} (spec 2026-11-17-concept-check-streaming-ui §2)."""
     emit = on_event or (lambda e: None)
@@ -112,6 +114,7 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
     t0 = time.monotonic()
     user = user_fact_set(user_facts)
     catalog = catalog or load_catalog()
+    rule_evaluator = evaluator_for(catalog, evaluator or default_kind())      # tên lạ -> ValueError trước mọi lời gọi LLM
     basis = basis or AnchorLawBasis(catalog, None)
     llm = _CountingLLM(llm)
     tagger = _CountingLLM(tag_llm) if tag_llm is not None else llm
@@ -138,10 +141,24 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
     warnings += tag.warnings
     _add_ops(contract, tag.ops)
 
+    session_state: dict = {}              # phiên đánh giá và dữ kiện đã đưa vào: lần đọc sau recheck chỉ update phần đổi
+
+    def evaluate_now(facts: Facts, present: set[str], evidence: dict) -> list[RuleResult]:
+        session = session_state.get("session")
+        if session is None:
+            session = session_state["session"] = rule_evaluator.session(day=day, facts=facts, present=present,
+                                                                       evidence=evidence)
+        else:
+            old = session_state["facts"]
+            session.update({n: facts.get(n) for n in set(old) | set(facts) if old.get(n) != facts.get(n)},
+                           present=present, evidence=evidence)
+        session_state["facts"] = dict(facts)
+        return session.results()
+
     def read_graph():
         view, build_id, graph_warnings, _ = contract_view(contract, graph, at)
         factset, fact_warnings = factset_from_graph(view, day=day, sign_date=contract.sign_date)
-        results = evaluate(catalog, {**factset.facts, **user}, set(factset.present), factset.evidence, day)
+        results = evaluate_now({**factset.facts, **user}, set(factset.present), factset.evidence)
         if on_event:
             nodes = [n for label in ("Contract", "Part", "Unit", "Value", "Party", "ContractFact", "ConceptInstance")
                      for n in view.find(label)]

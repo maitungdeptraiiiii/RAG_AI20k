@@ -12,9 +12,10 @@ from typing import Any, Callable
 
 from rag.bridge.basis import AnchorLawBasis
 from rag.bridge.catalog import Catalog
-from rag.bridge.engine import CONFLICT, Facts, evaluate_concept
+from rag.bridge.engine import CONFLICT, Facts
 from rag.bridge.graph_facts import factset_from_graph
 from rag.contracts.graph.view import ContractGraphView, run_cypher
+from rag.rules.evaluator import default_kind, evaluator_for
 
 OUTPUT_LIMIT = 3000
 LEGAL_DOWN = {"error": "legal_graph_unavailable"}
@@ -125,6 +126,7 @@ def make_tools(view: ContractGraphView, *, catalog: Catalog, day: date, sign_dat
     """`day`: ngày soát (mặc định cho công cụ luật và dữ kiện); `legal`: LegalGraph hoặc None.
     `expand_context` / `text2cypher`: tắt để đo đối chứng (scripts/bench_contract_agent.py)."""
     basis = AnchorLawBasis(catalog, legal)
+    evaluator = evaluator_for(catalog, default_kind())          # biên dịch một lần cho cả bộ công cụ
 
     def facts_at():
         return factset_from_graph(view, day=day, sign_date=sign_date)
@@ -191,8 +193,10 @@ def make_tools(view: ContractGraphView, *, catalog: Catalog, day: date, sign_dat
         if concept is None:
             raise ValueError(f"không có khái niệm {a['concept_id']!r} trong danh mục")
         fs, _ = facts_at()
-        results = evaluate_concept(concept, {**fs.facts, **(user_facts or {})}, present=concept.id in fs.present,
-                                   evidence=fs.evidence.get(concept.id, ()), day=day, ctx=catalog.context)
+        session = evaluator.session(day=day, facts={**fs.facts, **(user_facts or {})},
+                                    present={concept.id} if concept.id in fs.present else set(),
+                                    evidence={concept.id: list(fs.evidence.get(concept.id, ()))})
+        results = [r for r in session.results() if r.concept_id == concept.id]
         keep = ("rule_id", "finding", "status", "law_values", "facts_used", "missing_facts", "evidence")
         return {"concept_id": concept.id, "label": concept.label, "day": day.isoformat(),
                 "results": [{k: v for k, v in asdict(r).items() if k in keep} for r in results]}

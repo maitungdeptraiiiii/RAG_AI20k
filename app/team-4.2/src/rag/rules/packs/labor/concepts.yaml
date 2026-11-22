@@ -53,7 +53,7 @@ law_values_valid_from: "2021-01-01"   # ngày BLLĐ 45/2019 có hiệu lực; á
 
 roles:
   - {id: NLD,                     label: "Người lao động"}
-  - {id: NSDLD,                   label: "Người sử dụng lao động"}
+  - {id: NSDLD,                   label: "Người sử dụng lao động", aliases: ["công ty", "người sử dụng"]}   # aliases: chữ mô tả bên trong hợp đồng
   - {id: NLD_nu,                  label: "Lao động nữ",                          subtype_of: NLD}
   - {id: NLD_mang_thai,           label: "Lao động nữ mang thai",                subtype_of: NLD_nu}
   - {id: NLD_nuoi_con_duoi_12t,   label: "Người lao động nuôi con dưới 12 tháng tuổi", subtype_of: NLD}

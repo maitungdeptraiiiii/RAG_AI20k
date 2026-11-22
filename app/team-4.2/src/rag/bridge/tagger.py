@@ -108,7 +108,8 @@ def check_item(contract: Contract, batch_uids: list[str], item: Any, catalog: Ca
 def assert_op(contract: Contract, checked: dict, catalog: Catalog, *, at: datetime, found_by: str,
               model: str | None, prompt_version: str) -> GraphOperation:
     content = {"kind": "concept", "concept_id": checked["concept_id"], "slots_raw": checked["slots_raw"],
-               "slots": checked["slots"], "catalog_version": catalog.version, "found_by": found_by}
+               "slots": checked["slots"], "catalog_version": catalog.version, "found_by": found_by,
+               "holder": catalog.concepts[checked["concept_id"]].holder}     # đồ thị nối HOLDER không cần nạp lại gói
     if checked.get("dropped_slots"):
         content["dropped_slots"] = checked["dropped_slots"]
     bad = checked["bad_slots"]

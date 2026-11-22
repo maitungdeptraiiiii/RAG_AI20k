@@ -232,21 +232,35 @@ def build_factset(contract_level: Facts, ops: Sequence[GraphOperation]) -> FactS
     return FactSet(out, frozenset(present), evidence, frozenset(absent - present))
 
 
-_PARTY_LABEL = {"NLD": "Người lao động", "NSDLD": "Người sử dụng lao động"}
+def _roles(roles):
+    if roles is None:
+        from rag.bridge.catalog import load_catalog
+        roles = load_catalog().roles
+    return roles
 
 
-def party_role(role_text: str) -> str | None:
+def party_role(role_text: str, roles=None) -> str | None:
+    """Vai trò (id trong `roles` của gói) mà chữ mô tả bên trong hợp đồng nói tới: nhãn hoặc `aliases` của vai trò dài
+    nhất nằm trong chữ đó thắng. Vai trò con (`subtype_of`) không dùng để nhận diện bên. `roles` None -> gói labor."""
     t = " ".join(str(role_text or "").casefold().split())
-    if "sử dụng lao động" in t or "công ty" in t or "người sử dụng" in t:
-        return "NSDLD"
-    return "NLD" if "người lao động" in t else None
+    best = None
+    for rid, r in _roles(roles).items():
+        if r.get("subtype_of"):
+            continue
+        for name in [r.get("label") or "", *(r.get("aliases") or [])]:
+            n = " ".join(str(name).casefold().split())
+            if n and n in t and (best is None or len(n) > best[1]):
+                best = (rid, len(n))
+    return best[0] if best else None
 
 
-def party_ops(facts: dict, contract_id: str, *, at: datetime) -> list[GraphOperation]:
-    """Một thao tác ASSERT `party` cho mỗi vai trò NLĐ / NSDLĐ tìm thấy trong `facts["parties"]`. Không ghi tên."""
-    roles = list(dict.fromkeys(r for p in facts.get("parties") or [] if (r := party_role(p.get("role")))))
-    return [machine_op(contract_id, "ASSERT", f"party:{r}", {"kind": "party", "role": r, "label": _PARTY_LABEL[r]},
-                       "rule", "auto_accepted", at=at) for r in roles]
+def party_ops(facts: dict, contract_id: str, *, at: datetime, roles=None) -> list[GraphOperation]:
+    """Một thao tác ASSERT `party` cho mỗi vai trò của gói tìm thấy trong `facts["parties"]`. Không ghi tên."""
+    table = _roles(roles)
+    found = list(dict.fromkeys(r for p in facts.get("parties") or [] if (r := party_role(p.get("role"), table))))
+    return [machine_op(contract_id, "ASSERT", f"party:{r}",
+                       {"kind": "party", "role": r, "label": table[r].get("label", r)},
+                       "rule", "auto_accepted", at=at) for r in found]
 
 
 __all__ = ["FactSet", "build_factset", "contract_facts", "fact_ops", "normalize_slot", "party_ops", "party_role"]

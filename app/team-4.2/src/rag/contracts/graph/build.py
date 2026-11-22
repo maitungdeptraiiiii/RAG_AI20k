@@ -172,9 +172,12 @@ def _concept_layer(cid: str, common: dict, oplog: OperationLog, nid: dict[str, s
         nodes.append(GraphNode(node_id, "ConceptInstance", props))
         if o.source_uid in nid:
             edges.append(GraphEdge("ABOUT", node_id, nid[o.source_uid], {}))
-        concept = concepts.get(o.content["concept_id"])
-        if concept is not None and concept.holder in parties:
-            edges.append(GraphEdge("HOLDER", node_id, parties[concept.holder], {}))
+        holder = o.content.get("holder")
+        if holder is None:                           # thao tác cũ (trước khi ghi holder): tra gói labor như trước
+            concept = concepts.get(o.content["concept_id"])
+            holder = concept.holder if concept is not None else None
+        if holder in parties:
+            edges.append(GraphEdge("HOLDER", node_id, parties[holder], {}))
 
 
 def _day(s, default: date) -> date:

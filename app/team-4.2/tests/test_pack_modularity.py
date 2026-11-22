@@ -188,3 +188,41 @@ def test_check_contract_sends_no_labor_wording_for_a_loan_contract():
     r = next(x for x in report.results if (x.concept_id, x.rule_id) == ("loan.interest_cap", "r1"))
     assert (r.status, r.finding) == ("FAIL", "violation")
     assert r.facts_used["interest_rate"] == {"value": 30.0, "unit": "percent_per_year"}
+
+
+# ── D40 (logic): vai trò các bên và bên giữ quyền theo gói ──
+def _cases():
+    import importlib.util
+    import pathlib
+    spec = importlib.util.spec_from_file_location("pack_cases_mod", pathlib.Path(__file__).with_name("pack_cases.py"))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_party_roles_come_from_pack_roles():
+    from datetime import datetime
+    from rag.bridge.facts_map import party_ops
+    at = datetime(2026, 1, 1)
+    loan = {"parties": [{"name": "A", "role": "Bên cho vay"}, {"name": "B", "role": "Bên vay"}]}
+    ops = party_ops(loan, "c1", at=at, roles=LOAN.roles)
+    assert sorted((o.content["role"], o.content["label"]) for o in ops) == [("BEN_CHO_VAY", "Bên cho vay"),
+                                                                           ("BEN_VAY", "Bên vay")]
+    assert party_ops(loan, "c1", at=at) == []                                   # gói labor không có vai trò này
+    labor = {"parties": [{"role": "Người sử dụng lao động"}, {"role": "Người lao động"}, {"role": "Công ty TNHH A"},
+                         {"role": "Người làm chứng"}]}
+    for roles in (None, load_catalog().roles):
+        got = sorted({o.content["role"] for o in party_ops(labor, "c1", at=at, roles=roles)})
+        assert got == ["NLD", "NSDLD"]
+
+
+def test_loan_contract_graph_links_holder_to_pack_party():
+    from rag.bridge.check import contract_view
+    cases = _cases()
+    _llm, _report, c = cases.run_loan_contract_with_contract()
+    view, _, _, _ = contract_view(c, None, cases.AT)
+    parties = {p["role"] for p in view.find("Party")}
+    assert parties == {"BEN_CHO_VAY", "BEN_VAY"}
+    ci = next(n for n in view.find("ConceptInstance") if n["concept_id"] == "loan.interest_cap")
+    holders = [h["node"]["role"] for h in view.neighbors(ci["node_id"], rel_types=["HOLDER"], direction="out")]
+    assert holders == ["BEN_CHO_VAY"]

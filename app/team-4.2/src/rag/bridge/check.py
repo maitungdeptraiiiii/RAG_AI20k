@@ -137,7 +137,7 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
         day = catalog.law_values_valid_from
         warnings.append(f"Không có ngày ký: tạm dùng giá trị luật từ {day.isoformat()}")
 
-    _add_ops(contract, party_ops(contract.facts, contract.contract_id, at=at))
+    _add_ops(contract, party_ops(contract.facts, contract.contract_id, at=at, roles=catalog.roles))
     _add_ops(contract, fact_ops(contract.facts, contract.contract_id, at=at, ctx=catalog.context))
     stage("tag", "start")
     tag = tag_contract(tagger, contract, catalog, at=at, model=tag_model,

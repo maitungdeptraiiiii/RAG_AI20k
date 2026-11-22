@@ -50,3 +50,9 @@ def run_loan_contract(**kw):
     report = check_contract(llm, loan_contract(), at=AT, packs=["civil_loan"],
                             user_facts={"special_law_applies": False}, **kw)
     return llm, report
+
+
+def run_loan_contract_with_contract(**kw):
+    llm, c = ScriptedLoanLLM(), loan_contract()
+    report = check_contract(llm, c, at=AT, packs=["civil_loan"], user_facts={"special_law_applies": False}, **kw)
+    return llm, report, c

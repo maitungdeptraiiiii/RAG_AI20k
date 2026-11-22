@@ -4,6 +4,7 @@ Chữ ký ở đây được công bố cho benchmark và giữ ổn định đ�
 mỗi `update` (chuẩn đúng); `network` (giai đoạn 2) chưa có."""
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from datetime import date
 from typing import Any, Literal, Mapping, Protocol, Sequence
@@ -93,8 +94,19 @@ class ReferenceEvaluator:
 
 def evaluator_for(catalog: Catalog, kind: EvaluatorKind = "reference") -> Evaluator:
     if kind == "network":
-        raise NotImplementedError("network: giai đoạn 2")
+        from rag.rules.network.network import NetworkEvaluator   # nạp muộn: network.session import lại Diff / RuleChange ở đây
+        return NetworkEvaluator(catalog)
+    if kind != "reference":
+        raise ValueError(f"evaluator lạ {kind!r}: chọn 'reference' hoặc 'network'")
     return ReferenceEvaluator(catalog)
+
+
+def default_kind() -> EvaluatorKind:
+    """Evaluator mặc định, đổi được bằng biến môi trường RAG_RULE_EVALUATOR (reference | network)."""
+    kind = os.environ.get("RAG_RULE_EVALUATOR", "reference")
+    if kind not in ("reference", "network"):
+        raise ValueError(f"RAG_RULE_EVALUATOR={kind!r}: chọn 'reference' hoặc 'network'")
+    return kind                                                                 # type: ignore[return-value]
 
 
 def make_evaluator(packs: Sequence[str], kind: EvaluatorKind = "reference") -> Evaluator:

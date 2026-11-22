@@ -71,11 +71,11 @@ def test_objects_not_supported_yet():
         evaluator_for(CAT).session(day=DAY, facts={}, present=set(), evidence={}, objects=[object()])
 
 
-def test_network_kind_not_available_yet():
-    with pytest.raises(NotImplementedError):
-        make_evaluator(["labor"], "network")
-    with pytest.raises(NotImplementedError):
-        evaluator_for(CAT, "network")
+def test_unknown_kind_rejected_and_network_available():
+    with pytest.raises(ValueError):
+        evaluator_for(CAT, "khong_co")
+    kw = dict(day=DAY, facts=dict(BASE_FACTS), present={"leave.annual"}, evidence={})
+    assert evaluator_for(CAT, "network").session(**kw).results() == evaluator_for(CAT).session(**kw).results()
 
 
 def test_stub_removed():

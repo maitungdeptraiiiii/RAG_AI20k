@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Any, Literal, Mapping, Protocol, Sequence
 
+from rag.rules.derived import derive_all
 from rag.rules.loader import load_packs
 from rag.rules.model import Catalog
 from rag.rules.reference import evaluate_all
@@ -31,7 +32,11 @@ class Diff:
 
 
 class Session(Protocol):
+    day: date
+
     def results(self) -> list[RuleResult]: ...
+
+    def facts(self) -> Facts: ...        # bản sao bảng dữ kiện đã gộp dữ kiện suy ra (cho explain)
 
     def update(self, changes: Mapping[str, Fact | None], *, present: set[str] | None = None,
                evidence: dict[str, list[dict]] | None = None, objects: Any = None) -> Diff: ...
@@ -53,6 +58,13 @@ class ReferenceSession:
         self._catalog, self._day = catalog, day
         self._facts, self._present, self._evidence = dict(facts), set(present), _copy_evidence(evidence)
         self._results = self._evaluate()
+
+    @property
+    def day(self) -> date:
+        return self._day
+
+    def facts(self) -> Facts:
+        return derive_all(self._catalog.context, self._facts)
 
     def _evaluate(self) -> list[RuleResult]:
         return evaluate_all(self._catalog, self._facts, self._present, self._evidence, self._day)

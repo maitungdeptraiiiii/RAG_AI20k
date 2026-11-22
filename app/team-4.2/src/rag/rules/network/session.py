@@ -77,6 +77,13 @@ class NetworkSession:
         return (decide_rule(slot.concept_id, slot.rule, facts, slot.concept_id in self._present,
                             self._evidence.get(slot.concept_id, ()), inputs, ctx), rule_state(inputs))
 
+    @property
+    def day(self) -> date:
+        return self._day
+
+    def facts(self) -> Facts:
+        return dict(self._facts)
+
     def results(self) -> list[RuleResult]:
         return list(self._results)
 

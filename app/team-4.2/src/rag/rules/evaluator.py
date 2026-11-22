@@ -1,7 +1,7 @@
 """Interface của bộ đánh giá rule (spec §7): `Evaluator` -> `Session` -> `results()` / `update()` / `fork()`.
 
 Chữ ký ở đây được công bố cho benchmark và giữ ổn định đến hết giai đoạn 7. `ReferenceEvaluator` tính lại toàn bộ sau
-mỗi `update` (chuẩn đúng); `network` (giai đoạn 2) chưa có."""
+mỗi `update` (chuẩn đúng); `network` (`rag.rules.network`) chỉ tính lại rule bị ảnh hưởng và là mặc định."""
 from __future__ import annotations
 
 import os
@@ -109,5 +109,6 @@ def default_kind() -> EvaluatorKind:
     return kind                                                                 # type: ignore[return-value]
 
 
-def make_evaluator(packs: Sequence[str], kind: EvaluatorKind = "reference") -> Evaluator:
-    return evaluator_for(load_packs(packs), kind)
+def make_evaluator(packs: Sequence[str], kind: EvaluatorKind | None = None) -> Evaluator:
+    """`kind` bỏ trống thì theo `default_kind()` (biến môi trường RAG_RULE_EVALUATOR, mặc định network)."""
+    return evaluator_for(load_packs(packs), kind or default_kind())

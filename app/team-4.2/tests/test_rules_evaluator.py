@@ -80,3 +80,13 @@ def test_unknown_kind_rejected_and_network_available():
 
 def test_stub_removed():
     assert not hasattr(evaluator, "StubEvaluator")
+
+
+@pytest.mark.parametrize("env,cls", [(None, "NetworkEvaluator"), ("reference", "ReferenceEvaluator"),
+                                     ("network", "NetworkEvaluator")])
+def test_make_evaluator_default_follows_default_kind(monkeypatch, env, cls):
+    if env is None:
+        monkeypatch.delenv("RAG_RULE_EVALUATOR", raising=False)
+    else:
+        monkeypatch.setenv("RAG_RULE_EVALUATOR", env)
+    assert type(make_evaluator(["labor"])).__name__ == cls

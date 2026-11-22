@@ -6,6 +6,9 @@
 
 ## 0. Vai trò trong 5 dòng
 
+> **Định hướng W04 (bản 3, 23/11): phủ rộng nhiều loại hợp đồng.** Ba miền ngang hàng: lao động (T1), vay (T3), thuê
+> nhà (**T6**), cùng gói cha dân sự chung (T2). Danh sách `kind` (T4) phải đúng cho cả ba miền.
+
 - Tùng viết engine và chuyển rule thành YAML. Tuấn là người **đọc luật** và ghi lại rule ở dạng có cấu trúc, đủ để
   Tùng chuyển thành YAML **mà không phải đọc lại văn bản luật**.
 - Tuấn **không viết code engine, không viết YAML pack**.
@@ -39,20 +42,33 @@ Lãi suất trần, lãi khi vay không thỏa thuận rõ lãi, lãi chậm tr�
 hạn / không kỳ hạn, có lãi / không lãi), quyền đòi lại tài sản. Ghi rõ quan hệ với luật chuyên ngành (Luật các TCTD)
 — **chỉ ghi nhận là ngoại lệ, không phân tích sâu** trong W04.
 
-### T4 — Đề xuất danh sách `kind` (ngày 1–2)
+### T4 — Đề xuất danh sách `kind` (ngày 1–2; bản 3: kiểm trên ba miền)
 
-Đọc 39 concept trong `src/rag/bridge/concepts.yaml`, gom theo **dạng pháp lý** (payment, time_limit, notice,
-rate_cap, termination, penalty, …), mỗi kind có slot chung (tên, kiểu, đơn vị). Concept không vừa kind nào → liệt kê
-riêng, đừng ép. Kiểm danh sách với concept BLDS ở T2–T3.
+Gom concept của **mọi gói** (`packs/labor`, `packs/civil_general`, `packs/civil_loan`, `packs/civil_lease`) và các mục
+trong bản liệt kê T1–T3, T6 theo **dạng pháp lý** (payment, time_limit, notice, rate_cap, termination, penalty,
+void_clause, form_requirement, …), mỗi kind có slot chung (tên, kiểu, đơn vị). Bắt đầu từ 39 concept lao động là được,
+nhưng **danh sách chỉ xong khi mỗi kind dùng chung có concept của ít nhất hai miền**; kind chỉ có ở một miền ghi rõ là
+kind riêng của miền đó. Concept không vừa kind nào → liệt kê riêng kèm lý do, đừng ép. Mục bản liệt kê ghi
+`kind: none` phải có lý do trong `open_questions`.
+
+### T6 — Thuê nhà ở: BLDS Đ472–482 + Luật Nhà ở 27/2023/QH15 Đ163–173 (bản 3, xong ngày 3)
+
+`docs/rule_inventory/civil_lease.yaml`. Chỉ lấy quy định kiểm được trên văn bản hợp đồng: thời hạn thuê (Đ474 BLDS,
+Đ170 LNO), giá thuê và điều chỉnh giá (Đ473 BLDS, Đ170 LNO), cho thuê lại (Đ475 BLDS, Đ170 LNO), trả tiền thuê (Đ481),
+đơn phương chấm dứt và báo trước (Đ172 LNO), các trường hợp chấm dứt (Đ171 LNO), hình thức / công chứng (Đ163–164 LNO,
+nối với `civil.form_required_by_law`), quyền tiếp tục thuê (Đ173 LNO). Ghi rõ quan hệ luật chung (BLDS) – luật chuyên
+ngành (Luật Nhà ở): rule nào của LNO là **ngoại lệ** của rule BLDS (dùng `exceptions`).
 
 ### T5 — Nhãn gold cho hồ sơ của Tú (ngày 3–4)
 
-Với mỗi hồ sơ trong `tests/fixtures/rete/<dossier_id>/`, điền `gold.yaml` (định dạng §3). Mỗi nhãn có `basis` (pid +
+Với mỗi hồ sơ trong `tests/fixtures/rete/<dossier_id>/` (lao động a1, b1–b5; vay `loan/`; thuê nhà `lease/`, r1),
+điền `gold.yaml` (định dạng §3). Mỗi nhãn có `basis` (pid +
 trích nguyên văn). Không chắc → `status: UNKNOWN` + ghi lý do, **không đoán**.
 
 ## 2. Định dạng bản liệt kê rule (chốt ngày 1 với Tùng)
 
-File: `docs/rule_inventory/<pack>.yaml` (`labor_w04.yaml`, `civil_general.yaml`, `civil_loan.yaml`).
+File: `docs/rule_inventory/<pack>.yaml` (`labor_w04.yaml`, `civil_general.yaml`, `civil_loan.yaml`,
+`civil_lease.yaml`).
 
 ```yaml
 - id: civil_loan.interest_cap                 # đề xuất <pack>.<tên ngắn>; Tùng có thể đổi
@@ -110,7 +126,7 @@ expected:
 - Không dùng LLM để viết `quote`, kết luận pháp lý hay nhãn gold. (Được dùng để tìm vị trí điều luật, rồi đọc văn bản
   gốc.)
 - Không sửa `concepts.yaml`, `pack.yaml`, code. Muốn thêm concept → ghi vào bản liệt kê, Tùng quyết.
-- Không mở rộng sang luật khác ngoài T1–T3 khi chưa xong và chưa hỏi Tùng.
+- Không mở rộng sang luật khác ngoài T1–T3, T6 khi chưa xong và chưa hỏi Tùng.
 - Không bỏ trống `exceptions` vì "chắc không có" — phải ghi `exceptions: []` sau khi đã đọc hết điều luật và các điều
   dẫn chiếu.
 
@@ -119,7 +135,8 @@ expected:
 | # | Tiêu chí |
 |---|---|
 | T1–T3 | Tùng chuyển được 100% mục thành YAML mà không phải mở văn bản luật; Huy xác nhận pid giải được |
-| T4 | Mọi concept lao động có kind hoặc nằm trong danh sách "không vừa" kèm lý do |
+| T4 | Mọi concept của cả ba miền có kind hoặc nằm trong danh sách "không vừa" kèm lý do; kind dùng chung có concept của ≥2 miền |
+| T6 | Như T1–T3, cho `civil_lease.yaml`; mỗi quy định Luật Nhà ở đè lên BLDS ghi thành `exceptions` |
 | T5 | Mỗi nhãn có basis; nhãn khớp với kết quả engine, chỗ không khớp được Tuấn + Tùng xem và ghi kết luận (lỗi engine hay lỗi nhãn) |
 
 ## 6. Mốc kiểm tra với Tùng
@@ -128,7 +145,7 @@ expected:
 |---|---|
 | 1 (23/11) | Chốt định dạng §2, §3; nộp bản nháp T4 |
 | 2 | Nộp T1 (lao động) — Tùng review 30 phút cùng Tuấn |
-| 3 | Nộp T2, T3 |
+| 3 | Nộp T2, T3, T6 |
 | 4 | Nộp T5 cho bộ A, B và hợp đồng vay |
 | 5 | Đối chiếu nhãn với kết quả engine; chuẩn bị phần trình bày |
 

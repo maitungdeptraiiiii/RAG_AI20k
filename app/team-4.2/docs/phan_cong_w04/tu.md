@@ -6,6 +6,9 @@
 
 ## 0. Vai trò trong 5 dòng
 
+> **Định hướng W04 (bản 3, 23/11): phủ rộng nhiều loại hợp đồng.** Hồ sơ mẫu phải trải ba miền ngang hàng: lao động
+> (D1–D2), vay (D3), thuê nhà (D3b); kịch bản demo có ít nhất một miền không phải lao động.
+
 - Phần join của mạng chỉ "đáng dùng" khi dữ liệu có **lịch sử theo thời gian** (phụ lục) và **quan hệ giữa văn bản** (nhiều hợp
   đồng của một NLĐ). Tú soạn đúng những hồ sơ làm lộ ra hai điều đó.
 - Tú cập nhật **Contract Studio** để người xem *thấy* mạng tăng dần làm việc: cái gì thay đổi, vì sao, hỏi gì tiếp.
@@ -26,8 +29,11 @@ và câu dẫn chiếu kiểu "sửa đổi Khoản 1 Điều 5 của Hợp đ�
 | HĐ xác định thời hạn 36 tháng, vùng I | 01/03/2023 | Lương 4.700.000 | Hợp lệ lúc ký |
 | (mốc luật) | 01/07/2024 | lương tối thiểu vùng I tăng | Vi phạm phát sinh dù hợp đồng không đổi |
 | Phụ lục 1 | 01/09/2024 | Tăng lương 5.000.000 | Hết vi phạm |
-| Phụ lục 2 | 01/02/2025 | Sửa thời hạn hợp đồng lần 1 | Hợp lệ |
-| Phụ lục 3 | 01/08/2025 | Sửa thời hạn lần 2 | Vi phạm (Tuấn xác nhận căn cứ) |
+| Phụ lục 2 | 01/02/2025 | Sửa thời hạn hợp đồng lần 1 | **Vi phạm** Đ22.2 BLLĐ 2019 ("không được sửa đổi thời hạn") |
+| Phụ lục 3 | 01/08/2025 | Sửa thời hạn lần 2 | Vi phạm (cùng căn cứ) |
+
+> Sửa 23/11: bản cũ ghi "phụ lục 2 hợp lệ" theo quy định cho sửa thời hạn một lần của BLLĐ 2012; BLLĐ 2019 cấm hẳn
+> (xem `docs/rule_inventory/labor_w04.yaml`, `labor.appendix_no_term_change`).
 | (mốc luật) | 01/01/2026 | lương tối thiểu vùng I tăng | Vi phạm lại |
 
 ### D2 — Bộ B: nhiều hợp đồng của một NLĐ (xong ngày 3)
@@ -49,9 +55,17 @@ Tuấn (`docs/rule_inventory/labor_w04.yaml`) — nếu Tuấn chưa xong, soạ
 lãi ghi theo tháng (cần quy đổi), không ghi lãi, có điều khoản phạt chậm trả, có điều khoản trả trước hạn. Mỗi hợp đồng
 một dòng trong `tests/fixtures/rete/loan/README.md` nói nó kiểm gì. Nhãn gold do Tuấn điền.
 
+### D3b — Hợp đồng thuê nhà mẫu (bản 3, xong ngày 3)
+
+`tests/fixtures/rete/lease/` — ≥5 hợp đồng thuê nhà ở (cá nhân / doanh nghiệp cho thuê; có sẵn
+`data/team-4.2/contracts_demo/hop_dong_thue_nha_2023.txt` làm mẫu): thời hạn và giá thuê rõ, không ghi thời hạn, cho
+thuê lại không có đồng ý của bên cho thuê, điều khoản đơn phương chấm dứt không báo trước, tăng giá thuê giữa kỳ. Nội
+dung pháp lý lấy theo `docs/rule_inventory/civil_lease.yaml` (T6). Thêm **một hồ sơ nhiều văn bản** `tests/fixtures/rete/r1/`:
+hợp đồng thuê + phụ lục gia hạn + phụ lục tăng giá (cho rule xuyên văn bản và dòng thời gian).
+
 ### D4 — Kịch bản demo theo bước (ngày 3)
 
-`tests/fixtures/rete/<dossier_id>/scenario.yaml` cho a1, b1/b2, b3/b4:
+`tests/fixtures/rete/<dossier_id>/scenario.yaml` cho a1, b1/b2, b3/b4 và **r1 (thuê nhà)**:
 
 ```yaml
 dossier_id: b3
@@ -89,12 +103,18 @@ Mock: `contract-studio/src/live/mocks/rete/*.json` — viết tay theo §4 cho a
 ```yaml
 dossier_id: b1
 review_date: 2024-03-01
-employee: {id: e1, name: "Nguyễn Văn A", cccd: "001090000001", birth_date: 1990-05-01}
-documents:
-  - {doc_id: hd1_2022, file: hd1_2022.txt, kind: labor_contract, employee: e1}
-  - {doc_id: hd2_2023/pl1, file: hd2_2023_pl1.txt, kind: amendment, contract: hd2_2023}
+packs: [labor]                     # bỏ trống -> chọn theo loại văn bản (classify_contract của Huy)
+parties:                           # vai trò lấy theo `roles` của gói; không có khóa riêng cho người lao động
+  - {id: e1, role: employee, name: "Nguyễn Văn A", birth_date: 1990-05-01}
+  - {id: c1, role: employer, name: "Công ty TNHH Mẫu"}
+documents:                         # kind = một `document_kinds` của gói; refs = vai trò / văn bản liên quan
+  - {doc_id: hd1_2022, file: hd1_2022.txt, kind: labor_contract, refs: {employee: e1, employer: c1}}
+  - {doc_id: hd2_2023/pl1, file: hd2_2023_pl1.txt, kind: amendment, refs: {contract: hd2_2023}}
 user_facts: {wage_region: I}
 ```
+
+Hồ sơ thuê nhà dùng cùng định dạng: `parties` có `role: lessor` / `lessee`, văn bản `kind: lease_contract`,
+`refs: {lessee: t1, property: p1}`.
 
 ## 4. JSON mẫu (Tùng chốt ngày 1; đây là bản nháp để bắt đầu)
 
@@ -125,9 +145,9 @@ user_facts: {wage_region: I}
 
 | # | Tiêu chí |
 |---|---|
-| D1–D3 | Parser hiện có đọc được mọi văn bản (Điều/Khoản, phụ lục, ngày hiệu lực); Huy chạy `dossier_objects` không lỗi |
+| D1–D3b | Parser hiện có đọc được mọi văn bản của ba miền (Điều/Khoản, phụ lục, ngày hiệu lực); Huy chạy `dossier_objects` không lỗi |
 | D4 | Mỗi kịch bản chạy hết trên UI bằng mock, sau đó bằng engine thật |
-| D5 | Bốn phần UI + chế độ kịch bản chạy được trên a1, b3/b4; không lỗi console |
+| D5 | Bốn phần UI + chế độ kịch bản chạy được trên a1, b3/b4 và r1 (thuê nhà); nhãn hiển thị không có chữ "người lao động" khi soát hợp đồng không phải lao động; không lỗi console |
 
 ## 6. Mốc kiểm tra với Tùng
 

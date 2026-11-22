@@ -29,7 +29,8 @@ BLDS 91/2015/QH13, Luật Thương mại 36/2005/QH11, Luật Bảo vệ quyền
 Bộ sinh:
 - Sinh **pack YAML tổng hợp** theo đúng định dạng pack của Tùng và **nạp bằng loader thật** (`rag.rules.loader`) —
   không dựng đối tượng Rule bằng tay.
-- **Trục 1, số rule:** 44 (pack thật `labor`), 500, 2.000, 10.000; tỉ lệ điều kiện dùng chung (0.2 / 0.5); độ sâu
+- **Trục 1, số rule:** 44 (pack thật `labor`), **ba miền thật nạp cùng lúc** (`labor` + `civil_loan` + `civil_lease`,
+  bản 3), 500, 2.000, 10.000; tỉ lệ điều kiện dùng chung (0.2 / 0.5); độ sâu
   kết luận trung gian (0 / 3); số dữ kiện đầu vào (50–500); seed.
 - **Trục 2, số đối tượng mỗi hồ sơ:** 1 / 5 / 20 / 100 hợp đồng + phụ lục của một người lao động, với 5–50 rule xuyên
   đối tượng (đếm, ghép cặp, phủ định; spec §5.6). Đối tượng sinh theo kiểu `WorkingObject` (Tùng chốt ngày 1).
@@ -56,7 +57,10 @@ kiện) và báo Tùng ngay, không "bỏ qua".
 ### K3 — Harness eval theo pack (ngày 3–5)
 
 `scripts/eval_rule_engine.py`:
-- Đọc mọi `tests/fixtures/rete/*/gold.yaml` (Tùng gắn nhãn) + `dossier.yaml` (Tùng soạn).
+- Đọc mọi `tests/fixtures/rete/*/gold.yaml` (Tùng gắn nhãn) + `dossier.yaml` (Tùng soạn) của **cả ba miền** (lao
+  động, vay, thuê nhà; bản 3). Miền nào chưa có gold thì ghi rõ trong `summary.md`, không âm thầm bỏ.
+- Thêm một bảng **chọn gói**: với mỗi hợp đồng mẫu, loại do `classify_contract` (Huy) trả về, gói được chạy, và có
+  kết quả nào của gói sai miền không (vd. hợp đồng thuê nhà ra kết quả gói `labor` là lỗi).
 - Chạy: (a) engine cũ (`rag.bridge.engine.evaluate`), (b) engine mới `reference`, (c) engine mới `network`.
 - Báo theo pack và theo loại rule: đúng / sai / UNKNOWN so với gold; ma trận nhầm PASS/FAIL/UNKNOWN; danh sách ca
   sai kèm `explain()` của engine (nếu có).

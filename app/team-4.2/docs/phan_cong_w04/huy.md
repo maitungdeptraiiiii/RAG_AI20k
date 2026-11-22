@@ -6,7 +6,8 @@
 
 ## 0. Bối cảnh trong 5 dòng
 
-- W04 mở rộng từ HĐLĐ sang nhiều loại hợp đồng (trước mắt: BLDS phần chung hợp đồng + hợp đồng vay).
+- W04 mở rộng từ HĐLĐ sang nhiều loại hợp đồng: **ba miền ngang hàng** — lao động, vay (BLDS Đ463–471), thuê nhà
+  (BLDS Đ472–482 + Luật Nhà ở 2023), chung gói cha BLDS phần chung hợp đồng (bản 3, 23/11).
 - Tùng viết lại rule engine (`src/rag/rules/`): ngữ nghĩa ba trị + ngoại lệ + kết luận trung gian, hai evaluator
   (Reference, Network). Rule viết trong domain pack YAML.
 - Mạng cần **join** (kiểu TREAT): soát từng phụ lục / nhiều hợp đồng của cùng một NLĐ, không chỉ bảng dữ kiện phẳng như hiện nay.
@@ -22,14 +23,15 @@ Hiện tại `src/rag/bridge/facts_map.py::_resolve` gộp mọi phụ lục th�
 thắng, cũ vào `amended_from`). Giữ nguyên đường này (tương thích). Thêm đường mới xuất **đối tượng**:
 
 ```python
-# src/rag/contracts/dossier.py  (file mới)
-@dataclass(frozen=True)
-class WorkingObject:
-    id: str                         # "hd1_2022", "hd1_2022/pl2", "e1"
-    type: Literal["Employee", "Contract", "Amendment"]
-    attrs: dict[str, Fact]          # Fact của rag.bridge.engine (value, unit, source, uid, quote)
-    valid_from: date | None         # Contract: ngày hiệu lực; Amendment: "hiệu lực kể từ ngày" (amendments._effective)
-    valid_to: date | None           # Contract: ngày hết hạn nếu có
+# WorkingObject đã có ở rag.rules.objects (Tùng, giai đoạn 7) — dùng lại, không định nghĩa lại.
+# src/rag/contracts/dossier.py  (file mới của Huy)
+from rag.rules.objects import WorkingObject
+#   id: str                         # "hd1_2022", "hd1_2022/pl2", "tn_2023"
+#   type: str                       # kiểu do gói khai trong pack.yaml `object_types` (labor: Contract, Amendment;
+#                                   #   civil_lease: Lease, Amendment; civil_loan: Loan) — KHÔNG cố định danh sách
+#   attrs: dict[str, Fact]          # Fact của rag.rules.semantics (value, unit, source, uid, quote)
+#   valid_from: date | None         # hợp đồng: ngày hiệu lực; phụ lục: "hiệu lực kể từ ngày" (amendments._effective)
+#   valid_to: date | None           # hợp đồng: ngày hết hạn nếu có
     refs: dict[str, str]            # {"contract": "hd1_2022"} cho Amendment; {"employee": "e1"} cho Contract
 
 def dossier_objects(dossier: Dossier) -> list[WorkingObject]: ...
@@ -42,15 +44,22 @@ Yêu cầu:
 - Thêm thuộc tính phái sinh tối thiểu cho rule xuyên văn bản: `Amendment.modifies` (danh sách tên dữ kiện bị sửa),
   `Contract.contract_kind`, `Contract.job_title`, `Contract.has_probation`, `Contract.sign_date`, `Contract.end_date`.
   Danh sách cuối cùng chốt với Tùng ngày 1 theo bản liệt kê rule của Tùng.
-- Gom văn bản về cùng NLĐ: **bản đầu dùng khai báo tay trong `dossier.yaml`**. Tự nhận diện theo CCCD/tên qua
+- Kiểu đối tượng của một văn bản = kiểu trong `object_types` của gói có `document_kinds` chứa `kind` của văn bản
+  (bản 3); thuộc tính lấy đúng danh sách `attrs` / `refs` gói khai. Hồ sơ thuê nhà (r1) chạy cùng code với hồ sơ lao động.
+- Gom văn bản về cùng chủ thể (NLĐ, bên thuê, bên vay): **bản đầu dùng khai báo tay trong `dossier.yaml`**. Tự nhận diện theo CCCD/tên qua
   `party_ops` là bước 2, chỉ làm khi bước 1 xong và có test.
 - Không đổi kết quả của luồng hiện tại (`check_contract` trên một hợp đồng).
 
 ### H2 — Trích dữ kiện cho loại hợp đồng mới (ưu tiên 2)
 
-- **Nhận diện loại hợp đồng**: `classify_contract(contract) -> {"kind": "labor_contract" | "loan_contract" | ... |
-  "unknown", "confidence": float, "evidence": [uid, quote]}`. Trả `unknown` khi không chắc — không đoán.
-  Danh sách loại = `document_kinds` trong các `pack.yaml` Tùng công bố.
+- **Nhận diện loại hợp đồng** (bản 3: Must, quyết định gói nào được chạy): `classify_contract(contract) -> {"kind":
+  "labor_contract" | "loan_contract" | "lease_contract" | ... | "unknown", "confidence": float, "evidence": [uid, quote]}`.
+  Trả `unknown` khi không chắc — không đoán. Danh sách loại = `document_kinds` trong các `pack.yaml` Tùng công bố.
+  `unknown` thì `check_contract` không chạy gói nào (Tùng làm phía engine), không rơi về gói lao động.
+- **Bỏ chữ "lao động" viết cứng khỏi các bước LLM** (bản 3): `bridge/tagger.py` `TAG_PROMPT`, `bridge/recheck.py`
+  `RECHECK_PROMPT`, `contracts/graph/agent.py` `AGENT_PROMPT`: loại hợp đồng và vai trò các bên lấy từ kết quả
+  `classify_contract` + `roles` của gói. Danh mục dữ kiện `contracts/fact_catalog.json` thêm kiểu cho vay và thuê nhà
+  (hiện chỉ có `common`, `labor`).
 - **Tagger theo `kind`**: `kind` (payment, time_limit, notice, rate_cap, termination, penalty, …; danh sách do Tùng
   đề xuất, Tùng chốt) có slot chung. Prompt trích dựng **từ slot của kind**, không viết prompt riêng cho từng concept.
   Tagger chỉ gửi cho LLM các concept của pack áp dụng cho loại hợp đồng đã nhận diện.
@@ -75,25 +84,15 @@ Yêu cầu:
 
 ## 3. Định dạng dùng chung (chốt ngày 1 với Tùng)
 
-`tests/fixtures/rete/<dossier_id>/dossier.yaml`:
-
-```yaml
-dossier_id: b1
-review_date: 2024-03-01            # ngày soát mặc định của kịch bản
-employee: {id: e1, name: "Nguyễn Văn A", cccd: "0010xxxxxxx", birth_date: 1990-05-01}
-documents:
-  - {doc_id: hd1_2022, file: hd1_2022.txt, kind: labor_contract, employee: e1}
-  - {doc_id: hd2_2023, file: hd2_2023.txt, kind: labor_contract, employee: e1}
-  - {doc_id: hd2_2023/pl1, file: hd2_2023_pl1.txt, kind: amendment, contract: hd2_2023}
-user_facts: {wage_region: I}
-```
+`tests/fixtures/rete/<dossier_id>/dossier.yaml`: định dạng tổng quát (bản 3) ở `tu.md` §3 — `packs`, `parties`
+theo vai trò của gói, `documents[].refs`; không có khóa riêng cho người lao động.
 
 ## 4. Nghiệm thu
 
 | # | Tiêu chí |
 |---|---|
 | H1 | `dossier_objects` chạy đúng trên mọi hồ sơ của Tùng (bộ A, B1–B5); test so từng đối tượng với bảng kỳ vọng viết tay; luồng một hợp đồng không đổi kết quả |
-| H2 | Nhận diện đúng loại trên toàn bộ hợp đồng mẫu (HĐLĐ, vay, thuê nhà sẵn có `hop_dong_thue_nha_2023.txt`); điểm `score_concept_check.py` của HĐLĐ không giảm; trên hợp đồng vay mẫu, dữ kiện trích có quote kiểm được |
+| H2 | Nhận diện đúng loại trên toàn bộ hợp đồng mẫu của ba miền (HĐLĐ, vay, thuê nhà); điểm `score_concept_check.py` của HĐLĐ không giảm; trên hợp đồng vay và thuê nhà mẫu, dữ kiện trích có quote kiểm được; prompt gửi LLM khi soát hợp đồng vay / thuê không có chữ "lao động" |
 | H3 | 100% anchor của pack mới giải được; ghi lại số neo phải sửa |
 
 ## 5. Mốc kiểm tra với Tùng

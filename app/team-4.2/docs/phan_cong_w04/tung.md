@@ -1,6 +1,8 @@
 # Kế hoạch W04 — Tùng: rule engine + phần của Tú (hồ sơ, UI) + phần của Tuấn (phân tích luật, gold)
 
-> Thiết kế: `docs/superpowers/specs/2026-11-22-rete-rule-engine-design.md` (giai đoạn P1–P7).
+> Thiết kế: `docs/superpowers/specs/2026-11-22-rete-rule-engine-design.md` (giai đoạn P1–P8, **bản 3**).
+> **Định hướng W04 (chốt 23/11): phủ rộng nhiều loại hợp đồng.** Rà soát 23/11 thấy bản kế hoạch cũ lấy lao động làm
+> chính và đẩy "đa luật" xuống Should / Could / cắt đầu tiên; mục 1 và 4 dưới đây đã sửa lại.
 > Việc gốc: `tu.md` (D1–D5), `tuan.md` (T1–T5). Người phụ thuộc vào mình: Huy (`huy.md`), Khánh (`khanh.md`).
 
 ## 0. Thực tế khối lượng
@@ -19,24 +21,26 @@
 
 ## 1. Ưu tiên
 
-**Must — thiếu là không có demo**
-- P1 (Reference + pack labor, kết quả giống hệt engine cũ), P2 (mạng điều kiện, đối chiếu = Reference), P3 (kết luận trung gian
-  + ngoại lệ), `evaluation_diff` + `explain()` (một phần P4).
-- T1 (Đ20, Đ22.2, Đ25 BLLĐ) → rule trong pack labor.
-- D1 bộ A, D2 b1–b4, gold cho a1 + b1–b4, kịch bản b3/b4.
-- P7 tối thiểu: join đủ cho b1 (đếm HĐ XĐTH) và b3/b4 (kết luận trung gian xuyên hợp đồng), dùng `dossier_objects` của Huy.
-- UI tối thiểu: diff lan truyền + cây giải thích + chạy kịch bản từng bước.
+**Must — thiếu là không có demo** (bản 3: ba miền ngang hàng)
+- Engine P1–P4, P7 (đã xong 23/11) + **P8 phủ rộng**: gói `civil_lease`; chọn gói theo loại hợp đồng (`unknown` → không
+  chạy gói nào); `party_impact` thay `employee_impact`; nhãn hiển thị lấy theo gói.
+- Ba miền, mỗi miền có rule đọc từ văn bản + hồ sơ mẫu + gold:
+  - lao động: T1 → a1, b1–b4 (+ b5), kịch bản b3/b4;
+  - vay: T3 → `civil_loan` (trần lãi, lãi chậm trả, trả trước hạn) + ≥5 hợp đồng vay;
+  - thuê nhà: **T6** (BLDS Đ472–482 + Luật Nhà ở 2023 Đ163–173) → `civil_lease` + ≥5 hợp đồng thuê (có
+    `hop_dong_thue_nha_2023.txt`) + một hồ sơ nhiều văn bản (gia hạn / phụ lục).
+- T2 BLDS phần chung (gói cha `civil_general` cho cả vay và thuê).
+- T4 danh sách kind **kiểm trên cả ba miền** (Huy cần cho tagger).
+- UI tối thiểu: diff lan truyền + cây giải thích + chạy kịch bản, có ít nhất một kịch bản không phải lao động.
 
-**Should — "đa luật"**
-- T3 + P5 pack `civil_loan` (chỉ Đ468 lãi suất trần + lãi chậm trả) + D3 3 hợp đồng vay + gold.
-- T4 danh sách kind (Huy cần cho tagger — làm sớm dù là Should).
-- `next_questions()` + UI câu hỏi.
+**Should**
+- `next_questions()` + UI câu hỏi; UI dòng thời gian (bộ A).
+- Prompt kiểm lại / trả lời trên đồ thị không viết cứng lao động (giao Huy, H2).
 
 **Could**
-- T2 BLDS phần chung đầy đủ, `civil_general` + `extends`.
-- UI dòng thời gian, b5, Đ22.2 đếm phụ lục sửa thời hạn trong bộ A.
+- D30 `network+beta`; miền thứ tư.
 
-**Không làm tuần này**: tự nhận diện hồ sơ theo CCCD, thuê nhà, người tiêu dùng, Phreak/lazy.
+**Không làm tuần này**: tự nhận diện hồ sơ theo CCCD, thương mại, người tiêu dùng, mua bán nhà, Phreak/lazy.
 
 ## 2. Lịch theo ngày
 
@@ -131,12 +135,13 @@ Chiều:
 
 ## 4. Nếu quá tải — cắt theo thứ tự
 
-1. UI dòng thời gian, câu hỏi gợi ý (demo bằng JSON / CLI thay vì UI).
-2. `civil_loan` (nói "đa luật" bằng thiết kế pack + benchmark, không bằng pack thật).
-3. P7b join cho b1/b5 (giữ b3/b4 vì demo rút lại kết luận trực quan hơn); D30 (`network+beta`).
+1. D30 (`network+beta`), UI dòng thời gian, câu hỏi gợi ý (demo bằng JSON / CLI thay vì UI).
+2. b5 và bớt số hồ sơ lao động (giữ a1, b1, b3/b4).
+3. Bớt số rule mỗi miền (mỗi miền giữ tối thiểu 3 rule có gold), **không bỏ miền nào**.
 4. Nhờ Huy làm UI tối thiểu (Huy là tác giả `contract-studio/`), đổi lại bỏ H3 của Huy.
 
-Không bao giờ cắt: golden P1, đối chiếu Network = Reference, quote nguyên văn trong inventory/gold.
+Không bao giờ cắt: golden P1, đối chiếu Network = Reference, quote nguyên văn trong inventory/gold, **ba miền chạy
+end-to-end** (bản 3).
 
 ## 5. Kỷ luật làm việc (giữ đúng ý thiết kế khi tự làm hết)
 

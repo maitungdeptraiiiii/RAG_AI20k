@@ -1,7 +1,14 @@
 # Rule engine v2: lõi đa luật + mạng phụ thuộc tăng dần ba trị (join kiểu TREAT) — thiết kế
 
 Ngày: 2026-11-22 · **Bản 2** (sau khi khảo sát các biến thể của Rete) · Người quyết định: Tùng (A) ·
-Trạng thái: **đã duyệt** (Tùng, 2026-11-22); bước tiếp theo là kế hoạch triển khai
+Trạng thái: bản 2 **đã duyệt** (Tùng, 2026-11-22); **bản 3 chờ Tùng duyệt** (các thay đổi đánh dấu "bản 3")
+
+**Bản 3 (2026-11-23)** — chỉnh theo định hướng W04 "phủ rộng nhiều loại hợp đồng" (rà soát ngày 23/11 thấy kế hoạch
+vẫn lấy lao động làm chính): (1) ba miền bắt buộc chạy được thay vì một miền phụ: `labor`, `civil_general` +
+`civil_loan`, **`civil_lease`** (thuê nhà, G7); (2) chọn gói theo loại hợp đồng thành mục tiêu (G9), không còn là
+không mục tiêu; (3) từ vựng kết quả trung tính, không viết cứng "người lao động" (G10, §5.2); (4) kiểu đối tượng và hồ
+sơ tổng quát theo chủ thể, khai trong gói (§5.6); (5) `kind` phải kiểm trên cả ba miền (§5.5); (6) thêm phản mục tiêu
+về các bước ngoài engine còn viết cứng cho lao động; (7) thêm giai đoạn 8 (§11).
 
 Thay đổi so với bản 1: (1) không còn "Rete mệnh đề không join": mạng gồm phần điều kiện (mệnh đề, tăng dần) và phần
 join/đếm/phủ định trên đối tượng kiểu TREAT (§6.1); (2) thêm ngữ nghĩa ba trị cho đối tượng, đếm, phủ định (§5.6);
@@ -26,8 +33,9 @@ lao động nhưng có ba chỗ chặn việc mở rộng:
 
 Người dùng muốn có một engine **dựa trên Rete** để chứng minh nó chịu được khi số rule tăng (ước tính 160–250 rule
 khi đủ 7 gói, benchmark tới 10.000 rule tổng hợp) và để có phần "phương pháp nâng cao" trình bày với mentor.
-Các ca demo (phụ lục theo thời gian, nhiều hợp đồng của một người lao động) cần join, đếm, phủ định trên nhiều
-văn bản.
+Các ca demo (phụ lục theo thời gian, nhiều hợp đồng của cùng một chủ thể: người lao động, bên thuê, bên vay) cần
+join, đếm, phủ định trên nhiều văn bản. Demo phải trải **ít nhất ba miền** (lao động, vay, thuê nhà) để chứng minh lõi
+dùng chung, không chỉ một miền có thêm một gói phụ.
 
 Thiết kế ghép các hệ thống đã khảo sát: ngữ nghĩa ngoại lệ của Catala; dữ kiện suy ra có justification (tính lại
 theo phụ thuộc, không phải truth maintenance của Drools); mạng mệnh đề ba trị (US 7418434); join kiểu TREAT; vòng hỏi
@@ -45,13 +53,22 @@ kèm trích dẫn nguyên văn, đi vào justification; ngữ nghĩa ba trị ch
 - G4. `explain()` (cây giải thích tới câu trích trong hợp đồng) và `next_questions()` (dữ kiện nên hỏi người dùng).
 - G5. Benchmark tái lập được, báo trung thực ba kịch bản (§9).
 - G6. Gói `labor` cho kết quả **giống hệt** engine cũ trên toàn bộ test + eval hiện có.
-- G7. Gói thứ hai `civil_general` + `civil_loan` (BLDS phần chung hợp đồng + vay tài sản) chạy mà không sửa lõi.
-- G8. Rule xuyên đối tượng: đếm, ghép cặp, phủ định trên nhiều hợp đồng / phụ lục của một người lao động, có soát
-  theo ngày hiệu lực (§5.6). Phục vụ các hồ sơ a1, b1–b5.
+- G7. Ba miền chạy mà không sửa lõi, nạp riêng hoặc cùng lúc: `labor`; `civil_general` + `civil_loan` (BLDS phần
+  chung hợp đồng + vay tài sản Đ463–471); `civil_lease` extends `civil_general` (BLDS thuê tài sản Đ472–482 + Luật
+  Nhà ở 27/2023/QH15 phần thuê nhà ở Đ163–173). Mỗi miền có hợp đồng mẫu + gold.
+- G8. Rule xuyên đối tượng: đếm, ghép cặp, phủ định trên nhiều hợp đồng / phụ lục của cùng một chủ thể, có soát
+  theo ngày hiệu lực (§5.6). Phục vụ các hồ sơ a1, b1–b5 (lao động) và ít nhất một hồ sơ thuê nhà (gia hạn / phụ lục).
+- G9. Chọn gói theo loại hợp đồng: mỗi `pack.yaml` khai `document_kinds`; `classify_contract` (Huy) trả loại hoặc
+  `unknown`; `check_contract` chạy các gói khai loại đó. Loại `unknown` → **không chạy gói nào**, trả cảnh báo (không
+  soát nhầm một hợp đồng thuê nhà bằng gói lao động). Người gọi vẫn truyền `packs=` để ép.
+- G10. Từ vựng kết quả trung tính: `RuleResult` có `party_impact` (bất lợi / trung lập cho bên nào là vai trò trong
+  `applies_to` của concept); `employee_impact` giữ làm tên tương thích, chỉ còn nghĩa với gói `labor`.
 
 **Không mục tiêu**
-- Tự nhận diện loại hợp đồng (người gọi truyền danh sách pack; mặc định `labor`). Spec riêng sau.
-- Tự gom văn bản về cùng một người lao động bằng CCCD/tên: bản đầu dùng khai báo tay trong `dossier.yaml`.
+- Nhận diện loại hợp đồng chính xác tuyệt đối: bản đầu chỉ cần đúng trên hợp đồng mẫu của ba miền và trả `unknown`
+  khi không chắc (G9).
+- Tự gom văn bản về cùng một chủ thể bằng CCCD/tên: bản đầu dùng khai báo tay trong `dossier.yaml`.
+- Miền thứ tư trở đi (thương mại, người tiêu dùng, mua bán nhà): sau W04; kho đã nạp luật nhưng chưa viết gói.
 - Phreak / LEAPS / Rete/UL và các biến thể tối ưu khác: hoãn, lý do ở §4.2. Chỉ làm khi benchmark chỉ ra mạng chậm.
 - Join nhiều bảng với thứ tự tối ưu theo ước lượng số bản ghi (Hiperfact): join ở đây chỉ vài đối tượng.
 - LLM sinh rule.
@@ -62,6 +79,10 @@ kèm trích dẫn nguyên văn, đi vào justification; ngữ nghĩa ba trị ch
 - Thiếu dữ kiện thành vi phạm (bất biến cũ, giữ nguyên, kể cả qua ngoại lệ, dữ kiện suy ra, đếm và phủ định).
 - Benchmark chỉ khoe kịch bản mạng thắng, hoặc chỉ đo trục số rule mà bỏ trục số đối tượng.
 - Gọi thuật toán là "Rete đầy đủ" khi không có bộ nhớ beta; tên đúng ở §6.1.
+- Một bước của luồng soát (trích dữ kiện, gán khái niệm, kiểm lại, trả lời trên đồ thị, hiển thị kết quả) chỉ đúng
+  cho hợp đồng lao động: prompt, nhãn, danh mục dữ kiện phải lấy từ gói / loại hợp đồng, không viết cứng.
+- Hợp đồng không phải lao động bị soát bằng gói `labor` (mặc định cũ) hoặc ra nhãn "người lao động".
+- `kind`, định dạng hồ sơ hay kiểu đối tượng suy ra từ một miền rồi gọi là "chung".
 
 ## 3. Ràng buộc
 
@@ -234,15 +255,21 @@ src/rag/rules/packs/<pack_id>/
   `conflict`, `missing_content`) và những gì pack khai báo thêm (`labor` khai báo `hidden_right`, `possible_right`).
 - Gói `labor`: chuyển `bridge/concepts.yaml` sang `rules/packs/labor/concepts.yaml`; `catalog.DEFAULT_PATH` trỏ tới
   đó; `CONTRACT_FACTS`, `USER_FACTS` giữ làm hằng tương thích, được đọc ra từ `pack.yaml`. Báo LU đường dẫn mới.
-- `kind` (payment, time_limit, notice, rate_cap, termination, penalty, …): trường nhãn trên concept, khai báo slot
-  chung; engine không dùng. Dùng cho tagger/prompt trích (ngoài phạm vi engine, chỉ cần bộ nạp chấp nhận và kiểm
-  slot của concept khớp slot của kind).
+- `kind` (payment, time_limit, notice, rate_cap, termination, penalty, void_clause, form_requirement, …): trường nhãn
+  trên concept, khai báo slot chung; engine không dùng. Dùng cho tagger/prompt trích (ngoài phạm vi engine, chỉ cần bộ
+  nạp chấp nhận và kiểm slot của concept khớp slot của kind). **Danh sách kind là chung cho mọi gói**: mọi concept của
+  cả ba miền phải có kind hoặc nằm trong danh sách "không vừa" kèm lý do; một kind chỉ dùng được ở một miền thì ghi rõ
+  là kind riêng của miền đó (bản 3).
 
 ### 5.6 Đối tượng, join, đếm, phủ định (mới; thiết kế của nhóm)
 
-**Đối tượng.** Ngoài bảng dữ kiện phẳng, phiên nhận các `WorkingObject` có kiểu (`Employee`, `Contract`,
-`Amendment`): `{id, type, attrs: {tên: Fact}, valid_from, valid_to, refs: {tên: id}}`, do `rag.contracts.dossier` cấp.
-Bảng dữ kiện phẳng hiện tại là trường hợp một hợp đồng không có đối tượng; rule cũ không đổi.
+**Đối tượng.** Ngoài bảng dữ kiện phẳng, phiên nhận các `WorkingObject` có kiểu:
+`{id, type, attrs: {tên: Fact}, valid_from, valid_to, refs: {tên: id}}`, do `rag.contracts.dossier` cấp. **Kiểu đối
+tượng do gói khai** (`object_types` trong `pack.yaml`, kèm `document_kinds` của văn bản sinh ra kiểu đó), lõi không biết
+kiểu nào (bản 3): `labor` có `Contract` (ref `employee`) và `Amendment` (ref `contract`); `civil_lease` có `Lease`
+(ref `tenant`, `property`) và `Amendment`; `civil_loan` có `Loan` (ref `borrower`). Bảng dữ kiện phẳng là trường hợp một
+hợp đồng không có đối tượng; rule cũ không đổi. Hồ sơ (`dossier.yaml`) khai `parties` theo vai trò của gói, không có
+khóa riêng cho người lao động.
 
 **Thành viên tại ngày soát.** Đối tượng thuộc bộ nhớ của kiểu nó tại ngày `day` khi `valid_from ≤ day` và (`valid_to`
 rỗng hoặc `day ≤ valid_to`). `valid_from` chưa biết → thành viên *có thể* (trị U).
@@ -387,7 +414,7 @@ của mạng có ích trực tiếp (nhiều lần fork + update trên một h�
 
 - **Trục 1, số rule:** 44 (pack thật), 500, 2.000, 10.000; tỉ lệ điều kiện dùng chung (0.2 / 0.5); độ sâu dữ kiện
   suy ra (0 / 3); 50–500 dữ kiện đầu vào.
-- **Trục 2, số đối tượng mỗi hồ sơ:** 1 / 5 / 20 / 100 hợp đồng+phụ lục của một người, với 5–50 rule xuyên đối tượng
+- **Trục 2, số đối tượng mỗi hồ sơ:** 1 / 5 / 20 / 100 hợp đồng+phụ lục của một chủ thể, với 5–50 rule xuyên đối tượng
   (đếm, ghép cặp, phủ định).
 - Kịch bản:
   1. **Biên dịch** mạng (một lần cho cả catalog).
@@ -414,7 +441,12 @@ của mạng có ích trực tiếp (nhiều lần fork + update trên một h�
   chưa biết, khóa nhóm chưa biết), phát hiện vòng, `extends`, trùng id.
 - **Bất biến**: không đầu vào nào mà một dữ kiện chuyển từ có giá trị sang thiếu lại làm một rule chuyển sang `FAIL`
   (thiếu dữ kiện không thành vi phạm) — kiểm bằng đối chiếu ngẫu nhiên.
-- **Pack thứ hai**: vài hợp đồng vay mẫu (tự soạn, có cả lãi vượt trần 20%/năm và lãi hợp lệ), chạy không sửa lõi.
+- **Ba miền** (bản 3): mỗi miền ngoài `labor` có ≥5 hợp đồng mẫu tự soạn + gold (vay: có lãi vượt trần 20%/năm và lãi
+  hợp lệ, lãi theo tháng; thuê nhà: thời hạn, giá thuê, đơn phương chấm dứt, cho thuê lại), chạy không sửa lõi. Một
+  test nạp cả ba miền cùng lúc không xung đột. Một test chọn gói theo loại: hợp đồng thuê nhà mẫu không ra kết quả
+  của gói `labor`.
+- **Không viết cứng lao động**: test các prompt / nhãn hiển thị lấy từ gói (không có chữ "lao động" khi soát hợp đồng
+  vay hoặc thuê nhà).
 
 ## 11. Giai đoạn (mỗi giai đoạn tự demo được)
 
@@ -433,6 +465,10 @@ của mạng có ích trực tiếp (nhiều lần fork + update trên một h�
    - **7b** (sau giai đoạn 3): `ObjectMemory`, `GroupMatchNode`, `ObjectLeaf` trong mạng; đối chiếu ngẫu nhiên với
      Reference; rule xuyên văn bản cho b1–b5 và đếm phụ lục ở a1.
    Giai đoạn 7 phải xong trước khi nối endpoint demo cho các hồ sơ b.
+8. **Phủ rộng** (bản 3, Must của W04): gói `civil_lease`; chọn gói theo `document_kinds` + `classify_contract`, `unknown`
+   không chạy gói nào; từ vựng kết quả trung tính (`party_impact`); prompt các bước + nhãn hiển thị + danh mục dữ kiện
+   lấy theo gói; `kind` kiểm trên ba miền; hồ sơ + gold + kịch bản demo cho vay và thuê nhà. Nghiệm thu: ba miền chạy
+   end-to-end từ văn bản tới kết quả, không sửa lõi.
 
 ## 12. Quyết định của người viết spec (cần người dùng xem lại)
 
@@ -447,6 +483,12 @@ của mạng có ích trực tiếp (nhiều lần fork + update trên một h�
 - Evaluator mặc định là `network` sau giai đoạn 2, có công tắc về `reference`.
 - Bỏ cách gọi "TMS" của Drools; dùng "tính lại theo phụ thuộc" (§6.3).
 - Hoãn Phreak / LEAPS / Rete/UL; loại Rete II/III/NT, Hiperfact, DBSP (§4.2).
+- (Bản 3) Miền thứ ba là thuê nhà (`civil_lease`): có hợp đồng mẫu sẵn, BLDS Đ472–482 và Luật Nhà ở 27/2023 đã có trong
+  kho; thương mại / người tiêu dùng để sau W04.
+- (Bản 3) Loại hợp đồng `unknown` không chạy gói nào thay vì rơi về `labor`.
+- (Bản 3) `party_impact` thay cho `employee_impact` trong YAML mới; bộ nạp vẫn nhận `employee_impact` (gói cũ).
+- (Bản 3) §5.2 ghi `outcome` truyền nguyên dạng vào `RuleResult.outcome`; bản cài đặt giai đoạn 1–7 vẫn giữ hai trường
+  `legality` / `employee_impact`. Giai đoạn 8 thêm `outcome` (dict) + `party_impact`, giữ hai trường cũ để tương thích.
 
 ## 13. Để lại cho người triển khai
 

@@ -4,6 +4,8 @@
 > + phần của Tú (`tu.md`, D1–D5) + tích hợp + demo. Thứ tự trong mỗi nhóm = thứ tự làm.
 > Ký hiệu "→ ai" = xong việc này thì báo người đó. Mã việc D1–D30 là mã trong file này (không phải D1–D5 của `tu.md`).
 > Bản 2: mạng điều kiện tăng dần + join kiểu TREAT; evaluator tên `reference` / `network`.
+> **Bản 3 (23/11): định hướng phủ rộng nhiều loại hợp đồng** — ba miền ngang hàng (lao động, vay, thuê nhà); thêm
+> B7, C3b, C7, mục P8 (D31–D37), E5; sửa B1, C4, C5 và thứ tự cắt. Spec bản 3 chờ duyệt.
 
 ## A. Chuẩn bị và gỡ chặn (ngày 0–1)
 
@@ -18,13 +20,18 @@
 
 ## B. Phân tích luật (phần Tuấn)
 
-- [ ] B1. (T4) Danh sách `kind` + slot chung từ 39 concept lao động; danh sách concept "không vừa". → Huy
-- [ ] B2. (T1) Đ20 BLLĐ: nghĩa vụ ký mới, hệ quả không ký, giới hạn số lần ký HĐ XĐTH, **đủ mọi ngoại lệ** (đọc cả
-      các điều được dẫn chiếu) → `docs/rule_inventory/labor_w04.yaml`.
-- [ ] B3. (T1) Đ22.2 (phụ lục sửa thời hạn), Đ25 (thử việc một lần / một công việc), NĐ 145 phần liên quan.
-- [ ] B4. (T3) BLDS Đ463–471 hợp đồng vay → `docs/rule_inventory/civil_loan.yaml` (Đ466, Đ468 kỹ nhất).
-- [ ] B5. (T2) BLDS phần chung hợp đồng (hình thức, hợp đồng mẫu, phạt vi phạm, bồi thường, đơn phương chấm dứt,
-      vô hiệu) → `docs/rule_inventory/civil_general.yaml`.
+- [ ] B1. (T4) Danh sách `kind` + slot chung **cho cả ba miền** (bắt đầu từ 39 concept lao động); kind dùng chung có
+      concept của ≥2 miền; danh sách concept "không vừa". → Huy. *(Bản nháp 23/11 `docs/rule_inventory/kinds.yaml`
+      mới suy từ lao động, 3 kind dân sự rỗng — phải làm lại sau B7.)*
+- [x] B2. (T1) Đ20 BLLĐ: nghĩa vụ ký mới, hệ quả không ký, giới hạn số lần ký HĐ XĐTH, **đủ mọi ngoại lệ** (đọc cả
+      các điều được dẫn chiếu) → `docs/rule_inventory/labor_w04.yaml`. *(Claude soạn, cần duyệt)*
+- [x] B3. (T1) Đ22.2 (phụ lục sửa thời hạn), Đ25 (thử việc một lần / một công việc). *(NĐ 145/2020 không có trong kho:
+      ghi open_questions.)*
+- [x] B4. (T3) BLDS Đ463–471 hợp đồng vay → `docs/rule_inventory/civil_loan.yaml` (11 mục). *(cần duyệt)*
+- [x] B5. (T2) BLDS phần chung hợp đồng → `docs/rule_inventory/civil_general.yaml` (9 mục). *(cần duyệt; Luật Thương
+      mại không có trong kho nên trần phạt 8% chưa trích được)*
+- [ ] B7. (T6) Thuê nhà ở: BLDS Đ472–482 + Luật Nhà ở 27/2023 Đ163–173 → `docs/rule_inventory/civil_lease.yaml`; quy
+      định Luật Nhà ở đè BLDS ghi thành `exceptions`.
 - [ ] B6. Kiểm lại mọi số điều đã ghi trong spec / file phân công theo văn bản gốc.
 
 Mỗi mục: pid, quote nguyên văn, type, kind, derogation, facts_needed, threshold, exceptions (mỗi cái có pid + quote),
@@ -38,8 +45,12 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
       lại cùng công việc) + `dossier.yaml` mỗi bộ. → Huy
 - [ ] C3. (D3) `tests/fixtures/rete/loan/`: 5–10 hợp đồng vay (hợp lệ, vượt trần, lãi theo tháng, không ghi lãi,
       phạt chậm trả, trả trước hạn) + `README.md`.
-- [ ] C4. (T5) `gold.yaml` cho a1, b1–b5, loan — **viết trước khi chạy engine trên hồ sơ đó**; mỗi nhãn có basis.
-- [ ] C5. (D4) `scenario.yaml` cho a1, b1→b2, b3→b4.
+- [ ] C3b. (D3b) `tests/fixtures/rete/lease/`: ≥5 hợp đồng thuê nhà (có `hop_dong_thue_nha_2023.txt`) + hồ sơ nhiều
+      văn bản `r1/` (HĐ thuê + phụ lục gia hạn + phụ lục tăng giá) + `README.md`.
+- [ ] C4. (T5) `gold.yaml` cho a1, b1–b5, loan, **lease, r1** — **viết trước khi chạy engine trên hồ sơ đó**; mỗi nhãn
+      có basis.
+- [ ] C5. (D4) `scenario.yaml` cho a1, b1→b2, b3→b4, **r1**.
+- [ ] C7. `dossier.yaml` theo định dạng tổng quát (`tu.md` §3 bản 3: `packs`, `parties` theo vai trò, `documents[].refs`).
 - [ ] C6. Kiểm parser hiện có đọc được mọi văn bản (Điều/Khoản, phụ lục, ngày hiệu lực).
 
 ## D. Engine
@@ -99,13 +110,29 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
 - [x] D29. Đối chiếu ngẫu nhiên Network = Reference có đối tượng (thêm / xóa / đổi đối tượng).
 - [ ] D30. (Could) biến thể `network+beta` (nối lưu bộ nhớ beta kiểu Rete) chỉ để Khánh so với TREAT trên trục 2.
 
+**P8 — phủ rộng (bản 3, Must)**
+- [ ] D31. Gói `packs/civil_lease/` (extends `civil_general`) từ B7; `document_kinds: [lease_contract]`, `object_types`
+      `Lease` / `Amendment`, `roles` bên cho thuê / bên thuê.
+- [ ] D32. `document_kinds` của mọi gói thành nguồn chọn gói: `packs_for_kind(kind) -> list[str]`; `check_contract`
+      không truyền `packs` thì chọn theo `classify_contract` (H2 của Huy); `unknown` → không chạy gói nào + cảnh báo.
+- [ ] D33. `party_impact` trung tính: YAML mới dùng `outcome.party_impact`; bộ nạp nhận `employee_impact` cũ; thêm
+      `RuleResult.outcome` (dict) đúng spec §5.2; `employee_impact` giữ làm tên tương thích.
+- [ ] D34. Nhãn hiển thị theo gói: `bridge/view.py` (`VERDICTS`, `FACT_LABELS` viết cứng "người lao động") lấy từ
+      `pack.yaml` (`findings` kèm nhãn, `user_fact_questions` / nhãn dữ kiện).
+- [ ] D35. `kind` chung: sửa `kinds.yaml` theo B1, khai `kind` cho concept dân sự (`civil.unilateral_termination` → notice),
+      test mọi concept của mọi gói có kind hoặc nằm trong "không vừa".
+- [ ] D36. Test ba miền: nạp `labor` + `civil_loan` + `civil_lease` cùng lúc không xung đột; hợp đồng thuê nhà mẫu không
+      ra kết quả gói `labor`; khi soát vay / thuê, không prompt / nhãn nào có chữ "lao động".
+- [ ] D37. Rule xuyên văn bản cho thuê nhà (hồ sơ r1: gia hạn, tăng giá giữa kỳ) sau khi đọc luật (B7).
+
 ## E. Tích hợp
 
 - [x] E1. `check_contract`: tham số `packs=`, `evaluator=` (mặc định `network`), biến môi trường
       `RAG_RULE_EVALUATOR`; sau recheck chỉ `update` dữ kiện mới. *(phần `packs=` chưa làm: giai đoạn 5)*
 - [x] E2. `tools.check_concept` + `ask_contract_graph` dùng session.
 - [ ] E3. Endpoint SSE trong `ui/contract_studio.py`: chạy hồ sơ / kịch bản, phát `evaluation_diff`, trả `explain`,
-      `next_questions`, nhận `answer`.
+      `next_questions`, nhận `answer`. Chạy được hồ sơ của cả ba miền.
+- [ ] E5. Nối `classify_contract` (Huy) vào `check_contract` / `ask_contract_graph` theo D32. → Huy
 - [x] E4. Báo Khánh engine thật sẵn sàng. → Khánh (`reports/team-4.2/w04/engine_interface.md`; cần gửi cho Khánh và Huy)
 
 ## F. UI Contract Studio (phần Tú)
@@ -141,18 +168,19 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
 | Nhóm | Số việc |
 |---|---|
 | A Chuẩn bị | 5 |
-| B Phân tích luật | 6 |
-| C Dữ liệu | 6 |
-| D Engine | 30 (trong đó D30 là Could) |
-| E Tích hợp | 4 |
+| B Phân tích luật | 7 |
+| C Dữ liệu | 8 |
+| D Engine | 37 (trong đó D30 là Could) |
+| E Tích hợp | 5 |
 | F UI | 7 |
 | G Đánh giá + demo | 6 |
 | H Theo dõi | 4 |
-| **Cộng** | **68** (67 không tính Could) |
+| **Cộng** | **79** (78 không tính Could) |
 
 Đường găng (trễ là trễ cả tuần): A5 → D1–D7 → D23–D25 (Reference có đối tượng) → D8–D11 → D13–D16 → D26–D29 → E3 →
 F6/F7 → G5. Mạng điều kiện (D8–D11) và Reference có đối tượng (D23–D25) có thể xen kẽ vì dùng chung `semantics.py`.
 Việc đọc luật (B) và soạn dữ liệu (C) chạy song song, nhưng B2–B3 phải xong trước D16 và D26, C1–C2 trước H2.
 
-Nếu quá tải, cắt theo thứ tự: D30 → UI phụ → gói vay → D26 cho b1/b5 (giữ b3/b4). Không cắt: golden (A5), đối chiếu
-Network = Reference (D11, D29), trích nguyên văn trong inventory / gold.
+Nếu quá tải, cắt theo thứ tự (bản 3): D30 → UI phụ (dòng thời gian, câu hỏi) → b5 → bớt số rule mỗi miền (giữ ≥3 rule
+có gold mỗi miền). **Không bỏ miền nào.** Không cắt: golden (A5), đối chiếu Network = Reference (D11, D29), trích
+nguyên văn trong inventory / gold, ba miền chạy end-to-end (P8).

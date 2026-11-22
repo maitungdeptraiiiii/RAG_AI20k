@@ -132,6 +132,42 @@ có chi phí nếu sai). Nhánh `feat/team-4.2/w04-rules-engine`, chưa merge. T
 | 7.23 | Hợp đồng vay ký trước 2017 vẫn bị soát theo Đ468 BLDS 2015: `law_values_valid_from` không áp lên giá trị luật không có kỳ | Còn |
 | 7.24 | Bảng dữ kiện phẳng: HĐ xác định thời hạn đang hiệu lực mà thiếu `worked_after_expiry_days` cho `content.term/r4` UNKNOWN (hỏi người dùng). Gói phẳng không có `expired` vì không có ngày hết hạn ở dạng đối tượng | Còn |
 
+## Đánh giá lại theo định hướng "phủ rộng nhiều loại hợp đồng" (23/11, spec bản 3)
+
+Tiêu chí: lõi và luồng soát dùng được cho hợp đồng không phải lao động mà không sửa lõi; ba miền ngang hàng.
+
+**Phần đã làm — đúng hướng (giữ)**
+
+| # | Phần | Vì sao đúng hướng |
+|---|---|---|
+| R.1 | Giai đoạn 1: lõi tách khỏi lao động (`Context`, `pack.yaml`, đơn vị / dữ kiện / finding / `silences` khai theo gói) | Đây là điều kiện để có miền thứ hai, thứ ba |
+| R.2 | Giai đoạn 3: dữ kiện suy ra, ngoại lệ giữa rule và giữa gói | Dùng được cho quan hệ luật chung (BLDS) – luật chuyên ngành (Luật Nhà ở, Luật TCTD) |
+| R.3 | Giai đoạn 5: `extends`, `packs=`, `kind`, gói `civil_general` + `civil_loan` | Chứng minh được gói thứ hai không sửa lõi |
+| R.4 | Giai đoạn 7: `object_types` khai trong gói (không cố định `Employee`), `group_by` theo ref bất kỳ | Thuê nhà (`Lease`, ref `tenant`) dùng lại được |
+| R.5 | Giai đoạn 4: `user_fact_questions`, `explain`, `evaluation_diff` | Không gắn với miền |
+| R.6 | Bản liệt kê `civil_general.yaml` (9 mục), `civil_loan.yaml` (11 mục) | Hai phần ba bản liệt kê là ngoài lao động |
+
+**Phần đã làm — lệch hướng (phải sửa, đã đưa vào checklist P8)**
+
+| # | Phần | Lệch thế nào | Việc sửa |
+|---|---|---|---|
+| R.7 | `kinds.yaml` (T4) | Suy từ 39 concept lao động; 3 kind dân sự rỗng; 7/29 mục liệt kê `kind: none` (4 mục dân sự chung không có kind nào chứa) | D35, B1 |
+| R.8 | `RuleResult.employee_impact`, outcome của gói dân sự | Hợp đồng vay gắn `employee_impact: unfavorable` (sai nghĩa); spec §5.2 hứa `outcome` dict nhưng cài đặt chưa có | D33 |
+| R.9 | `check_contract` mặc định gói `labor` khi không truyền `packs` | Hợp đồng thuê nhà đưa vào bị soát bằng rule lao động | D32, E5 |
+| R.10 | `bridge/view.py` (`VERDICTS`, `FACT_LABELS`), prompt `tagger` / `recheck` / `agent` | Viết cứng "người lao động", "hợp đồng lao động" | D34 (Tùng), H2 (Huy) |
+| R.11 | Gói dân sự mới có 3 rule chạy được (Đ468.1 + ngoại lệ, Đ428.2) dù bản liệt kê có 20 mục | Miền dân sự mỏng so với lao động (54 rule) | D20/D21 bổ sung theo bản liệt kê |
+| R.12 | Thuộc tính dựng sẵn `expired` và các attr Đ20.2 nằm trong gói labor | Đúng chỗ (gói), nhưng chưa có ca thuê nhà để kiểm `expired` dùng chung | D37 |
+| R.13 | `engine_interface.md` chỉ ví dụ gói labor | Huy / Khánh dễ hiểu là chỉ có lao động | cập nhật khi có `civil_lease` |
+
+**Phần đang làm dở (phần Tú / Tuấn) — điều chỉnh trước khi làm tiếp**
+
+| # | Phần | Điều chỉnh |
+|---|---|---|
+| R.14 | Hồ sơ mẫu (C1–C3) chưa soạn | Soạn theo định dạng `dossier.yaml` tổng quát (bản 3), thêm C3b thuê nhà + r1; không soạn theo định dạng cũ có khóa `employee` |
+| R.15 | Gold (C4) chưa soạn | Gồm cả ba miền; bảng a1 đã sửa theo Đ22.2 (phụ lục 2 cũng vi phạm) |
+| R.16 | Thuê nhà (B7 / T6) chưa đọc | Làm trước C3b và trước khi sửa `kinds.yaml` (để kind kiểm được trên ba miền) |
+| R.17 | UI (F) chưa làm | Kịch bản demo có r1 (thuê nhà); nhãn lấy theo gói |
+
 ## Tồn đọng chung (môi trường, quy trình)
 
 | # | Mục | Trạng thái |

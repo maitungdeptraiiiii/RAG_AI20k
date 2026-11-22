@@ -9,7 +9,7 @@ from rag.rules.loader import load_pack
 from rag.rules.model import CatalogError, Definition, DerivedFact
 from rag.rules.semantics import CONFLICT, UNKNOWN, Fact, eval_cond
 
-BASE_CTX = load_pack("labor").context()
+BASE_CTX = dataclasses.replace(load_pack("labor").context(), derived={})      # nền không có dữ kiện suy ra
 
 
 def cond(name, value=1):

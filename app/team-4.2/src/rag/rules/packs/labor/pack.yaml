@@ -28,7 +28,16 @@ document_facts:
 
 # Dữ kiện người dùng xác nhận.
 user_facts: [work_condition, pregnant, pregnancy_month, child_under_12_months, employee_consent,
-             medical_certificate, wage_region, employee_is_female]
+             medical_certificate, wage_region, employee_is_female,
+             # Điều 20.2 BLLĐ: hợp đồng xác định thời hạn hết hạn mà người lao động vẫn làm việc
+             worked_after_expiry_days,        # số ngày làm việc tiếp kể từ ngày hợp đồng hết hạn (đơn vị day)
+             new_contract_signed,             # hai bên đã ký hợp đồng lao động mới chưa (bool)
+             fixed_term_contract_count,       # số HĐ xác định thời hạn đã ký liên tiếp với người lao động, kể cả HĐ đang soát
+             # ngoại lệ của giới hạn số lần ký HĐ xác định thời hạn (Đ20.2.c)
+             is_state_enterprise_director,    # được thuê làm giám đốc trong doanh nghiệp có vốn nhà nước
+             is_elderly_employee,             # người lao động cao tuổi (Đ149.1)
+             is_foreign_employee,             # người lao động nước ngoài làm việc tại Việt Nam (Đ151.2)
+             is_union_leader_in_term]         # thành viên ban lãnh đạo tổ chức đại diện NLĐ tại cơ sở đang trong nhiệm kỳ (Đ177.4)
 
 # Finding thêm ngoài tập chung của lõi (ok, violation, needs_facts, conflict, missing_content).
 findings: [hidden_right, possible_right]
@@ -37,3 +46,21 @@ silences:
   hidden_right:
     applicable: [PASS, hidden_right]
     unknown: [UNKNOWN, possible_right]
+
+# Dữ kiện suy ra (spec §5.3). Điều 20.2.b BLLĐ: hợp đồng xác định thời hạn hết hạn, người lao động vẫn làm việc, hết 30 ngày
+# kể từ ngày hết hạn mà hai bên không ký hợp đồng mới thì trở thành hợp đồng không xác định thời hạn.
+derived:
+  - fact: contract_kind_effective
+    unit: null
+    definitions:
+      - id: base
+        from: contract_kind
+      - id: d20k2b
+        exception_of: base
+        when:
+          all:
+            - {fact: contract_kind, op: eq, value: xac_dinh_thoi_han}
+            - {fact: worked_after_expiry_days, op: gt, value: 30, unit: day}
+            - {fact: new_contract_signed, op: eq, value: false}
+        value: khong_xac_dinh_thoi_han
+        anchors: [{pid: "bo-luat:45/2019/QH14#d20.k2.b", role: basis}]

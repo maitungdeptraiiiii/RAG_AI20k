@@ -36,6 +36,13 @@ FACT_LABELS: dict[str, str] = {
     "medical_certificate": "Giấy xác nhận của cơ sở y tế",
     "wage_region": "Vùng lương tối thiểu",
     "employee_is_female": "Người lao động là nữ",
+    "worked_after_expiry_days": "Số ngày làm việc tiếp sau khi hợp đồng hết hạn",
+    "new_contract_signed": "Hai bên đã ký hợp đồng lao động mới",
+    "fixed_term_contract_count": "Số hợp đồng xác định thời hạn đã ký liên tiếp (kể cả hợp đồng này)",
+    "is_state_enterprise_director": "Được thuê làm giám đốc doanh nghiệp có vốn nhà nước",
+    "is_elderly_employee": "Người lao động cao tuổi",
+    "is_foreign_employee": "Người lao động nước ngoài",
+    "is_union_leader_in_term": "Thành viên ban lãnh đạo tổ chức đại diện người lao động tại cơ sở, đang trong nhiệm kỳ",
 }
 
 _UNITS = {"percent": "%", "day": " ngày", "workday": " ngày làm việc", "minute": " phút", "hour": " giờ",

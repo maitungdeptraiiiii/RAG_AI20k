@@ -107,7 +107,12 @@ concepts:
     anchors:
       - {pid: "bo-luat:45/2019/QH14#d21.k1.d", role: basis}
       - {pid: "bo-luat:45/2019/QH14#d20.k1", role: basis}
-      - {pid: "bo-luat:45/2019/QH14#d20.k2", role: basis, note: "số lần ký HĐ xác định thời hạn; chưa có rule"}
+      - {pid: "bo-luat:45/2019/QH14#d20.k2", role: basis, note: "hết hạn mà vẫn làm việc: ký mới trong 30 ngày, quá hạn thành HĐ không xác định thời hạn"}
+      - {pid: "bo-luat:45/2019/QH14#d20.k2.b", role: basis, note: "kết luận trung gian contract_kind_effective (pack.yaml, derived); rule r4"}
+      - {pid: "bo-luat:45/2019/QH14#d20.k2.c", role: basis, note: "chỉ được ký thêm 01 lần HĐ xác định thời hạn; rule r3"}
+      - {pid: "bo-luat:45/2019/QH14#d149.k1", role: exception, note: "người lao động cao tuổi: ký nhiều lần; rule r3_elderly"}
+      - {pid: "bo-luat:45/2019/QH14#d151.k2", role: exception, note: "người lao động nước ngoài: ký nhiều lần; rule r3_foreign"}
+      - {pid: "bo-luat:45/2019/QH14#d177.k4", role: exception, note: "ban lãnh đạo tổ chức đại diện NLĐ tại cơ sở: gia hạn đến hết nhiệm kỳ; rule r3_union_leader"}
     rules:
       - {id: r1, mode: required, derogation: mandatory, on_silence: missing_content,
          outcome: {legality: illegal, employee_impact: unfavorable}}
@@ -119,6 +124,38 @@ concepts:
         derogation: mandatory
         on_silence: none
         outcome: {legality: illegal, employee_impact: unfavorable}
+      # Điều 20.2.c: ngoài hợp đồng đầu, chỉ được ký thêm 01 lần hợp đồng xác định thời hạn (tối đa 2 hợp đồng liên tiếp).
+      # Nguồn của `fixed_term_contract_count` là người dùng; giai đoạn 7 thay bằng phép đếm đối tượng, không đổi rule.
+      - id: r3
+        mode: threshold
+        applicability: {fact: contract_kind, op: eq, value: xac_dinh_thoi_han}
+        law: {max_fixed_term_contracts: {value: 2, unit: null}}
+        check: {fact: fixed_term_contract_count, op: lte, law: max_fixed_term_contracts}
+        derogation: mandatory
+        on_silence: none
+        outcome: {legality: illegal, employee_impact: unfavorable}
+      # Bốn ngoại lệ ghi tại cuối Điều 20.2.c; rule nào áp dụng thì r3 không áp dụng (spec §5.4).
+      - {id: r3_state_director, mode: required, derogation: mandatory, on_silence: none, exception_of: content.term/r3,
+         applicability: {fact: is_state_enterprise_director, op: eq, value: true},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+      - {id: r3_elderly, mode: required, derogation: mandatory, on_silence: none, exception_of: content.term/r3,
+         applicability: {fact: is_elderly_employee, op: eq, value: true},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+      - {id: r3_foreign, mode: required, derogation: mandatory, on_silence: none, exception_of: content.term/r3,
+         applicability: {fact: is_foreign_employee, op: eq, value: true},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+      - {id: r3_union_leader, mode: required, derogation: mandatory, on_silence: none, exception_of: content.term/r3,
+         applicability: {fact: is_union_leader_in_term, op: eq, value: true},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+      # Điều 20.2.b: hợp đồng đã trở thành không xác định thời hạn theo luật mà văn bản vẫn ghi loại khác thì cần soát lại
+      # (không phải hợp đồng trái luật: legality `unknown`, employee_impact `neutral`).
+      - id: r4
+        mode: required
+        applicability: {fact: contract_kind_effective, op: eq, value: khong_xac_dinh_thoi_han}
+        check: {fact: contract_kind, op: eq, value: khong_xac_dinh_thoi_han}
+        derogation: mandatory
+        on_silence: none
+        outcome: {legality: unknown, employee_impact: neutral}
 
   - id: content.wage_terms
     label: Mức lương, hình thức trả, thời hạn trả, phụ cấp

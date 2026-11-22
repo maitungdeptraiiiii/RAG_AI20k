@@ -42,7 +42,7 @@ def _with_rule(**rule):
 
 def test_real_labor_catalog_via_new_loader():
     c = load_concepts(LABOR_CONCEPTS, LABOR)
-    assert len(c.concepts) == 39 and sum(len(x.rules) for x in c.concepts.values()) == 44
+    assert len(c.concepts) == 39 and sum(len(x.rules) for x in c.concepts.values()) == 50
     assert c.context.units.convert(2, "month", "day") == 60
 
 

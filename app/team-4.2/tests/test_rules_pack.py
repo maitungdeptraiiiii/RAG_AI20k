@@ -13,7 +13,9 @@ def test_labor_pack_declarations_match_legacy_constants():
                                 "job_level": None, "sign_date": None}
     assert p.user_facts == frozenset({"work_condition", "pregnant", "pregnancy_month", "child_under_12_months",
                                       "employee_consent", "medical_certificate", "wage_region",
-                                      "employee_is_female"})
+                                      "employee_is_female", "worked_after_expiry_days", "new_contract_signed",
+                                      "fixed_term_contract_count", "is_state_enterprise_director",
+                                      "is_elderly_employee", "is_foreign_employee", "is_union_leader_in_term"})
     assert p.units.names == frozenset({"day", "workday", "week", "month", "hour", "minute", "percent", "vnd", "count"})
     assert p.silences["hidden_right"] == Silence(("PASS", "hidden_right"), ("UNKNOWN", "possible_right"))
     assert p.silences["none"] == CORE_SILENCES["none"]

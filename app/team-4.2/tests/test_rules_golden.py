@@ -17,9 +17,18 @@ def _mismatches(evaluate_concept_fn, **kw):
     return bad
 
 
+# Rule thêm sau khi đóng băng golden (giai đoạn 3, Điều 20.2): có bảng ca riêng ở tests/fixtures/bridge/engine_cases.yaml
+# và tests/test_rules_labor_term.py; golden không có (nó đóng băng kết quả của engine cũ).
+POST_GOLDEN_RULES = {("content.term", r) for r in ("r3", "r3_state_director", "r3_elderly", "r3_foreign",
+                                                   "r3_union_leader", "r4")}
+
+
 def test_golden_has_every_rule_with_enough_cases():
     count = Counter((r["case"]["concept"], r["case"]["rule"]) for r in load_golden())
-    assert [(c.id, r.id) for c in CAT.concepts.values() for r in c.rules if count[(c.id, r.id)] < 3] == []
+    in_catalog = {(c.id, r.id) for c in CAT.concepts.values() for r in c.rules}
+    assert sorted(set(count) - in_catalog) == [], "rule trong golden không còn trong catalog"
+    assert [k for k, n in count.items() if n < 3] == []
+    assert in_catalog - set(count) == POST_GOLDEN_RULES
     assert sum(count.values()) >= 500
 
 

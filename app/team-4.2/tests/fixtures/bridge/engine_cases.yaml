@@ -16,6 +16,27 @@
 - {concept: content.term, rule: r2, present: true, facts: {contract_kind: [xac_dinh_thoi_han], term_months: [48, month]}, expect: {status: FAIL, finding: violation}}
 - {concept: content.term, rule: r2, present: true, facts: {contract_kind: [khong_xac_dinh_thoi_han]}, expect: {status: NOT_APPLICABLE, finding: ok}}
 - {concept: content.term, rule: r2, present: false, facts: {contract_kind: [xac_dinh_thoi_han], term_months: [48, month]}, expect: {status: FAIL, finding: violation}}
+- {concept: content.term, rule: r3, present: true, facts: {contract_kind: [xac_dinh_thoi_han], fixed_term_contract_count: [2], is_state_enterprise_director: [false], is_elderly_employee: [false], is_foreign_employee: [false], is_union_leader_in_term: [false]}, expect: {status: PASS, finding: ok}}
+- {concept: content.term, rule: r3, present: true, facts: {contract_kind: [xac_dinh_thoi_han], fixed_term_contract_count: [3], is_state_enterprise_director: [false], is_elderly_employee: [false], is_foreign_employee: [false], is_union_leader_in_term: [false]}, expect: {status: FAIL, finding: violation}}
+- {concept: content.term, rule: r3, present: true, facts: {contract_kind: [xac_dinh_thoi_han], fixed_term_contract_count: [3], is_state_enterprise_director: [false], is_elderly_employee: [true], is_foreign_employee: [false], is_union_leader_in_term: [false]}, expect: {status: NOT_APPLICABLE, finding: ok}}
+- {concept: content.term, rule: r3, present: true, facts: {contract_kind: [xac_dinh_thoi_han], fixed_term_contract_count: [3]}, expect: {status: UNKNOWN, finding: needs_facts}}
+- {concept: content.term, rule: r3, present: true, facts: {contract_kind: [khong_xac_dinh_thoi_han], fixed_term_contract_count: [3], is_state_enterprise_director: [false], is_elderly_employee: [false], is_foreign_employee: [false], is_union_leader_in_term: [false]}, expect: {status: NOT_APPLICABLE, finding: ok}}
+- {concept: content.term, rule: r3_state_director, present: true, facts: {is_state_enterprise_director: [true]}, expect: {status: PASS, finding: ok}}
+- {concept: content.term, rule: r3_state_director, present: true, facts: {is_state_enterprise_director: [false]}, expect: {status: NOT_APPLICABLE, finding: ok}}
+- {concept: content.term, rule: r3_state_director, present: false, facts: {is_state_enterprise_director: [true]}, expect: {status: PASS, finding: ok}}
+- {concept: content.term, rule: r3_elderly, present: true, facts: {is_elderly_employee: [true]}, expect: {status: PASS, finding: ok}}
+- {concept: content.term, rule: r3_elderly, present: true, facts: {is_elderly_employee: [false]}, expect: {status: NOT_APPLICABLE, finding: ok}}
+- {concept: content.term, rule: r3_elderly, present: false, facts: {is_elderly_employee: [true]}, expect: {status: PASS, finding: ok}}
+- {concept: content.term, rule: r3_foreign, present: true, facts: {is_foreign_employee: [true]}, expect: {status: PASS, finding: ok}}
+- {concept: content.term, rule: r3_foreign, present: true, facts: {is_foreign_employee: [false]}, expect: {status: NOT_APPLICABLE, finding: ok}}
+- {concept: content.term, rule: r3_foreign, present: false, facts: {is_foreign_employee: [true]}, expect: {status: PASS, finding: ok}}
+- {concept: content.term, rule: r3_union_leader, present: true, facts: {is_union_leader_in_term: [true]}, expect: {status: PASS, finding: ok}}
+- {concept: content.term, rule: r3_union_leader, present: true, facts: {is_union_leader_in_term: [false]}, expect: {status: NOT_APPLICABLE, finding: ok}}
+- {concept: content.term, rule: r3_union_leader, present: false, facts: {is_union_leader_in_term: [true]}, expect: {status: PASS, finding: ok}}
+- {concept: content.term, rule: r4, present: true, facts: {contract_kind: [xac_dinh_thoi_han], worked_after_expiry_days: [45, day], new_contract_signed: [false]}, expect: {status: FAIL, finding: violation}}
+- {concept: content.term, rule: r4, present: true, facts: {contract_kind: [xac_dinh_thoi_han], worked_after_expiry_days: [20, day]}, expect: {status: NOT_APPLICABLE, finding: ok}}
+- {concept: content.term, rule: r4, present: true, facts: {contract_kind: [khong_xac_dinh_thoi_han]}, expect: {status: PASS, finding: ok}}
+- {concept: content.term, rule: r4, present: true, facts: {contract_kind: [xac_dinh_thoi_han]}, expect: {status: UNKNOWN, finding: needs_facts}}
 - {concept: content.wage_terms, rule: r1, present: true, facts: {}, expect: {status: PASS, finding: ok}}
 - {concept: content.wage_terms, rule: r1, present: false, facts: {}, expect: {status: FAIL, finding: missing_content}}
 - {concept: content.wage_terms, rule: r1, present: false, facts: {base_salary_vnd: [15000000, vnd]}, expect: {status: FAIL, finding: missing_content}}

@@ -93,6 +93,7 @@ class Context:
     unit_forms: Mapping[str, tuple[str, ...]] = field(default_factory=dict)  # đơn vị -> cách viết sau con số ("/năm")
     document_specs: Mapping[str, DocumentFact] = field(default_factory=dict)  # dữ kiện cấp hợp đồng -> cách trích
     extract_fields: tuple[dict, ...] = ()        # trường cần LLM trích thêm (ngoài contracts/fact_catalog.json)
+    document_label: str = "hợp đồng"             # tên loại văn bản cho prompt / hiển thị (vd. "hợp đồng vay tài sản")
 
     @property
     def reported(self) -> frozenset[str]:
@@ -120,11 +121,13 @@ class PackSpec:
     unit_forms: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
     document_specs: Mapping[str, DocumentFact] = field(default_factory=dict)
     extract_fields: tuple[dict, ...] = ()
+    document_labels: Mapping[str, str] = field(default_factory=dict)    # document_kind -> nhãn
+    document_label: str = "hợp đồng"
 
     def context(self) -> Context:
         inputs = {**{n: None for n in self.user_facts}, **dict(self.user_fact_units), **dict(self.document_facts)}
         return Context(self.units, frozenset(self.document_facts), self.silences, self.derived, self.user_fact_questions,
-                       inputs, self.unit_forms, self.document_specs, self.extract_fields)
+                       inputs, self.unit_forms, self.document_specs, self.extract_fields, self.document_label)
 
 
 # ── danh mục khái niệm (concepts.yaml) ──

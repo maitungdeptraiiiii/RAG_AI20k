@@ -156,3 +156,35 @@ def test_loader_validates_document_fact_declarations(tmp_path):
         load_pack("badd", root=tmp_path)
     text = "\n".join(e.value.problems)
     assert "doan_mo" in text and "'b'" in text and "'c'" in text and "extract_fields" in text
+
+
+# ── Prompt theo gói: không viết cứng "hợp đồng lao động" ──
+def test_document_label_comes_from_packs():
+    assert load_catalog().context.document_label == "hợp đồng lao động"
+    assert LOAN.context.document_label == "hợp đồng vay tài sản"              # gói lá (civil_loan), không phải gói cha
+    assert load_packs(["civil_general"]).context.document_label == "hợp đồng dân sự"
+    assert load_packs(["labor", "civil_loan"]).context.document_label == "hợp đồng"   # nhiều miền: nhãn chung
+
+
+def test_prompts_render_label_and_labor_text_is_unchanged():
+    from rag.bridge.recheck import RECHECK_PROMPT, recheck_prompt
+    from rag.bridge.tagger import TAG_PROMPT, tag_prompt
+    from rag.contracts.graph.agent import AGENT_PROMPT, agent_prompt
+    labor = load_catalog().context
+    for const, render in ((TAG_PROMPT, tag_prompt), (RECHECK_PROMPT, recheck_prompt), (AGENT_PROMPT, agent_prompt)):
+        assert render(labor) == const
+        loan = render(LOAN.context)
+        assert "lao động" not in loan and "hợp đồng vay tài sản" in loan
+
+
+def test_check_contract_sends_no_labor_wording_for_a_loan_contract():
+    import importlib.util
+    import pathlib
+    spec = importlib.util.spec_from_file_location("exp_loan_case", pathlib.Path(__file__).with_name("pack_cases.py"))
+    cases = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cases)
+    llm, report = cases.run_loan_contract()
+    assert llm.systems and not any("lao động" in s for s in llm.systems)
+    r = next(x for x in report.results if (x.concept_id, x.rule_id) == ("loan.interest_cap", "r1"))
+    assert (r.status, r.finding) == ("FAIL", "violation")
+    assert r.facts_used["interest_rate"] == {"value": 30.0, "unit": "percent_per_year"}

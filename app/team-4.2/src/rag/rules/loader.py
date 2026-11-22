@@ -272,11 +272,19 @@ def load_pack(pack_id: str, *, root: Path = PACKS_ROOT) -> PackSpec:
             problems.append(f"unit_forms: {unit!r} cần danh sách chuỗi không rỗng")
             continue
         unit_forms[unit] = tuple(forms)
+    labels = data.get("document_labels") or {}
+    if not isinstance(labels, dict) or not all(isinstance(v, str) and v.strip() for v in labels.values()):
+        problems.append("document_labels phải là dict {document_kind: nhãn}")
+        labels = {}
+    for k in labels:
+        if k not in kinds:
+            problems.append(f"document_labels: {k!r} không có trong document_kinds")
+    label = next((labels[k] for k in kinds if k in labels), "hợp đồng")
     if problems:
         raise CatalogError(problems)
     return PackSpec(pack_id, str(data.get("version")), tuple(extends), tuple(kinds), Units(names, factors),
                     document_facts, user_facts, findings, silences, derived, dict(user_fact_units), questions,
-                    concept_kinds, object_types, unit_forms, document_specs, extract_fields)
+                    concept_kinds, object_types, unit_forms, document_specs, extract_fields, dict(labels), label)
 
 
 # ── concepts.yaml ──
@@ -593,10 +601,14 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
     for name in derived:
         if name in document_facts or name in user_facts:
             problems.append(_CLASH.format(name))
+    parents = {p for s in specs for p in s.extends}
+    leaves = [s for s in specs if s.id not in parents]           # gói lá: miền cụ thể (civil_loan), không phải gói cha
+    label = leaves[0].document_label if len(leaves) == 1 else "hợp đồng"
+    labels = {k: v for s in specs for k, v in s.document_labels.items()}
     return PackSpec("+".join(s.id for s in specs), "+".join(f"{s.id}@{s.version}" for s in specs), (), tuple(kinds),
                     Units(frozenset(names), factors), document_facts, frozenset(user_facts), frozenset(findings),
                     silences, derived, user_fact_units, questions, concept_kinds, object_types, unit_forms,
-                    document_specs, tuple(extract_fields.values()))
+                    document_specs, tuple(extract_fields.values()), labels, label)
 
 
 def load_packs(pack_ids: Sequence[str], *, root: Path = PACKS_ROOT) -> Catalog:

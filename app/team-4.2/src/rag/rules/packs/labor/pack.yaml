@@ -4,6 +4,7 @@ id: labor
 version: "0.1"
 extends: []
 document_kinds: [labor_contract]
+document_labels: {labor_contract: "hợp đồng lao động"}   # tên loại văn bản trong prompt
 
 units: [day, workday, week, month, hour, minute, percent, vnd, count]
 # Quy đổi về đơn vị gốc: giá trị * factor. workday không quy đổi được (số ngày làm việc phụ thuộc lịch).

@@ -3,6 +3,7 @@ id: civil_loan
 version: "0.1"
 extends: [civil_general]
 document_kinds: [loan_contract]
+document_labels: {loan_contract: "hợp đồng vay tài sản"}   # tên loại văn bản trong prompt
 units: []
 conversions: {}
 document_facts: {}

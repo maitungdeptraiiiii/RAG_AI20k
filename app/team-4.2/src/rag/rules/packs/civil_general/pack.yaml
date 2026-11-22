@@ -4,6 +4,7 @@ id: civil_general
 version: "0.1"
 extends: []
 document_kinds: [civil_contract]
+document_labels: {civil_contract: "hợp đồng dân sự"}   # tên loại văn bản trong prompt
 
 units: [day, hour, month, year, vnd, percent, percent_per_year, percent_per_month, count]
 # Cùng bảng với gói labor cho đơn vị dùng chung (gộp hai gói không xung đột); tháng 30 ngày, năm 360 ngày.

@@ -16,7 +16,7 @@ from rag.schema import Chunk
 
 RECHECK_PROMPT_VERSION = "concept-recheck-1"
 
-RECHECK_PROMPT = """Bạn kiểm tra lại MỘT khái niệm trong hợp đồng lao động tiếng Việt. "concepts" có đúng một khái niệm;
+_RECHECK_PROMPT_TEMPLATE = """Bạn kiểm tra lại MỘT khái niệm trong <<DOCUMENT>> tiếng Việt. "concepts" có đúng một khái niệm;
 "units" là vài đoạn của hợp đồng có thể liên quan.
 
 Có đoạn nào NÓI TỚI khái niệm đó không (dựa vào "describe" và "phrasing")? Có thì trả
@@ -25,6 +25,14 @@ không có thì trả {"items": []}.
 - "quote" chép đúng từng chữ. Slot kiểu duration / percent / money chép nguyên cụm chứa con số trong quote; bool là
   true / false; enum là một giá trị trong "options". Chỉ điền slot khi đoạn văn nói rõ.
 - Không đoán. Không đánh giá đúng sai luật."""
+
+
+def recheck_prompt(ctx=None) -> str:
+    """Prompt cho loại văn bản của gói đang dùng (`ctx.document_label`); None -> hợp đồng lao động."""
+    return _RECHECK_PROMPT_TEMPLATE.replace("<<DOCUMENT>>", getattr(ctx, "document_label", None) or "hợp đồng lao động")
+
+
+RECHECK_PROMPT = recheck_prompt()          # bản cho gói labor (tên công khai cũ, giữ tương thích)
 
 _SILENT = ("missing_content", "hidden_right")
 
@@ -60,7 +68,7 @@ def recheck(llm, contract: Contract, catalog: Catalog, concept_ids: list[str], *
                                  for u in uids],
                        "concepts": catalog_payload(catalog, [cid])}
             try:
-                data = ask_json(llm, RECHECK_PROMPT, payload, contract.mask_state)
+                data = ask_json(llm, recheck_prompt(catalog.context), payload, contract.mask_state)
             except ContractAIError:
                 if on_event:
                     on_event({"type": "recheck", "status": "error", "concept_id": cid, "uids": uids})

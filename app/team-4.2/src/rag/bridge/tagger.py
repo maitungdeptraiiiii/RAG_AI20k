@@ -19,7 +19,7 @@ TAG_PROMPT_VERSION = "concept-tag-2"
 BATCH_BUDGET = BUDGET
 _TEXT_SLOTS = ("duration", "percent", "money")
 
-TAG_PROMPT = """Bạn đọc MỘT PHẦN của một hợp đồng lao động tiếng Việt (các đơn vị có uid trong "units"). "context" và
+_TAG_PROMPT_TEMPLATE = """Bạn đọc MỘT PHẦN của một <<DOCUMENT>> tiếng Việt (các đơn vị có uid trong "units"). "context" và
 "references" chỉ để hiểu, không gán khái niệm cho chúng.
 
 "concepts" là danh sách khái niệm cố định. Với MỖI đơn vị trong "units", tìm những khái niệm mà đơn vị đó NÓI TỚI
@@ -36,6 +36,14 @@ Trả về {"items": [{"concept": <id>, "uid": <uid của đơn vị>, "quote": 
 - Chỉ điền slot khi điều khoản nói rõ; không có thì bỏ.
 - Không đánh giá điều khoản đúng hay sai luật.
 - Không có khái niệm nào thì trả {"items": []}."""
+
+
+def tag_prompt(ctx=None) -> str:
+    """Prompt cho loại văn bản của gói đang dùng (`ctx.document_label`); None -> hợp đồng lao động."""
+    return _TAG_PROMPT_TEMPLATE.replace("<<DOCUMENT>>", getattr(ctx, "document_label", None) or "hợp đồng lao động")
+
+
+TAG_PROMPT = tag_prompt()          # bản cho gói labor (tên công khai cũ, giữ tương thích)
 
 
 @dataclass
@@ -122,7 +130,7 @@ def tag_contract(llm, contract: Contract, catalog: Catalog, *, at: datetime, mod
                    "references": list(batch.references), "concepts": concepts}
         if on_event:
             on_event({"type": "tag_batch", "status": "start", "batch": batch.index, "uids": batch.uids})
-        data = ask_json(llm, TAG_PROMPT, payload, contract.mask_state)
+        data = ask_json(llm, tag_prompt(catalog.context), payload, contract.mask_state)
         if on_event:
             for item in data.get("items", []) if isinstance(data.get("items"), list) else []:
                 checked, reason = check_item(contract, batch.uids, item, catalog)

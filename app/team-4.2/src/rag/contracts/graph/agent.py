@@ -18,7 +18,7 @@ from rag.contracts.graph.view import ContractGraphView
 from rag.contracts.llm_json import ContractAIError, _parse
 from rag.quality.pii import MaskState, mask_text
 
-AGENT_PROMPT = """Bạn là trợ lý trả lời câu hỏi về MỘT hợp đồng lao động bằng cách đi trên đồ thị của hợp đồng.
+_AGENT_PROMPT_TEMPLATE = """Bạn là trợ lý trả lời câu hỏi về MỘT <<DOCUMENT>> bằng cách đi trên đồ thị của hợp đồng.
 Đồ thị: Contract -HAS_PART-> Part -HAS_UNIT-> Unit (Điều, khoản); Unit -REFERS_TO-> Unit (dẫn chiếu);
 Unit -AMENDS-> Unit (phụ lục sửa điều khoản, có valid_from); Unit -HAS_VALUE-> Value; ConceptInstance -ABOUT-> Unit;
 Contract -HAS_FACT-> ContractFact -EVIDENCE-> Unit. Luật đọc qua công cụ law_* với pid trong neo của khái niệm.
@@ -41,6 +41,14 @@ Quy tắc:
 - "history" (nếu có): các lượt hỏi đáp trước, dùng để hiểu câu hỏi nối tiếp.
 - Ký hiệu dạng [HD_...] là thông tin cá nhân đã ẩn: giữ nguyên, không đoán.
 - Khi payload có "force_final": true, phải trả "final" ngay từ những gì đã biết."""
+
+
+def agent_prompt(ctx=None) -> str:
+    """Prompt cho loại văn bản của gói đang dùng (`ctx.document_label`); None -> hợp đồng lao động."""
+    return _AGENT_PROMPT_TEMPLATE.replace("<<DOCUMENT>>", getattr(ctx, "document_label", None) or "hợp đồng lao động")
+
+
+AGENT_PROMPT = agent_prompt()          # bản cho gói labor (tên công khai cũ, giữ tương thích)
 
 _LEGAL_CLAIM = re.compile(r"đúng luật|trái luật|trái pháp luật|vi phạm|hợp pháp|đúng quy định", re.IGNORECASE)
 Confidence = Literal["answer", "partial", "cannot"]
@@ -70,7 +78,8 @@ def agent_context(view: ContractGraphView, catalog: Catalog, *, sign_date: date 
         concept = catalog.concepts.get(ci["concept_id"])
         concepts.append({"concept_id": ci["concept_id"], "label": concept.label if concept else None,
                          "node_id": ci["node_id"], "about": about[0]["node"]["node_id"] if about else None})
-    return {"contract_id": view.contract_id, "sign_date": sign_date.isoformat() if sign_date else None,
+    return {"contract_id": view.contract_id, "document_label": catalog.context.document_label,
+            "sign_date": sign_date.isoformat() if sign_date else None,
             "parts": parts, "articles": articles, "concepts": concepts,
             "catalog": [{"concept_id": c.id, "label": c.label} for c in catalog.concepts.values()]}
 
@@ -103,7 +112,8 @@ class GraphAgent:
         self.check_references = True       # tắt để đo đối chứng
 
     def _ask_llm(self, payload: dict) -> str:
-        return self.llm.complete(AGENT_PROMPT, json.dumps(payload, ensure_ascii=False, default=str))
+        prompt = _AGENT_PROMPT_TEMPLATE.replace("<<DOCUMENT>>", self.context.get("document_label") or "hợp đồng lao động")
+        return self.llm.complete(prompt, json.dumps(payload, ensure_ascii=False, default=str))
 
     def _history(self, history) -> list[dict]:
         """3 lượt cuối, mỗi chuỗi ≤500 ký tự, đã che PII; phần tử không phải dict bị bỏ."""

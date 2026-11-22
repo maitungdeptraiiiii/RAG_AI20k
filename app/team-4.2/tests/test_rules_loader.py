@@ -83,3 +83,15 @@ def test_labor_concepts_yaml_moved_and_old_path_gone():
     from rag.bridge.catalog import DEFAULT_PATH
     assert DEFAULT_PATH.parts[-4:] == ("rules", "packs", "labor", "concepts.yaml")
     assert not (Path(__file__).resolve().parents[1] / "src" / "rag" / "bridge" / "concepts.yaml").exists()
+
+
+def test_case_level_by_must_be_a_known_fact(tmp_path):
+    d = copy.deepcopy(BASE)
+    d["concepts"][0]["rules"][0] = {
+        "id": "r1", "mode": "threshold", "derogation": "floor", "on_silence": "none",
+        "cases": [{"when": {"fact": "flag", "op": "eq", "value": True},
+                   "law": {"v": {"by": "khong_co", "unit": "day", "periods": [{"valid_from": "2022-01-01", "values": {"I": 1}}]}}}],
+        "check": {"fact": "days", "op": "gte", "law": "v"}, "outcome": OUTCOME}
+    with pytest.raises(CatalogError) as e:
+        _load(tmp_path, d)
+    assert any("khong_co" in p and "by" in p for p in e.value.problems), e.value.problems

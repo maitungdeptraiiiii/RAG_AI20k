@@ -177,7 +177,8 @@ def fact_names(cond: Any) -> list[str]:
 def referenced(rule: Rule) -> list[str]:
     names = fact_names(rule.applicability) + fact_names(rule.check)
     names += [n for c in rule.cases for n in fact_names(c.get("when"))]
-    names += [v["by"] for v in rule.law.values() if isinstance(v, dict) and v.get("by")]
+    laws = [rule.law, *[c.get("law") or {} for c in rule.cases]]            # `by` có thể khai ở law của rule hoặc của một case
+    names += [v["by"] for law in laws for v in law.values() if isinstance(v, dict) and v.get("by")]
     return list(dict.fromkeys(names))
 
 

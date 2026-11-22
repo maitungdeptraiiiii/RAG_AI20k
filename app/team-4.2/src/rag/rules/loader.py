@@ -131,9 +131,10 @@ def _rule(c: dict, r: dict, pack: PackSpec, problems: list[str]) -> Rule:
     _check_law_values(where, r.get("law") or {}, pack, problems)
     for case in r.get("cases") or []:
         _check_law_values(where, case.get("law") or {}, pack, problems)
-    for name, v in (r.get("law") or {}).items():
-        if isinstance(v, dict) and v.get("by") is not None and v["by"] not in known:
-            problems.append(f"{where}: dữ kiện {v['by']!r} (by của {name}) không xác định")
+    for law in [r.get("law") or {}, *[c.get("law") or {} for c in r.get("cases") or []]]:
+        for name, v in law.items():
+            if isinstance(v, dict) and v.get("by") is not None and v["by"] not in known:
+                problems.append(f"{where}: dữ kiện {v['by']!r} (by của {name}) không xác định")
     fits = _fits_unstated_false(r.get("check"), slots)
     explicit = r.get("unstated_false")
     if explicit is None:

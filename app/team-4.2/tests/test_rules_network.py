@@ -164,3 +164,35 @@ def test_objects_not_supported_yet():
 def test_make_evaluator_network_runs():
     kw = dict(day=DAY, facts={"work_condition": Fact("binh_thuong")}, present={"leave.annual"}, evidence={})
     assert make_evaluator(["labor"], "network").session(**kw).results() == REF.session(**kw).results()
+
+
+def _case_by_catalog(tmp_path):
+    """Catalog tổng hợp: giá trị luật theo kỳ có khóa `by` khai ở cases[*].law (không ở law của rule)."""
+    import yaml
+    data = {"version": "t", "law_values_valid_from": "2021-01-01",
+            "roles": [{"id": "NLD", "label": "NLĐ"}, {"id": "NSDLD", "label": "NSDLĐ"}],
+            "concepts": [{
+                "id": "x.a", "label": "A", "scope": "core", "phase": "P0", "holder": "NLD", "counterparty": "NSDLD",
+                "applies_to": ["NLD"], "describe": "d", "phrasing": ["a", "b", "c"], "slots": {},
+                "anchors": [{"pid": "bo-luat:45/2019/QH14#d1", "role": "basis"}],
+                "rules": [{"id": "r1", "mode": "threshold", "derogation": "floor", "on_silence": "none",
+                           "cases": [{"when": {"fact": "has_probation", "op": "eq", "value": True},
+                                      "law": {"min_wage": {"by": "wage_region", "unit": "vnd", "periods": [
+                                          {"valid_from": "2022-07-01", "values": {"I": 4680000, "IV": 3250000}}]}}}],
+                           "check": {"fact": "base_salary_vnd", "op": "gte", "law": "min_wage"},
+                           "outcome": {"legality": "illegal"}}]}]}
+    path = tmp_path / "c.yaml"
+    path.write_text(yaml.safe_dump(data, allow_unicode=True), encoding="utf-8")
+    return load_concepts(path, load_pack("labor"))
+
+
+def test_case_level_by_fact_is_tracked(tmp_path):
+    cat = _case_by_catalog(tmp_path)
+    kw = dict(day=DAY, facts={"has_probation": Fact(True), "base_salary_vnd": Fact(4500000, "vnd"),
+                              "wage_region": Fact("I")}, present={"x.a"}, evidence={})
+    ref, net = ReferenceEvaluator(cat).session(**kw), evaluator_for(cat, "network").session(**kw)
+    assert net.results() == ref.results() and net.results()[0].finding == "violation"       # 4.5tr < 4.68tr (vùng I)
+    change = {"wage_region": Fact("IV")}                                                    # vùng IV: 3.25tr -> đạt
+    assert diff_key(net.update(change)) == diff_key(ref.update(change))
+    assert net.results() == ref.results() and net.results()[0].finding == "ok"
+    assert "wage_region" in net.results()[0].facts_used

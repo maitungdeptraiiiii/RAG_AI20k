@@ -3,7 +3,7 @@
 # Đây là khóa chung giữa đồ thị hợp đồng và đồ thị luật: hai bên gặp nhau ở `id` của khái niệm.
 # Thiết kế: docs/superpowers/specs/2026-11-14-legal-graph-concept-layer-design.md (phía luật)
 #           docs/superpowers/specs/2026-11-14-contract-concept-check-design.md (phía hợp đồng)
-# Bộ nạp và kiểm: src/rag/bridge/catalog.py (sai định dạng thì dừng, báo hết lỗi).
+# Bộ nạp và kiểm: src/rag/rules/loader.py (sai định dạng thì dừng, báo hết lỗi).
 #
 # AI LÀM GÌ
 #   A  (Tùng): viết khái niệm, `describe`, `phrasing`, `slots`, `rules`. Phía hợp đồng và rule engine đọc các trường này.

@@ -1,11 +1,13 @@
 """Nạp gói luật: `pack.yaml` -> PackSpec. Lỗi nào cũng dừng, báo hết một lần (như CatalogError cũ)."""
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
 
 import yaml
 
-from rag.rules.model import CORE_FINDINGS, CORE_SILENCES, CatalogError, PackSpec, Silence
+from rag.rules.model import (CORE_FINDINGS, CORE_SILENCES, DEROGATIONS, MODES, OPS, SLOT_KINDS, Catalog, CatalogError,
+                             Concept, PackSpec, Rule, Silence, Slot, leaves)
 from rag.rules.units import Units
 
 PACKS_ROOT = Path(__file__).with_name("packs")
@@ -67,3 +69,118 @@ def load_pack(pack_id: str, *, root: Path = PACKS_ROOT) -> PackSpec:
         raise CatalogError(problems)
     return PackSpec(pack_id, str(data.get("version")), tuple(extends), tuple(kinds), Units(names, factors),
                     document_facts, user_facts, findings, silences)
+
+
+# ── concepts.yaml ──
+def _law_names(rule: dict) -> tuple[set[str], list[set[str]]]:
+    return set(rule.get("law") or {}), [set(c.get("law") or {}) for c in rule.get("cases") or []]
+
+
+def _check_law_values(where: str, law: dict, pack: PackSpec, problems: list[str]) -> None:
+    for name, v in (law or {}).items():
+        if not isinstance(v, dict):
+            problems.append(f"{where}: giá trị luật {name} phải là {{value, unit}}")
+            continue
+        if v.get("unit") is not None and v["unit"] not in pack.units.names:
+            problems.append(f"{where}: giá trị luật {name} có đơn vị lạ {v['unit']!r}")
+        if "periods" in v:
+            for p in v["periods"]:
+                if "valid_from" not in p or "values" not in p:
+                    problems.append(f"{where}: giá trị luật {name}: kỳ thiếu valid_from / values")
+        elif "value" not in v:
+            problems.append(f"{where}: giá trị luật {name} thiếu value")
+
+
+def _fits_unstated_false(check: object, slots: set[str]) -> bool:
+    """check là một slot có/không "= false" không kèm giá trị luật (hợp đồng không có hạn chế / hành vi cấm)."""
+    return (isinstance(check, dict) and check.get("op") == "eq" and check.get("value") is False
+            and "law" not in check and check.get("fact") in slots)
+
+
+def _rule(c: dict, r: dict, pack: PackSpec, problems: list[str]) -> Rule:
+    where = f"{c.get('id')}/{r.get('id')}"
+    for key, allowed in (("mode", MODES), ("derogation", DEROGATIONS), ("on_silence", set(pack.silences))):
+        if r.get(key) not in allowed:
+            problems.append(f"{where}: {key} {r.get(key)!r} không hợp lệ")
+    slots = set(c.get("slots") or {})
+    known = slots | set(pack.document_facts) | pack.user_facts
+    conds = [r.get("applicability"), r.get("check")] + [x.get("when") for x in r.get("cases") or []]
+    for leaf in [leaf for cond in conds for leaf in leaves(cond)]:
+        if leaf.get("op") not in OPS:
+            problems.append(f"{where}: toán tử {leaf.get('op')!r} không hợp lệ")
+        if leaf.get("fact") not in known:
+            problems.append(f"{where}: dữ kiện {leaf.get('fact')!r} không phải slot, dữ kiện hợp đồng hay người dùng")
+        if leaf.get("unit") is not None and leaf["unit"] not in pack.units.names:
+            problems.append(f"{where}: đơn vị {leaf['unit']!r} không hợp lệ")
+    fixed, per_case = _law_names(r)
+    for leaf in leaves(r.get("check")):
+        name = leaf.get("law")
+        if name is not None and name not in fixed and not (per_case and all(name in s for s in per_case)):
+            problems.append(f"{where}: check dùng giá trị law {name!r} không có trong law / mọi cases")
+    _check_law_values(where, r.get("law") or {}, pack, problems)
+    for case in r.get("cases") or []:
+        _check_law_values(where, case.get("law") or {}, pack, problems)
+    for name, v in (r.get("law") or {}).items():
+        if isinstance(v, dict) and v.get("by") is not None and v["by"] not in known:
+            problems.append(f"{where}: dữ kiện {v['by']!r} (by của {name}) không xác định")
+    fits = _fits_unstated_false(r.get("check"), slots)
+    explicit = r.get("unstated_false")
+    if explicit is None:
+        unstated = fits
+    elif not isinstance(explicit, bool):
+        problems.append(f"{where}: unstated_false phải là true / false")
+        unstated = False
+    else:
+        unstated = explicit
+        if explicit and not fits:
+            problems.append(f"{where}: unstated_false: true cần check dạng {{fact: <slot>, op: eq, value: false}}")
+    return Rule(str(r.get("id")), r.get("mode"), r.get("derogation"), r.get("on_silence"), r.get("applicability"),
+                dict(r.get("law") or {}), tuple(r.get("cases") or ()), r.get("check"), dict(r.get("outcome") or {}),
+                unstated)
+
+
+def _slots(c: dict, pack: PackSpec, problems: list[str]) -> dict[str, Slot]:
+    out = {}
+    for name, s in (c.get("slots") or {}).items():
+        if s.get("kind") not in SLOT_KINDS:
+            problems.append(f"{c.get('id')}: slot {name} có kind lạ {s.get('kind')!r}")
+        if s.get("unit") is not None and s["unit"] not in pack.units.names:
+            problems.append(f"{c.get('id')}: slot {name} có đơn vị lạ {s['unit']!r}")
+        out[name] = Slot(name, s.get("kind"), s.get("unit"), tuple(s.get("options") or ()))
+    return out
+
+
+def load_concepts(path: Path, pack: PackSpec) -> Catalog:
+    """Nạp một concepts.yaml, kiểm theo khai báo của `pack`. Lỗi nào cũng dừng, báo hết một lần."""
+    data = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+    problems: list[str] = []
+    roles = {r["id"]: r for r in data.get("roles") or []}
+    for r in roles.values():
+        if r.get("subtype_of") is not None and r["subtype_of"] not in roles:
+            problems.append(f"role {r['id']}: subtype_of {r['subtype_of']!r} không có")
+    concepts: dict[str, Concept] = {}
+    for c in data.get("concepts") or []:
+        cid = c.get("id")
+        if cid in concepts:
+            problems.append(f"{cid}: trùng id")
+        for key in ("holder", "counterparty"):
+            if c.get(key) not in roles:
+                problems.append(f"{cid}: role {key} {c.get(key)!r} không khai báo")
+        for role in c.get("applies_to") or []:
+            if role not in roles:
+                problems.append(f"{cid}: role applies_to {role!r} không khai báo")
+        slots = _slots(c, pack, problems)
+        rules = tuple(_rule(c, r, pack, problems) for r in c.get("rules") or [])
+        concepts[cid] = Concept(cid, c.get("label", ""), c.get("scope", ""), c.get("phase", ""), c.get("holder"),
+                                c.get("counterparty"), tuple(c.get("applies_to") or ()), c.get("describe", ""),
+                                tuple(c.get("phrasing") or ()), slots, tuple(c.get("anchors") or ()),
+                                tuple(c.get("value_sources") or ()), rules,
+                                tuple(dict(x) for x in c.get("not_about") or ()))
+    for cid, concept in concepts.items():
+        for x in concept.not_about:
+            if not x.get("text") or x.get("see") not in concepts:
+                problems.append(f"{cid}: not_about cần text và see là khái niệm có trong danh mục: {x!r}")
+    if problems:
+        raise CatalogError(problems)
+    return Catalog(str(data.get("version")), date.fromisoformat(str(data["law_values_valid_from"])), roles, concepts,
+                   pack.context())

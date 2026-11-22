@@ -192,7 +192,7 @@ def make_tools(view: ContractGraphView, *, catalog: Catalog, day: date, sign_dat
             raise ValueError(f"không có khái niệm {a['concept_id']!r} trong danh mục")
         fs, _ = facts_at()
         results = evaluate_concept(concept, {**fs.facts, **(user_facts or {})}, present=concept.id in fs.present,
-                                   evidence=fs.evidence.get(concept.id, ()), day=day)
+                                   evidence=fs.evidence.get(concept.id, ()), day=day, ctx=catalog.context)
         keep = ("rule_id", "finding", "status", "law_values", "facts_used", "missing_facts", "evidence")
         return {"concept_id": concept.id, "label": concept.label, "day": day.isoformat(),
                 "results": [{k: v for k, v in asdict(r).items() if k in keep} for r in results]}

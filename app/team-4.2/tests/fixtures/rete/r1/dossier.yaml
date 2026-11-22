@@ -1,0 +1,29 @@
+dossier_id: r1
+review_date: '2026-03-01'
+packs:
+- civil_lease
+parties:
+- id: l1
+  role: BEN_CHO_THUE
+  name: Ngô Văn Giáp
+- id: t1
+  role: BEN_THUE
+  name: Đinh Thị Hạnh
+documents:
+- doc_id: tn_2024
+  file: tn_2024.txt
+  kind: lease_contract
+  refs:
+    lessor: l1
+    lessee: t1
+- doc_id: tn_2024_pl1
+  file: tn_2024_pl1.txt
+  kind: amendment
+  refs:
+    contract: tn_2024
+- doc_id: tn_2024_pl2
+  file: tn_2024_pl2.txt
+  kind: amendment
+  refs:
+    contract: tn_2024
+user_facts: {}

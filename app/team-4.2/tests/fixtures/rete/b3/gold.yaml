@@ -1,0 +1,24 @@
+# Nhãn đúng theo kỳ (README §5). Người gắn nhãn: Claude theo yêu cầu của Tùng, viết từ luật TRƯỚC khi chạy engine trên hồ sơ — cần Tùng duyệt.
+dossier_id: b3
+labeled_by: Claude theo yêu cầu của Tùng, viết từ luật TRƯỚC khi chạy engine trên hồ sơ — cần Tùng duyệt
+expected:
+- rule: content.term/r6
+  object: employee=e1
+  periods:
+  - from: '2023-06-01'
+    status: FAIL
+  basis:
+    pid: bo-luat:45/2019/QH14#d20.k2.b
+    quote: Nếu hết thời hạn 30 ngày kể từ ngày hợp đồng lao động hết hạn mà hai bên không ký kết hợp đồng lao động mới thì
+      hợp đồng đã giao kết theo quy định tại điểm b khoản 1 Điều này trở thành hợp đồng lao động không xác định thời hạn;
+  note: HĐ1 đã thành HĐ không xác định thời hạn mà vẫn ghi xác định thời hạn (kết luận trung gian)
+- rule: content.term/r5
+  object: employee=e1
+  periods:
+  - from: '2023-06-01'
+    status: PASS
+  basis:
+    pid: bo-luat:45/2019/QH14#d20.k2.c
+    quote: Trường hợp hai bên ký kết hợp đồng lao động mới là hợp đồng lao động xác định thời hạn thì cũng chỉ được ký thêm
+      01 lần, sau đó nếu người lao động vẫn tiếp tục làm việc thì phải ký kết hợp đồng lao động không xác định thời hạn
+  note: 'HĐ1 không còn tính là xác định thời hạn: chỉ một HĐ xác định thời hạn'

@@ -1,0 +1,39 @@
+# Dữ kiện cấp hợp đồng theo thời gian (README §4).
+rent_vnd:
+- value: 9000000
+  unit: vnd
+  from: '2024-09-10'
+  doc: tn_2024
+  quote: Giá thuê nhà là 9.000.000 đồng/tháng.
+- value: 9500000
+  unit: vnd
+  from: '2026-02-15'
+  doc: tn_2024_pl2
+  quote: Giá thuê nhà là 9.500.000 đồng/tháng.
+lease_term_months:
+- value: 12
+  unit: month
+  from: '2024-09-10'
+  doc: tn_2024
+  quote: Thời hạn thuê là 12 tháng
+- value: 24
+  unit: month
+  from: '2025-09-15'
+  doc: tn_2024_pl1
+  quote: Thời hạn thuê là 24 tháng
+landlord_may_terminate_at_will:
+- value: false
+  from: '2024-09-10'
+  doc: tn_2024
+  quote: Trong thời hạn thuê, Bên A không được đơn phương chấm dứt hợp đồng, trừ các trường hợp pháp luật về nhà ở cho phép.
+nonpayment_months_before_termination:
+- value: 3
+  unit: month
+  from: '2024-09-10'
+  doc: tn_2024
+  quote: nếu Bên B không trả đủ tiền thuê từ 03 tháng trở lên
+tenant_barred_from_unilateral_termination:
+- value: false
+  from: '2024-09-10'
+  doc: tn_2024
+  quote: Bên B được đơn phương chấm dứt hợp đồng khi Bên A vi phạm nghĩa vụ

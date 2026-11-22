@@ -1,0 +1,29 @@
+dossier_id: b5
+review_date: '2023-03-01'
+packs:
+- labor
+parties:
+- id: e1
+  role: NLD
+  name: Vũ Thị Em
+- id: c1
+  role: NSDLD
+  name: Công ty TNHH Thử Nghiệm Số Một
+documents:
+- doc_id: hd1_2022
+  file: hd1_2022.txt
+  kind: labor_contract
+  refs:
+    employee: e1
+    employer: c1
+- doc_id: hd2_2023
+  file: hd2_2023.txt
+  kind: labor_contract
+  refs:
+    employee: e1
+    employer: c1
+user_facts:
+  is_state_enterprise_director: false
+  is_elderly_employee: false
+  is_foreign_employee: false
+  is_union_leader_in_term: false

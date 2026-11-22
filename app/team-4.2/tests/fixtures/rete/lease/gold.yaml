@@ -61,3 +61,32 @@ expected:
     periods: [{from: 2020-06-01, status: FAIL, finding: violation}]
     basis: {pid: "luat:65/2014/QH13#d132.k2.b", quote: "Bên thuê không trả tiền thuê nhà ở theo thỏa thuận từ 03 tháng trở lên mà không có lý do chính đáng"}
     note: "ký 2020 nên theo Luật Nhà ở 2014; 02 tháng < 03 tháng"
+  # t7: mẫu có sẵn của dự án, ký 15/03/2023 -> Luật Nhà ở 65/2014. Nhãn viết trước khi chạy engine — cần Tùng duyệt.
+  - rule: lease.content_property/r1
+    object: t7_mau_2023
+    periods: [{from: 2023-03-15, status: PASS}]
+    basis: {pid: "luat:65/2014/QH13#d121.k2", quote: "Mô tả đặc điểm của nhà ở giao dịch và đặc điểm của thửa đất ở gắn với nhà ở đó."}
+  - rule: lease.content_rent_payment/r1
+    object: t7_mau_2023
+    periods: [{from: 2023-03-15, status: PASS}]
+    basis: {pid: "luat:65/2014/QH13#d121.k4", quote: "Thời hạn và phương thức thanh toán tiền nếu là trường hợp mua bán, cho thuê, cho thuê mua, chuyển nhượng hợp đồng mua bán nhà ở;"}
+  - rule: lease.content_term_handover/r1
+    object: t7_mau_2023
+    periods: [{from: 2023-03-15, status: PASS}]
+    basis: {pid: "luat:65/2014/QH13#d121.k5", quote: "thời hạn cho thuê, cho thuê mua, thế chấp, cho mượn, cho ở nhờ, ủy quyền quản lý nhà ở"}
+    note: "thời điểm giao nhà = ngày bắt đầu thuê (Điều 6.1 dẫn về Điều 3)"
+  - rule: lease.landlord_termination/r1
+    object: t7_mau_2023
+    periods: [{from: 2023-03-15, status: FAIL, finding: violation}]
+    basis: {pid: "luat:65/2014/QH13#d132.k1", quote: "Trong thời hạn thuê nhà ở theo thỏa thuận trong hợp đồng, bên cho thuê không được đơn phương chấm dứt hợp đồng thuê nhà và thu hồi nhà ở đang cho thuê"}
+    note: "Điều 9.1: bên cho thuê chấm dứt bất cứ lúc nào"
+  - rule: lease.nonpayment_termination/r1
+    object: t7_mau_2023
+    periods: [{from: 2023-03-15, status: FAIL, finding: violation}]
+    basis: {pid: "luat:65/2014/QH13#d132.k2.b", quote: "Bên thuê không trả tiền thuê nhà ở theo thỏa thuận từ 03 tháng trở lên mà không có lý do chính đáng"}
+    note: "Điều 9.3: chậm quá 30 ngày đã cho chấm dứt; 30 ngày < 03 tháng"
+  - rule: lease.tenant_termination_right/r1
+    object: t7_mau_2023
+    periods: [{from: 2023-03-15, status: PASS}]
+    basis: {pid: "luat:65/2014/QH13#d132.k3", quote: "Bên thuê nhà ở có quyền đơn phương chấm dứt thực hiện hợp đồng thuê nhà ở khi bên cho thuê nhà ở có một trong các hành vi sau đây:"}
+    note: "bên thuê vẫn có một căn cứ chấm dứt (Điều 9.2) nên không phải 'cấm trong mọi trường hợp'; việc thu hẹp căn cứ và mất cọc chưa có rule (L.14)"

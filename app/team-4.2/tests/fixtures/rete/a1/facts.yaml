@@ -1,0 +1,12 @@
+# Dữ kiện cấp hợp đồng theo thời gian (README §4).
+base_salary_vnd:
+- value: 4700000
+  unit: vnd
+  from: '2023-03-01'
+  doc: hd_2023
+  quote: '1. Mức lương chính: 4.700.000 đồng/tháng.'
+- value: 5000000
+  unit: vnd
+  from: '2024-09-01'
+  doc: hd_2023_pl1
+  quote: 'Mức lương chính: 5.000.000 đồng/tháng.'

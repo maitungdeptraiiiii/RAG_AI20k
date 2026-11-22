@@ -239,7 +239,20 @@ trả khái niệm lao động, và hai gói dân sự không khai `document_fac
 | L.10 | `outcome.employee_impact` sai nghĩa với vay / thuê | Xong (D33): YAML mọi gói ghi `party_impact`; bộ nạp đổi `employee_impact` cũ thành `party_impact` (khai cả hai khác nhau là lỗi); `RuleResult.outcome` (dict) + `party_impact`; `employee_impact` giữ cùng giá trị để tương thích. Golden engine cũ không đổi |
 | L.12 | `RuleResult.party_impact` chưa ghi bất lợi cho BÊN nào (spec G10: vai trò `holder`); người đọc lấy `holder` từ khái niệm. UI vẫn đọc `employee_impact` (D34, để sau) | Còn |
 | L.13 | `appendix.states_change/r1` (Đ22.2 câu 2) cần hai thuộc tính phụ lục `states_target_clause`, `states_valid_from`; `rag.contracts.amendments` đã bắt được dẫn chiếu và câu "hiệu lực kể từ ngày" nhưng chưa có bước nào ghi chúng vào đối tượng Amendment (việc `dossier_objects` của Huy). Thiếu thì rule ra UNKNOWN, không ra vi phạm | Còn (Huy) |
+| L.14 | t7 (mẫu thật) có điều khoản chưa kiểm vì chưa có rule có căn cứ: bên cho thuê điều chỉnh giá khi "thị trường thay đổi" (Điều 4.3), vào nhà không báo trước (6.3), bên thuê chỉ có một căn cứ chấm dứt và mất cọc (9.2) | Còn (cần đọc thêm luật) |
 | L.11 | Bộ test đầy đủ sau gói thuê nhà: 35 failed (đúng số baseline, toàn agent / conversation / warehouse / pipeline), 2264 passed | Ghi nhận |
+
+## Hồ sơ nhiều văn bản a1, b1–b5, r1 (23/11)
+
+| # | Hạn chế | Trạng thái |
+|---|---|---|
+| H.1 | Gold mới (a1, b1–b5, r1, lease t7) do Claude viết từ luật trước khi chạy engine; engine khớp ngay lần đầu | Chờ Tùng duyệt |
+| H.2 | Test dựng đối tượng từ `objects.yaml` viết tay và chọn dữ kiện theo `from` (thay cho `graph_facts`); luồng thật cần `dossier_objects` (Huy, H1) — `objects.yaml` là đáp án của H1 | Còn (Huy) |
+| H.3 | Thuộc tính suy từ nhiều văn bản (`worked_after_expiry_days`, `new_contract_signed`) không có câu trích, chỉ ghi `why`; `dossier_objects` phải tính từ ngày hết hạn / ngày ký của các HĐ | Còn (Huy) |
+| H.4 | "Không có FAIL ngoài gold" ở hồ sơ chỉ xét rule xuyên đối tượng và rule có dữ kiện trong `facts.yaml`; nội dung bắt buộc của từng HĐ kiểm ở bộ hợp đồng đơn lẻ | Ghi nhận |
+| H.5 | Bước `set_review_date` của kịch bản dựng phiên mới: phiên chưa có thao tác đổi ngày soát tăng dần (cần cho dòng thời gian F4 / E3) | Còn |
+| H.6 | r1: `civil_lease` chưa khai `object_types` nên `refs` (`lessor`, `lessee`) không đối chiếu được với gói; hồ sơ chỉ kiểm rule trên dữ kiện phẳng theo thời gian | Ghi nhận (D37: không có rule xuyên văn bản) |
+| H.7 | b4: bổ sung HĐ bị sót làm kết luận trung gian rút lại NHƯNG HĐ2 thành lần ký xác định thời hạn thứ ba (vi phạm Đ20.2.c) — cách đọc "HĐ bị sót 02 tháng cũng tính một lần ký" cần Tùng xác nhận | Chờ Tùng duyệt |
 
 ## Tồn đọng chung (môi trường, quy trình)
 

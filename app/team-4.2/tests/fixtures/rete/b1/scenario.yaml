@@ -1,0 +1,15 @@
+# Kịch bản demo theo bước (README §6).
+dossier_id: b1
+steps:
+- do: load
+  state: b1
+  review_date: '2024-03-01'
+  say: Ba HĐ xác định thời hạn liên tiếp
+  expect:
+    content.term/r5@employee=e1: FAIL
+- do: answer
+  facts:
+    is_elderly_employee: true
+  say: 'Người dùng trả lời: NLĐ là người cao tuổi (b2)'
+  expect:
+    content.term/r5@employee=e1: NOT_APPLICABLE

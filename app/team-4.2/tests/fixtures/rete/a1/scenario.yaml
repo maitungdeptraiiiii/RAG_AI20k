@@ -1,0 +1,30 @@
+# Kịch bản demo theo bước (README §6).
+dossier_id: a1
+steps:
+- do: load
+  state: a1
+  review_date: '2023-06-01'
+  say: 'Ký hợp đồng: lương 4.700.000 ≥ 4.680.000'
+  expect:
+    wage.minimum_regional/r1: PASS
+- do: set_review_date
+  value: '2024-07-15'
+  say: Lương tối thiểu vùng I tăng lên 4.960.000
+  expect:
+    wage.minimum_regional/r1: FAIL
+- do: set_review_date
+  value: '2024-09-15'
+  say: Phụ lục 1 tăng lương lên 5.000.000
+  expect:
+    wage.minimum_regional/r1: PASS
+    content.term/r7@contract=hd_2023: PASS
+- do: set_review_date
+  value: '2025-02-15'
+  say: Phụ lục 2 sửa thời hạn hợp đồng
+  expect:
+    content.term/r7@contract=hd_2023: FAIL
+- do: set_review_date
+  value: '2026-01-15'
+  say: Lương tối thiểu vùng I tăng lên 5.310.000
+  expect:
+    wage.minimum_regional/r1: FAIL

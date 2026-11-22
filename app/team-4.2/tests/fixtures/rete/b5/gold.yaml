@@ -1,0 +1,26 @@
+# Nhãn đúng theo kỳ (README §5). Người gắn nhãn: Claude theo yêu cầu của Tùng, viết từ luật TRƯỚC khi chạy engine trên hồ sơ — cần Tùng duyệt.
+dossier_id: b5
+labeled_by: Claude theo yêu cầu của Tùng, viết từ luật TRƯỚC khi chạy engine trên hồ sơ — cần Tùng duyệt
+expected:
+- rule: probation.once/r2
+  object: employee=e1,job=ke_toan
+  periods:
+  - from: '2022-01-01'
+    status: PASS
+  - from: '2023-01-01'
+    status: FAIL
+  basis:
+    pid: bo-luat:45/2019/QH14#d25
+    quote: Thời gian thử việc do hai bên thỏa thuận căn cứ vào tính chất và mức độ phức tạp của công việc nhưng chỉ được thử
+      việc một lần đối với một công việc
+  note: thử việc lần hai cho cùng công việc kế toán
+- rule: content.term/r5
+  object: employee=e1
+  periods:
+  - from: '2023-01-01'
+    status: PASS
+  basis:
+    pid: bo-luat:45/2019/QH14#d20.k2.c
+    quote: Trường hợp hai bên ký kết hợp đồng lao động mới là hợp đồng lao động xác định thời hạn thì cũng chỉ được ký thêm
+      01 lần, sau đó nếu người lao động vẫn tiếp tục làm việc thì phải ký kết hợp đồng lao động không xác định thời hạn
+  note: 'hai HĐ xác định thời hạn: được ký thêm 01 lần'

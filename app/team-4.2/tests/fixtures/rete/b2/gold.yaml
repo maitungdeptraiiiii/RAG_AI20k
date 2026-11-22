@@ -1,0 +1,14 @@
+# Nhãn đúng theo kỳ (README §5). Người gắn nhãn: Claude theo yêu cầu của Tùng, viết từ luật TRƯỚC khi chạy engine trên hồ sơ — cần Tùng duyệt.
+dossier_id: b2
+labeled_by: Claude theo yêu cầu của Tùng, viết từ luật TRƯỚC khi chạy engine trên hồ sơ — cần Tùng duyệt
+expected:
+- rule: content.term/r5
+  object: employee=e1
+  periods:
+  - from: '2024-01-01'
+    status: NOT_APPLICABLE
+  basis:
+    pid: bo-luat:45/2019/QH14#d149.k1
+    quote: Khi sử dụng người lao động cao tuổi, hai bên có thể thỏa thuận giao kết nhiều lần hợp đồng lao động xác định thời
+      hạn.
+  note: 'ngoại lệ Đ20.2.c (khoản 1 Điều 149): NLĐ cao tuổi được ký nhiều lần HĐ xác định thời hạn'

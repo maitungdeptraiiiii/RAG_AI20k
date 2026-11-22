@@ -74,3 +74,24 @@ t6_truoc_2024:
     lease.content_term_handover: {}
     lease.nonpayment_termination:
       nonpayment_months_before_termination: ["02 tháng", "Nếu Bên B không trả tiền thuê 02 tháng thì Bên A có quyền đơn phương chấm dứt hợp đồng và thu hồi nhà."]
+
+# Mẫu có sẵn của dự án (data/team-4.2/contracts_demo/hop_dong_thue_nha_2023.txt), ký 15/03/2023: Luật Nhà ở 2014.
+t7_mau_2023:
+  sign_date: 2023-03-15
+  document:
+    value: ["12.000.000 đồng", "Giá thuê là 12.000.000 đồng/tháng"]
+    term: ["24 tháng", "Thời hạn thuê là 24 tháng"]
+  slots:
+    lease.content_property: {}
+    lease.content_rent_payment: {}
+    lease.content_term_handover: {}
+    lease.landlord_termination:
+      landlord_may_terminate_at_will: [true, "Bên A được quyền đơn phương chấm dứt hợp đồng bất cứ lúc nào mà không cần báo trước và không phải bồi thường cho Bên B."]
+    lease.nonpayment_termination:
+      nonpayment_months_before_termination: ["30 ngày", "Trường hợp Bên B chậm thanh toán tiền thuê theo Điều 4 quá 30 ngày, Bên A được chấm dứt hợp đồng theo khoản 1 Điều này."]
+    lease.tenant_termination_right:
+      tenant_barred_from_unilateral_termination: [false, "Bên B được đơn phương chấm dứt hợp đồng nếu Bên A vi phạm nghiêm trọng nghĩa vụ giao nhà theo Điều 6"]
+  present_quotes:
+    lease.content_property: "Bên A đồng ý cho Bên B thuê căn hộ số 805, tầng 8, nhà chung cư số 20 phố Liễu Giai"
+    lease.content_rent_payment: "Bên B thanh toán tiền thuê theo từng quý, thanh toán đúng hạn bằng chuyển khoản vào tài khoản của Bên A."
+    lease.content_term_handover: "Thời hạn thuê là 24 tháng, kể từ ngày 01 tháng 4 năm 2023 đến hết ngày 31 tháng 3 năm 2025."

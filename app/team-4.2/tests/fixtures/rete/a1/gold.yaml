@@ -1,0 +1,51 @@
+# Nhãn đúng theo kỳ (README §5). Người gắn nhãn: Claude theo yêu cầu của Tùng, viết từ luật TRƯỚC khi chạy engine trên hồ sơ — cần Tùng duyệt.
+dossier_id: a1
+labeled_by: Claude theo yêu cầu của Tùng, viết từ luật TRƯỚC khi chạy engine trên hồ sơ — cần Tùng duyệt
+expected:
+- rule: wage.minimum_regional/r1
+  object: null
+  periods:
+  - from: '2023-03-01'
+    status: PASS
+  - from: '2024-07-01'
+    status: FAIL
+  - from: '2024-09-01'
+    status: PASS
+  - from: '2026-01-01'
+    status: FAIL
+  basis:
+    pid: bo-luat:45/2019/QH14#d90.k2
+    quote: Mức lương theo công việc hoặc chức danh không được thấp hơn mức lương tối thiểu.
+  note: 'vùng I: 4.680.000 (NĐ 38/2022) → 4.960.000 từ 01/07/2024 (NĐ 74/2024) → 5.310.000 từ 01/01/2026 (NĐ 293/2025)'
+- rule: content.term/r7
+  object: contract=hd_2023
+  periods:
+  - from: '2024-09-01'
+    status: PASS
+  - from: '2025-02-01'
+    status: FAIL
+  basis:
+    pid: bo-luat:45/2019/QH14#d22.k2
+    quote: Phụ lục hợp đồng lao động quy định chi tiết, sửa đổi, bổ sung một số điều, khoản của hợp đồng lao động nhưng không
+      được sửa đổi thời hạn của hợp đồng lao động.
+  note: 'phụ lục 1 chỉ sửa lương; phụ lục 2 (và 3) sửa thời hạn: BLLĐ 2019 cấm, không có ''một lần'''
+- rule: appendix.states_change/r1
+  object: contract=hd_2023
+  periods:
+  - from: '2024-09-01'
+    status: PASS
+  basis:
+    pid: bo-luat:45/2019/QH14#d22.k2
+    quote: Trường hợp phụ lục hợp đồng lao động sửa đổi, bổ sung một số điều, khoản của hợp đồng lao động thì phải ghi rõ
+      nội dung điều, khoản sửa đổi, bổ sung và thời điểm có hiệu lực.
+  note: cả ba phụ lục ghi rõ điều khoản sửa và ngày hiệu lực
+- rule: content.term/r5
+  object: employee=e1
+  periods:
+  - from: '2023-03-01'
+    status: PASS
+  basis:
+    pid: bo-luat:45/2019/QH14#d20.k2.c
+    quote: Trường hợp hai bên ký kết hợp đồng lao động mới là hợp đồng lao động xác định thời hạn thì cũng chỉ được ký thêm
+      01 lần, sau đó nếu người lao động vẫn tiếp tục làm việc thì phải ký kết hợp đồng lao động không xác định thời hạn
+  note: một HĐ xác định thời hạn

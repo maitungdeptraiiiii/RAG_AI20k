@@ -1,0 +1,51 @@
+# Nhãn đúng theo kỳ (README §5). Người gắn nhãn: Claude theo yêu cầu của Tùng, viết từ luật TRƯỚC khi chạy engine trên hồ sơ — cần Tùng duyệt.
+dossier_id: r1
+labeled_by: Claude theo yêu cầu của Tùng, viết từ luật TRƯỚC khi chạy engine trên hồ sơ — cần Tùng duyệt
+expected:
+- rule: lease.landlord_termination/r1
+  object: null
+  periods:
+  - from: '2024-09-10'
+    status: PASS
+  - from: '2025-09-15'
+    status: PASS
+  - from: '2026-02-15'
+    status: PASS
+  basis:
+    pid: luat:27/2023/QH15#d172.k1
+    quote: bên cho thuê không được đơn phương chấm dứt thực hiện hợp đồng thuê nhà ở và thu hồi nhà ở đang cho thuê, trừ trường
+      hợp quy định tại khoản 2 Điều này.
+  note: không đổi qua hai phụ lục
+- rule: lease.nonpayment_termination/r1
+  object: null
+  periods:
+  - from: '2024-09-10'
+    status: PASS
+  - from: '2025-09-15'
+    status: PASS
+  - from: '2026-02-15'
+    status: PASS
+  basis:
+    pid: luat:27/2023/QH15#d172.k2.b
+    quote: Bên thuê không trả đủ tiền thuê nhà ở theo thỏa thuận trong hợp đồng từ 03 tháng trở lên
+  note: 03 tháng = đúng mức luật
+- rule: lease.tenant_termination_right/r1
+  object: null
+  periods:
+  - from: '2024-09-10'
+    status: PASS
+  - from: '2025-09-15'
+    status: PASS
+  - from: '2026-02-15'
+    status: PASS
+  basis:
+    pid: luat:27/2023/QH15#d172.k3
+    quote: 'Bên thuê nhà ở có quyền đơn phương chấm dứt thực hiện hợp đồng thuê nhà ở khi thuộc một trong các trường hợp sau
+      đây:'
+  note: bên thuê giữ quyền chấm dứt
+d37:
+  pid: luat:27/2023/QH15#d170.k2
+  quote: Trường hợp bên cho thuê thực hiện cải tạo nhà ở và được bên thuê đồng ý thì bên cho thuê được quyền điều chỉnh giá
+    thuê nhà ở nếu thời gian cho thuê còn lại từ một phần ba thời hạn của hợp đồng thuê nhà ở trở xuống.
+note: 'D37 (Tùng duyệt 23/11): phụ lục gia hạn và phụ lục tăng giá do hai bên ký là hợp lệ (giá thuê do các bên thỏa thuận;
+  tăng giá sau cải tạo được bên thuê đồng ý) — hồ sơ không có vi phạm. Căn cứ: luat:27/2023/QH15#d170.k2'

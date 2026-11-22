@@ -1,0 +1,28 @@
+# Bảng đối tượng kỳ vọng (README §3): đầu vào engine và đáp án cho dossier_objects (Huy, H1).
+- id: hd1_2022
+  type: Contract
+  valid_from: '2022-01-01'
+  valid_to: '2022-12-31'
+  refs:
+    employee: e1
+  attrs:
+    kind:
+      value: xac_dinh_thoi_han
+      quote: 'Loại hợp đồng: Hợp đồng lao động xác định thời hạn'
+    worked_after_expiry_days:
+      value: 73
+      unit: day
+      why: NLĐ vẫn làm từ 01/01/2023 tới khi ký HĐ2 ngày 15/03/2023 (73 ngày)
+    new_contract_signed:
+      value: false
+      why: không có HĐ mới nào ký trong 30 ngày kể từ ngày hết hạn
+- id: hd2_2023
+  type: Contract
+  valid_from: '2023-03-15'
+  valid_to: '2024-03-14'
+  refs:
+    employee: e1
+  attrs:
+    kind:
+      value: xac_dinh_thoi_han
+      quote: 'Loại hợp đồng: Hợp đồng lao động xác định thời hạn'

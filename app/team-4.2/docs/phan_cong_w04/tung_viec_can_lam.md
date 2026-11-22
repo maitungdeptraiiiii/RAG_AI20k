@@ -13,7 +13,7 @@
       phủ định (spec §4.2 ghi "chưa xác minh").
 - [ ] A2. Commit spec + `docs/phan_cong_w04/`; gửi `huy.md`, `khanh.md`.
 - [x] A3. `src/rag/rules/evaluator.py`: Protocol `Evaluator`, `Session`, `Diff`, `make_evaluator` (stub, đúng kiểu). → Khánh
-- [ ] A4. Chốt định dạng: `dossier.yaml`, `gold.yaml` (theo kỳ), `scenario.yaml`, bản liệt kê rule, JSON
+- [x] A4. Chốt định dạng: `dossier.yaml`, `gold.yaml` (theo kỳ), `scenario.yaml`, bản liệt kê rule, JSON
       `evaluation_diff` / `ExplanationTree` / `Question`, `WorkingObject`. → Huy, Khánh
 - [x] A5. **Golden**: chạy engine cũ trên mọi fixture hợp đồng hiện có, lưu `RuleResult` vào
       `tests/fixtures/rules/golden/`. Làm trước khi sửa bất kỳ dòng engine nào.
@@ -42,21 +42,25 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
 
 ## C. Dữ liệu hồ sơ (phần Tú)
 
-- [ ] C1. (D1) Bộ A `tests/fixtures/rete/a1/`: HĐ 2023 + 3 phụ lục (lương, sửa thời hạn ×2), câu "có hiệu lực kể từ
+- [x] C1. (D1) Bộ A `tests/fixtures/rete/a1/`: HĐ 2023 + 3 phụ lục (lương, sửa thời hạn ×2), câu "có hiệu lực kể từ
       ngày", dẫn chiếu "sửa đổi Khoản … Điều …". → Huy
-- [ ] C2. (D2) b1 (3 HĐ XĐTH), b2 (b1 + ngoại lệ), b3 (hết hạn vẫn làm, ký muộn), b4 (b3 + HĐ bị sót), b5 (thử việc
+- [x] C2. (D2) b1 (3 HĐ XĐTH), b2 (b1 + ngoại lệ), b3 (hết hạn vẫn làm, ký muộn), b4 (b3 + HĐ bị sót), b5 (thử việc
       lại cùng công việc) + `dossier.yaml` mỗi bộ. → Huy
 - [x] C3. (D3) `tests/fixtures/rete/loan/`: 5–10 hợp đồng vay (hợp lệ, vượt trần, lãi theo tháng, không ghi lãi,
       phạt chậm trả, trả trước hạn) + `README.md`. *(7 hợp đồng; chưa có: lãi không ghi kỳ, phạt + lãi quá hạn, hợp đồng
       của tổ chức tín dụng)*
-- [~] C3b. (D3b) `tests/fixtures/rete/lease/`: ≥5 hợp đồng thuê nhà (có `hop_dong_thue_nha_2023.txt`) + hồ sơ nhiều
+- [x] C3b. (D3b) `tests/fixtures/rete/lease/`: ≥5 hợp đồng thuê nhà (có `hop_dong_thue_nha_2023.txt`) + hồ sơ nhiều
       văn bản `r1/` (HĐ thuê + phụ lục gia hạn + phụ lục tăng giá) + `README.md`. *(Có 6 hợp đồng + facts + gold 11
-      nhãn. Chưa có: hồ sơ `r1/` (xem D37), `hop_dong_thue_nha_2023.txt` không có trong repo, README.)*
-- [ ] C4. (T5) `gold.yaml` cho a1, b1–b5, loan, **lease, r1** — **viết trước khi chạy engine trên hồ sơ đó**; mỗi nhãn
+      nhãn. 23/11: thêm `t7_mau_2023` (mẫu `data/team-4.2/contracts_demo/hop_dong_thue_nha_2023.txt`, 6 nhãn), README,
+      hồ sơ `r1/`.)*
+- [x] C4. (T5) `gold.yaml` cho a1, b1–b5, loan, **lease, r1** — **viết trước khi chạy engine trên hồ sơ đó**; mỗi nhãn
       có basis.
-- [ ] C5. (D4) `scenario.yaml` cho a1, b1→b2, b3→b4, **r1**.
-- [ ] C7. `dossier.yaml` theo định dạng tổng quát (`tu.md` §3 bản 3: `packs`, `parties` theo vai trò, `documents[].refs`).
-- [ ] C6. Kiểm parser hiện có đọc được mọi văn bản (Điều/Khoản, phụ lục, ngày hiệu lực).
+- [x] C5. (D4) `scenario.yaml` cho a1, b1→b2, b3→b4, **r1**.
+- [x] C7. `dossier.yaml` theo định dạng tổng quát (`tu.md` §3 bản 3: `packs`, `parties` theo vai trò, `documents[].refs`).
+- [x] C6. Kiểm parser hiện có đọc được mọi văn bản (Điều/Khoản, phụ lục, ngày hiệu lực).
+      *(23/11: định dạng chốt ở `tests/fixtures/rete/README.md`; hồ sơ a1, b1–b5, r1 có `dossier.yaml`, văn bản, `objects.yaml`
+      (đáp án cho `dossier_objects` của Huy), `gold.yaml` theo kỳ (16 nhãn, viết trước khi chạy engine, engine khớp
+      ở cả hai evaluator), `scenario.yaml` cho a1, b1→b2, b3→b4, r1. Test `tests/test_rete_dossiers.py`.)*
 
 ## D. Engine
 

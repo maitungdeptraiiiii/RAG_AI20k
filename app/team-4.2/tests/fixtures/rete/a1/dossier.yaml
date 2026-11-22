@@ -1,0 +1,39 @@
+dossier_id: a1
+review_date: '2025-03-01'
+packs:
+- labor
+parties:
+- id: e1
+  role: NLD
+  name: Trần Văn An
+- id: c1
+  role: NSDLD
+  name: Công ty TNHH Thử Nghiệm Số Một
+documents:
+- doc_id: hd_2023
+  file: hd_2023.txt
+  kind: labor_contract
+  refs:
+    employee: e1
+    employer: c1
+- doc_id: hd_2023_pl1
+  file: hd_2023_pl1.txt
+  kind: amendment
+  refs:
+    contract: hd_2023
+- doc_id: hd_2023_pl2
+  file: hd_2023_pl2.txt
+  kind: amendment
+  refs:
+    contract: hd_2023
+- doc_id: hd_2023_pl3
+  file: hd_2023_pl3.txt
+  kind: amendment
+  refs:
+    contract: hd_2023
+user_facts:
+  wage_region: I
+  is_state_enterprise_director: false
+  is_elderly_employee: false
+  is_foreign_employee: false
+  is_union_leader_in_term: false

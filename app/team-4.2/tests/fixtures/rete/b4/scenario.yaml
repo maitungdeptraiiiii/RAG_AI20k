@@ -1,0 +1,26 @@
+# Kịch bản demo theo bước (README §6).
+dossier_id: b4
+steps:
+- do: load
+  state: b3
+  review_date: '2023-06-01'
+  say: 'Hồ sơ ban đầu: HĐ1 hết hạn, NLĐ vẫn làm, HĐ2 ký muộn'
+  expect:
+    content.term/r6@employee=e1: FAIL
+    content.term/r5@employee=e1: PASS
+- do: add
+  state: b4
+  docs:
+  - hd_sot_2023
+  say: 'Bổ sung HĐ bị sót ký 10/01/2023: kết luận trung gian rút lại, HĐ2 thành lần ký thứ ba'
+  expect:
+    content.term/r6@employee=e1: PASS
+    content.term/r5@employee=e1: FAIL
+- do: remove
+  state: b3
+  docs:
+  - hd_sot_2023
+  say: 'Bỏ HĐ bị sót: quay về kết quả ban đầu'
+  expect:
+    content.term/r6@employee=e1: FAIL
+    content.term/r5@employee=e1: PASS

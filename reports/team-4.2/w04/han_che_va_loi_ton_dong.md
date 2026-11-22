@@ -211,6 +211,18 @@ trả khái niệm lao động, và hai gói dân sự không khai `document_fac
 | K.3 | NĐ 145/2020 có trong kho nhưng chưa đọc phần liên quan Đ20, Đ22, Đ25 (B3) | Còn |
 | K.4 | Crawl thêm cho gói vay: Luật Các tổ chức tín dụng 32/2024/QH15, Nghị quyết 01/2019/NQ-HĐTP (API công khai VBPL, `scripts/team-4.2/fetch_loan_scope.py`); mới vào `raw/` + `supplements/loan-scope-v1/`, chưa nhập snapshot, chưa dựng đồ thị luật (việc của Khánh / Huy) | Còn |
 
+## Làm đầy gói vay (23/11)
+
+| # | Mục | Trạng thái |
+|---|---|---|
+| V.1 | Gói `civil_loan` từ 1 lên 5 khái niệm: trần lãi theo ngày ký (BLDS 2005 Đ476 trước 2017, BLDS 2015 Đ468.1 từ 2017), lãi nợ gốc quá hạn ≤ 30%/năm (NQ 01/2019 Đ5.2.c), lãi chậm trả ≤ 20%/năm (Đ357.2), bên cho vay không đòi trước hạn tùy ý (Đ465.3, ngoại lệ Đ467), bên vay được trả trước hạn khoản vay không lãi (Đ470.1) | Xong |
+| V.2 | 7 hợp đồng vay mẫu + nhãn đúng (12 nhãn) viết trước khi chạy engine; engine khớp cả 12 ở hai evaluator. Nhãn do Claude gắn, **cần Tùng duyệt** | Xong (chờ duyệt) |
+| V.3 | Trần trước 01/01/2017 = 13,5%/năm lấy từ ví dụ trong NQ 01/2019 (lãi suất cơ bản 9%/năm theo QĐ 2868/QĐ-NHNN); QĐ 2868 không có trong kho; trước 01/12/2010 chưa có giá trị (ra UNKNOWN) | Còn |
+| V.4 | NQ 01/2019 Đ2.1 (hợp đồng trước 2017 đang thực hiện mà lãi phù hợp BLDS 2015 thì từ 01/01/2017 áp BLDS 2015): engine soát theo ngày ký, chưa chia theo khoảng thực hiện. Gold `l6_truoc_2017` ghi rõ | Còn |
+| V.5 | Ngoại lệ tổ chức tín dụng vẫn qua dữ kiện người dùng chung `special_law_applies`; chưa tự nhận ra bên cho vay là tổ chức tín dụng | Còn |
+| V.6 | Chưa có rule: lãi chỉ khi có thỏa thuận (Đ463), lãi 50% trần khi không rõ lãi suất (Đ468.2, là giá trị suy ra chứ không phải vi phạm), phạt vi phạm cùng lãi quá hạn (NQ 01/2019 Đ12) | Còn |
+| V.7 | Sửa bên giữ quyền của trần lãi: bên vay (bản đầu gán nhầm bên cho vay) | Đã sửa |
+
 ## Tồn đọng chung (môi trường, quy trình)
 
 | # | Mục | Trạng thái |

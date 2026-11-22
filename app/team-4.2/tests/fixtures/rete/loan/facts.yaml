@@ -1,0 +1,81 @@
+# Dữ kiện mà bước trích (facts.py + tagger) phải lấy được từ từng hợp đồng vay mẫu, kèm câu trích nguyên văn.
+# Dùng để chạy engine mà không cần LLM thật; giá trị slot ghi ĐÚNG như chữ trong hợp đồng để thử cả bộ đọc đơn vị.
+# document: trường trích (candidates của facts.py) -> [giá trị, câu trích]. slots: khái niệm -> slot -> [chữ, câu trích].
+l1_hop_le:
+  sign_date: 2024-03-01
+  document:
+    value: ["100.000.000 đồng", "Bên A cho Bên B vay số tiền 100.000.000 đồng"]
+    term: ["12 tháng", "Thời hạn vay là 12 tháng kể từ ngày nhận tiền."]
+    loan_interest: ["Lãi suất vay là 1%/tháng", "Lãi suất vay là 1%/tháng"]
+  slots:
+    loan.interest_cap: {interest_rate: ["1%/tháng", "Lãi suất vay là 1%/tháng"]}
+  user_facts: {special_law_applies: false}
+
+l2_vuot_tran:
+  sign_date: 2024-05-10
+  document:
+    value: ["200.000.000 đồng", "Bên A cho Bên B vay số tiền 200.000.000 đồng."]
+    term: ["6 tháng", "Thời hạn vay là 6 tháng."]
+    loan_interest: ["Lãi suất vay là 3%/tháng", "Lãi suất vay là 3%/tháng."]
+  slots:
+    loan.interest_cap: {interest_rate: ["3%/tháng", "Lãi suất vay là 3%/tháng."]}
+    loan.overdue_interest_cap: {overdue_rate: ["4,5%/tháng", "lãi suất quá hạn 4,5%/tháng"]}
+  user_facts: {special_law_applies: false}
+
+l3_lai_nam_hop_le:
+  sign_date: 2023-08-01
+  document:
+    value: ["50.000.000 đồng", "Bên A cho Bên B vay số tiền 50.000.000 đồng."]
+    term: ["24 tháng", "Thời hạn vay là 24 tháng."]
+    loan_interest: ["Lãi suất vay là 18%/năm", "Lãi suất vay là 18%/năm."]
+  slots:
+    loan.interest_cap: {interest_rate: ["18%/năm", "Lãi suất vay là 18%/năm."]}
+    loan.overdue_interest_cap: {overdue_rate: ["27%/năm", "Nợ gốc quá hạn chịu lãi suất 27%/năm."]}
+    loan.late_interest_cap: {late_interest_rate: ["10%/năm", "lãi chậm trả 10%/năm"]}
+  user_facts: {special_law_applies: false}
+
+l4_khong_lai_cam_tra_truoc:
+  sign_date: 2025-02-01
+  document:
+    value: ["30.000.000 đồng", "Bên A cho Bên B vay số tiền 30.000.000 đồng."]
+    term: ["12 tháng", "Thời hạn vay là 12 tháng."]
+    loan_interest: ["Khoản vay không tính lãi.", "Khoản vay không tính lãi."]
+  slots:
+    loan.borrower_early_repayment: {borrower_barred_from_early_repayment: [true, "Bên B không được trả nợ trước thời hạn vay."]}
+  user_facts: {}
+
+l5_doi_truoc_han_tuy_y:
+  sign_date: 2024-06-20
+  document:
+    value: ["80.000.000 đồng", "Bên A cho Bên B vay số tiền 80.000.000 đồng."]
+    term: ["18 tháng", "Thời hạn vay là 18 tháng."]
+    loan_interest: ["Lãi suất vay là 1,5%/tháng", "Lãi suất vay là 1,5%/tháng."]
+  slots:
+    loan.interest_cap: {interest_rate: ["1,5%/tháng", "Lãi suất vay là 1,5%/tháng."]}
+    loan.lender_early_recall:
+      lender_may_recall_early_without_consent: [true, "Bên A có quyền yêu cầu Bên B trả toàn bộ nợ trước hạn bất cứ lúc nào mà không cần sự đồng ý của Bên B."]
+      recall_only_on_misuse: [false, "Bên A có quyền yêu cầu Bên B trả toàn bộ nợ trước hạn bất cứ lúc nào mà không cần sự đồng ý của Bên B."]
+  user_facts: {special_law_applies: false}
+
+l6_truoc_2017:
+  sign_date: 2016-06-15
+  document:
+    value: ["150.000.000 đồng", "Bên A cho Bên B vay số tiền 150.000.000 đồng."]
+    term: ["36 tháng", "Thời hạn vay là 36 tháng."]
+    loan_interest: ["Lãi suất vay là 15%/năm", "Lãi suất vay là 15%/năm."]
+  slots:
+    loan.interest_cap: {interest_rate: ["15%/năm", "Lãi suất vay là 15%/năm."]}
+  user_facts: {special_law_applies: false}
+
+l7_doi_truoc_han_sai_muc_dich:
+  sign_date: 2024-09-02
+  document:
+    value: ["60.000.000 đồng", "Bên A cho Bên B vay số tiền 60.000.000 đồng"]
+    term: ["12 tháng", "Thời hạn vay là 12 tháng."]
+    loan_interest: ["Lãi suất vay là 12%/năm", "Lãi suất vay là 12%/năm."]
+  slots:
+    loan.interest_cap: {interest_rate: ["12%/năm", "Lãi suất vay là 12%/năm."]}
+    loan.lender_early_recall:
+      lender_may_recall_early_without_consent: [true, "Bên A được thu hồi nợ trước hạn chỉ khi Bên B sử dụng tiền vay sai mục đích"]
+      recall_only_on_misuse: [true, "chỉ khi Bên B sử dụng tiền vay sai mục đích đã thỏa thuận và không khắc phục sau khi Bên A đã nhắc nhở"]
+  user_facts: {special_law_applies: false}

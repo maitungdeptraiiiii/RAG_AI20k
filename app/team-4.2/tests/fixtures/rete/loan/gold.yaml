@@ -1,0 +1,68 @@
+# Nhãn đúng cho hợp đồng vay mẫu (phần Tuấn, T5; định dạng tuan.md §3, mỗi hợp đồng là một đối tượng).
+# Viết TRƯỚC khi chạy engine trên các hợp đồng này, chỉ từ văn bản luật (docs/rule_inventory/civil_loan.yaml).
+# Người gắn nhãn: Claude theo yêu cầu của Tùng — CẦN TÙNG DUYỆT (tuan.md §4 không cho LLM tự gắn nhãn gold).
+# Ngày soát = ngày ký (check_contract soát theo ngày ký).
+dossier_id: loan
+labeled_by: "Claude (theo yêu cầu của Tùng) — cần Tùng duyệt"
+expected:
+  - rule: loan.interest_cap/r1
+    object: l1_hop_le
+    periods: [{from: 2024-03-01, status: PASS}]
+    basis: {pid: "bo-luat:91/2015/QH13#d468.k1", quote: "lãi suất theo thỏa thuận không được vượt quá 20%/năm của khoản tiền vay"}
+    note: "1%/tháng = 12%/năm"
+
+  - rule: loan.interest_cap/r1
+    object: l2_vuot_tran
+    periods: [{from: 2024-05-10, status: FAIL, finding: violation}]
+    basis: {pid: "bo-luat:91/2015/QH13#d468.k1", quote: "lãi suất theo thỏa thuận không được vượt quá 20%/năm của khoản tiền vay"}
+    note: "3%/tháng = 36%/năm; hai bên là cá nhân nên không có luật chuyên ngành"
+  - rule: loan.overdue_interest_cap/r1
+    object: l2_vuot_tran
+    periods: [{from: 2024-05-10, status: FAIL, finding: violation}]
+    basis: {pid: "nghi-quyet:01/2019/NQ-HĐTP#d5.k2.c", quote: "Mức lãi suất trên nợ gốc quá hạn do các bên thỏa thuận không được vượt quá 150% mức lãi suất quy định tại khoản 1 Điều 468 Bộ luật Dân sự năm 2015."}
+    note: "4,5%/tháng = 54%/năm > 30%/năm"
+
+  - rule: loan.interest_cap/r1
+    object: l3_lai_nam_hop_le
+    periods: [{from: 2023-08-01, status: PASS}]
+    basis: {pid: "bo-luat:91/2015/QH13#d468.k1", quote: "lãi suất theo thỏa thuận không được vượt quá 20%/năm của khoản tiền vay"}
+  - rule: loan.overdue_interest_cap/r1
+    object: l3_lai_nam_hop_le
+    periods: [{from: 2023-08-01, status: PASS}]
+    basis: {pid: "nghi-quyet:01/2019/NQ-HĐTP#d5.k2.c", quote: "Mức lãi suất trên nợ gốc quá hạn do các bên thỏa thuận không được vượt quá 150% mức lãi suất quy định tại khoản 1 Điều 468 Bộ luật Dân sự năm 2015."}
+    note: "27%/năm ≤ 30%/năm"
+  - rule: loan.late_interest_cap/r1
+    object: l3_lai_nam_hop_le
+    periods: [{from: 2023-08-01, status: PASS}]
+    basis: {pid: "bo-luat:91/2015/QH13#d357.k2", quote: "Lãi suất phát sinh do chậm trả tiền được xác định theo thỏa thuận của các bên nhưng không được vượt quá mức lãi suất được quy định tại khoản 1 Điều 468 của Bộ luật này"}
+
+  - rule: loan.borrower_early_repayment/r1
+    object: l4_khong_lai_cam_tra_truoc
+    periods: [{from: 2025-02-01, status: FAIL, finding: violation}]
+    basis: {pid: "bo-luat:91/2015/QH13#d470.k1", quote: "Đối với hợp đồng vay có kỳ hạn và không có lãi thì bên vay có quyền trả lại tài sản bất cứ lúc nào"}
+
+  - rule: loan.interest_cap/r1
+    object: l5_doi_truoc_han_tuy_y
+    periods: [{from: 2024-06-20, status: PASS}]
+    basis: {pid: "bo-luat:91/2015/QH13#d468.k1", quote: "lãi suất theo thỏa thuận không được vượt quá 20%/năm của khoản tiền vay"}
+    note: "1,5%/tháng = 18%/năm"
+  - rule: loan.lender_early_recall/r1
+    object: l5_doi_truoc_han_tuy_y
+    periods: [{from: 2024-06-20, status: FAIL, finding: violation}]
+    basis: {pid: "bo-luat:91/2015/QH13#d465.k3", quote: "Không được yêu cầu bên vay trả lại tài sản trước thời hạn"}
+
+  - rule: loan.interest_cap/r1
+    object: l6_truoc_2017
+    periods: [{from: 2016-06-15, status: FAIL, finding: violation}]
+    basis: {pid: "bo-luat:33/2005/QH11#d476.k1", quote: "Lãi suất vay do các bên thoả thuận nhưng không được vượt quá 150% của lãi suất cơ bản do Ngân hàng Nhà nước công bố đối với loại cho vay tương ứng."}
+    note: "15%/năm > 13,5%/năm (150% × 9%). Chưa xét chuyển tiếp NQ 01/2019 Đ2.1 (từ 01/01/2017 lãi 15% phù hợp BLDS 2015)."
+
+  - rule: loan.interest_cap/r1
+    object: l7_doi_truoc_han_sai_muc_dich
+    periods: [{from: 2024-09-02, status: PASS}]
+    basis: {pid: "bo-luat:91/2015/QH13#d468.k1", quote: "lãi suất theo thỏa thuận không được vượt quá 20%/năm của khoản tiền vay"}
+  - rule: loan.lender_early_recall/r1
+    object: l7_doi_truoc_han_sai_muc_dich
+    periods: [{from: 2024-09-02, status: NOT_APPLICABLE}]
+    basis: {pid: "bo-luat:91/2015/QH13#d467", quote: "có quyền đòi lại tài sản vay trước thời hạn nếu đã nhắc nhở mà bên vay vẫn sử dụng tài sản trái mục đích"}
+    note: "điều khoản đòi trước hạn chỉ khi dùng sai mục đích sau khi nhắc: thuộc ngoại lệ Đ467"

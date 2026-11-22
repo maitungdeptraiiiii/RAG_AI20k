@@ -43,8 +43,9 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
       ngày", dẫn chiếu "sửa đổi Khoản … Điều …". → Huy
 - [ ] C2. (D2) b1 (3 HĐ XĐTH), b2 (b1 + ngoại lệ), b3 (hết hạn vẫn làm, ký muộn), b4 (b3 + HĐ bị sót), b5 (thử việc
       lại cùng công việc) + `dossier.yaml` mỗi bộ. → Huy
-- [ ] C3. (D3) `tests/fixtures/rete/loan/`: 5–10 hợp đồng vay (hợp lệ, vượt trần, lãi theo tháng, không ghi lãi,
-      phạt chậm trả, trả trước hạn) + `README.md`.
+- [x] C3. (D3) `tests/fixtures/rete/loan/`: 5–10 hợp đồng vay (hợp lệ, vượt trần, lãi theo tháng, không ghi lãi,
+      phạt chậm trả, trả trước hạn) + `README.md`. *(7 hợp đồng; chưa có: lãi không ghi kỳ, phạt + lãi quá hạn, hợp đồng
+      của tổ chức tín dụng)*
 - [ ] C3b. (D3b) `tests/fixtures/rete/lease/`: ≥5 hợp đồng thuê nhà (có `hop_dong_thue_nha_2023.txt`) + hồ sơ nhiều
       văn bản `r1/` (HĐ thuê + phụ lục gia hạn + phụ lục tăng giá) + `README.md`.
 - [ ] C4. (T5) `gold.yaml` cho a1, b1–b5, loan, **lease, r1** — **viết trước khi chạy engine trên hồ sơ đó**; mỗi nhãn

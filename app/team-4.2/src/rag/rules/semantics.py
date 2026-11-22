@@ -5,7 +5,7 @@ Giá trị chân lý: "T" đúng, "F" sai, "U" chưa biết (thiếu dữ kiện
 Thiếu dữ kiện không bao giờ thành vi phạm."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 from typing import Any, Literal, Sequence
 
@@ -173,6 +173,10 @@ class RuleResult:
     evidence: tuple[dict, ...]
     reasons: tuple[str, ...]
     object: str | None = None             # nhãn nhóm của rule xuyên đối tượng (vd. "employee=E1"); None với rule thường
+    outcome: dict = field(default_factory=dict)  # outcome của rule nguyên dạng khi finding được báo (spec §5.2); {} khi không
+    party_impact: str | None = None       # outcome["party_impact"]: bất lợi / trung lập cho bên giữ quyền (`holder`) của khái niệm
+
+    # `legality`, `employee_impact` (tên cũ của party_impact) giữ làm trường tương thích cho người đọc cũ (bridge, UI, golden).
 
 
 def fact_names(cond: Any) -> list[str]:
@@ -223,11 +227,10 @@ def _result(concept_id: str, rule: Rule, status: str, finding: str, law, facts: 
                                if n in ctx.derived and (facts.get(n) is None or facts.get(n) is UNKNOWN)])
     else:
         missing = tuple(n for n in names if facts.get(n) is None)
-    reported = finding in ctx.reported
-    return RuleResult(concept_id, rule.id, status, finding,
-                      rule.outcome.get("legality") if reported else None,
-                      rule.outcome.get("employee_impact") if reported else None,
-                      law or {}, used, missing, tuple(evidence), tuple(reasons))
+    outcome = dict(rule.outcome) if finding in ctx.reported else {}
+    impact = outcome.get("party_impact")
+    return RuleResult(concept_id, rule.id, status, finding, outcome.get("legality"), impact,
+                      law or {}, used, missing, tuple(evidence), tuple(reasons), outcome=outcome, party_impact=impact)
 
 
 @dataclass(frozen=True)

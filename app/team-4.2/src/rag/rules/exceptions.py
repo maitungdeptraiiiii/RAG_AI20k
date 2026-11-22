@@ -94,7 +94,7 @@ def finalize(base: RuleResult, overrides: Sequence[Override]) -> RuleResult:
     (giữ bất biến "thiếu dữ kiện không thành vi phạm"); trạng thái khác giữ nguyên, chỉ thêm reason."""
     true = [o for o in overrides if o.applies == "T"]
     if true:
-        return dataclasses.replace(base, status="NOT_APPLICABLE", finding="ok", legality=None, employee_impact=None,
+        return dataclasses.replace(base, status="NOT_APPLICABLE", finding="ok", legality=None, employee_impact=None, outcome={}, party_impact=None,
                                    law_values={}, missing_facts=(),
                                    reasons=tuple(f"overridden_by:{o.key}" for o in true))
     unknown = [o for o in overrides if o.applies == "U"]
@@ -102,7 +102,7 @@ def finalize(base: RuleResult, overrides: Sequence[Override]) -> RuleResult:
         return base
     reasons = (*base.reasons, *[f"exception_unknown:{o.key}" for o in unknown])
     if base.status == "FAIL":
-        return dataclasses.replace(base, status="UNKNOWN", finding="needs_facts", legality=None, employee_impact=None,
+        return dataclasses.replace(base, status="UNKNOWN", finding="needs_facts", legality=None, employee_impact=None, outcome={}, party_impact=None,
                                    missing_facts=_dedupe(base.missing_facts, *[o.open_facts for o in unknown]),
                                    reasons=reasons)
     return dataclasses.replace(base, reasons=reasons)

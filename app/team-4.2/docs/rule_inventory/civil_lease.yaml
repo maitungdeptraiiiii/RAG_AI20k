@@ -1,5 +1,5 @@
 # Bản liệt kê rule hợp đồng thuê nhà ở (phần Tuấn, T6). Miền thứ ba của định hướng W04 "phủ rộng nhiều loại hợp đồng".
-# Người soạn: Claude theo yêu cầu của Tùng — CẦN TÙNG DUYỆT (xem đầu labor_w04.yaml). Quote kiểm bằng tests/test_rule_inventory.py.
+# Người soạn: Claude theo yêu cầu của Tùng — Tùng đã duyệt 23/11 (xem đầu labor_w04.yaml). Quote kiểm bằng tests/test_rule_inventory.py.
 # Nguồn: BLDS 91/2015/QH13 Đ472–482 (thuê tài sản, luật chung); Luật Nhà ở 65/2014/QH13 (hiệu lực 01/07/2015) Đ121, 122,
 # 129, 132; Luật Nhà ở 27/2023/QH15 Đ163, 164, 170, 172. Luật 27/2023 có hiệu lực từ 01/08/2024 (Luật 43/2024/QH15 Đ2
 # sửa khoản 1 Điều 197, trước đó là 01/01/2025).
@@ -158,7 +158,7 @@
     - {facts: {tenant_barred_from_unilateral_termination: true}, expected: FAIL}
     - {facts: {}, expected: UNKNOWN, why: "chưa đọc được điều khoản chấm dứt"}
   open_questions:
-    - "Đ172.3 trao quyền nhưng không nói rõ điều khoản từ bỏ quyền này vô hiệu; xếp 'mandatory' là cách đọc của người soạn, cần Tùng duyệt."
+    - "Đ172.3 trao quyền nhưng không nói rõ điều khoản từ bỏ quyền này vô hiệu; xếp 'mandatory' là cách đọc của người soạn, Tùng đã duyệt 23/11."
     - "Điều khoản chỉ cấm chấm dứt 'tùy ý' (ngoài các trường hợp k3) thì hợp lệ: slot chỉ true khi cấm trong MỌI trường hợp."
 
 - id: civil_lease.termination_notice

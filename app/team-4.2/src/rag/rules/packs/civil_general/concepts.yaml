@@ -22,4 +22,4 @@ concepts:
     rules:
       - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
          check: {fact: terminates_without_notice, op: eq, value: false},
-         outcome: {legality: illegal, employee_impact: unfavorable}}
+         outcome: {legality: illegal, party_impact: unfavorable}}

@@ -233,10 +233,11 @@ trả khái niệm lao động, và hai gói dân sự không khai `document_fac
 | L.4 | 6 hợp đồng thuê mẫu, 11 nhãn viết trước khi chạy engine, khớp cả hai evaluator; test không báo FAIL ngoài gold; `check_contract(document_kind="lease_contract")` chạy đầu-cuối không có chữ "lao động" | Xong (nhãn chờ duyệt) |
 | L.5 | Danh sách kind chung `src/rag/rules/packs/kinds.yaml`, bộ nạp đọc cho mọi gói; gói không được khai lại kind chung khác đi; 46/51 khái niệm có kind, 5 khái niệm thai sản "không vừa" có lý do; 4 kind dùng ở ≥ 2 miền. Bản nháp `docs/rule_inventory/kinds.yaml` đã gộp và xóa | Xong (chờ duyệt) |
 | L.6 | Nhiều kind có `slot_kinds: []` (required_content, time_limit, payment, notice, count_limit, penalty) vì khái niệm lấy giá trị từ dữ kiện cấp hợp đồng hoặc có slot khác loại: kiểm theo loại slot chỉ còn ý nghĩa với leave_entitlement, prohibited_practice, rate_cap, termination | Còn (hạn chế thiết kế) |
-| L.7 | `lease.tenant_termination_right` xếp vi phạm (mandatory) là cách đọc của người soạn: Đ172.3 trao quyền nhưng không nói điều khoản từ bỏ vô hiệu | Chờ Tùng duyệt |
-| L.8 | D37 (rule xuyên văn bản thuê nhà: gia hạn, tăng giá giữa kỳ): giá mới "do các bên thỏa thuận" (Đ170.2) nên phụ lục hai bên ký là hợp lệ, chưa có rule vi phạm có căn cứ; chưa khai `object_types` Lease/Amendment | Chờ Tùng quyết |
+| L.7 | `lease.tenant_termination_right` xếp vi phạm (mandatory) là cách đọc của người soạn: Đ172.3 trao quyền nhưng không nói điều khoản từ bỏ vô hiệu | Tùng duyệt (23/11) |
+| L.8 | D37 (rule xuyên văn bản thuê nhà: gia hạn, tăng giá giữa kỳ): giá mới "do các bên thỏa thuận" (Đ170.2) nên phụ lục hai bên ký là hợp lệ, chưa có rule vi phạm có căn cứ; chưa khai `object_types` Lease/Amendment | Tùng duyệt (23/11): không có rule; r1 chỉ là hồ sơ kiểm \"phụ lục hợp lệ không ra vi phạm\" |
 | L.9 | Chưa soát: báo trước 30 ngày (Đ172.4, là mặc định, được thỏa thuận khác), cho thuê lại (sự kiện thực hiện), giá do Nhà nước quy định (nhà ở xã hội), lý do chậm trả "đã thỏa thuận" (2023) / "chính đáng" (2014); hợp đồng ký trước 01/07/2015 (Luật Nhà ở 2005) | Còn |
-| L.10 | `outcome.employee_impact` vẫn dùng cho gói vay / thuê (sai nghĩa) | Còn (D33) |
+| L.10 | `outcome.employee_impact` sai nghĩa với vay / thuê | Xong (D33): YAML mọi gói ghi `party_impact`; bộ nạp đổi `employee_impact` cũ thành `party_impact` (khai cả hai khác nhau là lỗi); `RuleResult.outcome` (dict) + `party_impact`; `employee_impact` giữ cùng giá trị để tương thích. Golden engine cũ không đổi |
+| L.12 | `RuleResult.party_impact` chưa ghi bất lợi cho BÊN nào (spec G10: vai trò `holder`); người đọc lấy `holder` từ khái niệm. UI vẫn đọc `employee_impact` (D34, để sau) | Còn |
 | L.11 | Bộ test đầy đủ sau gói thuê nhà: 35 failed (đúng số baseline, toàn agent / conversation / warehouse / pipeline), 2264 passed | Ghi nhận |
 
 ## Tồn đọng chung (môi trường, quy trình)

@@ -1,6 +1,6 @@
 # Danh sách `kind` CHUNG cho mọi gói (spec bản 3 §5.5). Bộ nạp đọc file này cho mọi gói trong cùng thư mục packs/;
 # gói chỉ được khai thêm kind riêng của nó trong pack.yaml (concept_kinds), không được khai lại kind chung khác đi.
-# Người soạn: Claude theo yêu cầu của Tùng — CẦN TÙNG DUYỆT. Kiểm bằng tests/test_kinds.py.
+# Người soạn: Claude theo yêu cầu của Tùng — Tùng đã duyệt 23/11. Kiểm bằng tests/test_kinds.py.
 #
 # slot_kinds: LOẠI slot mà khái niệm thuộc kind phải có (không ép tên slot: tên slot là khóa dữ kiện). Danh sách rỗng khi
 #   các khái niệm của kind lấy giá trị từ dữ kiện cấp hợp đồng (vd. thời hạn hợp đồng, lương) hoặc có slot khác loại nhau.

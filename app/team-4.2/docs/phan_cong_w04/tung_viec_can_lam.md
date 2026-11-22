@@ -9,7 +9,7 @@
 
 ## A. Chuẩn bị và gỡ chặn (ngày 0–1)
 
-- [ ] A1. Duyệt spec engine bản 2 (đã thêm giai đoạn 7, §5.6, §4.2); chốt §12; kiểm với bài gốc TREAT việc xử lý
+- [x] A1. Duyệt spec engine bản 2 (đã thêm giai đoạn 7, §5.6, §4.2); chốt §12; kiểm với bài gốc TREAT việc xử lý
       phủ định (spec §4.2 ghi "chưa xác minh").
 - [ ] A2. Commit spec + `docs/phan_cong_w04/`; gửi `huy.md`, `khanh.md`.
 - [x] A3. `src/rag/rules/evaluator.py`: Protocol `Evaluator`, `Session`, `Diff`, `make_evaluator` (stub, đúng kiểu). → Khánh
@@ -123,8 +123,8 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
       không truyền `packs` thì chọn theo `classify_contract` (H2 của Huy); `unknown` → không chạy gói nào + cảnh báo.
       *(Phía engine xong: `packs_for_kind`, `check_contract(document_kind=)`. Chưa có `classify_contract` nên khi không
       truyền gì vẫn dùng gói labor — chuyển tiếp, xem E5.)*
-- [ ] D33. `party_impact` trung tính: YAML mới dùng `outcome.party_impact`; bộ nạp nhận `employee_impact` cũ; thêm
-      `RuleResult.outcome` (dict) đúng spec §5.2; `employee_impact` giữ làm tên tương thích.
+- [x] D33. `party_impact` trung tính: YAML mới dùng `outcome.party_impact`; bộ nạp nhận `employee_impact` cũ; thêm
+      `RuleResult.outcome` (dict) đúng spec §5.2; `employee_impact` giữ làm tên tương thích. *(Xong 23/11: `tests/test_party_impact.py`.)*
 - [ ] D34. *(UI — để sau, 23/11)* Nhãn hiển thị theo gói: `bridge/view.py` (`VERDICTS`, `FACT_LABELS` viết cứng "người lao động") lấy từ
       `pack.yaml` (`findings` kèm nhãn, `user_fact_questions` / nhãn dữ kiện).
 - [x] D35. `kind` chung: sửa `kinds.yaml` theo B1, khai `kind` cho concept dân sự (`civil.unilateral_termination` → notice),
@@ -143,9 +143,9 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
       gói. **Còn phần UI** (`ui/contracts_api.py`, `ui/contract_studio.py`): để sau theo yêu cầu 23/11.)*
 - [x] D41. Mẫu gói: `src/rag/rules/packs/README.md` + test `tests/test_pack_plugin.py` "thêm gói giả không sửa file code nào" (chạy gói tổng
       hợp qua `check_contract` với LLM giả, kiểm trích slot, đơn vị, nhãn, đồ thị).
-- [ ] D37. Rule xuyên văn bản cho thuê nhà (hồ sơ r1: gia hạn, tăng giá giữa kỳ) sau khi đọc luật (B7). *(Đọc luật
+- [x] D37. Rule xuyên văn bản cho thuê nhà (hồ sơ r1: gia hạn, tăng giá giữa kỳ) sau khi đọc luật (B7). *(Đọc luật
       23/11: giá thuê mới luôn "do các bên thỏa thuận" (Luật Nhà ở 2023 Đ170.2), nên phụ lục gia hạn / tăng giá hai bên
-      ký là hợp lệ — chưa tìm được rule vi phạm có căn cứ; chờ Tùng quyết có bỏ mục này không.)*
+      ký là hợp lệ — chưa tìm được rule vi phạm có căn cứ; Tùng duyệt 23/11: không viết rule; r1 thành hồ sơ kiểm phụ lục hợp lệ không ra vi phạm.)*
 
 ## E. Tích hợp
 

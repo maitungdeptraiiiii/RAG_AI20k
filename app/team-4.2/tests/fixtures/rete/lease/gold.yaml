@@ -1,9 +1,9 @@
 # Nhãn đúng cho hợp đồng thuê nhà mẫu (phần Tuấn; định dạng tuan.md §3, mỗi hợp đồng là một đối tượng).
 # Viết TRƯỚC khi chạy engine trên các hợp đồng này, chỉ từ văn bản luật (docs/rule_inventory/civil_lease.yaml).
-# Người gắn nhãn: Claude theo yêu cầu của Tùng — CẦN TÙNG DUYỆT (tuan.md §4 không cho LLM tự gắn nhãn gold).
+# Người gắn nhãn: Claude theo yêu cầu của Tùng — Tùng đã duyệt 23/11 (tuan.md §4 không cho LLM tự gắn nhãn gold).
 # Ngày soát = ngày ký. Ký từ 01/08/2024: Luật Nhà ở 27/2023; trước đó: Luật Nhà ở 65/2014.
 dossier_id: lease
-labeled_by: "Claude (theo yêu cầu của Tùng) — cần Tùng duyệt"
+labeled_by: "Claude (theo yêu cầu của Tùng) — Tùng đã duyệt 23/11"
 expected:
   - rule: lease.content_property/r1
     object: t1_hop_le
@@ -44,7 +44,7 @@ expected:
     object: t4_cam_ben_thue_cham_dut
     periods: [{from: 2024-09-10, status: FAIL, finding: violation}]
     basis: {pid: "luat:27/2023/QH15#d172.k3", quote: "Bên thuê nhà ở có quyền đơn phương chấm dứt thực hiện hợp đồng thuê nhà ở khi thuộc một trong các trường hợp sau đây:"}
-    note: "cấm trong mọi trường hợp; cách đọc 'mandatory' cần Tùng duyệt (civil_lease.yaml open_questions)"
+    note: "cấm trong mọi trường hợp; cách đọc 'mandatory' Tùng đã duyệt 23/11 (civil_lease.yaml open_questions)"
 
   - rule: lease.content_property/r1
     object: t5_thieu_thoi_han

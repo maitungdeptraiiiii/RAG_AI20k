@@ -162,10 +162,14 @@ def run_case(case: GoldenCase, catalog: Catalog, evaluate_concept_fn: Callable, 
 
 
 def result_json(result) -> dict:
-    """RuleResult dạng dict JSON như golden. Golden đóng băng từ engine cũ (chưa có `object`): bỏ khóa này khi None."""
+    """RuleResult dạng dict JSON như golden. Golden đóng băng từ engine cũ (chưa có `object`, `outcome`, `party_impact`):
+    bỏ `object` khi None; `outcome` / `party_impact` (D33) phải khớp hai trường cũ `legality` / `employee_impact` rồi bỏ."""
     d = json.loads(json.dumps(asdict(result), ensure_ascii=False, sort_keys=True))
     if d.get("object", 0) is None:
         d.pop("object")
+    outcome, impact = d.pop("outcome", {}), d.pop("party_impact", None)
+    assert impact == d["employee_impact"] == outcome.get("party_impact"), (result.concept_id, result.rule_id)
+    assert d["legality"] == outcome.get("legality"), (result.concept_id, result.rule_id)
     return d
 
 

@@ -389,8 +389,21 @@ def _rule(c: dict, r: dict, pack: PackSpec, problems: list[str]) -> Rule:
         problems.append(f"{where}: exception_of {exc!r} phải có dạng <concept>/<rule>")
         exc = None
     return Rule(str(r.get("id")), r.get("mode"), r.get("derogation"), r.get("on_silence"), r.get("applicability"),
-                dict(r.get("law") or {}), tuple(r.get("cases") or ()), r.get("check"), dict(r.get("outcome") or {}),
+                dict(r.get("law") or {}), tuple(r.get("cases") or ()), r.get("check"), _outcome(where, r, problems),
                 unstated, exc, standalone, over, group_by)
+
+
+def _outcome(where: str, r: dict, problems: list[str]) -> dict:
+    """outcome của rule (spec bản 3 §5.2, G10): tên trung tính `party_impact`; `employee_impact` của YAML cũ được nhận
+    và đổi thành `party_impact`. Khai cả hai mà khác nhau là lỗi."""
+    out = dict(r.get("outcome") or {})
+    if "employee_impact" in out:
+        old = out.pop("employee_impact")
+        if "party_impact" in out and out["party_impact"] != old:
+            problems.append(f"{where}: outcome khai cả party_impact {out['party_impact']!r} và employee_impact {old!r} "
+                            "khác nhau (employee_impact là tên cũ của party_impact)")
+        out.setdefault("party_impact", old)
+    return out
 
 
 def _object_rule(where: str, r: dict, pack: PackSpec, problems: list[str]):

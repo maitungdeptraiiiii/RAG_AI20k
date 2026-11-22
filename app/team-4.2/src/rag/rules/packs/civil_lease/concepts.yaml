@@ -22,7 +22,7 @@ concepts:
       - {pid: "luat:65/2014/QH13#d121.k2", role: basis, note: "hợp đồng ký trước 01/08/2024"}
     rules:
       - {id: r1, mode: required, derogation: mandatory, on_silence: missing_content,
-         outcome: {legality: illegal, employee_impact: neutral}}
+         outcome: {legality: illegal, party_impact: neutral}}
 
   - id: lease.content_rent_payment
     kind: required_content
@@ -40,7 +40,7 @@ concepts:
       - {pid: "luat:65/2014/QH13#d121.k4", role: basis, note: "hợp đồng ký trước 01/08/2024"}
     rules:
       - {id: r1, mode: required, derogation: mandatory, on_silence: missing_content,
-         outcome: {legality: illegal, employee_impact: unfavorable}}
+         outcome: {legality: illegal, party_impact: unfavorable}}
 
   - id: lease.content_term_handover
     kind: required_content
@@ -57,7 +57,7 @@ concepts:
       - {pid: "luat:65/2014/QH13#d121.k5", role: basis, note: "hợp đồng ký trước 01/08/2024"}
     rules:
       - {id: r1, mode: required, derogation: mandatory, on_silence: missing_content,
-         outcome: {legality: illegal, employee_impact: unfavorable}}
+         outcome: {legality: illegal, party_impact: unfavorable}}
 
   # ───────────── 2. CHẤM DỨT TRƯỚC HẠN (Luật Nhà ở 2023 Đ172; 2014 Đ132) ─────────────
   - id: lease.landlord_termination
@@ -79,7 +79,7 @@ concepts:
     rules:
       - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
          check: {fact: landlord_may_terminate_at_will, op: eq, value: false},
-         outcome: {legality: illegal, employee_impact: unfavorable}}
+         outcome: {legality: illegal, party_impact: unfavorable}}
 
   - id: lease.nonpayment_termination
     kind: time_limit
@@ -108,7 +108,7 @@ concepts:
         check: {fact: nonpayment_months_before_termination, op: gte, law: min_nonpayment}
         derogation: floor
         on_silence: none
-        outcome: {legality: illegal, employee_impact: unfavorable}
+        outcome: {legality: illegal, party_impact: unfavorable}
 
   - id: lease.tenant_termination_right
     kind: termination
@@ -128,4 +128,4 @@ concepts:
     rules:
       - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
          check: {fact: tenant_barred_from_unilateral_termination, op: eq, value: false},
-         outcome: {legality: illegal, employee_impact: unfavorable}}
+         outcome: {legality: illegal, party_impact: unfavorable}}

@@ -1,9 +1,9 @@
 # Nhãn đúng cho hợp đồng vay mẫu (phần Tuấn, T5; định dạng tuan.md §3, mỗi hợp đồng là một đối tượng).
 # Viết TRƯỚC khi chạy engine trên các hợp đồng này, chỉ từ văn bản luật (docs/rule_inventory/civil_loan.yaml).
-# Người gắn nhãn: Claude theo yêu cầu của Tùng — CẦN TÙNG DUYỆT (tuan.md §4 không cho LLM tự gắn nhãn gold).
+# Người gắn nhãn: Claude theo yêu cầu của Tùng — Tùng đã duyệt 23/11 (tuan.md §4 không cho LLM tự gắn nhãn gold).
 # Ngày soát = ngày ký (check_contract soát theo ngày ký).
 dossier_id: loan
-labeled_by: "Claude (theo yêu cầu của Tùng) — cần Tùng duyệt"
+labeled_by: "Claude (theo yêu cầu của Tùng) — Tùng đã duyệt 23/11"
 expected:
   - rule: loan.interest_cap/r1
     object: l1_hop_le

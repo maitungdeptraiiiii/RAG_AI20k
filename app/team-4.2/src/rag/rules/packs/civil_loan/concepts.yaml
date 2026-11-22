@@ -36,11 +36,11 @@ concepts:
         check: {fact: interest_rate, op: lte, law: max_interest}
         derogation: mandatory
         on_silence: none
-        outcome: {legality: illegal, employee_impact: unfavorable}
+        outcome: {legality: illegal, party_impact: unfavorable}
       # Đ468.1 "trừ trường hợp luật khác có liên quan quy định khác" (vd. Luật Các TCTD Đ100.2).
       - {id: r1_special_law, mode: required, derogation: mandatory, on_silence: none, exception_of: loan.interest_cap/r1,
          applicability: {fact: special_law_applies, op: eq, value: true},
-         outcome: {legality: illegal, employee_impact: unfavorable}}
+         outcome: {legality: illegal, party_impact: unfavorable}}
 
   - id: loan.overdue_interest_cap
     kind: rate_cap
@@ -67,7 +67,7 @@ concepts:
         check: {fact: overdue_rate, op: lte, law: max_overdue}
         derogation: mandatory
         on_silence: none
-        outcome: {legality: illegal, employee_impact: unfavorable}
+        outcome: {legality: illegal, party_impact: unfavorable}
 
   - id: loan.late_interest_cap
     kind: rate_cap
@@ -94,7 +94,7 @@ concepts:
         check: {fact: late_interest_rate, op: lte, law: max_late}
         derogation: mandatory
         on_silence: none
-        outcome: {legality: illegal, employee_impact: unfavorable}
+        outcome: {legality: illegal, party_impact: unfavorable}
 
   - id: loan.lender_early_recall
     kind: termination
@@ -116,10 +116,10 @@ concepts:
     rules:
       - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
          check: {fact: lender_may_recall_early_without_consent, op: eq, value: false},
-         outcome: {legality: illegal, employee_impact: unfavorable}}
+         outcome: {legality: illegal, party_impact: unfavorable}}
       - {id: r1_misuse, mode: required, derogation: mandatory, on_silence: none, exception_of: loan.lender_early_recall/r1,
          applicability: {fact: recall_only_on_misuse, op: eq, value: true},
-         outcome: {legality: illegal, employee_impact: unfavorable}}
+         outcome: {legality: illegal, party_impact: unfavorable}}
 
   - id: loan.borrower_early_repayment
     kind: termination
@@ -140,4 +140,4 @@ concepts:
       - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
          applicability: {fact: has_interest, op: eq, value: khong_lai},
          check: {fact: borrower_barred_from_early_repayment, op: eq, value: false},
-         outcome: {legality: illegal, employee_impact: unfavorable}}
+         outcome: {legality: illegal, party_impact: unfavorable}}

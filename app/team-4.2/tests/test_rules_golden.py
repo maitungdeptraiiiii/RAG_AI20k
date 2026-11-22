@@ -8,11 +8,11 @@ from rules_golden_cases import case_from_json, golden_cases, load_golden, run_ca
 CAT = load_catalog()
 
 
-def _mismatches(evaluate_concept_fn):
+def _mismatches(evaluate_concept_fn, **kw):
     bad = []
     for row in load_golden():
         case = case_from_json(row["case"])
-        if run_case(case, CAT, evaluate_concept_fn) != row["result"]:
+        if run_case(case, CAT, evaluate_concept_fn, **kw) != row["result"]:
             bad.append(case.case_id)
     return bad
 
@@ -30,3 +30,12 @@ def test_golden_via_bridge_api_unchanged():
 
 def test_golden_generation_is_deterministic():
     assert golden_cases(CAT) == golden_cases(CAT)
+
+
+def test_golden_via_rules_reference():
+    from functools import partial
+
+    from rag.rules import reference, semantics
+    bad = _mismatches(partial(reference.evaluate_concept, ctx=CAT.context), fact_cls=semantics.Fact,
+                      conflict=semantics.CONFLICT)
+    assert bad == [], f"{len(bad)} ca lệch golden, 5 ca đầu: {bad[:5]}"

@@ -42,11 +42,12 @@ class GoldenCase:
     day: date
 
 
-def facts_from_spec(spec: Mapping[str, Any] | None) -> Facts:
-    """{"tên": [giá trị, đơn vị?]} hoặc "CONFLICT" -> Facts (cùng dạng engine_cases.yaml)."""
+def facts_from_spec(spec: Mapping[str, Any] | None, fact_cls=Fact, conflict=CONFLICT) -> Facts:
+    """{"tên": [giá trị, đơn vị?]} hoặc "CONFLICT" -> Facts (cùng dạng engine_cases.yaml). `fact_cls` / `conflict`
+    chọn lớp của engine đang thử (engine cũ và rag.rules có hai lớp Fact khác nhau đến khi bridge.engine thành shim)."""
     out: Facts = {}
     for name, v in (spec or {}).items():
-        out[name] = CONFLICT if v == "CONFLICT" else Fact(v[0], v[1] if len(v) > 1 else None)
+        out[name] = conflict if v == "CONFLICT" else fact_cls(v[0], v[1] if len(v) > 1 else None)
     return out
 
 
@@ -151,9 +152,10 @@ def golden_cases(catalog: Catalog) -> list[GoldenCase]:
     return cases
 
 
-def run_case(case: GoldenCase, catalog: Catalog, evaluate_concept_fn: Callable) -> dict:
+def run_case(case: GoldenCase, catalog: Catalog, evaluate_concept_fn: Callable, *, fact_cls=Fact,
+             conflict=CONFLICT) -> dict:
     """Kết quả của đúng rule `case.rule_id`, dạng dict JSON. `evaluate_concept_fn(concept, facts, present=, evidence=, day=)`."""
-    results = evaluate_concept_fn(catalog.concepts[case.concept_id], facts_from_spec(case.facts),
+    results = evaluate_concept_fn(catalog.concepts[case.concept_id], facts_from_spec(case.facts, fact_cls, conflict),
                                   present=case.present, evidence=(), day=case.day)
     got = next(r for r in results if r.rule_id == case.rule_id)
     return json.loads(json.dumps(asdict(got), ensure_ascii=False, sort_keys=True))

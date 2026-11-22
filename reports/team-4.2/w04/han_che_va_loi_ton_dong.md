@@ -91,6 +91,30 @@ có chi phí nếu sai). Nhánh `feat/team-4.2/w04-rules-engine`, chưa merge. T
 | 5.7 | Tháng = 30 ngày, năm = 360 ngày trong bảng quy đổi (cùng cách với gói labor) | Có chủ ý |
 | 5.8 | Ngoại lệ chéo gói chưa có ca thật (ngoại lệ luật chuyên ngành đặt cùng gói `civil_loan`); cơ chế đã có test bằng gói tổng hợp | Còn |
 
+## Giai đoạn 6 — benchmark
+
+| # | Mục | Trạng thái |
+|---|---|---|
+| 6.1 | Benchmark (`scripts/bench_rule_engine.py`, `src/rag/rules/bench/synth.py`, 6 kịch bản, hai trục) **giao cho Khánh** theo `khanh.md` (K2); Tùng không làm thay để giữ phần đo độc lập. Engine đã có đủ interface Khánh cần (`engine_interface.md`). Đến khi có số liệu, vẫn **chưa chứng minh được** "nhiều rule vẫn chịu được" (xem 2.8) | Chờ Khánh |
+| 6.2 | `network+beta` (D30, Could) không làm | Có chủ ý |
+
+## Giai đoạn 7 — đối tượng, đếm, phủ định (TREAT)
+
+| # | Mục | Trạng thái |
+|---|---|---|
+| 7.1 | `next_questions` khóa kết quả theo `(concept, rule)` nên gộp nhầm các nhóm của rule xuyên đối tượng (đếm 1 thay vì 2). Nay khóa theo cả `object`; `evaluation_diff` và `explain` cũng phân biệt nhóm | Đã sửa |
+| 7.2 | Viết `timeline.py` trước khi chạy test đỏ (lệch TDD); bù bằng 3 đột biến cố ý, test đều bắt được | Đã xử lý |
+| 7.3 | `over` chỉ một biến; nối nhiều biến (ghép cặp hai đối tượng khác kiểu, vd. phụ lục ↔ hợp đồng theo điều kiện trên cả hai) chưa làm; hiện thay bằng `group_by` nhiều khóa | Còn |
+| 7.4 | Rule xuyên đối tượng không dùng được `exception_of`; bốn ngoại lệ Đ20.2.c của `r5` viết lại bằng `applicability` (lặp với `r3_*`) | Có chủ ý |
+| 7.5 | Không có đối tượng của kiểu → `NOT_APPLICABLE no_objects` (kể cả `exists`): hồ sơ thiếu hẳn hợp đồng không bị báo vi phạm | Có chủ ý |
+| 7.6 | Chưa có nguồn đối tượng thật: `dossier_objects` của Huy (H2) chưa xong, `check_contract` chưa truyền `objects`; rule xuyên văn bản chỉ chạy trong test và qua API phiên | Còn |
+| 7.7 | `explain` của rule xuyên đối tượng dừng ở số đếm nhóm, chưa mở tới từng đối tượng / ứng viên U | Còn |
+| 7.8 | `history: true` đếm cả hợp đồng đã hết hạn nhưng không kiểm "liên tiếp" (Đ20.2.c nói ký mới sau HĐ cũ); hợp đồng cách nhau nhiều năm vẫn bị đếm | Còn (cần người làm pháp lý xem) |
+| 7.9 | `r7` (Đ22.2) dựa vào thuộc tính `modifies_term` của phụ lục; việc nhận ra phụ lục có sửa thời hạn là phần trích (Huy), engine không tự suy | Còn |
+| 7.10 | Soát theo kỳ (D28) chưa so với `gold.yaml` vì bộ A (C1, C4) chưa có; mỗi ngày ranh giới tạo một phiên mới (không tận dụng tăng dần giữa các ngày) | Còn |
+| 7.11 | Network tính lại số đếm của rule bằng cách cộng lại toàn bộ trị ứng viên đã nhớ của rule đó (O(số đối tượng) phép cộng); chỉ phần đắt (đánh giá `where`, dữ kiện suy ra theo đối tượng) là tăng dần | Có chủ ý |
+| 7.12 | Hai đối tượng khác kiểu có thể trùng `id`; `apply_object_changes` coi `id` là khóa duy nhất của cả hồ sơ | Còn |
+
 ## Tồn đọng chung (môi trường, quy trình)
 
 | # | Mục | Trạng thái |
@@ -103,4 +127,4 @@ có chi phí nếu sai). Nhánh `feat/team-4.2/w04-rules-engine`, chưa merge. T
 | E.6 | Spec §4.2 ghi "chưa xác minh" việc xử lý phủ định trong bài gốc TREAT; checklist A1 chưa tick | Còn |
 | E.7 | Chưa merge, chưa push; việc tích hợp là quyết định của người dùng | Chờ quyết định |
 | E.8 | Nhánh có thay đổi cũ không phải của phiên này (`reports/week-02`, `week-03` README, các thư mục dữ liệu chưa theo dõi); không đưa vào commit nào | Có chủ ý |
-| E.9 | Giai đoạn 6–7 chưa xong (benchmark, đối tượng và join) | Chưa làm |
+| E.9 | Giai đoạn 6 (benchmark) chờ Khánh; giai đoạn 7 đã xong phần engine | Chờ |

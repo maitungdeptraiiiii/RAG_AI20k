@@ -275,6 +275,17 @@ riêng (vd. `Contract.kind_effective`); ngữ nghĩa cây ngoại lệ giữ ngu
 
 Bộ nạp kiểm: biến đã khai báo, kiểu tồn tại, không nối vòng.
 
+*Chốt khi triển khai (giai đoạn 7, `rules/objects.py`, `network/session.py`):*
+- `over` chỉ **một biến**; "ghép cặp" viết bằng `group_by` nhiều khóa (vd. `employee` + `job`). Nối nhiều biến chưa làm.
+- `over.<biến>.history: true`: thành viên = `valid_from ≤ day` (bỏ `valid_to`), để đếm hợp đồng đã ký; mặc định như trên.
+- Kiểu đối tượng khai trong `pack.yaml` `object_types: {Kiểu: {attrs, refs}}`; `derived` có thể khai `object_type`.
+- Nhóm: khóa đã biết của mọi đối tượng cùng kiểu (kể cả ứng viên F) tạo nhóm; chỉ có ứng viên khóa chưa biết thì một
+  nhóm `object=None`. Không có đối tượng nào của kiểu → một kết quả `NOT_APPLICABLE` reason `no_objects`.
+- Rule xuyên đối tượng coi như có mặt (cấp hồ sơ) và **không tham gia `exception_of`**; ngoại lệ viết bằng `applicability`.
+- `reasons` có `count:<n_T>..<n_T+n_U>`. Ngưỡng là `value` hoặc `law: <tên>`.
+- Network: `ObjectMemory` giữ đối tượng, bảng dữ kiện từng đối tượng và trị ứng viên theo (rule, đối tượng); đối tượng đổi
+  → chỉ tính lại ứng viên của nó, số đếm cộng lại từ trị đã nhớ (không lưu kết quả nối trung gian).
+
 ## 6. Mạng phụ thuộc tăng dần ba trị (join kiểu TREAT)
 
 ### 6.1 Hai phần

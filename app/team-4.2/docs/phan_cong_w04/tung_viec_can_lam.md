@@ -83,19 +83,20 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
 - [x] D22. Trường `kind` trong concept + kiểm slot khớp kind (B1). (Kiểm theo *loại* slot, không ép tên slot; danh sách kind của B1 chưa có, mới khai `rate_cap`.)
 
 **P7a — ngữ nghĩa đối tượng trong Reference (làm ngay sau P1, song song P2; Reference là chuẩn đúng nên có trước mạng)**
-- [ ] D23. Spec §5.6 trong `semantics.py`: ba trị của ứng viên, đếm theo khoảng `[n_T, n_T + n_U]`, `exists` /
+- [x] D23. Spec §5.6 trong `semantics.py`: ba trị của ứng viên, đếm theo khoảng `[n_T, n_T + n_U]`, `exists` /
       `not exists`, thành viên theo ngày soát, nhóm; trường `RuleResult.object`.
-- [ ] D24. Cú pháp YAML `over` / `group_by` / `check.count` + loader kiểm (biến, kiểu, không vòng).
-- [ ] D25. `ReferenceEvaluator` nhận `objects`; test bảng chân lý §5.6 (mọi toán tử, ứng viên U, `valid_from` chưa biết,
+- [x] D24. Cú pháp YAML `over` / `group_by` / `check.count` + loader kiểm (biến, kiểu, không vòng).
+- [x] D25. `ReferenceEvaluator` nhận `objects`; test bảng chân lý §5.6 (mọi toán tử, ứng viên U, `valid_from` chưa biết,
       khóa nhóm chưa biết).
-- [ ] D26. Rule xuyên văn bản vào `packs/labor/`: số lần ký HĐ XĐTH (b1/b2), chuyển loại HĐ (b3/b4), thử việc lại
+- [x] D26. Rule xuyên văn bản vào `packs/labor/`: số lần ký HĐ XĐTH (b1/b2), chuyển loại HĐ (b3/b4), thử việc lại
       (b5), đếm phụ lục sửa thời hạn (a1).
 
 **P7b — join kiểu TREAT trong mạng (sau P3)**
-- [ ] D27. `network/objects.py`: `ObjectMemory`, `GroupMatchNode`, `ObjectLeaf`; `update(objects=...)` chỉ tính lại
+      Đã có: `content.term/r5` (Đ20.2.c đếm HĐ), `r6` (Đ20.2.b theo từng HĐ), `r7` (Đ22.2), `probation.once/r2` (Đ25).
+- [x] D27. `network/objects.py`: `ObjectMemory`, `GroupMatchNode`, `ObjectLeaf`; `update(objects=...)` chỉ tính lại
       nhóm bị ảnh hưởng, không lưu kết quả nối trung gian.
-- [ ] D28. Soát theo kỳ cho bộ A (kết quả theo khoảng thời gian, khớp `gold.yaml`).
-- [ ] D29. Đối chiếu ngẫu nhiên Network = Reference có đối tượng (thêm / xóa / đổi đối tượng).
+- [x] D28. Soát theo kỳ cho bộ A (kết quả theo khoảng thời gian, khớp `gold.yaml`). (`rules/timeline.py`; chưa so với `gold.yaml` vì bộ A — C1/C4 — chưa có.)
+- [x] D29. Đối chiếu ngẫu nhiên Network = Reference có đối tượng (thêm / xóa / đổi đối tượng).
 - [ ] D30. (Could) biến thể `network+beta` (nối lưu bộ nhớ beta kiểu Rete) chỉ để Khánh so với TREAT trên trục 2.
 
 ## E. Tích hợp
@@ -105,7 +106,7 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
 - [x] E2. `tools.check_concept` + `ask_contract_graph` dùng session.
 - [ ] E3. Endpoint SSE trong `ui/contract_studio.py`: chạy hồ sơ / kịch bản, phát `evaluation_diff`, trả `explain`,
       `next_questions`, nhận `answer`.
-- [ ] E4. Báo Khánh engine thật sẵn sàng. → Khánh
+- [x] E4. Báo Khánh engine thật sẵn sàng. → Khánh (`reports/team-4.2/w04/engine_interface.md`; cần gửi cho Khánh và Huy)
 
 ## F. UI Contract Studio (phần Tú)
 

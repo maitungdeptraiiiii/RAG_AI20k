@@ -168,6 +168,40 @@ Tiêu chí: lõi và luồng soát dùng được cho hợp đồng không phả
 | R.16 | Thuê nhà (B7 / T6) chưa đọc | Làm trước C3b và trước khi sửa `kinds.yaml` (để kind kiểm được trên ba miền) |
 | R.17 | UI (F) chưa làm | Kịch bản demo có r1 (thuê nhà); nhãn lấy theo gói |
 
+## Thử nghiệm "cắm gói mới như module" (23/11)
+
+Câu hỏi của Tùng: thêm một loại hợp đồng mới có cần sửa nhiều code không. Cách kiểm: chạy hợp đồng vay mẫu qua
+`check_contract(packs=["civil_loan"])` với LLM giả, và tìm chỗ còn gọi gói labor ngoài `rag.rules`.
+
+**Kết luận: lớp engine là module (chỉ YAML); lớp quanh engine chưa.** Thêm gói chỉ bằng YAML đã chạy được cho rule,
+ngoại lệ, đơn vị, kiểu đối tượng, `kind`. Nhưng một loại hợp đồng mới hiện còn phải sửa code ở 6 chỗ:
+
+| # | Chỗ | Bằng chứng | Hậu quả với loại hợp đồng mới | Việc |
+|---|---|---|---|---|
+| M.1 | `facts_map.normalize_slot` | Lãi "30%/năm" ra `Fact(30, "percent")` thay vì `percent_per_year`; so với trần 20%/năm không quy đổi được | Rule ra `UNKNOWN needs_facts` mà `missing_facts` rỗng: **không bao giờ báo vi phạm, người dùng không có gì để trả lời**. Lãi theo tháng bị coi như theo năm nếu bỏ chữ kỳ: sai gấp 12 lần | D38 |
+| M.2 | `facts_map._CONTRACT_MAP` | 7 dữ kiện lao động viết cứng (`contract_kind`, `term_months`, `base_salary_vnd`, …) | `document_facts` khai trong `pack.yaml` của gói mới không bao giờ được điền từ hợp đồng. Hai gói dân sự hiện để `document_facts: {}` nên che mất lỗi này | D39 |
+| M.3 | Prompt `TAG_PROMPT`, `RECHECK_PROMPT`, `AGENT_PROMPT` | Thử nghiệm: prompt gán khái niệm gửi cho hợp đồng vay mở đầu bằng "hợp đồng lao động tiếng Việt" | LLM bị dẫn sai miền; đã giao Huy (H2) | H2 |
+| M.4 | `ui/contracts_api.py` 437, 514; `ui/contract_studio.py` 34, 268; `contracts/graph/build.py:164` | Đều gọi `load_catalog()` (labor) không có `packs` | UI không chọn được gói; đồ thị bỏ cạnh `HOLDER` im lặng cho khái niệm gói khác (không cảnh báo) | D40 |
+| M.5 | `bridge/view.py` `FACT_LABELS`, `VERDICTS` | Bảng tĩnh tiếng lao động | Dữ kiện / finding của gói mới hiển thị thô hoặc sai nghĩa | D34 |
+| M.6 | Chọn gói theo loại hợp đồng | `resolve_catalog` mặc định labor; chưa có `classify_contract` | Hợp đồng thuê nhà bị soát bằng rule lao động | D32, E5 |
+
+**Trạng thái sau khi sửa (23/11, phần logic; UI để sau theo yêu cầu):**
+
+| # | Trạng thái | Commit |
+|---|---|---|
+| M.1 | Đã sửa: `unit_forms` trong `pack.yaml`; "30%/năm" ra `percent_per_year`; tỉ lệ không ghi kỳ với slot theo kỳ thì không đoán (slot không chuẩn hóa được → thao tác chờ duyệt) | f0c5777 |
+| M.2 | Đã sửa: `document_facts` khai `from` + `parse`; `extract_fields`; gói labor chuyển sang khai báo, kết quả giữ nguyên | 50aed8a |
+| M.3 | Đã sửa phần nhãn loại văn bản: `document_labels`; ba prompt điền theo gói, gói labor ra đúng văn bản cũ. Phần prompt dựng theo `kind` vẫn là của Huy (H2) | 9c2fdc3 |
+| M.4 | Phần logic đã sửa: vai trò các bên theo `roles` (+ `aliases`) của gói; ASSERT khái niệm ghi `holder`; đồ thị nối `HOLDER` cho mọi gói. **Còn** `ui/contracts_api.py`, `ui/contract_studio.py` (UI, để sau) | 9bf2816 |
+| M.5 | **Còn** (UI, để sau): `bridge/view.py` | — |
+| M.6 | Phía engine đã sửa: `packs_for_kind`, `check_contract(document_kind=)`, loại không có gói → không chạy rule nào, không gọi LLM. **Còn** `classify_contract` (Huy) và việc bỏ mặc định labor khi không truyền gì (chuyển tiếp) | 1ae4ee3 |
+| M.7 | Test chặn tái phát: `tests/test_pack_plugin.py` (gói giả chạy hết luồng; đã thử ba đột biến, đều bị bắt) | (commit này) |
+| M.8 | Mới thấy khi sửa M.1: slot không chuẩn hóa được làm thao tác ASSERT thành `pending` (chờ duyệt), khái niệm coi như chưa có mặt cho tới khi duyệt; với rule `on_silence: none` kết quả tạm là PASS. Đây là hành vi có sẵn cho mọi gói, không mới, nhưng với "lãi 30%" không ghi kỳ thì kết quả tạm PASS dễ gây hiểu nhầm | Còn |
+
+Vì sao test cũ không bắt được: `test_check_contract_with_packs_labor_matches_default` và test gói vay chỉ dùng LLM giả
+trả khái niệm lao động, và hai gói dân sự không khai `document_facts`. Đã thêm D41: test "gói giả chạy qua
+`check_contract` không sửa file code nào" để lỗi kiểu này lộ ra khi thêm gói thứ tư.
+
 ## Tồn đọng chung (môi trường, quy trình)
 
 | # | Mục | Trạng thái |

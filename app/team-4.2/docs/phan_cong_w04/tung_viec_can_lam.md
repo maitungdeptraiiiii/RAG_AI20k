@@ -113,16 +113,30 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
 **P8 — phủ rộng (bản 3, Must)**
 - [ ] D31. Gói `packs/civil_lease/` (extends `civil_general`) từ B7; `document_kinds: [lease_contract]`, `object_types`
       `Lease` / `Amendment`, `roles` bên cho thuê / bên thuê.
-- [ ] D32. `document_kinds` của mọi gói thành nguồn chọn gói: `packs_for_kind(kind) -> list[str]`; `check_contract`
+- [x] D32. `document_kinds` của mọi gói thành nguồn chọn gói: `packs_for_kind(kind) -> list[str]`; `check_contract`
       không truyền `packs` thì chọn theo `classify_contract` (H2 của Huy); `unknown` → không chạy gói nào + cảnh báo.
+      *(Phía engine xong: `packs_for_kind`, `check_contract(document_kind=)`. Chưa có `classify_contract` nên khi không
+      truyền gì vẫn dùng gói labor — chuyển tiếp, xem E5.)*
 - [ ] D33. `party_impact` trung tính: YAML mới dùng `outcome.party_impact`; bộ nạp nhận `employee_impact` cũ; thêm
       `RuleResult.outcome` (dict) đúng spec §5.2; `employee_impact` giữ làm tên tương thích.
-- [ ] D34. Nhãn hiển thị theo gói: `bridge/view.py` (`VERDICTS`, `FACT_LABELS` viết cứng "người lao động") lấy từ
+- [ ] D34. *(UI — để sau, 23/11)* Nhãn hiển thị theo gói: `bridge/view.py` (`VERDICTS`, `FACT_LABELS` viết cứng "người lao động") lấy từ
       `pack.yaml` (`findings` kèm nhãn, `user_fact_questions` / nhãn dữ kiện).
 - [ ] D35. `kind` chung: sửa `kinds.yaml` theo B1, khai `kind` cho concept dân sự (`civil.unilateral_termination` → notice),
       test mọi concept của mọi gói có kind hoặc nằm trong "không vừa".
 - [ ] D36. Test ba miền: nạp `labor` + `civil_loan` + `civil_lease` cùng lúc không xung đột; hợp đồng thuê nhà mẫu không
       ra kết quả gói `labor`; khi soát vay / thuê, không prompt / nhãn nào có chữ "lao động".
+- [x] D38. `bridge/facts_map.normalize_slot` theo `slot.unit` của gói: `percent` kèm kỳ ("/năm", "/tháng") ra
+      `percent_per_year` / `percent_per_month`, `money` đúng đơn vị gói; hiện luôn trả `percent` / `vnd` nên lãi vay
+      "30%/năm" ra UNKNOWN rỗng `missing_facts` (thử nghiệm 23/11).
+- [x] D39. `document_facts` của gói khai cách trích (`pack.yaml`: khóa trường trích + bộ chuẩn hóa trong sổ đăng ký);
+      `facts_map._CONTRACT_MAP` (7 dữ kiện lao động viết cứng) đọc từ gói; gói không khai thì không có dữ kiện hợp đồng.
+- [ ] D40. Gói được chọn đi suốt luồng: `ui/contracts_api.py` (dòng 437, 514), `ui/contract_studio.py` (34, 268) và
+      `contracts/graph/build.py:164` gọi `load_catalog()` (labor) không `packs`; đồ thị bỏ cạnh `HOLDER` im lặng cho khái
+      niệm gói khác. Truyền `catalog` / `packs` từ `check_contract` xuống.
+      *(Phần logic xong: vai trò các bên theo `roles` của gói, ASSERT khái niệm ghi `holder`, đồ thị nối `HOLDER` cho mọi
+      gói. **Còn phần UI** (`ui/contracts_api.py`, `ui/contract_studio.py`): để sau theo yêu cầu 23/11.)*
+- [x] D41. Mẫu gói: `src/rag/rules/packs/README.md` + test `tests/test_pack_plugin.py` "thêm gói giả không sửa file code nào" (chạy gói tổng
+      hợp qua `check_contract` với LLM giả, kiểm trích slot, đơn vị, nhãn, đồ thị).
 - [ ] D37. Rule xuyên văn bản cho thuê nhà (hồ sơ r1: gia hạn, tăng giá giữa kỳ) sau khi đọc luật (B7).
 
 ## E. Tích hợp
@@ -170,12 +184,12 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
 | A Chuẩn bị | 5 |
 | B Phân tích luật | 7 |
 | C Dữ liệu | 8 |
-| D Engine | 37 (trong đó D30 là Could) |
+| D Engine | 41 (trong đó D30 là Could) |
 | E Tích hợp | 5 |
 | F UI | 7 |
 | G Đánh giá + demo | 6 |
 | H Theo dõi | 4 |
-| **Cộng** | **79** (78 không tính Could) |
+| **Cộng** | **83** (82 không tính Could) |
 
 Đường găng (trễ là trễ cả tuần): A5 → D1–D7 → D23–D25 (Reference có đối tượng) → D8–D11 → D13–D16 → D26–D29 → E3 →
 F6/F7 → G5. Mạng điều kiện (D8–D11) và Reference có đối tượng (D23–D25) có thể xen kẽ vì dùng chung `semantics.py`.

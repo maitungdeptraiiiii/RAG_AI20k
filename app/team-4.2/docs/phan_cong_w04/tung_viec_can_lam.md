@@ -11,7 +11,7 @@
 
 - [x] A1. Duyệt spec engine bản 2 (đã thêm giai đoạn 7, §5.6, §4.2); chốt §12; kiểm với bài gốc TREAT việc xử lý
       phủ định (spec §4.2 ghi "chưa xác minh").
-- [ ] A2. Commit spec + `docs/phan_cong_w04/`; gửi `huy.md`, `khanh.md`.
+- [x] A2. Commit spec + `docs/phan_cong_w04/`; gửi `huy.md`, `khanh.md`. *(Đã commit; việc gửi cho Huy / Khánh: Tùng.)*
 - [x] A3. `src/rag/rules/evaluator.py`: Protocol `Evaluator`, `Session`, `Diff`, `make_evaluator` (stub, đúng kiểu). → Khánh
 - [x] A4. Chốt định dạng: `dossier.yaml`, `gold.yaml` (theo kỳ), `scenario.yaml`, bản liệt kê rule, JSON
       `evaluation_diff` / `ExplanationTree` / `Question`, `WorkingObject`. → Huy, Khánh
@@ -35,7 +35,9 @@
       định Luật Nhà ở đè BLDS ghi thành `exceptions`. *(9 mục, trích theo kỳ Luật Nhà ở 2014 / 2023 (`periods`);
       Luật 27/2023 hiệu lực 01/08/2024 theo Luật 43/2024. Quan hệ BLDS ↔ Luật Nhà ở ghi ở open_questions thay vì
       exceptions vì BLDS Đ472 dẫn thẳng sang Luật Nhà ở. Cần duyệt.)*
-- [ ] B6. Kiểm lại mọi số điều đã ghi trong spec / file phân công theo văn bản gốc.
+- [x] B6. Kiểm lại mọi số điều đã ghi trong spec / file phân công theo văn bản gốc. *(23/11: mọi điều dẫn trong spec
+      và 5 file phân công có trong kho và đúng tên điều (BLLĐ 20/22/24/25/90/91/149/151/177; BLDS 418/428/463–482;
+      LNO 2023 163–173; LNO 2014 121–132); 105 neo của ba gói trỏ đúng Điều/Khoản — test `tests/test_anchor_articles.py`.)*
 
 Mỗi mục: pid, quote nguyên văn, type, kind, derogation, facts_needed, threshold, exceptions (mỗi cái có pid + quote),
 conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).

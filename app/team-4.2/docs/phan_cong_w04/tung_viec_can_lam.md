@@ -55,11 +55,11 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
 - [x] D7. Nghiệm thu P1: toàn bộ `tests/test_bridge_*.py`, `test_contract_graph_tools.py` + golden xanh.
 
 **P2 — mạng điều kiện (mệnh đề, tăng dần)**
-- [ ] D8. `network/nodes.py`: Fact, Alpha (dùng chung), And/Or/Not (bộ đếm T/F/U), Law, LawLeaf, Presence, Rule.
-- [ ] D9. `network/network.py`: biên dịch từ pack, rank topo, cache theo (packs, version).
-- [ ] D10. `network/session.py`: `results`, `update` (hàng đợi theo rank, mỗi node tính ≤1 lần), `fork`, `Diff`.
-- [ ] D11. Test đối chiếu ngẫu nhiên Network = Reference (pack + dữ kiện + chuỗi update, seed cố định, vài nghìn ca).
-- [ ] D12. Bất biến: dữ kiện chuyển sang thiếu không làm rule nào thành `FAIL`.
+- [x] D8. `network/nodes.py`: Fact, Alpha (dùng chung), And/Or/Not (bộ đếm T/F/U), Law, LawLeaf, Presence, Rule.
+- [x] D9. `network/network.py`: biên dịch từ pack, rank topo, cache theo (packs, version).
+- [x] D10. `network/session.py`: `results`, `update` (hàng đợi theo rank, mỗi node tính ≤1 lần), `fork`, `Diff`.
+- [x] D11. Test đối chiếu ngẫu nhiên Network = Reference (pack + dữ kiện + chuỗi update, seed cố định, vài nghìn ca).
+- [x] D12. Bất biến: dữ kiện chuyển sang thiếu không làm rule nào thành `FAIL`.
 
 **P3 — kết luận trung gian + ngoại lệ**
 - [ ] D13. `derived` + cây ngoại lệ (§5.3) ở cả hai evaluator; phát hiện vòng; `missing_facts` mở ra dữ kiện đầu vào.
@@ -95,9 +95,9 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
 
 ## E. Tích hợp
 
-- [ ] E1. `check_contract`: tham số `packs=`, `evaluator=` (mặc định `network`), biến môi trường
+- [x] E1. `check_contract`: tham số `packs=`, `evaluator=` (mặc định `network`), biến môi trường *(phần `packs=` chưa làm: giai đoạn 5)*
       `RAG_RULE_EVALUATOR`; sau recheck chỉ `update` dữ kiện mới.
-- [ ] E2. `tools.check_concept` + `ask_contract_graph` dùng session.
+- [x] E2. `tools.check_concept` + `ask_contract_graph` dùng session.
 - [ ] E3. Endpoint SSE trong `ui/contract_studio.py`: chạy hồ sơ / kịch bản, phát `evaluation_diff`, trả `explain`,
       `next_questions`, nhận `answer`.
 - [ ] E4. Báo Khánh engine thật sẵn sàng. → Khánh

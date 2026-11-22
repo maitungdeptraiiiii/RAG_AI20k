@@ -103,7 +103,7 @@ def evaluator_for(catalog: Catalog, kind: EvaluatorKind = "reference") -> Evalua
 
 def default_kind() -> EvaluatorKind:
     """Evaluator mặc định, đổi được bằng biến môi trường RAG_RULE_EVALUATOR (reference | network)."""
-    kind = os.environ.get("RAG_RULE_EVALUATOR", "reference")
+    kind = os.environ.get("RAG_RULE_EVALUATOR", "network")
     if kind not in ("reference", "network"):
         raise ValueError(f"RAG_RULE_EVALUATOR={kind!r}: chọn 'reference' hoặc 'network'")
     return kind                                                                 # type: ignore[return-value]

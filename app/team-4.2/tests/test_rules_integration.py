@@ -50,3 +50,14 @@ def test_network_evaluator_is_actually_used_and_recheck_goes_through_update(monk
     monkeypatch.setattr(NetworkSession, "update", lambda self, *a, **k: calls.append(sorted(a[0])) or orig(self, *a, **k))
     check_contract(ScriptLLM(), contract(), catalog=CAT, at=AT, model="m", evaluator="network")
     assert calls and all(isinstance(names, list) for names in calls)
+
+
+def test_default_evaluator_is_network(monkeypatch):
+    from rag.rules.evaluator import default_kind
+    monkeypatch.delenv("RAG_RULE_EVALUATOR", raising=False)
+    assert default_kind() == "network"
+    monkeypatch.setenv("RAG_RULE_EVALUATOR", "reference")
+    assert default_kind() == "reference"
+    monkeypatch.setenv("RAG_RULE_EVALUATOR", "khong_co")
+    with pytest.raises(ValueError, match="khong_co"):
+        default_kind()

@@ -10,6 +10,12 @@ from rag.rules.network.nodes import CondState
 from rag.rules.semantics import (Fact, Facts, RuleInputs, RuleResult, check_cond, decide_rule, resolve_law_with)
 
 
+def _same(old: object, new: object) -> bool:
+    """`Fact.__eq__` coi 1 == True == 1.0; ở đây khác kiểu giá trị là dữ kiện đã đổi (kết quả mang theo giá trị).
+    Mốc CONFLICT / UNKNOWN không có `.value`: so như thường."""
+    return old == new and type(getattr(old, "value", None)) is type(getattr(new, "value", None))
+
+
 def _copy_evidence(evidence: dict[str, list[dict]]) -> dict[str, list[dict]]:
     return {k: list(v) for k, v in evidence.items()}
 
@@ -49,7 +55,7 @@ class NetworkSession:
                 if name in self._facts:
                     del self._facts[name]
                     changed_names.add(name)
-            elif self._facts.get(name) != fact:
+            elif not _same(self._facts.get(name), fact):
                 self._facts[name] = fact
                 changed_names.add(name)
         for name in changed_names:

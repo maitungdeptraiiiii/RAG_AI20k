@@ -196,3 +196,13 @@ def test_case_level_by_fact_is_tracked(tmp_path):
     assert diff_key(net.update(change)) == diff_key(ref.update(change))
     assert net.results() == ref.results() and net.results()[0].finding == "ok"
     assert "wage_region" in net.results()[0].facts_used
+
+
+@pytest.mark.parametrize("old,new", [(1, True), (True, 1), (0, False), (1, 1.0)])
+def test_update_value_of_other_type_but_equal_in_python_is_not_skipped(old, new):
+    names = sorted({n for c in CAT.concepts.values() for r in c.rules for n in semantics.referenced(r)})
+    for name in names:
+        net = NET.session(day=DAY, facts={name: Fact(old)}, present=set(), evidence={})
+        ref = REF.session(day=DAY, facts={name: Fact(old)}, present=set(), evidence={})
+        net.update({name: Fact(new)}), ref.update({name: Fact(new)})
+        assert net.results() == ref.results(), name

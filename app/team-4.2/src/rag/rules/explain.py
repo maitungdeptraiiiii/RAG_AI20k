@@ -113,9 +113,12 @@ def _law_nodes(rule: Rule, chosen: dict | None, facts: Facts, day: date) -> list
             live = [p for p in v["periods"] if date.fromisoformat(str(p["valid_from"])) <= day]
             if live:
                 p = max(live, key=lambda p: str(p["valid_from"]))
-                key = facts.get(v.get("by"))
-                detail |= {"by": v.get("by"), "source": p.get("source"), "valid_from": str(p["valid_from"]),
-                           "value": None if key is None or is_unresolved(key) else p["values"].get(key.value)}
+                detail |= {"by": v.get("by"), "source": p.get("source"), "valid_from": str(p["valid_from"])}
+                if v.get("by") is None:
+                    detail["value"] = p.get("value")
+                else:
+                    key = facts.get(v.get("by"))
+                    detail["value"] = None if key is None or is_unresolved(key) else p["values"].get(key.value)
         else:
             detail["value"] = v.get("value")
         out.append(ExplanationNode("law", name, None, detail))

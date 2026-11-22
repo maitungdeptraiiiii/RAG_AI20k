@@ -300,9 +300,14 @@ def _check_law_values(where: str, law: dict, pack: PackSpec, problems: list[str]
         if v.get("unit") is not None and v["unit"] not in pack.units.names:
             problems.append(f"{where}: giá trị luật {name} có đơn vị lạ {v['unit']!r}")
         if "periods" in v:
+            keyed = v.get("by") is not None           # có `by`: mỗi kỳ một bảng values; không: mỗi kỳ một value
             for p in v["periods"]:
-                if "valid_from" not in p or "values" not in p:
-                    problems.append(f"{where}: giá trị luật {name}: kỳ thiếu valid_from / values")
+                if not isinstance(p, dict) or "valid_from" not in p:
+                    problems.append(f"{where}: giá trị luật {name}: kỳ thiếu valid_from")
+                elif keyed and "values" not in p:
+                    problems.append(f"{where}: giá trị luật {name}: kỳ thiếu values (có by)")
+                elif not keyed and ("value" not in p or "values" in p):
+                    problems.append(f"{where}: giá trị luật {name}: không có by thì mỗi kỳ cần đúng một value")
         elif "value" not in v:
             problems.append(f"{where}: giá trị luật {name} thiếu value")
 

@@ -124,6 +124,9 @@ def _materialize(law: dict, facts: Facts, day: date, reasons: list[str]) -> tupl
             reasons.append("law_period_not_covered")
             return None, "U"
         period = max(live, key=lambda p: str(p["valid_from"]))
+        if v.get("by") is None:                                   # kỳ không theo dữ kiện: một giá trị mỗi kỳ
+            out[name] = {"value": period["value"], "unit": v.get("unit")}
+            continue
         key = facts.get(v.get("by"))
         if key is None or is_unresolved(key):
             reasons.append(f"missing_fact:{v.get('by')}")

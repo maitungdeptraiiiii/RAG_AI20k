@@ -284,7 +284,7 @@ class GraphAgent:
 
 def ask_contract_graph(llm, contract, question: str, *, at, catalog: Catalog | None = None, graph=None, legal=None,
                        agent_llm=None, tag_llm=None, model: str | None = None, max_steps: int = 8,
-                       user_facts: dict | None = None, packs=None):
+                       user_facts: dict | None = None, packs=None, document_kind: str | None = None):
     """Soát hợp đồng (ghi oplog, dựng/công bố đồ thị) rồi để agent trả lời trên đồ thị vừa dựng.
     Trả (GraphAnswer, CheckReport). agent_llm None -> dùng `llm`."""
     from rag.bridge.basis import AnchorLawBasis
@@ -292,6 +292,11 @@ def ask_contract_graph(llm, contract, question: str, *, at, catalog: Catalog | N
     from rag.bridge.check import check_contract, contract_view, user_fact_set
     from rag.contracts.graph.build import graph_mask_state
     from rag.contracts.graph.tools import make_tools
+    if document_kind is not None and catalog is None and packs is None:
+        from rag.rules.loader import packs_for_kind
+        packs = packs_for_kind(document_kind) or None
+        if packs is None:
+            raise ValueError(f"Loại hợp đồng {document_kind!r} không có gói luật")
     catalog = resolve_catalog(catalog, packs)
     report = check_contract(llm, contract, catalog=catalog, basis=AnchorLawBasis(catalog, legal), at=at, model=model,
                             tag_llm=tag_llm, user_facts=user_facts, graph=graph)

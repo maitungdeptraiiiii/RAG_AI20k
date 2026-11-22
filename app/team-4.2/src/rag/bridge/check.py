@@ -25,6 +25,7 @@ from rag.contracts.graph.view import ContractGraphView, open_view
 from rag.contracts.models import Contract
 from rag.rules.events import diff_event
 from rag.rules.evaluator import default_kind, evaluator_for
+from rag.rules.loader import packs_for_kind
 
 _ORDER = ("violation", "missing_content", "hidden_right", "conflict", "possible_right", "needs_facts")
 _TITLES = {
@@ -107,7 +108,8 @@ def contract_view(contract: Contract, graph, at: datetime) -> tuple[ContractGrap
 def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, basis: LawBasis | None = None,
                    at: datetime, model: str | None = None, tag_llm=None, tag_model: str | None = None,
                    user_facts: dict | None = None, graph=None, evaluator: str | None = None,
-                   packs: Sequence[str] | None = None, on_event: Callable[[dict], None] | None = None) -> CheckReport:
+                   packs: Sequence[str] | None = None, document_kind: str | None = None,
+                   on_event: Callable[[dict], None] | None = None) -> CheckReport:
     """tag_llm / tag_model: model riêng cho bước gán khái niệm (so model); None -> dùng llm / model.
     evaluator: "reference" | "network"; None -> RAG_RULE_EVALUATOR (spec 2026-11-22-rete-rule-engine-design §7).
     graph: ContractGraphService để công bố và đọc từ Neo4j; None -> đọc bản dựng trong bộ nhớ.
@@ -117,6 +119,14 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
     def stage(name: str, status: str) -> None:
         emit({"type": "stage", "stage": name, "status": status})
     t0 = time.monotonic()
+    if document_kind is not None:
+        if catalog is not None or packs is not None:
+            raise ValueError("document_kind chọn gói: không truyền kèm catalog hoặc packs")
+        packs = packs_for_kind(document_kind)
+        if not packs:                    # loại không nhận diện được: không soát bằng gói nào, không gọi LLM
+            return CheckReport(contract.contract_id, contract.sign_date or at.date(), "none", [], {},
+                               warnings=[f"Loại hợp đồng {document_kind!r} không có gói luật: không chạy rule nào"],
+                               stats={"packs": []})
     catalog = resolve_catalog(catalog, packs)
     user = user_fact_set(user_facts, catalog.context)
     rule_evaluator = evaluator_for(catalog, evaluator or default_kind())      # tên lạ -> ValueError trước mọi lời gọi LLM

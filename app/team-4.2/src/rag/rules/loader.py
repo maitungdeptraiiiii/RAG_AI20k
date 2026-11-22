@@ -611,6 +611,16 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
                     document_specs, tuple(extract_fields.values()), labels, label)
 
 
+def packs_for_kind(document_kind: str, *, root: Path = PACKS_ROOT) -> list[str]:
+    """Gói (có concepts.yaml) khai `document_kind` trong `document_kinds`, theo tên thư mục. Không gói nào -> []
+    (người gọi không chạy rule nào thay vì rơi về một gói mặc định; spec bản 3 G9)."""
+    out = []
+    for d in sorted(p for p in Path(root).iterdir() if (p / "pack.yaml").is_file() and (p / "concepts.yaml").is_file()):
+        if document_kind in load_pack(d.name, root=root).document_kinds:
+            out.append(d.name)
+    return out
+
+
 def load_packs(pack_ids: Sequence[str], *, root: Path = PACKS_ROOT) -> Catalog:
     """Nạp và gộp nhiều gói. Gói cha (`extends`) nạp trước; gói con thấy khai báo của cha. Lỗi nào cũng dừng, báo hết.
     Một gói: giữ nguyên `version` của concepts.yaml; nhiều gói: `<gói>@<version>` nối bằng `+`;

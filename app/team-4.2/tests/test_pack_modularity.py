@@ -226,3 +226,35 @@ def test_loan_contract_graph_links_holder_to_pack_party():
     ci = next(n for n in view.find("ConceptInstance") if n["concept_id"] == "loan.interest_cap")
     holders = [h["node"]["role"] for h in view.neighbors(ci["node_id"], rel_types=["HOLDER"], direction="out")]
     assert holders == ["BEN_CHO_VAY"]
+
+
+# ── D32: chọn gói theo loại hợp đồng ──
+def test_packs_for_kind_uses_document_kinds_of_packs():
+    from rag.rules.loader import packs_for_kind
+    assert packs_for_kind("labor_contract") == ["labor"]
+    assert packs_for_kind("loan_contract") == ["civil_loan"]
+    assert packs_for_kind("civil_contract") == ["civil_general"]
+    assert packs_for_kind("unknown") == [] and packs_for_kind("khong_co") == []
+
+
+def test_unknown_kind_runs_no_pack_and_calls_no_llm():
+    from rag.bridge.check import check_contract
+    cases = _cases()
+
+    class NoLLM:
+        def complete(self, system, user):
+            raise AssertionError("không được gọi LLM khi không có gói")
+    report = check_contract(NoLLM(), cases.loan_contract(), at=cases.AT, document_kind="unknown")
+    assert report.results == [] and report.catalog_version == "none"
+    assert any("unknown" in w for w in report.warnings)
+
+
+def test_kind_selects_the_pack_and_conflicts_with_explicit_packs():
+    from rag.bridge.check import check_contract
+    cases = _cases()
+    llm = cases.ScriptedLoanLLM()
+    report = check_contract(llm, cases.loan_contract(), at=cases.AT, document_kind="loan_contract",
+                            user_facts={"special_law_applies": False})
+    assert {r.concept_id for r in report.results} == {"loan.interest_cap", "civil.unilateral_termination"}
+    with pytest.raises(ValueError):
+        check_contract(llm, cases.loan_contract(), at=cases.AT, document_kind="loan_contract", packs=["labor"])

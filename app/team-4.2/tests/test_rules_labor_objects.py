@@ -102,3 +102,21 @@ def test_a1_amendment_must_not_change_the_term_art_22_2():
     assert run(ok)[("content.term/r7", "contract=h1")].status == "PASS"
     future = [contract("h1", kind=KXDTH), amendment("p2", "h1", True, start=date(2026, 1, 1))]
     assert run(future)[("content.term/r7", "contract=h1")].status == "PASS"           # chưa hiệu lực ngày soát
+
+
+def test_questions_events_and_explain_keep_groups_apart():
+    from rag.rules.events import diff_event
+    from rag.rules.explain import explain
+    from rag.rules.questions import next_questions
+    dossier = [contract(f"h{i}", start=date(2020 + i, 1, 1)) for i in range(3)] + \
+        [contract("x1", employee="E2"), contract("x2", employee="E2", start=date(2021, 1, 1)),
+         contract("x3", employee="E2", start=date(2022, 1, 1))]
+    s = evaluator_for(CAT, "network").session(day=DAY, facts={}, present=set(), evidence={}, objects=dossier)
+    qs = {q.fact: q for q in next_questions(CAT, s)}
+    assert qs["is_elderly_employee"].possible == 2                  # cả hai nhóm (E1, E2) cùng được quyết định
+    diff = s.update(dict(NO_EXC))
+    event = diff_event(diff, s.stats)
+    groups = {c["object"] for c in event["changes"] if c["rule_id"] == "r5"}
+    assert groups == {"employee=E1", "employee=E2"}
+    tree = explain(CAT, s, "content.term", "r5", obj="employee=E2")
+    assert tree.label == "content.term/r5" and tree.detail["object"] == "employee=E2" and tree.status == "FAIL"

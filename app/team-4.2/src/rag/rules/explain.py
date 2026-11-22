@@ -122,16 +122,18 @@ def _law_nodes(rule: Rule, chosen: dict | None, facts: Facts, day: date) -> list
     return out
 
 
-def explain(catalog: Catalog, session, concept_id: str, rule_id: str) -> ExplanationNode:
-    """Cây giải thích kết quả của `concept_id/rule_id` trong `session` (Reference hay Network đều được)."""
+def explain(catalog: Catalog, session, concept_id: str, rule_id: str, obj: str | None = None) -> ExplanationNode:
+    """Cây giải thích kết quả của `concept_id/rule_id` (nhóm `obj` với rule xuyên đối tượng) trong `session`.
+    Rule xuyên đối tượng: cây dừng ở số đếm của nhóm (`reasons` có `count:a..b`); chưa mở tới từng đối tượng."""
     rule = next((r for r in catalog.concepts[concept_id].rules if r.id == rule_id), None) if concept_id in catalog.concepts else None
-    result = next((x for x in session.results() if (x.concept_id, x.rule_id) == (concept_id, rule_id)), None)
+    result = next((x for x in session.results()
+                   if (x.concept_id, x.rule_id) == (concept_id, rule_id) and (obj is None or x.object == obj)), None)
     if rule is None or result is None:
         raise KeyError(f"{concept_id}/{rule_id}")
     ctx, facts, day = catalog.context, session.facts(), session.day
     root = ExplanationNode("rule", f"{concept_id}/{rule_id}", result.status, {
         "finding": result.finding, "reasons": list(result.reasons), "missing_facts": list(result.missing_facts),
-        "mode": rule.mode, "derogation": rule.derogation})
+        "mode": rule.mode, "derogation": rule.derogation, "object": result.object})
     if rule.applicability is not None:
         root.children.append(ExplanationNode("applicability", "applicability", eval_cond(rule.applicability, facts, ctx),
                                              children=[_cond_node(rule.applicability, facts, ctx)]))
@@ -146,7 +148,12 @@ def explain(catalog: Catalog, session, concept_id: str, rule_id: str) -> Explana
             root.children.append(ExplanationNode("case", str(case.get("when")), st, {"chosen": is_chosen},
                                                  [_cond_node(case["when"], facts, ctx)] if case.get("when") else []))
     root.children += _law_nodes(rule, chosen, facts, day)
-    if rule.check is not None:
+    if rule.over is not None:
+        var, typ, where, history = rule.over
+        root.children.append(ExplanationNode("objects", f"{var}: {typ}", None, {
+            "where": where, "history": history, "group_by": dict(rule.group_by), "check": rule.check,
+            "count": next((r.split(":", 1)[1] for r in result.reasons if r.startswith("count:")), None)}))
+    elif rule.check is not None:
         root.children.append(ExplanationNode("check", "check", check_cond(rule.check, facts, result.law_values, ctx),
                                              children=[_cond_node(rule.check, facts, ctx, result.law_values)]))
     by_key = {f"{x.concept_id}/{x.rule_id}": x for x in session.results()}

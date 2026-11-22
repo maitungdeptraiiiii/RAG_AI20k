@@ -23,7 +23,7 @@ def test_diff_event_shape_and_json_safe():
     assert json.loads(json.dumps(event))["changes"]
     assert diff_event(Diff(()), None) == {"type": "evaluation_diff", "changes": [], "stats": None}
     added = diff_event(Diff((RuleChange("c", "r", None, None),)))
-    assert added["changes"] == [{"concept_id": "c", "rule_id": "r", "before": None, "after": None}]
+    assert added["changes"] == [{"concept_id": "c", "rule_id": "r", "object": None, "before": None, "after": None}]
 
 
 def test_check_contract_emits_evaluation_diff_only_after_recheck():

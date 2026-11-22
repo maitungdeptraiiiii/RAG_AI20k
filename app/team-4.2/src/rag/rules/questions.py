@@ -26,7 +26,7 @@ def next_questions(catalog: Catalog, session) -> list[Question]:
     """Xếp theo (guaranteed, possible) giảm dần rồi theo tên; bỏ câu hỏi không giải quyết được kết quả nào."""
     ctx = catalog.context
     results = session.results()
-    unknown = {(r.concept_id, r.rule_id) for r in results if r.status == "UNKNOWN"}
+    unknown = {(r.concept_id, r.rule_id, r.object) for r in results if r.status == "UNKNOWN"}   # theo nhóm (§5.6)
     candidates = list(dict.fromkeys(f for r in results if r.status == "UNKNOWN" for f in r.missing_facts
                                     if f in ctx.questions))
     out = []
@@ -36,8 +36,8 @@ def next_questions(catalog: Catalog, session) -> list[Question]:
         for value in spec.values:
             fork = session.fork()
             fork.update({name: Fact(value, spec.unit, "user")})
-            after = {(r.concept_id, r.rule_id): r.status for r in fork.results()}
-            outcomes.append((value, sum(1 for key in unknown if after[key] != "UNKNOWN")))
+            after = {(r.concept_id, r.rule_id, r.object): r.status for r in fork.results()}
+            outcomes.append((value, sum(1 for key in unknown if after.get(key, "UNKNOWN") != "UNKNOWN")))
         counts = [n for _, n in outcomes]
         if max(counts) > 0:
             out.append(Question(name, spec.question, spec.unit, min(counts), max(counts), tuple(outcomes)))

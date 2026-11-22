@@ -9,7 +9,7 @@ import yaml
 
 from rag.rules.derived import definition_inputs, find_cycle
 from rag.rules.model import (CORE_FINDINGS, CORE_SILENCES, DEROGATIONS, MODES, OPS, SLOT_KINDS, Catalog, CatalogError,
-                             Concept, Definition, DerivedFact, PackSpec, Rule, Silence, Slot, leaves)
+                             Concept, Definition, DerivedFact, PackSpec, Rule, Silence, Slot, UserQuestion, leaves)
 from rag.rules.units import Units
 
 PACKS_ROOT = Path(__file__).with_name("packs")
@@ -156,10 +156,27 @@ def load_pack(pack_id: str, *, root: Path = PACKS_ROOT) -> PackSpec:
             problems.append(f"user_fact_units: {name!r} không có trong user_facts")
         if unit not in names:
             problems.append(f"user_fact_units: dữ kiện {name!r} có đơn vị lạ {unit!r}")
+    questions: dict[str, UserQuestion] = {}
+    raw_q = data.get("user_fact_questions") or {}
+    if not isinstance(raw_q, dict):
+        problems.append("user_fact_questions phải là dict {dữ kiện: {question, values, unit?}}")
+        raw_q = {}
+    for name, q in raw_q.items():
+        where = f"user_fact_questions: {name!r}"
+        if name not in user_facts:
+            problems.append(f"{where} không có trong user_facts")
+        q = q if isinstance(q, dict) else {}
+        if not isinstance(q.get("question"), str) or not q["question"]:
+            problems.append(f"{where}: thiếu question (chuỗi)")
+        if not isinstance(q.get("values"), list) or not q["values"]:
+            problems.append(f"{where}: values phải là danh sách không rỗng")
+        if q.get("unit") is not None and q["unit"] not in names:
+            problems.append(f"{where}: đơn vị lạ {q['unit']!r}")
+        questions[name] = UserQuestion(name, str(q.get("question")), tuple(q.get("values") or ()), q.get("unit"))
     if problems:
         raise CatalogError(problems)
     return PackSpec(pack_id, str(data.get("version")), tuple(extends), tuple(kinds), Units(names, factors),
-                    document_facts, user_facts, findings, silences, derived, dict(user_fact_units))
+                    document_facts, user_facts, findings, silences, derived, dict(user_fact_units), questions)
 
 
 # ── concepts.yaml ──
@@ -327,6 +344,7 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
     silences: dict[str, Silence] = dict(CORE_SILENCES)
     derived: dict[str, DerivedFact] = {}
     user_fact_units: dict[str, str | None] = {}
+    questions: dict[str, UserQuestion] = {}
     kinds: list[str] = []
     for s in specs:
         names |= s.units.names
@@ -340,6 +358,10 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
                 problems.append(f"document_facts: dữ kiện {name!r} có đơn vị khác nhau giữa các gói")
             document_facts[name] = unit
         user_facts |= s.user_facts
+        for name, q in s.user_fact_questions.items():
+            if name in questions and questions[name] != q:
+                problems.append(f"user_fact_questions: {name!r} khai báo khác nhau giữa các gói")
+            questions[name] = q
         for name, unit in s.user_fact_units.items():
             if name in user_fact_units and user_fact_units[name] != unit:
                 problems.append(f"user_fact_units: dữ kiện {name!r} có đơn vị mặc định khác nhau giữa các gói")
@@ -360,7 +382,7 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
             problems.append(_CLASH.format(name))
     return PackSpec("+".join(s.id for s in specs), "+".join(f"{s.id}@{s.version}" for s in specs), (), tuple(kinds),
                     Units(frozenset(names), factors), document_facts, frozenset(user_facts), frozenset(findings),
-                    silences, derived, user_fact_units)
+                    silences, derived, user_fact_units, questions)
 
 
 def load_packs(pack_ids: Sequence[str], *, root: Path = PACKS_ROOT) -> Catalog:

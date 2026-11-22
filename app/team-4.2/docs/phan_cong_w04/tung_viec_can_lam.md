@@ -73,9 +73,9 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
       `fixed_term_contract_count` đổi từ người dùng sang phép đếm đối tượng, rule `r3` giữ nguyên.
 
 **P4 — giải thích, câu hỏi, sự kiện**
-- [ ] D17. `explain.py`: cây tới quote hợp đồng, nguồn giá trị luật, ngoại lệ bị loại; JSON + markdown.
-- [ ] D18. `questions.py`: `next_questions()` bằng `fork` + `update`, điểm = số UNKNOWN chắc chắn giải quyết.
-- [ ] D19. Sự kiện stream `evaluation_diff`.
+- [x] D17. `explain.py`: cây tới quote hợp đồng, nguồn giá trị luật, ngoại lệ bị loại; JSON + markdown.
+- [x] D18. `questions.py`: `next_questions()` bằng `fork` + `update`, điểm = số UNKNOWN chắc chắn giải quyết.
+- [x] D19. Sự kiện stream `evaluation_diff`. (`rules/events.py`; `check_contract` phát sau recheck. Miền câu hỏi: `user_fact_questions` trong `pack.yaml`.)
 
 **P5 — pack dân sự**
 - [ ] D20. `packs/civil_loan/` từ B4 (đơn vị `percent_per_year`, quy đổi tháng → năm).

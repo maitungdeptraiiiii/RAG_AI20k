@@ -50,12 +50,22 @@ class DerivedFact:
 
 
 @dataclass(frozen=True)
+class UserQuestion:
+    """Câu hỏi cho một dữ kiện người dùng (spec §8): `values` là miền giá trị khả dĩ để `next_questions` thử."""
+    fact: str
+    question: str
+    values: tuple
+    unit: str | None = None
+
+
+@dataclass(frozen=True)
 class Context:
     """Phần của gói mà logic thuần cần: đơn vị, dữ kiện cấp hợp đồng, bảng on_silence, dữ kiện suy ra."""
     units: Units
     document_facts: frozenset[str]
     silences: Mapping[str, Silence]
     derived: Mapping[str, DerivedFact] = field(default_factory=dict)
+    questions: Mapping[str, UserQuestion] = field(default_factory=dict)
 
     @property
     def reported(self) -> frozenset[str]:
@@ -77,9 +87,10 @@ class PackSpec:
     silences: Mapping[str, Silence]                # đã gộp CORE_SILENCES
     derived: Mapping[str, DerivedFact] = field(default_factory=dict)
     user_fact_units: Mapping[str, str | None] = field(default_factory=dict)   # đơn vị mặc định khi người dùng trả lời một con số
+    user_fact_questions: Mapping[str, UserQuestion] = field(default_factory=dict)
 
     def context(self) -> Context:
-        return Context(self.units, frozenset(self.document_facts), self.silences, self.derived)
+        return Context(self.units, frozenset(self.document_facts), self.silences, self.derived, self.user_fact_questions)
 
 
 # ── danh mục khái niệm (concepts.yaml) ──

@@ -67,6 +67,17 @@ có chi phí nếu sai). Nhánh `feat/team-4.2/w04-rules-engine`, chưa merge. T
 | 3.17 | Điều 22.2 (phụ lục sửa thời hạn) và Điều 25 phần "một lần một công việc" **chưa làm**, chuyển sang 7b vì cần đối tượng phụ lục / nhiều hợp đồng | Checklist D16 chưa tick hết |
 | 3.18 | Ca biên 30 ngày chọn `worked_after_expiry_days > 30 day` (Đ20.2.b: "hết thời hạn 30 ngày") | Ca đúng 30 ngày |
 
+## Giai đoạn 4 — giải thích, câu hỏi gợi ý, sự kiện diff
+
+| # | Mục | Trạng thái |
+|---|---|---|
+| 4.1 | Chỉ dữ kiện người dùng có khai miền trong `user_fact_questions` mới được gợi ý; dữ kiện như `work_condition`, `wage_region`, `pregnancy_month` chưa có miền nên không bao giờ được hỏi | Còn |
+| 4.2 | Miền dữ kiện số là giá trị đại diện do người viết chọn (vd. `worked_after_expiry_days: [10, 45]`), không tự suy từ ngưỡng luật; đổi ngưỡng luật mà quên đổi miền thì điểm câu hỏi sai | Còn |
+| 4.3 | `next_questions` fork + update một lần mỗi giá trị khả dĩ trên toàn bộ catalog: đủ nhanh cho 50 rule, chưa đo cho catalog lớn (giai đoạn 6) | Còn |
+| 4.4 | `explain` dựng lại cây từ kết quả + bảng dữ kiện, không lưu vết lúc đánh giá; nên nếu ngữ nghĩa `decide_rule` đổi mà quên cập nhật `explain` thì hai bên có thể lệch (test chỉ ghim các ca chính) | Còn |
+| 4.5 | `evaluation_diff` chỉ phát sau recheck; lần đọc đầu vẫn phát từng `evaluation` như cũ | Có chủ ý |
+| 4.6 | Hai nút `fact` của cùng một dữ kiện có thể lặp trong cây (mỗi điều kiện kèm nút dữ kiện của nó) | Có chủ ý |
+
 ## Tồn đọng chung (môi trường, quy trình)
 
 | # | Mục | Trạng thái |
@@ -79,4 +90,4 @@ có chi phí nếu sai). Nhánh `feat/team-4.2/w04-rules-engine`, chưa merge. T
 | E.6 | Spec §4.2 ghi "chưa xác minh" việc xử lý phủ định trong bài gốc TREAT; checklist A1 chưa tick | Còn |
 | E.7 | Chưa merge, chưa push; việc tích hợp là quyết định của người dùng | Chờ quyết định |
 | E.8 | Nhánh có thay đổi cũ không phải của phiên này (`reports/week-02`, `week-03` README, các thư mục dữ liệu chưa theo dõi); không đưa vào commit nào | Có chủ ý |
-| E.9 | Giai đoạn 4–7 chưa bắt đầu (giải thích và câu hỏi gợi ý, gói dân sự, benchmark, đối tượng và join) | Chưa làm |
+| E.9 | Giai đoạn 5–7 chưa xong (gói dân sự, benchmark, đối tượng và join) | Chưa làm |

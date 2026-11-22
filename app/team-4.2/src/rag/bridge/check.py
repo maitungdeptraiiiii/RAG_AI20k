@@ -23,6 +23,7 @@ from rag.contracts.doc import ContractDoc
 from rag.contracts.graph.build import build_graph
 from rag.contracts.graph.view import ContractGraphView, open_view
 from rag.contracts.models import Contract
+from rag.rules.events import diff_event
 from rag.rules.evaluator import default_kind, evaluator_for
 
 _ORDER = ("violation", "missing_content", "hidden_right", "conflict", "possible_right", "needs_facts")
@@ -150,8 +151,9 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
                                                                        evidence=evidence)
         else:
             old = session_state["facts"]
-            session.update({n: facts.get(n) for n in set(old) | set(facts) if old.get(n) != facts.get(n)},
-                           present=present, evidence=evidence)
+            diff = session.update({n: facts.get(n) for n in set(old) | set(facts) if old.get(n) != facts.get(n)},
+                                  present=present, evidence=evidence)
+            emit(diff_event(diff, getattr(session, "stats", None)))
         session_state["facts"] = dict(facts)
         return session.results()
 

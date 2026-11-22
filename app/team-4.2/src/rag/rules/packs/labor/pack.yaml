@@ -43,6 +43,27 @@ user_facts: [work_condition, pregnant, pregnancy_month, child_under_12_months, e
 user_fact_units:
   worked_after_expiry_days: day
 
+# Câu hỏi gợi ý cho người dùng (spec §8): `values` là miền giá trị để next_questions thử; dữ kiện người dùng không khai ở đây
+# thì không được gợi ý. Dữ kiện số khai giá trị đại diện cho từng khoảng quanh ngưỡng luật.
+user_fact_questions:
+  pregnant: {question: "Người lao động có đang mang thai không?", values: [true, false]}
+  employee_is_female: {question: "Người lao động có phải là nữ không?", values: [true, false]}
+  child_under_12_months: {question: "Người lao động có đang nuôi con dưới 12 tháng tuổi không?", values: [true, false]}
+  employee_consent: {question: "Người lao động có đồng ý không?", values: [true, false]}
+  medical_certificate: {question: "Có giấy xác nhận của cơ sở y tế không?", values: [true, false]}
+  worked_after_expiry_days:
+    question: "Hợp đồng đã hết hạn mà người lao động vẫn làm việc tiếp được bao nhiêu ngày?"
+    values: [10, 45]
+    unit: day
+  new_contract_signed: {question: "Hai bên đã ký hợp đồng lao động mới chưa?", values: [true, false]}
+  fixed_term_contract_count:
+    question: "Người lao động đã ký liên tiếp bao nhiêu hợp đồng xác định thời hạn (kể cả hợp đồng này)?"
+    values: [1, 3]
+  is_state_enterprise_director: {question: "Người lao động được thuê làm giám đốc doanh nghiệp có vốn nhà nước?", values: [true, false]}
+  is_elderly_employee: {question: "Người lao động là người lao động cao tuổi?", values: [true, false]}
+  is_foreign_employee: {question: "Người lao động là người nước ngoài làm việc tại Việt Nam?", values: [true, false]}
+  is_union_leader_in_term: {question: "Người lao động là thành viên ban lãnh đạo tổ chức đại diện người lao động tại cơ sở, đang trong nhiệm kỳ?", values: [true, false]}
+
 # Finding thêm ngoài tập chung của lõi (ok, violation, needs_facts, conflict, missing_content).
 findings: [hidden_right, possible_right]
 # on_silence ngoài `none` / `missing_content` (có sẵn trong lõi): quyền ẩn khi hợp đồng không nhắc.

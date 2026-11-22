@@ -40,8 +40,28 @@ def _first(text: str, kind: str):
     return next((v for v in extract_values(text) if v.kind == kind), None)
 
 
-def normalize_slot(slot: Slot, raw: Any) -> Fact | None:
-    """Giá trị thô LLM trả cho một slot -> Fact (nguồn "concept"), None nếu không chuẩn hóa được."""
+def _percent(slot: Slot, text: str, ctx) -> Fact | None:
+    """Tỉ lệ: số trước "%". Slot có đơn vị khác `percent` (vd. percent_per_year) thì cách viết của kỳ ngay sau "%"
+    phải khớp một `unit_forms` của gói và quy đổi được về đơn vị slot; không ghi kỳ thì không đoán (trả None)."""
+    v = _first(text, "percent")
+    if v is None:
+        return None
+    if slot.unit in (None, "percent") or ctx is None:
+        return Fact(v.norm["percent"], "percent", "concept")
+    rest = " ".join(text[v.end:].casefold().split())
+    best = None
+    for unit, forms in ctx.unit_forms.items():
+        for form in forms:
+            f = " ".join(form.casefold().split())
+            if rest.startswith(f) and ctx.units.convert(1, unit, slot.unit) is not None:
+                if best is None or len(f) > best[1]:
+                    best = (unit, len(f))
+    return Fact(v.norm["percent"], best[0], "concept") if best else None
+
+
+def normalize_slot(slot: Slot, raw: Any, ctx=None) -> Fact | None:
+    """Giá trị thô LLM trả cho một slot -> Fact (nguồn "concept"), None nếu không chuẩn hóa được.
+    `ctx`: Context của gói (đơn vị, `unit_forms`); None -> như cũ (gói labor)."""
     if slot.kind == "bool":
         if isinstance(raw, bool):
             return Fact(raw, None, "concept")
@@ -54,8 +74,7 @@ def normalize_slot(slot: Slot, raw: Any) -> Fact | None:
         d = _duration(text)
         return Fact(d[0], d[1], "concept") if d else None
     if slot.kind == "percent":
-        v = _first(text, "percent")
-        return Fact(v.norm["percent"], "percent", "concept") if v else None
+        return _percent(slot, text, ctx)
     if slot.kind == "money":
         v = _first(text, "money")
         return Fact(v.norm["amount"], "vnd", "concept") if v and v.norm["currency"] == "VND" else None

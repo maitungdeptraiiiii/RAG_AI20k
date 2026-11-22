@@ -17,6 +17,11 @@ conversions:
 
 document_facts: {}
 
+# Cách viết đơn vị ngay sau con số trong hợp đồng (bộ đọc slot dùng, không đoán): "30%/năm", "1,5% mỗi tháng".
+unit_forms:
+  percent_per_year: ["/năm", "/ năm", "một năm", "mỗi năm", "/1 năm", "trên năm"]
+  percent_per_month: ["/tháng", "/ tháng", "một tháng", "mỗi tháng", "/1 tháng", "trên tháng"]
+
 # Dữ kiện người dùng xác nhận.
 user_facts: [special_law_applies]    # có luật chuyên ngành quy định khác (vd. tổ chức tín dụng) mà BLDS cho phép (Đ468.1)
 user_fact_questions:

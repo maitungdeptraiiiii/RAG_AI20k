@@ -88,7 +88,7 @@ def check_item(contract: Contract, batch_uids: list[str], item: Any, catalog: Ca
         slot = concept.slots[name]
         if slot.kind in _TEXT_SLOTS and _norm(str(raw)) not in _norm(quote):
             return None, "slot_not_in_quote"
-        f = normalize_slot(slot, raw)
+        f = normalize_slot(slot, raw, catalog.context)
         if f is None:
             bad.append(name)
         else:

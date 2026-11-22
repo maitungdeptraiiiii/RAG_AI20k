@@ -203,11 +203,23 @@ def load_pack(pack_id: str, *, root: Path = PACKS_ROOT) -> PackSpec:
         if BUILTIN_ATTRS & set(attrs):
             problems.append(f"object_types: {tname!r} khai thuộc tính dựng sẵn {sorted(BUILTIN_ATTRS & set(attrs))}")
         object_types[tname] = ObjectType(tname, frozenset(attrs), frozenset(refs))
+    unit_forms: dict[str, tuple[str, ...]] = {}
+    raw_forms = data.get("unit_forms") or {}
+    if not isinstance(raw_forms, dict):
+        problems.append("unit_forms phải là dict {đơn vị: [cách viết, ...]}")
+        raw_forms = {}
+    for unit, forms in raw_forms.items():
+        if unit not in names:
+            problems.append(f"unit_forms: đơn vị {unit!r} không có trong units")
+        if not isinstance(forms, list) or not forms or not all(isinstance(x, str) and x.strip() for x in forms):
+            problems.append(f"unit_forms: {unit!r} cần danh sách chuỗi không rỗng")
+            continue
+        unit_forms[unit] = tuple(forms)
     if problems:
         raise CatalogError(problems)
     return PackSpec(pack_id, str(data.get("version")), tuple(extends), tuple(kinds), Units(names, factors),
                     document_facts, user_facts, findings, silences, derived, dict(user_fact_units), questions,
-                    concept_kinds, object_types)
+                    concept_kinds, object_types, unit_forms)
 
 
 # ── concepts.yaml ──
@@ -468,6 +480,7 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
     questions: dict[str, UserQuestion] = {}
     concept_kinds: dict[str, tuple[str, ...]] = {}
     object_types: dict[str, ObjectType] = {}
+    unit_forms: dict[str, tuple[str, ...]] = {}
     kinds: list[str] = []
     for s in specs:
         names |= s.units.names
@@ -481,6 +494,8 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
                 problems.append(f"document_facts: dữ kiện {name!r} có đơn vị khác nhau giữa các gói")
             document_facts[name] = unit
         user_facts |= s.user_facts
+        for unit, forms in s.unit_forms.items():
+            unit_forms[unit] = tuple(dict.fromkeys([*unit_forms.get(unit, ()), *forms]))
         for name, ot in s.object_types.items():
             if name in object_types and object_types[name] != ot:
                 problems.append(f"object_types: {name!r} khai báo khác nhau giữa các gói")
@@ -513,7 +528,7 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
             problems.append(_CLASH.format(name))
     return PackSpec("+".join(s.id for s in specs), "+".join(f"{s.id}@{s.version}" for s in specs), (), tuple(kinds),
                     Units(frozenset(names), factors), document_facts, frozenset(user_facts), frozenset(findings),
-                    silences, derived, user_fact_units, questions, concept_kinds, object_types)
+                    silences, derived, user_fact_units, questions, concept_kinds, object_types, unit_forms)
 
 
 def load_packs(pack_ids: Sequence[str], *, root: Path = PACKS_ROOT) -> Catalog:

@@ -76,6 +76,7 @@ class Context:
     derived: Mapping[str, DerivedFact] = field(default_factory=dict)
     questions: Mapping[str, UserQuestion] = field(default_factory=dict)
     input_units: Mapping[str, str | None] = field(default_factory=dict)   # dữ kiện đầu vào (hợp đồng + người dùng) -> đơn vị mặc định
+    unit_forms: Mapping[str, tuple[str, ...]] = field(default_factory=dict)  # đơn vị -> cách viết sau con số ("/năm")
 
     @property
     def reported(self) -> frozenset[str]:
@@ -100,11 +101,12 @@ class PackSpec:
     user_fact_questions: Mapping[str, UserQuestion] = field(default_factory=dict)
     concept_kinds: Mapping[str, tuple[str, ...]] = field(default_factory=dict)   # kind -> các loại slot concept phải có
     object_types: Mapping[str, ObjectType] = field(default_factory=dict)
+    unit_forms: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
 
     def context(self) -> Context:
         inputs = {**{n: None for n in self.user_facts}, **dict(self.user_fact_units), **dict(self.document_facts)}
         return Context(self.units, frozenset(self.document_facts), self.silences, self.derived, self.user_fact_questions,
-                       inputs)
+                       inputs, self.unit_forms)
 
 
 # ── danh mục khái niệm (concepts.yaml) ──

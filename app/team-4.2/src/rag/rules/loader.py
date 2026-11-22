@@ -7,6 +7,7 @@ from typing import Mapping, Sequence
 
 import yaml
 
+from rag.rules.derived import definition_inputs, find_cycle
 from rag.rules.model import (CORE_FINDINGS, CORE_SILENCES, DEROGATIONS, MODES, OPS, SLOT_KINDS, Catalog, CatalogError,
                              Concept, Definition, DerivedFact, PackSpec, Rule, Silence, Slot, leaves)
 from rag.rules.units import Units
@@ -23,36 +24,9 @@ def _names(data: dict, key: str, problems: list[str]) -> list[str]:
     return v
 
 
-def _definition_inputs(d: Definition) -> list[str]:
-    return list(dict.fromkeys([*([d.from_fact] if d.from_fact else []),
-                               *[leaf["fact"] for leaf in leaves(d.when) if leaf.get("fact")]]))
-
-
-def _find_cycle(graph: Mapping[str, Sequence[str]]) -> list[str] | None:
-    """Một vòng trong đồ thị phụ thuộc (đường khép kín `a -> b -> a`), hoặc None."""
-    state: dict[str, int] = {}
-
-    def visit(n: str, stack: list[str]) -> list[str] | None:
-        state[n] = 1
-        for m in graph.get(n, ()):
-            if m not in graph:
-                continue
-            if state.get(m) == 1:
-                return [*stack[stack.index(m):], n, m] if m in stack else [n, m]
-            if m not in state and (c := visit(m, [*stack, n])):
-                return c
-        state[n] = 2
-        return None
-
-    for node in graph:
-        if node not in state and (cycle := visit(node, [])):
-            return cycle
-    return None
-
-
 def _check_derived_cycles(derived: Mapping[str, DerivedFact], problems: list[str]) -> None:
-    deps = {name: [x for d in df.definitions for x in _definition_inputs(d)] for name, df in derived.items()}
-    if cycle := _find_cycle(deps):
+    deps = {name: [x for d in df.definitions for x in definition_inputs(d)] for name, df in derived.items()}
+    if cycle := find_cycle(deps):
         problems.append("derived: phụ thuộc vòng giữa các dữ kiện suy ra " + " -> ".join(cycle))
 
 
@@ -89,7 +63,7 @@ def _derived(data: dict, units: frozenset[str], inputs: set[str], problems: list
             if d.exception_of is not None and d.exception_of not in ids:
                 problems.append(f"derived {name!r} định nghĩa {d.id!r}: exception_of {d.exception_of!r} không có")
         parent = {d.id: d.exception_of for d in defs if d.exception_of in ids}
-        if cycle := _find_cycle({k: [v] for k, v in parent.items()}):
+        if cycle := find_cycle({k: [v] for k, v in parent.items()}):
             problems.append(f"derived {name!r}: exception_of vòng " + " -> ".join(cycle))
         out[name] = DerivedFact(name, unit, tuple(defs))
     return out
@@ -269,7 +243,7 @@ def load_concepts(path: Path, pack: PackSpec) -> Catalog:
     known_inputs = slot_names | set(pack.document_facts) | pack.user_facts | set(pack.derived)
     for df in pack.derived.values():
         for d in df.definitions:
-            for n in _definition_inputs(d):
+            for n in definition_inputs(d):
                 if n not in known_inputs:
                     problems.append(f"derived {df.fact!r} định nghĩa {d.id!r}: dữ kiện {n!r} không phải slot, dữ kiện "
                                     "hợp đồng, người dùng hay dữ kiện suy ra")

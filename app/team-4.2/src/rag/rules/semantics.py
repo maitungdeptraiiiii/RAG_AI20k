@@ -25,6 +25,7 @@ class Fact:
     quote: str | None = None
     amended_from: tuple[dict, ...] = ()   # giá trị cũ bị phụ lục sửa đổi thay thế: ({value, unit, uid}, ...)
     later_amendments: tuple[dict, ...] = ()   # sửa đổi hiệu lực sau ngày soát: ({value, unit, uid, valid_from}, ...)
+    derived_by: str | None = None             # dữ kiện suy ra: id định nghĩa thắng (spec §5.3)
 
 
 class _Conflict:

@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date
-from typing import Any, Literal
+from typing import Any, Literal, Sequence
 
 from rag.rules.model import Context, Rule, leaves
 from rag.rules.units import Units
@@ -134,13 +134,13 @@ def _materialize(law: dict, facts: Facts, day: date, reasons: list[str]) -> tupl
     return out, "T"
 
 
-def resolve_law(rule: Rule, facts: Facts, day: date, ctx: Context) -> tuple[dict[str, dict] | None, Tri, tuple[str, ...]]:
-    """(giá trị luật đã chọn, trạng thái chọn, lý do). Có `cases`: lấy case đầu tiên `when = T`; gặp `U` trước thì `U`;
-    không case nào khớp thì `F` (rule không áp dụng)."""
+def resolve_law_with(rule: Rule, whens: Sequence[Tri], facts: Facts,
+                     day: date) -> tuple[dict[str, dict] | None, Tri, tuple[str, ...]]:
+    """(giá trị luật đã chọn, trạng thái chọn, lý do) khi đã biết trị của `rule.cases[i].when`. Có `cases`: lấy case đầu
+    tiên `when = T`; gặp `U` trước thì `U`; không case nào khớp thì `F` (rule không áp dụng)."""
     reasons: list[str] = []
     if rule.cases:
-        for case in rule.cases:
-            st = eval_cond(case.get("when"), facts, ctx)
+        for case, st in zip(rule.cases, whens):
             if st == "U":
                 return None, "U", ("case_needs_facts",)
             if st == "T":
@@ -149,6 +149,10 @@ def resolve_law(rule: Rule, facts: Facts, day: date, ctx: Context) -> tuple[dict
         return None, "F", ("no_case_matches",)
     law, st = _materialize(rule.law, facts, day, reasons)
     return law, st, tuple(reasons)
+
+
+def resolve_law(rule: Rule, facts: Facts, day: date, ctx: Context) -> tuple[dict[str, dict] | None, Tri, tuple[str, ...]]:
+    return resolve_law_with(rule, [eval_cond(c.get("when"), facts, ctx) for c in rule.cases], facts, day)
 
 
 @dataclass(frozen=True)
@@ -211,15 +215,37 @@ def _result(concept_id: str, rule: Rule, status: str, finding: str, law, facts: 
                       law or {}, used, missing, tuple(evidence), tuple(reasons))
 
 
+@dataclass(frozen=True)
+class RuleInputs:
+    """Những gì bảng quyết định cần từ dữ kiện: mạng tăng dần giữ chúng trong bộ nhớ, Reference tính lại mỗi lần."""
+    app: Tri                                # eval_cond(applicability)
+    law: dict | None
+    law_st: Tri
+    law_reasons: tuple[str, ...]            # kết quả resolve_law
+    check_st: Tri | None                    # check_cond(check, ..., law); None khi rule không có check
+
+
+def rule_inputs(rule: Rule, facts: Facts, day: date, ctx: Context) -> RuleInputs:
+    law, law_st, law_reasons = resolve_law(rule, facts, day, ctx)
+    check_st = None if rule.check is None else check_cond(rule.check, facts, law or {}, ctx)
+    return RuleInputs(eval_cond(rule.applicability, facts, ctx), law, law_st, law_reasons, check_st)
+
+
 def evaluate_rule(concept_id: str, rule: Rule, facts: Facts, present: bool, evidence, day: date,
                   ctx: Context) -> RuleResult:
+    return decide_rule(concept_id, rule, facts, present, evidence, rule_inputs(rule, facts, day, ctx), ctx)
+
+
+def decide_rule(concept_id: str, rule: Rule, facts: Facts, present: bool, evidence, inputs: RuleInputs,
+                ctx: Context) -> RuleResult:
+    """Bảng trạng thái của một rule (applicability -> giá trị luật -> present -> check -> on_silence) trên đầu vào đã tính."""
     def out(status, finding, law=None, reasons=()):
         return _result(concept_id, rule, status, finding, law, facts, evidence, reasons, ctx)
 
-    app = eval_cond(rule.applicability, facts, ctx)
+    app = inputs.app
     if app == "F":
         return out("NOT_APPLICABLE", "ok", reasons=("not_applicable",))
-    law, law_st, reasons = resolve_law(rule, facts, day, ctx)
+    law, law_st, reasons = inputs.law, inputs.law_st, inputs.law_reasons
     if law_st == "F":
         return out("NOT_APPLICABLE", "ok", reasons=reasons)
     present = present or _contract_level_check(rule, facts, ctx)
@@ -234,7 +260,7 @@ def evaluate_rule(concept_id: str, rule: Rule, facts: Facts, present: bool, evid
         conflict = any(facts.get(n) is CONFLICT for n in fact_names(rule.check))
         if law_st == "U":
             return out("UNKNOWN", "conflict" if conflict else "needs_facts", law, reasons)
-        st = check_cond(rule.check, facts, law or {}, ctx)
+        st = inputs.check_st
         if st == "U":
             return out("UNKNOWN", "conflict" if conflict else "needs_facts", law, (*reasons, "check_unknown"))
         if st == "T":

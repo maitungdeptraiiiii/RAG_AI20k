@@ -115,3 +115,42 @@ def test_unstated_restriction_flag():
     assert (r.status, r.finding) == ("PASS", "ok") and "restriction_not_stated" in r.reasons
     r = ev(mk_rule(check=check, unstated_false=False), {}, present=True)
     assert (r.status, r.finding) == ("UNKNOWN", "needs_facts")
+
+
+# ── tách evaluate_rule thành đầu vào + bảng quyết định (giai đoạn 2, Task 1) ──
+import json  # noqa: E402
+from dataclasses import asdict  # noqa: E402
+
+from rag.rules import semantics  # noqa: E402
+from rag.rules.loader import PACKS_ROOT, load_concepts  # noqa: E402
+from rules_golden_cases import case_from_json, facts_from_spec, load_golden  # noqa: E402
+
+_CAT = load_concepts(PACKS_ROOT / "labor" / "concepts.yaml", load_pack("labor"))
+
+
+def _golden_inputs():
+    for row in load_golden():
+        case = case_from_json(row["case"])
+        rule = next(r for r in _CAT.concepts[case.concept_id].rules if r.id == case.rule_id)
+        yield row, case, rule, facts_from_spec(case.facts, semantics.Fact, semantics.CONFLICT)
+
+
+def test_decide_rule_of_rule_inputs_matches_golden():
+    ctx, bad = _CAT.context, []
+    for row, case, rule, facts in _golden_inputs():
+        got = semantics.decide_rule(case.concept_id, rule, facts, case.present, (),
+                                    semantics.rule_inputs(rule, facts, case.day, ctx), ctx)
+        if json.loads(json.dumps(asdict(got), ensure_ascii=False, sort_keys=True)) != row["result"]:
+            bad.append(case.case_id)
+    assert bad == [], bad[:5]
+
+
+def test_resolve_law_with_equals_resolve_law_on_rules_with_cases():
+    ctx, checked = _CAT.context, 0
+    for _row, case, rule, facts in _golden_inputs():
+        if not rule.cases:
+            continue
+        whens = [eval_cond(c.get("when"), facts, ctx) for c in rule.cases]
+        assert semantics.resolve_law_with(rule, whens, facts, case.day) == resolve_law(rule, facts, case.day, ctx)
+        checked += 1
+    assert checked > 100

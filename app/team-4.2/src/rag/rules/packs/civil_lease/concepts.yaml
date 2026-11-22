@@ -1,0 +1,131 @@
+# Khái niệm hợp đồng thuê nhà ở. Nguồn và trích dẫn: docs/rule_inventory/civil_lease.yaml.
+# Soát theo ngày ký: hợp đồng từ 01/08/2024 theo Luật Nhà ở 27/2023, từ 01/07/2015 theo Luật Nhà ở 65/2014.
+version: "0.1"
+law_values_valid_from: "2015-07-01"
+roles:
+  - {id: BEN_CHO_THUE, label: "Bên cho thuê", aliases: ["chủ nhà", "bên cho thuê nhà"]}
+  - {id: BEN_THUE, label: "Bên thuê", aliases: ["người thuê", "bên thuê nhà"]}
+concepts:
+  # ───────────── 1. NỘI DUNG BẮT BUỘC (Luật Nhà ở 2023 Đ163; 2014 Đ121) ─────────────
+  - id: lease.content_property
+    kind: required_content
+    label: Mô tả nhà ở cho thuê
+    scope: core
+    phase: P0
+    holder: BEN_THUE
+    counterparty: BEN_CHO_THUE
+    applies_to: [BEN_THUE]
+    describe: "Điều khoản mô tả nhà ở cho thuê: địa chỉ, diện tích, kết cấu, thửa đất gắn với nhà."
+    phrasing: ["địa chỉ nhà", "diện tích", "đặc điểm nhà", "căn hộ số", "thửa đất"]
+    anchors:
+      - {pid: "luat:27/2023/QH15#d163.k2", role: basis}
+      - {pid: "luat:65/2014/QH13#d121.k2", role: basis, note: "hợp đồng ký trước 01/08/2024"}
+    rules:
+      - {id: r1, mode: required, derogation: mandatory, on_silence: missing_content,
+         outcome: {legality: illegal, employee_impact: neutral}}
+
+  - id: lease.content_rent_payment
+    kind: required_content
+    label: Giá thuê, thời hạn và phương thức trả tiền thuê
+    scope: core
+    phase: P0
+    holder: BEN_THUE
+    counterparty: BEN_CHO_THUE
+    applies_to: [BEN_THUE]
+    describe: "Điều khoản ghi giá thuê, kỳ trả và cách trả tiền thuê (tiền mặt, chuyển khoản)."
+    phrasing: ["giá thuê", "tiền thuê", "phương thức thanh toán", "trả tiền thuê", "kỳ thanh toán"]
+    anchors:
+      - {pid: "luat:27/2023/QH15#d163.k3", role: basis}
+      - {pid: "luat:27/2023/QH15#d163.k4", role: basis}
+      - {pid: "luat:65/2014/QH13#d121.k4", role: basis, note: "hợp đồng ký trước 01/08/2024"}
+    rules:
+      - {id: r1, mode: required, derogation: mandatory, on_silence: missing_content,
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  - id: lease.content_term_handover
+    kind: required_content
+    label: Thời hạn thuê và thời gian giao nhà
+    scope: core
+    phase: P0
+    holder: BEN_THUE
+    counterparty: BEN_CHO_THUE
+    applies_to: [BEN_THUE]
+    describe: "Điều khoản ghi thời hạn cho thuê và ngày giao nhận nhà."
+    phrasing: ["thời hạn thuê", "thời hạn cho thuê", "ngày bàn giao", "giao nhà", "kể từ ngày"]
+    anchors:
+      - {pid: "luat:27/2023/QH15#d163.k5", role: basis}
+      - {pid: "luat:65/2014/QH13#d121.k5", role: basis, note: "hợp đồng ký trước 01/08/2024"}
+    rules:
+      - {id: r1, mode: required, derogation: mandatory, on_silence: missing_content,
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  # ───────────── 2. CHẤM DỨT TRƯỚC HẠN (Luật Nhà ở 2023 Đ172; 2014 Đ132) ─────────────
+  - id: lease.landlord_termination
+    kind: termination
+    label: Bên cho thuê không được lấy lại nhà tùy ý trong thời hạn thuê
+    scope: core
+    phase: P0
+    holder: BEN_THUE
+    counterparty: BEN_CHO_THUE
+    applies_to: [BEN_THUE]
+    describe: "Điều khoản cho bên cho thuê đơn phương chấm dứt hợp đồng hoặc lấy lại nhà trước hạn."
+    phrasing: ["lấy lại nhà", "thu hồi nhà", "đơn phương chấm dứt", "chấm dứt hợp đồng trước thời hạn", "bất cứ lúc nào"]
+    slots:
+      landlord_may_terminate_at_will: {kind: bool, unit: null}
+    anchors:
+      - {pid: "luat:27/2023/QH15#d172.k1", role: basis}
+      - {pid: "luat:65/2014/QH13#d132.k1", role: basis, note: "hợp đồng ký trước 01/08/2024"}
+      - {pid: "luat:27/2023/QH15#d172.k2", role: exception, note: "căn cứ được chấm dứt: nợ tiền thuê, sai mục đích, tự ý cải tạo..."}
+    rules:
+      - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
+         check: {fact: landlord_may_terminate_at_will, op: eq, value: false},
+         outcome: {legality: illegal, employee_impact: unfavorable}}
+
+  - id: lease.nonpayment_termination
+    kind: time_limit
+    label: Chấm dứt vì nợ tiền thuê chỉ khi nợ từ 03 tháng
+    scope: core
+    phase: P0
+    holder: BEN_THUE
+    counterparty: BEN_CHO_THUE
+    applies_to: [BEN_THUE]
+    describe: "Điều khoản cho bên cho thuê chấm dứt hợp đồng khi bên thuê chậm hoặc không trả tiền thuê một số tháng."
+    phrasing: ["không trả tiền thuê", "chậm trả tiền thuê", "nợ tiền thuê", "quá hạn thanh toán tiền thuê"]
+    slots:
+      nonpayment_months_before_termination: {kind: duration, unit: month}
+    anchors:
+      - {pid: "luat:27/2023/QH15#d172.k2.b", role: basis}
+      - {pid: "luat:65/2014/QH13#d132.k2.b", role: basis, note: "hợp đồng ký trước 01/08/2024"}
+    rules:
+      - id: r1
+        mode: threshold
+        law:
+          min_nonpayment:
+            unit: month
+            periods:
+              - {valid_from: "2015-07-01", value: 3, source: "luat:65/2014/QH13#d132.k2.b"}
+              - {valid_from: "2024-08-01", value: 3, source: "luat:27/2023/QH15#d172.k2.b"}
+        check: {fact: nonpayment_months_before_termination, op: gte, law: min_nonpayment}
+        derogation: floor
+        on_silence: none
+        outcome: {legality: illegal, employee_impact: unfavorable}
+
+  - id: lease.tenant_termination_right
+    kind: termination
+    label: Không tước quyền chấm dứt của bên thuê
+    scope: core
+    phase: P0
+    holder: BEN_THUE
+    counterparty: BEN_CHO_THUE
+    applies_to: [BEN_THUE]
+    describe: "Điều khoản cấm bên thuê đơn phương chấm dứt hợp đồng trong mọi trường hợp (kể cả khi nhà hư hỏng nặng không được sửa, bị tăng giá bất hợp lý)."
+    phrasing: ["bên thuê không được đơn phương chấm dứt", "trong mọi trường hợp", "không được trả nhà trước hạn"]
+    slots:
+      tenant_barred_from_unilateral_termination: {kind: bool, unit: null}
+    anchors:
+      - {pid: "luat:27/2023/QH15#d172.k3", role: basis}
+      - {pid: "luat:65/2014/QH13#d132.k3", role: basis, note: "hợp đồng ký trước 01/08/2024"}
+    rules:
+      - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
+         check: {fact: tenant_barred_from_unilateral_termination, op: eq, value: false},
+         outcome: {legality: illegal, employee_impact: unfavorable}}

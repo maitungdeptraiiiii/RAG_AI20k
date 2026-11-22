@@ -1,0 +1,76 @@
+# Dữ kiện mà bước trích (facts.py + tagger) phải lấy được từ từng hợp đồng thuê nhà mẫu, kèm câu trích nguyên văn.
+# document: trường trích (candidates của facts.py) -> [giá trị, câu trích]. slots: khái niệm -> slot -> [chữ, câu trích];
+# khái niệm nội dung bắt buộc không có slot ({}), câu trích ở present_quotes.
+t1_hop_le:
+  sign_date: 2025-03-01
+  document:
+    value: ["8.000.000 đồng", "Giá thuê nhà là 8.000.000 đồng/tháng."]
+    term: ["12 tháng", "Thời hạn thuê là 12 tháng."]
+  slots:
+    lease.content_property: {}
+    lease.content_rent_payment: {}
+    lease.content_term_handover: {}
+    lease.landlord_termination:
+      landlord_may_terminate_at_will: [false, "Trong thời hạn thuê, Bên A không được đơn phương chấm dứt hợp đồng, trừ các trường hợp pháp luật về nhà ở cho phép."]
+    lease.nonpayment_termination:
+      nonpayment_months_before_termination: ["03 tháng", "nếu Bên B không trả đủ tiền thuê từ 03 tháng trở lên"]
+  present_quotes:
+    lease.content_property: "Bên A cho Bên B thuê căn nhà tại địa chỉ số 12 ngõ 34 phố Giả Định"
+    lease.content_rent_payment: "Bên B trả tiền thuê hằng tháng bằng chuyển khoản vào tài khoản của Bên A trước ngày 05 của tháng."
+    lease.content_term_handover: "Bên A giao nhà cho Bên B vào ngày 05/03/2025."
+
+t2_lay_nha_tuy_y:
+  sign_date: 2024-10-01
+  document:
+    value: ["5.000.000 đồng", "Giá thuê nhà là 5.000.000 đồng/tháng."]
+    term: ["24 tháng", "Thời hạn thuê là 24 tháng."]
+  slots:
+    lease.content_property: {}
+    lease.content_rent_payment: {}
+    lease.content_term_handover: {}
+    lease.landlord_termination:
+      landlord_may_terminate_at_will: [true, "Bên A có quyền lấy lại nhà bất cứ lúc nào trong thời hạn thuê, chỉ cần báo trước cho Bên B 15 ngày."]
+
+t3_no_mot_thang:
+  sign_date: 2025-01-15
+  document:
+    value: ["7.000.000 đồng", "Giá thuê nhà là 7.000.000 đồng/tháng."]
+    term: ["12 tháng", "Thời hạn thuê là 12 tháng."]
+  slots:
+    lease.content_property: {}
+    lease.content_rent_payment: {}
+    lease.content_term_handover: {}
+    lease.nonpayment_termination:
+      nonpayment_months_before_termination: ["01 tháng", "Nếu Bên B chậm trả tiền thuê quá 01 tháng thì Bên A có quyền đơn phương chấm dứt hợp đồng và lấy lại nhà."]
+
+t4_cam_ben_thue_cham_dut:
+  sign_date: 2024-09-10
+  document:
+    value: ["6.000.000 đồng", "Giá thuê nhà là 6.000.000 đồng/tháng."]
+    term: ["36 tháng", "Thời hạn thuê là 36 tháng."]
+  slots:
+    lease.content_property: {}
+    lease.content_rent_payment: {}
+    lease.content_term_handover: {}
+    lease.tenant_termination_right:
+      tenant_barred_from_unilateral_termination: [true, "Bên B không được đơn phương chấm dứt hợp đồng trước thời hạn trong mọi trường hợp."]
+
+t5_thieu_thoi_han:
+  sign_date: 2025-05-01
+  document:
+    value: ["4.000.000 đồng", "Giá thuê nhà là 4.000.000 đồng/tháng."]
+  slots:
+    lease.content_property: {}
+    lease.content_rent_payment: {}
+
+t6_truoc_2024:
+  sign_date: 2020-06-01
+  document:
+    value: ["3.500.000 đồng", "Giá thuê nhà là 3.500.000 đồng/tháng."]
+    term: ["24 tháng", "Thời hạn thuê là 24 tháng."]
+  slots:
+    lease.content_property: {}
+    lease.content_rent_payment: {}
+    lease.content_term_handover: {}
+    lease.nonpayment_termination:
+      nonpayment_months_before_termination: ["02 tháng", "Nếu Bên B không trả tiền thuê 02 tháng thì Bên A có quyền đơn phương chấm dứt hợp đồng và thu hồi nhà."]

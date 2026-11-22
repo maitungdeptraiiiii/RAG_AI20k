@@ -7,7 +7,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 INVENTORY = ROOT / "docs" / "rule_inventory"
 from legal_corpus import ROOTS, law_text  # noqa: E402
-FILES = ["labor_w04.yaml", "civil_general.yaml", "civil_loan.yaml"]
+FILES = ["labor_w04.yaml", "civil_general.yaml", "civil_loan.yaml", "civil_lease.yaml"]
 TYPES = {"threshold", "required", "prohibited", "default", "derived", "exception"}
 DEROGATIONS = {"mandatory", "floor", "ceiling", "default"}
 SILENCE = {"missing_content", "hidden_right", "default_applies", "none"}
@@ -30,6 +30,7 @@ def _norm(s: str) -> str:
 def test_every_quote_is_verbatim_in_the_corpus(name, entry):
     quotes = [(entry["source"]["pid"], entry["source"]["quote"])]
     quotes += [(x["pid"], x["quote"]) for x in entry["exceptions"]]
+    quotes += [(x["pid"], x["quote"]) for x in entry.get("periods") or []]   # cùng quy định ở các bản luật trước/sau
     for pid, quote in quotes:
         text = law_text(pid)
         if text is None:
@@ -42,7 +43,7 @@ def test_every_quote_is_verbatim_in_the_corpus(name, entry):
 def test_entry_shape(name, entry):
     assert REQUIRED <= set(entry), REQUIRED - set(entry)
     assert entry["type"] in TYPES and entry["derogation"] in DEROGATIONS and entry["on_silence"] in SILENCE
-    assert entry["id"].split(".")[0] in {"labor", "civil", "civil_loan"}
+    assert entry["id"].split(".")[0] in {"labor", "civil", "civil_loan", "civil_lease"}
     assert "#d" in entry["source"]["pid"] and entry["source"]["quote"].strip()
     for x in entry["exceptions"]:
         assert {"pid", "quote", "condition"} <= set(x)
@@ -76,3 +77,14 @@ def test_kinds_cover_every_labor_concept_and_inventory_kinds_are_declared():
     for x in kinds["not_fitting"]:
         assert x["why"]
     assert {e["kind"] for _, e in entries()} <= declared | {"none"}
+
+
+def test_periods_are_ordered_and_cover_the_source():
+    """Quy định có nhiều bản luật: mỗi kỳ có ngày bắt đầu, tăng dần, và kỳ cuối là `source`."""
+    for _, e in entries():
+        periods = e.get("periods")
+        if not periods:
+            continue
+        starts = [str(p["valid_from"]) for p in periods]
+        assert starts == sorted(starts) and len(set(starts)) == len(starts), e["id"]
+        assert periods[-1]["pid"] == e["source"]["pid"], e["id"]

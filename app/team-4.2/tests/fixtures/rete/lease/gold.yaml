@@ -1,0 +1,63 @@
+# Nhãn đúng cho hợp đồng thuê nhà mẫu (phần Tuấn; định dạng tuan.md §3, mỗi hợp đồng là một đối tượng).
+# Viết TRƯỚC khi chạy engine trên các hợp đồng này, chỉ từ văn bản luật (docs/rule_inventory/civil_lease.yaml).
+# Người gắn nhãn: Claude theo yêu cầu của Tùng — CẦN TÙNG DUYỆT (tuan.md §4 không cho LLM tự gắn nhãn gold).
+# Ngày soát = ngày ký. Ký từ 01/08/2024: Luật Nhà ở 27/2023; trước đó: Luật Nhà ở 65/2014.
+dossier_id: lease
+labeled_by: "Claude (theo yêu cầu của Tùng) — cần Tùng duyệt"
+expected:
+  - rule: lease.content_property/r1
+    object: t1_hop_le
+    periods: [{from: 2025-03-01, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k2", quote: "Mô tả đặc điểm của nhà ở giao dịch và đặc điểm của thửa đất ở gắn với nhà ở đó."}
+  - rule: lease.content_rent_payment/r1
+    object: t1_hop_le
+    periods: [{from: 2025-03-01, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k4", quote: "Thời hạn và phương thức thanh toán tiền nếu là trường hợp mua bán, cho thuê mua, cho thuê nhà ở;"}
+  - rule: lease.content_term_handover/r1
+    object: t1_hop_le
+    periods: [{from: 2025-03-01, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k5", quote: "thời hạn cho thuê mua, cho thuê, thế chấp, cho mượn, cho ở nhờ, ủy quyền quản lý nhà ở"}
+  - rule: lease.landlord_termination/r1
+    object: t1_hop_le
+    periods: [{from: 2025-03-01, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d172.k1", quote: "bên cho thuê không được đơn phương chấm dứt thực hiện hợp đồng thuê nhà ở và thu hồi nhà ở đang cho thuê, trừ trường hợp quy định tại khoản 2 Điều này."}
+    note: "chỉ cho chấm dứt theo căn cứ luật nhà ở"
+  - rule: lease.nonpayment_termination/r1
+    object: t1_hop_le
+    periods: [{from: 2025-03-01, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d172.k2.b", quote: "Bên thuê không trả đủ tiền thuê nhà ở theo thỏa thuận trong hợp đồng từ 03 tháng trở lên"}
+    note: "03 tháng = đúng mức luật"
+
+  - rule: lease.landlord_termination/r1
+    object: t2_lay_nha_tuy_y
+    periods: [{from: 2024-10-01, status: FAIL, finding: violation}]
+    basis: {pid: "luat:27/2023/QH15#d172.k1", quote: "bên cho thuê không được đơn phương chấm dứt thực hiện hợp đồng thuê nhà ở và thu hồi nhà ở đang cho thuê, trừ trường hợp quy định tại khoản 2 Điều này."}
+    note: "lấy lại nhà bất cứ lúc nào, báo trước 15 ngày; ký sau 01/08/2024 nên theo Luật 27/2023"
+
+  - rule: lease.nonpayment_termination/r1
+    object: t3_no_mot_thang
+    periods: [{from: 2025-01-15, status: FAIL, finding: violation}]
+    basis: {pid: "luat:27/2023/QH15#d172.k2.b", quote: "Bên thuê không trả đủ tiền thuê nhà ở theo thỏa thuận trong hợp đồng từ 03 tháng trở lên"}
+    note: "01 tháng < 03 tháng: mở rộng căn cứ chấm dứt của bên cho thuê"
+
+  - rule: lease.tenant_termination_right/r1
+    object: t4_cam_ben_thue_cham_dut
+    periods: [{from: 2024-09-10, status: FAIL, finding: violation}]
+    basis: {pid: "luat:27/2023/QH15#d172.k3", quote: "Bên thuê nhà ở có quyền đơn phương chấm dứt thực hiện hợp đồng thuê nhà ở khi thuộc một trong các trường hợp sau đây:"}
+    note: "cấm trong mọi trường hợp; cách đọc 'mandatory' cần Tùng duyệt (civil_lease.yaml open_questions)"
+
+  - rule: lease.content_property/r1
+    object: t5_thieu_thoi_han
+    periods: [{from: 2025-05-01, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k2", quote: "Mô tả đặc điểm của nhà ở giao dịch và đặc điểm của thửa đất ở gắn với nhà ở đó."}
+  - rule: lease.content_term_handover/r1
+    object: t5_thieu_thoi_han
+    periods: [{from: 2025-05-01, status: FAIL, finding: missing_content}]
+    basis: {pid: "luat:27/2023/QH15#d163.k5", quote: "thời hạn cho thuê mua, cho thuê, thế chấp, cho mượn, cho ở nhờ, ủy quyền quản lý nhà ở"}
+    note: "không ghi thời hạn thuê, không ghi ngày giao nhà"
+
+  - rule: lease.nonpayment_termination/r1
+    object: t6_truoc_2024
+    periods: [{from: 2020-06-01, status: FAIL, finding: violation}]
+    basis: {pid: "luat:65/2014/QH13#d132.k2.b", quote: "Bên thuê không trả tiền thuê nhà ở theo thỏa thuận từ 03 tháng trở lên mà không có lý do chính đáng"}
+    note: "ký 2020 nên theo Luật Nhà ở 2014; 02 tháng < 03 tháng"

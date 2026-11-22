@@ -1,0 +1,28 @@
+# Gói hợp đồng thuê nhà ở (BLDS 91/2015/QH13 Đ472–482; Luật Nhà ở 65/2014/QH13 từ 01/07/2015; Luật Nhà ở 27/2023/QH15
+# từ 01/08/2024). Thừa kế đơn vị, dữ kiện và finding của civil_general.
+# Bản liệt kê có trích dẫn: docs/rule_inventory/civil_lease.yaml.
+id: civil_lease
+version: "0.1"
+extends: [civil_general]
+document_kinds: [lease_contract]
+document_labels: {lease_contract: "hợp đồng thuê nhà ở"}   # tên loại văn bản trong prompt
+
+units: [hour, day, month, vnd]
+conversions:
+  hour:  {base: hour, factor: 1}
+  day:   {base: hour, factor: 24}
+  month: {base: hour, factor: 720}
+
+# Dữ kiện cấp hợp đồng: "value" (giá trị hợp đồng = tiền thuê) và "term" (thời hạn) là trường trích chung của facts.py.
+document_facts:
+  rent_vnd: {unit: vnd, from: value, parse: money}
+  lease_term_months: {unit: month, from: term, parse: duration_to_unit}
+
+extract_fields: []
+user_facts: []
+findings: []
+# Loại khái niệm (spec §5.5): khái niệm khai `kind` phải có slot thuộc các loại này.
+concept_kinds:
+  required_content: {slot_kinds: []}
+  termination: {slot_kinds: [bool]}
+  time_limit: {slot_kinds: [duration]}

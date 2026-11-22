@@ -1,0 +1,240 @@
+# Bản liệt kê rule hợp đồng thuê nhà ở (phần Tuấn, T6). Miền thứ ba của định hướng W04 "phủ rộng nhiều loại hợp đồng".
+# Người soạn: Claude theo yêu cầu của Tùng — CẦN TÙNG DUYỆT (xem đầu labor_w04.yaml). Quote kiểm bằng tests/test_rule_inventory.py.
+# Nguồn: BLDS 91/2015/QH13 Đ472–482 (thuê tài sản, luật chung); Luật Nhà ở 65/2014/QH13 (hiệu lực 01/07/2015) Đ121, 122,
+# 129, 132; Luật Nhà ở 27/2023/QH15 Đ163, 164, 170, 172. Luật 27/2023 có hiệu lực từ 01/08/2024 (Luật 43/2024/QH15 Đ2
+# sửa khoản 1 Điều 197, trước đó là 01/01/2025).
+# BLDS Đ472: "Hợp đồng thuê nhà ở ... được thực hiện theo quy định của Bộ luật này, Luật nhà ở" — quy định riêng của Luật
+# Nhà ở được ưu tiên cho nhà ở. `periods`: cùng quy định ở bản luật trước, kỳ cuối là `source` (soát theo ngày ký).
+
+- id: civil_lease.content_property
+  source:
+    pid: "luat:27/2023/QH15#d163.k2"
+    quote: "Mô tả đặc điểm của nhà ở giao dịch và đặc điểm của thửa đất ở gắn với nhà ở đó."
+  periods:
+    - {valid_from: "2015-07-01", pid: "luat:65/2014/QH13#d121.k2", quote: "Mô tả đặc điểm của nhà ở giao dịch và đặc điểm của thửa đất ở gắn với nhà ở đó."}
+    - {valid_from: "2024-08-01", pid: "luat:27/2023/QH15#d163.k2", quote: "Mô tả đặc điểm của nhà ở giao dịch và đặc điểm của thửa đất ở gắn với nhà ở đó."}
+  type: required
+  kind: required_content
+  derogation: mandatory
+  applies_when: "Mọi hợp đồng thuê nhà ở"
+  facts_needed:
+    - {name: present, kind: bool, from: contract, note: "khái niệm được gắn cho một điều khoản"}
+  exceptions: []
+  conclusion: "Hợp đồng không mô tả nhà ở cho thuê: thiếu nội dung bắt buộc"
+  on_silence: missing_content
+  derived_from: []
+  yaml_rule: "lease.content_property/r1"
+  examples:
+    - {facts: {present: true}, expected: PASS}
+    - {facts: {present: false}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "chưa đọc được hợp đồng (không có văn bản)"}
+  open_questions:
+    - "Hợp đồng ký trước 01/07/2015 (Luật Nhà ở 2005) chưa có trong bản liệt kê; engine vẫn soát theo yêu cầu này."
+
+- id: civil_lease.content_rent_payment
+  source:
+    pid: "luat:27/2023/QH15#d163.k4"
+    quote: "Thời hạn và phương thức thanh toán tiền nếu là trường hợp mua bán, cho thuê mua, cho thuê nhà ở;"
+  periods:
+    - {valid_from: "2015-07-01", pid: "luat:65/2014/QH13#d121.k4", quote: "Thời hạn và phương thức thanh toán tiền nếu là trường hợp mua bán, cho thuê, cho thuê mua, chuyển nhượng hợp đồng mua bán nhà ở;"}
+    - {valid_from: "2024-08-01", pid: "luat:27/2023/QH15#d163.k4", quote: "Thời hạn và phương thức thanh toán tiền nếu là trường hợp mua bán, cho thuê mua, cho thuê nhà ở;"}
+  type: required
+  kind: required_content
+  derogation: mandatory
+  applies_when: "Mọi hợp đồng thuê nhà ở"
+  facts_needed:
+    - {name: present, kind: bool, from: contract, note: "điều khoản ghi giá thuê, thời hạn và phương thức trả tiền thuê"}
+  exceptions: []
+  conclusion: "Hợp đồng không ghi giá thuê / cách trả tiền thuê: thiếu nội dung bắt buộc"
+  on_silence: missing_content
+  derived_from: []
+  yaml_rule: "lease.content_rent_payment/r1"
+  examples:
+    - {facts: {present: true}, expected: PASS}
+    - {facts: {present: false}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "chưa đọc được hợp đồng"}
+  open_questions:
+    - "Đ163.3 (giá giao dịch) gộp vào khái niệm này; giá do Nhà nước quy định (nhà ở xã hội, tài sản công) chưa kiểm."
+
+- id: civil_lease.content_term_handover
+  source:
+    pid: "luat:27/2023/QH15#d163.k5"
+    quote: "thời hạn cho thuê mua, cho thuê, thế chấp, cho mượn, cho ở nhờ, ủy quyền quản lý nhà ở"
+  periods:
+    - {valid_from: "2015-07-01", pid: "luat:65/2014/QH13#d121.k5", quote: "thời hạn cho thuê, cho thuê mua, thế chấp, cho mượn, cho ở nhờ, ủy quyền quản lý nhà ở"}
+    - {valid_from: "2024-08-01", pid: "luat:27/2023/QH15#d163.k5", quote: "thời hạn cho thuê mua, cho thuê, thế chấp, cho mượn, cho ở nhờ, ủy quyền quản lý nhà ở"}
+  type: required
+  kind: required_content
+  derogation: mandatory
+  applies_when: "Mọi hợp đồng thuê nhà ở"
+  facts_needed:
+    - {name: present, kind: bool, from: contract, note: "điều khoản ghi thời gian giao nhà và thời hạn thuê"}
+  exceptions: []
+  conclusion: "Hợp đồng không ghi thời hạn thuê / thời gian giao nhà: thiếu nội dung bắt buộc"
+  on_silence: missing_content
+  derived_from: []
+  yaml_rule: "lease.content_term_handover/r1"
+  examples:
+    - {facts: {present: true}, expected: PASS}
+    - {facts: {present: false}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "chưa đọc được hợp đồng"}
+  open_questions:
+    - "BLDS Đ474.1: không thỏa thuận thời hạn thì xác định theo mục đích thuê; Luật Nhà ở vẫn đòi ghi thời hạn trong hợp đồng."
+
+- id: civil_lease.landlord_no_unilateral_termination
+  source:
+    pid: "luat:27/2023/QH15#d172.k1"
+    quote: "Trong thời hạn thuê nhà ở theo thỏa thuận trong hợp đồng, bên cho thuê không được đơn phương chấm dứt thực hiện hợp đồng thuê nhà ở và thu hồi nhà ở đang cho thuê, trừ trường hợp quy định tại khoản 2 Điều này."
+  periods:
+    - {valid_from: "2015-07-01", pid: "luat:65/2014/QH13#d132.k1", quote: "Trong thời hạn thuê nhà ở theo thỏa thuận trong hợp đồng, bên cho thuê không được đơn phương chấm dứt hợp đồng thuê nhà và thu hồi nhà ở đang cho thuê, trừ các trường hợp quy định tại khoản 2 Điều này."}
+    - {valid_from: "2024-08-01", pid: "luat:27/2023/QH15#d172.k1", quote: "Trong thời hạn thuê nhà ở theo thỏa thuận trong hợp đồng, bên cho thuê không được đơn phương chấm dứt thực hiện hợp đồng thuê nhà ở và thu hồi nhà ở đang cho thuê, trừ trường hợp quy định tại khoản 2 Điều này."}
+  type: prohibited
+  kind: termination
+  derogation: mandatory
+  applies_when: "Hợp đồng thuê nhà ở có thời hạn"
+  facts_needed:
+    - {name: landlord_may_terminate_at_will, kind: bool, from: contract, note: "điều khoản cho bên cho thuê lấy lại nhà / chấm dứt bất cứ lúc nào, không cần căn cứ k2"}
+  exceptions:
+    - pid: "luat:27/2023/QH15#d172.k2"
+      quote: "Bên cho thuê nhà ở có quyền đơn phương chấm dứt thực hiện hợp đồng thuê nhà ở và thu hồi nhà ở đang cho thuê khi thuộc một trong các trường hợp sau đây:"
+      condition: "Điều khoản chỉ cho bên cho thuê chấm dứt theo các căn cứ của k2 (nợ tiền thuê, dùng sai mục đích, tự ý cải tạo, cho thuê lại không đồng ý...)"
+  conclusion: "Điều khoản cho bên cho thuê đơn phương chấm dứt / thu hồi nhà tùy ý trong thời hạn thuê trái Đ172.1"
+  on_silence: none
+  derived_from: []
+  yaml_rule: "lease.landlord_termination/r1"
+  examples:
+    - {facts: {landlord_may_terminate_at_will: false}, expected: PASS}
+    - {facts: {landlord_may_terminate_at_will: true}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "chưa đọc được điều khoản chấm dứt"}
+  open_questions: []
+
+- id: civil_lease.nonpayment_termination_min
+  source:
+    pid: "luat:27/2023/QH15#d172.k2.b"
+    quote: "Bên thuê không trả đủ tiền thuê nhà ở theo thỏa thuận trong hợp đồng từ 03 tháng trở lên mà không có lý do đã được thỏa thuận trong hợp đồng"
+  periods:
+    - {valid_from: "2015-07-01", pid: "luat:65/2014/QH13#d132.k2.b", quote: "Bên thuê không trả tiền thuê nhà ở theo thỏa thuận từ 03 tháng trở lên mà không có lý do chính đáng"}
+    - {valid_from: "2024-08-01", pid: "luat:27/2023/QH15#d172.k2.b", quote: "Bên thuê không trả đủ tiền thuê nhà ở theo thỏa thuận trong hợp đồng từ 03 tháng trở lên mà không có lý do đã được thỏa thuận trong hợp đồng"}
+  type: threshold
+  kind: time_limit
+  derogation: floor
+  applies_when: "Hợp đồng cho bên cho thuê chấm dứt vì bên thuê chậm trả tiền thuê"
+  facts_needed:
+    - {name: nonpayment_months_before_termination, kind: duration, unit: month, from: contract, note: "số tháng chậm trả để bên cho thuê được chấm dứt"}
+  threshold: {value: 3, unit: month}
+  exceptions: []
+  conclusion: "Cho bên cho thuê chấm dứt khi chậm trả dưới 03 tháng: mở rộng căn cứ của Đ172.2, trái Đ172.1"
+  on_silence: none
+  derived_from: [civil_lease.landlord_no_unilateral_termination]
+  yaml_rule: "lease.nonpayment_termination/r1"
+  examples:
+    - {facts: {nonpayment_months_before_termination: 3}, expected: PASS}
+    - {facts: {nonpayment_months_before_termination: 1}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "điều khoản không ghi số tháng"}
+  open_questions:
+    - "BLDS Đ481.2 (thuê tài sản chung): chấm dứt khi không trả tiền ba kỳ liên tiếp, 'trừ trường hợp có thỏa thuận khác'. Với nhà ở dùng Luật Nhà ở (Đ472)."
+    - "2014: 'không có lý do chính đáng'; 2023: 'không có lý do đã được thỏa thuận trong hợp đồng' — chưa kiểm phần lý do."
+
+- id: civil_lease.tenant_termination_right
+  source:
+    pid: "luat:27/2023/QH15#d172.k3"
+    quote: "Bên thuê nhà ở có quyền đơn phương chấm dứt thực hiện hợp đồng thuê nhà ở khi thuộc một trong các trường hợp sau đây:"
+  periods:
+    - {valid_from: "2015-07-01", pid: "luat:65/2014/QH13#d132.k3", quote: "Bên thuê nhà ở có quyền đơn phương chấm dứt thực hiện hợp đồng thuê nhà ở khi bên cho thuê nhà ở có một trong các hành vi sau đây:"}
+    - {valid_from: "2024-08-01", pid: "luat:27/2023/QH15#d172.k3", quote: "Bên thuê nhà ở có quyền đơn phương chấm dứt thực hiện hợp đồng thuê nhà ở khi thuộc một trong các trường hợp sau đây:"}
+  type: prohibited
+  kind: termination
+  derogation: mandatory
+  applies_when: "Hợp đồng có điều khoản cấm bên thuê chấm dứt trước hạn trong mọi trường hợp"
+  facts_needed:
+    - {name: tenant_barred_from_unilateral_termination, kind: bool, from: contract, note: "cấm tuyệt đối, kể cả khi bên cho thuê không sửa nhà hư hỏng nặng / tăng giá bất hợp lý"}
+  exceptions: []
+  conclusion: "Điều khoản tước quyền chấm dứt của bên thuê trong các trường hợp Đ172.3 trái luật"
+  on_silence: none
+  derived_from: []
+  yaml_rule: "lease.tenant_termination_right/r1"
+  examples:
+    - {facts: {tenant_barred_from_unilateral_termination: false}, expected: PASS}
+    - {facts: {tenant_barred_from_unilateral_termination: true}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "chưa đọc được điều khoản chấm dứt"}
+  open_questions:
+    - "Đ172.3 trao quyền nhưng không nói rõ điều khoản từ bỏ quyền này vô hiệu; xếp 'mandatory' là cách đọc của người soạn, cần Tùng duyệt."
+    - "Điều khoản chỉ cấm chấm dứt 'tùy ý' (ngoài các trường hợp k3) thì hợp lệ: slot chỉ true khi cấm trong MỌI trường hợp."
+
+- id: civil_lease.termination_notice
+  source:
+    pid: "luat:27/2023/QH15#d172.k4"
+    quote: "Bên đơn phương chấm dứt thực hiện hợp đồng thuê nhà ở phải thông báo bằng văn bản hoặc bằng hình thức khác theo thỏa thuận trong hợp đồng cho bên kia biết trước ít nhất 30 ngày, trừ trường hợp các bên có thỏa thuận khác"
+  periods:
+    - {valid_from: "2015-07-01", pid: "luat:65/2014/QH13#d132.k4", quote: "Bên đơn phương chấm dứt thực hiện hợp đồng thuê nhà ở phải thông báo cho bên kia biết trước ít nhất 30 ngày, trừ trường hợp các bên có thỏa thuận khác"}
+    - {valid_from: "2024-08-01", pid: "luat:27/2023/QH15#d172.k4", quote: "Bên đơn phương chấm dứt thực hiện hợp đồng thuê nhà ở phải thông báo bằng văn bản hoặc bằng hình thức khác theo thỏa thuận trong hợp đồng cho bên kia biết trước ít nhất 30 ngày, trừ trường hợp các bên có thỏa thuận khác"}
+  type: default
+  kind: notice
+  derogation: default
+  applies_when: "Một bên đơn phương chấm dứt hợp đồng thuê nhà ở"
+  facts_needed:
+    - {name: notice_days, kind: duration, unit: day, from: contract}
+    - {name: notice_agreed_in_contract, kind: bool, from: contract}
+  threshold: {value: 30, unit: day}
+  exceptions: []
+  conclusion: "Báo trước 30 ngày là mặc định; các bên được thỏa thuận khác nên điều khoản ghi ngắn hơn KHÔNG trái luật"
+  on_silence: default_applies
+  derived_from: []
+  yaml_rule: "chưa có (luật mặc định, hợp đồng ghi khác vẫn hợp lệ; chỉ là sự kiện khi một bên chấm dứt mà không báo)"
+  examples:
+    - {facts: {notice_days: 15, notice_agreed_in_contract: true}, expected: PASS}
+    - {facts: {notice_days: 10, notice_agreed_in_contract: false}, expected: FAIL, note: "sự kiện chấm dứt thực tế, không phải điều khoản"}
+    - {facts: {notice_days: 10}, expected: UNKNOWN, why: "chưa biết thời hạn báo trước có do hợp đồng thỏa thuận không"}
+  open_questions: []
+
+- id: civil_lease.rent_adjustment_on_renovation
+  source:
+    pid: "luat:27/2023/QH15#d170.k2"
+    quote: "Trường hợp bên cho thuê thực hiện cải tạo nhà ở và được bên thuê đồng ý thì bên cho thuê được quyền điều chỉnh giá thuê nhà ở nếu thời gian cho thuê còn lại từ một phần ba thời hạn của hợp đồng thuê nhà ở trở xuống."
+  periods:
+    - {valid_from: "2015-07-01", pid: "luat:65/2014/QH13#d129.k2", quote: "Trường hợp chưa hết hạn hợp đồng thuê nhà ở mà bên cho thuê thực hiện cải tạo nhà ở và được bên thuê đồng ý thì bên cho thuê được quyền điều chỉnh giá thuê nhà ở."}
+    - {valid_from: "2024-08-01", pid: "luat:27/2023/QH15#d170.k2", quote: "Trường hợp bên cho thuê thực hiện cải tạo nhà ở và được bên thuê đồng ý thì bên cho thuê được quyền điều chỉnh giá thuê nhà ở nếu thời gian cho thuê còn lại từ một phần ba thời hạn của hợp đồng thuê nhà ở trở xuống."}
+  type: default
+  kind: none
+  derogation: default
+  applies_when: "Bên cho thuê điều chỉnh giá thuê giữa kỳ"
+  facts_needed:
+    - {name: renovated_with_tenant_consent, kind: bool, from: dossier}
+    - {name: remaining_term_share, kind: percent, from: derived, note: "thời gian còn lại / thời hạn hợp đồng, tính từ phụ lục tăng giá"}
+  exceptions: []
+  conclusion: "Quyền của bên cho thuê ĐỀ NGHỊ giá mới; 'giá thuê nhà ở mới do các bên thỏa thuận', không thỏa thuận được thì bên cho thuê chấm dứt và bồi thường"
+  on_silence: none
+  derived_from: []
+  yaml_rule: "chưa có — xem open_questions"
+  examples:
+    - {facts: {renovated_with_tenant_consent: true, remaining_term_share: 30}, expected: PASS}
+    - {facts: {renovated_with_tenant_consent: false}, expected: FAIL, note: "chỉ khi bên cho thuê áp giá mới mà bên thuê không đồng ý"}
+    - {facts: {renovated_with_tenant_consent: true}, expected: UNKNOWN, why: "chưa biết thời gian thuê còn lại (2023 đòi ≤ 1/3)"}
+  open_questions:
+    - "Giá mới luôn do các bên thỏa thuận (k2 câu 2), nên phụ lục tăng giá có hai bên ký là hợp lệ: không có rule 'tăng giá giữa kỳ' trên hồ sơ (D37) có căn cứ. Điều khoản 'bên cho thuê đơn phương tăng giá' chưa xếp là vi phạm vì luật không nói thẳng."
+    - "Khác biệt 2014/2023 (điều kiện ≤ 1/3 thời hạn còn lại) chỉ ảnh hưởng quyền chấm dứt của bên cho thuê (Đ172.2.g)."
+
+- id: civil_lease.sublease_needs_consent
+  source:
+    pid: "luat:27/2023/QH15#d170.k4"
+    quote: "Bên thuê có quyền cho thuê lại nhà ở mà mình đã thuê nếu được bên cho thuê đồng ý."
+  type: default
+  kind: none
+  derogation: default
+  applies_when: "Bên thuê cho thuê lại"
+  facts_needed:
+    - {name: sublet_without_consent, kind: bool, from: dossier}
+  exceptions: []
+  conclusion: "Cho thuê lại cần bên cho thuê đồng ý (BLDS Đ475); không đồng ý thì bên cho thuê được chấm dứt (Đ172.2.đ). Là sự kiện thực hiện, không phải điều khoản sai"
+  on_silence: none
+  derived_from: []
+  yaml_rule: "chưa có (sự kiện thực hiện hợp đồng, không soát trên văn bản)"
+  examples:
+    - {facts: {sublet_without_consent: false}, expected: PASS}
+    - {facts: {sublet_without_consent: true}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "chưa có thông tin việc cho thuê lại"}
+  open_questions:
+    - "Luật Nhà ở 2014 không có khoản tương ứng trong Đ129 (chỉ BLDS Đ475 và Đ132.2.đ)."
+
+# Không ghi mục riêng: Luật Nhà ở 27/2023 Đ164.2 (2014: Đ122.2) — thuê nhà ở không bắt buộc công chứng, chứng thực,
+# hiệu lực theo thỏa thuận hoặc ngày ký; không có trường hợp vi phạm (xem civil.form_required_by_law trong civil_general.yaml).

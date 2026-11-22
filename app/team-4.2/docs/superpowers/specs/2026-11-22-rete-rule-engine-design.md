@@ -1,7 +1,7 @@
 # Rule engine v2: lõi đa luật + mạng phụ thuộc tăng dần ba trị (join kiểu TREAT) — thiết kế
 
 Ngày: 2026-11-22 · **Bản 2** (sau khi khảo sát các biến thể của Rete) · Người quyết định: Tùng (A) ·
-Trạng thái: bản 2 **đã duyệt** (Tùng, 2026-11-22); **bản 3 chờ Tùng duyệt** (các thay đổi đánh dấu "bản 3")
+Trạng thái: bản 2 **đã duyệt** (Tùng, 2026-11-22); **bản 3 đã duyệt** (Tùng, 2026-11-23; các thay đổi đánh dấu "bản 3")
 
 **Bản 3 (2026-11-23)** — chỉnh theo định hướng W04 "phủ rộng nhiều loại hợp đồng" (rà soát ngày 23/11 thấy kế hoạch
 vẫn lấy lao động làm chính): (1) ba miền bắt buộc chạy được thay vì một miền phụ: `labor`, `civil_general` +

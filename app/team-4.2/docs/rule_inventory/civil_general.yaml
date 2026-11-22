@@ -16,7 +16,7 @@
   conclusion: "Thiếu công chứng / chứng thực / đăng ký mà luật bắt buộc thì vi phạm điều kiện hình thức"
   on_silence: none
   derived_from: []
-  yaml_rule: "chưa có (cần luật chuyên ngành: Luật Nhà ở 27/2023 chưa đọc)"
+  yaml_rule: "chưa có (luật chuyên ngành; thuê nhà ở: Luật Nhà ở 27/2023 Đ164.2 không bắt buộc công chứng, xem civil_lease.yaml)"
   examples:
     - {facts: {form_requirement: notarized, notarized: true}, expected: PASS}
     - {facts: {form_requirement: notarized, notarized: false}, expected: FAIL}

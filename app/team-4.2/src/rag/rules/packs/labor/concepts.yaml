@@ -417,7 +417,7 @@ concepts:
           min_wage:
             by: wage_region
             unit: vnd
-            periods:     # số do người viết nhớ; test đối chiếu lời văn nghị định khi kho luật được giải nén
+            periods:     # đối chiếu bảng Vùng I–IV của từng nghị định: tests/test_rules_labor_term.py
               - {valid_from: "2022-07-01", source: "nghi-dinh:38/2022/NĐ-CP",
                  values: {I: 4680000, II: 4160000, III: 3640000, IV: 3250000}}
               - {valid_from: "2024-07-01", source: "nghi-dinh:74/2024/NĐ-CP",

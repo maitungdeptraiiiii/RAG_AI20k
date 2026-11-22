@@ -1,9 +1,12 @@
 # Bản liệt kê rule lao động W04 (phần Tuấn, T1; định dạng tuan.md §2).
 # Người soạn: Claude theo yêu cầu của Tùng — CẦN TÙNG DUYỆT. tuan.md §4 cấm dùng LLM viết trích dẫn / kết luận pháp lý:
-#   - `quote`: chép từ data/team-4.2/legal/raw/bo-luat_45_2019_QH14/*.txt, test tests/test_rule_inventory.py kiểm nguyên văn.
+#   - `quote`: chép từ kho luật của ứng dụng (app/team-4.2/data/team-4.2/legal/raw/), tests/test_rule_inventory.py
+#     kiểm nguyên văn (helper tests/legal_corpus.py).
 #   - `conclusion`, `exceptions[].condition`, `examples`, `open_questions`: do Claude viết, phải được người duyệt.
-# Kho luật KHÔNG có Nghị định 145/2020/NĐ-CP (hướng dẫn BLLĐ) và các nghị định lương tối thiểu vùng (38/2022, 74/2024,
-# 293/2025): mọi mục cần văn bản đó ghi ở open_questions.
+# Sửa 23/11: bản trước ghi "kho không có NĐ 145/2020 và nghị định lương tối thiểu" là SAI (đã kiểm nhầm thư mục
+# data/ ở gốc repo). Kho ứng dụng có NĐ 145/2020, 38/2022, 74/2024, 293/2025; mức lương tối thiểu trong gói labor đã
+# đối chiếu với bảng Vùng I–IV của ba nghị định (tests/test_rules_labor_term.py). NĐ 145/2020 có trong kho nhưng CHƯA
+# đọc phần liên quan Đ20, Đ22, Đ25 (B3).
 
 - id: labor.term_max_36_months
   source:
@@ -225,7 +228,7 @@
   facts_needed:
     - {name: base_salary_vnd, kind: money, unit: vnd, from: contract}
     - {name: wage_region, kind: enum, from: user}
-  threshold: {note: "theo vùng, do Chính phủ công bố (Đ91.4) — số trong pack chưa đối chiếu nghị định"}
+  threshold: {note: "theo vùng, do Chính phủ công bố (Đ91.4): NĐ 38/2022, 74/2024, 293/2025 — đã đối chiếu"}
   exceptions: []
   conclusion: "Lương theo công việc thấp hơn lương tối thiểu vùng tại ngày soát là trái Đ90.2"
   on_silence: none
@@ -236,4 +239,4 @@
     - {facts: {base_salary_vnd: 4700000, wage_region: I, day: "2025-03-01"}, expected: FAIL}
     - {facts: {base_salary_vnd: 4700000}, expected: UNKNOWN, why: "chưa biết vùng lương"}
   open_questions:
-    - "Kho luật không có NĐ 38/2022, 74/2024, 293/2025: mức lương tối thiểu vùng trong pack (4.680.000 / 4.960.000 / 5.310.000 vùng I) là số người viết nhớ, CHƯA đối chiếu văn bản. Nhãn gold dựa vào các số này ghi basis.verified: false."
+    - "Vùng của địa bàn nơi làm việc tra theo phụ lục danh mục địa bàn của từng nghị định; engine nhận vùng từ người dùng (wage_region), chưa tự tra địa bàn."

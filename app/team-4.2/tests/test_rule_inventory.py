@@ -6,21 +6,13 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 INVENTORY = ROOT / "docs" / "rule_inventory"
-RAW = Path(__file__).resolve().parents[3] / "data" / "team-4.2" / "legal" / "raw"
+from legal_corpus import ROOTS, law_text  # noqa: E402
 FILES = ["labor_w04.yaml", "civil_general.yaml", "civil_loan.yaml"]
 TYPES = {"threshold", "required", "prohibited", "default", "derived", "exception"}
 DEROGATIONS = {"mandatory", "floor", "ceiling", "default"}
 SILENCE = {"missing_content", "hidden_right", "default_applies", "none"}
 REQUIRED = {"id", "source", "type", "kind", "derogation", "applies_when", "facts_needed", "exceptions", "conclusion",
             "on_silence", "derived_from", "examples", "open_questions"}
-
-
-def law_text(pid: str) -> str | None:
-    """`bo-luat:91/2015/QH13#d468.k1` -> văn bản trong data/team-4.2/legal/raw/bo-luat_91_2015_QH13/*.txt."""
-    doc = pid.split("#", 1)[0]
-    kind, number = doc.split(":", 1)
-    files = sorted((RAW / f"{kind}_{number.replace('/', '_')}").glob("*.txt"))
-    return files[0].read_text(encoding="utf-8") if files else None
 
 
 def entries():
@@ -33,7 +25,7 @@ def _norm(s: str) -> str:
     return " ".join(s.split())
 
 
-@pytest.mark.skipif(not RAW.is_dir(), reason="không có kho luật cục bộ")
+@pytest.mark.skipif(not ROOTS, reason="không có kho luật cục bộ")
 @pytest.mark.parametrize("name,entry", list(entries()), ids=lambda x: x if isinstance(x, str) else x.get("id"))
 def test_every_quote_is_verbatim_in_the_corpus(name, entry):
     quotes = [(entry["source"]["pid"], entry["source"]["quote"])]

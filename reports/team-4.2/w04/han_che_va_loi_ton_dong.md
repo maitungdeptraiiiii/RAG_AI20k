@@ -202,6 +202,15 @@ Vì sao test cũ không bắt được: `test_check_contract_with_packs_labor_ma
 trả khái niệm lao động, và hai gói dân sự không khai `document_facts`. Đã thêm D41: test "gói giả chạy qua
 `check_contract` không sửa file code nào" để lỗi kiểu này lộ ra khi thêm gói thứ tư.
 
+## Sửa nhận định sai về kho luật (23/11)
+
+| # | Mục | Trạng thái |
+|---|---|---|
+| K.1 | Các bản trước (bản liệt kê T1, câu trả lời 23/11) ghi "kho không có NĐ 145/2020 và nghị định lương tối thiểu". **Sai**: mình kiểm `data/team-4.2/legal/raw/` ở gốc repo (bản cũ, ít văn bản), còn kho ứng dụng dùng là `app/team-4.2/data/team-4.2/legal/raw/` (120 văn bản, có NĐ 145/2020, 38/2022, 74/2024, 293/2025). Test trích dẫn giờ đọc kho ứng dụng trước (`tests/legal_corpus.py`) | Đã sửa |
+| K.2 | Mức lương tối thiểu vùng trong gói labor (12 số) khớp đúng bảng của ba nghị định; thay ghi chú "số người viết nhớ" bằng test đối chiếu | Đã sửa |
+| K.3 | NĐ 145/2020 có trong kho nhưng chưa đọc phần liên quan Đ20, Đ22, Đ25 (B3) | Còn |
+| K.4 | Crawl thêm cho gói vay: Luật Các tổ chức tín dụng 32/2024/QH15, Nghị quyết 01/2019/NQ-HĐTP (API công khai VBPL, `scripts/team-4.2/fetch_loan_scope.py`); mới vào `raw/` + `supplements/loan-scope-v1/`, chưa nhập snapshot, chưa dựng đồ thị luật (việc của Khánh / Huy) | Còn |
+
 ## Tồn đọng chung (môi trường, quy trình)
 
 | # | Mục | Trạng thái |

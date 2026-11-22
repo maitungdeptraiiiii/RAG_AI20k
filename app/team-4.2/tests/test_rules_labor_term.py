@@ -127,3 +127,20 @@ def test_limit_checked_even_when_term_clause_not_recognized():
     r3 = run(facts, present=())["r3"]
     assert (r3.status, r3.finding) == ("FAIL", "violation")
     assert run({"contract_kind": Fact(XDTH), **NO_EXC}, present=())["r3"].status == "PASS"   # chưa có dữ kiện: như cũ
+
+
+
+@pytest.mark.parametrize("pid", ["nghi-dinh:38/2022/NĐ-CP", "nghi-dinh:74/2024/NĐ-CP", "nghi-dinh:293/2025/NĐ-CP"])
+def test_minimum_wage_periods_match_decree_text(pid):
+    """Mức lương tối thiểu vùng trong gói labor phải đúng bảng "Vùng I ... IV" của nghị định nguồn (kho ứng dụng)."""
+    import re
+    from legal_corpus import law_text
+    text = law_text(pid)
+    if text is None:
+        pytest.skip("kho luật cục bộ không có " + pid)
+    rule = CAT.concepts["wage.minimum_regional"].rules[0]
+    period = next(p for p in rule.law["min_wage"]["periods"] if p["source"] == pid)
+    for region, value in period["values"].items():
+        m = re.search(rf"^Vùng {region}\s*\n\s*([\d.]+)", text, re.MULTILINE)
+        assert m, (pid, region)
+        assert int(m.group(1).replace(".", "")) == value, (pid, region, m.group(1), value)

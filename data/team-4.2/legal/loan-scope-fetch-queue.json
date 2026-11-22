@@ -1,0 +1,20 @@
+{
+  "scope_version": "loan-1.0",
+  "count": 2,
+  "documents": [
+    {
+      "document_key": "luat:32/2024/QH15",
+      "title": "Luật Các tổ chức tín dụng 2024",
+      "topic": "loan",
+      "use": "exception_source",
+      "note": "'luật khác có liên quan' mà BLDS Đ468.1 cho phép quy định lãi suất khác (cho vay của tổ chức tín dụng)"
+    },
+    {
+      "document_key": "nghi-quyet:01/2019/NQ-HĐTP",
+      "title": "Hướng dẫn áp dụng pháp luật về trách nhiệm hoàn trả tiền lãi, lãi suất (HĐTP TANDTC)",
+      "topic": "loan",
+      "use": "selected_provisions",
+      "note": "cách tính lãi trên nợ gốc quá hạn, lãi chậm trả, lãi 50% mức trần Đ468.2"
+    }
+  ]
+}

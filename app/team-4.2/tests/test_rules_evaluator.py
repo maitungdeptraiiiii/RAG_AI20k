@@ -63,12 +63,11 @@ def test_fork_is_independent():
     assert _leave(s.results()).status == "UNKNOWN" and _leave(f.results()).status == "FAIL"
 
 
-def test_objects_not_supported_yet():
+def test_objects_must_be_object_changes_or_dict():
+    """Giai đoạn 7: update nhận ObjectChanges / dict; kiểu khác là lỗi (thay test "objects chưa hỗ trợ" cũ)."""
     s = _session()
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(TypeError):
         s.update({}, objects=[object()])
-    with pytest.raises(NotImplementedError):
-        evaluator_for(CAT).session(day=DAY, facts={}, present=set(), evidence={}, objects=[object()])
 
 
 def test_unknown_kind_rejected_and_network_available():

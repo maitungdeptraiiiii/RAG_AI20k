@@ -47,6 +47,15 @@ class DerivedFact:
     fact: str
     unit: str | None
     definitions: tuple[Definition, ...]
+    object_type: str | None = None     # khai cho một kiểu đối tượng: mỗi đối tượng có giá trị riêng (spec §5.6)
+
+
+@dataclass(frozen=True)
+class ObjectType:
+    """Kiểu đối tượng của hồ sơ (spec §5.6): thuộc tính (`attrs`) và tham chiếu tới đối tượng khác (`refs`)."""
+    name: str
+    attrs: frozenset[str]
+    refs: frozenset[str]
 
 
 @dataclass(frozen=True)
@@ -89,6 +98,7 @@ class PackSpec:
     user_fact_units: Mapping[str, str | None] = field(default_factory=dict)   # đơn vị mặc định khi người dùng trả lời một con số
     user_fact_questions: Mapping[str, UserQuestion] = field(default_factory=dict)
     concept_kinds: Mapping[str, tuple[str, ...]] = field(default_factory=dict)   # kind -> các loại slot concept phải có
+    object_types: Mapping[str, ObjectType] = field(default_factory=dict)
 
     def context(self) -> Context:
         return Context(self.units, frozenset(self.document_facts), self.silences, self.derived, self.user_fact_questions)
@@ -127,6 +137,9 @@ class Rule:
     # Phép kiểm chỉ dùng dữ kiện người dùng cung cấp, không đến từ một điều khoản: có dữ kiện là xét, kể cả khi
     # khái niệm không có mặt (như rule chỉ dùng `document_facts`).
     standalone: bool = False
+    # Rule xuyên đối tượng (spec §5.6): over = (biến, kiểu, where, history); group_by = ((tên, đường dẫn), ...).
+    over: tuple[str, str, dict | None, bool] | None = None
+    group_by: tuple[tuple[str, str], ...] = ()
 
 
 @dataclass(frozen=True)

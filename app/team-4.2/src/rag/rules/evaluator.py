@@ -12,6 +12,7 @@ from typing import Any, Literal, Mapping, Protocol, Sequence
 from rag.rules.derived import derive_all
 from rag.rules.loader import load_packs
 from rag.rules.model import Catalog
+from rag.rules.objects import WorkingObject, apply_object_changes
 from rag.rules.reference import evaluate_all
 from rag.rules.semantics import Fact, Facts, RuleResult
 
@@ -24,6 +25,31 @@ class RuleChange:
     rule_id: str
     before: RuleResult | None
     after: RuleResult | None
+    object: str | None = None             # nhóm của rule xuyên đối tượng (spec §5.6)
+
+
+def slot_changes(before: Sequence[RuleResult], after: Sequence[RuleResult]) -> list[RuleChange]:
+    """Thay đổi giữa hai danh sách kết quả của MỘT rule, khóa theo `object`: theo thứ tự kết quả mới, rồi các nhóm biến mất."""
+    old = {r.object: r for r in before}
+    out = []
+    for r in after:
+        b = old.pop(r.object, None)
+        if b != r:
+            out.append(RuleChange(r.concept_id, r.rule_id, b, r, r.object))
+    out += [RuleChange(b.concept_id, b.rule_id, b, None, b.object) for b in old.values()]
+    return out
+
+
+def diff_results(before: Sequence[RuleResult], after: Sequence[RuleResult]) -> list[RuleChange]:
+    """Thay đổi giữa hai lần đánh giá toàn catalog, theo thứ tự rule rồi theo `slot_changes`."""
+    def by_rule(results):
+        groups: dict[tuple[str, str], list[RuleResult]] = {}
+        for r in results:
+            groups.setdefault((r.concept_id, r.rule_id), []).append(r)
+        return groups
+    b, a = by_rule(before), by_rule(after)
+    keys = list(dict.fromkeys([*a, *b]))
+    return [c for k in keys for c in slot_changes(b.get(k, ()), a.get(k, ()))]
 
 
 @dataclass(frozen=True)
@@ -54,9 +80,11 @@ def _copy_evidence(evidence: dict[str, list[dict]]) -> dict[str, list[dict]]:
 
 
 class ReferenceSession:
-    def __init__(self, catalog: Catalog, day: date, facts: Facts, present: set[str], evidence: dict[str, list[dict]]):
+    def __init__(self, catalog: Catalog, day: date, facts: Facts, present: set[str], evidence: dict[str, list[dict]],
+                 objects: Sequence[WorkingObject] = ()):
         self._catalog, self._day = catalog, day
         self._facts, self._present, self._evidence = dict(facts), set(present), _copy_evidence(evidence)
+        self._objects: dict[str, WorkingObject] = {o.id: o for o in objects}
         self._results = self._evaluate()
 
     @property
@@ -67,16 +95,17 @@ class ReferenceSession:
         return derive_all(self._catalog.context, self._facts)
 
     def _evaluate(self) -> list[RuleResult]:
-        return evaluate_all(self._catalog, self._facts, self._present, self._evidence, self._day)
+        return evaluate_all(self._catalog, self._facts, self._present, self._evidence, self._day,
+                            list(self._objects.values()))
 
     def results(self) -> list[RuleResult]:
         return list(self._results)
 
     def update(self, changes: Mapping[str, Fact | None], *, present: set[str] | None = None,
                evidence: dict[str, list[dict]] | None = None, objects: Any = None) -> Diff:
-        """`None` xóa dữ kiện; `present` / `evidence` nếu truyền thì thay hẳn giá trị hiện có."""
+        """`None` xóa dữ kiện; `present` / `evidence` nếu truyền thì thay hẳn giá trị hiện có; `objects`: ObjectChanges."""
         if objects:
-            raise NotImplementedError("objects: giai đoạn 7")
+            apply_object_changes(self._objects, objects)
         for name, fact in changes.items():
             if fact is None:
                 self._facts.pop(name, None)
@@ -87,10 +116,11 @@ class ReferenceSession:
         if evidence is not None:
             self._evidence = _copy_evidence(evidence)
         before, self._results = self._results, self._evaluate()
-        return Diff(tuple(RuleChange(b.concept_id, b.rule_id, b, a) for b, a in zip(before, self._results) if b != a))
+        return Diff(tuple(diff_results(before, self._results)))
 
     def fork(self) -> "ReferenceSession":
-        return ReferenceSession(self._catalog, self._day, self._facts, self._present, self._evidence)
+        return ReferenceSession(self._catalog, self._day, self._facts, self._present, self._evidence,
+                                list(self._objects.values()))
 
 
 class ReferenceEvaluator:
@@ -99,9 +129,7 @@ class ReferenceEvaluator:
 
     def session(self, *, day: date, facts: Facts, present: set[str], evidence: dict[str, list[dict]],
                 objects: Sequence[Any] = ()) -> ReferenceSession:
-        if objects:
-            raise NotImplementedError("objects: giai đoạn 7")
-        return ReferenceSession(self._catalog, day, facts, present, evidence)
+        return ReferenceSession(self._catalog, day, facts, present, evidence, objects)
 
 
 def evaluator_for(catalog: Catalog, kind: EvaluatorKind = "reference") -> Evaluator:

@@ -10,6 +10,7 @@ from rag.rules.evaluator import ReferenceEvaluator, evaluator_for, make_evaluato
 from rag.rules.loader import PACKS_ROOT, load_concepts, load_pack
 from rag.rules.model import leaves
 from rag.rules.semantics import CONFLICT, UNKNOWN, Fact
+from rules_golden_cases import result_json  # noqa: E402
 from rules_golden_cases import MISSING, _candidates, case_from_json, facts_from_spec, load_golden
 
 CAT = load_concepts(PACKS_ROOT / "labor" / "concepts.yaml", load_pack("labor"))
@@ -77,7 +78,7 @@ def test_network_session_results_equal_golden():
         s = NET.session(day=case.day, facts=facts_from_spec(case.facts, semantics.Fact, semantics.CONFLICT),
                         present={case.concept_id} if case.present else set(), evidence={})
         got = next(r for r in s.results() if (r.concept_id, r.rule_id) == (case.concept_id, case.rule_id))
-        if json.loads(json.dumps(asdict(got), ensure_ascii=False, sort_keys=True)) != row["result"]:
+        if result_json(got) != row["result"]:
             bad.append(case.case_id)
     assert bad == [], bad[:5]
 

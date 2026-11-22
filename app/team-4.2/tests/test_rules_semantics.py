@@ -119,7 +119,9 @@ def test_unstated_restriction_flag():
 
 # ── tách evaluate_rule thành đầu vào + bảng quyết định (giai đoạn 2, Task 1) ──
 import json  # noqa: E402
-from dataclasses import asdict  # noqa: E402
+from dataclasses import asdict  # noqa: E402,F401
+
+from rules_golden_cases import result_json  # noqa: E402
 
 from rag.rules import semantics  # noqa: E402
 from rag.rules.loader import PACKS_ROOT, load_concepts  # noqa: E402
@@ -140,7 +142,7 @@ def test_decide_rule_of_rule_inputs_matches_golden():
     for row, case, rule, facts in _golden_inputs():
         got = semantics.decide_rule(case.concept_id, rule, facts, case.present, (),
                                     semantics.rule_inputs(rule, facts, case.day, ctx), ctx)
-        if json.loads(json.dumps(asdict(got), ensure_ascii=False, sort_keys=True)) != row["result"]:
+        if result_json(got) != row["result"]:
             bad.append(case.case_id)
     assert bad == [], bad[:5]
 

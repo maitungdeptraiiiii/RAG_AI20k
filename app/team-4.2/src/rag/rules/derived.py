@@ -107,14 +107,20 @@ def eval_derived(df: DerivedFact, facts: Facts, ctx: Context) -> Fact | object |
     return _combine([node(d) for d in children.get(None, ())])
 
 
+def global_derived(derived: Mapping[str, DerivedFact]) -> dict[str, DerivedFact]:
+    """Dữ kiện suy ra của bảng dữ kiện phẳng (không khai `object_type`)."""
+    return {n: d for n, d in derived.items() if d.object_type is None}
+
+
 def derive_all(ctx: Context, facts: Facts) -> Facts:
     """Bản sao `facts` đã bỏ khóa trùng tên dữ kiện suy ra, cộng các dữ kiện suy ra tính theo thứ tự topo (chuỗi được).
     Kết quả `None` (không áp dụng) thì dữ kiện vắng mặt."""
-    if not ctx.derived:
+    flat = global_derived(ctx.derived)
+    if not flat:
         return dict(facts)
-    out = {k: v for k, v in facts.items() if k not in ctx.derived}
-    for name in derived_order(ctx.derived):
-        result = eval_derived(ctx.derived[name], out, ctx)
+    out = {k: v for k, v in facts.items() if k not in flat}
+    for name in derived_order(flat):
+        result = eval_derived(flat[name], out, ctx)
         if result is not None:
             out[name] = result
     return out

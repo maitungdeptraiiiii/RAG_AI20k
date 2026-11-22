@@ -169,6 +169,7 @@ class RuleResult:
     missing_facts: tuple[str, ...]
     evidence: tuple[dict, ...]
     reasons: tuple[str, ...]
+    object: str | None = None             # nhãn nhóm của rule xuyên đối tượng (vd. "employee=E1"); None với rule thường
 
 
 def fact_names(cond: Any) -> list[str]:

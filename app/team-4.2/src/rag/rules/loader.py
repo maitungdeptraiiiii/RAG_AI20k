@@ -8,8 +8,9 @@ from typing import Mapping, Sequence
 import yaml
 
 from rag.rules.derived import definition_inputs, find_cycle
+from rag.rules.objects import COUNT_OPS
 from rag.rules.model import (CORE_FINDINGS, CORE_SILENCES, DEROGATIONS, MODES, OPS, SLOT_KINDS, Catalog, CatalogError,
-                             Concept, Definition, DerivedFact, PackSpec, Rule, Silence, Slot, UserQuestion, leaves)
+                             Concept, Definition, DerivedFact, ObjectType, PackSpec, Rule, Silence, Slot, UserQuestion, leaves)
 from rag.rules.units import Units
 
 PACKS_ROOT = Path(__file__).with_name("packs")
@@ -88,7 +89,11 @@ def _derived(data: dict, units: frozenset[str], inputs: set[str], problems: list
         parent = {d.id: d.exception_of for d in defs if d.exception_of in ids}
         if cycle := find_cycle({k: [v] for k, v in parent.items()}):
             problems.append(f"derived {name!r}: exception_of vòng " + " -> ".join(cycle))
-        out[name] = DerivedFact(name, unit, tuple(defs))
+        otype = entry.get("object_type")
+        if otype is not None and not isinstance(otype, str):
+            problems.append(f"derived {name!r}: object_type phải là tên kiểu (chuỗi)")
+            otype = None
+        out[name] = DerivedFact(name, unit, tuple(defs), otype)
     return out
 
 
@@ -184,11 +189,23 @@ def load_pack(pack_id: str, *, root: Path = PACKS_ROOT) -> PackSpec:
             problems.append(f"concept_kinds: {kind!r} cần slot_kinds là danh sách các loại thuộc {sorted(SLOT_KINDS)}")
             sk = []
         concept_kinds[kind] = tuple(sk)
+    object_types: dict[str, ObjectType] = {}
+    raw_types = data.get("object_types") or {}
+    if not isinstance(raw_types, dict):
+        problems.append("object_types phải là dict {Kiểu: {attrs: [...], refs: [...]}}")
+        raw_types = {}
+    for tname, spec in raw_types.items():
+        spec = spec if isinstance(spec, dict) else {}
+        attrs, refs = spec.get("attrs", []), spec.get("refs", [])
+        if not all(isinstance(x, list) and all(isinstance(y, str) for y in x) for x in (attrs, refs)):
+            problems.append(f"object_types: {tname!r} cần attrs và refs là danh sách chuỗi")
+            attrs, refs = [], []
+        object_types[tname] = ObjectType(tname, frozenset(attrs), frozenset(refs))
     if problems:
         raise CatalogError(problems)
     return PackSpec(pack_id, str(data.get("version")), tuple(extends), tuple(kinds), Units(names, factors),
                     document_facts, user_facts, findings, silences, derived, dict(user_fact_units), questions,
-                    concept_kinds)
+                    concept_kinds, object_types)
 
 
 # ── concepts.yaml ──
@@ -223,8 +240,10 @@ def _rule(c: dict, r: dict, pack: PackSpec, problems: list[str]) -> Rule:
         if r.get(key) not in allowed:
             problems.append(f"{where}: {key} {r.get(key)!r} không hợp lệ")
     slots = set(c.get("slots") or {})
-    known = slots | set(pack.document_facts) | pack.user_facts | set(pack.derived)
-    conds = [r.get("applicability"), r.get("check")] + [x.get("when") for x in r.get("cases") or []]
+    known = slots | set(pack.document_facts) | pack.user_facts | {n for n, d in pack.derived.items()
+                                                                  if d.object_type is None}
+    over, group_by = _object_rule(where, r, pack, problems)
+    conds = [r.get("applicability"), None if over else r.get("check")] + [x.get("when") for x in r.get("cases") or []]
     for leaf in [leaf for cond in conds for leaf in leaves(cond)]:
         if leaf.get("op") not in OPS:
             problems.append(f"{where}: toán tử {leaf.get('op')!r} không hợp lệ")
@@ -265,7 +284,61 @@ def _rule(c: dict, r: dict, pack: PackSpec, problems: list[str]) -> Rule:
         exc = None
     return Rule(str(r.get("id")), r.get("mode"), r.get("derogation"), r.get("on_silence"), r.get("applicability"),
                 dict(r.get("law") or {}), tuple(r.get("cases") or ()), r.get("check"), dict(r.get("outcome") or {}),
-                unstated, exc, standalone)
+                unstated, exc, standalone, over, group_by)
+
+
+def _object_rule(where: str, r: dict, pack: PackSpec, problems: list[str]):
+    """Kiểm và dựng phần xuyên đối tượng của rule (spec §5.6): `over`, `group_by`, `check` đếm / exists / not_exists."""
+    raw, gb = r.get("over"), r.get("group_by")
+    if raw is None:
+        if gb:
+            problems.append(f"{where}: group_by chỉ dùng được cùng over")
+        return None, ()
+    if not isinstance(raw, dict) or len(raw) != 1:
+        problems.append(f"{where}: over phải khai đúng một biến {{biến: {{type, where}}}} (nối nhiều biến chưa hỗ trợ)")
+        return None, ()
+    (var, spec), = raw.items()
+    spec = spec if isinstance(spec, dict) else {}
+    typ = spec.get("type")
+    otype = pack.object_types.get(typ)
+    if otype is None:
+        problems.append(f"{where}: kiểu đối tượng {typ!r} chưa khai trong object_types")
+        return None, ()
+    typed = {n for n, d in pack.derived.items() if d.object_type == typ}
+    for leaf in leaves(spec.get("where")):
+        if leaf.get("op") not in OPS:
+            problems.append(f"{where}: toán tử {leaf.get('op')!r} không hợp lệ")
+        if leaf.get("fact") not in otype.attrs | typed:
+            problems.append(f"{where}: {leaf.get('fact')!r} không phải thuộc tính hay dữ kiện suy ra của {typ}")
+        if leaf.get("unit") is not None and leaf["unit"] not in pack.units.names:
+            problems.append(f"{where}: đơn vị {leaf['unit']!r} không hợp lệ")
+    group = []
+    for name, path in (gb or {}).items():
+        head, _, rest = str(path).partition(".")
+        if head != var:
+            problems.append(f"{where}: group_by {name}: biến {head!r} chưa khai trong over")
+        elif rest.startswith("refs."):
+            if rest[5:] not in otype.refs:
+                problems.append(f"{where}: group_by {name}: ref {rest[5:]!r} không có trong {typ}")
+        elif rest not in otype.attrs | typed:
+            problems.append(f"{where}: group_by {name}: thuộc tính {rest!r} không có trong {typ}")
+        group.append((str(name), str(path)))
+    check = r.get("check")
+    if not isinstance(check, dict) or len(check) != 1 or next(iter(check)) not in ("count", "exists", "not_exists"):
+        problems.append(f"{where}: rule có over cần check là count / exists / not_exists")
+    elif "count" in check:
+        c = check["count"] if isinstance(check["count"], dict) else {}
+        if c.get("of") != var:
+            problems.append(f"{where}: count.of {c.get('of')!r} không phải biến {var!r}")
+        if c.get("op") not in COUNT_OPS:
+            problems.append(f"{where}: count.op {c.get('op')!r} không hợp lệ ({sorted(COUNT_OPS)})")
+        if ("value" in c) == ("law" in c):
+            problems.append(f"{where}: count cần đúng một trong value và law")
+        elif "law" in c and c["law"] not in (r.get("law") or {}):
+            problems.append(f"{where}: count dùng giá trị law {c['law']!r} không có trong law")
+    elif check[next(iter(check))] != var:
+        problems.append(f"{where}: {next(iter(check))} {check[next(iter(check))]!r} không phải biến {var!r}")
+    return (var, typ, spec.get("where"), bool(spec.get("history", False))), tuple(group)
 
 
 def _check_exceptions(concepts: Mapping[str, Concept], problems: list[str], *, strict: bool) -> None:
@@ -276,6 +349,8 @@ def _check_exceptions(concepts: Mapping[str, Concept], problems: list[str], *, s
         target = r.exception_of
         if target is None:
             continue
+        if r.over is not None or (target in rules and rules[target].over is not None):
+            problems.append(f"{key}: exception_of không dùng với rule xuyên đối tượng (viết ngoại lệ bằng applicability)")
         if target == key:
             problems.append(f"{key}: exception_of trỏ chính nó")
         elif target not in rules and (strict or target.split("/")[0] in concepts):
@@ -337,11 +412,17 @@ def load_concepts(path: Path, pack: PackSpec) -> Catalog:
     for name in pack.derived:
         if name in slot_names:
             problems.append(f"derived: {name!r} trùng tên slot của một khái niệm")
-    known_inputs = slot_names | set(pack.document_facts) | pack.user_facts | set(pack.derived)
+    known_inputs = slot_names | set(pack.document_facts) | pack.user_facts | {
+        n for n, d in pack.derived.items() if d.object_type is None}
     for df in pack.derived.values():
+        if df.object_type is not None and df.object_type not in pack.object_types:
+            problems.append(f"derived {df.fact!r}: object_type {df.object_type!r} chưa khai trong object_types")
+            continue
+        allowed = known_inputs if df.object_type is None else pack.object_types[df.object_type].attrs | {
+            n for n, d in pack.derived.items() if d.object_type == df.object_type}
         for d in df.definitions:
             for n in definition_inputs(d):
-                if n not in known_inputs:
+                if n not in allowed:
                     problems.append(f"derived {df.fact!r} định nghĩa {d.id!r}: dữ kiện {n!r} không phải slot, dữ kiện "
                                     "hợp đồng, người dùng hay dữ kiện suy ra")
     for cid, concept in concepts.items():
@@ -368,6 +449,7 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
     user_fact_units: dict[str, str | None] = {}
     questions: dict[str, UserQuestion] = {}
     concept_kinds: dict[str, tuple[str, ...]] = {}
+    object_types: dict[str, ObjectType] = {}
     kinds: list[str] = []
     for s in specs:
         names |= s.units.names
@@ -381,6 +463,10 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
                 problems.append(f"document_facts: dữ kiện {name!r} có đơn vị khác nhau giữa các gói")
             document_facts[name] = unit
         user_facts |= s.user_facts
+        for name, ot in s.object_types.items():
+            if name in object_types and object_types[name] != ot:
+                problems.append(f"object_types: {name!r} khai báo khác nhau giữa các gói")
+            object_types[name] = ot
         for name, sk in s.concept_kinds.items():
             if name in concept_kinds and concept_kinds[name] != sk:
                 problems.append(f"concept_kinds: {name!r} khai báo khác nhau giữa các gói")
@@ -409,7 +495,7 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
             problems.append(_CLASH.format(name))
     return PackSpec("+".join(s.id for s in specs), "+".join(f"{s.id}@{s.version}" for s in specs), (), tuple(kinds),
                     Units(frozenset(names), factors), document_facts, frozenset(user_facts), frozenset(findings),
-                    silences, derived, user_fact_units, questions, concept_kinds)
+                    silences, derived, user_fact_units, questions, concept_kinds, object_types)
 
 
 def load_packs(pack_ids: Sequence[str], *, root: Path = PACKS_ROOT) -> Catalog:

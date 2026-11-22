@@ -158,7 +158,15 @@ def run_case(case: GoldenCase, catalog: Catalog, evaluate_concept_fn: Callable, 
     results = evaluate_concept_fn(catalog.concepts[case.concept_id], facts_from_spec(case.facts, fact_cls, conflict),
                                   present=case.present, evidence=(), day=case.day)
     got = next(r for r in results if r.rule_id == case.rule_id)
-    return json.loads(json.dumps(asdict(got), ensure_ascii=False, sort_keys=True))
+    return result_json(got)
+
+
+def result_json(result) -> dict:
+    """RuleResult dạng dict JSON như golden. Golden đóng băng từ engine cũ (chưa có `object`): bỏ khóa này khi None."""
+    d = json.loads(json.dumps(asdict(result), ensure_ascii=False, sort_keys=True))
+    if d.get("object", 0) is None:
+        d.pop("object")
+    return d
 
 
 def case_to_json(case: GoldenCase) -> dict:

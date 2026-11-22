@@ -207,9 +207,16 @@ def _result(concept_id: str, rule: Rule, status: str, finding: str, law, facts: 
             ctx: Context) -> RuleResult:
     names = referenced(rule)
     used = {n: {"value": f.value, "unit": f.unit, **({"amended_from": list(f.amended_from)} if f.amended_from else {}),
-                **({"later_amendments": list(f.later_amendments)} if f.later_amendments else {})}
+                **({"later_amendments": list(f.later_amendments)} if f.later_amendments else {}),
+                **({"derived_by": f.derived_by} if f.derived_by else {})}
             for n in names if (f := facts.get(n)) is not None and not is_unresolved(f)}
-    missing = tuple(n for n in names if facts.get(n) is None)
+    if ctx.derived:
+        from rag.rules.derived import missing_inputs    # nạp muộn: derived.py import lại semantics
+        missing = missing_inputs(names, facts, ctx)
+        reasons = (*reasons, *[f"derived_unknown:{n}" for n in names
+                               if n in ctx.derived and (facts.get(n) is None or facts.get(n) is UNKNOWN)])
+    else:
+        missing = tuple(n for n in names if facts.get(n) is None)
     reported = finding in ctx.reported
     return RuleResult(concept_id, rule.id, status, finding,
                       rule.outcome.get("legality") if reported else None,

@@ -81,9 +81,11 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
 - [x] D13. `derived` + cây ngoại lệ (§5.3) ở cả hai evaluator; phát hiện vòng; `missing_facts` mở ra dữ kiện đầu vào.
 - [x] D14. `exception_of` giữa rule / giữa pack (§5.4), bảng ba hàng T/F/U.
 - [x] D15. Test bảng chân lý §5.3, §5.4.
-- [ ] D16. Rule từ B2–B3 vào `packs/labor/` (Đ20.2 kết luận trung gian + giới hạn số lần ký + ngoại lệ; Đ22.2; Đ25).
+- [x] D16. Rule từ B2–B3 vào `packs/labor/` (Đ20.2 kết luận trung gian + giới hạn số lần ký + ngoại lệ; Đ22.2; Đ25).
       Xong phần Đ20.2 (đọc văn bản gốc: Đ20, 149.1, 151.2, 177.4): `contract_kind_effective`, `content.term/r3` (+ 4 ngoại lệ
-      `r3_*`), `r4`; 7 dữ kiện người dùng mới trong `pack.yaml` (Tú / Huy: cần hỏi người dùng; nhãn ở `bridge/view.py`).
+      `r3_*`), `r4`; 7 dữ kiện người dùng mới trong `pack.yaml` (Tú / Huy: cần hỏi người dùng; nhãn ở `bridge/view.py`). Đ22.2 câu 1 = `content.term/r7`,
+      Đ25 = `probation.once/r2` (giai đoạn 7); 23/11 thêm Đ22.2 câu 2 = `appendix.states_change/r1` (phụ lục ghi rõ điều khoản
+      sửa và ngày hiệu lực; thuộc tính `states_target_clause`, `states_valid_from` của Amendment).
       **Chưa làm, chuyển sang giai đoạn 7b:** Đ22.2 (phụ lục sửa thời hạn: cần đối tượng phụ lục) và "một lần một công việc"
       của Đ25 (cần nhiều hợp đồng; theo từng văn bản đã có `probation.duration`, `probation.once`). Khi 7b xong, nguồn của
       `fixed_term_contract_count` đổi từ người dùng sang phép đếm đối tượng, rule `r3` giữ nguyên.

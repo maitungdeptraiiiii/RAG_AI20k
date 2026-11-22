@@ -54,7 +54,7 @@ def _write(tmp_path, data):
 
 def test_real_catalog_loads():
     c = load_catalog()
-    assert len(c.concepts) == 39
+    assert len(c.concepts) == 40
     assert c.concepts["leave.annual"].slots["annual_leave"].unit == "day"
     assert all(len(x.phrasing) >= 3 for x in c.concepts.values())
     assert list(c.concepts)[0] == "content.party_info"

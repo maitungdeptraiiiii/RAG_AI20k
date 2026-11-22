@@ -36,7 +36,7 @@ def test_civil_loan_extends_civil_general_and_loads_both_concept_sets():
 def test_civil_and_labor_load_together_without_clashes():
     both = load_packs(["labor", "civil_loan"])
     civil = load_packs(["civil_loan"]).concepts
-    assert len(both.concepts) == 39 + len(civil) and both.context.units.convert(1, "month", "day") == 30
+    assert len(both.concepts) == 40 + len(civil) and both.context.units.convert(1, "month", "day") == 30
     assert both.context.units.convert(24, "percent_per_month", "percent_per_year") == 288
 
 

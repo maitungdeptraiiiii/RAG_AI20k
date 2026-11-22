@@ -200,6 +200,31 @@ concepts:
         on_silence: none
         outcome: {legality: illegal, party_impact: unfavorable}
 
+  - id: appendix.states_change
+    kind: required_content
+    label: Phụ lục ghi rõ điều khoản sửa đổi và thời điểm hiệu lực
+    scope: core
+    phase: P0
+    holder: NLD
+    counterparty: NSDLD
+    applies_to: [NLD]
+    describe: "Phụ lục hợp đồng sửa đổi, bổ sung điều khoản: có ghi rõ điều, khoản được sửa và ngày có hiệu lực không."
+    phrasing: ["Phụ lục hợp đồng lao động", "sửa đổi Khoản", "có hiệu lực kể từ ngày", "bổ sung Điều"]
+    anchors:
+      - {pid: "bo-luat:45/2019/QH14#d22.k2", role: basis}
+    rules:
+      # Đ22.2 câu 2: "Trường hợp phụ lục hợp đồng lao động sửa đổi, bổ sung một số điều, khoản của hợp đồng lao động thì
+      # phải ghi rõ nội dung điều, khoản sửa đổi, bổ sung và thời điểm có hiệu lực." Kiểm trên đối tượng phụ lục của hồ sơ.
+      - id: r1
+        mode: required
+        over: {a: {type: Amendment, where: {any: [{fact: states_target_clause, op: eq, value: false},
+                                                   {fact: states_valid_from, op: eq, value: false}]}, history: true}}
+        group_by: {contract: a.refs.contract}
+        check: {not_exists: a}
+        derogation: mandatory
+        on_silence: none
+        outcome: {legality: illegal, party_impact: unfavorable}
+
   - id: content.wage_terms
     kind: required_content
     label: Mức lương, hình thức trả, thời hạn trả, phụ cấp

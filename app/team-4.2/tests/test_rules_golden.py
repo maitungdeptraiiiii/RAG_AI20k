@@ -20,8 +20,8 @@ def _mismatches(evaluate_concept_fn, **kw):
 # Rule thêm sau khi đóng băng golden (giai đoạn 3, Điều 20.2): có bảng ca riêng ở tests/fixtures/bridge/engine_cases.yaml
 # và tests/test_rules_labor_term.py; golden không có (nó đóng băng kết quả của engine cũ).
 POST_GOLDEN_RULES = {("content.term", r) for r in ("r3", "r3_state_director", "r3_elderly", "r3_foreign",
-                                                   "r3_union_leader", "r4", "r5", "r6", "r7")} | {("probation.once", "r2")}
-# r5, r6, r7, probation.once/r2 là rule xuyên đối tượng (giai đoạn 7): kiểm ở tests/test_rules_labor_objects.py.
+                                                   "r3_union_leader", "r4", "r5", "r6", "r7")} | {("probation.once", "r2"), ("appendix.states_change", "r1")}
+# r5, r6, r7, probation.once/r2, appendix.states_change/r1 là rule xuyên đối tượng (giai đoạn 7): kiểm ở tests/test_rules_labor_objects.py.
 
 
 def test_golden_has_every_rule_with_enough_cases():

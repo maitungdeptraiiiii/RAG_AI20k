@@ -40,7 +40,7 @@ def run(objects, facts=None):
 
 def test_flat_contract_without_objects_is_unchanged():
     out = run([], {"contract_kind": Fact(XDTH)})
-    for key in ("content.term/r5", "content.term/r6", "content.term/r7", "probation.once/r2"):
+    for key in ("content.term/r5", "content.term/r6", "content.term/r7", "probation.once/r2", "appendix.states_change/r1"):
         r = out[(key, None)]
         assert (r.status, r.reasons) == ("NOT_APPLICABLE", ("no_objects",)), key
 
@@ -120,3 +120,23 @@ def test_questions_events_and_explain_keep_groups_apart():
     assert groups == {"employee=E1", "employee=E2"}
     tree = explain(CAT, s, "content.term", "r5", obj="employee=E2")
     assert tree.label == "content.term/r5" and tree.detail["object"] == "employee=E2" and tree.status == "FAIL"
+
+
+def appendix(aid, contract_id, **attrs):
+    return WorkingObject(aid, "Amendment", {k: Fact(v) for k, v in attrs.items()}, date(2021, 1, 1), None,
+                         {"contract": contract_id})
+
+
+def test_appendix_must_state_clause_and_effective_date_art_22_2():
+    """Đ22.2 câu 2: phụ lục sửa đổi, bổ sung điều khoản phải ghi rõ điều khoản sửa, bổ sung và thời điểm có hiệu lực."""
+    key = ("appendix.states_change/r1", "contract=h1")
+    ok = [contract("h1"), appendix("p1", "h1", states_target_clause=True, states_valid_from=True)]
+    assert run(ok)[key].status == "PASS"
+    for missing in ("states_target_clause", "states_valid_from"):
+        bad = [contract("h1"), appendix("p1", "h1", **{"states_target_clause": True, "states_valid_from": True,
+                                                      missing: False})]
+        r = run(bad)[key]
+        assert (r.status, r.finding, r.legality) == ("FAIL", "violation", "illegal"), missing
+    unknown = [contract("h1"), appendix("p1", "h1", states_target_clause=True)]
+    assert run(unknown)[key].status == "UNKNOWN"                 # chưa biết phụ lục có ghi ngày hiệu lực không
+    assert run([contract("h1")]).get(key) is None or run([contract("h1")])[key].status != "FAIL"

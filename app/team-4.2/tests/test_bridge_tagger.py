@@ -39,7 +39,7 @@ def item(**kw):
 
 def test_catalog_payload_has_only_recognition_fields():
     p = catalog_payload(CAT)
-    assert len(p) == 39
+    assert len(p) == 40
     assert set(p[0]) <= {"id", "label", "describe", "phrasing", "slots", "not_about"}
     leave = next(x for x in p if x["id"] == "leave.annual")
     assert leave["slots"] == {"annual_leave": {"kind": "duration", "unit": "day"}}

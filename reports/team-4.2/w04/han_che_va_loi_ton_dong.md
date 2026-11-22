@@ -238,6 +238,7 @@ trả khái niệm lao động, và hai gói dân sự không khai `document_fac
 | L.9 | Chưa soát: báo trước 30 ngày (Đ172.4, là mặc định, được thỏa thuận khác), cho thuê lại (sự kiện thực hiện), giá do Nhà nước quy định (nhà ở xã hội), lý do chậm trả "đã thỏa thuận" (2023) / "chính đáng" (2014); hợp đồng ký trước 01/07/2015 (Luật Nhà ở 2005) | Còn |
 | L.10 | `outcome.employee_impact` sai nghĩa với vay / thuê | Xong (D33): YAML mọi gói ghi `party_impact`; bộ nạp đổi `employee_impact` cũ thành `party_impact` (khai cả hai khác nhau là lỗi); `RuleResult.outcome` (dict) + `party_impact`; `employee_impact` giữ cùng giá trị để tương thích. Golden engine cũ không đổi |
 | L.12 | `RuleResult.party_impact` chưa ghi bất lợi cho BÊN nào (spec G10: vai trò `holder`); người đọc lấy `holder` từ khái niệm. UI vẫn đọc `employee_impact` (D34, để sau) | Còn |
+| L.13 | `appendix.states_change/r1` (Đ22.2 câu 2) cần hai thuộc tính phụ lục `states_target_clause`, `states_valid_from`; `rag.contracts.amendments` đã bắt được dẫn chiếu và câu "hiệu lực kể từ ngày" nhưng chưa có bước nào ghi chúng vào đối tượng Amendment (việc `dossier_objects` của Huy). Thiếu thì rule ra UNKNOWN, không ra vi phạm | Còn (Huy) |
 | L.11 | Bộ test đầy đủ sau gói thuê nhà: 35 failed (đúng số baseline, toàn agent / conversation / warehouse / pipeline), 2264 passed | Ghi nhận |
 
 ## Tồn đọng chung (môi trường, quy trình)

@@ -158,7 +158,7 @@
   conclusion: "Phụ lục sửa đổi mà không ghi rõ điều khoản sửa hoặc thời điểm hiệu lực là thiếu nội dung bắt buộc"
   on_silence: missing_content
   derived_from: []
-  yaml_rule: "chưa có (đề xuất cho Tùng)"
+  yaml_rule: appendix.states_change/r1
   examples:
     - {facts: {amendment_valid_from: "2024-09-01", amendment_target_clause: "Điều 2"}, expected: PASS}
     - {facts: {amendment_target_clause: "Điều 2"}, expected: FAIL}

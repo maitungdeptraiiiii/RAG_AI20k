@@ -128,6 +128,8 @@ object_types:
     attrs: [kind, worked_after_expiry_days, new_contract_signed, has_probation, job]
     refs: [employee]
   Amendment:
-    attrs: [modifies_term]          # phụ lục có sửa thời hạn của hợp đồng không (Đ22.2)
+    attrs: [modifies_term,          # phụ lục có sửa thời hạn của hợp đồng không (Đ22.2 câu 1)
+            states_target_clause,   # phụ lục có ghi rõ điều, khoản sửa đổi / bổ sung không (Đ22.2 câu 2)
+            states_valid_from]      # phụ lục có ghi thời điểm có hiệu lực không (Đ22.2 câu 2)
     refs: [contract]
 

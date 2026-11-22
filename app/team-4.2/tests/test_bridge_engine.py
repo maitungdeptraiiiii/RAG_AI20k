@@ -91,7 +91,8 @@ def test_engine_case(case):
 
 def test_every_rule_has_three_cases():
     count = Counter((c["concept"], c["rule"]) for c in CASES)
-    assert [(k, r.id) for k, x in CAT.concepts.items() for r in x.rules if count[(k, r.id)] < 3] == []
+    # Rule xuyên đối tượng (r.over) cần hồ sơ có đối tượng; bảng ca này là hợp đồng đơn lẻ (xem test_rules_labor_objects.py).
+    assert [(k, r.id) for k, x in CAT.concepts.items() for r in x.rules if r.over is None and count[(k, r.id)] < 3] == []
 
 
 def test_outcome_only_on_findings_and_evidence_passthrough():

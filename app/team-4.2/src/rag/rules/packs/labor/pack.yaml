@@ -89,3 +89,30 @@ derived:
             - {fact: new_contract_signed, op: eq, value: false}
         value: khong_xac_dinh_thoi_han
         anchors: [{pid: "bo-luat:45/2019/QH14#d20.k2.b", role: basis}]
+  # Cùng định nghĩa Đ20.2.b, tính riêng cho từng hợp đồng của hồ sơ (spec §5.6).
+  - fact: kind_effective
+    object_type: Contract
+    unit: null
+    definitions:
+      - id: base
+        from: kind
+      - id: d20k2b
+        exception_of: base
+        when:
+          all:
+            - {fact: kind, op: eq, value: xac_dinh_thoi_han}
+            - {fact: worked_after_expiry_days, op: gt, value: 30, unit: day}
+            - {fact: new_contract_signed, op: eq, value: false}
+        value: khong_xac_dinh_thoi_han
+        anchors: [{pid: "bo-luat:45/2019/QH14#d20.k2.b", role: basis}]
+
+# Đối tượng của hồ sơ (spec §5.6): nhiều hợp đồng / phụ lục của một người lao động, do rag.contracts.dossier cấp.
+# Thuộc tính trùng ý nghĩa với dữ kiện phẳng cùng tên nhưng thuộc về từng hợp đồng.
+object_types:
+  Contract:
+    attrs: [kind, worked_after_expiry_days, new_contract_signed, has_probation, job]
+    refs: [employee]
+  Amendment:
+    attrs: [modifies_term]          # phụ lục có sửa thời hạn của hợp đồng không (Đ22.2)
+    refs: [contract]
+

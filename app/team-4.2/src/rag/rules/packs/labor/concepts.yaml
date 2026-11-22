@@ -113,6 +113,7 @@ concepts:
       - {pid: "bo-luat:45/2019/QH14#d149.k1", role: exception, note: "người lao động cao tuổi: ký nhiều lần; rule r3_elderly"}
       - {pid: "bo-luat:45/2019/QH14#d151.k2", role: exception, note: "người lao động nước ngoài: ký nhiều lần; rule r3_foreign"}
       - {pid: "bo-luat:45/2019/QH14#d177.k4", role: exception, note: "ban lãnh đạo tổ chức đại diện NLĐ tại cơ sở: gia hạn đến hết nhiệm kỳ; rule r3_union_leader"}
+      - {pid: "bo-luat:45/2019/QH14#d22.k2", role: basis, note: "phụ lục không được sửa thời hạn HĐ; rule r7 (hồ sơ có đối tượng Amendment)"}
     rules:
       - {id: r1, mode: required, derogation: mandatory, on_silence: missing_content,
          outcome: {legality: illegal, employee_impact: unfavorable}}
@@ -157,6 +158,44 @@ concepts:
         derogation: mandatory
         on_silence: none
         outcome: {legality: unknown, employee_impact: neutral}
+      # ── Rule xuyên văn bản (spec §5.6): cần hồ sơ có đối tượng; hợp đồng đơn lẻ -> NOT_APPLICABLE `no_objects`. ──
+      # Đ20.2.c trên hồ sơ: đếm HĐ xác định thời hạn (theo loại hiệu lực) đã ký với từng người lao động, kể cả HĐ đã hết
+      # hạn (history). Bốn ngoại lệ viết bằng applicability (rule xuyên đối tượng không dùng exception_of).
+      - id: r5
+        mode: threshold
+        applicability:
+          not: {any: [{fact: is_state_enterprise_director, op: eq, value: true}, {fact: is_elderly_employee, op: eq, value: true},
+                      {fact: is_foreign_employee, op: eq, value: true}, {fact: is_union_leader_in_term, op: eq, value: true}]}
+        law: {max_fixed_term_contracts: {value: 2, unit: null}}
+        over: {c: {type: Contract, where: {fact: kind_effective, op: eq, value: xac_dinh_thoi_han}, history: true}}
+        group_by: {employee: c.refs.employee}
+        check: {count: {of: c, op: lte, law: max_fixed_term_contracts}}
+        derogation: mandatory
+        on_silence: none
+        outcome: {legality: illegal, employee_impact: unfavorable}
+      # Đ20.2.b trên hồ sơ: không còn hợp đồng nào ghi xác định thời hạn mà theo luật đã thành không xác định thời hạn.
+      - id: r6
+        mode: required
+        over:
+          c:
+            type: Contract
+            history: true
+            where: {all: [{fact: kind, op: eq, value: xac_dinh_thoi_han},
+                          {fact: kind_effective, op: eq, value: khong_xac_dinh_thoi_han}]}
+        group_by: {employee: c.refs.employee}
+        check: {not_exists: c}
+        derogation: mandatory
+        on_silence: none
+        outcome: {legality: unknown, employee_impact: neutral}
+      # Đ22.2: phụ lục hợp đồng lao động không được sửa đổi thời hạn của hợp đồng lao động.
+      - id: r7
+        mode: prohibited
+        over: {a: {type: Amendment, where: {fact: modifies_term, op: eq, value: true}, history: true}}
+        group_by: {contract: a.refs.contract}
+        check: {not_exists: a}
+        derogation: mandatory
+        on_silence: none
+        outcome: {legality: illegal, employee_impact: unfavorable}
 
   - id: content.wage_terms
     label: Mức lương, hình thức trả, thời hạn trả, phụ cấp
@@ -303,6 +342,17 @@ concepts:
       - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
          check: {fact: allows_probation_extension, op: eq, value: false},
          outcome: {legality: illegal, employee_impact: unfavorable}}
+      # Đ25 trên hồ sơ: "chỉ được thử việc một lần đối với một công việc" — mỗi (người lao động, công việc) tối đa một HĐ
+      # có thử việc, kể cả HĐ đã hết hạn.
+      - id: r2
+        mode: threshold
+        law: {max_probations: {value: 1, unit: null}}
+        over: {c: {type: Contract, where: {fact: has_probation, op: eq, value: true}, history: true}}
+        group_by: {employee: c.refs.employee, job: c.job}
+        check: {count: {of: c, op: lte, law: max_probations}}
+        derogation: mandatory
+        on_silence: none
+        outcome: {legality: illegal, employee_impact: unfavorable}
 
   - id: probation.pay
     label: Tiền lương thử việc tối thiểu

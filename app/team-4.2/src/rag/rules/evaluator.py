@@ -12,7 +12,7 @@ from typing import Any, Literal, Mapping, Protocol, Sequence
 from rag.rules.derived import derive_all
 from rag.rules.loader import load_packs
 from rag.rules.model import Catalog
-from rag.rules.objects import WorkingObject, apply_object_changes
+from rag.rules.objects import WorkingObject, apply_object_changes, check_object
 from rag.rules.reference import evaluate_all
 from rag.rules.semantics import Fact, Facts, RuleResult
 
@@ -84,7 +84,7 @@ class ReferenceSession:
                  objects: Sequence[WorkingObject] = ()):
         self._catalog, self._day = catalog, day
         self._facts, self._present, self._evidence = dict(facts), set(present), _copy_evidence(evidence)
-        self._objects: dict[str, WorkingObject] = {o.id: o for o in objects}
+        self._objects: dict[str, WorkingObject] = {check_object(o).id: o for o in objects}
         self._results = self._evaluate()
 
     @property

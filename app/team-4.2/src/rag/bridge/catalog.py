@@ -37,6 +37,8 @@ def load_catalog(path: Path = DEFAULT_PATH) -> Catalog:
 
 def resolve_catalog(catalog: Catalog | None, packs: Sequence[str] | None) -> Catalog:
     """Catalog cho check_contract / ask_contract_graph: truyền sẵn `catalog`, hoặc danh sách `packs` (mặc định labor)."""
+    if packs is not None and not packs:
+        raise ValueError("packs rỗng: bỏ trống (mặc định labor) hoặc liệt kê ít nhất một gói")
     if catalog is not None and packs:
         raise ValueError("chỉ truyền catalog hoặc packs, không truyền cả hai")
     if catalog is not None:

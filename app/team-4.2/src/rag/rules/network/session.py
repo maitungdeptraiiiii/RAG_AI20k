@@ -13,7 +13,7 @@ from rag.rules.evaluator import Diff, slot_changes
 from rag.rules.exceptions import apply_exceptions, exception_open, rule_state
 from rag.rules.network.network import Network
 from rag.rules.network.nodes import CondState
-from rag.rules.objects import (WorkingObject, aggregate, apply_object_changes, candidate, object_facts,
+from rag.rules.objects import (WorkingObject, aggregate, apply_object_changes, candidate, check_object, object_facts,
                                object_results)
 from rag.rules.semantics import (Fact, Facts, RuleInputs, RuleResult, Tri, check_cond, decide_rule, resolve_law_with)
 
@@ -33,7 +33,7 @@ class ObjectMemory:
     (thuộc tính + dữ kiện suy ra theo kiểu), và trị ứng viên `cands[slot][id] = (tri, khóa nhóm)`."""
 
     def __init__(self, objects: Sequence[WorkingObject] = ()):
-        self.objects: dict[str, WorkingObject] = {o.id: o for o in objects}
+        self.objects: dict[str, WorkingObject] = {check_object(o).id: o for o in objects}
         self.tables: dict[str, Facts] = {}
         self.cands: dict[int, dict[str, tuple[Tri, tuple | None]]] = {}
 
@@ -55,7 +55,7 @@ class NetworkSession:
         self._mem = ObjectMemory(objects)
         recomputed = 0
         for oid, o in self._mem.objects.items():
-            self._mem.tables[oid] = object_facts(o, ctx)
+            self._mem.tables[oid] = object_facts(o, ctx, day)
         for typ, slots in network.object_slots_by_type.items():
             for i in slots:
                 self._mem.cands[i] = {}
@@ -133,7 +133,7 @@ class NetworkSession:
             if new is None:
                 mem.tables.pop(oid, None)
             else:
-                mem.tables[oid] = object_facts(new, ctx)
+                mem.tables[oid] = object_facts(new, ctx, self._day)
             for typ in {o.type for o in (old, new) if o is not None}:
                 for i in net.object_slots_by_type.get(typ, ()):
                     cands = mem.cands[i]

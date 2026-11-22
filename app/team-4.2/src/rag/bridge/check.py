@@ -60,14 +60,18 @@ class _CountingLLM:
         return self.llm.complete(system, user)
 
 
-def user_fact_set(user_facts: dict | None) -> Facts:
+def user_fact_set(user_facts: dict | None, ctx=None) -> Facts:
     """Dữ kiện người dùng trả lời: {tên: giá trị} hoặc {tên: [giá trị, đơn vị]}. Tên phải là dữ kiện người dùng hoặc
-    dữ kiện cấp hợp đồng (vd. job_level khi hợp đồng không ghi trình độ). Ghi đè giá trị trích từ hợp đồng."""
+    dữ kiện cấp hợp đồng của gói đang dùng (`ctx`, mặc định gói labor). Ghi đè giá trị trích từ hợp đồng."""
+    if ctx is None or not ctx.input_units:
+        allowed = {**{n: None for n in USER_FACTS}, **USER_FACT_UNITS, **CONTRACT_FACTS}
+    else:
+        allowed = dict(ctx.input_units)
     out: Facts = {}
     for name, v in (user_facts or {}).items():
-        if name not in USER_FACTS and name not in CONTRACT_FACTS:
+        if name not in allowed:
             raise ValueError(f"Dữ kiện người dùng không có trong danh mục: {name}")
-        value, unit = (v[0], v[1]) if isinstance(v, (list, tuple)) else (v, USER_FACT_UNITS.get(name, CONTRACT_FACTS.get(name)))
+        value, unit = (v[0], v[1]) if isinstance(v, (list, tuple)) else (v, allowed[name])
         out[name] = Fact(value, unit, "user")
     return out
 
@@ -113,8 +117,8 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
     def stage(name: str, status: str) -> None:
         emit({"type": "stage", "stage": name, "status": status})
     t0 = time.monotonic()
-    user = user_fact_set(user_facts)
     catalog = resolve_catalog(catalog, packs)
+    user = user_fact_set(user_facts, catalog.context)
     rule_evaluator = evaluator_for(catalog, evaluator or default_kind())      # tên lạ -> ValueError trước mọi lời gọi LLM
     basis = basis or AnchorLawBasis(catalog, None)
     llm = _CountingLLM(llm)

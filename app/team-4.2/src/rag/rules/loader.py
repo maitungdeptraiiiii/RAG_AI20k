@@ -8,7 +8,7 @@ from typing import Mapping, Sequence
 import yaml
 
 from rag.rules.derived import definition_inputs, find_cycle
-from rag.rules.objects import COUNT_OPS
+from rag.rules.objects import BUILTIN_ATTRS, COUNT_OPS
 from rag.rules.model import (CORE_FINDINGS, CORE_SILENCES, DEROGATIONS, MODES, OPS, SLOT_KINDS, Catalog, CatalogError,
                              Concept, Definition, DerivedFact, ObjectType, PackSpec, Rule, Silence, Slot, UserQuestion, leaves)
 from rag.rules.units import Units
@@ -200,6 +200,8 @@ def load_pack(pack_id: str, *, root: Path = PACKS_ROOT) -> PackSpec:
         if not all(isinstance(x, list) and all(isinstance(y, str) for y in x) for x in (attrs, refs)):
             problems.append(f"object_types: {tname!r} cần attrs và refs là danh sách chuỗi")
             attrs, refs = [], []
+        if BUILTIN_ATTRS & set(attrs):
+            problems.append(f"object_types: {tname!r} khai thuộc tính dựng sẵn {sorted(BUILTIN_ATTRS & set(attrs))}")
         object_types[tname] = ObjectType(tname, frozenset(attrs), frozenset(refs))
     if problems:
         raise CatalogError(problems)
@@ -304,8 +306,19 @@ def _object_rule(where: str, r: dict, pack: PackSpec, problems: list[str]):
     if otype is None:
         problems.append(f"{where}: kiểu đối tượng {typ!r} chưa khai trong object_types")
         return None, ()
-    typed = {n for n, d in pack.derived.items() if d.object_type == typ}
-    for leaf in leaves(spec.get("where")):
+    typed = {n for n, d in pack.derived.items() if d.object_type == typ} | BUILTIN_ATTRS
+    where_cond = spec.get("where")
+    if where_cond is not None and not isinstance(where_cond, dict):
+        problems.append(f"{where}: over.{var}.where phải là điều kiện (dict), gặp {where_cond!r}")
+        where_cond = None
+    history = spec.get("history", False)
+    if not isinstance(history, bool):
+        problems.append(f"{where}: over.{var}.history phải là true / false")
+        history = False
+    if gb is not None and not isinstance(gb, dict):
+        problems.append(f"{where}: group_by phải là dict {{tên: đường dẫn}}")
+        gb = None
+    for leaf in leaves(where_cond):
         if leaf.get("op") not in OPS:
             problems.append(f"{where}: toán tử {leaf.get('op')!r} không hợp lệ")
         if leaf.get("fact") not in otype.attrs | typed:
@@ -334,11 +347,13 @@ def _object_rule(where: str, r: dict, pack: PackSpec, problems: list[str]):
             problems.append(f"{where}: count.op {c.get('op')!r} không hợp lệ ({sorted(COUNT_OPS)})")
         if ("value" in c) == ("law" in c):
             problems.append(f"{where}: count cần đúng một trong value và law")
+        elif "value" in c and (isinstance(c["value"], bool) or not isinstance(c["value"], (int, float))):
+            problems.append(f"{where}: count.value phải là số, gặp {c['value']!r}")
         elif "law" in c and c["law"] not in (r.get("law") or {}):
             problems.append(f"{where}: count dùng giá trị law {c['law']!r} không có trong law")
     elif check[next(iter(check))] != var:
         problems.append(f"{where}: {next(iter(check))} {check[next(iter(check))]!r} không phải biến {var!r}")
-    return (var, typ, spec.get("where"), bool(spec.get("history", False))), tuple(group)
+    return (var, typ, where_cond, history), tuple(group)
 
 
 def _check_exceptions(concepts: Mapping[str, Concept], problems: list[str], *, strict: bool) -> None:
@@ -398,6 +413,9 @@ def load_concepts(path: Path, pack: PackSpec) -> Catalog:
                                 tuple(c.get("value_sources") or ()), rules,
                                 tuple(dict(x) for x in c.get("not_about") or ()), c.get("kind"))
     for cid, concept in concepts.items():
+        if concept.kind is not None and not isinstance(concept.kind, str):
+            problems.append(f"{cid}: kind phải là chuỗi, gặp {concept.kind!r}")
+            continue
         if concept.kind is None:
             continue
         if concept.kind not in pack.concept_kinds:
@@ -418,7 +436,7 @@ def load_concepts(path: Path, pack: PackSpec) -> Catalog:
         if df.object_type is not None and df.object_type not in pack.object_types:
             problems.append(f"derived {df.fact!r}: object_type {df.object_type!r} chưa khai trong object_types")
             continue
-        allowed = known_inputs if df.object_type is None else pack.object_types[df.object_type].attrs | {
+        allowed = known_inputs if df.object_type is None else pack.object_types[df.object_type].attrs | BUILTIN_ATTRS | {
             n for n, d in pack.derived.items() if d.object_type == df.object_type}
         for d in df.definitions:
             for n in definition_inputs(d):

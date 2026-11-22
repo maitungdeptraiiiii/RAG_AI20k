@@ -16,6 +16,9 @@ from rag.rules.model import Context, Rule
 from rag.rules.semantics import (Fact, Facts, RuleInputs, RuleResult, Tri, decide_rule, eval_cond, is_unresolved)
 
 COUNT_OPS = frozenset({"lt", "lte", "gt", "gte", "eq"})
+# Thuộc tính dựng sẵn của mọi đối tượng (không khai trong object_types): đã hết hạn trước ngày soát chưa
+# (`valid_to < day`; `valid_to` rỗng -> False). Dùng để chỉ xét quy định "khi hợp đồng hết hạn" cho đối tượng đã hết hạn.
+BUILTIN_ATTRS = frozenset({"expired"})
 
 
 @dataclass(frozen=True)
@@ -36,13 +39,41 @@ class ObjectChanges:
     changed: tuple[WorkingObject, ...] = ()
 
 
+def check_object(o: object) -> WorkingObject:
+    """Kiểm một đối tượng trước khi vào phiên; sai kiểu -> TypeError nói rõ trường nào."""
+    if not isinstance(o, WorkingObject):
+        raise TypeError(f"đối tượng phải là WorkingObject, gặp {type(o).__name__}")
+    if not isinstance(o.id, str) or not isinstance(o.type, str):
+        raise TypeError(f"{o!r}: id và type phải là chuỗi")
+    if not isinstance(o.attrs, Mapping) or not isinstance(o.refs, Mapping):
+        raise TypeError(f"{o.id}: attrs và refs phải là dict")
+    for name, v in o.attrs.items():
+        if v is not None and not isinstance(v, Fact) and not is_unresolved(v):
+            raise TypeError(f"{o.id}: thuộc tính {name!r} phải là Fact / CONFLICT, gặp {type(v).__name__}")
+    for name in ("valid_from", "valid_to"):
+        v = getattr(o, name)
+        if v is not None and not isinstance(v, date):
+            raise TypeError(f"{o.id}: {name} phải là date hoặc None, gặp {type(v).__name__}")
+    return o
+
+
+def _seq(changes: Mapping, key: str) -> tuple:
+    v = changes.get(key, ())
+    if isinstance(v, (str, bytes, WorkingObject)) or not isinstance(v, (list, tuple, set, frozenset)):
+        raise TypeError(f"objects[{key!r}] phải là danh sách, gặp {type(v).__name__}")
+    return tuple(v)
+
+
 def apply_object_changes(store: dict[str, WorkingObject], changes: ObjectChanges | Mapping) -> set[str]:
     """Ghi `changes` vào `store` (id -> đối tượng): `added` / `changed` ghi đè theo id, `removed` xóa. Trả id đã đổi."""
     if isinstance(changes, Mapping):
-        changes = ObjectChanges(tuple(changes.get("added", ())), tuple(changes.get("removed", ())),
-                                tuple(changes.get("changed", ())))
+        changes = ObjectChanges(_seq(changes, "added"), _seq(changes, "removed"), _seq(changes, "changed"))
     if not isinstance(changes, ObjectChanges):
         raise TypeError(f"objects phải là ObjectChanges hoặc dict, gặp {type(changes).__name__}")
+    if isinstance(changes.removed, (str, bytes)):
+        raise TypeError("ObjectChanges.removed phải là danh sách id")
+    for o in (*changes.added, *changes.changed):
+        check_object(o)
     out: set[str] = set()
     for oid in changes.removed:
         if store.pop(oid, None) is not None:
@@ -63,9 +94,12 @@ def membership(o: WorkingObject, day: date, *, history: bool = False) -> Tri:
     return "T" if history or o.valid_to is None or day <= o.valid_to else "F"
 
 
-def object_facts(o: WorkingObject, ctx: Context) -> Facts:
-    """Bảng dữ kiện của một đối tượng: thuộc tính cộng dữ kiện suy ra khai cho kiểu của nó (§5.6, theo §5.3)."""
+def object_facts(o: WorkingObject, ctx: Context, day: date | None = None) -> Facts:
+    """Bảng dữ kiện của một đối tượng: thuộc tính, thuộc tính dựng sẵn `expired` (khi biết `day`), cộng dữ kiện suy ra
+    khai cho kiểu của nó (§5.6, theo §5.3)."""
     table: Facts = {k: v for k, v in o.attrs.items() if v is not None}
+    if day is not None:
+        table["expired"] = Fact(o.valid_to is not None and o.valid_to < day, source="derived")
     typed = {n: d for n, d in ctx.derived.items() if d.object_type == o.type}
     if typed:
         for name in derived_order(typed):
@@ -106,7 +140,9 @@ def aggregate(cands: Iterable[tuple[Tri, tuple | None]]) -> dict[tuple | None, t
     cộng U vào mọi nhóm; chỉ có ứng viên khóa chưa biết thì một nhóm khóa None."""
     counts: dict[tuple, list[int]] = {}
     loose = 0
+    seen = False
     for tri, key in cands:
+        seen = True
         if key is None:
             loose += tri != "F"
             continue
@@ -115,8 +151,8 @@ def aggregate(cands: Iterable[tuple[Tri, tuple | None]]) -> dict[tuple | None, t
             c[0] += 1
         elif tri == "U":
             c[1] += 1
-    if not counts:
-        return {None: (0, loose)} if loose else {}
+    if not counts:                                  # có đối tượng nhưng khóa đều chưa biết: một nhóm None (khác "không có")
+        return {None: (0, loose)} if seen else {}
     return {k: (t, u + loose) for k, (t, u) in counts.items()}
 
 

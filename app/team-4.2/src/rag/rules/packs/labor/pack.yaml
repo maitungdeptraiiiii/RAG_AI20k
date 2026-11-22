@@ -101,6 +101,7 @@ derived:
         when:
           all:
             - {fact: kind, op: eq, value: xac_dinh_thoi_han}
+            - {fact: expired, op: eq, value: true}          # thuộc tính dựng sẵn: HĐ đã hết hạn trước ngày soát
             - {fact: worked_after_expiry_days, op: gt, value: 30, unit: day}
             - {fact: new_contract_signed, op: eq, value: false}
         value: khong_xac_dinh_thoi_han

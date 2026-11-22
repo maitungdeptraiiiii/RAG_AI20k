@@ -17,7 +17,7 @@ def evaluate_rules(items: Sequence[tuple[str, Rule, bool, Sequence[dict]]], fact
     """`items` = `(concept_id, rule, present, evidence)`; kết quả theo thứ tự `items` (rule xuyên đối tượng cho một kết
     quả mỗi nhóm, §5.6). Dữ kiện suy ra được tính trước (§5.3); ngoại lệ giữa rule được áp dụng sau cùng (§5.4)."""
     table = derive_all(ctx, facts)
-    tables = {o.id: object_facts(o, ctx) for o in objects}
+    tables = {o.id: object_facts(o, ctx, day) for o in objects}
     inputs = [rule_inputs(rule, table, day, ctx) for _, rule, _, _ in items]
     bases: list = []
     for (cid, rule, present, evidence), inp in zip(items, inputs):

@@ -115,6 +115,23 @@ có chi phí nếu sai). Nhánh `feat/team-4.2/w04-rules-engine`, chưa merge. T
 | 7.11 | Network tính lại số đếm của rule bằng cách cộng lại toàn bộ trị ứng viên đã nhớ của rule đó (O(số đối tượng) phép cộng); chỉ phần đắt (đánh giá `where`, dữ kiện suy ra theo đối tượng) là tăng dần | Có chủ ý |
 | 7.12 | Hai đối tượng khác kiểu có thể trùng `id`; `apply_object_changes` coi `id` là khóa duy nhất của cả hồ sơ | Còn |
 
+**Review độc lập giai đoạn 4, 5, 7** (Network = Reference: 0 lệch trên 300 seed × 60 bước; bất biến giữ trên 3000 ca bớt thông tin). Sửa, mỗi mục có test đỏ trước (`tests/test_rules_review7_fixes.py`):
+
+| # | Mục | Trạng thái |
+|---|---|---|
+| 7.13 | **r5 / r6 không kết luận được trên hồ sơ thật**: HĐ đang hiệu lực chưa có `worked_after_expiry_days` nên `kind_effective` thành UNKNOWN, r5 ra UNKNOWN thay vì FAIL (test cũ gán `days=0` cho mọi HĐ nên che lỗi). Thêm thuộc tính dựng sẵn `expired` (`valid_to < ngày soát`) cho mọi đối tượng; ngoại lệ Đ20.2.b chỉ xét HĐ đã hết hạn | Đã sửa |
+| 7.14 | **Gói vay bị chặn qua bridge**: `user_fact_set` kiểm tên theo hằng gói labor nên `special_law_applies` bị từ chối, trần lãi luôn UNKNOWN. Nay kiểm theo `Context.input_units` của gói đang dùng | Đã sửa |
+| 7.15 | "Có đối tượng nhưng mọi ứng viên F + khóa chưa biết" bị gộp với "không có đối tượng" (`no_objects`), bớt thông tin có thể làm NOT_APPLICABLE → FAIL | Đã sửa |
+| 7.16 | YAML `over` / `group_by` / `count.value` / `history` / `kind` sai hình dạng làm crash lúc nạp hoặc lúc đánh giá; nay là `CatalogError` | Đã sửa |
+| 7.17 | `{"removed": "k1"}` xóa nhầm id `k` và `1`; `WorkingObject` sai kiểu (thuộc tính không phải Fact, `attrs=None`, ngày là chuỗi) crash sâu trong engine; nay `TypeError` rõ ràng ở cửa vào phiên | Đã sửa |
+| 7.18 | `explain(obj=None)` trên rule nhiều nhóm âm thầm lấy nhóm đầu; nay `KeyError` liệt kê các nhóm | Đã sửa |
+| 7.19 | `packs=[]` âm thầm rơi về gói labor; nay `ValueError` | Đã sửa |
+| 7.20 | `group_by` nhiều khóa: ứng viên biết `employee` mà thiếu `job` vẫn cộng U vào nhóm của người lao động khác (đúng chữ spec, sinh UNKNOWN thừa) | Còn |
+| 7.21 | Đ428.2 chỉ quy định nghĩa vụ "thông báo ngay" và bồi thường nếu gây thiệt hại; gắn `legality: illegal` cho điều khoản "chấm dứt không cần thông báo" có thể quá tay | Còn (cần người làm pháp lý xem) |
+| 7.22 | `r1_special_law` luôn PASS khi concept có mặt (nhiễu như 3.9) | Còn |
+| 7.23 | Hợp đồng vay ký trước 2017 vẫn bị soát theo Đ468 BLDS 2015: `law_values_valid_from` không áp lên giá trị luật không có kỳ | Còn |
+| 7.24 | Bảng dữ kiện phẳng: HĐ xác định thời hạn đang hiệu lực mà thiếu `worked_after_expiry_days` cho `content.term/r4` UNKNOWN (hỏi người dùng). Gói phẳng không có `expired` vì không có ngày hết hạn ở dạng đối tượng | Còn |
+
 ## Tồn đọng chung (môi trường, quy trình)
 
 | # | Mục | Trạng thái |

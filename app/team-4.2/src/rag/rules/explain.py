@@ -126,8 +126,12 @@ def explain(catalog: Catalog, session, concept_id: str, rule_id: str, obj: str |
     """Cây giải thích kết quả của `concept_id/rule_id` (nhóm `obj` với rule xuyên đối tượng) trong `session`.
     Rule xuyên đối tượng: cây dừng ở số đếm của nhóm (`reasons` có `count:a..b`); chưa mở tới từng đối tượng."""
     rule = next((r for r in catalog.concepts[concept_id].rules if r.id == rule_id), None) if concept_id in catalog.concepts else None
-    result = next((x for x in session.results()
-                   if (x.concept_id, x.rule_id) == (concept_id, rule_id) and (obj is None or x.object == obj)), None)
+    matches = [x for x in session.results() if (x.concept_id, x.rule_id) == (concept_id, rule_id)
+               and (obj is None or x.object == obj)]
+    if obj is None and len(matches) > 1:
+        raise KeyError(f"{concept_id}/{rule_id} có {len(matches)} nhóm: truyền obj (một trong "
+                       f"{[x.object for x in matches]})")
+    result = matches[0] if matches else None
     if rule is None or result is None:
         raise KeyError(f"{concept_id}/{rule_id}")
     ctx, facts, day = catalog.context, session.facts(), session.day

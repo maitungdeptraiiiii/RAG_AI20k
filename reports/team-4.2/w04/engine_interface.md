@@ -38,6 +38,11 @@ WorkingObject(id="p2", type="Amendment", attrs={"modifies_term": Fact(True)}, va
 ```
 
 Thuộc tính thiếu thì để vắng (không ghi `Fact(None)`); thuộc tính hai nguồn mâu thuẫn dùng `semantics.CONFLICT`.
+Engine tự thêm thuộc tính `expired` (`valid_to < ngày soát`) cho mọi đối tượng; không khai `expired` trong `attrs`.
+Với HĐ **đã hết hạn** trước ngày soát, dossier phải điền `worked_after_expiry_days` (ngày từ hết hạn tới khi ký HĐ mới,
+hoặc tới ngày soát nếu chưa ký) và `new_contract_signed` (đã ký HĐ mới trong 30 ngày) — đây là phép nối giữa các HĐ
+của cùng người, làm ở dossier, engine không tự tính. Đối tượng sai kiểu -> `TypeError` khi tạo phiên / update.
+`user_fact_set(user_facts, catalog.context)` kiểm tên theo gói đang dùng.
 Ngày, đơn vị phải đúng (vd. `worked_after_expiry_days` đơn vị `day`), nếu không phép so ra U (UNKNOWN), không bao giờ ra vi phạm.
 
 ## Khác

@@ -16,15 +16,28 @@ conversions:
 
 # Dữ kiện cấp hợp đồng (do facts.py trích và kiểm trích dẫn) -> đơn vị. Rule chỉ dùng các dữ kiện này được xét
 # ngay cả khi LLM không gắn khái niệm cho điều khoản nào.
+# Mỗi dữ kiện khai trường trích (`from`, khóa trong contracts/fact_catalog.json) và bộ đọc (`parse`).
 document_facts:
-  contract_kind: null
-  term_months: month
-  base_salary_vnd: vnd
-  has_probation: null
-  probation_length: day
-  probation_pay_pct: percent
-  job_level: null
-  sign_date: null
+  contract_kind:
+    unit: null
+    from: labor_kind
+    parse: contains                       # thứ tự quan trọng: "không xác định" phải thắng "xác định"
+    contains: [["không xác định", khong_xac_dinh_thoi_han], ["xác định", xac_dinh_thoi_han]]
+  term_months: {unit: month, from: term, parse: duration_to_unit}
+  base_salary_vnd: {unit: vnd, from: salary, parse: money}
+  has_probation: {unit: null, from: probation_period, parse: flag}
+  probation_length: {unit: day, from: probation_period, parse: duration}
+  probation_pay_pct: {unit: percent, from: probation_salary, parse: percent}
+  job_level:
+    unit: null
+    from: job_level
+    parse: enum                           # nhãn trùng contracts/fact_catalog.json "job_levels"
+    values:
+      "Người quản lý doanh nghiệp": quan_ly_doanh_nghiep
+      "Công việc cần trình độ cao đẳng trở lên": cao_dang_tro_len
+      "Công việc cần trình độ trung cấp, công nhân kỹ thuật, nhân viên nghiệp vụ": trung_cap_ky_thuat
+      "Công việc khác": cong_viec_khac
+  sign_date: null                         # lấy từ ngày ký của hợp đồng, không qua bộ đọc
 
 # Dữ kiện người dùng xác nhận.
 user_facts: [work_condition, pregnant, pregnancy_month, child_under_12_months, employee_consent,

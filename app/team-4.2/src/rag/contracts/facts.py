@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 import unicodedata
 from datetime import date
-from typing import Any
+from typing import Any, Sequence
 
 from rag.contracts.batches import Batch, make_batches, run_batches
 from rag.contracts.llm_json import ContractAIError, ask_json, quote_ok
@@ -151,16 +151,16 @@ def _iso(value: Any) -> date | None:
         return None
 
 
-def _wanted() -> list[dict]:
+def _wanted(specs: Sequence[dict]) -> list[dict]:
     return [{"key": s["key"], "label": s["label"], "hint": s.get("hint", ""),
              **({"options": s["options"]} if isinstance(s.get("options"), list) else {})}
-            for s in all_specs() if s["key"] not in ("party", "sign_date", "type", *_SCALARS)]
+            for s in specs if s["key"] not in ("party", "sign_date", "type", *_SCALARS)]
 
 
-def _payload(batch: Batch, known: list[dict]) -> dict:
+def _payload(batch: Batch, known: list[dict], specs: Sequence[dict]) -> dict:
     return {"units": batch.payload_units(), "context": list(batch.context), "references": list(batch.references),
             "known_parties": [{"name": p.get("name"), "role": p.get("role")} for p in known],
-            "fields_wanted": _wanted()}
+            "fields_wanted": _wanted(specs)}
 
 
 def _add(cands: dict[str, list[dict]], key: str, item: dict | None) -> None:
@@ -176,14 +176,18 @@ def _items(raw: Any) -> list:
     return raw if isinstance(raw, list) else [raw]
 
 
-def extract_facts(llm, contract: Contract, *, on_event=None) -> dict:
+def extract_facts(llm, contract: Contract, *, on_event=None, extra_fields: Sequence[dict] = ()) -> dict:
+    """`extra_fields`: trường các gói đang dùng khai thêm (`pack.yaml` extract_fields), trích cùng danh mục chung."""
     specs = {s["key"]: s for s in all_specs()}
+    for f in extra_fields:
+        specs.setdefault(f["key"], dict(f))
+    spec_list = list(specs.values())
     parties: list[dict] = []
 
     def read(batch: Batch) -> dict:
         if on_event:
             on_event({"type": "fact_batch", "status": "start", "uids": batch.uids, "batch": batch.index})
-        data = ask_json(llm, FACTS_PROMPT, _payload(batch, parties), contract.mask_state)
+        data = ask_json(llm, FACTS_PROMPT, _payload(batch, parties, spec_list), contract.mask_state)
         for p in (_checked(contract, x, batch) for x in data.get("parties") or []):
             if p and p.get("role"):
                 found = _text_aliases(contract, p)

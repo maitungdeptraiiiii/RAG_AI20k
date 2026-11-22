@@ -59,3 +59,100 @@ def test_loader_validates_unit_forms(tmp_path):
     write_pack(tmp_path, {"units": ["percent_per_year"], "unit_forms": {"percent_per_year": "/năm"}}, pack_id="uf2")
     with pytest.raises(CatalogError):
         load_pack("uf2", root=tmp_path)
+
+
+# ── D39: dữ kiện cấp hợp đồng theo gói ──
+LEASE_LIKE = {
+    "units": ["vnd", "month", "day", "hour"],
+    "conversions": {"hour": {"base": "hour", "factor": 1}, "day": {"base": "hour", "factor": 24},
+                    "month": {"base": "hour", "factor": 720}},
+    "document_facts": {
+        "monthly_rent_vnd": {"unit": "vnd", "from": "rent", "parse": "money"},
+        "lease_term": {"unit": "month", "from": "lease_term", "parse": "duration_to_unit"},
+        "rent_kind": {"unit": None, "from": "rent_kind", "parse": "contains",
+                      "contains": [["cố định", "fixed"], ["điều chỉnh", "adjustable"]]},
+        "sign_date": None,
+    },
+    "extract_fields": [{"key": "rent", "label": "Giá thuê", "kind": "text", "hint": "số tiền thuê mỗi kỳ"},
+                       {"key": "lease_term", "label": "Thời hạn thuê", "kind": "text", "hint": "số tháng / năm"},
+                       {"key": "rent_kind", "label": "Giá thuê cố định hay điều chỉnh", "kind": "text"}],
+}
+
+
+def _lease_catalog(tmp_path):
+    write_pack(tmp_path, LEASE_LIKE, [concept("lease.x", [rule("r1")])], pack_id="leasey")
+    return load_packs(["leasey"], root=tmp_path)
+
+
+def test_document_facts_filled_from_pack_declaration(tmp_path):
+    from rag.bridge.facts_map import contract_facts
+    cat = _lease_catalog(tmp_path)
+    facts = {"candidates": {
+        "rent": [{"value": "5.000.000 đồng/tháng", "unit": "p0.d2", "quote": "Giá thuê 5.000.000 đồng/tháng"}],
+        "lease_term": [{"value": "2 năm", "unit": "p0.d3", "quote": "Thời hạn thuê 2 năm"}],
+        "rent_kind": [{"value": "giá thuê cố định trong suốt thời hạn", "unit": "p0.d2", "quote": "q"}],
+        "salary": [{"value": "15.000.000 đồng", "unit": "p0.d1", "quote": "q"}]}}       # trường của gói khác: bỏ
+    out = contract_facts(facts, sign_date=None, ctx=cat.context)
+    assert (out["monthly_rent_vnd"].value, out["monthly_rent_vnd"].unit) == (5000000, "vnd")
+    assert (out["lease_term"].value, out["lease_term"].unit) == (24, "month")
+    assert out["rent_kind"].value == "fixed" and "base_salary_vnd" not in out
+    assert out["monthly_rent_vnd"].uid == "p0.d2" and out["monthly_rent_vnd"].quote.startswith("Giá thuê")
+
+
+def test_fact_ops_follow_pack_declaration(tmp_path):
+    from datetime import datetime
+    from rag.bridge.facts_map import fact_ops
+    cat = _lease_catalog(tmp_path)
+    facts = {"candidates": {"rent": [{"value": "5.000.000 đồng", "unit": "p0.d2", "quote": "Giá thuê 5.000.000 đồng"}]}}
+    ops = fact_ops(facts, "c1", at=datetime(2026, 1, 1), ctx=cat.context)
+    assert [(o.content["name"], o.content["value"], o.content["unit"]) for o in ops] == [("monthly_rent_vnd", 5000000, "vnd")]
+
+
+def test_labor_document_facts_declared_in_pack_and_unchanged():
+    from rag.bridge.facts_map import contract_facts
+    labor = load_catalog().context
+    assert set(labor.document_specs) == {"contract_kind", "term_months", "base_salary_vnd", "has_probation",
+                                         "probation_length", "probation_pay_pct", "job_level"}
+    facts = {"candidates": {
+        "labor_kind": [{"value": "Không xác định thời hạn", "unit": "p0.d1", "quote": "q"}],
+        "term": [{"value": "12 tháng", "unit": "p0.d1", "quote": "q"}],
+        "salary": [{"value": "điều chỉnh từ 15.000.000 đồng lên 17.000.000 đồng", "unit": "p1.d1",
+                    "quote": "điều chỉnh từ 15.000.000 đồng lên 17.000.000 đồng"}],
+        "probation_period": [{"value": "02 tháng", "unit": "p0.d2", "quote": "q"}],
+        "probation_salary": [{"value": "85%", "unit": "p0.d2", "quote": "q"}],
+        "job_level": [{"value": "Công việc khác", "unit": "p0.d1", "quote": "q"}]}}
+    for ctx in (None, labor):
+        out = contract_facts(facts, sign_date=None, ctx=ctx)
+        got = {k: (v.value, v.unit) for k, v in out.items()}
+        assert got == {"contract_kind": ("khong_xac_dinh_thoi_han", None), "term_months": (12, "month"),
+                       "base_salary_vnd": (17000000, "vnd"), "has_probation": (True, None),
+                       "probation_length": (2, "month"), "probation_pay_pct": (85.0, "percent"),
+                       "job_level": ("cong_viec_khac", None)}
+
+
+def test_extract_facts_asks_for_fields_of_the_selected_packs(tmp_path):
+    import json
+    from rag.contracts.facts import FACTS_PROMPT, extract_facts
+    from test_bridge_check import contract
+    cat = _lease_catalog(tmp_path)
+    seen = []
+
+    class LLM:
+        def complete(self, system, user):
+            if system.startswith(FACTS_PROMPT[:40]):
+                seen.append([f["key"] for f in json.loads(user)["fields_wanted"]])
+            return json.dumps({"type": "chưa rõ", "parties": [], "fields": {}})
+    extract_facts(LLM(), contract(), extra_fields=cat.context.extract_fields)
+    assert seen and all({"rent", "lease_term", "rent_kind"} <= set(keys) for keys in seen)
+
+
+def test_loader_validates_document_fact_declarations(tmp_path):
+    bad = {"document_facts": {"a": {"unit": "vnd", "from": "x", "parse": "doan_mo"},
+                              "b": {"unit": None, "from": "y", "parse": "enum"},
+                              "c": {"unit": None, "parse": "money"}},
+           "units": ["vnd"], "extract_fields": [{"key": "x"}]}
+    write_pack(tmp_path, bad, pack_id="badd")
+    with pytest.raises(CatalogError) as e:
+        load_pack("badd", root=tmp_path)
+    text = "\n".join(e.value.problems)
+    assert "doan_mo" in text and "'b'" in text and "'c'" in text and "extract_fields" in text

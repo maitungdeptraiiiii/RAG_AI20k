@@ -50,6 +50,20 @@ class DerivedFact:
     object_type: str | None = None     # khai cho một kiểu đối tượng: mỗi đối tượng có giá trị riêng (spec §5.6)
 
 
+# Bộ đọc giá trị cho dữ kiện cấp hợp đồng (cài ở rag.bridge.facts_map); gói chọn theo tên, không viết code mới.
+DOCUMENT_PARSERS = frozenset({"duration", "duration_to_unit", "money", "percent", "flag", "enum", "contains"})
+
+
+@dataclass(frozen=True)
+class DocumentFact:
+    """Một dữ kiện cấp hợp đồng của gói: lấy từ trường trích `field` (facts.py), đọc bằng `parse`."""
+    name: str
+    unit: str | None
+    field: str
+    parse: str
+    values: tuple[tuple[str, str], ...] = ()       # enum: (nhãn, mã); contains: (cụm chữ, mã) theo thứ tự ưu tiên
+
+
 @dataclass(frozen=True)
 class ObjectType:
     """Kiểu đối tượng của hồ sơ (spec §5.6): thuộc tính (`attrs`) và tham chiếu tới đối tượng khác (`refs`)."""
@@ -77,6 +91,8 @@ class Context:
     questions: Mapping[str, UserQuestion] = field(default_factory=dict)
     input_units: Mapping[str, str | None] = field(default_factory=dict)   # dữ kiện đầu vào (hợp đồng + người dùng) -> đơn vị mặc định
     unit_forms: Mapping[str, tuple[str, ...]] = field(default_factory=dict)  # đơn vị -> cách viết sau con số ("/năm")
+    document_specs: Mapping[str, DocumentFact] = field(default_factory=dict)  # dữ kiện cấp hợp đồng -> cách trích
+    extract_fields: tuple[dict, ...] = ()        # trường cần LLM trích thêm (ngoài contracts/fact_catalog.json)
 
     @property
     def reported(self) -> frozenset[str]:
@@ -102,11 +118,13 @@ class PackSpec:
     concept_kinds: Mapping[str, tuple[str, ...]] = field(default_factory=dict)   # kind -> các loại slot concept phải có
     object_types: Mapping[str, ObjectType] = field(default_factory=dict)
     unit_forms: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
+    document_specs: Mapping[str, DocumentFact] = field(default_factory=dict)
+    extract_fields: tuple[dict, ...] = ()
 
     def context(self) -> Context:
         inputs = {**{n: None for n in self.user_facts}, **dict(self.user_fact_units), **dict(self.document_facts)}
         return Context(self.units, frozenset(self.document_facts), self.silences, self.derived, self.user_fact_questions,
-                       inputs, self.unit_forms)
+                       inputs, self.unit_forms, self.document_specs, self.extract_fields)
 
 
 # ── danh mục khái niệm (concepts.yaml) ──

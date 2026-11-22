@@ -9,8 +9,8 @@ import yaml
 
 from rag.rules.derived import definition_inputs, find_cycle
 from rag.rules.objects import BUILTIN_ATTRS, COUNT_OPS
-from rag.rules.model import (CORE_FINDINGS, CORE_SILENCES, DEROGATIONS, MODES, OPS, SLOT_KINDS, Catalog, CatalogError,
-                             Concept, Definition, DerivedFact, ObjectType, PackSpec, Rule, Silence, Slot, UserQuestion, leaves)
+from rag.rules.model import (CORE_FINDINGS, DOCUMENT_PARSERS, CORE_SILENCES, DEROGATIONS, MODES, OPS, SLOT_KINDS, Catalog, CatalogError,
+                             Concept, Definition, DerivedFact, DocumentFact, ObjectType, PackSpec, Rule, Silence, Slot, UserQuestion, leaves)
 from rag.rules.units import Units
 
 PACKS_ROOT = Path(__file__).with_name("packs")
@@ -97,6 +97,65 @@ def _derived(data: dict, units: frozenset[str], inputs: set[str], problems: list
     return out
 
 
+def _document_facts(raw: object, units: frozenset[str], problems: list[str]):
+    """`document_facts`: `{tên: đơn vị}` (chỉ khai, không tự trích) hoặc `{tên: {unit, from, parse, values | contains}}`."""
+    if not isinstance(raw, dict):
+        problems.append("document_facts phải là dict")
+        return {}, {}
+    plain: dict[str, str | None] = {}
+    specs: dict[str, DocumentFact] = {}
+    for name, v in raw.items():
+        if v is None or isinstance(v, str):
+            unit, spec = v, None
+        elif isinstance(v, dict):
+            unit, spec = v.get("unit"), v
+        else:
+            problems.append(f"document_facts: {name!r} phải là đơn vị hoặc {{unit, from, parse}}")
+            continue
+        if unit is not None and unit not in units:
+            problems.append(f"document_facts: dữ kiện {name!r} có đơn vị lạ {unit!r}")
+        plain[name] = unit
+        if spec is None:
+            continue
+        where = f"document_facts {name!r}"
+        if not isinstance(spec.get("from"), str) or not spec["from"]:
+            problems.append(f"{where}: thiếu `from` (khóa trường trích)")
+            continue
+        if spec.get("parse") not in DOCUMENT_PARSERS:
+            problems.append(f"{where}: parse {spec.get('parse')!r} không thuộc {sorted(DOCUMENT_PARSERS)}")
+            continue
+        values: tuple = ()
+        if spec["parse"] == "enum":
+            m = spec.get("values")
+            if not isinstance(m, dict) or not m:
+                problems.append(f"{where}: parse enum cần `values` {{nhãn: mã}}")
+                continue
+            values = tuple((str(k), str(c)) for k, c in m.items())
+        elif spec["parse"] == "contains":
+            m = spec.get("contains")
+            if not isinstance(m, list) or not m or not all(isinstance(x, list) and len(x) == 2 for x in m):
+                problems.append(f"{where}: parse contains cần `contains` [[cụm chữ, mã], ...]")
+                continue
+            values = tuple((str(a), str(b)) for a, b in m)
+        specs[name] = DocumentFact(name, unit, spec["from"], spec["parse"], values)
+    return plain, specs
+
+
+def _extract_fields(raw: object, problems: list[str]) -> tuple[dict, ...]:
+    """Trường gói muốn LLM trích thêm: [{key, label, kind (text | enum | date), hint?, options?}]."""
+    if not isinstance(raw, list):
+        problems.append("extract_fields phải là danh sách")
+        return ()
+    out = []
+    for f in raw:
+        if not (isinstance(f, dict) and isinstance(f.get("key"), str) and isinstance(f.get("label"), str)
+                and f.get("kind", "text") in ("text", "enum", "date")):
+            problems.append(f"extract_fields: mỗi mục cần key, label (chuỗi) và kind text | enum | date, gặp {f!r}")
+            continue
+        out.append({"kind": "text", **f})
+    return tuple(out)
+
+
 def load_pack(pack_id: str, *, root: Path = PACKS_ROOT) -> PackSpec:
     path = Path(root) / pack_id / "pack.yaml"
     if not path.is_file():
@@ -131,10 +190,8 @@ def load_pack(pack_id: str, *, root: Path = PACKS_ROOT) -> PackSpec:
                 problems.append(f"conversions: gốc {base!r} của {unit!r} phải tự quy về chính nó với factor 1")
         elif base in names:
             factors[base] = (base, 1)
-    document_facts = dict(data.get("document_facts") or {})
-    for name, unit in document_facts.items():
-        if unit is not None and unit not in names:
-            problems.append(f"document_facts: dữ kiện {name!r} có đơn vị lạ {unit!r}")
+    document_facts, document_specs = _document_facts(data.get("document_facts") or {}, names, problems)
+    extract_fields = _extract_fields(data.get("extract_fields") or [], problems)
     silences = dict(CORE_SILENCES)
     for name, s in (data.get("silences") or {}).items():
         if name in CORE_SILENCES:
@@ -219,7 +276,7 @@ def load_pack(pack_id: str, *, root: Path = PACKS_ROOT) -> PackSpec:
         raise CatalogError(problems)
     return PackSpec(pack_id, str(data.get("version")), tuple(extends), tuple(kinds), Units(names, factors),
                     document_facts, user_facts, findings, silences, derived, dict(user_fact_units), questions,
-                    concept_kinds, object_types, unit_forms)
+                    concept_kinds, object_types, unit_forms, document_specs, extract_fields)
 
 
 # ── concepts.yaml ──
@@ -481,6 +538,8 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
     concept_kinds: dict[str, tuple[str, ...]] = {}
     object_types: dict[str, ObjectType] = {}
     unit_forms: dict[str, tuple[str, ...]] = {}
+    document_specs: dict[str, DocumentFact] = {}
+    extract_fields: dict[str, dict] = {}
     kinds: list[str] = []
     for s in specs:
         names |= s.units.names
@@ -494,6 +553,14 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
                 problems.append(f"document_facts: dữ kiện {name!r} có đơn vị khác nhau giữa các gói")
             document_facts[name] = unit
         user_facts |= s.user_facts
+        for name, spec in s.document_specs.items():
+            if name in document_specs and document_specs[name] != spec:
+                problems.append(f"document_facts: cách trích {name!r} khác nhau giữa các gói")
+            document_specs[name] = spec
+        for f in s.extract_fields:
+            if f["key"] in extract_fields and extract_fields[f["key"]] != f:
+                problems.append(f"extract_fields: trường {f['key']!r} khai báo khác nhau giữa các gói")
+            extract_fields[f["key"]] = f
         for unit, forms in s.unit_forms.items():
             unit_forms[unit] = tuple(dict.fromkeys([*unit_forms.get(unit, ()), *forms]))
         for name, ot in s.object_types.items():
@@ -528,7 +595,8 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
             problems.append(_CLASH.format(name))
     return PackSpec("+".join(s.id for s in specs), "+".join(f"{s.id}@{s.version}" for s in specs), (), tuple(kinds),
                     Units(frozenset(names), factors), document_facts, frozenset(user_facts), frozenset(findings),
-                    silences, derived, user_fact_units, questions, concept_kinds, object_types, unit_forms)
+                    silences, derived, user_fact_units, questions, concept_kinds, object_types, unit_forms,
+                    document_specs, tuple(extract_fields.values()))
 
 
 def load_packs(pack_ids: Sequence[str], *, root: Path = PACKS_ROOT) -> Catalog:

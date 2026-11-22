@@ -127,7 +127,8 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
     warnings: list[str] = []
     stage("facts", "start")
     if not contract.facts:
-        extract_facts(llm, contract, **({"on_event": emit} if on_event else {}))
+        extract_facts(llm, contract, extra_fields=catalog.context.extract_fields,
+                      **({"on_event": emit} if on_event else {}))
     stage("facts", "done")
     warnings += list(contract.facts.get("warnings") or [])
 
@@ -137,7 +138,7 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
         warnings.append(f"Không có ngày ký: tạm dùng giá trị luật từ {day.isoformat()}")
 
     _add_ops(contract, party_ops(contract.facts, contract.contract_id, at=at))
-    _add_ops(contract, fact_ops(contract.facts, contract.contract_id, at=at))
+    _add_ops(contract, fact_ops(contract.facts, contract.contract_id, at=at, ctx=catalog.context))
     stage("tag", "start")
     tag = tag_contract(tagger, contract, catalog, at=at, model=tag_model,
                        on_progress=lambda done, total: emit({"type": "progress", "stage": "tag", "done": done,

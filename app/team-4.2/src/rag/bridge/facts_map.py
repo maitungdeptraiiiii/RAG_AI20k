@@ -13,11 +13,9 @@ from rag.bridge.engine import CONFLICT, Fact, Facts, _Conflict
 from rag.contracts.amendments import AMEND_RE as _AMEND
 from rag.contracts.graph.oplog import GraphOperation, machine_op
 from rag.contracts.values import extract_values
-from rag.contracts.verify import catalog as fact_catalog
 
 _ACTIVE = ("auto_accepted", "approved")
 _DURATION_UNITS = {"ngày": "day", "tuần": "week", "tháng": "month", "năm": "year", "giờ": "hour"}
-_JOB_LEVEL_CODES = ("quan_ly_doanh_nghiep", "cao_dang_tro_len", "trung_cap_ky_thuat", "cong_viec_khac")
 _TRUE = {"true", "có", "yes", "1"}
 _FALSE = {"false", "không", "no", "0"}
 
@@ -81,25 +79,6 @@ def normalize_slot(slot: Slot, raw: Any, ctx=None) -> Fact | None:
     return None
 
 
-def _labor_kind(text: str) -> str | None:
-    t = text.casefold()
-    if "không xác định" in t:
-        return "khong_xac_dinh_thoi_han"
-    return "xac_dinh_thoi_han" if "xác định" in t else None
-
-
-def _term_months(text: str) -> tuple[float, str] | None:
-    d = _duration(text)
-    if d is None:
-        return None
-    n, unit = d
-    if unit == "month":
-        return n, "month"
-    if unit == "day":
-        return n / 30, "month"
-    return None
-
-
 _NEW_VALUE = re.compile(r"\s(?:lên|thành)\s", re.IGNORECASE)
 _PART = re.compile(r"^p(\d+)\.")
 
@@ -112,28 +91,49 @@ def _salary(text: str) -> tuple[int, str] | None:
     return (v.norm["amount"], "vnd") if v and v.norm["currency"] == "VND" else None
 
 
-def _pct(text: str) -> tuple[float, str] | None:
-    v = _first(text, "percent")
-    return (v.norm["percent"], "percent") if v else None
+def _p_duration_to_unit(text: str, spec, ctx) -> tuple[float, str] | None:
+    """Thời hạn quy về đơn vị khai của dữ kiện (vd. "2 năm" -> 24 tháng, "365 ngày" -> 12,17 tháng)."""
+    d = _duration(text)
+    if d is None:
+        return None
+    if d[1] == spec.unit:
+        return d
+    v = ctx.units.convert(d[0], d[1], spec.unit)
+    return (v, spec.unit) if v is not None else None
 
 
-def _job_level(text: str) -> tuple[str, None] | None:
-    levels = [str(x) for x in fact_catalog().get("job_levels") or []]
-    for code, label in zip(_JOB_LEVEL_CODES, levels):
-        if text.strip().casefold() == label.casefold():
-            return code, None
-    return None
+def _p_enum(text: str, spec, ctx):
+    t = text.strip().casefold()
+    return next(((code, None) for label, code in spec.values if label.casefold() == t), None)
 
 
-_CONTRACT_MAP = {
-    "contract_kind": ("labor_kind", lambda t: (k, None) if (k := _labor_kind(t)) else None),
-    "term_months": ("term", _term_months),
-    "base_salary_vnd": ("salary", _salary),
-    "has_probation": ("probation_period", lambda t: (True, None)),
-    "probation_length": ("probation_period", _duration),
-    "probation_pay_pct": ("probation_salary", _pct),
-    "job_level": ("job_level", _job_level),
+def _p_contains(text: str, spec, ctx):
+    t = text.casefold()
+    return next(((code, None) for piece, code in spec.values if piece.casefold() in t), None)
+
+
+def _p_percent(text: str, spec, ctx):
+    f = _percent(Slot(spec.name, "percent", spec.unit), text, ctx)
+    return (f.value, f.unit) if f is not None else None
+
+
+# Bộ đọc theo tên (`parse` trong pack.yaml document_facts); danh sách tên ở rag.rules.model.DOCUMENT_PARSERS.
+_PARSERS = {
+    "duration": lambda t, spec, ctx: _duration(t),
+    "duration_to_unit": _p_duration_to_unit,
+    "money": lambda t, spec, ctx: _salary(t),
+    "percent": _p_percent,
+    "flag": lambda t, spec, ctx: (True, None),
+    "enum": _p_enum,
+    "contains": _p_contains,
 }
+
+
+def _specs(ctx):
+    if ctx is None:
+        from rag.bridge.catalog import labor_context
+        ctx = labor_context()
+    return ctx, ctx.document_specs
 
 
 def _part(uid: str | None) -> int:
@@ -153,14 +153,16 @@ def _resolve(seen: list[Fact]) -> Fact | _Conflict:
                                                              for f in older))
 
 
-def contract_facts(facts: dict, *, sign_date: date | None) -> Facts:
-    """Dữ kiện cấp hợp đồng từ `contract.facts` (đầu ra của extract_facts: candidates[key] = [{value, unit, quote}])."""
+def contract_facts(facts: dict, *, sign_date: date | None, ctx=None) -> Facts:
+    """Dữ kiện cấp hợp đồng từ `contract.facts` (đầu ra của extract_facts: candidates[key] = [{value, unit, quote}]),
+    theo khai báo `document_facts` của gói (`ctx`; None -> gói labor)."""
     cands = facts.get("candidates") or {}
     out: Facts = {}
-    for name, (key, norm) in _CONTRACT_MAP.items():
+    ctx, specs = _specs(ctx)
+    for name, spec in specs.items():
         seen: list[Fact] = []
-        for c in cands.get(key) or []:
-            got = norm(str(c.get("value") or ""))
+        for c in cands.get(spec.field) or []:
+            got = _PARSERS[spec.parse](str(c.get("value") or ""), spec, ctx)
             if got is None:
                 continue
             f = Fact(got[0], got[1], "contract", c.get("unit"), c.get("quote"))
@@ -175,15 +177,16 @@ def contract_facts(facts: dict, *, sign_date: date | None) -> Facts:
     return out
 
 
-def fact_ops(facts: dict, contract_id: str, *, at: datetime) -> list[GraphOperation]:
+def fact_ops(facts: dict, contract_id: str, *, at: datetime, ctx=None) -> list[GraphOperation]:
     """Một ASSERT `fact` cho mỗi (tên dữ kiện, ứng viên) chuẩn hóa được; ứng viên thiếu đơn vị chứa câu trích bị bỏ.
     Đồ thị dựng nút `ContractFact` từ các thao tác này (spec 2026-11-16-contract-graph-agent §5.2)."""
     cands = facts.get("candidates") or {}
     ops: list[GraphOperation] = []
-    for name, (key, norm) in _CONTRACT_MAP.items():
-        for c in cands.get(key) or []:
+    ctx, specs = _specs(ctx)
+    for name, spec in specs.items():
+        for c in cands.get(spec.field) or []:
             uid = c.get("unit")
-            got = norm(str(c.get("value") or "")) if uid else None
+            got = _PARSERS[spec.parse](str(c.get("value") or ""), spec, ctx) if uid else None
             if got is None:
                 continue
             content = {"kind": "fact", "name": name, "value": got[0], "unit": got[1]}

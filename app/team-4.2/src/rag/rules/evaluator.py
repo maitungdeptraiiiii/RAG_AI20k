@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Any, Literal, Mapping, Protocol, Sequence
 
-from rag.rules.loader import PACKS_ROOT, load_concepts, load_pack
+from rag.rules.loader import load_packs
 from rag.rules.model import Catalog
 from rag.rules.reference import evaluate_all
 from rag.rules.semantics import Fact, Facts, RuleResult
@@ -98,7 +98,4 @@ def evaluator_for(catalog: Catalog, kind: EvaluatorKind = "reference") -> Evalua
 
 
 def make_evaluator(packs: Sequence[str], kind: EvaluatorKind = "reference") -> Evaluator:
-    if len(packs) != 1:
-        raise NotImplementedError("nhiều gói: load_packs ở Task 9")
-    pack = load_pack(packs[0])
-    return evaluator_for(load_concepts(PACKS_ROOT / packs[0] / "concepts.yaml", pack), kind)
+    return evaluator_for(load_packs(packs), kind)

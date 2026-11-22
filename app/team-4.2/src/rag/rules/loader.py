@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from datetime import date
 from pathlib import Path
+from typing import Sequence
 
 import yaml
 
@@ -184,3 +185,101 @@ def load_concepts(path: Path, pack: PackSpec) -> Catalog:
         raise CatalogError(problems)
     return Catalog(str(data.get("version")), date.fromisoformat(str(data["law_values_valid_from"])), roles, concepts,
                    pack.context())
+
+
+# ── nhiều gói ──
+def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
+    """Hợp nhất khai báo của các gói (đơn vị, dữ kiện, finding, on_silence); khai báo xung đột ghi vào `problems`."""
+    names: set[str] = set()
+    factors: dict[str, tuple[str, float]] = {}
+    owner: dict[str, str] = {}
+    document_facts: dict[str, str | None] = {}
+    user_facts: set[str] = set()
+    findings: set[str] = set()
+    silences: dict[str, Silence] = dict(CORE_SILENCES)
+    kinds: list[str] = []
+    for s in specs:
+        names |= s.units.names
+        for unit, f in s.units.factors.items():
+            if unit in factors and factors[unit] != f:
+                problems.append(f"conversions: đơn vị {unit!r} có hệ số khác nhau giữa các gói ({owner[unit]} và {s.id})")
+            else:
+                factors[unit], owner[unit] = f, s.id
+        for name, unit in s.document_facts.items():
+            if name in document_facts and document_facts[name] != unit:
+                problems.append(f"document_facts: dữ kiện {name!r} có đơn vị khác nhau giữa các gói")
+            document_facts[name] = unit
+        user_facts |= s.user_facts
+        findings |= s.findings
+        for name, silence in s.silences.items():
+            if name in silences and silences[name] != silence:
+                problems.append(f"silences: {name!r} khai báo khác nhau giữa các gói")
+            silences[name] = silence
+        kinds += [k for k in s.document_kinds if k not in kinds]
+    return PackSpec("+".join(s.id for s in specs), "+".join(f"{s.id}@{s.version}" for s in specs), (), tuple(kinds),
+                    Units(frozenset(names), factors), document_facts, frozenset(user_facts), frozenset(findings),
+                    silences)
+
+
+def load_packs(pack_ids: Sequence[str], *, root: Path = PACKS_ROOT) -> Catalog:
+    """Nạp và gộp nhiều gói. Gói cha (`extends`) nạp trước; gói con thấy khai báo của cha. Lỗi nào cũng dừng, báo hết.
+    Một gói: giữ nguyên `version` của concepts.yaml; nhiều gói: `<gói>@<version>` nối bằng `+`;
+    `law_values_valid_from` lấy ngày lớn nhất."""
+    problems: list[str] = []
+    specs: dict[str, PackSpec] = {}
+    order: list[str] = []
+
+    def visit(pid: str, via: str | None, stack: list[str]) -> None:
+        if pid in order:
+            return
+        if pid in stack:
+            problems.append(f"extends: vòng {' -> '.join([*stack, pid])}")
+            return
+        try:
+            spec = specs[pid] = specs.get(pid) or load_pack(pid, root=root)
+        except CatalogError as e:
+            problems.append(f"{'extends' if via else 'pack'}: không nạp được gói {pid!r}"
+                            f"{f' (extends của {via})' if via else ''}: " + "; ".join(e.problems))
+            return
+        for parent in spec.extends:
+            visit(parent, pid, [*stack, pid])
+        order.append(pid)
+
+    for pid in pack_ids:
+        visit(pid, None, [])
+    if problems:
+        raise CatalogError(list(dict.fromkeys(problems)))
+
+    def lineage(pid: str) -> set[str]:
+        return {pid}.union(*(lineage(p) for p in specs[pid].extends))
+
+    catalogs: list[tuple[str, Catalog]] = []
+    for pid in order:
+        path = Path(root) / pid / "concepts.yaml"
+        if not path.is_file():
+            continue
+        view = _merge_packs([specs[p] for p in order if p in lineage(pid)], problems)
+        try:
+            catalogs.append((pid, load_concepts(path, view)))
+        except CatalogError as e:
+            problems += [f"[{pid}] {p}" for p in e.problems]
+    merged = _merge_packs([specs[p] for p in order], problems)
+    concepts: dict[str, Concept] = {}
+    owner: dict[str, str] = {}
+    roles: dict[str, dict] = {}
+    for pid, cat in catalogs:
+        for cid, c in cat.concepts.items():
+            if cid in concepts:
+                problems.append(f"{cid}: trùng id giữa gói {owner[cid]} và {pid}")
+            else:
+                concepts[cid], owner[cid] = c, pid
+        for rid, r in cat.roles.items():
+            if rid in roles and roles[rid] != r:
+                problems.append(f"role {rid!r}: khai báo khác nhau giữa các gói")
+            roles.setdefault(rid, r)
+    if not catalogs:
+        problems.append("không gói nào có concepts.yaml")
+    if problems:
+        raise CatalogError(list(dict.fromkeys(problems)))
+    version = catalogs[0][1].version if len(catalogs) == 1 else "+".join(f"{pid}@{c.version}" for pid, c in catalogs)
+    return Catalog(version, max(c.law_values_valid_from for _, c in catalogs), roles, concepts, merged.context())

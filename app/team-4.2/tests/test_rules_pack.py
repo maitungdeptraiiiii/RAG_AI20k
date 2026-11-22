@@ -31,7 +31,7 @@ def test_units_convert_matches_legacy_table():
 
 
 def _write_pack(root, data):
-    (root / "bad").mkdir()
+    (root / "bad").mkdir(exist_ok=True)
     (root / "bad" / "pack.yaml").write_text(yaml.safe_dump(data, allow_unicode=True), encoding="utf-8")
 
 
@@ -54,3 +54,22 @@ def test_unknown_pack_id_rejected(tmp_path):
     with pytest.raises(CatalogError) as e:
         load_pack("khong_co", root=tmp_path)
     assert "khong_co" in "\n".join(e.value.problems)
+
+
+def _unit_pack(tmp_path, conversions):
+    _write_pack(tmp_path, {"id": "bad", "version": "1", "units": ["day", "hour"], "conversions": conversions})
+    return load_pack("bad", root=tmp_path)
+
+
+def test_base_unit_without_own_entry_gets_identity(tmp_path):
+    u = _unit_pack(tmp_path, {"day": {"base": "hour", "factor": 24}}).units
+    assert u.convert(1, "day", "hour") == 24 and u.convert(48, "hour", "day") == 2
+
+
+def test_base_unit_entry_must_be_identity(tmp_path):
+    with pytest.raises(CatalogError) as e:
+        _unit_pack(tmp_path, {"day": {"base": "hour", "factor": 24}, "hour": {"base": "hour", "factor": 2}})
+    assert any("hour" in p and "factor 1" in p for p in e.value.problems), e.value.problems
+    with pytest.raises(CatalogError) as e:
+        _unit_pack(tmp_path, {"day": {"base": "hour", "factor": 24}, "hour": {"base": "day", "factor": 1}})
+    assert any("hour" in p and "gốc" in p for p in e.value.problems), e.value.problems

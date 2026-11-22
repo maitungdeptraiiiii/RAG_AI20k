@@ -47,6 +47,16 @@ def load_pack(pack_id: str, *, root: Path = PACKS_ROOT) -> PackSpec:
             problems.append(f"conversions: factor của {unit!r} phải là số > 0, gặp {factor!r}")
         else:
             factors[unit] = (base, factor)
+    for unit, (base, factor) in list(factors.items()):
+        # đơn vị gốc phải quy về chính nó với factor 1: thiếu thì tự thêm, sai thì báo (không thì mọi phép so khác đơn vị ra U)
+        if base == unit:
+            if factor != 1:
+                problems.append(f"conversions: đơn vị gốc {unit!r} phải có factor 1, gặp {factor!r}")
+        elif base in factors:
+            if factors[base] != (base, 1):
+                problems.append(f"conversions: gốc {base!r} của {unit!r} phải tự quy về chính nó với factor 1")
+        elif base in names:
+            factors[base] = (base, 1)
     document_facts = dict(data.get("document_facts") or {})
     for name, unit in document_facts.items():
         if unit is not None and unit not in names:

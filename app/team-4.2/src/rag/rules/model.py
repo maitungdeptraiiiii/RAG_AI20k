@@ -110,6 +110,7 @@ class Rule:
     # Phép kiểm là một slot có/không "= false" (hợp đồng không có hạn chế): khái niệm có mặt mà slot không được điền
     # thì coi là không có hạn chế. Bộ nạp tự suy từ `check` khi YAML không ghi (spec §5.2).
     unstated_false: bool = False
+    exception_of: str | None = None       # `<concept_id>/<rule_id>` của rule gốc mà rule này là ngoại lệ (spec §5.4)
 
 
 @dataclass(frozen=True)

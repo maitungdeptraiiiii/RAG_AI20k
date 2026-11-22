@@ -194,9 +194,30 @@ def _rule(c: dict, r: dict, pack: PackSpec, problems: list[str]) -> Rule:
         unstated = explicit
         if explicit and not fits:
             problems.append(f"{where}: unstated_false: true cần check dạng {{fact: <slot>, op: eq, value: false}}")
+    exc = r.get("exception_of")
+    if exc is not None and not (isinstance(exc, str) and exc.count("/") == 1 and all(exc.split("/"))):
+        problems.append(f"{where}: exception_of {exc!r} phải có dạng <concept>/<rule>")
+        exc = None
     return Rule(str(r.get("id")), r.get("mode"), r.get("derogation"), r.get("on_silence"), r.get("applicability"),
                 dict(r.get("law") or {}), tuple(r.get("cases") or ()), r.get("check"), dict(r.get("outcome") or {}),
-                unstated)
+                unstated, exc)
+
+
+def _check_exceptions(concepts: Mapping[str, Concept], problems: list[str], *, strict: bool) -> None:
+    """`exception_of` trỏ tới rule có thật, không tự trỏ, không vòng. `strict=False` (một concepts.yaml): đích thuộc concept
+    không có trong file được bỏ qua (có thể nằm ở gói khác, `load_packs` kiểm sau khi gộp)."""
+    rules = {f"{cid}/{r.id}": r for cid, c in concepts.items() for r in c.rules}
+    for key, r in rules.items():
+        target = r.exception_of
+        if target is None:
+            continue
+        if target == key:
+            problems.append(f"{key}: exception_of trỏ chính nó")
+        elif target not in rules and (strict or target.split("/")[0] in concepts):
+            problems.append(f"{key}: exception_of {target!r} không phải rule có trong danh mục")
+    graph = {k: [r.exception_of] for k, r in rules.items() if r.exception_of and r.exception_of != k}
+    if cycle := find_cycle(graph):
+        problems.append("exception_of: vòng " + " -> ".join(cycle))
 
 
 def _slots(c: dict, pack: PackSpec, problems: list[str]) -> dict[str, Slot]:
@@ -236,6 +257,7 @@ def load_concepts(path: Path, pack: PackSpec) -> Catalog:
                                 tuple(c.get("phrasing") or ()), slots, tuple(c.get("anchors") or ()),
                                 tuple(c.get("value_sources") or ()), rules,
                                 tuple(dict(x) for x in c.get("not_about") or ()))
+    _check_exceptions(concepts, problems, strict=False)
     slot_names = {n for c in concepts.values() for n in c.slots}
     for name in pack.derived:
         if name in slot_names:
@@ -353,6 +375,7 @@ def load_packs(pack_ids: Sequence[str], *, root: Path = PACKS_ROOT) -> Catalog:
             if rid in roles and roles[rid] != r:
                 problems.append(f"role {rid!r}: khai báo khác nhau giữa các gói")
             roles.setdefault(rid, r)
+    _check_exceptions(concepts, problems, strict=True)
     if not catalogs:
         problems.append("không gói nào có concepts.yaml")
     if problems:

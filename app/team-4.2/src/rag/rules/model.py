@@ -1,7 +1,7 @@
 """Kiểu dữ liệu của rule engine: gói luật, ngữ cảnh đánh giá, lỗi nạp (spec §5.5, §7)."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 from typing import Any, Literal, Mapping
 
@@ -30,11 +30,32 @@ CORE_SILENCES: dict[str, Silence] = {
 
 
 @dataclass(frozen=True)
+class Definition:
+    """Một định nghĩa của dữ kiện suy ra (spec §5.3): lấy `value` hằng hoặc giá trị dữ kiện `from_fact` khi `when` đúng;
+    `exception_of` trỏ id định nghĩa mà nó là ngoại lệ."""
+    id: str
+    when: dict | None
+    exception_of: str | None
+    from_fact: str | None
+    has_value: bool                    # YAML có khóa `value` (False / None cũng là giá trị hợp lệ)
+    value: Any
+    anchors: tuple[dict, ...] = ()
+
+
+@dataclass(frozen=True)
+class DerivedFact:
+    fact: str
+    unit: str | None
+    definitions: tuple[Definition, ...]
+
+
+@dataclass(frozen=True)
 class Context:
-    """Phần của gói mà logic thuần cần: đơn vị, dữ kiện cấp hợp đồng, bảng on_silence."""
+    """Phần của gói mà logic thuần cần: đơn vị, dữ kiện cấp hợp đồng, bảng on_silence, dữ kiện suy ra."""
     units: Units
     document_facts: frozenset[str]
     silences: Mapping[str, Silence]
+    derived: Mapping[str, DerivedFact] = field(default_factory=dict)
 
     @property
     def reported(self) -> frozenset[str]:
@@ -54,9 +75,10 @@ class PackSpec:
     user_facts: frozenset[str]
     findings: frozenset[str]                       # finding thêm ngoài CORE_FINDINGS
     silences: Mapping[str, Silence]                # đã gộp CORE_SILENCES
+    derived: Mapping[str, DerivedFact] = field(default_factory=dict)
 
     def context(self) -> Context:
-        return Context(self.units, frozenset(self.document_facts), self.silences)
+        return Context(self.units, frozenset(self.document_facts), self.silences, self.derived)
 
 
 # ── danh mục khái niệm (concepts.yaml) ──

@@ -3,12 +3,12 @@ from __future__ import annotations
 
 from datetime import date
 from pathlib import Path
-from typing import Sequence
+from typing import Mapping, Sequence
 
 import yaml
 
 from rag.rules.model import (CORE_FINDINGS, CORE_SILENCES, DEROGATIONS, MODES, OPS, SLOT_KINDS, Catalog, CatalogError,
-                             Concept, PackSpec, Rule, Silence, Slot, leaves)
+                             Concept, Definition, DerivedFact, PackSpec, Rule, Silence, Slot, leaves)
 from rag.rules.units import Units
 
 PACKS_ROOT = Path(__file__).with_name("packs")
@@ -21,6 +21,78 @@ def _names(data: dict, key: str, problems: list[str]) -> list[str]:
         problems.append(f"{key} phải là danh sách chuỗi")
         return []
     return v
+
+
+def _definition_inputs(d: Definition) -> list[str]:
+    return list(dict.fromkeys([*([d.from_fact] if d.from_fact else []),
+                               *[leaf["fact"] for leaf in leaves(d.when) if leaf.get("fact")]]))
+
+
+def _find_cycle(graph: Mapping[str, Sequence[str]]) -> list[str] | None:
+    """Một vòng trong đồ thị phụ thuộc (đường khép kín `a -> b -> a`), hoặc None."""
+    state: dict[str, int] = {}
+
+    def visit(n: str, stack: list[str]) -> list[str] | None:
+        state[n] = 1
+        for m in graph.get(n, ()):
+            if m not in graph:
+                continue
+            if state.get(m) == 1:
+                return [*stack[stack.index(m):], n, m] if m in stack else [n, m]
+            if m not in state and (c := visit(m, [*stack, n])):
+                return c
+        state[n] = 2
+        return None
+
+    for node in graph:
+        if node not in state and (cycle := visit(node, [])):
+            return cycle
+    return None
+
+
+def _check_derived_cycles(derived: Mapping[str, DerivedFact], problems: list[str]) -> None:
+    deps = {name: [x for d in df.definitions for x in _definition_inputs(d)] for name, df in derived.items()}
+    if cycle := _find_cycle(deps):
+        problems.append("derived: phụ thuộc vòng giữa các dữ kiện suy ra " + " -> ".join(cycle))
+
+
+def _derived(data: dict, units: frozenset[str], inputs: set[str], problems: list[str]) -> dict[str, DerivedFact]:
+    out: dict[str, DerivedFact] = {}
+    for entry in data.get("derived") or []:
+        name = (entry or {}).get("fact")
+        if not isinstance(name, str) or not name:
+            problems.append(f"derived: mỗi mục cần `fact` là chuỗi, gặp {entry!r}")
+            continue
+        if name in out:
+            problems.append(f"derived: trùng tên, dữ kiện suy ra {name!r} khai báo hai lần")
+        if name in inputs:
+            problems.append(f"derived: {name!r} trùng tên dữ kiện đầu vào (document_facts / user_facts)")
+        unit = entry.get("unit")
+        if unit is not None and unit not in units:
+            problems.append(f"derived: {name!r} có đơn vị lạ {unit!r}")
+        defs, ids = [], set()
+        for raw in entry.get("definitions") or []:
+            did = str(raw.get("id"))
+            where = f"derived {name!r} định nghĩa {did!r}"
+            if did in ids:
+                problems.append(f"{where}: trùng id")
+            ids.add(did)
+            has_from, has_value = raw.get("from") is not None, "value" in raw
+            if has_from == has_value:
+                problems.append(f"{where}: cần đúng một trong `from` và `value`")
+            for leaf in leaves(raw.get("when")):
+                if leaf.get("op") not in OPS:
+                    problems.append(f"{where}: toán tử {leaf.get('op')!r} không hợp lệ")
+            defs.append(Definition(did, raw.get("when"), raw.get("exception_of"), raw.get("from"), has_value,
+                                   raw.get("value"), tuple(raw.get("anchors") or ())))
+        for d in defs:
+            if d.exception_of is not None and d.exception_of not in ids:
+                problems.append(f"derived {name!r} định nghĩa {d.id!r}: exception_of {d.exception_of!r} không có")
+        parent = {d.id: d.exception_of for d in defs if d.exception_of in ids}
+        if cycle := _find_cycle({k: [v] for k, v in parent.items()}):
+            problems.append(f"derived {name!r}: exception_of vòng " + " -> ".join(cycle))
+        out[name] = DerivedFact(name, unit, tuple(defs))
+    return out
 
 
 def load_pack(pack_id: str, *, root: Path = PACKS_ROOT) -> PackSpec:
@@ -76,10 +148,12 @@ def load_pack(pack_id: str, *, root: Path = PACKS_ROOT) -> PackSpec:
                 pair[key] = (v[0], v[1])
         if len(pair) == 2 and name not in CORE_SILENCES:
             silences[name] = Silence(pair["applicable"], pair["unknown"])
+    derived = _derived(data, names, set(document_facts) | user_facts, problems)
+    _check_derived_cycles(derived, problems)
     if problems:
         raise CatalogError(problems)
     return PackSpec(pack_id, str(data.get("version")), tuple(extends), tuple(kinds), Units(names, factors),
-                    document_facts, user_facts, findings, silences)
+                    document_facts, user_facts, findings, silences, derived)
 
 
 # ── concepts.yaml ──
@@ -114,7 +188,7 @@ def _rule(c: dict, r: dict, pack: PackSpec, problems: list[str]) -> Rule:
         if r.get(key) not in allowed:
             problems.append(f"{where}: {key} {r.get(key)!r} không hợp lệ")
     slots = set(c.get("slots") or {})
-    known = slots | set(pack.document_facts) | pack.user_facts
+    known = slots | set(pack.document_facts) | pack.user_facts | set(pack.derived)
     conds = [r.get("applicability"), r.get("check")] + [x.get("when") for x in r.get("cases") or []]
     for leaf in [leaf for cond in conds for leaf in leaves(cond)]:
         if leaf.get("op") not in OPS:
@@ -188,6 +262,17 @@ def load_concepts(path: Path, pack: PackSpec) -> Catalog:
                                 tuple(c.get("phrasing") or ()), slots, tuple(c.get("anchors") or ()),
                                 tuple(c.get("value_sources") or ()), rules,
                                 tuple(dict(x) for x in c.get("not_about") or ()))
+    slot_names = {n for c in concepts.values() for n in c.slots}
+    for name in pack.derived:
+        if name in slot_names:
+            problems.append(f"derived: {name!r} trùng tên slot của một khái niệm")
+    known_inputs = slot_names | set(pack.document_facts) | pack.user_facts | set(pack.derived)
+    for df in pack.derived.values():
+        for d in df.definitions:
+            for n in _definition_inputs(d):
+                if n not in known_inputs:
+                    problems.append(f"derived {df.fact!r} định nghĩa {d.id!r}: dữ kiện {n!r} không phải slot, dữ kiện "
+                                    "hợp đồng, người dùng hay dữ kiện suy ra")
     for cid, concept in concepts.items():
         for x in concept.not_about:
             if not x.get("text") or x.get("see") not in concepts:
@@ -208,6 +293,7 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
     user_facts: set[str] = set()
     findings: set[str] = set()
     silences: dict[str, Silence] = dict(CORE_SILENCES)
+    derived: dict[str, DerivedFact] = {}
     kinds: list[str] = []
     for s in specs:
         names |= s.units.names
@@ -227,9 +313,14 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
                 problems.append(f"silences: {name!r} khai báo khác nhau giữa các gói")
             silences[name] = silence
         kinds += [k for k in s.document_kinds if k not in kinds]
+        for name, df in s.derived.items():
+            if name in derived:
+                problems.append(f"derived: dữ kiện suy ra {name!r} trùng tên giữa các gói")
+            derived[name] = df
+    _check_derived_cycles(derived, problems)
     return PackSpec("+".join(s.id for s in specs), "+".join(f"{s.id}@{s.version}" for s in specs), (), tuple(kinds),
                     Units(frozenset(names), factors), document_facts, frozenset(user_facts), frozenset(findings),
-                    silences)
+                    silences, derived)
 
 
 def load_packs(pack_ids: Sequence[str], *, root: Path = PACKS_ROOT) -> Catalog:

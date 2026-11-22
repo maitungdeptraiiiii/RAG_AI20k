@@ -1,0 +1,32 @@
+version: "0.1"
+law_values_valid_from: "2017-01-01"
+roles:
+  - {id: BEN_CHO_VAY, label: "Bên cho vay"}
+  - {id: BEN_VAY, label: "Bên vay"}
+concepts:
+  - id: loan.interest_cap
+    kind: rate_cap
+    label: Lãi suất vay không vượt quá 20%/năm
+    scope: core
+    phase: P0
+    holder: BEN_CHO_VAY
+    counterparty: BEN_VAY
+    applies_to: [BEN_VAY]
+    describe: "Điều khoản ghi lãi suất của khoản vay (theo năm hoặc theo tháng)."
+    phrasing: ["lãi suất", "lãi suất vay", "%/năm", "%/tháng", "tiền lãi"]
+    slots:
+      interest_rate: {kind: percent, unit: percent_per_year}
+    anchors:
+      - {pid: "bo-luat:91/2015/QH13#d468.k1", role: basis, note: "lãi suất thỏa thuận không vượt quá 20%/năm; phần vượt không có hiệu lực"}
+    rules:
+      # Đ468.1: không vượt quá 20%/năm của khoản tiền vay, trừ trường hợp luật khác có liên quan quy định khác.
+      - id: r1
+        mode: threshold
+        law: {max_interest: {value: 20, unit: percent_per_year}}
+        check: {fact: interest_rate, op: lte, law: max_interest}
+        derogation: mandatory
+        on_silence: none
+        outcome: {legality: illegal, employee_impact: unfavorable}
+      - {id: r1_special_law, mode: required, derogation: mandatory, on_silence: none, exception_of: loan.interest_cap/r1,
+         applicability: {fact: special_law_applies, op: eq, value: true},
+         outcome: {legality: illegal, employee_impact: unfavorable}}

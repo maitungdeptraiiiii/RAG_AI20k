@@ -274,15 +274,15 @@ class GraphAgent:
 
 def ask_contract_graph(llm, contract, question: str, *, at, catalog: Catalog | None = None, graph=None, legal=None,
                        agent_llm=None, tag_llm=None, model: str | None = None, max_steps: int = 8,
-                       user_facts: dict | None = None):
+                       user_facts: dict | None = None, packs=None):
     """Soát hợp đồng (ghi oplog, dựng/công bố đồ thị) rồi để agent trả lời trên đồ thị vừa dựng.
     Trả (GraphAnswer, CheckReport). agent_llm None -> dùng `llm`."""
     from rag.bridge.basis import AnchorLawBasis
-    from rag.bridge.catalog import load_catalog
+    from rag.bridge.catalog import resolve_catalog
     from rag.bridge.check import check_contract, contract_view, user_fact_set
     from rag.contracts.graph.build import graph_mask_state
     from rag.contracts.graph.tools import make_tools
-    catalog = catalog or load_catalog()
+    catalog = resolve_catalog(catalog, packs)
     report = check_contract(llm, contract, catalog=catalog, basis=AnchorLawBasis(catalog, legal), at=at, model=model,
                             tag_llm=tag_llm, user_facts=user_facts, graph=graph)
     view, _, warnings, doc = contract_view(contract, graph, at)

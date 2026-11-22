@@ -6,7 +6,9 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
-from rag.rules.loader import PACKS_ROOT, load_concepts, load_pack
+from typing import Sequence
+
+from rag.rules.loader import PACKS_ROOT, load_concepts, load_pack, load_packs
 from rag.rules.model import OPS, Catalog, CatalogError, Concept, Context, PackSpec, Rule, Slot
 from rag.rules.model import leaves as _leaves  # noqa: F401  (engine cũ và test còn import tên này)
 
@@ -31,6 +33,15 @@ UNITS = labor_pack().units.names
 
 def load_catalog(path: Path = DEFAULT_PATH) -> Catalog:
     return load_concepts(path, labor_pack())
+
+
+def resolve_catalog(catalog: Catalog | None, packs: Sequence[str] | None) -> Catalog:
+    """Catalog cho check_contract / ask_contract_graph: truyền sẵn `catalog`, hoặc danh sách `packs` (mặc định labor)."""
+    if catalog is not None and packs:
+        raise ValueError("chỉ truyền catalog hoặc packs, không truyền cả hai")
+    if catalog is not None:
+        return catalog
+    return load_packs(packs) if packs else load_catalog()
 
 
 __all__ = ["CONTRACT_FACTS", "DEFAULT_PATH", "OPS", "UNITS", "USER_FACTS", "USER_FACT_UNITS", "Catalog", "CatalogError", "Concept",

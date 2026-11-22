@@ -78,9 +78,9 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
 - [x] D19. Sự kiện stream `evaluation_diff`. (`rules/events.py`; `check_contract` phát sau recheck. Miền câu hỏi: `user_fact_questions` trong `pack.yaml`.)
 
 **P5 — pack dân sự**
-- [ ] D20. `packs/civil_loan/` từ B4 (đơn vị `percent_per_year`, quy đổi tháng → năm).
-- [ ] D21. `packs/civil_general/` từ B5; `civil_loan` extends `civil_general`; ngoại lệ luật chuyên ngành.
-- [ ] D22. Trường `kind` trong concept + kiểm slot khớp kind (B1).
+- [x] D20. `packs/civil_loan/` từ B4 (đơn vị `percent_per_year`, quy đổi tháng → năm). (Mới có trần lãi Đ468.1 + ngoại lệ luật chuyên ngành; đã đọc Đ463–471, chưa viết rule cho Đ466.4, Đ468.2, Đ470.)
+- [x] D21. `packs/civil_general/` từ B5; `civil_loan` extends `civil_general`; ngoại lệ luật chuyên ngành. (Mới có Đ428.2 phải thông báo khi đơn phương chấm dứt.)
+- [x] D22. Trường `kind` trong concept + kiểm slot khớp kind (B1). (Kiểm theo *loại* slot, không ép tên slot; danh sách kind của B1 chưa có, mới khai `rate_cap`.)
 
 **P7a — ngữ nghĩa đối tượng trong Reference (làm ngay sau P1, song song P2; Reference là chuẩn đúng nên có trước mạng)**
 - [ ] D23. Spec §5.6 trong `semantics.py`: ba trị của ứng viên, đếm theo khoảng `[n_T, n_T + n_U]`, `exists` /

@@ -7,12 +7,12 @@ from __future__ import annotations
 
 import threading
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import asdict, dataclass, field
 from datetime import date, datetime
 
 from rag.bridge.basis import AnchorLawBasis, LawBasis
-from rag.bridge.catalog import CONTRACT_FACTS, USER_FACT_UNITS, USER_FACTS, Catalog, load_catalog
+from rag.bridge.catalog import CONTRACT_FACTS, USER_FACT_UNITS, USER_FACTS, Catalog, load_catalog, resolve_catalog
 from rag.bridge.engine import Fact, Facts, RuleResult
 from rag.bridge.facts_map import fact_ops, party_ops
 from rag.bridge.graph_facts import factset_from_graph
@@ -103,7 +103,7 @@ def contract_view(contract: Contract, graph, at: datetime) -> tuple[ContractGrap
 def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, basis: LawBasis | None = None,
                    at: datetime, model: str | None = None, tag_llm=None, tag_model: str | None = None,
                    user_facts: dict | None = None, graph=None, evaluator: str | None = None,
-                   on_event: Callable[[dict], None] | None = None) -> CheckReport:
+                   packs: Sequence[str] | None = None, on_event: Callable[[dict], None] | None = None) -> CheckReport:
     """tag_llm / tag_model: model riêng cho bước gán khái niệm (so model); None -> dùng llm / model.
     evaluator: "reference" | "network"; None -> RAG_RULE_EVALUATOR (spec 2026-11-22-rete-rule-engine-design §7).
     graph: ContractGraphService để công bố và đọc từ Neo4j; None -> đọc bản dựng trong bộ nhớ.
@@ -114,7 +114,7 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
         emit({"type": "stage", "stage": name, "status": status})
     t0 = time.monotonic()
     user = user_fact_set(user_facts)
-    catalog = catalog or load_catalog()
+    catalog = resolve_catalog(catalog, packs)
     rule_evaluator = evaluator_for(catalog, evaluator or default_kind())      # tên lạ -> ValueError trước mọi lời gọi LLM
     basis = basis or AnchorLawBasis(catalog, None)
     llm = _CountingLLM(llm)

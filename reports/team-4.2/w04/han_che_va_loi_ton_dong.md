@@ -78,6 +78,19 @@ có chi phí nếu sai). Nhánh `feat/team-4.2/w04-rules-engine`, chưa merge. T
 | 4.5 | `evaluation_diff` chỉ phát sau recheck; lần đọc đầu vẫn phát từng `evaluation` như cũ | Có chủ ý |
 | 4.6 | Hai nút `fact` của cùng một dữ kiện có thể lặp trong cây (mỗi điều kiện kèm nút dữ kiện của nó) | Có chủ ý |
 
+## Giai đoạn 5 — gói dân sự `civil_general` + `civil_loan`, `kind`, `packs=`
+
+| # | Mục | Trạng thái |
+|---|---|---|
+| 5.1 | Mới có 3 rule dân sự: trần lãi 20%/năm (Đ468.1) + ngoại lệ luật chuyên ngành, đơn phương chấm dứt phải thông báo (Đ428.2). Chưa viết: Đ466.4 (lãi chậm trả), Đ468.2 (lãi 50% mức trần khi không xác định rõ), Đ470 (trả nợ trước hạn), Đ465.3/467 (đòi nợ trước hạn), phạt vi phạm | Còn |
+| 5.2 | `check_contract(packs=["civil_loan"])` chỉ chọn catalog; **trích dữ kiện và gán khái niệm vẫn là prompt lao động**, nên hợp đồng vay chưa chạy end-to-end. Cần tagger / nhận diện loại hợp đồng theo kind (phần Huy) | Còn |
+| 5.3 | Nhãn kết quả dùng từ vựng lao động (`employee_impact`) cho hợp đồng dân sự; role `BEN_*` tạm đặt tên | Còn |
+| 5.4 | Cạnh `pid` anchors dân sự (`bo-luat:91/2015/QH13#d468.k1`, `#d428.k2`) chưa kiểm với đồ thị luật; `AnchorLawBasis` chưa thử với catalog dân sự | Còn |
+| 5.5 | `kind`: bộ nạp kiểm theo loại slot (concept phải có slot thuộc loại kind yêu cầu), không kiểm tên; danh sách kind chung của B1 chưa có (mới `rate_cap`) | Còn |
+| 5.6 | Khoản vay không ghi đơn vị lãi (`Fact(30)` không đơn vị) ra `UNKNOWN`, không phải vi phạm (có chủ ý, đúng bất biến) | Có chủ ý |
+| 5.7 | Tháng = 30 ngày, năm = 360 ngày trong bảng quy đổi (cùng cách với gói labor) | Có chủ ý |
+| 5.8 | Ngoại lệ chéo gói chưa có ca thật (ngoại lệ luật chuyên ngành đặt cùng gói `civil_loan`); cơ chế đã có test bằng gói tổng hợp | Còn |
+
 ## Tồn đọng chung (môi trường, quy trình)
 
 | # | Mục | Trạng thái |
@@ -90,4 +103,4 @@ có chi phí nếu sai). Nhánh `feat/team-4.2/w04-rules-engine`, chưa merge. T
 | E.6 | Spec §4.2 ghi "chưa xác minh" việc xử lý phủ định trong bài gốc TREAT; checklist A1 chưa tick | Còn |
 | E.7 | Chưa merge, chưa push; việc tích hợp là quyết định của người dùng | Chờ quyết định |
 | E.8 | Nhánh có thay đổi cũ không phải của phiên này (`reports/week-02`, `week-03` README, các thư mục dữ liệu chưa theo dõi); không đưa vào commit nào | Có chủ ý |
-| E.9 | Giai đoạn 5–7 chưa xong (gói dân sự, benchmark, đối tượng và join) | Chưa làm |
+| E.9 | Giai đoạn 6–7 chưa xong (benchmark, đối tượng và join) | Chưa làm |

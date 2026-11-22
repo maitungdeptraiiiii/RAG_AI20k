@@ -88,6 +88,7 @@ class PackSpec:
     derived: Mapping[str, DerivedFact] = field(default_factory=dict)
     user_fact_units: Mapping[str, str | None] = field(default_factory=dict)   # đơn vị mặc định khi người dùng trả lời một con số
     user_fact_questions: Mapping[str, UserQuestion] = field(default_factory=dict)
+    concept_kinds: Mapping[str, tuple[str, ...]] = field(default_factory=dict)   # kind -> các loại slot concept phải có
 
     def context(self) -> Context:
         return Context(self.units, frozenset(self.document_facts), self.silences, self.derived, self.user_fact_questions)
@@ -144,6 +145,7 @@ class Concept:
     value_sources: tuple[dict, ...]
     rules: tuple[Rule, ...]
     not_about: tuple[dict, ...] = ()   # [{text, see}]: điều khoản dễ gán nhầm vào khái niệm này; see = khái niệm đúng
+    kind: str | None = None            # nhãn loại khái niệm (rate_cap, notice, ...): engine không dùng, bộ nạp kiểm slot (§5.5)
 
 
 @dataclass(frozen=True)

@@ -1,0 +1,27 @@
+# Gói luật dân sự chung (BLDS 91/2015/QH13, phần chung về hợp đồng). Gói chuyên biệt extends gói này.
+# Thiết kế: docs/superpowers/specs/2026-11-22-rete-rule-engine-design.md §5.5.
+id: civil_general
+version: "0.1"
+extends: []
+document_kinds: [civil_contract]
+
+units: [day, hour, month, year, vnd, percent, percent_per_year, percent_per_month, count]
+# Cùng bảng với gói labor cho đơn vị dùng chung (gộp hai gói không xung đột); tháng 30 ngày, năm 360 ngày.
+conversions:
+  hour:  {base: hour, factor: 1}
+  day:   {base: hour, factor: 24}
+  month: {base: hour, factor: 720}
+  year:  {base: hour, factor: 8640}
+  percent_per_year:  {base: percent_per_year, factor: 1}
+  percent_per_month: {base: percent_per_year, factor: 12}
+
+document_facts: {}
+
+# Dữ kiện người dùng xác nhận.
+user_facts: [special_law_applies]    # có luật chuyên ngành quy định khác (vd. tổ chức tín dụng) mà BLDS cho phép (Đ468.1)
+user_fact_questions:
+  special_law_applies:
+    question: "Giao dịch này có chịu một luật chuyên ngành quy định mức khác với Bộ luật Dân sự không (ví dụ cho vay của tổ chức tín dụng)?"
+    values: [true, false]
+
+findings: []

@@ -173,10 +173,22 @@ def load_pack(pack_id: str, *, root: Path = PACKS_ROOT) -> PackSpec:
         if q.get("unit") is not None and q["unit"] not in names:
             problems.append(f"{where}: đơn vị lạ {q['unit']!r}")
         questions[name] = UserQuestion(name, str(q.get("question")), tuple(q.get("values") or ()), q.get("unit"))
+    concept_kinds: dict[str, tuple[str, ...]] = {}
+    raw_kinds = data.get("concept_kinds") or {}
+    if not isinstance(raw_kinds, dict):
+        problems.append("concept_kinds phải là dict {kind: {slot_kinds: [...]}}")
+        raw_kinds = {}
+    for kind, spec in raw_kinds.items():
+        sk = (spec or {}).get("slot_kinds") if isinstance(spec, dict) else None
+        if not isinstance(sk, list) or not all(x in SLOT_KINDS for x in sk):
+            problems.append(f"concept_kinds: {kind!r} cần slot_kinds là danh sách các loại thuộc {sorted(SLOT_KINDS)}")
+            sk = []
+        concept_kinds[kind] = tuple(sk)
     if problems:
         raise CatalogError(problems)
     return PackSpec(pack_id, str(data.get("version")), tuple(extends), tuple(kinds), Units(names, factors),
-                    document_facts, user_facts, findings, silences, derived, dict(user_fact_units), questions)
+                    document_facts, user_facts, findings, silences, derived, dict(user_fact_units), questions,
+                    concept_kinds)
 
 
 # ── concepts.yaml ──
@@ -309,7 +321,17 @@ def load_concepts(path: Path, pack: PackSpec) -> Catalog:
                                 c.get("counterparty"), tuple(c.get("applies_to") or ()), c.get("describe", ""),
                                 tuple(c.get("phrasing") or ()), slots, tuple(c.get("anchors") or ()),
                                 tuple(c.get("value_sources") or ()), rules,
-                                tuple(dict(x) for x in c.get("not_about") or ()))
+                                tuple(dict(x) for x in c.get("not_about") or ()), c.get("kind"))
+    for cid, concept in concepts.items():
+        if concept.kind is None:
+            continue
+        if concept.kind not in pack.concept_kinds:
+            problems.append(f"{cid}: kind {concept.kind!r} chưa khai báo trong concept_kinds của gói")
+            continue
+        have = {s.kind for s in concept.slots.values()}
+        for needed in pack.concept_kinds[concept.kind]:
+            if needed not in have:
+                problems.append(f"{cid}: kind {concept.kind!r} cần slot loại {needed!r}")
     _check_exceptions(concepts, problems, strict=False)
     slot_names = {n for c in concepts.values() for n in c.slots}
     for name in pack.derived:
@@ -345,6 +367,7 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
     derived: dict[str, DerivedFact] = {}
     user_fact_units: dict[str, str | None] = {}
     questions: dict[str, UserQuestion] = {}
+    concept_kinds: dict[str, tuple[str, ...]] = {}
     kinds: list[str] = []
     for s in specs:
         names |= s.units.names
@@ -358,6 +381,10 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
                 problems.append(f"document_facts: dữ kiện {name!r} có đơn vị khác nhau giữa các gói")
             document_facts[name] = unit
         user_facts |= s.user_facts
+        for name, sk in s.concept_kinds.items():
+            if name in concept_kinds and concept_kinds[name] != sk:
+                problems.append(f"concept_kinds: {name!r} khai báo khác nhau giữa các gói")
+            concept_kinds[name] = sk
         for name, q in s.user_fact_questions.items():
             if name in questions and questions[name] != q:
                 problems.append(f"user_fact_questions: {name!r} khai báo khác nhau giữa các gói")
@@ -382,7 +409,7 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
             problems.append(_CLASH.format(name))
     return PackSpec("+".join(s.id for s in specs), "+".join(f"{s.id}@{s.version}" for s in specs), (), tuple(kinds),
                     Units(frozenset(names), factors), document_facts, frozenset(user_facts), frozenset(findings),
-                    silences, derived, user_fact_units, questions)
+                    silences, derived, user_fact_units, questions, concept_kinds)
 
 
 def load_packs(pack_ids: Sequence[str], *, root: Path = PACKS_ROOT) -> Catalog:

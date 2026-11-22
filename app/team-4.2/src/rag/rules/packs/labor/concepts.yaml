@@ -64,6 +64,7 @@ concepts:
   # ───────────── 1. NỘI DUNG BẮT BUỘC CỦA HỢP ĐỒNG (Đ21 k1) ─────────────
 
   - id: content.party_info
+    kind: required_content
     label: Thông tin hai bên giao kết
     scope: core
     phase: P0
@@ -80,6 +81,7 @@ concepts:
          outcome: {legality: illegal, employee_impact: neutral}}
 
   - id: content.job_and_workplace
+    kind: required_content
     label: Công việc và địa điểm làm việc
     scope: core
     phase: P0
@@ -96,6 +98,7 @@ concepts:
          outcome: {legality: illegal, employee_impact: unfavorable}}
 
   - id: content.term
+    kind: time_limit
     label: Loại và thời hạn hợp đồng
     scope: core
     phase: P0
@@ -198,6 +201,7 @@ concepts:
         outcome: {legality: illegal, employee_impact: unfavorable}
 
   - id: content.wage_terms
+    kind: required_content
     label: Mức lương, hình thức trả, thời hạn trả, phụ cấp
     scope: core
     phase: P0
@@ -214,6 +218,7 @@ concepts:
          outcome: {legality: illegal, employee_impact: unfavorable}}
 
   - id: content.raise_policy
+    kind: required_content
     label: Chế độ nâng bậc, nâng lương
     scope: core
     phase: P0
@@ -230,6 +235,7 @@ concepts:
          outcome: {legality: illegal, employee_impact: unfavorable}}
 
   - id: content.hours_rest
+    kind: required_content
     label: Thời giờ làm việc, thời giờ nghỉ ngơi
     scope: core
     phase: P0
@@ -245,6 +251,7 @@ concepts:
          outcome: {legality: illegal, employee_impact: unfavorable}}
 
   - id: content.protective_equipment
+    kind: required_content
     label: Trang bị bảo hộ lao động
     scope: core
     phase: P0
@@ -260,6 +267,7 @@ concepts:
          outcome: {legality: illegal, employee_impact: unfavorable}}
 
   - id: content.insurance
+    kind: prohibited_practice
     label: Bảo hiểm xã hội, bảo hiểm y tế, bảo hiểm thất nghiệp
     scope: core
     phase: P0
@@ -283,6 +291,7 @@ concepts:
          outcome: {legality: illegal, employee_impact: unfavorable}}
 
   - id: content.training
+    kind: required_content
     label: Đào tạo, bồi dưỡng, nâng cao trình độ
     scope: core
     phase: P0
@@ -300,6 +309,7 @@ concepts:
   # ───────────── 2. THỬ VIỆC (Đ24–27) ─────────────
 
   - id: probation.duration
+    kind: time_limit
     label: Thời gian thử việc tối đa
     scope: core
     phase: P0
@@ -326,6 +336,7 @@ concepts:
         outcome: {legality: illegal, employee_impact: unfavorable}
 
   - id: probation.once
+    kind: count_limit
     label: Chỉ thử việc một lần cho một công việc
     scope: core
     phase: P0
@@ -355,6 +366,7 @@ concepts:
         outcome: {legality: illegal, employee_impact: unfavorable}
 
   - id: probation.pay
+    kind: payment
     label: Tiền lương thử việc tối thiểu
     scope: core
     phase: P0
@@ -376,6 +388,7 @@ concepts:
         outcome: {legality: illegal, employee_impact: unfavorable}
 
   - id: probation.cancel_no_notice
+    kind: notice
     label: Hủy bỏ thử việc không cần báo trước, không bồi thường
     scope: core
     phase: P0
@@ -397,6 +410,7 @@ concepts:
   # ───────────── 3. TIỀN LƯƠNG (Đ90–102) ─────────────
 
   - id: wage.minimum_regional
+    kind: payment
     label: Mức lương không thấp hơn lương tối thiểu vùng
     scope: core
     phase: P0
@@ -430,6 +444,7 @@ concepts:
         outcome: {legality: illegal, employee_impact: unfavorable}
 
   - id: wage.pay_period
+    kind: time_limit
     label: Kỳ hạn trả lương
     scope: core
     phase: P0
@@ -455,6 +470,7 @@ concepts:
         outcome: {legality: illegal, employee_impact: unfavorable}
 
   - id: wage.overtime_pay
+    kind: payment
     label: Tiền lương làm thêm giờ
     scope: core
     phase: P0
@@ -487,6 +503,7 @@ concepts:
         outcome: {legality: illegal, employee_impact: unfavorable}
 
   - id: wage.night_pay
+    kind: payment
     label: Tiền lương làm việc ban đêm
     scope: core
     phase: P0
@@ -510,6 +527,7 @@ concepts:
         outcome: {legality: illegal, employee_impact: unfavorable}
 
   - id: wage.deduction_limit
+    kind: payment
     label: Giới hạn khấu trừ tiền lương
     scope: core
     phase: P0
@@ -539,6 +557,7 @@ concepts:
   # ───────────── 4. THỜI GIỜ LÀM VIỆC, NGHỈ NGƠI (Đ105–115) ─────────────
 
   - id: hours.normal
+    kind: time_limit
     label: Thời giờ làm việc bình thường
     scope: core
     phase: P0
@@ -568,6 +587,7 @@ concepts:
         outcome: {legality: illegal, employee_impact: unfavorable}
 
   - id: hours.overtime_limit
+    kind: time_limit
     label: Điều kiện và giới hạn làm thêm giờ
     scope: core
     phase: P0
@@ -602,6 +622,7 @@ concepts:
          outcome: {legality: illegal, employee_impact: unfavorable}}
 
   - id: rest.weekly
+    kind: time_limit
     label: Nghỉ hằng tuần
     scope: core
     phase: P0
@@ -624,6 +645,7 @@ concepts:
         outcome: {legality: illegal, employee_impact: unfavorable}
 
   - id: rest.holidays
+    kind: leave_entitlement
     label: Nghỉ lễ, tết hưởng nguyên lương
     scope: core
     phase: P0
@@ -646,6 +668,7 @@ concepts:
         outcome: {legality: illegal, employee_impact: unfavorable}
 
   - id: leave.annual
+    kind: leave_entitlement
     label: Nghỉ hằng năm hưởng nguyên lương
     scope: core
     phase: P0
@@ -674,6 +697,7 @@ concepts:
         outcome: {legality: illegal, employee_impact: unfavorable}
 
   - id: leave.personal_paid
+    kind: leave_entitlement
     label: Nghỉ việc riêng hưởng nguyên lương
     scope: core
     phase: P0
@@ -698,6 +722,7 @@ concepts:
   # ───────────── 5. CHẤM DỨT HỢP ĐỒNG (Đ35–48) ─────────────
 
   - id: termination.employee_unilateral
+    kind: notice
     label: NLĐ đơn phương chấm dứt hợp đồng
     scope: core
     phase: P0
@@ -729,6 +754,7 @@ concepts:
         outcome: {legality: unknown, employee_impact: unfavorable}   # cần người xem lại trước khi kết luận trái luật
 
   - id: termination.employer_unilateral
+    kind: notice
     label: NSDLĐ đơn phương chấm dứt hợp đồng
     scope: core
     phase: P0
@@ -763,6 +789,7 @@ concepts:
         outcome: {legality: illegal, employee_impact: unfavorable}
 
   - id: termination.severance
+    kind: prohibited_practice
     label: Trợ cấp thôi việc
     scope: core
     phase: P0
@@ -783,6 +810,7 @@ concepts:
          outcome: {legality: illegal, employee_impact: unfavorable}}
 
   - id: termination.settlement_deadline
+    kind: time_limit
     label: Thời hạn thanh toán khi chấm dứt hợp đồng
     scope: core
     phase: P0
@@ -807,6 +835,7 @@ concepts:
   # ───────────── 6. ĐIỀU KHOẢN BỊ CẤM VÀ ĐIỀU KIỆN HIỆU LỰC ─────────────
 
   - id: prohibit.keep_documents
+    kind: prohibited_practice
     label: Cấm giữ bản chính giấy tờ, văn bằng của NLĐ
     scope: core
     phase: P0
@@ -825,6 +854,7 @@ concepts:
          outcome: {legality: illegal, employee_impact: unfavorable}}
 
   - id: prohibit.deposit
+    kind: prohibited_practice
     label: Cấm buộc đặt cọc, bảo đảm bằng tiền hoặc tài sản
     scope: core
     phase: P0
@@ -843,6 +873,7 @@ concepts:
          outcome: {legality: illegal, employee_impact: unfavorable}}
 
   - id: prohibit.fine_instead_of_discipline
+    kind: prohibited_practice
     label: Cấm phạt tiền, cắt lương thay xử lý kỷ luật
     scope: core
     phase: P0
@@ -861,6 +892,7 @@ concepts:
          outcome: {legality: illegal, employee_impact: unfavorable}}
 
   - id: training.cost_repayment
+    kind: prohibited_practice
     label: Hoàn trả chi phí đào tạo
     scope: core
     phase: P0
@@ -922,6 +954,7 @@ concepts:
          outcome: {legality: illegal, employee_impact: unfavorable}}
 
   - id: maternity.no_dismissal
+    kind: prohibited_practice
     label: Không bị sa thải, đơn phương chấm dứt vì kết hôn, mang thai, nghỉ thai sản, nuôi con nhỏ
     scope: core
     phase: P1
@@ -977,6 +1010,7 @@ concepts:
          outcome: {legality: illegal, employee_impact: unfavorable}}
 
   - id: maternity.leave
+    kind: leave_entitlement
     label: Nghỉ thai sản 06 tháng
     scope: core
     phase: P1

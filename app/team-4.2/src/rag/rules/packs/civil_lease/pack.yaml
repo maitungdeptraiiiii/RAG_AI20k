@@ -21,8 +21,4 @@ document_facts:
 extract_fields: []
 user_facts: []
 findings: []
-# Loại khái niệm (spec §5.5): khái niệm khai `kind` phải có slot thuộc các loại này.
-concept_kinds:
-  required_content: {slot_kinds: []}
-  termination: {slot_kinds: [bool]}
-  time_limit: {slot_kinds: [duration]}
+# Loại khái niệm: dùng danh sách kind chung packs/kinds.yaml (spec bản 3 §5.5), gói không khai riêng.

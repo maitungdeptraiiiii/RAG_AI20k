@@ -31,7 +31,4 @@ extract_fields:
 
 user_facts: []
 findings: []
-# Loại khái niệm (spec §5.5): khái niệm khai `kind` phải có slot thuộc các loại này. Không ép tên slot (tên là khóa dữ kiện).
-concept_kinds:
-  rate_cap: {slot_kinds: [percent]}
-  termination: {slot_kinds: [bool]}
+# Loại khái niệm: dùng danh sách kind chung packs/kinds.yaml (spec bản 3 §5.5), gói không khai riêng.

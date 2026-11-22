@@ -66,19 +66,6 @@ def test_ids_unique_and_derived_from_resolves():
             assert d in ids, (e["id"], d)
 
 
-def test_kinds_cover_every_labor_concept_and_inventory_kinds_are_declared():
-    from rag.bridge.catalog import load_catalog
-    kinds = yaml.safe_load((INVENTORY / "kinds.yaml").read_text(encoding="utf-8"))
-    declared = set(kinds["kinds"])
-    placed = {c for k in kinds["kinds"].values() for c in k["concepts"]} | {x["concept"] for x in kinds["not_fitting"]}
-    assert placed == set(load_catalog().concepts)
-    for k in kinds["kinds"].values():
-        assert k["slots"] and all({"name", "kind"} <= set(s) for s in k["slots"])
-    for x in kinds["not_fitting"]:
-        assert x["why"]
-    assert {e["kind"] for _, e in entries()} <= declared | {"none"}
-
-
 def test_periods_are_ordered_and_cover_the_source():
     """Quy định có nhiều bản luật: mỗi kỳ có ngày bắt đầu, tăng dần, và kỳ cuối là `source`."""
     for _, e in entries():

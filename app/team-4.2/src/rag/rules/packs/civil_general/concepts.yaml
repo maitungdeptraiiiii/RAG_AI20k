@@ -6,6 +6,7 @@ roles:
   - {id: BEN_B, label: "Bên thứ hai"}
 concepts:
   - id: civil.unilateral_termination
+    kind: notice
     label: Đơn phương chấm dứt phải thông báo
     scope: core
     phase: P0

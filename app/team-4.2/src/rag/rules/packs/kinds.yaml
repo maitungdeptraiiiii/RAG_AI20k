@@ -1,0 +1,64 @@
+# Danh sách `kind` CHUNG cho mọi gói (spec bản 3 §5.5). Bộ nạp đọc file này cho mọi gói trong cùng thư mục packs/;
+# gói chỉ được khai thêm kind riêng của nó trong pack.yaml (concept_kinds), không được khai lại kind chung khác đi.
+# Người soạn: Claude theo yêu cầu của Tùng — CẦN TÙNG DUYỆT. Kiểm bằng tests/test_kinds.py.
+#
+# slot_kinds: LOẠI slot mà khái niệm thuộc kind phải có (không ép tên slot: tên slot là khóa dữ kiện). Danh sách rỗng khi
+#   các khái niệm của kind lấy giá trị từ dữ kiện cấp hợp đồng (vd. thời hạn hợp đồng, lương) hoặc có slot khác loại nhau.
+# domains: các miền đang dùng kind (labor, civil, loan, lease); test kiểm khớp với khái niệm thật. Kind chỉ một miền dùng
+#   là kind riêng của miền đó; [] là kind đã có trong bản liệt kê nhưng chưa có khái niệm nào.
+kinds:
+  required_content:
+    describe: "Nội dung bắt buộc phải có trong hợp đồng (BLLĐ Đ21.1; Luật Nhà ở Đ163); vi phạm = thiếu nội dung"
+    slot_kinds: []
+    domains: [labor, lease]
+  time_limit:
+    describe: "Khoảng thời gian có trần / sàn luật định (thời hạn, thử việc, giờ làm, kỳ trả lương, số tháng nợ tiền thuê)"
+    slot_kinds: []
+    domains: [labor, lease]
+  leave_entitlement:
+    describe: "Số ngày nghỉ người lao động được hưởng (sàn luật định)"
+    slot_kinds: [duration]
+    domains: [labor]
+  payment:
+    describe: "Khoản tiền hoặc tỉ lệ tiền phải trả, có sàn luật định (lương tối thiểu, lương làm thêm, khấu trừ)"
+    slot_kinds: []
+    domains: [labor]
+  notice:
+    describe: "Thời hạn báo trước / nghĩa vụ thông báo khi chấm dứt"
+    slot_kinds: []
+    domains: [labor, civil]
+  prohibited_practice:
+    describe: "Hành vi bị cấm ghi trong hợp đồng (slot bool = hợp đồng có hành vi đó)"
+    slot_kinds: [bool]
+    domains: [labor]
+  count_limit:
+    describe: "Giới hạn số lần (ký hợp đồng xác định thời hạn, thử việc một lần)"
+    slot_kinds: []
+    domains: [labor]
+  rate_cap:
+    describe: "Tỉ lệ có trần (lãi suất vay, lãi quá hạn, lãi chậm trả)"
+    slot_kinds: [percent]
+    domains: [loan]
+  termination:
+    describe: "Quyền chấm dứt / đòi lại / trả trước hạn mà luật bảo vệ cho một bên (slot bool = điều khoản trái quyền đó)"
+    slot_kinds: [bool]
+    domains: [loan, lease]
+  penalty:
+    describe: "Phạt vi phạm, bồi thường kèm phạt (BLDS Đ418; bản liệt kê civil_general)"
+    slot_kinds: []
+    domains: []
+
+# Khái niệm không vừa kind nào (không có kind trong concepts.yaml).
+not_fitting:
+  - {concept: maternity.no_night_overtime_travel, why: "Bảo vệ theo tình trạng NLĐ (mang thai, nuôi con nhỏ) — dữ kiện người dùng, không có slot trên hợp đồng"}
+  - {concept: maternity.lighter_work, why: "Như trên; là quyền yêu cầu của NLĐ, hợp đồng thường không ghi"}
+  - {concept: maternity.breaks, why: "Như trên"}
+  - {concept: maternity.terminate_or_suspend, why: "Quyền đơn phương của NLĐ mang thai kèm giấy y tế — không phải điều khoản hợp đồng"}
+  - {concept: maternity.job_guarantee, why: "Nghĩa vụ sau thai sản, kiểm được chỉ khi có sự kiện quay lại làm việc"}
+
+open_questions:
+  - "content.term vừa là nội dung bắt buộc (r1) vừa có thời hạn (r2) và số lần (r3, r5): xếp time_limit; một khái niệm một kind."
+  - "wage.deduction_limit có cả tỉ lệ (payment) và hành vi cấm: xếp payment."
+  - "termination.severance (slot waives_severance) xếp prohibited_practice vì rule kiểm điều khoản từ bỏ trợ cấp."
+  - "civil.unilateral_termination kiểm việc chấm dứt không thông báo: xếp notice (cùng labor termination.*_unilateral)."
+  - "prohibited_practice (labor) và termination (loan, lease) đều là 'điều khoản bool trái luật'; tách vì termination gom quyền chấm dứt của một bên, dùng chung giữa vay và thuê."

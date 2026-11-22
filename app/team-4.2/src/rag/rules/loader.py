@@ -156,6 +156,32 @@ def _extract_fields(raw: object, problems: list[str]) -> tuple[dict, ...]:
     return tuple(out)
 
 
+def _kind_specs(raw, where: str, problems: list[str]) -> dict[str, tuple[str, ...]]:
+    """{kind: {slot_kinds: [...]}} -> {kind: (loại slot, ...)}."""
+    if raw is None:
+        return {}
+    if not isinstance(raw, dict):
+        problems.append(f"{where} phải là dict {{kind: {{slot_kinds: [...]}}}}")
+        return {}
+    out = {}
+    for kind, spec in raw.items():
+        sk = spec.get("slot_kinds") if isinstance(spec, dict) else None
+        if not isinstance(sk, list) or not all(x in SLOT_KINDS for x in sk):
+            problems.append(f"{where}: {kind!r} cần slot_kinds là danh sách các loại thuộc {sorted(SLOT_KINDS)}")
+            sk = []
+        out[kind] = tuple(sk)
+    return out
+
+
+def _shared_kinds(root: Path, problems: list[str]) -> dict[str, tuple[str, ...]]:
+    """Danh sách kind chung cho mọi gói trong `root` (`root/kinds.yaml`, spec bản 3 §5.5); không có file thì rỗng."""
+    path = root / "kinds.yaml"
+    if not path.is_file():
+        return {}
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    return _kind_specs(data.get("kinds") or {}, "kinds.yaml", problems)
+
+
 def load_pack(pack_id: str, *, root: Path = PACKS_ROOT) -> PackSpec:
     path = Path(root) / pack_id / "pack.yaml"
     if not path.is_file():
@@ -235,17 +261,13 @@ def load_pack(pack_id: str, *, root: Path = PACKS_ROOT) -> PackSpec:
         if q.get("unit") is not None and q["unit"] not in names:
             problems.append(f"{where}: đơn vị lạ {q['unit']!r}")
         questions[name] = UserQuestion(name, str(q.get("question")), tuple(q.get("values") or ()), q.get("unit"))
-    concept_kinds: dict[str, tuple[str, ...]] = {}
-    raw_kinds = data.get("concept_kinds") or {}
-    if not isinstance(raw_kinds, dict):
-        problems.append("concept_kinds phải là dict {kind: {slot_kinds: [...]}}")
-        raw_kinds = {}
-    for kind, spec in raw_kinds.items():
-        sk = (spec or {}).get("slot_kinds") if isinstance(spec, dict) else None
-        if not isinstance(sk, list) or not all(x in SLOT_KINDS for x in sk):
-            problems.append(f"concept_kinds: {kind!r} cần slot_kinds là danh sách các loại thuộc {sorted(SLOT_KINDS)}")
-            sk = []
-        concept_kinds[kind] = tuple(sk)
+    shared = _shared_kinds(Path(root), problems)
+    concept_kinds: dict[str, tuple[str, ...]] = dict(shared)
+    for kind, sk in _kind_specs(data.get("concept_kinds"), "concept_kinds", problems).items():
+        if kind in shared and shared[kind] != sk:
+            problems.append(f"concept_kinds: {kind!r} là kind chung (kinds.yaml), không được khai lại khác đi")
+            continue
+        concept_kinds[kind] = sk
     object_types: dict[str, ObjectType] = {}
     raw_types = data.get("object_types") or {}
     if not isinstance(raw_types, dict):

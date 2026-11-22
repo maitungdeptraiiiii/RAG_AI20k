@@ -151,7 +151,7 @@ Tiêu chí: lõi và luồng soát dùng được cho hợp đồng không phả
 
 | # | Phần | Lệch thế nào | Việc sửa |
 |---|---|---|---|
-| R.7 | `kinds.yaml` (T4) | Suy từ 39 concept lao động; 3 kind dân sự rỗng; 7/29 mục liệt kê `kind: none` (4 mục dân sự chung không có kind nào chứa) | D35, B1 |
+| R.7 | `kinds.yaml` (T4) | Suy từ 39 concept lao động; 3 kind dân sự rỗng; 7/29 mục liệt kê `kind: none` (4 mục dân sự chung không có kind nào chứa) | **Đã sửa 23/11** (mục Gói thuê nhà, L.5) |
 | R.8 | `RuleResult.employee_impact`, outcome của gói dân sự | Hợp đồng vay gắn `employee_impact: unfavorable` (sai nghĩa); spec §5.2 hứa `outcome` dict nhưng cài đặt chưa có | D33 |
 | R.9 | `check_contract` mặc định gói `labor` khi không truyền `packs` | Hợp đồng thuê nhà đưa vào bị soát bằng rule lao động | D32, E5 |
 | R.10 | `bridge/view.py` (`VERDICTS`, `FACT_LABELS`), prompt `tagger` / `recheck` / `agent` | Viết cứng "người lao động", "hợp đồng lao động" | D34 (Tùng), H2 (Huy) |
@@ -165,7 +165,7 @@ Tiêu chí: lõi và luồng soát dùng được cho hợp đồng không phả
 |---|---|---|
 | R.14 | Hồ sơ mẫu (C1–C3) chưa soạn | Soạn theo định dạng `dossier.yaml` tổng quát (bản 3), thêm C3b thuê nhà + r1; không soạn theo định dạng cũ có khóa `employee` |
 | R.15 | Gold (C4) chưa soạn | Gồm cả ba miền; bảng a1 đã sửa theo Đ22.2 (phụ lục 2 cũng vi phạm) |
-| R.16 | Thuê nhà (B7 / T6) chưa đọc | Làm trước C3b và trước khi sửa `kinds.yaml` (để kind kiểm được trên ba miền) |
+| R.16 | Thuê nhà (B7 / T6) chưa đọc | **Đã làm 23/11** (mục Gói thuê nhà) |
 | R.17 | UI (F) chưa làm | Kịch bản demo có r1 (thuê nhà); nhãn lấy theo gói |
 
 ## Thử nghiệm "cắm gói mới như module" (23/11)
@@ -222,6 +222,22 @@ trả khái niệm lao động, và hai gói dân sự không khai `document_fac
 | V.5 | Ngoại lệ tổ chức tín dụng vẫn qua dữ kiện người dùng chung `special_law_applies`; chưa tự nhận ra bên cho vay là tổ chức tín dụng | Còn |
 | V.6 | Chưa có rule: lãi chỉ khi có thỏa thuận (Đ463), lãi 50% trần khi không rõ lãi suất (Đ468.2, là giá trị suy ra chứ không phải vi phạm), phạt vi phạm cùng lãi quá hạn (NQ 01/2019 Đ12) | Còn |
 | V.7 | Sửa bên giữ quyền của trần lãi: bên vay (bản đầu gán nhầm bên cho vay) | Đã sửa |
+
+## Gói thuê nhà và kind chung (23/11, spec bản 3 đã duyệt)
+
+| # | Mục | Trạng thái |
+|---|---|---|
+| L.1 | Bản liệt kê `civil_lease.yaml`: 9 quy định, mỗi quy định trích nguyên văn theo kỳ (`periods`: Luật Nhà ở 65/2014 từ 01/07/2015, 27/2023 từ 01/08/2024); test kiểm mọi câu trích | Xong (chờ duyệt) |
+| L.2 | Sửa nhận định cũ: Luật Nhà ở 27/2023 hiệu lực **01/08/2024** (Luật 43/2024/QH15 Đ2 sửa khoản 1 Điều 197), không phải 01/01/2025 | Đã sửa |
+| L.3 | Gói `civil_lease`: 6 khái niệm (3 nội dung bắt buộc Đ163, lấy lại nhà tùy ý Đ172.1, nợ tiền thuê từ 03 tháng Đ172.2.b theo kỳ, tước quyền chấm dứt của bên thuê Đ172.3). Không sửa code engine | Xong |
+| L.4 | 6 hợp đồng thuê mẫu, 11 nhãn viết trước khi chạy engine, khớp cả hai evaluator; test không báo FAIL ngoài gold; `check_contract(document_kind="lease_contract")` chạy đầu-cuối không có chữ "lao động" | Xong (nhãn chờ duyệt) |
+| L.5 | Danh sách kind chung `src/rag/rules/packs/kinds.yaml`, bộ nạp đọc cho mọi gói; gói không được khai lại kind chung khác đi; 46/51 khái niệm có kind, 5 khái niệm thai sản "không vừa" có lý do; 4 kind dùng ở ≥ 2 miền. Bản nháp `docs/rule_inventory/kinds.yaml` đã gộp và xóa | Xong (chờ duyệt) |
+| L.6 | Nhiều kind có `slot_kinds: []` (required_content, time_limit, payment, notice, count_limit, penalty) vì khái niệm lấy giá trị từ dữ kiện cấp hợp đồng hoặc có slot khác loại: kiểm theo loại slot chỉ còn ý nghĩa với leave_entitlement, prohibited_practice, rate_cap, termination | Còn (hạn chế thiết kế) |
+| L.7 | `lease.tenant_termination_right` xếp vi phạm (mandatory) là cách đọc của người soạn: Đ172.3 trao quyền nhưng không nói điều khoản từ bỏ vô hiệu | Chờ Tùng duyệt |
+| L.8 | D37 (rule xuyên văn bản thuê nhà: gia hạn, tăng giá giữa kỳ): giá mới "do các bên thỏa thuận" (Đ170.2) nên phụ lục hai bên ký là hợp lệ, chưa có rule vi phạm có căn cứ; chưa khai `object_types` Lease/Amendment | Chờ Tùng quyết |
+| L.9 | Chưa soát: báo trước 30 ngày (Đ172.4, là mặc định, được thỏa thuận khác), cho thuê lại (sự kiện thực hiện), giá do Nhà nước quy định (nhà ở xã hội), lý do chậm trả "đã thỏa thuận" (2023) / "chính đáng" (2014); hợp đồng ký trước 01/07/2015 (Luật Nhà ở 2005) | Còn |
+| L.10 | `outcome.employee_impact` vẫn dùng cho gói vay / thuê (sai nghĩa) | Còn (D33) |
+| L.11 | Bộ test đầy đủ sau gói thuê nhà: 35 failed (đúng số baseline, toàn agent / conversation / warehouse / pipeline), 2264 passed | Ghi nhận |
 
 ## Tồn đọng chung (môi trường, quy trình)
 

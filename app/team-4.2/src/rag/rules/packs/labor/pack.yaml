@@ -1,0 +1,39 @@
+# Gói luật lao động: những gì lõi rule engine cần biết về lĩnh vực này.
+# Khái niệm và rule nằm ở concepts.yaml cùng thư mục. Thiết kế: docs/superpowers/specs/2026-11-22-rete-rule-engine-design.md §5.5.
+id: labor
+version: "0.1"
+extends: []
+document_kinds: [labor_contract]
+
+units: [day, workday, week, month, hour, minute, percent, vnd, count]
+# Quy đổi về đơn vị gốc: giá trị * factor. workday không quy đổi được (số ngày làm việc phụ thuộc lịch).
+conversions:
+  day:    {base: hour, factor: 24}
+  week:   {base: hour, factor: 168}
+  month:  {base: hour, factor: 720}
+  hour:   {base: hour, factor: 1}
+  minute: {base: hour, factor: 0.016666666666666666}
+
+# Dữ kiện cấp hợp đồng (do facts.py trích và kiểm trích dẫn) -> đơn vị. Rule chỉ dùng các dữ kiện này được xét
+# ngay cả khi LLM không gắn khái niệm cho điều khoản nào.
+document_facts:
+  contract_kind: null
+  term_months: month
+  base_salary_vnd: vnd
+  has_probation: null
+  probation_length: day
+  probation_pay_pct: percent
+  job_level: null
+  sign_date: null
+
+# Dữ kiện người dùng xác nhận.
+user_facts: [work_condition, pregnant, pregnancy_month, child_under_12_months, employee_consent,
+             medical_certificate, wage_region, employee_is_female]
+
+# Finding thêm ngoài tập chung của lõi (ok, violation, needs_facts, conflict, missing_content).
+findings: [hidden_right, possible_right]
+# on_silence ngoài `none` / `missing_content` (có sẵn trong lõi): quyền ẩn khi hợp đồng không nhắc.
+silences:
+  hidden_right:
+    applicable: [PASS, hidden_right]
+    unknown: [UNKNOWN, possible_right]

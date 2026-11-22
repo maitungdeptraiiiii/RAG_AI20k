@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Mapping
+from datetime import date
+from typing import Any, Literal, Mapping
 
 from rag.rules.units import Units
 
@@ -56,3 +57,73 @@ class PackSpec:
 
     def context(self) -> Context:
         return Context(self.units, frozenset(self.document_facts), self.silences)
+
+
+# ── danh mục khái niệm (concepts.yaml) ──
+OPS = frozenset({"eq", "lt", "lte", "gt", "gte", "in", "present", "absent"})
+MODES = frozenset({"required", "threshold", "prohibited", "default"})
+DEROGATIONS = frozenset({"floor", "mandatory", "default"})
+SLOT_KINDS = frozenset({"duration", "percent", "money", "bool", "enum"})
+
+
+@dataclass(frozen=True)
+class Slot:
+    name: str
+    kind: Literal["duration", "percent", "money", "bool", "enum"]
+    unit: str | None
+    options: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class Rule:
+    id: str
+    mode: str
+    derogation: str
+    on_silence: str
+    applicability: dict | None
+    law: dict
+    cases: tuple[dict, ...]
+    check: dict | None
+    outcome: dict
+    # Phép kiểm là một slot có/không "= false" (hợp đồng không có hạn chế): khái niệm có mặt mà slot không được điền
+    # thì coi là không có hạn chế. Bộ nạp tự suy từ `check` khi YAML không ghi (spec §5.2).
+    unstated_false: bool = False
+
+
+@dataclass(frozen=True)
+class Concept:
+    id: str
+    label: str
+    scope: str
+    phase: str
+    holder: str
+    counterparty: str
+    applies_to: tuple[str, ...]
+    describe: str
+    phrasing: tuple[str, ...]
+    slots: dict[str, Slot]
+    anchors: tuple[dict, ...]
+    value_sources: tuple[dict, ...]
+    rules: tuple[Rule, ...]
+    not_about: tuple[dict, ...] = ()   # [{text, see}]: điều khoản dễ gán nhầm vào khái niệm này; see = khái niệm đúng
+
+
+@dataclass(frozen=True)
+class Catalog:
+    version: str
+    law_values_valid_from: date
+    roles: dict[str, dict]
+    concepts: dict[str, Concept]
+    context: Context
+
+
+def leaves(cond: Any) -> list[dict]:
+    """Các lá {fact, op, ...} của một điều kiện all / any / not."""
+    if not isinstance(cond, dict):
+        return []
+    for key in ("all", "any"):
+        if key in cond:
+            return [x for c in cond[key] for x in leaves(c)]
+    if "not" in cond:
+        return leaves(cond["not"])
+    return [cond]

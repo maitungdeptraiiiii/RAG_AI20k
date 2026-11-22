@@ -62,10 +62,15 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
 - [x] D12. Bất biến: dữ kiện chuyển sang thiếu không làm rule nào thành `FAIL`.
 
 **P3 — kết luận trung gian + ngoại lệ**
-- [ ] D13. `derived` + cây ngoại lệ (§5.3) ở cả hai evaluator; phát hiện vòng; `missing_facts` mở ra dữ kiện đầu vào.
-- [ ] D14. `exception_of` giữa rule / giữa pack (§5.4), bảng ba hàng T/F/U.
-- [ ] D15. Test bảng chân lý §5.3, §5.4.
+- [x] D13. `derived` + cây ngoại lệ (§5.3) ở cả hai evaluator; phát hiện vòng; `missing_facts` mở ra dữ kiện đầu vào.
+- [x] D14. `exception_of` giữa rule / giữa pack (§5.4), bảng ba hàng T/F/U.
+- [x] D15. Test bảng chân lý §5.3, §5.4.
 - [ ] D16. Rule từ B2–B3 vào `packs/labor/` (Đ20.2 kết luận trung gian + giới hạn số lần ký + ngoại lệ; Đ22.2; Đ25).
+      Xong phần Đ20.2 (đọc văn bản gốc: Đ20, 149.1, 151.2, 177.4): `contract_kind_effective`, `content.term/r3` (+ 4 ngoại lệ
+      `r3_*`), `r4`; 7 dữ kiện người dùng mới trong `pack.yaml` (Tú / Huy: cần hỏi người dùng; nhãn ở `bridge/view.py`).
+      **Chưa làm, chuyển sang giai đoạn 7b:** Đ22.2 (phụ lục sửa thời hạn: cần đối tượng phụ lục) và "một lần một công việc"
+      của Đ25 (cần nhiều hợp đồng; theo từng văn bản đã có `probation.duration`, `probation.once`). Khi 7b xong, nguồn của
+      `fixed_term_contract_count` đổi từ người dùng sang phép đếm đối tượng, rule `r3` giữ nguyên.
 
 **P4 — giải thích, câu hỏi, sự kiện**
 - [ ] D17. `explain.py`: cây tới quote hợp đồng, nguồn giá trị luật, ngoại lệ bị loại; JSON + markdown.
@@ -95,8 +100,8 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
 
 ## E. Tích hợp
 
-- [x] E1. `check_contract`: tham số `packs=`, `evaluator=` (mặc định `network`), biến môi trường *(phần `packs=` chưa làm: giai đoạn 5)*
-      `RAG_RULE_EVALUATOR`; sau recheck chỉ `update` dữ kiện mới.
+- [x] E1. `check_contract`: tham số `packs=`, `evaluator=` (mặc định `network`), biến môi trường
+      `RAG_RULE_EVALUATOR`; sau recheck chỉ `update` dữ kiện mới. *(phần `packs=` chưa làm: giai đoạn 5)*
 - [x] E2. `tools.check_concept` + `ask_contract_graph` dùng session.
 - [ ] E3. Endpoint SSE trong `ui/contract_studio.py`: chạy hồ sơ / kịch bản, phát `evaluation_diff`, trả `explain`,
       `next_questions`, nhận `answer`.

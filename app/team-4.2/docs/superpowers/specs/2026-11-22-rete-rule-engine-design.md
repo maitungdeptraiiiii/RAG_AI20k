@@ -176,6 +176,16 @@ dùng trả lời được); tên dữ kiện suy ra ghi vào `reasons` (`derive
 Bộ nạp từ chối: phụ thuộc vòng giữa dữ kiện suy ra; `exception_of` trỏ tới định nghĩa không tồn tại; dữ kiện suy ra
 trùng tên dữ kiện đầu vào.
 
+*Chốt khi triển khai (giai đoạn 3, `rules/derived.py`):*
+- Con `CONFLICT` của một nút thắng mọi giá trị anh em (spec không nói; chọn thận trọng). Con `UNKNOWN` thua giá trị
+  (đúng chữ bước 1: một ngoại lệ đã cho giá trị thì dùng giá trị đó dù ngoại lệ anh em chưa biết).
+- Ngoại lệ cho giá trị hay `UNKNOWN` đều thắng gốc kể cả khi `when` của gốc là F (ngoại lệ không phụ thuộc điều kiện gốc).
+- Dữ kiện đầu vào truyền vào mà trùng tên dữ kiện suy ra bị bỏ qua ở cả hai evaluator; dữ kiện suy ra luôn do định nghĩa
+  quyết định. `Fact.derived_by` ghi id định nghĩa thắng; `facts_used[<tên>].derived_by` đưa nó ra kết quả.
+- `missing_facts` mở dữ kiện suy ra thiếu / `UNKNOWN` thành dữ kiện đầu vào thiếu của định nghĩa có `when` khác F: tên
+  thiếu trong lá `when` (chỉ khi `when` = U) và `from` thiếu; mở đệ quy qua dữ kiện suy ra khác. `reasons` thêm
+  `derived_unknown:<tên>`.
+
 ### 5.4 Ngoại lệ giữa rule (mới)
 
 Rule có thể khai báo `exception_of: <concept_id>/<rule_id>` (được trỏ sang pack khác). Rule ngoại lệ thay thế
@@ -192,6 +202,17 @@ Lý do hàng U: giữ bất biến "thiếu dữ kiện không thành vi phạm"
 
 Nhiều ngoại lệ cùng T cho một rule gốc: cả hai đều cho kết quả; rule gốc `NOT_APPLICABLE` với reason liệt kê cả hai.
 Ngoại lệ lồng nhau (ngoại lệ của ngoại lệ) được phép; không vòng.
+
+*Chốt khi triển khai (giai đoạn 3, `rules/exceptions.py`):*
+- Rule ngoại lệ "áp dụng" khi applicability T **và** giá trị luật chọn được (không case nào khớp thì F; case chưa quyết
+  định thì U). Một rule coi là áp dụng nếu chính nó hoặc bất kỳ ngoại lệ (kể cả gián tiếp) của nó áp dụng, như cây ngoại lệ
+  của Catala: R2 là ngoại lệ của R, R là ngoại lệ của X, R2 áp dụng thì cả R lẫn X đều bị thay thế.
+- Hàng U khi rule gốc `FAIL`: hạ thành `UNKNOWN` / `needs_facts`, `legality` / `employee_impact` = None, `missing_facts`
+  thêm dữ kiện đầu vào còn thiếu của cả cây ngoại lệ đang U. Có ngoại lệ T thì ngoại lệ U bị bỏ qua.
+- `reasons`: `overridden_by:<concept>/<rule>` (mỗi ngoại lệ T một dòng, theo thứ tự trong catalog) hoặc
+  `exception_unknown:<concept>/<rule>`.
+- `evaluate_concept` (từng concept, lớp tương thích) chỉ áp dụng ngoại lệ giữa các rule cùng concept; ngoại lệ chéo
+  concept chỉ có ở `evaluate_all` và ở phiên. Đích `exception_of` ở gói khác chỉ kiểm tồn tại ở `load_packs` (sau khi gộp).
 
 ### 5.5 Pack và hợp nhất
 
@@ -406,6 +427,7 @@ của mạng có ích trực tiếp (nhiều lần fork + update trên một h�
   Đây là thiết kế của nhóm, không có tài liệu công bố để đối chiếu.
 - Ngoại lệ U: chỉ hạ `FAIL` thành `UNKNOWN`, giữ `PASS` (§5.4).
 - Id concept toàn cục, không namespace (§5.5).
+- Cây ngoại lệ dữ kiện suy ra và ngoại lệ giữa rule: các chi tiết đã chốt khi triển khai nằm ở cuối §5.3 và §5.4.
 - Chuyển `concepts.yaml` sang `rules/packs/labor/` (ảnh hưởng LU).
 - Evaluator mặc định là `network` sau giai đoạn 2, có công tắc về `reference`.
 - Bỏ cách gọi "TMS" của Drools; dùng "tính lại theo phụ thuộc" (§6.3).

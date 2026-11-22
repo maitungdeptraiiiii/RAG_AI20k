@@ -154,12 +154,11 @@ def test_removing_a_fact_never_creates_a_violation():
     assert checked > 100
 
 
-def test_objects_not_supported_yet():
+def test_objects_must_be_object_changes_or_dict():
+    """Giai đoạn 7: update nhận ObjectChanges / dict (thay test "objects chưa hỗ trợ" cũ)."""
     _ref, net = sessions()
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(TypeError):
         net.update({}, objects=[object()])
-    with pytest.raises(NotImplementedError):
-        NET.session(day=DAY, facts={}, present=set(), evidence={}, objects=[object()])
 
 
 def test_make_evaluator_network_runs():

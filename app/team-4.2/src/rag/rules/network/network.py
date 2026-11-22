@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Any, Sequence
 
-from rag.rules.derived import derived_inputs, derived_order
+from rag.rules.derived import derived_inputs, derived_order, global_derived
 from rag.rules.exceptions import ExceptionIndex
 from rag.rules.model import Catalog, Rule
 from rag.rules.network.nodes import CondGraph
@@ -35,10 +35,11 @@ class Network:
     derived_order: tuple[str, ...] = ()              # thứ tự tính dữ kiện suy ra (đầu vào trước)
     derived_deps: dict[str, frozenset[str]] = field(default_factory=dict)   # dữ kiện suy ra -> đầu vào trực tiếp
     exceptions: ExceptionIndex | None = None         # quan hệ exception_of giữa rule, theo RuleSlot.index
+    object_slots_by_type: dict[str, tuple[int, ...]] = field(default_factory=dict)   # kiểu đối tượng -> rule xuyên đối tượng
 
     @staticmethod
     def compile(catalog: Catalog) -> "Network":
-        derived = catalog.context.derived
+        derived = global_derived(catalog.context.derived)        # dữ kiện suy ra theo kiểu đối tượng nằm ở ObjectMemory
         deps = {name: frozenset(derived_inputs(df)) for name, df in derived.items()}
 
         def closure(name: str) -> set[str]:
@@ -66,10 +67,15 @@ class Network:
                     by_fact.setdefault(name, []).append(i)
                 for node in {n for n in (app, *whens) if n is not None}:
                     by_node.setdefault(node, []).append(i)
+        by_type: dict[str, list[int]] = {}
+        for s in slots:
+            if s.rule.over is not None:
+                by_type.setdefault(s.rule.over[1], []).append(s.index)
         return Network(catalog, graph, tuple(slots), {k: tuple(v) for k, v in by_fact.items()},
                        {k: tuple(v) for k, v in by_node.items()}, {k: tuple(v) for k, v in by_concept.items()},
                        derived_order(derived) if derived else (), deps,
-                       ExceptionIndex.build([(s.concept_id, s.rule) for s in slots]))
+                       ExceptionIndex.build([(s.concept_id, s.rule) for s in slots]),
+                       {k: tuple(v) for k, v in by_type.items()})
 
 
 class NetworkEvaluator:
@@ -80,7 +86,5 @@ class NetworkEvaluator:
 
     def session(self, *, day: date, facts: Facts, present: set[str], evidence: dict[str, list[dict]],
                 objects: Sequence[Any] = ()):
-        if objects:
-            raise NotImplementedError("objects: giai đoạn 7")
         from rag.rules.network.session import NetworkSession
-        return NetworkSession(self.network, day, facts, present, evidence)
+        return NetworkSession(self.network, day, facts, present, evidence, objects)

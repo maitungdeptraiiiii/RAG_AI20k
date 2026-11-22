@@ -99,3 +99,29 @@ def test_derived_names_checked_against_slots_and_known_facts_with_concepts(tmp_p
     with pytest.raises(CatalogError) as e:
         load_packs(["unk"], root=tmp_path)
     assert any("khong_ai_khai" in p for p in e.value.problems), e.value.problems
+
+
+def test_derived_clashing_with_input_fact_of_a_sibling_or_parent_pack_rejected(tmp_path):
+    d = {"fact": "u", "definitions": [{"id": "d", "value": 1}]}
+    write_pack(tmp_path, {"derived": [d]}, [concept("c.a", [rule("r1")])], pack_id="pa")
+    write_pack(tmp_path, {"user_facts": ["u"]}, [concept("c.b", [rule("r1")])], pack_id="pb")
+    with pytest.raises(CatalogError) as e:
+        load_packs(["pa", "pb"], root=tmp_path)
+    assert any("'u'" in p and "đầu vào" in p for p in e.value.problems), e.value.problems
+    write_pack(tmp_path, {"document_facts": {"u": None}}, [concept("c.c", [rule("r1")])], pack_id="cha2")
+    write_pack(tmp_path, {"extends": ["cha2"], "derived": [d]}, [concept("c.d", [rule("r1")])], pack_id="con2")
+    with pytest.raises(CatalogError) as e:
+        load_packs(["con2"], root=tmp_path)
+    assert any("'u'" in p and "đầu vào" in p for p in e.value.problems), e.value.problems
+
+
+def test_malformed_derived_shapes_and_units_are_catalog_errors_not_crashes(tmp_path):
+    for bad in (["chuoi"], {"fact": "k"}, [{"fact": "k", "definitions": "x"}], [{"fact": "k", "definitions": ["x"]}],
+                [{"fact": "k", "definitions": [{"id": "d", "when": "a", "value": 1}]}],
+                [{"fact": "k", "definitions": [{"id": "d", "exception_of": ["b"], "value": 1}]}],
+                [{"fact": "k", "definitions": [{"value": 1}]}],
+                [{"fact": "k", "definitions": [{"id": "d", "value": 1,
+                                                "when": {"fact": "a", "op": "gt", "value": 1, "unit": "week"}}]}]):
+        write_pack(tmp_path, {**FACTS, "derived": bad})
+        with pytest.raises(CatalogError):
+            load_pack("synth", root=tmp_path)

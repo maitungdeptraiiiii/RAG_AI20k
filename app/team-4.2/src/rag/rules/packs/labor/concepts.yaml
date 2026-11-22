@@ -127,6 +127,7 @@ concepts:
       # Điều 20.2.c: ngoài hợp đồng đầu, chỉ được ký thêm 01 lần hợp đồng xác định thời hạn (tối đa 2 hợp đồng liên tiếp).
       # Nguồn của `fixed_term_contract_count` là người dùng; giai đoạn 7 thay bằng phép đếm đối tượng, không đổi rule.
       - id: r3
+        standalone: true      # fixed_term_contract_count do người dùng cung cấp: xét kể cả khi điều khoản thời hạn không được nhận ra
         mode: threshold
         applicability: {fact: contract_kind, op: eq, value: xac_dinh_thoi_han}
         law: {max_fixed_term_contracts: {value: 2, unit: null}}

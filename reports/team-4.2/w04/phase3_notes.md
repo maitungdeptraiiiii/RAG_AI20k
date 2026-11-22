@@ -28,6 +28,17 @@ Nhánh `feat/team-4.2/w04-rules-engine`. Kế hoạch: `app/team-4.2/docs/superp
 
 Biên dịch mạng 0.51 ms. Số liệu một máy, chỉ để thấy cùng bậc với giai đoạn 2; benchmark có kiểm soát là giai đoạn 6.
 
+## Sửa sau review độc lập (Important, mỗi mục có test đỏ trước)
+
+1. Nhóm anh em có một ngoại lệ cho giá trị và một ngoại lệ `UNKNOWN` giờ ra `UNKNOWN` (trước: ra giá trị, bớt dữ kiện có thể
+   thành `FAIL`). **Lệch chữ spec §5.3 bước 1, chọn bất biến** (xem spec).
+2. Người dùng trả lời `worked_after_expiry_days = 45` (không đơn vị) từng làm `r4` kẹt `UNKNOWN` mà không hỏi gì: thêm
+   `user_fact_units` trong `pack.yaml`, `user_fact_set` dùng làm đơn vị mặc định.
+3. Bộ nạp nay từ chối dữ kiện suy ra trùng `document_facts` / `user_facts` của gói khác (anh em hoặc cha).
+4. `content.term/r3` ra `PASS` khi điều khoản thời hạn không được nhận ra dù đã biết đang ký HĐ thứ ba: thêm cờ rule
+   `standalone: true`, `r3` dùng.
+Kèm: bộ nạp báo `CatalogError` (thay vì crash) với `derived` sai hình dạng và đơn vị lạ trong `when`.
+
 ## Kiểm thử
 
 - Đối chiếu ngẫu nhiên Network = Reference trên gói tổng hợp có dữ kiện suy ra hai tầng, ngoại lệ lồng và ngoại lệ chéo

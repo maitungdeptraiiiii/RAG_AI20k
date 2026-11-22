@@ -95,3 +95,12 @@ def test_case_level_by_must_be_a_known_fact(tmp_path):
     with pytest.raises(CatalogError) as e:
         _load(tmp_path, d)
     assert any("khong_co" in p and "by" in p for p in e.value.problems), e.value.problems
+
+
+def test_standalone_flag_must_be_bool_and_is_loaded(tmp_path):
+    ok = _with_rule(standalone=True)
+    assert _load(tmp_path, ok).concepts["x.a"].rules[0].standalone is True
+    assert _load(tmp_path, BASE).concepts["x.a"].rules[0].standalone is False
+    with pytest.raises(CatalogError) as e:
+        _load(tmp_path, _with_rule(standalone="co"))
+    assert any("standalone" in p for p in e.value.problems), e.value.problems

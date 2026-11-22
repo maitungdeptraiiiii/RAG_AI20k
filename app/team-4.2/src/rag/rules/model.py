@@ -76,6 +76,7 @@ class PackSpec:
     findings: frozenset[str]                       # finding thêm ngoài CORE_FINDINGS
     silences: Mapping[str, Silence]                # đã gộp CORE_SILENCES
     derived: Mapping[str, DerivedFact] = field(default_factory=dict)
+    user_fact_units: Mapping[str, str | None] = field(default_factory=dict)   # đơn vị mặc định khi người dùng trả lời một con số
 
     def context(self) -> Context:
         return Context(self.units, frozenset(self.document_facts), self.silences, self.derived)
@@ -111,6 +112,9 @@ class Rule:
     # thì coi là không có hạn chế. Bộ nạp tự suy từ `check` khi YAML không ghi (spec §5.2).
     unstated_false: bool = False
     exception_of: str | None = None       # `<concept_id>/<rule_id>` của rule gốc mà rule này là ngoại lệ (spec §5.4)
+    # Phép kiểm chỉ dùng dữ kiện người dùng cung cấp, không đến từ một điều khoản: có dữ kiện là xét, kể cả khi
+    # khái niệm không có mặt (như rule chỉ dùng `document_facts`).
+    standalone: bool = False
 
 
 @dataclass(frozen=True)

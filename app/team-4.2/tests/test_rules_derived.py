@@ -79,8 +79,10 @@ def test_two_exceptions_same_value_different_value_unknown_and_conflict():
     assert value_of(eval_derived(k, both_true, ctx_of(k))) == "X"
     k = make("X", "Y")
     assert eval_derived(k, both_true, ctx_of(k)) is CONFLICT
-    # một ngoại lệ cho giá trị, một ngoại lệ UNKNOWN -> giá trị (đúng chữ §5.3 bước 1; ghi lại có chủ ý)
-    assert value_of(eval_derived(k, {"a": Fact(1)}, ctx_of(k))) == "X"
+    # một ngoại lệ cho giá trị, một ngoại lệ UNKNOWN -> UNKNOWN (không bỏ qua ngoại lệ chưa biết: bất biến "thiếu dữ
+    # kiện không thành vi phạm"; lệch khỏi chữ §5.3 bước 1, xem ledger giai đoạn 3)
+    assert eval_derived(k, {"a": Fact(1)}, ctx_of(k)) is UNKNOWN
+    assert eval_derived(k, {"b": Fact(1)}, ctx_of(k)) is UNKNOWN
     assert eval_derived(k, {}, ctx_of(k)) is UNKNOWN                              # hai ngoại lệ đều U
     assert value_of(eval_derived(k, {"a": Fact(2), "b": Fact(2)}, ctx_of(k))) == "P"
     # một ngoại lệ cho giá trị, ngoại lệ kia CONFLICT (ở `from`) -> CONFLICT (quyết định của kế hoạch)

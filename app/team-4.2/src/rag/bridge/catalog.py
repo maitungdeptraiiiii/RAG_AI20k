@@ -25,6 +25,7 @@ def labor_context() -> Context:
 # Hằng tương thích, đọc ra từ packs/labor/pack.yaml.
 CONTRACT_FACTS: dict[str, str | None] = dict(labor_pack().document_facts)
 USER_FACTS = labor_pack().user_facts
+USER_FACT_UNITS: dict[str, str | None] = dict(labor_pack().user_fact_units)
 UNITS = labor_pack().units.names
 
 
@@ -32,5 +33,5 @@ def load_catalog(path: Path = DEFAULT_PATH) -> Catalog:
     return load_concepts(path, labor_pack())
 
 
-__all__ = ["CONTRACT_FACTS", "DEFAULT_PATH", "OPS", "UNITS", "USER_FACTS", "Catalog", "CatalogError", "Concept",
+__all__ = ["CONTRACT_FACTS", "DEFAULT_PATH", "OPS", "UNITS", "USER_FACTS", "USER_FACT_UNITS", "Catalog", "CatalogError", "Concept",
            "Rule", "Slot", "labor_context", "labor_pack", "load_catalog"]

@@ -200,6 +200,8 @@ def _contract_level_check(rule: Rule, facts: Facts, ctx: Context) -> bool:
     """Rule mà check chỉ dùng dữ kiện cấp hợp đồng của gói được xét khi có dữ kiện đó, kể cả khi LLM không gắn khái niệm
     cho điều khoản nào: dữ kiện đã được facts.py trích và kiểm trích dẫn."""
     names = fact_names(rule.check)
+    if rule.standalone:
+        return bool(names) and any(facts.get(n) is not None for n in names)
     return bool(names) and all(n in ctx.document_facts for n in names) and any(facts.get(n) is not None for n in names)
 
 

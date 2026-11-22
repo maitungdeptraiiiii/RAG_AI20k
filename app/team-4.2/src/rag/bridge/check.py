@@ -12,7 +12,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import date, datetime
 
 from rag.bridge.basis import AnchorLawBasis, LawBasis
-from rag.bridge.catalog import CONTRACT_FACTS, USER_FACTS, Catalog, load_catalog
+from rag.bridge.catalog import CONTRACT_FACTS, USER_FACT_UNITS, USER_FACTS, Catalog, load_catalog
 from rag.bridge.engine import Fact, Facts, RuleResult
 from rag.bridge.facts_map import fact_ops, party_ops
 from rag.bridge.graph_facts import factset_from_graph
@@ -66,7 +66,7 @@ def user_fact_set(user_facts: dict | None) -> Facts:
     for name, v in (user_facts or {}).items():
         if name not in USER_FACTS and name not in CONTRACT_FACTS:
             raise ValueError(f"Dữ kiện người dùng không có trong danh mục: {name}")
-        value, unit = (v[0], v[1]) if isinstance(v, (list, tuple)) else (v, CONTRACT_FACTS.get(name))
+        value, unit = (v[0], v[1]) if isinstance(v, (list, tuple)) else (v, USER_FACT_UNITS.get(name, CONTRACT_FACTS.get(name)))
         out[name] = Fact(value, unit, "user")
     return out
 

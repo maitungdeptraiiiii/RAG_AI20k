@@ -39,6 +39,10 @@ user_facts: [work_condition, pregnant, pregnancy_month, child_under_12_months, e
              is_foreign_employee,             # người lao động nước ngoài làm việc tại Việt Nam (Đ151.2)
              is_union_leader_in_term]         # thành viên ban lãnh đạo tổ chức đại diện NLĐ tại cơ sở đang trong nhiệm kỳ (Đ177.4)
 
+# Đơn vị mặc định khi người dùng trả lời một con số (không kèm đơn vị).
+user_fact_units:
+  worked_after_expiry_days: day
+
 # Finding thêm ngoài tập chung của lõi (ok, violation, needs_facts, conflict, missing_content).
 findings: [hidden_right, possible_right]
 # on_silence ngoài `none` / `missing_content` (có sẵn trong lõi): quyền ẩn khi hợp đồng không nhắc.

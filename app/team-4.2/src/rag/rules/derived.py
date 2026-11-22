@@ -63,14 +63,17 @@ def derived_order(derived: Mapping[str, DerivedFact]) -> tuple[str, ...]:
 
 
 def _combine(results: Sequence[object]) -> object:
-    """Bước 1–2 của §5.3 cho một nhóm anh em: CONFLICT > giá trị (cùng giá trị thì giữ, khác thì CONFLICT) > UNKNOWN > None."""
+    """Bước 1–2 của §5.3 cho một nhóm anh em: CONFLICT > UNKNOWN > giá trị (cùng giá trị thì giữ, khác thì CONFLICT) > None.
+    UNKNOWN đứng trên giá trị (lệch chữ §5.3 bước 1) để thiếu dữ kiện không thể biến thành giá trị rồi thành vi phạm."""
     if any(r is CONFLICT for r in results):
         return CONFLICT
+    if any(r is UNKNOWN for r in results):
+        return UNKNOWN          # ngoại lệ chưa biết có thể cho giá trị khác: không bỏ qua (xem ledger giai đoạn 3, Ruling)
     values = [r for r in results if isinstance(r, Fact)]
     if values:
         first = values[0]
         return first if all(v.value == first.value and v.unit == first.unit for v in values) else CONFLICT
-    return UNKNOWN if any(r is UNKNOWN for r in results) else None
+    return None
 
 
 def _own(d: Definition, df: DerivedFact, facts: Facts) -> object:

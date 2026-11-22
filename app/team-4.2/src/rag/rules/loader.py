@@ -30,35 +30,58 @@ def _check_derived_cycles(derived: Mapping[str, DerivedFact], problems: list[str
         problems.append("derived: phụ thuộc vòng giữa các dữ kiện suy ra " + " -> ".join(cycle))
 
 
+_CLASH = "derived: {!r} trùng tên dữ kiện đầu vào (document_facts / user_facts)"
+
+
 def _derived(data: dict, units: frozenset[str], inputs: set[str], problems: list[str]) -> dict[str, DerivedFact]:
     out: dict[str, DerivedFact] = {}
-    for entry in data.get("derived") or []:
-        name = (entry or {}).get("fact")
+    entries = data.get("derived") or []
+    if not isinstance(entries, list):
+        problems.append("derived phải là danh sách")
+        return out
+    for entry in entries:
+        name = entry.get("fact") if isinstance(entry, dict) else None
         if not isinstance(name, str) or not name:
-            problems.append(f"derived: mỗi mục cần `fact` là chuỗi, gặp {entry!r}")
+            problems.append(f"derived: mỗi mục phải là dict có `fact` là chuỗi, gặp {entry!r}")
             continue
         if name in out:
             problems.append(f"derived: trùng tên, dữ kiện suy ra {name!r} khai báo hai lần")
         if name in inputs:
-            problems.append(f"derived: {name!r} trùng tên dữ kiện đầu vào (document_facts / user_facts)")
+            problems.append(_CLASH.format(name))
         unit = entry.get("unit")
         if unit is not None and unit not in units:
             problems.append(f"derived: {name!r} có đơn vị lạ {unit!r}")
+        raw_defs = entry.get("definitions")
+        if not isinstance(raw_defs, list) or not raw_defs:
+            problems.append(f"derived {name!r}: definitions phải là danh sách không rỗng")
+            raw_defs = []
         defs, ids = [], set()
-        for raw in entry.get("definitions") or []:
-            did = str(raw.get("id"))
+        for raw in raw_defs:
+            if not isinstance(raw, dict) or not isinstance(raw.get("id"), str) or not raw.get("id"):
+                problems.append(f"derived {name!r}: mỗi định nghĩa phải là dict có `id` là chuỗi, gặp {raw!r}")
+                continue
+            did = raw["id"]
             where = f"derived {name!r} định nghĩa {did!r}"
             if did in ids:
                 problems.append(f"{where}: trùng id")
             ids.add(did)
+            when, exc = raw.get("when"), raw.get("exception_of")
+            if when is not None and not isinstance(when, dict):
+                problems.append(f"{where}: when phải là điều kiện (dict), gặp {when!r}")
+                when = None
+            if exc is not None and not isinstance(exc, str):
+                problems.append(f"{where}: exception_of phải là id định nghĩa (chuỗi), gặp {exc!r}")
+                exc = None
             has_from, has_value = raw.get("from") is not None, "value" in raw
             if has_from == has_value:
                 problems.append(f"{where}: cần đúng một trong `from` và `value`")
-            for leaf in leaves(raw.get("when")):
+            for leaf in leaves(when):
                 if leaf.get("op") not in OPS:
                     problems.append(f"{where}: toán tử {leaf.get('op')!r} không hợp lệ")
-            defs.append(Definition(did, raw.get("when"), raw.get("exception_of"), raw.get("from"), has_value,
-                                   raw.get("value"), tuple(raw.get("anchors") or ())))
+                if leaf.get("unit") is not None and leaf["unit"] not in units:
+                    problems.append(f"{where}: đơn vị {leaf['unit']!r} không hợp lệ")
+            defs.append(Definition(did, when, exc, raw.get("from"), has_value, raw.get("value"),
+                                   tuple(raw.get("anchors") or ())))
         for d in defs:
             if d.exception_of is not None and d.exception_of not in ids:
                 problems.append(f"derived {name!r} định nghĩa {d.id!r}: exception_of {d.exception_of!r} không có")
@@ -124,10 +147,19 @@ def load_pack(pack_id: str, *, root: Path = PACKS_ROOT) -> PackSpec:
             silences[name] = Silence(pair["applicable"], pair["unknown"])
     derived = _derived(data, names, set(document_facts) | user_facts, problems)
     _check_derived_cycles(derived, problems)
+    user_fact_units = data.get("user_fact_units") or {}
+    if not isinstance(user_fact_units, dict):
+        problems.append("user_fact_units phải là dict {dữ kiện: đơn vị}")
+        user_fact_units = {}
+    for name, unit in user_fact_units.items():
+        if name not in user_facts:
+            problems.append(f"user_fact_units: {name!r} không có trong user_facts")
+        if unit not in names:
+            problems.append(f"user_fact_units: dữ kiện {name!r} có đơn vị lạ {unit!r}")
     if problems:
         raise CatalogError(problems)
     return PackSpec(pack_id, str(data.get("version")), tuple(extends), tuple(kinds), Units(names, factors),
-                    document_facts, user_facts, findings, silences, derived)
+                    document_facts, user_facts, findings, silences, derived, dict(user_fact_units))
 
 
 # ── concepts.yaml ──
@@ -194,13 +226,17 @@ def _rule(c: dict, r: dict, pack: PackSpec, problems: list[str]) -> Rule:
         unstated = explicit
         if explicit and not fits:
             problems.append(f"{where}: unstated_false: true cần check dạng {{fact: <slot>, op: eq, value: false}}")
+    standalone = r.get("standalone", False)
+    if not isinstance(standalone, bool):
+        problems.append(f"{where}: standalone phải là true / false")
+        standalone = False
     exc = r.get("exception_of")
     if exc is not None and not (isinstance(exc, str) and exc.count("/") == 1 and all(exc.split("/"))):
         problems.append(f"{where}: exception_of {exc!r} phải có dạng <concept>/<rule>")
         exc = None
     return Rule(str(r.get("id")), r.get("mode"), r.get("derogation"), r.get("on_silence"), r.get("applicability"),
                 dict(r.get("law") or {}), tuple(r.get("cases") or ()), r.get("check"), dict(r.get("outcome") or {}),
-                unstated, exc)
+                unstated, exc, standalone)
 
 
 def _check_exceptions(concepts: Mapping[str, Concept], problems: list[str], *, strict: bool) -> None:
@@ -290,6 +326,7 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
     findings: set[str] = set()
     silences: dict[str, Silence] = dict(CORE_SILENCES)
     derived: dict[str, DerivedFact] = {}
+    user_fact_units: dict[str, str | None] = {}
     kinds: list[str] = []
     for s in specs:
         names |= s.units.names
@@ -303,6 +340,10 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
                 problems.append(f"document_facts: dữ kiện {name!r} có đơn vị khác nhau giữa các gói")
             document_facts[name] = unit
         user_facts |= s.user_facts
+        for name, unit in s.user_fact_units.items():
+            if name in user_fact_units and user_fact_units[name] != unit:
+                problems.append(f"user_fact_units: dữ kiện {name!r} có đơn vị mặc định khác nhau giữa các gói")
+            user_fact_units[name] = unit
         findings |= s.findings
         for name, silence in s.silences.items():
             if name in silences and silences[name] != silence:
@@ -314,9 +355,12 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
                 problems.append(f"derived: dữ kiện suy ra {name!r} trùng tên giữa các gói")
             derived[name] = df
     _check_derived_cycles(derived, problems)
+    for name in derived:
+        if name in document_facts or name in user_facts:
+            problems.append(_CLASH.format(name))
     return PackSpec("+".join(s.id for s in specs), "+".join(f"{s.id}@{s.version}" for s in specs), (), tuple(kinds),
                     Units(frozenset(names), factors), document_facts, frozenset(user_facts), frozenset(findings),
-                    silences, derived)
+                    silences, derived, user_fact_units)
 
 
 def load_packs(pack_ids: Sequence[str], *, root: Path = PACKS_ROOT) -> Catalog:

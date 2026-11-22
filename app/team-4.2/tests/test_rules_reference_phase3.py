@@ -99,3 +99,22 @@ def test_invariant_missing_fact_never_causes_fail(cat):
                 for key, status in results[small].items():
                     if status == "FAIL":
                         assert results[big][key] == "FAIL", (assign, small, big, key)
+
+
+def test_two_sibling_exceptions_one_unknown_never_turns_into_violation(tmp_path):
+    """Một ngoại lệ cho giá trị khác, ngoại lệ anh em chưa biết: bớt dữ kiện không được làm rule FAIL."""
+    pack = {"document_facts": {"kind": None}, "user_facts": ["a", "b"],
+            "derived": [{"fact": "k_eff", "definitions": [
+                {"id": "base", "from": "kind"},
+                {"id": "x", "exception_of": "base", "when": {"fact": "a", "op": "eq", "value": 1}, "value": "v1"},
+                {"id": "y", "exception_of": "base", "when": {"fact": "b", "op": "eq", "value": 1}, "value": "v2"}]}]}
+    write_pack(tmp_path, pack, [concept("c.a", [rule("r", check={"fact": "k_eff", "op": "eq", "value": "k0"})])],
+               pack_id="sib")
+    cat2 = load_packs(["sib"], root=tmp_path)
+
+    def status(facts):
+        out = reference.evaluate_all(cat2, {k: Fact(v) for k, v in facts.items()}, {"c.a"}, {}, DAY)
+        return out[0].status
+    assert status({"kind": "k0", "a": 1, "b": 1}) == "UNKNOWN"          # hai ngoại lệ khác giá trị: CONFLICT
+    assert status({"kind": "k0", "a": 1}) == "UNKNOWN"                   # y chưa biết: không được ra FAIL
+    assert status({"kind": "k0", "a": 1, "b": 2}) == "FAIL"             # y đã loại: x thắng, v1 != k0

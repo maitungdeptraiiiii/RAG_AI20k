@@ -110,3 +110,20 @@ def test_phase3_rules_pinned_by_law_text():
     exception = next(d for d in derived.definitions if d.id == "d20k2b")
     assert {"fact": "worked_after_expiry_days", "op": "gt", "value": 30, "unit": "day"} in exception.when["all"]
     assert {r.exception_of for r in term.rules if r.id in EXC} == {"content.term/r3"}
+
+
+def test_user_answers_get_default_units_from_the_pack():
+    """Trả lời `worked_after_expiry_days` bằng một con số (không đơn vị) vẫn được hiểu là ngày."""
+    from rag.bridge.check import user_fact_set
+    facts = user_fact_set({"worked_after_expiry_days": 45, "new_contract_signed": False, "contract_kind": XDTH})
+    assert (facts["worked_after_expiry_days"].value, facts["worked_after_expiry_days"].unit) == (45, "day")
+    assert facts["new_contract_signed"].unit is None
+    assert run(facts)["r4"].status == "FAIL"
+
+
+def test_limit_checked_even_when_term_clause_not_recognized():
+    """Số lần ký là dữ kiện người dùng cung cấp: không phụ thuộc điều khoản thời hạn có được nhận ra hay không."""
+    facts = {"contract_kind": Fact(XDTH), "fixed_term_contract_count": Fact(3), **NO_EXC}
+    r3 = run(facts, present=())["r3"]
+    assert (r3.status, r3.finding) == ("FAIL", "violation")
+    assert run({"contract_kind": Fact(XDTH), **NO_EXC}, present=())["r3"].status == "PASS"   # chưa có dữ kiện: như cũ

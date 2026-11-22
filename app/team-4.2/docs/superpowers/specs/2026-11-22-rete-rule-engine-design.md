@@ -177,9 +177,13 @@ Bộ nạp từ chối: phụ thuộc vòng giữa dữ kiện suy ra; `exceptio
 trùng tên dữ kiện đầu vào.
 
 *Chốt khi triển khai (giai đoạn 3, `rules/derived.py`):*
-- Con `CONFLICT` của một nút thắng mọi giá trị anh em (spec không nói; chọn thận trọng). Con `UNKNOWN` thua giá trị
-  (đúng chữ bước 1: một ngoại lệ đã cho giá trị thì dùng giá trị đó dù ngoại lệ anh em chưa biết).
+- Thứ tự ưu tiên trong một nhóm anh em: `CONFLICT` > `UNKNOWN` > giá trị > không áp dụng. **Lệch khỏi chữ bước 1** (ở đó
+  giá trị thắng `UNKNOWN`): một ngoại lệ chưa biết có thể cho giá trị khác, nên bỏ qua nó làm "bớt dữ kiện thành vi phạm"
+  (reviewer tìm ra ca: hai ngoại lệ anh em khác giá trị, bớt dữ kiện của một ngoại lệ thì rule `FAIL`). Bất biến §10 thắng.
 - Ngoại lệ cho giá trị hay `UNKNOWN` đều thắng gốc kể cả khi `when` của gốc là F (ngoại lệ không phụ thuộc điều kiện gốc).
+- Bộ nạp: tên dữ kiện suy ra không được trùng `document_facts` / `user_facts` của bất kỳ gói nào trong tập đã gộp.
+- Rule có thể khai `standalone: true` (phép kiểm chỉ dùng dữ kiện người dùng cung cấp): có dữ kiện là xét, kể cả khi khái
+  niệm không có mặt. `pack.yaml` có `user_fact_units` (đơn vị mặc định khi người dùng trả lời một con số).
 - Dữ kiện đầu vào truyền vào mà trùng tên dữ kiện suy ra bị bỏ qua ở cả hai evaluator; dữ kiện suy ra luôn do định nghĩa
   quyết định. `Fact.derived_by` ghi id định nghĩa thắng; `facts_used[<tên>].derived_by` đưa nó ra kết quả.
 - `missing_facts` mở dữ kiện suy ra thiếu / `UNKNOWN` thành dữ kiện đầu vào thiếu của định nghĩa có `when` khác F: tên

@@ -85,3 +85,12 @@ def test_copy_is_independent():
     assert clone.values[root] == "F" and state.values[root] == "T"
     state.update({"b"}, {"a": Fact(1), "b": Fact(0)}, CTX)      # bộ đếm của bản gốc vẫn đúng sau khi bản sao đổi
     assert state.values[root] == "T"
+
+
+def test_date_values_get_their_own_node_without_crashing():
+    import datetime as dt
+    g = CondGraph()
+    d = g.add({"fact": "start", "op": "gte", "value": dt.date(2021, 1, 1)})
+    s = g.add({"fact": "start", "op": "gte", "value": "2021-01-01"})
+    assert d is not None and s is not None and d != s
+    assert g.add({"fact": "start", "op": "gte", "value": dt.date(2021, 1, 1)}) == d

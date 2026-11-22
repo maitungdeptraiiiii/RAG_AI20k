@@ -15,8 +15,14 @@ from rag.rules.semantics import Facts, Tri, eval_cond
 _IDX = {"T": 0, "F": 1, "U": 2}
 
 
+def _tagged(value: object) -> dict:
+    """Giá trị YAML không phải JSON (ngày, giờ, ...): ghi kèm tên kiểu để ngày 2021-01-01 khác chuỗi "2021-01-01"."""
+    text = value.isoformat() if hasattr(value, "isoformat") else repr(value)
+    return {"__type__": type(value).__name__, "value": text}
+
+
 def cond_key(cond: dict) -> str:
-    return json.dumps(cond, sort_keys=True, ensure_ascii=False)
+    return json.dumps(cond, sort_keys=True, ensure_ascii=False, default=_tagged)
 
 
 @dataclass

@@ -1,0 +1,239 @@
+# Bản liệt kê rule lao động W04 (phần Tuấn, T1; định dạng tuan.md §2).
+# Người soạn: Claude theo yêu cầu của Tùng — CẦN TÙNG DUYỆT. tuan.md §4 cấm dùng LLM viết trích dẫn / kết luận pháp lý:
+#   - `quote`: chép từ data/team-4.2/legal/raw/bo-luat_45_2019_QH14/*.txt, test tests/test_rule_inventory.py kiểm nguyên văn.
+#   - `conclusion`, `exceptions[].condition`, `examples`, `open_questions`: do Claude viết, phải được người duyệt.
+# Kho luật KHÔNG có Nghị định 145/2020/NĐ-CP (hướng dẫn BLLĐ) và các nghị định lương tối thiểu vùng (38/2022, 74/2024,
+# 293/2025): mọi mục cần văn bản đó ghi ở open_questions.
+
+- id: labor.term_max_36_months
+  source:
+    pid: "bo-luat:45/2019/QH14#d20.k1.b"
+    quote: "Hợp đồng lao động xác định thời hạn là hợp đồng mà trong đó hai bên xác định thời hạn, thời điểm chấm dứt hiệu lực của hợp đồng trong thời gian không quá 36 tháng kể từ thời điểm có hiệu lực của hợp đồng."
+  type: threshold
+  kind: time_limit
+  derogation: mandatory
+  applies_when: "Hợp đồng là hợp đồng xác định thời hạn"
+  facts_needed:
+    - {name: contract_kind, kind: enum, from: contract}
+    - {name: term_months, kind: duration, unit: month, from: contract}
+  threshold: {value: 36, unit: month}
+  exceptions: []
+  conclusion: "Thời hạn ghi trong hợp đồng xác định thời hạn vượt 36 tháng là trái Đ20.1.b"
+  on_silence: none
+  derived_from: []
+  yaml_rule: content.term/r2
+  examples:
+    - {facts: {contract_kind: xac_dinh_thoi_han, term_months: 24}, expected: PASS}
+    - {facts: {contract_kind: xac_dinh_thoi_han, term_months: 48}, expected: FAIL}
+    - {facts: {contract_kind: xac_dinh_thoi_han}, expected: UNKNOWN, why: "hợp đồng không ghi thời hạn"}
+  open_questions: []
+
+- id: labor.sign_new_within_30_days
+  source:
+    pid: "bo-luat:45/2019/QH14#d20.k2.a"
+    quote: "Trong thời hạn 30 ngày kể từ ngày hợp đồng lao động hết hạn, hai bên phải ký kết hợp đồng lao động mới; trong thời gian chưa ký kết hợp đồng lao động mới thì quyền, nghĩa vụ và lợi ích của hai bên được thực hiện theo hợp đồng đã giao kết;"
+  type: required
+  kind: time_limit
+  derogation: mandatory
+  applies_when: "Hợp đồng xác định thời hạn đã hết hạn mà người lao động vẫn tiếp tục làm việc"
+  facts_needed:
+    - {name: contract_kind, kind: enum, from: contract}
+    - {name: worked_after_expiry_days, kind: duration, unit: day, from: dossier, note: "số ngày từ ngày hết hạn tới ngày ký HĐ mới (hoặc tới ngày soát nếu chưa ký)"}
+    - {name: new_contract_signed, kind: bool, from: dossier, note: "đã ký HĐ mới trong 30 ngày kể từ ngày hết hạn"}
+  threshold: {value: 30, unit: day}
+  exceptions: []
+  conclusion: "Hai bên phải ký HĐ mới trong 30 ngày; trong khi chưa ký, quyền và nghĩa vụ theo HĐ cũ. Hệ quả khi quá 30 ngày: xem labor.becomes_indefinite"
+  on_silence: none
+  derived_from: []
+  yaml_rule: "(gộp vào dữ kiện suy ra contract_kind_effective / kind_effective)"
+  examples:
+    - {facts: {contract_kind: xac_dinh_thoi_han, worked_after_expiry_days: 10, new_contract_signed: true}, expected: PASS}
+    - {facts: {contract_kind: xac_dinh_thoi_han, worked_after_expiry_days: 45, new_contract_signed: false}, expected: FAIL}
+    - {facts: {contract_kind: xac_dinh_thoi_han, worked_after_expiry_days: 45}, expected: UNKNOWN, why: "chưa biết đã ký HĐ mới chưa"}
+  open_questions:
+    - "Ngày hết hạn có tính là ngày 0 không (ca biên đúng 30 ngày)? Engine hiện coi 'quá 30 ngày' là worked_after_expiry_days > 30."
+
+- id: labor.becomes_indefinite
+  source:
+    pid: "bo-luat:45/2019/QH14#d20.k2.b"
+    quote: "Nếu hết thời hạn 30 ngày kể từ ngày hợp đồng lao động hết hạn mà hai bên không ký kết hợp đồng lao động mới thì hợp đồng đã giao kết theo quy định tại điểm b khoản 1 Điều này trở thành hợp đồng lao động không xác định thời hạn;"
+  type: derived
+  kind: none
+  derogation: mandatory
+  applies_when: "HĐ xác định thời hạn hết hạn, NLĐ vẫn làm việc, quá 30 ngày chưa ký HĐ mới"
+  facts_needed:
+    - {name: contract_kind, kind: enum, from: contract}
+    - {name: worked_after_expiry_days, kind: duration, unit: day, from: dossier}
+    - {name: new_contract_signed, kind: bool, from: dossier}
+  exceptions: []
+  conclusion: "Kết luận trung gian: loại hợp đồng hiệu lực = không xác định thời hạn (contract_kind_effective / kind_effective)"
+  on_silence: none
+  derived_from: [labor.sign_new_within_30_days]
+  yaml_rule: "pack.yaml derived contract_kind_effective (d20k2b); kind_effective theo Contract; rule content.term/r4, r6"
+  examples:
+    - {facts: {contract_kind: xac_dinh_thoi_han, worked_after_expiry_days: 45, new_contract_signed: false}, expected: khong_xac_dinh_thoi_han}
+    - {facts: {contract_kind: xac_dinh_thoi_han, worked_after_expiry_days: 20, new_contract_signed: false}, expected: xac_dinh_thoi_han}
+    - {facts: {contract_kind: xac_dinh_thoi_han, worked_after_expiry_days: 45}, expected: UNKNOWN, why: "chưa biết đã ký HĐ mới chưa"}
+  open_questions: []
+
+- id: labor.fixed_term_limit
+  source:
+    pid: "bo-luat:45/2019/QH14#d20.k2.c"
+    quote: "Trường hợp hai bên ký kết hợp đồng lao động mới là hợp đồng lao động xác định thời hạn thì cũng chỉ được ký thêm 01 lần, sau đó nếu người lao động vẫn tiếp tục làm việc thì phải ký kết hợp đồng lao động không xác định thời hạn"
+  type: threshold
+  kind: count_limit
+  derogation: mandatory
+  applies_when: "NLĐ ký liên tiếp các HĐ xác định thời hạn với cùng NSDLĐ"
+  facts_needed:
+    - {name: fixed_term_contract_count, kind: count, from: dossier, note: "số HĐ xác định thời hạn liên tiếp, kể cả HĐ đang soát"}
+    - {name: is_state_enterprise_director, kind: bool, from: user}
+    - {name: is_elderly_employee, kind: bool, from: user}
+    - {name: is_foreign_employee, kind: bool, from: user}
+    - {name: is_union_leader_in_term, kind: bool, from: user}
+  threshold: {value: 2, unit: count, note: "HĐ đầu + ký thêm 01 lần"}
+  exceptions:
+    - pid: "bo-luat:45/2019/QH14#d20.k2.c"
+      quote: "trừ hợp đồng lao động đối với người được thuê làm giám đốc trong doanh nghiệp có vốn nhà nước"
+      condition: "NLĐ được thuê làm giám đốc trong doanh nghiệp có vốn nhà nước"
+    - pid: "bo-luat:45/2019/QH14#d149.k1"
+      quote: "Khi sử dụng người lao động cao tuổi, hai bên có thể thỏa thuận giao kết nhiều lần hợp đồng lao động xác định thời hạn."
+      condition: "NLĐ cao tuổi"
+    - pid: "bo-luat:45/2019/QH14#d151.k2"
+      quote: "Khi sử dụng người lao động nước ngoài làm việc tại Việt Nam, hai bên có thể thỏa thuận giao kết nhiều lần hợp đồng lao động xác định thời hạn."
+      condition: "NLĐ nước ngoài làm việc tại Việt Nam"
+    - pid: "bo-luat:45/2019/QH14#d177.k4"
+      quote: "Phải gia hạn hợp đồng lao động đã giao kết đến hết nhiệm kỳ cho người lao động là thành viên ban lãnh đạo của tổ chức đại diện người lao động tại cơ sở đang trong nhiệm kỳ mà hết hạn hợp đồng lao động."
+      condition: "NLĐ là thành viên ban lãnh đạo tổ chức đại diện NLĐ tại cơ sở đang trong nhiệm kỳ"
+  conclusion: "Từ HĐ xác định thời hạn thứ ba trở đi (không thuộc ngoại lệ) là trái Đ20.2.c; phải ký HĐ không xác định thời hạn"
+  on_silence: none
+  derived_from: [labor.becomes_indefinite]
+  yaml_rule: "content.term/r3 (+ r3_* ngoại lệ, dữ kiện người dùng); content.term/r5 (đếm trên hồ sơ)"
+  examples:
+    - {facts: {fixed_term_contract_count: 2, is_elderly_employee: false, is_foreign_employee: false, is_state_enterprise_director: false, is_union_leader_in_term: false}, expected: PASS}
+    - {facts: {fixed_term_contract_count: 3, is_elderly_employee: false, is_foreign_employee: false, is_state_enterprise_director: false, is_union_leader_in_term: false}, expected: FAIL}
+    - {facts: {fixed_term_contract_count: 3}, expected: UNKNOWN, why: "chưa biết NLĐ có thuộc ngoại lệ nào không"}
+  open_questions:
+    - "'Liên tiếp': HĐ cách nhau một khoảng nghỉ dài có còn đếm không? Văn bản không nói; engine đếm mọi HĐ xác định thời hạn đã ký với NLĐ (history)."
+    - "HĐ đã tự chuyển thành không xác định thời hạn (Đ20.2.b) có tính vào số lần ký không? Engine (r5) chỉ đếm HĐ có loại hiệu lực là xác định thời hạn."
+    - "Đ177.4 là nghĩa vụ gia hạn đến hết nhiệm kỳ, không phải 'ký nhiều lần'; mô hình hóa thành ngoại lệ theo chữ cuối Đ20.2.c."
+
+- id: labor.appendix_no_term_change
+  source:
+    pid: "bo-luat:45/2019/QH14#d22.k2"
+    quote: "Phụ lục hợp đồng lao động quy định chi tiết, sửa đổi, bổ sung một số điều, khoản của hợp đồng lao động nhưng không được sửa đổi thời hạn của hợp đồng lao động."
+  type: prohibited
+  kind: none
+  derogation: mandatory
+  applies_when: "Hợp đồng lao động có phụ lục"
+  facts_needed:
+    - {name: modifies_term, kind: bool, from: contract, note: "thuộc tính của từng phụ lục (đối tượng Amendment)"}
+  exceptions: []
+  conclusion: "Phụ lục sửa thời hạn hợp đồng là trái Đ22.2, bất kể là lần thứ mấy (số lần được sửa: 0)"
+  on_silence: none
+  derived_from: []
+  yaml_rule: content.term/r7
+  examples:
+    - {facts: {modifies_term: false}, expected: PASS}
+    - {facts: {modifies_term: true}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "chưa xác định được phụ lục có sửa thời hạn không"}
+  open_questions:
+    - "tu.md (bảng bộ A) ghi 'Phụ lục 2 sửa thời hạn lần 1 — hợp lệ'. BLLĐ 2019 cấm sửa thời hạn bằng phụ lục (không có 'một lần'); quy định cho phép sửa thời hạn một lần là của BLLĐ 2012. Bộ A và gold theo văn bản 2019: cả phụ lục 2 và 3 đều vi phạm."
+    - "Đổi loại HĐ (xác định ↔ không xác định thời hạn) bằng phụ lục: Đ20.1 phân loại theo thời hạn nên đổi loại là sửa thời hạn → cũng bị cấm (suy luận, cần Tùng xác nhận)."
+
+- id: labor.appendix_states_clause_and_effective_date
+  source:
+    pid: "bo-luat:45/2019/QH14#d22.k2"
+    quote: "Trường hợp phụ lục hợp đồng lao động sửa đổi, bổ sung một số điều, khoản của hợp đồng lao động thì phải ghi rõ nội dung điều, khoản sửa đổi, bổ sung và thời điểm có hiệu lực."
+  type: required
+  kind: none
+  derogation: mandatory
+  applies_when: "Phụ lục sửa đổi, bổ sung điều khoản của hợp đồng"
+  facts_needed:
+    - {name: amendment_valid_from, kind: date, from: contract, note: "rag.contracts.amendments bắt câu 'hiệu lực (kể) từ ngày'"}
+    - {name: amendment_target_clause, kind: enum, from: contract}
+  exceptions: []
+  conclusion: "Phụ lục sửa đổi mà không ghi rõ điều khoản sửa hoặc thời điểm hiệu lực là thiếu nội dung bắt buộc"
+  on_silence: missing_content
+  derived_from: []
+  yaml_rule: "chưa có (đề xuất cho Tùng)"
+  examples:
+    - {facts: {amendment_valid_from: "2024-09-01", amendment_target_clause: "Điều 2"}, expected: PASS}
+    - {facts: {amendment_target_clause: "Điều 2"}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "chưa đọc được phụ lục"}
+  open_questions: []
+
+- id: labor.probation_once_per_job
+  source:
+    pid: "bo-luat:45/2019/QH14#d25"
+    quote: "Thời gian thử việc do hai bên thỏa thuận căn cứ vào tính chất và mức độ phức tạp của công việc nhưng chỉ được thử việc một lần đối với một công việc"
+  type: threshold
+  kind: count_limit
+  derogation: mandatory
+  applies_when: "Cùng NLĐ có nhiều HĐ có thử việc"
+  facts_needed:
+    - {name: has_probation, kind: bool, from: contract}
+    - {name: job, kind: enum, from: contract, note: "chức danh chuyên môn ghi trong HĐ"}
+  threshold: {value: 1, unit: count}
+  exceptions: []
+  conclusion: "Thử việc lần hai cho cùng công việc là trái Đ25"
+  on_silence: none
+  derived_from: []
+  yaml_rule: "probation.once/r1 (điều khoản gia hạn thử việc), probation.once/r2 (đếm trên hồ sơ)"
+  examples:
+    - {facts: {probations_same_job: 1}, expected: PASS}
+    - {facts: {probations_same_job: 2}, expected: FAIL}
+    - {facts: {probations_same_job: 2, job_known: false}, expected: UNKNOWN, why: "không xác định được hai HĐ có cùng công việc không"}
+  open_questions:
+    - "Đ25 không định nghĩa 'một công việc'. Engine dùng chức danh chuyên môn (thuộc tính job). Đổi tên chức danh mà cùng nội dung công việc thì không bắt được."
+
+- id: labor.probation_max_duration
+  source:
+    pid: "bo-luat:45/2019/QH14#d25.k2"
+    quote: "Không quá 60 ngày đối với công việc có chức danh nghề nghiệp cần trình độ chuyên môn, kỹ thuật từ cao đẳng trở lên;"
+  type: threshold
+  kind: time_limit
+  derogation: floor
+  applies_when: "Hợp đồng có thử việc"
+  facts_needed:
+    - {name: has_probation, kind: bool, from: contract}
+    - {name: job_level, kind: enum, from: contract}
+    - {name: probation_length, kind: duration, unit: day, from: contract}
+  threshold: {note: "180 / 60 / 30 ngày / 06 ngày làm việc theo Đ25.1–4"}
+  exceptions:
+    - pid: "bo-luat:45/2019/QH14#d24.k3"
+      quote: "Không áp dụng thử việc đối với người lao động giao kết hợp đồng lao động có thời hạn dưới 01 tháng."
+      condition: "HĐ thời hạn dưới 01 tháng: không được thử việc"
+  conclusion: "Thời gian thử việc vượt mức tối đa theo trình độ công việc là trái Đ25"
+  on_silence: none
+  derived_from: []
+  yaml_rule: probation.duration/r1
+  examples:
+    - {facts: {has_probation: true, job_level: cao_dang_tro_len, probation_length: 60}, expected: PASS}
+    - {facts: {has_probation: true, job_level: cao_dang_tro_len, probation_length: 70}, expected: FAIL}
+    - {facts: {has_probation: true, probation_length: 70}, expected: UNKNOWN, why: "chưa biết trình độ công việc"}
+  open_questions:
+    - "Ngoại lệ Đ24.3 (HĐ dưới 01 tháng) chưa có rule trong pack."
+
+- id: labor.minimum_wage
+  source:
+    pid: "bo-luat:45/2019/QH14#d90.k2"
+    quote: "Mức lương theo công việc hoặc chức danh không được thấp hơn mức lương tối thiểu."
+  type: threshold
+  kind: payment
+  derogation: floor
+  applies_when: "Mọi hợp đồng lao động"
+  facts_needed:
+    - {name: base_salary_vnd, kind: money, unit: vnd, from: contract}
+    - {name: wage_region, kind: enum, from: user}
+  threshold: {note: "theo vùng, do Chính phủ công bố (Đ91.4) — số trong pack chưa đối chiếu nghị định"}
+  exceptions: []
+  conclusion: "Lương theo công việc thấp hơn lương tối thiểu vùng tại ngày soát là trái Đ90.2"
+  on_silence: none
+  derived_from: []
+  yaml_rule: wage.minimum_regional/r1
+  examples:
+    - {facts: {base_salary_vnd: 5000000, wage_region: I, day: "2025-03-01"}, expected: PASS}
+    - {facts: {base_salary_vnd: 4700000, wage_region: I, day: "2025-03-01"}, expected: FAIL}
+    - {facts: {base_salary_vnd: 4700000}, expected: UNKNOWN, why: "chưa biết vùng lương"}
+  open_questions:
+    - "Kho luật không có NĐ 38/2022, 74/2024, 293/2025: mức lương tối thiểu vùng trong pack (4.680.000 / 4.960.000 / 5.310.000 vùng I) là số người viết nhớ, CHƯA đối chiếu văn bản. Nhãn gold dựa vào các số này ghi basis.verified: false."

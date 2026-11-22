@@ -1,0 +1,70 @@
+# Danh sách `kind` (phần Tuấn, T4): gom concept theo dạng pháp lý, mỗi kind có slot chung.
+# Người soạn: Claude theo yêu cầu của Tùng — CẦN TÙNG DUYỆT. Gói từ 39 concept lao động (packs/labor/concepts.yaml),
+# kiểm với concept dân sự (civil_general, civil_loan). Engine chỉ kiểm theo LOẠI slot (`concept_kinds.slot_kinds`
+# trong pack.yaml), không ép tên slot; tên slot dưới đây là đề xuất cho tagger / prompt trích của Huy.
+
+kinds:
+  required_content:
+    describe: "Nội dung bắt buộc phải có trong hợp đồng (BLLĐ Đ21.1); vi phạm = thiếu nội dung"
+    slots: [{name: present, kind: bool}]
+    concepts: [content.party_info, content.job_and_workplace, content.wage_terms, content.raise_policy, content.hours_rest,
+               content.protective_equipment, content.training]
+
+  time_limit:
+    describe: "Một khoảng thời gian có trần / sàn luật định (thời hạn, thời gian thử việc, giờ làm, kỳ hạn thanh toán)"
+    slots: [{name: duration, kind: duration, unit: "day | hour | month | workday"}]
+    concepts: [content.term, probation.duration, hours.normal, hours.overtime_limit, rest.weekly,
+               termination.settlement_deadline, wage.pay_period]
+
+  leave_entitlement:
+    describe: "Số ngày nghỉ người lao động được hưởng (sàn luật định)"
+    slots: [{name: days, kind: duration, unit: day}]
+    concepts: [leave.annual, leave.personal_paid, rest.holidays, maternity.leave]
+
+  payment:
+    describe: "Khoản tiền hoặc tỉ lệ tiền phải trả, có sàn luật định"
+    slots: [{name: amount, kind: money, unit: vnd}, {name: rate, kind: percent, unit: percent}]
+    concepts: [wage.minimum_regional, wage.overtime_pay, wage.night_pay, probation.pay, wage.deduction_limit]
+
+  notice:
+    describe: "Thời hạn báo trước / nghĩa vụ thông báo"
+    slots: [{name: notice_period, kind: duration, unit: day}]
+    concepts: [termination.employee_unilateral, termination.employer_unilateral, probation.cancel_no_notice]
+
+  prohibited_practice:
+    describe: "Hành vi bị cấm ghi trong hợp đồng (slot bool = hợp đồng có hành vi đó)"
+    slots: [{name: practice_present, kind: bool}]
+    concepts: [prohibit.keep_documents, prohibit.deposit, prohibit.fine_instead_of_discipline, content.insurance,
+               training.cost_repayment, termination.severance, maternity.no_dismissal]
+
+  count_limit:
+    describe: "Giới hạn số lần (ký HĐ xác định thời hạn, thử việc một lần một công việc); thường cần nhiều văn bản"
+    slots: [{name: count, kind: enum, note: "đếm trên hồ sơ (rule xuyên đối tượng) hoặc dữ kiện người dùng"}]
+    concepts: [probation.once]
+
+  rate_cap:
+    describe: "Tỉ lệ có trần (lãi suất). Dân sự: loan.interest_cap"
+    slots: [{name: rate, kind: percent, unit: percent_per_year}]
+    concepts: []
+
+  penalty:
+    describe: "Phạt vi phạm, lãi chậm trả (dân sự, inventory civil_*)"
+    slots: [{name: rate, kind: percent}, {name: amount, kind: money, unit: vnd}]
+    concepts: []
+
+  termination:
+    describe: "Quyền chấm dứt / trả trước hạn / đòi lại tài sản (dân sự)"
+    slots: [{name: allowed, kind: bool}]
+    concepts: []
+
+not_fitting:
+  - {concept: maternity.no_night_overtime_travel, why: "Bảo vệ theo tình trạng NLĐ (mang thai, nuôi con nhỏ) — dữ kiện người dùng, không có slot trên hợp đồng"}
+  - {concept: maternity.lighter_work, why: "Như trên; là quyền yêu cầu của NLĐ, hợp đồng thường không ghi"}
+  - {concept: maternity.breaks, why: "Như trên"}
+  - {concept: maternity.terminate_or_suspend, why: "Quyền đơn phương của NLĐ mang thai kèm giấy y tế — không phải điều khoản hợp đồng"}
+  - {concept: maternity.job_guarantee, why: "Nghĩa vụ sau thai sản, kiểm được chỉ khi có sự kiện quay lại làm việc"}
+
+open_questions:
+  - "content.term vừa là required_content (r1) vừa có time_limit (r2) và count_limit (r3, r5): xếp vào time_limit; một concept chỉ có một kind."
+  - "wage.deduction_limit có cả rate (payment) và hành vi cấm (khấu trừ ngoài bồi thường): xếp payment."
+  - "termination.severance (slot waives_severance) xếp prohibited_practice vì rule kiểm điều khoản từ bỏ trợ cấp."

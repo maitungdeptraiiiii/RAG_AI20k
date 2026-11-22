@@ -1,0 +1,259 @@
+# Bản liệt kê rule hợp đồng vay tài sản (phần Tuấn, T3; BLDS 91/2015/QH13 Đ463–471, Đ357).
+# Người soạn: Claude theo yêu cầu của Tùng — CẦN TÙNG DUYỆT (xem đầu labor_w04.yaml). Quote kiểm bằng tests/test_rule_inventory.py.
+# Quan hệ với Luật các tổ chức tín dụng: chỉ ghi nhận là ngoại lệ (Đ468.1 "trừ trường hợp luật khác có liên quan quy định khác").
+
+- id: civil_loan.interest_cap
+  source:
+    pid: "bo-luat:91/2015/QH13#d468.k1"
+    quote: "Trường hợp các bên có thỏa thuận về lãi suất thì lãi suất theo thỏa thuận không được vượt quá 20%/năm của khoản tiền vay, trừ trường hợp luật khác có liên quan quy định khác."
+  type: threshold
+  kind: rate_cap
+  derogation: ceiling
+  applies_when: "Hợp đồng vay có thỏa thuận lãi suất"
+  facts_needed:
+    - {name: interest_rate, kind: percent, unit: percent_per_year, from: contract, note: "ghi theo tháng thì quy đổi ×12"}
+    - {name: special_law_applies, kind: bool, from: user, note: "vd. bên cho vay là tổ chức tín dụng"}
+  threshold: {value: 20, unit: percent_per_year}
+  exceptions:
+    - pid: "bo-luat:91/2015/QH13#d468.k1"
+      quote: "trừ trường hợp luật khác có liên quan quy định khác"
+      condition: "Giao dịch chịu luật chuyên ngành quy định khác (vd. cho vay của tổ chức tín dụng)"
+  conclusion: "Lãi suất thỏa thuận vượt 20%/năm: phần vượt không có hiệu lực (xem civil_loan.excess_interest_void)"
+  on_silence: none
+  derived_from: []
+  yaml_rule: "loan.interest_cap/r1 (+ r1_special_law)"
+  examples:
+    - {facts: {interest_rate: 18, special_law_applies: false}, expected: PASS}
+    - {facts: {interest_rate: 24, special_law_applies: false}, expected: FAIL}
+    - {facts: {interest_rate: 24}, expected: UNKNOWN, why: "chưa biết có luật chuyên ngành áp dụng không"}
+  open_questions:
+    - "Đ468.1 cho phép UBTVQH điều chỉnh mức 20%; kho chưa có nghị quyết điều chỉnh nào."
+
+- id: civil_loan.excess_interest_void
+  source:
+    pid: "bo-luat:91/2015/QH13#d468.k1"
+    quote: "Trường hợp lãi suất theo thỏa thuận vượt quá lãi suất giới hạn được quy định tại khoản này thì mức lãi suất vượt quá không có hiệu lực."
+  type: derived
+  kind: rate_cap
+  derogation: mandatory
+  applies_when: "Lãi suất thỏa thuận vượt trần"
+  facts_needed:
+    - {name: interest_rate, kind: percent, unit: percent_per_year, from: contract}
+  exceptions: []
+  conclusion: "Kết luận trung gian: lãi suất có hiệu lực = min(lãi thỏa thuận, 20%/năm); hợp đồng không vô hiệu toàn bộ"
+  on_silence: none
+  derived_from: [civil_loan.interest_cap]
+  yaml_rule: "chưa có (đề xuất: derived effective_interest_rate)"
+  examples:
+    - {facts: {interest_rate: 24}, expected: 20}
+    - {facts: {interest_rate: 15}, expected: 15}
+  open_questions: []
+
+- id: civil_loan.interest_only_if_agreed
+  source:
+    pid: "bo-luat:91/2015/QH13#d463"
+    quote: "khi đến hạn trả, bên vay phải hoàn trả cho bên cho vay tài sản cùng loại theo đúng số lượng, chất lượng và chỉ phải trả lãi nếu có thoả thuận hoặc pháp luật có quy định."
+  type: default
+  kind: payment
+  derogation: default
+  applies_when: "Mọi hợp đồng vay tài sản"
+  facts_needed:
+    - {name: interest_agreed, kind: bool, from: contract}
+  exceptions: []
+  conclusion: "Hợp đồng không thỏa thuận lãi thì bên vay không phải trả lãi (trừ pháp luật quy định, vd. lãi chậm trả Đ466.4)"
+  on_silence: default_applies
+  derived_from: []
+  yaml_rule: "chưa có"
+  examples:
+    - {facts: {interest_agreed: true}, expected: PASS}
+    - {facts: {interest_agreed: false, lender_demands_interest: true}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "chưa đọc được điều khoản lãi"}
+  open_questions: []
+
+- id: civil_loan.unclear_rate_half_cap
+  source:
+    pid: "bo-luat:91/2015/QH13#d468.k2"
+    quote: "Trường hợp các bên có thoả thuận về việc trả lãi, nhưng không xác định rõ lãi suất và có tranh chấp về lãi suất thì lãi suất được xác định bằng 50% mức lãi suất giới hạn quy định tại khoản 1 Điều này tại thời điểm trả nợ."
+  type: derived
+  kind: rate_cap
+  derogation: mandatory
+  applies_when: "Có thỏa thuận trả lãi nhưng không ghi rõ lãi suất, và có tranh chấp"
+  facts_needed:
+    - {name: interest_agreed, kind: bool, from: contract}
+    - {name: interest_rate, kind: percent, unit: percent_per_year, from: contract}
+    - {name: interest_dispute, kind: bool, from: user}
+  exceptions: []
+  conclusion: "Kết luận trung gian: lãi suất áp dụng = 10%/năm (50% của 20%)"
+  on_silence: none
+  derived_from: [civil_loan.interest_cap]
+  yaml_rule: "chưa có"
+  examples:
+    - {facts: {interest_agreed: true, interest_dispute: true}, expected: 10}
+    - {facts: {interest_agreed: true, interest_rate: 12, interest_dispute: true}, expected: 12}
+  open_questions: []
+
+- id: civil_loan.late_interest_no_interest_loan
+  source:
+    pid: "bo-luat:91/2015/QH13#d466.k4"
+    quote: "Trường hợp vay không có lãi mà khi đến hạn bên vay không trả nợ hoặc trả không đầy đủ thì bên cho vay có quyền yêu cầu trả tiền lãi với mức lãi suất theo quy định tại khoản 2 Điều 468 của Bộ luật này trên số tiền chậm trả tương ứng với thời gian chậm trả, trừ trường hợp có thoả thuận khác hoặc luật có quy định khác."
+  type: default
+  kind: penalty
+  derogation: default
+  applies_when: "Vay không lãi, quá hạn chưa trả"
+  facts_needed:
+    - {name: late_interest_rate, kind: percent, unit: percent_per_year, from: contract}
+  threshold: {value: 10, unit: percent_per_year, note: "mức Đ468.2 khi hợp đồng không thỏa thuận khác"}
+  exceptions:
+    - pid: "bo-luat:91/2015/QH13#d466.k4"
+      quote: "trừ trường hợp có thoả thuận khác hoặc luật có quy định khác"
+      condition: "Hợp đồng có thỏa thuận khác về lãi chậm trả"
+  conclusion: "Không thỏa thuận: lãi chậm trả theo 50% trần; có thỏa thuận: theo thỏa thuận nhưng không vượt trần (Đ357.2)"
+  on_silence: default_applies
+  derived_from: [civil_loan.unclear_rate_half_cap]
+  yaml_rule: "chưa có"
+  examples:
+    - {facts: {late_interest_rate: 10}, expected: PASS}
+    - {facts: {late_interest_rate: 25}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "hợp đồng không nói: áp mức mặc định, cần biết thời gian chậm trả"}
+  open_questions: []
+
+- id: civil_loan.late_payment_interest_cap
+  source:
+    pid: "bo-luat:91/2015/QH13#d357.k2"
+    quote: "Lãi suất phát sinh do chậm trả tiền được xác định theo thỏa thuận của các bên nhưng không được vượt quá mức lãi suất được quy định tại khoản 1 Điều 468 của Bộ luật này; nếu không có thỏa thuận thì thực hiện theo quy định tại khoản 2 Điều 468 của Bộ luật này."
+  type: threshold
+  kind: rate_cap
+  derogation: ceiling
+  applies_when: "Hợp đồng có điều khoản lãi chậm trả"
+  facts_needed:
+    - {name: late_interest_rate, kind: percent, unit: percent_per_year, from: contract}
+  threshold: {value: 20, unit: percent_per_year}
+  exceptions: []
+  conclusion: "Lãi chậm trả thỏa thuận vượt 20%/năm là vượt trần Đ357.2"
+  on_silence: none
+  derived_from: []
+  yaml_rule: "chưa có"
+  examples:
+    - {facts: {late_interest_rate: 15}, expected: PASS}
+    - {facts: {late_interest_rate: 30}, expected: FAIL}
+    - {facts: {late_interest_rate: 2}, expected: UNKNOWN, why: "không ghi theo tháng hay theo năm"}
+  open_questions: []
+
+- id: civil_loan.overdue_principal_150
+  source:
+    pid: "bo-luat:91/2015/QH13#d466.k5.b"
+    quote: "Lãi trên nợ gốc quá hạn chưa trả bằng 150% lãi suất vay theo hợp đồng tương ứng với thời gian chậm trả, trừ trường hợp có thoả thuận khác."
+  type: default
+  kind: penalty
+  derogation: default
+  applies_when: "Vay có lãi, nợ gốc quá hạn chưa trả"
+  facts_needed:
+    - {name: interest_rate, kind: percent, unit: percent_per_year, from: contract}
+    - {name: overdue_principal_rate, kind: percent, unit: percent_per_year, from: contract}
+  exceptions:
+    - pid: "bo-luat:91/2015/QH13#d466.k5.b"
+      quote: "trừ trường hợp có thoả thuận khác"
+      condition: "Hợp đồng có thỏa thuận khác về lãi nợ gốc quá hạn"
+  conclusion: "Không thỏa thuận: lãi nợ gốc quá hạn = 150% lãi vay"
+  on_silence: default_applies
+  derived_from: []
+  yaml_rule: "chưa có"
+  examples:
+    - {facts: {interest_rate: 12, overdue_principal_rate: 18}, expected: PASS}
+    - {facts: {interest_rate: 12, overdue_principal_rate: 18, agreed_otherwise: false, applied_rate: 24}, expected: FAIL}
+    - {facts: {interest_rate: 12}, expected: UNKNOWN, why: "hợp đồng không nói: mức mặc định 18%/năm, chưa có dữ kiện áp dụng"}
+  open_questions:
+    - "150% × lãi vay có thể vượt 20%/năm (vd. lãi 15% → 22,5%): Đ466.5.b có bị chặn bởi trần Đ468.1 không? Văn bản không nói rõ."
+
+- id: civil_loan.early_repayment_interest_loan
+  source:
+    pid: "bo-luat:91/2015/QH13#d470.k2"
+    quote: "Đối với hợp đồng vay có kỳ hạn và có lãi thì bên vay có quyền trả lại tài sản trước kỳ hạn, nhưng phải trả toàn bộ lãi theo kỳ hạn, trừ trường hợp có thoả thuận khác hoặc luật có quy định khác."
+  type: default
+  kind: termination
+  derogation: default
+  applies_when: "Vay có kỳ hạn và có lãi"
+  facts_needed:
+    - {name: borrower_may_repay_early, kind: bool, from: contract}
+  exceptions:
+    - pid: "bo-luat:91/2015/QH13#d470.k2"
+      quote: "trừ trường hợp có thoả thuận khác hoặc luật có quy định khác"
+      condition: "Hợp đồng thỏa thuận khác về lãi khi trả trước hạn"
+  conclusion: "Bên vay được trả trước hạn; mặc định vẫn phải trả toàn bộ lãi theo kỳ hạn"
+  on_silence: default_applies
+  derived_from: []
+  yaml_rule: "chưa có"
+  examples:
+    - {facts: {borrower_may_repay_early: true}, expected: PASS}
+    - {facts: {borrower_may_repay_early: false}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "hợp đồng không nói: quyền mặc định vẫn còn"}
+  open_questions:
+    - "Điều khoản cấm hẳn trả trước hạn có trái Đ470.2 không, hay là 'thỏa thuận khác' hợp lệ? Câu 'trừ trường hợp có thỏa thuận khác' có thể chỉ áp cho phần lãi."
+
+- id: civil_loan.early_repayment_no_interest
+  source:
+    pid: "bo-luat:91/2015/QH13#d470.k1"
+    quote: "Đối với hợp đồng vay có kỳ hạn và không có lãi thì bên vay có quyền trả lại tài sản bất cứ lúc nào, nhưng phải báo trước cho bên cho vay một thời gian hợp lý, còn bên cho vay chỉ được đòi lại tài sản trước kỳ hạn, nếu được bên vay đồng ý."
+  type: required
+  kind: termination
+  derogation: mandatory
+  applies_when: "Vay có kỳ hạn, không lãi"
+  facts_needed:
+    - {name: lender_may_recall_early_without_consent, kind: bool, from: contract}
+  exceptions: []
+  conclusion: "Điều khoản cho bên cho vay đòi lại trước hạn mà không cần bên vay đồng ý là trái Đ470.1"
+  on_silence: none
+  derived_from: []
+  yaml_rule: "chưa có"
+  examples:
+    - {facts: {lender_may_recall_early_without_consent: false}, expected: PASS}
+    - {facts: {lender_may_recall_early_without_consent: true}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "chưa xác định hợp đồng có lãi hay không"}
+  open_questions:
+    - "Đ470.1 không ghi 'trừ trường hợp có thỏa thuận khác'; vẫn cần xác nhận đây là quy định bắt buộc."
+
+- id: civil_loan.lender_no_early_demand
+  source:
+    pid: "bo-luat:91/2015/QH13#d465.k3"
+    quote: "Không được yêu cầu bên vay trả lại tài sản trước thời hạn, trừ trường hợp quy định tại Điều 470 của Bộ luật này hoặc luật khác có liên quan quy định khác."
+  type: prohibited
+  kind: termination
+  derogation: mandatory
+  applies_when: "Vay có kỳ hạn"
+  facts_needed:
+    - {name: lender_may_recall_early_without_consent, kind: bool, from: contract}
+  exceptions:
+    - pid: "bo-luat:91/2015/QH13#d467"
+      quote: "Bên cho vay có quyền kiểm tra việc sử dụng tài sản và có quyền đòi lại tài sản vay trước thời hạn nếu đã nhắc nhở mà bên vay vẫn sử dụng tài sản trái mục đích."
+      condition: "Hợp đồng có thỏa thuận mục đích vay và bên vay dùng trái mục đích sau khi đã được nhắc"
+  conclusion: "Bên cho vay không được đòi trước hạn, trừ các trường hợp luật cho phép"
+  on_silence: none
+  derived_from: []
+  yaml_rule: "chưa có"
+  examples:
+    - {facts: {lender_may_recall_early_without_consent: false}, expected: PASS}
+    - {facts: {lender_may_recall_early_without_consent: true, misuse_after_warning_clause: false}, expected: FAIL}
+    - {facts: {lender_may_recall_early_without_consent: true}, expected: UNKNOWN, why: "chưa biết điều khoản có gắn với dùng sai mục đích không"}
+  open_questions: []
+
+- id: civil_loan.ho_hui_interest
+  source:
+    pid: "bo-luat:91/2015/QH13#d471.k3"
+    quote: "Trường hợp việc tổ chức họ có lãi thì mức lãi suất phải tuân theo quy định của Bộ luật này."
+  type: threshold
+  kind: rate_cap
+  derogation: ceiling
+  applies_when: "Họ, hụi, biêu, phường có lãi"
+  facts_needed:
+    - {name: interest_rate, kind: percent, unit: percent_per_year, from: contract}
+  threshold: {value: 20, unit: percent_per_year}
+  exceptions: []
+  conclusion: "Lãi của họ cũng chịu trần Đ468.1"
+  on_silence: none
+  derived_from: [civil_loan.interest_cap]
+  yaml_rule: "ngoài phạm vi W04 (không có hợp đồng mẫu)"
+  examples:
+    - {facts: {interest_rate: 15}, expected: PASS}
+    - {facts: {interest_rate: 30}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "không có dữ kiện lãi"}
+  open_questions: []

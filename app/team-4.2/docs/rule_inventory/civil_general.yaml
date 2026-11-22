@@ -1,0 +1,215 @@
+# Bản liệt kê rule dân sự chung về hợp đồng (phần Tuấn, T2; BLDS 91/2015/QH13).
+# Chỉ lấy quy định kiểm được trên văn bản hợp đồng. Người soạn: Claude theo yêu cầu của Tùng — CẦN TÙNG DUYỆT.
+
+- id: civil.form_required_by_law
+  source:
+    pid: "bo-luat:91/2015/QH13#d119.k2"
+    quote: "Trường hợp luật quy định giao dịch dân sự phải được thể hiện bằng văn bản có công chứng, chứng thực, đăng ký thì phải tuân theo quy định đó."
+  type: required
+  kind: none
+  derogation: mandatory
+  applies_when: "Loại hợp đồng mà luật chuyên ngành bắt buộc công chứng / chứng thực / đăng ký (vd. một số giao dịch nhà ở)"
+  facts_needed:
+    - {name: form_requirement, kind: enum, from: user, note: "luật chuyên ngành của loại hợp đồng"}
+    - {name: notarized, kind: bool, from: contract}
+  exceptions: []
+  conclusion: "Thiếu công chứng / chứng thực / đăng ký mà luật bắt buộc thì vi phạm điều kiện hình thức"
+  on_silence: none
+  derived_from: []
+  yaml_rule: "chưa có (cần luật chuyên ngành: Luật Nhà ở 27/2023 chưa đọc)"
+  examples:
+    - {facts: {form_requirement: notarized, notarized: true}, expected: PASS}
+    - {facts: {form_requirement: notarized, notarized: false}, expected: FAIL}
+    - {facts: {notarized: false}, expected: UNKNOWN, why: "chưa biết luật có bắt buộc công chứng loại hợp đồng này không"}
+  open_questions:
+    - "Hình thức chung theo Đ119.1 là tự do (lời nói, văn bản, hành vi); chỉ kiểm được khi biết luật chuyên ngành đòi hình thức gì."
+
+- id: civil.appendix_not_contrary
+  source:
+    pid: "bo-luat:91/2015/QH13#d403.k2"
+    quote: "Trường hợp phụ lục hợp đồng có điều khoản trái với nội dung của điều khoản trong hợp đồng thì điều khoản này không có hiệu lực, trừ trường hợp có thỏa thuận khác."
+  type: default
+  kind: none
+  derogation: default
+  applies_when: "Hợp đồng có phụ lục"
+  facts_needed:
+    - {name: appendix_contradicts_contract, kind: bool, from: contract}
+    - {name: parties_accepted_change, kind: bool, from: contract}
+  exceptions:
+    - pid: "bo-luat:91/2015/QH13#d403.k2"
+      quote: "Trường hợp các bên chấp nhận phụ lục hợp đồng có điều khoản trái với điều khoản trong hợp đồng thì coi như điều khoản đó trong hợp đồng đã được sửa đổi."
+      condition: "Các bên chấp nhận phụ lục trái hợp đồng"
+  conclusion: "Phụ lục trái hợp đồng: điều khoản phụ lục không có hiệu lực, trừ khi các bên chấp nhận (khi đó coi như sửa hợp đồng)"
+  on_silence: none
+  derived_from: []
+  yaml_rule: "chưa có"
+  examples:
+    - {facts: {appendix_contradicts_contract: false}, expected: PASS}
+    - {facts: {appendix_contradicts_contract: true, parties_accepted_change: false}, expected: FAIL}
+    - {facts: {appendix_contradicts_contract: true}, expected: UNKNOWN, why: "chưa biết các bên có chấp nhận phụ lục không"}
+  open_questions:
+    - "Với hợp đồng lao động, Đ22 BLLĐ là quy định chuyên ngành (phụ lục quy định chi tiết dẫn tới cách hiểu khác thì theo HĐ)."
+
+- id: civil.adhesion_exemption_void
+  source:
+    pid: "bo-luat:91/2015/QH13#d405.k3"
+    quote: "Trường hợp hợp đồng theo mẫu có điều khoản miễn trách nhiệm của bên đưa ra hợp đồng theo mẫu, tăng trách nhiệm hoặc loại bỏ quyền lợi chính đáng của bên kia thì điều khoản này không có hiệu lực, trừ trường hợp có thỏa thuận khác."
+  type: prohibited
+  kind: none
+  derogation: default
+  applies_when: "Hợp đồng theo mẫu"
+  facts_needed:
+    - {name: is_adhesion_contract, kind: bool, from: user}
+    - {name: drafter_exempts_own_liability, kind: bool, from: contract}
+  exceptions:
+    - pid: "bo-luat:91/2015/QH13#d405.k3"
+      quote: "trừ trường hợp có thỏa thuận khác"
+      condition: "Hai bên có thỏa thuận khác"
+  conclusion: "Điều khoản miễn trách nhiệm cho bên soạn mẫu / tăng trách nhiệm / bỏ quyền lợi bên kia không có hiệu lực"
+  on_silence: none
+  derived_from: []
+  yaml_rule: "chưa có"
+  examples:
+    - {facts: {is_adhesion_contract: true, drafter_exempts_own_liability: false}, expected: PASS}
+    - {facts: {is_adhesion_contract: true, drafter_exempts_own_liability: true}, expected: FAIL}
+    - {facts: {drafter_exempts_own_liability: true}, expected: UNKNOWN, why: "chưa biết có phải hợp đồng theo mẫu không"}
+  open_questions:
+    - "'Trừ trường hợp có thỏa thuận khác' trong hợp đồng theo mẫu khó phân biệt với chính điều khoản mẫu; cần người làm pháp lý xem."
+
+- id: civil.general_conditions_exemption_void
+  source:
+    pid: "bo-luat:91/2015/QH13#d406.k3"
+    quote: "Trường hợp điều kiện giao dịch chung có quy định về miễn trách nhiệm của bên đưa ra điều kiện giao dịch chung, tăng trách nhiệm hoặc loại bỏ quyền lợi chính đáng của bên kia thì quy định này không có hiệu lực, trừ trường hợp có thỏa thuận khác."
+  type: prohibited
+  kind: none
+  derogation: default
+  applies_when: "Hợp đồng dẫn chiếu điều kiện giao dịch chung"
+  facts_needed:
+    - {name: uses_general_conditions, kind: bool, from: contract}
+    - {name: drafter_exempts_own_liability, kind: bool, from: contract}
+  exceptions:
+    - pid: "bo-luat:91/2015/QH13#d406.k3"
+      quote: "trừ trường hợp có thỏa thuận khác"
+      condition: "Hai bên có thỏa thuận khác"
+  conclusion: "Như civil.adhesion_exemption_void, áp cho điều kiện giao dịch chung"
+  on_silence: none
+  derived_from: []
+  yaml_rule: "chưa có"
+  examples:
+    - {facts: {uses_general_conditions: true, drafter_exempts_own_liability: false}, expected: PASS}
+    - {facts: {uses_general_conditions: true, drafter_exempts_own_liability: true}, expected: FAIL}
+    - {facts: {drafter_exempts_own_liability: true}, expected: UNKNOWN, why: "chưa biết có dùng điều kiện giao dịch chung không"}
+  open_questions: []
+
+- id: civil.penalty_amount
+  source:
+    pid: "bo-luat:91/2015/QH13#d418.k2"
+    quote: "Mức phạt vi phạm do các bên thoả thuận, trừ trường hợp luật liên quan có quy định khác."
+  type: default
+  kind: penalty
+  derogation: default
+  applies_when: "Hợp đồng có điều khoản phạt vi phạm"
+  facts_needed:
+    - {name: penalty_pct, kind: percent, unit: percent, from: contract}
+    - {name: special_law_penalty_cap, kind: percent, from: user, note: "vd. Luật Thương mại 8% giá trị phần nghĩa vụ vi phạm — chưa đọc"}
+  exceptions:
+    - pid: "bo-luat:91/2015/QH13#d418.k2"
+      quote: "trừ trường hợp luật liên quan có quy định khác"
+      condition: "Luật chuyên ngành có mức trần phạt (vd. thương mại)"
+  conclusion: "BLDS không đặt trần phạt; chỉ kiểm được khi luật chuyên ngành có trần"
+  on_silence: none
+  derived_from: []
+  yaml_rule: "chưa có"
+  examples:
+    - {facts: {penalty_pct: 5, special_law_penalty_cap: 8}, expected: PASS}
+    - {facts: {penalty_pct: 12, special_law_penalty_cap: 8}, expected: FAIL}
+    - {facts: {penalty_pct: 12}, expected: UNKNOWN, why: "chưa biết có luật chuyên ngành đặt trần không"}
+  open_questions:
+    - "Luật Thương mại 36/2005/QH11 chưa có trong kho đã đọc (thư mục luat_36_2005_QH11 không có) — không trích được trần 8%."
+
+- id: civil.penalty_and_damages
+  source:
+    pid: "bo-luat:91/2015/QH13#d418.k3"
+    quote: "Trường hợp các bên có thoả thuận về phạt vi phạm nhưng không thỏa thuận về việc vừa phải chịu phạt vi phạm và vừa phải bồi thường thiệt hại thì bên vi phạm nghĩa vụ chỉ phải chịu phạt vi phạm."
+  type: default
+  kind: penalty
+  derogation: default
+  applies_when: "Hợp đồng có phạt vi phạm"
+  facts_needed:
+    - {name: has_penalty_clause, kind: bool, from: contract}
+    - {name: penalty_plus_damages_agreed, kind: bool, from: contract}
+  exceptions: []
+  conclusion: "Không thỏa thuận cộng dồn thì chỉ chịu phạt, không đòi thêm bồi thường"
+  on_silence: default_applies
+  derived_from: []
+  yaml_rule: "chưa có"
+  examples:
+    - {facts: {has_penalty_clause: true, penalty_plus_damages_agreed: true, claims_both: true}, expected: PASS}
+    - {facts: {has_penalty_clause: true, penalty_plus_damages_agreed: false, claims_both: true}, expected: FAIL}
+    - {facts: {has_penalty_clause: true, claims_both: true}, expected: UNKNOWN, why: "chưa đọc được hợp đồng có thỏa thuận cộng dồn không"}
+  open_questions: []
+
+- id: civil.unilateral_termination_notice
+  source:
+    pid: "bo-luat:91/2015/QH13#d428.k2"
+    quote: "Bên đơn phương chấm dứt thực hiện hợp đồng phải thông báo ngay cho bên kia biết về việc chấm dứt hợp đồng, nếu không thông báo mà gây thiệt hại thì phải bồi thường."
+  type: required
+  kind: notice
+  derogation: mandatory
+  applies_when: "Hợp đồng có điều khoản đơn phương chấm dứt"
+  facts_needed:
+    - {name: terminates_without_notice, kind: bool, from: contract}
+  exceptions: []
+  conclusion: "Phải thông báo ngay; không thông báo mà gây thiệt hại thì bồi thường"
+  on_silence: none
+  derived_from: []
+  yaml_rule: civil.unilateral_termination/r1
+  examples:
+    - {facts: {terminates_without_notice: false}, expected: PASS}
+    - {facts: {terminates_without_notice: true}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "chưa đọc được điều khoản chấm dứt"}
+  open_questions:
+    - "Hệ quả pháp lý là bồi thường khi gây thiệt hại, không phải điều khoản vô hiệu; rule hiện gắn legality: illegal có thể quá tay (bảng hạn chế 7.21)."
+
+- id: civil.unilateral_termination_grounds
+  source:
+    pid: "bo-luat:91/2015/QH13#d428.k1"
+    quote: "Một bên có quyền đơn phương chấm dứt thực hiện hợp đồng và không phải bồi thường thiệt hại khi bên kia vi phạm nghiêm trọng nghĩa vụ trong hợp đồng hoặc các bên có thỏa thuận hoặc pháp luật có quy định."
+  type: default
+  kind: termination
+  derogation: default
+  applies_when: "Hợp đồng có điều khoản đơn phương chấm dứt"
+  facts_needed:
+    - {name: termination_without_ground_no_damages, kind: bool, from: contract}
+  exceptions: []
+  conclusion: "Chấm dứt không có căn cứ (vi phạm nghiêm trọng / thỏa thuận / luật) thì bên chấm dứt là bên vi phạm (Đ428.5)"
+  on_silence: none
+  derived_from: []
+  yaml_rule: "chưa có"
+  examples:
+    - {facts: {termination_without_ground_no_damages: false}, expected: PASS}
+    - {facts: {termination_without_ground_no_damages: true}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "chưa đọc được điều khoản"}
+  open_questions:
+    - "Vì 'các bên có thỏa thuận' cũng là căn cứ, một điều khoản tự do chấm dứt chính là thỏa thuận hợp lệ; FAIL chỉ khi điều khoản loại bỏ trách nhiệm của bên chấm dứt không căn cứ. Cần người làm pháp lý xem."
+
+- id: civil.rescission_notice
+  source:
+    pid: "bo-luat:91/2015/QH13#d423.k3"
+    quote: "Bên hủy bỏ hợp đồng phải thông báo ngay cho bên kia biết về việc hủy bỏ, nếu không thông báo mà gây thiệt hại thì phải bồi thường."
+  type: required
+  kind: notice
+  derogation: mandatory
+  applies_when: "Hợp đồng có điều khoản hủy bỏ"
+  facts_needed:
+    - {name: rescinds_without_notice, kind: bool, from: contract}
+  exceptions: []
+  conclusion: "Như civil.unilateral_termination_notice, áp cho hủy bỏ hợp đồng"
+  on_silence: none
+  derived_from: []
+  yaml_rule: "chưa có"
+  examples:
+    - {facts: {rescinds_without_notice: false}, expected: PASS}
+    - {facts: {rescinds_without_notice: true}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "chưa đọc được điều khoản"}
+  open_questions: []

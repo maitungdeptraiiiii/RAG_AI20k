@@ -240,17 +240,43 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
     stats = {"llm_calls": llm.calls + (tagger.calls if tagger is not llm else 0), "tag_model": tag_model, "recheck_concepts": len(todo), "tag_ops": len(tag.ops),
              "tag_rejected": len(tag.rejected), "assert_ops": kinds, "seconds": round(time.monotonic() - t0, 1),
              "graph_backend": view.backend, "build_id": build_id, "packs": list(packs) if packs else None,
-             **({"classification": classification} if classification else {})}
+             **({"classification": classification} if classification else {}),
+             "presence_only": presence_only(results, catalog)}
     stage("basis", "start")
     law_basis = {cid: basis.concept_basis(cid, day) for cid in reported}
     stage("basis", "done")
     return CheckReport(contract.contract_id, day, catalog.version, results, law_basis, tag.rejected, warnings, stats)
 
 
+def _key(x: RuleResult) -> str:
+    return f"{x.concept_id}/{x.rule_id}" + (f"@{x.object}" if x.object else "")
+
+
+def shared_clauses(results: Sequence[RuleResult]) -> dict[str, list[str]]:
+    """Điều khoản (uid) có FAIL của từ hai khái niệm trở lên: một chỗ sai, nhiều căn cứ cùng đúng (hạn chế N.4)."""
+    by_uid: dict[str, list[RuleResult]] = {}
+    for x in results:
+        if x.status == "FAIL":
+            for uid in dict.fromkeys(e.get("uid") for e in x.evidence if e.get("uid")):
+                by_uid.setdefault(uid, []).append(x)
+    return {uid: [_key(x) for x in xs] for uid, xs in by_uid.items() if len({x.concept_id for x in xs}) > 1}
+
+
+def presence_only(results: Sequence[RuleResult], catalog: Catalog) -> list[str]:
+    """PASS chỉ vì khái niệm có mặt (rule không có phép kiểm, không phải điều cấm): UI có thể ẩn (hạn chế 3.9, 7.22)."""
+    rules = {(cid, r.id): r for cid, c in catalog.concepts.items() for r in c.rules}
+    out = []
+    for x in results:
+        r = rules.get((x.concept_id, x.rule_id))
+        if x.status == "PASS" and r is not None and r.check is None and r.mode != "prohibited" and r.over is None:
+            out.append(_key(x))
+    return out
+
+
 def report_json(r: CheckReport) -> dict:
     return {"contract_id": r.contract_id, "day": r.day.isoformat(), "catalog_version": r.catalog_version,
             "results": [asdict(x) for x in r.results], "basis": r.basis, "tag_rejected": r.tag_rejected,
-            "warnings": r.warnings, "stats": r.stats}
+            "warnings": r.warnings, "stats": r.stats, "shared_clauses": shared_clauses(r.results)}
 
 
 def _law_text(values: dict) -> str:
@@ -292,9 +318,18 @@ def report_markdown(r: CheckReport, catalog: Catalog) -> str:
             if pids:
                 lines.append(f"  - Căn cứ: {', '.join(pids)}")
         lines.append("")
+    shared = shared_clauses(r.results)
+    if shared:
+        lines += ["## Một điều khoản vi phạm nhiều quy định", ""]
+        for uid, keys in shared.items():
+            names = [catalog.concepts[k.split("/")[0]].label for k in keys if k.split("/")[0] in catalog.concepts]
+            lines.append(f"- Hợp đồng [{uid}]: {'; '.join(names)}")
+        lines.append("")
     ok = sum(1 for x in r.results if x.finding == "ok")
-    lines += [f"Không có vấn đề: {ok} rule.", ""]
+    bare = len(r.stats.get("presence_only") or [])
+    lines += [f"Không có vấn đề: {ok} rule" + (f" ({bare} chỉ vì điều khoản có mặt)." if bare else "."), ""]
     return "\n".join(lines)
 
 
-__all__ = ["CheckReport", "check_contract", "contract_view", "report_json", "report_markdown", "user_fact_set"]
+__all__ = ["CheckReport", "check_contract", "contract_view", "presence_only", "report_json", "report_markdown",
+           "shared_clauses", "user_fact_set"]

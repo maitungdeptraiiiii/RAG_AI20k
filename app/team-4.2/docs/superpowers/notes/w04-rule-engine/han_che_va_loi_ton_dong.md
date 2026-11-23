@@ -51,7 +51,7 @@ có chi phí nếu sai). Nhánh `feat/team-4.2/w04-rules-engine`, chưa merge. T
 |---|---|---|
 | 3.7 | Dữ kiện suy ra `UNKNOWN` chỉ vì đầu vào `CONFLICT` ra `needs_facts` với `missing_facts` rỗng, đúng ra phải là `conflict` (`semantics.py` chỉ xét `CONFLICT` trực tiếp trong `check`) | Đã sửa (S.6) |
 | 3.8 | `value: null` trong định nghĩa dữ kiện suy ra được chấp nhận thành `Fact(None)` "có mặt" | Đã sửa (S.7) |
-| 3.9 | Bốn rule `r3_*` luôn ra `PASS/ok` khi điều khoản thời hạn có mặt (kể cả applicability chưa biết): mỗi HĐ xác định thời hạn sinh bốn dòng "ok", có thể gây nhiễu UI và báo cáo | Còn |
+| 3.9 | Bốn rule `r3_*` luôn ra `PASS/ok` khi điều khoản thời hạn có mặt (kể cả applicability chưa biết): mỗi HĐ xác định thời hạn sinh bốn dòng "ok", có thể gây nhiễu UI và báo cáo | Đã sửa ở lớp trình bày (S.15) |
 | 3.10 | Hàng U của §5.4 chỉ thêm dữ kiện của ngoại lệ vào `missing_facts` khi rule gốc là `FAIL`; gốc `UNKNOWN` thì phải hỏi thêm một vòng | Có chủ ý (đúng spec) |
 | 3.11 | Định nghĩa `from` lấy đơn vị theo nguồn, bỏ qua `unit` đã khai của dữ kiện suy ra, không kiểm hai đơn vị khớp nhau | Đã sửa (S.7) |
 | 3.12 | Nhãn dữ kiện `worked_after_expiry_days` chưa nói ngày hết hạn có tính là ngày 0 hay không (ca biên đúng 30 ngày phụ thuộc cách đếm) | Còn |
@@ -128,7 +128,7 @@ có chi phí nếu sai). Nhánh `feat/team-4.2/w04-rules-engine`, chưa merge. T
 | 7.19 | `packs=[]` âm thầm rơi về gói labor; nay `ValueError` | Đã sửa |
 | 7.20 | `group_by` nhiều khóa: ứng viên biết `employee` mà thiếu `job` vẫn cộng U vào nhóm của người lao động khác (đúng chữ spec, sinh UNKNOWN thừa) | Còn |
 | 7.21 | Đ428.2 chỉ quy định nghĩa vụ "thông báo ngay" và bồi thường nếu gây thiệt hại; gắn `legality: illegal` cho điều khoản "chấm dứt không cần thông báo" có thể quá tay | Đã duyệt (Tùng, 24/11) |
-| 7.22 | `r1_special_law` luôn PASS khi concept có mặt (nhiễu như 3.9) | Còn |
+| 7.22 | `r1_special_law` luôn PASS khi concept có mặt (nhiễu như 3.9) | Đã sửa ở lớp trình bày (S.15) |
 | 7.23 | Hợp đồng vay ký trước 2017 vẫn bị soát theo Đ468 BLDS 2015: `law_values_valid_from` không áp lên giá trị luật không có kỳ | Đã sửa (S.1, 24/11) |
 | 7.24 | Bảng dữ kiện phẳng: HĐ xác định thời hạn đang hiệu lực mà thiếu `worked_after_expiry_days` cho `content.term/r4` UNKNOWN (hỏi người dùng). Gói phẳng không có `expired` vì không có ngày hết hạn ở dạng đối tượng | Còn |
 
@@ -372,7 +372,7 @@ tệp bản liệt kê.
 | N.1 | Gói `consumer` (extends `civil_general`): 26 khái niệm / 26 rule: 14 điều khoản cấm Đ25.1–14, 10 nội dung cơ bản của hợp đồng theo mẫu Đ23.3 (chỉ áp khi người dùng xác nhận là hợp đồng mẫu), dịch vụ liên tục: ngừng dịch vụ (Đ41.3), báo trước khi hết hạn (Đ42.2.đ, e) | Xong, đã duyệt (tùng, 24/11) |
 | N.2 | 6 hợp đồng mẫu c1–c6, 52 nhãn viết tay ở `labels.yaml` trước khi chạy engine; gold sinh bằng `scripts/team-4.2/gold_from_labels.py`; test chung `tests/test_rete_pack_fixtures.py` (dùng lại cho gói thương mại) | Đã duyệt (Tùng, 24/11) |
 | N.3 | Nhận diện tự động chọn MỘT loại hợp đồng: gói `consumer` chỉ tự chạy khi văn bản được nhận là `consumer_contract`; chồng lên thuê / vay phải truyền `packs=[..., "consumer"]` | Còn (thiết kế) |
-| N.4 | Cùng một điều khoản có thể ra hai FAIL: `civil.standard_terms_exemption` (BLDS Đ405.3 / 406.3) và `consumer.liability_exclusion` (Đ25.1) — hai căn cứ cùng đúng; chưa gộp | Còn |
+| N.4 | Cùng một điều khoản có thể ra hai FAIL: `civil.standard_terms_exemption` (BLDS Đ405.3 / 406.3) và `consumer.liability_exclusion` (Đ25.1) — hai căn cứ cùng đúng; chưa gộp | Đã sửa ở lớp trình bày (S.15) |
 | N.5 | Không làm: Đ25.15 (thiện chí, tiêu chí chung), Đ23.2 + NĐ 55/2024 Đ6 (tiếng Việt, cỡ chữ 12, màu tương phản), đăng ký hợp đồng mẫu (Đ28, danh mục QĐ 07/2024 ở phụ lục chưa tải được), ngoại lệ "pháp luật liên quan cho phép" của Đ25.1, 6, 11 | Ghi nhận |
 | N.6 | Hợp đồng ký trước 01/07/2024 theo Luật BVQLNTD 59/2010/QH12 (chưa tải); gói không phân kỳ | Đã sửa phần không kết luận sai (S.1); soát theo Luật 59/2010 vẫn chưa có |
 | N.7 | Đ25.12 (chế tài bất lợi hơn) và c6 (mất cọc một chiều) là cách đọc của người soạn | Đã duyệt (Tùng, 24/11) |
@@ -466,6 +466,7 @@ Kế hoạch: `app/team-4.2/docs/superpowers/plans/2026-11-23-khanh-ingest-bench
 | S.9 | Trích bổ sung đọc lại mọi lô của hợp đồng (số lời gọi LLM = số lô) dù chỉ hỏi một trường | Có chủ ý (đơn giản; tối ưu khi cần) |
 | S.10 | R.3 + R.8: thư mục hồ sơ đọc từ `RAG_DOSSIER_ROOT` (mặc định bộ mẫu trong tests); `tests/test_rete_dossiers.py` dùng chung `scenario.load_dossier` / `objects_of` / `facts_at`. Kịch bản hỏng (không phải danh sách, bước đầu không phải load, thiếu `review_date` / `value` / `state` / `facts`) -> ValueError trước mọi sự kiện (route 400); mã hồ sơ lạ hoặc có đường dẫn (`../b1`) -> `UnknownDossier` (404). `labels.facts` có khóa không phải dữ kiện của gói -> CatalogError (các gói thật đều qua). `packs_for_kind` đệm theo thời điểm sửa `pack.yaml`. `document_kind` / `fields_tried` không gửi cho LLM tóm tắt (`INTERNAL_FACT_KEYS`) | Đã sửa |
 | S.11 | R.8 còn lại: `set_review_date` dựng phiên mới (`nodes_recomputed` = cả mạng); lỗi kiểm tra đồ thị luật K1 chỉ in stderr; loại `unknown` không kiểm dữ kiện người dùng (chưa có test riêng) | Còn |
-| S.12 | Gate đợt 1 (danh sách mở rộng: thêm `test_three_domains`, `test_contracts_review`, `test_rules_in_force`, `test_rules_loader_shapes`): 1760 passed, 1 skipped, 1 xfailed ở cả network và reference | Ghi nhận |
+| S.12 | Gate đợt 1 (danh sách mở rộng: thêm `test_three_domains`, `test_contracts_review`, `test_rules_in_force`, `test_rules_loader_shapes`, `test_typed_values`, `test_report_grouping`): 1827 passed, 1 skipped, 1 xfailed ở cả network và reference (sau S.15) | Ghi nhận |
 | S.13 | V.9: đơn vị trong `norm` phải có trong câu trích: thời hạn theo bảng cách viết lõi `quantity.DURATION_WORDS` (+ `unit_forms` của gói), kỳ của tỉ lệ theo `unit_forms` của gói (gói không khai cách viết thì không chặn). Thiếu -> không đọc (slot `pending`, như số không có căn cứ) | Đã sửa |
 | S.14 | Kiểm đơn vị là "có trong câu trích", không ràng buộc đúng vị trí sau con số: câu có cả "12 tháng" và "30 ngày" vẫn cho qua LLM ghi nhầm 12 ngày; "năm" trong ngày tháng ("năm 2024") làm kiểm đơn vị năm yếu | Còn |
+| S.15 | N.4, 3.9, 7.22 (lớp trình bày, `RuleResult` không đổi): `shared_clauses` nhóm FAIL của từ hai khái niệm trên cùng điều khoản (JSON `shared_clauses`, markdown mục "Một điều khoản vi phạm nhiều quy định"); `presence_only` đánh dấu PASS chỉ vì khái niệm có mặt (`stats.presence_only`, markdown đếm riêng). UI (Contract Studio, luồng SSE `evaluation`) chưa dùng hai trường này để ẩn / gộp | Đã sửa phần dữ liệu; UI còn |

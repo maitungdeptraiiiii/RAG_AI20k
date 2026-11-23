@@ -153,6 +153,7 @@ class PackSpec:
 
 # ── danh mục khái niệm (concepts.yaml) ──
 OPS = frozenset({"eq", "lt", "lte", "gt", "gte", "in", "present", "absent"})
+EARLIER_CONTRACTS = frozenset({"apply", "conforming_only", "skip"})
 MODES = frozenset({"required", "threshold", "prohibited", "default"})
 DEROGATIONS = frozenset({"floor", "mandatory", "default"})
 SLOT_KINDS = frozenset({"duration", "percent", "money", "bool", "enum"})
@@ -187,6 +188,11 @@ class Rule:
     # Rule xuyên đối tượng (spec §5.6): over = (biến, kiểu, where, history); group_by = ((tên, đường dẫn), ...).
     over: tuple[str, str, dict | None, bool] | None = None
     group_by: tuple[tuple[str, str], ...] = ()
+    # Ngày luật của rule có hiệu lực và cách áp cho hợp đồng ký trước ngày đó (`in_force` của concepts.yaml, đọc từ điều
+    # khoản chuyển tiếp): "apply" | "conforming_only" (được PASS, không được FAIL theo luật mới) | "skip" (không soát).
+    # Rule dựng tay mặc định "apply" (hành vi cũ); bộ nạp mặc định "skip" từ `law_values_valid_from`.
+    in_force_from: date | None = None
+    earlier_contracts: str = "apply"
 
 
 @dataclass(frozen=True)

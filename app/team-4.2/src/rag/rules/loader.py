@@ -1,6 +1,7 @@
 """Nạp gói luật: `pack.yaml` -> PackSpec. Lỗi nào cũng dừng, báo hết một lần (như CatalogError cũ)."""
 from __future__ import annotations
 
+import dataclasses
 from datetime import date
 from pathlib import Path
 from typing import Mapping, Sequence
@@ -9,7 +10,7 @@ import yaml
 
 from rag.rules.derived import definition_inputs, find_cycle
 from rag.rules.objects import BUILTIN_ATTRS, COUNT_OPS
-from rag.rules.model import (CORE_FINDINGS, DOCUMENT_PARSERS, CORE_SILENCES, DEROGATIONS, MODES, OPS, SLOT_KINDS, Catalog, CatalogError,
+from rag.rules.model import (CORE_FINDINGS, DOCUMENT_PARSERS, CORE_SILENCES, DEROGATIONS, EARLIER_CONTRACTS, MODES, OPS, SLOT_KINDS, Catalog, CatalogError,
                              Concept, Definition, DerivedFact, DocumentFact, ObjectType, PackSpec, Rule, Silence, Slot, UserQuestion, leaves)
 from rag.rules.units import Units
 
@@ -561,6 +562,39 @@ def _slots(c: dict, pack: PackSpec, problems: list[str]) -> dict[str, Slot]:
     return out
 
 
+def _date(where: str, raw: object, problems: list[str]) -> date | None:
+    try:
+        return raw if isinstance(raw, date) else date.fromisoformat(str(raw))
+    except ValueError:
+        problems.append(f"{where}: {raw!r} không phải ngày YYYY-MM-DD")
+        return None
+
+
+def _in_force(where: str, raw: object, default: tuple[date, str], problems: list[str]) -> tuple[date, str]:
+    """`in_force: {from, earlier_contracts}` (ngày luật có hiệu lực, cách áp cho hợp đồng ký trước ngày đó); khóa vắng lấy
+    theo `default` (gói: `law_values_valid_from` + "skip"; khái niệm: giá trị của gói)."""
+    if raw is None:
+        return default
+    if not isinstance(raw, dict) or set(raw) - {"from", "earlier_contracts"}:
+        problems.append(f"{where}: phải là {{from, earlier_contracts}}, gặp {raw!r}")
+        return default
+    start = _date(f"{where}.from", raw["from"], problems) if "from" in raw else default[0]
+    earlier = raw.get("earlier_contracts", default[1])
+    if earlier not in EARLIER_CONTRACTS:
+        problems.append(f"{where}.earlier_contracts {earlier!r} phải là một trong {sorted(EARLIER_CONTRACTS)}")
+        earlier = default[1]
+    return start or default[0], earlier
+
+
+def _with_in_force(rule: Rule, start: date, earlier: str, *, explicit: bool) -> Rule:
+    """Rule có giá trị luật theo kỳ (`periods`): các kỳ đã nói luật nào áp từ ngày nào (trước kỳ đầu -> UNKNOWN
+    `law_period_not_covered`), nên không nhận `in_force` của gói; chỉ nhận khi khái niệm khai `in_force` riêng."""
+    laws = [rule.law, *[c.get("law") or {} for c in rule.cases]]
+    if not explicit and any(isinstance(v, dict) and "periods" in v for law in laws for v in law.values()):
+        return rule
+    return dataclasses.replace(rule, in_force_from=start, earlier_contracts=earlier)
+
+
 def load_concepts(path: Path, pack: PackSpec) -> Catalog:
     """Nạp một concepts.yaml, kiểm theo khai báo của `pack`. Lỗi nào cũng dừng, báo hết một lần."""
     data = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
@@ -570,6 +604,8 @@ def load_concepts(path: Path, pack: PackSpec) -> Catalog:
         if r.get("subtype_of") is not None and r["subtype_of"] not in roles:
             problems.append(f"role {r['id']}: subtype_of {r['subtype_of']!r} không có")
     concepts: dict[str, Concept] = {}
+    valid_from = _date("law_values_valid_from", data.get("law_values_valid_from"), problems) or date.min
+    pack_in_force = _in_force("in_force", data.get("in_force"), (valid_from, "skip"), problems)
     for c in data.get("concepts") or []:
         cid = c.get("id")
         if cid in concepts:
@@ -581,7 +617,10 @@ def load_concepts(path: Path, pack: PackSpec) -> Catalog:
             if role not in roles:
                 problems.append(f"{cid}: role applies_to {role!r} không khai báo")
         slots = _slots(c, pack, problems)
-        rules = tuple(_rule(c, r, pack, problems) for r in c.get("rules") or [])
+        own = c.get("in_force")
+        start, earlier = _in_force(f"{cid}: in_force", own, pack_in_force, problems)
+        rules = tuple(_with_in_force(_rule(c, r, pack, problems), start, earlier, explicit=own is not None)
+                      for r in c.get("rules") or [])
         concepts[cid] = Concept(cid, c.get("label", ""), c.get("scope", ""), c.get("phase", ""), c.get("holder"),
                                 c.get("counterparty"), tuple(c.get("applies_to") or ()), c.get("describe", ""),
                                 tuple(c.get("phrasing") or ()), slots, tuple(c.get("anchors") or ()),
@@ -624,8 +663,7 @@ def load_concepts(path: Path, pack: PackSpec) -> Catalog:
                 problems.append(f"{cid}: not_about cần text và see là khái niệm có trong danh mục: {x!r}")
     if problems:
         raise CatalogError(problems)
-    return Catalog(str(data.get("version")), date.fromisoformat(str(data["law_values_valid_from"])), roles, concepts,
-                   pack.context())
+    return Catalog(str(data.get("version")), valid_from, roles, concepts, pack.context())
 
 
 # ── nhiều gói ──

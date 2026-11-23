@@ -2,6 +2,7 @@
 # Soát theo ngày ký: hợp đồng từ 01/08/2024 theo Luật Nhà ở 27/2023, từ 01/07/2015 theo Luật Nhà ở 65/2014.
 version: "0.1"
 law_values_valid_from: "2015-07-01"
+in_force: {earlier_contracts: skip}   # Luật Nhà ở 65/2014 Đ182, 27/2023 Đ198 không có chuyển tiếp cho nội dung hợp đồng thuê: không soát hợp đồng ký trước
 roles:
   - {id: BEN_CHO_THUE, label: "Bên cho thuê", aliases: ["chủ nhà", "bên cho thuê nhà"]}
   - {id: BEN_THUE, label: "Bên thuê", aliases: ["người thuê", "bên thuê nhà"]}
@@ -168,6 +169,7 @@ concepts:
   # ───────────── 4. NGHĨA VỤ CỦA BÊN CHO THUÊ (BLDS Đ477, Đ478) ─────────────
   - id: lease.landlord_major_repairs
     kind: prohibited_practice
+    in_force: {from: "2017-01-01", earlier_contracts: conforming_only}   # BLDS 91/2015 Đ477, Đ688.1
     label: Bên cho thuê phải sửa hư hỏng lớn
     scope: core
     phase: P0
@@ -189,6 +191,7 @@ concepts:
 
   - id: lease.quiet_enjoyment
     kind: prohibited_practice
+    in_force: {from: "2017-01-01", earlier_contracts: conforming_only}   # BLDS 91/2015 Đ478, Đ688.1
     label: Bên cho thuê bảo đảm việc sử dụng nhà ổn định
     scope: core
     phase: P0

@@ -141,7 +141,25 @@ def _materialize(law: dict, facts: Facts, day: date, reasons: list[str]) -> tupl
 def resolve_law_with(rule: Rule, whens: Sequence[Tri], facts: Facts,
                      day: date) -> tuple[dict[str, dict] | None, Tri, tuple[str, ...]]:
     """(giá trị luật đã chọn, trạng thái chọn, lý do) khi đã biết trị của `rule.cases[i].when`. Có `cases`: lấy case đầu
-    tiên `when = T`; gặp `U` trước thì `U`; không case nào khớp thì `F` (rule không áp dụng)."""
+    tiên `when = T`; gặp `U` trước thì `U`; không case nào khớp thì `F` (rule không áp dụng).
+    Hợp đồng ký trước ngày luật có hiệu lực (`rule.in_force_from`): "skip" -> `F` (không áp dụng); "conforming_only" -> chọn
+    luật như thường, kèm lý do `EARLIER` để `decide_rule` không kết luận FAIL theo luật mới."""
+    before = rule.in_force_from is not None and day < rule.in_force_from and rule.earlier_contracts != "apply"
+    if before and rule.earlier_contracts == "skip":
+        return None, "F", (_not_in_force(rule),)
+    law, st, reasons = _resolve_law_with(rule, whens, facts, day)
+    return law, st, (*reasons, EARLIER) if before else reasons
+
+
+EARLIER = "earlier_contract"      # lý do nội bộ: hợp đồng ký trước ngày luật có hiệu lực, chỉ được PASS
+
+
+def _not_in_force(rule: Rule) -> str:
+    return f"law_not_in_force:{rule.in_force_from.isoformat()}"
+
+
+def _resolve_law_with(rule: Rule, whens: Sequence[Tri], facts: Facts,
+                      day: date) -> tuple[dict[str, dict] | None, Tri, tuple[str, ...]]:
     reasons: list[str] = []
     if rule.cases:
         for case, st in zip(rule.cases, whens):
@@ -256,8 +274,15 @@ def evaluate_rule(concept_id: str, rule: Rule, facts: Facts, present: bool, evid
 
 def decide_rule(concept_id: str, rule: Rule, facts: Facts, present: bool, evidence, inputs: RuleInputs,
                 ctx: Context) -> RuleResult:
-    """Bảng trạng thái của một rule (applicability -> giá trị luật -> present -> check -> on_silence) trên đầu vào đã tính."""
+    """Bảng trạng thái của một rule (applicability -> giá trị luật -> present -> check -> on_silence) trên đầu vào đã tính.
+    Hợp đồng ký trước ngày luật có hiệu lực, chế độ "conforming_only": kết quả FAIL đổi thành NOT_APPLICABLE (hợp đồng khác
+    luật mới thì áp luật cũ, engine không có luật cũ để kết luận)."""
+    earlier = EARLIER in inputs.law_reasons
+
     def out(status, finding, law=None, reasons=()):
+        reasons = tuple(r for r in reasons if r != EARLIER)
+        if earlier and status == "FAIL":
+            status, finding, reasons = "NOT_APPLICABLE", "ok", (*reasons, _not_in_force(rule), "earlier_law_governs")
         return _result(concept_id, rule, status, finding, law, facts, evidence, reasons, ctx)
 
     app = inputs.app

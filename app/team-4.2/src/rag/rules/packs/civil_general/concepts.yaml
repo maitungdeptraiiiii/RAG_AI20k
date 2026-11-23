@@ -1,6 +1,7 @@
 # Khái niệm dân sự chung. Định dạng như gói labor (xem packs/labor/concepts.yaml).
 version: "0.1"
 law_values_valid_from: "2017-01-01"     # BLDS 2015 có hiệu lực từ 01/01/2017
+in_force: {earlier_contracts: conforming_only}   # BLDS 91/2015 Đ688.1: giao dịch trước 2017 phù hợp BLDS 2015 thì áp BLDS 2015, khác thì áp BLDS 2005
 roles:
   - {id: BEN_A, label: "Bên thứ nhất"}
   - {id: BEN_B, label: "Bên thứ hai"}

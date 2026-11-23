@@ -129,7 +129,7 @@ có chi phí nếu sai). Nhánh `feat/team-4.2/w04-rules-engine`, chưa merge. T
 | 7.20 | `group_by` nhiều khóa: ứng viên biết `employee` mà thiếu `job` vẫn cộng U vào nhóm của người lao động khác (đúng chữ spec, sinh UNKNOWN thừa) | Còn |
 | 7.21 | Đ428.2 chỉ quy định nghĩa vụ "thông báo ngay" và bồi thường nếu gây thiệt hại; gắn `legality: illegal` cho điều khoản "chấm dứt không cần thông báo" có thể quá tay | Đã duyệt (Tùng, 24/11) |
 | 7.22 | `r1_special_law` luôn PASS khi concept có mặt (nhiễu như 3.9) | Còn |
-| 7.23 | Hợp đồng vay ký trước 2017 vẫn bị soát theo Đ468 BLDS 2015: `law_values_valid_from` không áp lên giá trị luật không có kỳ | Còn |
+| 7.23 | Hợp đồng vay ký trước 2017 vẫn bị soát theo Đ468 BLDS 2015: `law_values_valid_from` không áp lên giá trị luật không có kỳ | Đã sửa (S.1, 24/11) |
 | 7.24 | Bảng dữ kiện phẳng: HĐ xác định thời hạn đang hiệu lực mà thiếu `worked_after_expiry_days` cho `content.term/r4` UNKNOWN (hỏi người dùng). Gói phẳng không có `expired` vì không có ngày hết hạn ở dạng đối tượng | Còn |
 
 ## Đánh giá lại theo định hướng "phủ rộng nhiều loại hợp đồng" (23/11, spec bản 3)
@@ -363,7 +363,7 @@ tệp bản liệt kê.
 | M.5 | Hợp đồng thuê mẫu t1–t6 thêm dòng địa chỉ giả cho các bên (không đổi câu trích cũ); thêm t8–t10; gold thuê 30 -> 52 nhãn (22 nhãn mới chờ duyệt); t7 thêm 1 vi phạm (vào nhà không báo trước) | Đã duyệt (Tùng, 24/11) |
 | M.6 | Ví dụ bản liệt kê cũ viết lỏng (thiếu đơn vị, tên dữ kiện không khớp slot, ngày ghi thành dữ kiện) đã sửa theo quy ước của test mới; kết luận pháp lý không đổi | Xong |
 | M.7 | Không làm rule (đã ghi lý do): giao kết, giải thích hợp đồng, công khai mẫu, thời hiệu Đ429, nội dung k6–k9, k11 Đ163, trả nhà 'như mới' (Đ482.1 cho thỏa thuận), mất cọc khi chấm dứt đúng căn cứ (L.14) | Ghi nhận |
-| M.8 | Rule BLDS (Đ477, Đ478, Đ357) gắn với BLDS 2015; hợp đồng thuê ký trước 01/01/2017 vẫn được xét theo câu chữ BLDS 2015 (rule không có giá trị theo kỳ) | Còn |
+| M.8 | Rule BLDS (Đ477, Đ478, Đ357) gắn với BLDS 2015; hợp đồng thuê ký trước 01/01/2017 vẫn được xét theo câu chữ BLDS 2015 (rule không có giá trị theo kỳ) | Đã sửa (S.1, 24/11) |
 
 ## N — gói `consumer` (Luật BVQLNTD 2023, 23/11)
 
@@ -374,7 +374,7 @@ tệp bản liệt kê.
 | N.3 | Nhận diện tự động chọn MỘT loại hợp đồng: gói `consumer` chỉ tự chạy khi văn bản được nhận là `consumer_contract`; chồng lên thuê / vay phải truyền `packs=[..., "consumer"]` | Còn (thiết kế) |
 | N.4 | Cùng một điều khoản có thể ra hai FAIL: `civil.standard_terms_exemption` (BLDS Đ405.3 / 406.3) và `consumer.liability_exclusion` (Đ25.1) — hai căn cứ cùng đúng; chưa gộp | Còn |
 | N.5 | Không làm: Đ25.15 (thiện chí, tiêu chí chung), Đ23.2 + NĐ 55/2024 Đ6 (tiếng Việt, cỡ chữ 12, màu tương phản), đăng ký hợp đồng mẫu (Đ28, danh mục QĐ 07/2024 ở phụ lục chưa tải được), ngoại lệ "pháp luật liên quan cho phép" của Đ25.1, 6, 11 | Ghi nhận |
-| N.6 | Hợp đồng ký trước 01/07/2024 theo Luật BVQLNTD 59/2010/QH12 (chưa tải); gói không phân kỳ | Còn |
+| N.6 | Hợp đồng ký trước 01/07/2024 theo Luật BVQLNTD 59/2010/QH12 (chưa tải); gói không phân kỳ | Đã sửa phần không kết luận sai (S.1); soát theo Luật 59/2010 vẫn chưa có |
 | N.7 | Đ25.12 (chế tài bất lợi hơn) và c6 (mất cọc một chiều) là cách đọc của người soạn | Đã duyệt (Tùng, 24/11) |
 
 ## O — gói `commercial` (Luật Thương mại 2005, 23/11)
@@ -450,3 +450,13 @@ Kế hoạch: `app/team-4.2/docs/superpowers/plans/2026-11-23-khanh-ingest-bench
 - R.6 (D40, duyệt cuối) `extract_fields` của gói (vd. `loan_interest` của `civil_loan` để suy `has_interest`) không đi vào luồng UI: upload trích dữ kiện trước khi biết loại hợp đồng, rồi `check_contract` bỏ qua bước trích vì đã có dữ kiện. Hợp đồng vay tải lên qua UI vì vậy thiếu `has_interest` (rule dùng nó ra `needs_facts`). Cần quyết định thiết kế: trích bổ sung chỉ các trường còn thiếu sau khi chọn gói (cần chế độ trích gia tăng cho `extract_facts`, tốn thêm lời gọi LLM) — Còn.
 - R.7 (D40, duyệt cuối) Đổi loại hợp đồng nhận diện sai: có qua API (`document_kind` trong body của `concept-check` và `concept-check/stream`, phải là loại có gói; được lưu) nhưng UI chưa có chỗ chọn; loại `unknown` được lưu để hỏi đáp báo 400 và lần soát sau nhận diện lại — Còn (UI).
 - R.8 (duyệt cuối, lỗi nhỏ hoãn) `scenario.yaml` hỏng (thiếu khóa, bước add/remove/answer trước load) ra 404/500 thay vì 400; `set_review_date` dựng phiên mới nên `nodes_recomputed` là cả mạng; `did` chưa kiểm với `list_dossiers()`; mọi lần `catalog_for` đọc cả 7 `pack.yaml` (chỉ `_packs_catalog` có đệm); `labels.facts` không kiểm khóa; loại `unknown` không kiểm dữ kiện người dùng (chưa có test); `document_kind` lọt vào payload báo cáo LLM; lỗi kiểm tra đồ thị luật (K1) chỉ in stderr, không vào báo cáo / mã thoát.
+
+## S — đợt 1 xử lý hạn chế (24/11, plan `2026-11-24-w04-han-che-dot-1.md`)
+
+| # | Mục | Trạng thái |
+|---|---|---|
+| S.1 | Luật chưa có hiệu lực khi ký (7.23, M.8, N.6): `in_force: {from, earlier_contracts}` trong concepts.yaml (gói, ghi đè ở khái niệm), đọc từ điều khoản chuyển tiếp: labor `apply` (BLLĐ Đ220.2); civil_general, civil_loan, consumer, 2 rule BLDS của gói thuê `conforming_only` (BLDS Đ688.1, BVQLNTD Đ80.1: hợp đồng cũ chỉ được PASS, FAIL thành NOT_APPLICABLE `earlier_law_governs`); civil_lease, commercial `skip`. Mặc định `skip` từ `law_values_valid_from`. Rule có `periods` không nhận mốc của gói (kỳ tự quyết). Báo cáo có cảnh báo đếm rule bị bỏ và nêu khái niệm cần soát theo luật cũ. Golden không đổi | Đã sửa |
+| S.2 | `conforming_only` dùng ngày ký làm mốc; Đ688.1 còn chia "chưa thực hiện / đang thực hiện / đã xong" và cho các bên thỏa thuận áp luật mới — engine không xét (cùng V.4) | Còn |
+| S.3 | BVQLNTD Đ80.2: hợp đồng theo mẫu công khai trước 01/07/2024 phải sửa cho phù hợp trước 31/12/2024 — với ngày soát sau 2024 thì luật mới áp cả cho mẫu cũ; engine soát theo ngày ký nên chưa thể hiện | Còn |
+| S.4 | Kho có BLDS 33/2005 nhưng thiếu điều hiệu lực cuối; trần lãi trước 01/12/2010 vẫn UNKNOWN (V.3), không khai mốc riêng | Ghi nhận |
+| S.5 | Labor `apply` theo Đ220.2 nhưng engine labor vẫn soát theo ngày ký (giá trị luật kỳ trước 2021 không có -> UNKNOWN); soát theo ngày soát cho HĐLĐ đang thực hiện chưa làm | Còn |

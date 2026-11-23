@@ -50,6 +50,7 @@
 
 version: "0.2-draft"
 law_values_valid_from: "2021-01-01"   # ngày BLLĐ 45/2019 có hiệu lực; áp cho mọi giá trị không theo kỳ
+in_force: {earlier_contracts: apply}   # BLLĐ 45/2019 Đ220.2: HĐLĐ giao kết trước 2021 chỉ tiếp tục nếu không trái Bộ luật này
 
 roles:
   - {id: NLD,                     label: "Người lao động"}

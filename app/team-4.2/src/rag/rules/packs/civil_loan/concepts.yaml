@@ -1,6 +1,7 @@
 # Khái niệm hợp đồng vay tài sản. Nguồn và trích dẫn: docs/rule_inventory/civil_loan.yaml.
 version: "0.2"
 law_values_valid_from: "2010-12-01"
+in_force: {from: "2017-01-01", earlier_contracts: conforming_only}   # BLDS 91/2015 Đ688.1 (rule có kỳ giá trị như trần lãi: kỳ tự quyết)
 roles:
   - {id: BEN_CHO_VAY, label: "Bên cho vay"}
   - {id: BEN_VAY, label: "Bên vay"}

@@ -2,6 +2,7 @@
 # Sinh từ bảng trong lần soạn 23/11; từ nay sửa trực tiếp tệp này.
 version: '0.1'
 law_values_valid_from: '2024-07-01'
+in_force: {earlier_contracts: conforming_only}   # Luật BVQLNTD 19/2023 Đ80.1: giao dịch trước 01/07/2024 phù hợp luật mới thì áp luật mới, khác thì áp Luật 59/2010
 roles:
 - id: BEN_KINH_DOANH
   label: Tổ chức, cá nhân kinh doanh

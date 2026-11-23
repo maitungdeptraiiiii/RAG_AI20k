@@ -106,6 +106,18 @@ def contract_view(contract: Contract, graph, at: datetime, catalog=None) -> tupl
     return open_view(build, status, getattr(graph, "store", None)), build.build_id, warnings, doc
 
 
+def in_force_warnings(results: Sequence[RuleResult], day: date) -> list[str]:
+    """Cảnh báo cho rule không soát vì hợp đồng ký trước ngày luật có hiệu lực (lý do `law_not_in_force:<ngày>`); rule
+    có `earlier_law_governs` là điều khoản khác luật mới: phải soát theo luật cũ, engine chưa có."""
+    skipped = [r for r in results if any(x.startswith("law_not_in_force:") for x in r.reasons)]
+    if not skipped:
+        return []
+    old = sorted({r.concept_id for r in skipped if "earlier_law_governs" in r.reasons})
+    msg = (f"Hợp đồng ký ngày {day.isoformat()}, trước ngày luật có hiệu lực: {len(skipped)} rule không soát theo luật "
+           "hiện hành")
+    return [msg + (f"; điều khoản khác luật mới, cần soát theo luật cũ: {', '.join(old)}" if old else "")]
+
+
 def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, basis: LawBasis | None = None,
                    at: datetime, model: str | None = None, tag_llm=None, tag_model: str | None = None,
                    user_facts: dict | None = None, graph=None, evaluator: str | None = None,
@@ -208,8 +220,9 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
         view, build_id, factset, results, graph_warnings = read_graph()
         stage("recheck", "done")
     warnings += graph_warnings
+    warnings += in_force_warnings(results, day)
 
-    reported = list(dict.fromkeys(r.concept_id for r in results if r.finding != "ok"))
+    reported =list(dict.fromkeys(r.concept_id for r in results if r.finding != "ok"))
     kinds: dict[str, int] = {}
     for op in contract.oplog.all():
         if op.op_type == "ASSERT":

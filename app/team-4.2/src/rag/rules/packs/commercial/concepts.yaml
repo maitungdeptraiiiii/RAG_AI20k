@@ -1,6 +1,7 @@
 # Khái niệm hợp đồng thương mại. Nguồn và trích dẫn: docs/rule_inventory/commercial.yaml.
 version: "0.1"
 law_values_valid_from: "2006-01-01"     # LTM 2005 có hiệu lực từ 01/01/2006
+in_force: {earlier_contracts: skip}   # LTM 36/2005 Đ323: hiệu lực 01/01/2006; không đọc điều chuyển tiếp cho hợp đồng trước 2006
 roles:
   - {id: BEN_BAN, label: "Bên bán / bên cung ứng dịch vụ", aliases: ["bên bán", "bên cung ứng", "bên cung cấp"]}
   - {id: BEN_MUA, label: "Bên mua / khách hàng", aliases: ["bên mua", "khách hàng", "bên sử dụng dịch vụ"]}

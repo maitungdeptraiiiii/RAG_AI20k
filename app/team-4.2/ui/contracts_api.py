@@ -218,18 +218,23 @@ def _packs_catalog(packs: tuple[str, ...]):
     return load_packs(list(packs))
 
 
-def _resolve_kind(c: Contract, llm, document_kind: str | None) -> str | None:
-    """Loại hợp đồng để soát: tham số > đã lưu trong facts > nhận diện bằng LLM (một lần; chỉ lưu loại có gói).
-    `document_kind=None` = chế độ cũ (gói labor, không nhận diện)."""
+def _resolve_kind(c: Contract, llm, document_kind: str | None) -> tuple[str | None, dict | None]:
+    """(loại hợp đồng để soát, kết quả nhận diện nếu vừa nhận diện). Thứ tự: loại người dùng chỉ định (phải có gói; được lưu, sửa
+    được loại nhận diện sai) > loại đã lưu có gói > nhận diện bằng LLM. `unknown` cũng được lưu (hỏi đáp báo rõ thay vì rơi về
+    labor) nhưng không coi là đã nhận diện: lần soát sau nhận diện lại. `document_kind=None` = chế độ cũ (gói labor)."""
     if document_kind is None:
-        return None
-    kind = document_kind if document_kind != AUTO_KIND else (c.facts or {}).get("document_kind")
-    if kind:
-        return kind
-    kind = classify_contract(llm, c)["kind"]
-    if kind != UNKNOWN:
-        c.facts = {**(c.facts or {}), "document_kind": kind}
-    return kind
+        return None, None
+    if document_kind != AUTO_KIND:
+        if not packs_for_kind(document_kind):
+            raise ValueError(f"Loại hợp đồng {document_kind!r} không có gói luật")
+        c.facts = {**(c.facts or {}), "document_kind": document_kind}
+        return document_kind, None
+    stored = (c.facts or {}).get("document_kind")
+    if stored and stored != UNKNOWN:
+        return stored, None
+    found = classify_contract(llm, c)
+    c.facts = {**(c.facts or {}), "document_kind": found["kind"]}
+    return found["kind"], found
 
 
 def _rebuild(c: Contract, now: datetime) -> None:
@@ -480,7 +485,7 @@ def concept_check(cid: str, user_facts: dict | None = None, *, tag_model: str | 
     c = get(cid)
     llm = CONFIG.llm_factory()
     now = _now()
-    kind = _resolve_kind(c, llm, document_kind)      # chọn gói trước: nền luật (basis) phải dựng trên danh mục của gói đó
+    kind, found = _resolve_kind(c, llm, document_kind)      # chọn gói trước: nền luật (basis) phải dựng trên danh mục của gói đó
     catalog = _catalog_or_labor(c, kind)
     tag_llm = (CONFIG.tag_llm or _default_tag_llm)(tag_model, tag_temp)
     legal_graph = (CONFIG.legal_graph or _default_legal_graph)()
@@ -497,6 +502,8 @@ def concept_check(cid: str, user_facts: dict | None = None, *, tag_model: str | 
                             model=getattr(llm, "model_id", None), tag_llm=tag_llm,
                             tag_model=getattr(tag_llm, "model_id", None), user_facts=user_facts, graph=_graph(),
                             on_event=relay)
+    if found is not None and found["kind"] == UNKNOWN:      # lý do nhận diện thất bại (check_contract chỉ thấy "unknown")
+        report.warnings.append(f"Không nhận diện được loại hợp đồng ({found.get('reason')}): chọn loại thủ công để soát")
     with _graph().writing(c.contract_id):
         _rebuild(c, now)
     g = c.graph or {}
@@ -653,8 +660,9 @@ def _events(fn, name: str) -> "queue.Queue":
     return q
 
 
-def concept_check_events(cid: str, user_facts: dict | None = None) -> "queue.Queue":
-    return _events(lambda emit: concept_check(cid, user_facts, on_event=emit), f"concept-check-{cid}")
+def concept_check_events(cid: str, user_facts: dict | None = None, document_kind: str | None = AUTO_KIND) -> "queue.Queue":
+    return _events(lambda emit: concept_check(cid, user_facts, on_event=emit, document_kind=document_kind),
+                   f"concept-check-{cid}")
 
 
 def contract_ask_events(cid: str, question: str, history: list | None = None,
@@ -860,7 +868,8 @@ async def handle_run(request: Request) -> Response:
 async def handle_concept_check(request: Request) -> Response:
     body = await _json(request)
     facts = body.get("user_facts")
-    return await _call(concept_check, request.path_params["cid"], facts if isinstance(facts, dict) else {})
+    return await _call(lambda cid, f, kind: concept_check(cid, f, document_kind=kind), request.path_params["cid"],
+                       facts if isinstance(facts, dict) else {}, str(body.get("document_kind") or AUTO_KIND))
 
 
 async def handle_concept_check_last(request: Request) -> Response:
@@ -870,7 +879,8 @@ async def handle_concept_check_last(request: Request) -> Response:
 async def handle_concept_check_stream(request: Request) -> Response:
     body = await _json(request)
     facts = body.get("user_facts")
-    return _sse_queue(concept_check_events(request.path_params["cid"], facts if isinstance(facts, dict) else {}))
+    return _sse_queue(concept_check_events(request.path_params["cid"], facts if isinstance(facts, dict) else {},
+                                           str(body.get("document_kind") or AUTO_KIND)))
 
 
 async def handle_ask_stream(request: Request) -> Response:
@@ -880,12 +890,12 @@ async def handle_ask_stream(request: Request) -> Response:
                                           body.get("history"), facts if isinstance(facts, dict) else {}))
 
 
-def scenario_events(dossier_id: str, evaluator: str = "network") -> "queue.Queue":
+def scenario_events(dossier_id: str, evaluator: str = "network", answers: dict | None = None) -> "queue.Queue":
     """E3: chạy kịch bản của một hồ sơ mẫu, mỗi sự kiện (step / evaluation / evaluation_diff / explain / expect / questions) một dòng SSE."""
     from rag.rules.scenario import run_scenario
 
     def run(emit) -> dict:
-        for event in run_scenario(dossier_id, evaluator=evaluator):
+        for event in run_scenario(dossier_id, evaluator=evaluator, answers=answers):
             emit(event)
         return {}
     return _events(run, f"scenario-{dossier_id}")
@@ -898,7 +908,9 @@ async def handle_dossiers(request: Request) -> Response:
 
 async def handle_scenario_stream(request: Request) -> Response:
     body = await _json(request)
-    return _sse_queue(scenario_events(request.path_params["did"], str(body.get("evaluator") or "network")))
+    answers = body.get("answers")
+    return _sse_queue(scenario_events(request.path_params["did"], str(body.get("evaluator") or "network"),
+                                      answers if isinstance(answers, dict) else None))
 
 
 def _sse_queue(q: "queue.Queue") -> Response:

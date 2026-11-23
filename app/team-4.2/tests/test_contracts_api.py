@@ -332,7 +332,8 @@ def test_concept_check_returns_report_and_markdown(client, monkeypatch):
     assert r.status_code == 200
     body = r.json()
     assert body["report"]["contract_id"] == cid
-    assert body["report"]["warnings"] == ["w"]
+    assert body["report"]["warnings"][0] == "w"                     # sau đó là cảnh báo nhận diện loại (StageLLM không nhận diện được)
+    assert "không nhận diện được loại" in body["report"]["warnings"][1].lower()
     assert isinstance(body["markdown"], str)
     assert body["labels"] == {}
     assert seen["user_facts"] == {"wage_region": "I"}
@@ -611,13 +612,36 @@ def test_concept_check_classifies_once_then_passes_concrete_kind(client, monkeyp
     assert llm.calls == 1                      # loại đã lưu: không nhận diện lại
 
 
-def test_concept_check_unknown_classification_is_not_stored(client, monkeypatch):
+def test_unknown_classification_is_stored_blocks_ask_and_is_retried(client, monkeypatch):
+    """Final-review 1: `unknown` được lưu để hỏi đáp báo rõ (400), không rơi về labor; lần soát sau vẫn nhận diện lại."""
     seen = {}
     _stub_check(monkeypatch, seen)
-    contracts_api.CONFIG.llm_factory = lambda: _ClassifyLLM("unknown")
+    llm = _ClassifyLLM("unknown")
+    contracts_api.CONFIG.llm_factory = lambda: llm
     cid, c = _upload_without_kind(client)
-    assert client.post(f"/api/contracts/{cid}/concept-check", json={}).status_code == 200
-    assert seen["document_kind"] == "unknown" and "document_kind" not in c.facts
+    body = client.post(f"/api/contracts/{cid}/concept-check", json={}).json()
+    assert seen["document_kind"] == "unknown" and c.facts["document_kind"] == "unknown"
+    assert any("không nhận diện được loại" in w.lower() and "model_unknown" in w for w in body["report"]["warnings"])
+    contracts_api.CONFIG.legal_graph = lambda: None
+    last = _sse_events(client.post(f"/api/contracts/{cid}/ask/stream", json={"question": "q"}).text)[-1]
+    assert last["type"] == "error" and last["status"] == 400 and "không có gói" in last["error"]
+    client.post(f"/api/contracts/{cid}/concept-check", json={})
+    assert llm.calls == 2                                  # loại lạ không bị coi là đã nhận diện
+
+
+def test_explicit_document_kind_overrides_and_is_stored(client, monkeypatch):
+    """Final-review 4: người dùng sửa được loại nhận diện sai (body.document_kind)."""
+    seen = {}
+    _stub_check(monkeypatch, seen)
+    cid = upload(client).json()["contract_id"]
+    c = contracts_api.get(cid)
+    c.facts = {**(c.facts or {}), "document_kind": "labor_contract"}
+    r = client.post(f"/api/contracts/{cid}/concept-check", json={"document_kind": "lease_contract"})
+    assert r.status_code == 200 and seen["document_kind"] == "lease_contract" and c.facts["document_kind"] == "lease_contract"
+    bad = client.post(f"/api/contracts/{cid}/concept-check", json={"document_kind": "khong_co_goi"})
+    assert bad.status_code == 400 and c.facts["document_kind"] == "lease_contract"
+    ev = _sse_events(client.post(f"/api/contracts/{cid}/concept-check/stream", json={"document_kind": "labor_contract"}).text)
+    assert ev[-1]["type"] == "done" and c.facts["document_kind"] == "labor_contract"
 
 
 def test_concept_check_legacy_none_kind_uses_labor_catalog(client, monkeypatch):

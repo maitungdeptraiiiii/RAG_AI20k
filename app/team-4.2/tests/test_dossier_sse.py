@@ -43,3 +43,17 @@ def test_sse_evaluator_choice_and_bad_value():
 def test_list_dossiers_endpoint():
     body = _client().get("/api/rules/dossiers").json()
     assert {"a1", "b1"} <= {d["dossier_id"] for d in body["dossiers"]}
+
+
+def test_sse_passes_user_answers_to_the_scenario(monkeypatch):
+    """Final-review 3: UI gửi `answers` (dữ kiện người dùng trả lời) cho kịch bản."""
+    import rag.rules.scenario as scenario
+    seen = {}
+
+    def fake(did, **kw):
+        seen.update(kw)
+        return iter([{"type": "step", "index": 0}])
+    monkeypatch.setattr(scenario, "run_scenario", fake)
+    events = _events(_client().post("/api/rules/dossiers/b1/scenario/stream",
+                                    json={"answers": {"is_elderly_employee": True}, "evaluator": "reference"}).text)
+    assert events[-1]["type"] == "done" and seen == {"evaluator": "reference", "answers": {"is_elderly_employee": True}}

@@ -9,6 +9,7 @@ Sự kiện (mỗi bước, theo thứ tự): `step` → `evaluation` (bước l
 from __future__ import annotations
 
 import dataclasses
+import os
 from datetime import date
 from functools import lru_cache
 from pathlib import Path
@@ -24,7 +25,16 @@ from rag.rules.objects import ObjectChanges, WorkingObject
 from rag.rules.questions import next_questions
 from rag.rules.semantics import Fact
 
-DOSSIER_ROOT = Path(__file__).resolve().parents[3] / "tests" / "fixtures" / "rete"
+DOSSIER_ROOT = Path(__file__).resolve().parents[3] / "tests" / "fixtures" / "rete"   # mặc định (môi trường dev)
+
+
+class UnknownDossier(LookupError):
+    """Mã hồ sơ không có trong thư mục hồ sơ (route trả 404)."""
+
+
+def dossier_root() -> Path:
+    """Thư mục hồ sơ: biến môi trường RAG_DOSSIER_ROOT, không có thì bộ mẫu trong tests (hạn chế R.3)."""
+    return Path(os.environ.get("RAG_DOSSIER_ROOT") or DOSSIER_ROOT)
 EVALUATORS = ("reference", "network")
 STEPS = ("load", "set_review_date", "add", "remove", "answer")
 
@@ -42,17 +52,46 @@ def _catalog(packs: tuple[str, ...]):
     return load_packs(list(packs))
 
 
-def _dossier(did: str, root: Path) -> dict:
-    d = _yaml(Path(root) / did / "dossier.yaml")
-    if d is None:
-        raise ValueError(f"Hồ sơ {did!r} không có")
-    d["objects"] = _yaml(Path(root) / did / "objects.yaml") or []
-    d["facts"] = _yaml(Path(root) / did / "facts.yaml") or {}
-    d["scenario"] = _yaml(Path(root) / did / "scenario.yaml")
+def load_dossier(did: str, root: Path | None = None) -> dict:
+    """dossier.yaml + objects / facts / gold / scenario của một hồ sơ (định dạng tests/fixtures/rete/README.md). Chỉ nhận
+    mã là tên một thư mục hồ sơ có trong `root` (không đường dẫn)."""
+    root = Path(root or dossier_root())
+    if not did or did != Path(did).name or did in (".", "..") or not (root / did / "dossier.yaml").is_file():
+        raise UnknownDossier(f"Hồ sơ {did!r} không có")
+    d = _yaml(root / did / "dossier.yaml")
+    d["objects"] = _yaml(root / did / "objects.yaml") or []
+    d["facts"] = _yaml(root / did / "facts.yaml") or {}
+    d["gold"] = _yaml(root / did / "gold.yaml")
+    d["scenario"] = _yaml(root / did / "scenario.yaml")
     return d
 
 
-def list_dossiers(root: Path = DOSSIER_ROOT) -> list[dict]:
+_dossier = load_dossier
+
+_NEEDS = {"load": ("review_date",), "set_review_date": ("value",), "add": ("state",), "remove": ("state",),
+          "answer": ("facts",)}
+
+
+def check_steps(steps: object) -> list[dict]:
+    """Kiểm kịch bản trước khi chạy (hạn chế R.8): danh sách bước, bước đầu là load, mỗi bước đủ khóa. Sai -> ValueError."""
+    if not isinstance(steps, list) or not steps or not all(isinstance(x, dict) for x in steps):
+        raise ValueError("scenario.yaml: steps phải là danh sách bước (dict) không rỗng")
+    for i, step in enumerate(steps):
+        do = step.get("do")
+        if do not in STEPS:
+            raise ValueError(f"bước {i}: thao tác lạ {do!r}")
+        if i == 0 and do != "load":
+            raise ValueError(f"bước 0: kịch bản phải bắt đầu bằng load, gặp {do!r}")
+        for key in _NEEDS[do]:
+            if step.get(key) in (None, ""):
+                raise ValueError(f"bước {i} ({do}): thiếu {key}")
+        if do == "answer" and not isinstance(step["facts"], dict):
+            raise ValueError(f"bước {i} (answer): facts phải là dict")
+    return steps
+
+
+def list_dossiers(root: Path | None = None) -> list[dict]:
+    root = Path(root or dossier_root())
     out = []
     for p in sorted(Path(root).glob("*/dossier.yaml")):
         d = _yaml(p)
@@ -91,21 +130,23 @@ def result_key(r) -> str:
     return f"{r.concept_id}/{r.rule_id}" + (f"@{r.object}" if r.object else "")
 
 
-def run_scenario(dossier_id: str, *, evaluator: str = "network", root: Path = DOSSIER_ROOT,
+def run_scenario(dossier_id: str, *, evaluator: str = "network", root: Path | None = None,
                  answers: dict[str, Any] | None = None) -> Iterator[dict]:
     """`answers`: dữ kiện người dùng trả lời trước khi chạy ({tên: giá trị}). Hồ sơ không có kịch bản: chỉ một bước load ở
     ngày soát của hồ sơ."""
     if evaluator not in EVALUATORS:
         raise ValueError(f"evaluator phải là một trong {EVALUATORS}, không phải {evaluator!r}")
+    root = Path(root or dossier_root())
     first = _dossier(dossier_id, root)
-    steps = (first["scenario"] or {}).get("steps") or [
-        {"do": "load", "state": dossier_id, "review_date": first.get("review_date"), "say": "Soát hồ sơ"}]
+    scenario = first["scenario"]
+    if scenario is not None and not isinstance(scenario, dict):
+        raise ValueError("scenario.yaml: phải là dict có khóa steps")
+    steps = check_steps((scenario or {}).get("steps") if scenario is not None else [
+        {"do": "load", "state": dossier_id, "review_date": first.get("review_date"), "say": "Soát hồ sơ"}])
     answered: dict[str, Fact] = {k: Fact(v, None, "user") for k, v in (answers or {}).items()}
     session = cat = state = day = d = None
     for i, step in enumerate(steps):
-        do = step.get("do")
-        if do not in STEPS:
-            raise ValueError(f"bước {i}: thao tác lạ {do!r}")
+        do = step["do"]
         changed: list = []
         if do in ("load", "set_review_date"):
             state = step.get("state", state) or dossier_id

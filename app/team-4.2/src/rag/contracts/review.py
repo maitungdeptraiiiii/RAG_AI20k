@@ -20,6 +20,7 @@ from rag.contracts.batches import make_batches, run_batches
 from rag.contracts.evidence import LawEvidence, LegacySearch, find_evidence, law_changes
 from rag.contracts.llm_json import ContractAIError, ask_json, quote_ok
 from rag.contracts.models import Contract
+from rag.contracts.facts import INTERNAL_FACT_KEYS
 from rag.contracts.parse import llm_units
 from rag.contracts.verify import known_facts, question_id
 from rag.quality.pii import mask_text
@@ -197,7 +198,8 @@ def _masked(contract: Contract, text: str) -> str:
 # --- thao tác ---------------------------------------------------------------------------------
 
 def summarize(ctx: ReviewContext, contract: Contract) -> dict[str, Any]:
-    data = ask_json(ctx.llm, SUMMARY, {"units": _units_payload(llm_units(contract.units)), "facts": contract.facts},
+    facts = {k: v for k, v in (contract.facts or {}).items() if k not in INTERNAL_FACT_KEYS}   # sổ sách nội bộ: không gửi LLM
+    data = ask_json(ctx.llm, SUMMARY, {"units": _units_payload(llm_units(contract.units)), "facts": facts},
                     contract.mask_state)
     labels = {u.uid: u.label for u in contract.units}
     sections = []

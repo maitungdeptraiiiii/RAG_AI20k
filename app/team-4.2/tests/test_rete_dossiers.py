@@ -20,6 +20,7 @@ from rag.contracts.doc import PageText
 from rag.contracts.structure import parse_contract
 from rag.rules.evaluator import evaluator_for
 from rag.rules.loader import load_pack, load_packs, packs_for_kind
+from rag.rules import scenario
 from rag.rules.objects import ObjectChanges, WorkingObject
 from rag.rules.semantics import Fact, fact_names
 
@@ -42,12 +43,7 @@ def _norm(s: str) -> str:
 
 @lru_cache(maxsize=None)
 def dossier(did: str) -> dict:
-    d = _yaml(HERE / did / "dossier.yaml")
-    d["objects"] = _yaml(HERE / did / "objects.yaml") or []
-    d["facts"] = _yaml(HERE / did / "facts.yaml") or {}
-    d["gold"] = _yaml(HERE / did / "gold.yaml")
-    d["scenario"] = _yaml(HERE / did / "scenario.yaml")
-    return d
+    return scenario.load_dossier(did, HERE)          # cùng bộ đọc với route kịch bản (hạn chế R.3)
 
 
 @lru_cache(maxsize=None)
@@ -60,23 +56,11 @@ def text(did: str, doc_id: str) -> str:
 
 
 def objects_of(did: str) -> list[WorkingObject]:
-    out = []
-    for o in dossier(did)["objects"]:
-        attrs = {k: Fact(a["value"], a.get("unit"), "contract", None, a.get("quote")) for k, a in o["attrs"].items()}
-        out.append(WorkingObject(o["id"], o["type"], attrs, _day(o["valid_from"]) if o.get("valid_from") else None,
-                                 _day(o["valid_to"]) if o.get("valid_to") else None, dict(o.get("refs") or {})))
-    return out
+    return scenario.objects_of(dossier(did))
 
 
 def facts_at(did: str, day: date) -> dict:
-    d = dossier(did)
-    facts = {k: Fact(v, None, "user") for k, v in (d.get("user_facts") or {}).items()}
-    for name, values in d["facts"].items():
-        live = [v for v in values if _day(v["from"]) <= day]
-        if live:
-            v = max(live, key=lambda x: _day(x["from"]))
-            facts[name] = Fact(v["value"], v.get("unit"), "contract", None, v.get("quote"))
-    return facts
+    return scenario.facts_at(dossier(did), day)
 
 
 def key(r) -> str:

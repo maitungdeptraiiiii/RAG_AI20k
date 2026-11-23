@@ -626,6 +626,8 @@ def _error_status(exc: Exception) -> tuple[str, int]:
     """Cùng cách ánh xạ lỗi như _call, cho luồng stream."""
     if isinstance(exc, KeyError):
         return GONE, 404
+    if isinstance(exc, LookupError):            # hồ sơ mẫu không có (rag.rules.scenario.UnknownDossier)
+        return str(exc), 404
     if isinstance(exc, NeedsConceptCheck):
         return NEEDS_CHECK, 409
     if isinstance(exc, GraphBusy):

@@ -237,3 +237,14 @@ def test_in_store_common_names():
     assert not _in_store("Bộ luật Lao động 2012", titles)
     assert not _in_store("Luật Việc làm", titles)
     assert not _in_store(None, titles)
+
+
+def test_summary_payload_has_no_internal_bookkeeping_keys():
+    """Hạn chế R.8: `document_kind` / `fields_tried` là sổ sách nội bộ, không gửi cho LLM tóm tắt."""
+    c = contract()
+    c.facts = {**c.facts, "document_kind": "lease_contract", "fields_tried": ["type"]}
+    llm = StageLLM({"summary": lambda p: {"sections": [{"title": "Các bên", "items": [
+        {"text": "Bên cho thuê và Bên thuê", "unit": c.units[0].uid}]}]}})
+    rv.summarize(ctx(llm), c)
+    sent = llm.calls[-1][1]["facts"]
+    assert "document_kind" not in sent and "fields_tried" not in sent and sent["type"] == "Hợp đồng thuê nhà ở"

@@ -71,7 +71,7 @@ def test_answer_step_updates_facts_and_emits_diff():
 
 
 def test_unknown_dossier_and_bad_evaluator_are_errors():
-    with pytest.raises(ValueError, match="không có"):
+    with pytest.raises(LookupError, match="không có"):                 # R.8: hồ sơ không có -> 404 ở route
         list(run_scenario("khong_co"))
     with pytest.raises(ValueError, match="evaluator"):
         list(run_scenario("a1", evaluator="x"))
@@ -92,3 +92,43 @@ def test_unknown_step_kind_is_error(tmp_path):
 def test_list_dossiers_marks_scenarios():
     rows = {r["dossier_id"]: r for r in list_dossiers()}
     assert rows["a1"]["has_scenario"] and rows["a1"]["packs"] == ["labor"] and rows["b2"]["has_scenario"] is False
+
+
+def _copy_dossier(tmp_path, did="b1", scenario=None):
+    import shutil
+    shutil.copytree(Path(DOSSIER_ROOT) / did, tmp_path / did)
+    if scenario is not None:
+        (tmp_path / did / "scenario.yaml").write_text(yaml.safe_dump(scenario, allow_unicode=True), encoding="utf-8")
+    return tmp_path
+
+
+@pytest.mark.parametrize("steps,why", [
+    ([{"do": "add", "state": "b1"}], "load"),                                       # add trước load
+    ([{"do": "answer", "facts": {"x": 1}}], "load"),                                # answer trước load
+    ([{"do": "load"}], "review_date"),                                              # load thiếu ngày soát
+    ([{"do": "load", "review_date": "2025-01-01"}, {"do": "set_review_date"}], "value"),
+    ([{"do": "load", "review_date": "2025-01-01"}, {"do": "answer"}], "facts"),
+    ([{"do": "load", "review_date": "2025-01-01"}, {"do": "add"}], "state"),
+    ({"steps": "không phải danh sách"}, "steps"),
+])
+def test_malformed_scenario_is_value_error_before_any_event(tmp_path, steps, why):
+    """Hạn chế R.8: scenario.yaml hỏng -> ValueError (400) nêu khóa thiếu, không KeyError (404) / lỗi lạ (500)."""
+    root = _copy_dossier(tmp_path, scenario=steps if isinstance(steps, dict) else {"steps": steps})
+    with pytest.raises(ValueError) as e:
+        list(run_scenario("b1", root=root))
+    assert why in str(e.value)
+
+
+def test_unknown_dossier_is_lookup_error():
+    from rag.rules.scenario import UnknownDossier
+    for did in ("khong_co", "../b1", "b1/../a1"):
+        with pytest.raises(UnknownDossier):
+            list(run_scenario(did))
+
+
+def test_dossier_root_from_env(tmp_path, monkeypatch):
+    """Hạn chế R.3: chạy ngoài môi trường dev đổi thư mục hồ sơ bằng RAG_DOSSIER_ROOT."""
+    root = _copy_dossier(tmp_path)
+    monkeypatch.setenv("RAG_DOSSIER_ROOT", str(root))
+    assert [d["dossier_id"] for d in list_dossiers()] == ["b1"]
+    assert next(iter(run_scenario("b1")))["type"] == "step"

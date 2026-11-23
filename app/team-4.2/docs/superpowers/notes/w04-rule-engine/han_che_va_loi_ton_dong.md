@@ -10,8 +10,8 @@ có chi phí nếu sai). Nhánh `feat/team-4.2/w04-rules-engine`, chưa merge. T
 | 1.1 | Đơn vị gốc không có dòng quy đổi riêng làm âm thầm tắt so sánh khác đơn vị (reviewer, Important). Loader nay tự thêm `(gốc, 1)` và báo lỗi nếu gốc có hệ số khác 1 (commit 7d8fc9b) | Đã sửa |
 | 1.2 | Khi lập kế hoạch tin sai "≥5 rule dùng `contract_kind`" (thực tế 5 lá / 3 rule): test đổi, ghi `Ruling` | Có chủ ý |
 | 1.3 | Từng ghi nhầm "Task 8 complete" vào sổ sau lệnh `git add` hỏng: đã xóa dòng, commit lại cho đúng | Đã sửa |
-| 1.4 | Bộ nạp ném ngoại lệ thô (`AttributeError`, `TypeError`) khi YAML sai hình dạng ở `concepts.yaml` / `pack.yaml` (phần `derived` đã được sửa ở giai đoạn 3) | Còn |
-| 1.5 | `version` trong `pack.yaml` không vào `Catalog.version` | Còn |
+| 1.4 | Bộ nạp ném ngoại lệ thô (`AttributeError`, `TypeError`) khi YAML sai hình dạng ở `concepts.yaml` / `pack.yaml` (phần `derived` đã được sửa ở giai đoạn 3) | Đã sửa (S.7) |
+| 1.5 | `version` trong `pack.yaml` không vào `Catalog.version` | Đã sửa (S.7) |
 | 1.6 | Gói con không dùng được role của gói cha và `not_about.see` trỏ khái niệm của gói cha | Còn |
 | 1.7 | `ReferenceSession` chia sẻ đối tượng kết quả và dict `evidence` giữa các lần gọi | Còn |
 | 1.8 | Docstring nói nạp lười gói labor, nhưng `bridge/catalog.py` nạp ngay khi import | Còn |
@@ -49,11 +49,11 @@ có chi phí nếu sai). Nhánh `feat/team-4.2/w04-rules-engine`, chưa merge. T
 
 | # | Mục | Trạng thái |
 |---|---|---|
-| 3.7 | Dữ kiện suy ra `UNKNOWN` chỉ vì đầu vào `CONFLICT` ra `needs_facts` với `missing_facts` rỗng, đúng ra phải là `conflict` (`semantics.py` chỉ xét `CONFLICT` trực tiếp trong `check`) | Còn |
-| 3.8 | `value: null` trong định nghĩa dữ kiện suy ra được chấp nhận thành `Fact(None)` "có mặt" | Còn |
+| 3.7 | Dữ kiện suy ra `UNKNOWN` chỉ vì đầu vào `CONFLICT` ra `needs_facts` với `missing_facts` rỗng, đúng ra phải là `conflict` (`semantics.py` chỉ xét `CONFLICT` trực tiếp trong `check`) | Đã sửa (S.6) |
+| 3.8 | `value: null` trong định nghĩa dữ kiện suy ra được chấp nhận thành `Fact(None)` "có mặt" | Đã sửa (S.7) |
 | 3.9 | Bốn rule `r3_*` luôn ra `PASS/ok` khi điều khoản thời hạn có mặt (kể cả applicability chưa biết): mỗi HĐ xác định thời hạn sinh bốn dòng "ok", có thể gây nhiễu UI và báo cáo | Còn |
 | 3.10 | Hàng U của §5.4 chỉ thêm dữ kiện của ngoại lệ vào `missing_facts` khi rule gốc là `FAIL`; gốc `UNKNOWN` thì phải hỏi thêm một vòng | Có chủ ý (đúng spec) |
-| 3.11 | Định nghĩa `from` lấy đơn vị theo nguồn, bỏ qua `unit` đã khai của dữ kiện suy ra, không kiểm hai đơn vị khớp nhau | Còn |
+| 3.11 | Định nghĩa `from` lấy đơn vị theo nguồn, bỏ qua `unit` đã khai của dữ kiện suy ra, không kiểm hai đơn vị khớp nhau | Đã sửa (S.7) |
 | 3.12 | Nhãn dữ kiện `worked_after_expiry_days` chưa nói ngày hết hạn có tính là ngày 0 hay không (ca biên đúng 30 ngày phụ thuộc cách đếm) | Còn |
 
 **Hạn chế và quyết định có chi phí nếu sai:**
@@ -444,10 +444,10 @@ Kế hoạch: `app/team-4.2/docs/superpowers/plans/2026-11-23-khanh-ingest-bench
 
 - R.1 (D40) Sửa kèm: `check_contract(document_kind="auto")` ghi `facts["document_kind"]` trước bước trích nên hợp đồng chưa có dữ kiện bị bỏ qua bước trích; nay loại không tính là dữ kiện đã trích. UI nhận diện trước khi dựng nền luật (basis) vì `check_contract` tự dựng basis không có đồ thị luật.
 - R.2 (D34) Nhãn dữ kiện / kết luận nằm trong `labels` của `pack.yaml`; nhãn của `civil_general`, `civil_loan`, `civil_lease`, `consumer`, `commercial` do Claude viết từ tên dữ kiện và câu hỏi của gói — Tùng đã duyệt (24/11). Studio: dữ kiện không có nhãn hiện trống (như cũ) trong sơ đồ, hiện tên gốc trong báo cáo — Còn (chưa đồng nhất).
-- R.3 (E3) `rag/rules/scenario.py` đọc hồ sơ từ `tests/fixtures/rete` (mặc định) — chạy ngoài môi trường dev cần đổi `DOSSIER_ROOT`. Bản đọc hồ sơ trùng logic với `tests/test_rete_dossiers.py` (chưa gộp). Hồ sơ vay / thuê / tiêu dùng / thương mại là bộ lẻ, chưa có `scenario.yaml` nên chưa chạy bằng route này — Còn.
+- R.3 (E3) `rag/rules/scenario.py` đọc hồ sơ từ `tests/fixtures/rete` (mặc định) — chạy ngoài môi trường dev cần đổi `DOSSIER_ROOT`. Bản đọc hồ sơ trùng logic với `tests/test_rete_dossiers.py` (chưa gộp). Hồ sơ vay / thuê / tiêu dùng / thương mại là bộ lẻ, chưa có `scenario.yaml` nên chưa chạy bằng route này — Còn. (Thư mục hồ sơ và bản đọc trùng: đã sửa, S.10.)
 - R.4 (K1) Chuỗi sửa đổi LTM 36/2005, NĐ 95/2024, NĐ 96/2024: cần `python -m rag.legal crawl` (tải vbpl.vn, ghi snapshot mới vào kho dùng chung), chưa chạy vì cần Tùng cho phép — Còn. Đồ thị luật chỉ kiểm bản dựng trong bộ nhớ, chưa kiểm với Neo4j thật — Còn.
 - R.5 Gate sau D34/D40/E3 (`tests/test_rules_*`, `test_bridge_*`, các test contract/graph/pack, `test_contract_studio`, `test_rete_dossiers`, `test_scenario_runner`, `test_dossier_sse`, `test_legal_ingest_report`, `test_bench_*`): 1017 passed, 2 skipped, 16 xfailed ở cả hai chế độ (network và reference).
-- R.6 (D40, duyệt cuối) `extract_fields` của gói (vd. `loan_interest` của `civil_loan` để suy `has_interest`) không đi vào luồng UI: upload trích dữ kiện trước khi biết loại hợp đồng, rồi `check_contract` bỏ qua bước trích vì đã có dữ kiện. Hợp đồng vay tải lên qua UI vì vậy thiếu `has_interest` (rule dùng nó ra `needs_facts`). Cần quyết định thiết kế: trích bổ sung chỉ các trường còn thiếu sau khi chọn gói (cần chế độ trích gia tăng cho `extract_facts`, tốn thêm lời gọi LLM) — Còn.
+- R.6 (D40, duyệt cuối) `extract_fields` của gói (vd. `loan_interest` của `civil_loan` để suy `has_interest`) không đi vào luồng UI: upload trích dữ kiện trước khi biết loại hợp đồng, rồi `check_contract` bỏ qua bước trích vì đã có dữ kiện. Hợp đồng vay tải lên qua UI vì vậy thiếu `has_interest` (rule dùng nó ra `needs_facts`). Cần quyết định thiết kế: trích bổ sung chỉ các trường còn thiếu sau khi chọn gói (cần chế độ trích gia tăng cho `extract_facts`, tốn thêm lời gọi LLM) — Đã sửa (S.8; ví dụ hợp đồng vay ở đây sai, xem S.8).
 - R.7 (D40, duyệt cuối) Đổi loại hợp đồng nhận diện sai: có qua API (`document_kind` trong body của `concept-check` và `concept-check/stream`, phải là loại có gói; được lưu) nhưng UI chưa có chỗ chọn; loại `unknown` được lưu để hỏi đáp báo 400 và lần soát sau nhận diện lại — Còn (UI).
 - R.8 (duyệt cuối, lỗi nhỏ hoãn) `scenario.yaml` hỏng (thiếu khóa, bước add/remove/answer trước load) ra 404/500 thay vì 400; `set_review_date` dựng phiên mới nên `nodes_recomputed` là cả mạng; `did` chưa kiểm với `list_dossiers()`; mọi lần `catalog_for` đọc cả 7 `pack.yaml` (chỉ `_packs_catalog` có đệm); `labels.facts` không kiểm khóa; loại `unknown` không kiểm dữ kiện người dùng (chưa có test); `document_kind` lọt vào payload báo cáo LLM; lỗi kiểm tra đồ thị luật (K1) chỉ in stderr, không vào báo cáo / mã thoát.
 
@@ -460,3 +460,10 @@ Kế hoạch: `app/team-4.2/docs/superpowers/plans/2026-11-23-khanh-ingest-bench
 | S.3 | BVQLNTD Đ80.2: hợp đồng theo mẫu công khai trước 01/07/2024 phải sửa cho phù hợp trước 31/12/2024 — với ngày soát sau 2024 thì luật mới áp cả cho mẫu cũ; engine soát theo ngày ký nên chưa thể hiện | Còn |
 | S.4 | Kho có BLDS 33/2005 nhưng thiếu điều hiệu lực cuối; trần lãi trước 01/12/2010 vẫn UNKNOWN (V.3), không khai mốc riêng | Ghi nhận |
 | S.5 | Labor `apply` theo Đ220.2 nhưng engine labor vẫn soát theo ngày ký (giá trị luật kỳ trước 2021 không có -> UNKNOWN); soát theo ngày soát cho HĐLĐ đang thực hiện chưa làm | Còn |
+| S.6 | 3.7: `derived.conflicted_inputs` (cùng bộ duyệt với `missing_inputs`): dữ kiện suy ra chưa xác định vì đầu vào CONFLICT -> finding `conflict`; Network cập nhật đúng khi đầu vào hết mâu thuẫn | Đã sửa |
+| S.7 | Bộ nạp: tệp không phải dict, `concepts` / `slots` / `rules` sai kiểu -> CatalogError nêu tệp; phần sai hình dạng còn lại bắt ở ranh giới YAML (`_shape_guard`) thay vì AttributeError / TypeError (1.4). `Catalog.version` = `<gói>@<version pack.yaml>/<version concepts.yaml>` nối `+`, cả `load_catalog` (1.5; đổi chuỗi version trong báo cáo và thao tác). Dữ kiện suy ra `value: null` bị từ chối (3.8); `from` khác đơn vị đã khai: bộ nạp kiểm quy đổi được, lúc chạy đổi về đơn vị đã khai, không đổi được -> UNKNOWN (3.11) | Đã sửa |
+| S.8 | R.6: ví dụ "hợp đồng vay thiếu `has_interest`" là **sai** — `loan_interest` đã có trong danh mục chung `fact_catalog.json` (loại `loan`, commit H2) nên được trích lúc tải lên. Lỗ hổng thật là tổng quát: trường `extract_fields` của gói không chép vào `fact_catalog.json` không bao giờ được trích sau lúc tải lên. Nay `extract_facts` ghi `fields_tried`; `check_contract` khi đã có dữ kiện gọi `extract_more_fields` cho trường của gói chưa hỏi (chỉ hỏi các trường đó, không đụng bên / ngày ký), một lần; lỗi LLM -> cảnh báo, soát vẫn chạy. Dữ kiện cũ chưa có `fields_tried` coi như đã hỏi danh mục chung | Đã sửa |
+| S.9 | Trích bổ sung đọc lại mọi lô của hợp đồng (số lời gọi LLM = số lô) dù chỉ hỏi một trường | Có chủ ý (đơn giản; tối ưu khi cần) |
+| S.10 | R.3 + R.8: thư mục hồ sơ đọc từ `RAG_DOSSIER_ROOT` (mặc định bộ mẫu trong tests); `tests/test_rete_dossiers.py` dùng chung `scenario.load_dossier` / `objects_of` / `facts_at`. Kịch bản hỏng (không phải danh sách, bước đầu không phải load, thiếu `review_date` / `value` / `state` / `facts`) -> ValueError trước mọi sự kiện (route 400); mã hồ sơ lạ hoặc có đường dẫn (`../b1`) -> `UnknownDossier` (404). `labels.facts` có khóa không phải dữ kiện của gói -> CatalogError (các gói thật đều qua). `packs_for_kind` đệm theo thời điểm sửa `pack.yaml`. `document_kind` / `fields_tried` không gửi cho LLM tóm tắt (`INTERNAL_FACT_KEYS`) | Đã sửa |
+| S.11 | R.8 còn lại: `set_review_date` dựng phiên mới (`nodes_recomputed` = cả mạng); lỗi kiểm tra đồ thị luật K1 chỉ in stderr; loại `unknown` không kiểm dữ kiện người dùng (chưa có test riêng) | Còn |
+| S.12 | Gate đợt 1 (danh sách mở rộng: thêm `test_three_domains`, `test_contracts_review`, `test_rules_in_force`, `test_rules_loader_shapes`): 1760 passed, 1 skipped, 1 xfailed ở cả network và reference | Ghi nhận |

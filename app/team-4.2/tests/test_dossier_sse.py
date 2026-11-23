@@ -30,7 +30,7 @@ def test_sse_streams_scenario_and_ends_with_done():
 
 def test_sse_unknown_dossier_is_error_event_then_closes():
     events = _events(_client().post("/api/rules/dossiers/khong_co/scenario/stream", json={}).text)
-    assert events[-1]["type"] == "error" and events[-1]["status"] == 400 and "không có" in events[-1]["error"]
+    assert events[-1]["type"] == "error" and events[-1]["status"] == 404 and "không có" in events[-1]["error"]
 
 
 def test_sse_evaluator_choice_and_bad_value():
@@ -57,3 +57,16 @@ def test_sse_passes_user_answers_to_the_scenario(monkeypatch):
     events = _events(_client().post("/api/rules/dossiers/b1/scenario/stream",
                                     json={"answers": {"is_elderly_employee": True}, "evaluator": "reference"}).text)
     assert events[-1]["type"] == "done" and seen == {"evaluator": "reference", "answers": {"is_elderly_employee": True}}
+
+
+def test_sse_unknown_dossier_is_404_and_bad_scenario_is_400(tmp_path, monkeypatch):
+    import shutil
+    import yaml
+    from rag.rules.scenario import DOSSIER_ROOT
+    last = _events(_client().post("/api/rules/dossiers/khong_co/scenario/stream", json={}).text)[-1]
+    assert last["type"] == "error" and last["status"] == 404
+    shutil.copytree(DOSSIER_ROOT / "b1", tmp_path / "b1")
+    (tmp_path / "b1" / "scenario.yaml").write_text(yaml.safe_dump({"steps": [{"do": "add"}]}), encoding="utf-8")
+    monkeypatch.setenv("RAG_DOSSIER_ROOT", str(tmp_path))
+    last = _events(_client().post("/api/rules/dossiers/b1/scenario/stream", json={}).text)[-1]
+    assert last["type"] == "error" and last["status"] == 400

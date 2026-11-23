@@ -2,7 +2,7 @@
 
 Chạy từ app/team-4.2 (không chạy việc nặng khác cùng lúc):
     .venv/Scripts/python.exe scripts/bench_rule_engine.py --seed 0
-Ra reports/week-04/team-4.2/bench/<thời điểm>.json + summary.md + axis1.png + axis2.png.
+Ra evals/team-4.2/results/w04-rule-engine/bench/<thời điểm>.json + summary.md + axis1.png + axis2.png.
 `--quick`: cấu hình nhỏ (cho test). Hai evaluator lệch -> in ca lỗi, ghi phần đã đo, thoát mã 2 (không bỏ qua).
 """
 from __future__ import annotations
@@ -159,7 +159,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--repeats", type=int, default=20)
     ap.add_argument("--quick", action="store_true")
-    ap.add_argument("--out", type=Path, default=REPO / "reports" / "week-04" / "team-4.2" / "bench")
+    ap.add_argument("--out", type=Path, default=REPO / "evals" / "team-4.2" / "results" / "w04-rule-engine" / "bench")
     args = ap.parse_args(argv)
     repeats = 3 if args.quick else max(20, args.repeats)
     started = datetime.now()

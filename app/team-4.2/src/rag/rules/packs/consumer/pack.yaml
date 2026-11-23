@@ -3,7 +3,7 @@
 # Bản liệt kê có trích dẫn: docs/rule_inventory/consumer.yaml.
 # Dùng hai cách: (1) loại văn bản `consumer_contract` (hợp đồng mua hàng / dùng dịch vụ của cá nhân, gia đình);
 # (2) chồng lên gói khác khi một bên là người tiêu dùng, vd. packs=["civil_lease", "consumer"] (nhận diện tự động chỉ chọn
-# MỘT loại nên chưa tự chồng: xem reports/week-04/team-4.2/han_che_va_loi_ton_dong.md mục N).
+# MỘT loại nên chưa tự chồng: xem app/team-4.2/docs/superpowers/notes/w04-rule-engine/han_che_va_loi_ton_dong.md mục N).
 id: consumer
 version: "0.1"
 extends: [civil_general]

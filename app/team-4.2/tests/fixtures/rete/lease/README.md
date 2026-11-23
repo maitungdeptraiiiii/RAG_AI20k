@@ -23,5 +23,5 @@ Hồ sơ nhiều văn bản (HĐ thuê + phụ lục gia hạn + phụ lục tă
 t7 thêm một vi phạm: vào kiểm tra nhà bất cứ lúc nào không cần báo trước (Điều 6.3, BLDS Đ478.1, cách đọc chờ duyệt).
 
 Chưa kiểm (không có rule có căn cứ, xem `docs/rule_inventory/civil_lease.yaml` và
-`reports/week-04/team-4.2/han_che_va_loi_ton_dong.md` mục L): bên cho thuê đơn phương điều chỉnh giá khi "thị trường thay đổi"
+`app/team-4.2/docs/superpowers/notes/w04-rule-engine/han_che_va_loi_ton_dong.md` mục L): bên cho thuê đơn phương điều chỉnh giá khi "thị trường thay đổi"
 (t7 Điều 4.3), bên thuê mất cọc khi chấm dứt đúng căn cứ (t7 Điều 9.2), cho thuê lại.

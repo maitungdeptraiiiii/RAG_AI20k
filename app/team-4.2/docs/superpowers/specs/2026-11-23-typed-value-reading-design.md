@@ -4,7 +4,7 @@
 
 Luồng cũ: LLM trả chuỗi tự do ("2 năm 6 tháng"), regex `contracts/values.py` đoán nghĩa và lấy mẫu khớp ĐẦU TIÊN.
 Mỗi cách viết mới cần mẫu mới; đọc thiếu thì sai im lặng ("2 năm 6 tháng" -> 24 tháng). Tùng: không vá từng cách
-viết, sửa tổng quát. Đo thử: `reports/week-04/team-4.2/regex_vs_llm_plan.md`, `han_che_va_loi_ton_dong.md` V.1–V.6.
+viết, sửa tổng quát. Đo thử: `app/team-4.2/docs/superpowers/notes/w04-rule-engine/regex_vs_llm_plan.md`, `han_che_va_loi_ton_dong.md` V.1–V.6.
 
 ## Thiết kế (đã duyệt)
 

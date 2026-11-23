@@ -1,4 +1,4 @@
-"""K3: eval rule engine theo gói trên hồ sơ mẫu tests/fixtures/rete/* -> reports/week-04/team-4.2/eval/summary.md.
+"""K3: eval rule engine theo gói trên hồ sơ mẫu tests/fixtures/rete/* -> evals/team-4.2/results/w04-rule-engine/eval/summary.md.
 
 Chạy từ app/team-4.2: .venv/Scripts/python.exe scripts/eval_rule_engine.py [--out DIR] [--no-classify]
 Nhận diện loại hợp đồng dùng LLM thật (classify_contract), có đệm ở <out>/classify_cache.json: chạy lại không gọi LLM."""
@@ -34,7 +34,7 @@ def main(argv: list[str] | None = None) -> int:
     from rag.rules.bench.evalrun import ENGINES, cached_classifier, pack_choice, render_summary, score
 
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--out", type=Path, default=REPO / "reports" / "week-04" / "team-4.2" / "eval")
+    ap.add_argument("--out", type=Path, default=REPO / "evals" / "team-4.2" / "results" / "w04-rule-engine" / "eval")
     ap.add_argument("--no-classify", action="store_true", help="không gọi LLM nhận diện loại")
     args = ap.parse_args(argv)
     cases, no_gold = load_cases()

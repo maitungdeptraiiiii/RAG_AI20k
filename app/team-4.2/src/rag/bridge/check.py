@@ -82,14 +82,14 @@ def _add_ops(contract: Contract, ops) -> int:
     return sum(1 for op in ops if contract.oplog.add(op))
 
 
-def contract_view(contract: Contract, graph, at: datetime) -> tuple[ContractGraphView, str, list[str], ContractDoc]:
+def contract_view(contract: Contract, graph, at: datetime, catalog=None) -> tuple[ContractGraphView, str, list[str], ContractDoc]:
     """Dựng lại đồ thị từ oplog hiện tại và mở view: (view, build_id, cảnh báo, ContractDoc của bản dựng). `graph`: ContractGraphService
     hoặc None (chỉ bản bộ nhớ). Đồ thị lỗi lược đồ / đang bị khóa / Neo4j tắt -> vẫn đọc bản bộ nhớ."""
     from rag.contracts.graph.service import GraphBusy
     warnings: list[str] = []
     if not contract.page_texts:
         warnings.append("Hợp đồng không có văn bản theo trang: đồ thị rỗng, chỉ có dữ kiện người dùng")
-    kw = dict(file_checksum=contract.file_checksum or "")
+    kw = dict(file_checksum=contract.file_checksum or "", catalog=catalog)
     status: dict = {"published": False}
     build = None
     if graph is not None:
@@ -144,7 +144,7 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
     tag_model = tag_model or model
     warnings: list[str] = []
     stage("facts", "start")
-    if not contract.facts:
+    if not {k: v for k, v in (contract.facts or {}).items() if k != "document_kind"}:   # loại đã nhận diện không phải dữ kiện đã trích
         extract_facts(llm, contract, extra_fields=catalog.context.extract_fields,
                       **({"on_event": emit} if on_event else {}))
     stage("facts", "done")
@@ -181,7 +181,7 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
         return session.results()
 
     def read_graph():
-        view, build_id, graph_warnings, _ = contract_view(contract, graph, at)
+        view, build_id, graph_warnings, _ = contract_view(contract, graph, at, catalog)
         factset, fact_warnings = factset_from_graph(view, day=day, sign_date=contract.sign_date)
         results = evaluate_now({**factset.facts, **user}, set(factset.present), factset.evidence)
         if on_event:

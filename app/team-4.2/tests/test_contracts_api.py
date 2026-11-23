@@ -342,6 +342,7 @@ def test_concept_check_unknown_fact_is_400(client):
     contracts_api.CONFIG.tag_llm = lambda model, temp: None
     contracts_api.CONFIG.legal_graph = lambda: None
     cid = upload(client).json()["contract_id"]
+    contracts_api.get(cid).facts["document_kind"] = "lease_contract"      # có gói thì dữ kiện người dùng mới được kiểm
     r = client.post(f"/api/contracts/{cid}/concept-check", json={"user_facts": {"abc": 1}})
     assert r.status_code == 400
 
@@ -421,6 +422,7 @@ def test_stream_unknown_fact_error_event(client):
     contracts_api.CONFIG.tag_llm = lambda model, temp: None
     contracts_api.CONFIG.legal_graph = lambda: None
     cid = upload(client).json()["contract_id"]
+    contracts_api.get(cid).facts["document_kind"] = "lease_contract"
     events = _sse_events(client.post(f"/api/contracts/{cid}/concept-check/stream",
                                      json={"user_facts": {"abc": 1}}).text)
     assert events[-1]["type"] == "error" and events[-1]["status"] == 400
@@ -556,3 +558,80 @@ def test_card_counts_concepts(client):
         c.oplog.add(machine_op(cid, "ASSERT", f"concept:{concept}", {"kind": "concept", "concept_id": concept,
                                "slots": {}}, "llm", "auto_accepted", source_uid=uid, at=at))
     assert client.get(f"/api/contracts/{cid}").json()["concepts"] == 2
+
+
+# --- D40: gói luật theo loại hợp đồng đi suốt luồng ------------------------------------------
+
+def test_catalog_for_picks_pack_by_kind_and_legacy_is_labor(client):
+    cid = upload(client).json()["contract_id"]
+    c = contracts_api.get(cid)
+    c.facts = {k: v for k, v in (c.facts or {}).items() if k != "document_kind"}
+    assert "probation.pay" in contracts_api.catalog_for(c).concepts           # chưa có loại: labor như cũ
+    c.facts["document_kind"] = "lease_contract"
+    cat = contracts_api.catalog_for(c)
+    assert any(k.startswith("lease.") for k in cat.concepts) and "probation.pay" not in cat.concepts
+
+
+def test_catalog_for_unknown_kind_raises_not_labor(client):
+    cid = upload(client).json()["contract_id"]
+    c = contracts_api.get(cid)
+    c.facts = {**(c.facts or {}), "document_kind": "unknown"}
+    with pytest.raises(ValueError, match="không có gói"):
+        contracts_api.catalog_for(c)
+
+
+class _ClassifyLLM:
+    """Chỉ trả lời bước nhận diện loại; số lần gọi để kiểm 'nhận diện một lần'."""
+    def __init__(self, kind):
+        self.kind, self.calls = kind, 0
+
+    def complete(self, system, user):
+        self.calls += system.startswith("Bạn đọc PHẦN ĐẦU")      # chỉ đếm bước nhận diện loại (trích dữ kiện cũng dùng llm này)
+        return json.dumps({"kind": self.kind, "confidence": 0.9, "unit": "u1", "quote": "BÊN CHO THUÊ (Bên A)"},
+                          ensure_ascii=False)
+
+
+def _upload_without_kind(client):
+    cid = upload(client).json()["contract_id"]
+    c = contracts_api.get(cid)
+    c.facts = {k: v for k, v in (c.facts or {}).items() if k != "document_kind"}
+    return cid, c
+
+
+def test_concept_check_classifies_once_then_passes_concrete_kind(client, monkeypatch):
+    seen = {}
+    _stub_check(monkeypatch, seen)
+    llm = _ClassifyLLM("lease_contract")
+    contracts_api.CONFIG.llm_factory = lambda: llm
+    cid, c = _upload_without_kind(client)
+    assert client.post(f"/api/contracts/{cid}/concept-check", json={}).status_code == 200
+    assert seen["document_kind"] == "lease_contract" and "catalog" not in seen and c.facts["document_kind"] == "lease_contract"
+    assert llm.calls == 1
+    assert client.post(f"/api/contracts/{cid}/concept-check", json={}).status_code == 200
+    assert llm.calls == 1                      # loại đã lưu: không nhận diện lại
+
+
+def test_concept_check_unknown_classification_is_not_stored(client, monkeypatch):
+    seen = {}
+    _stub_check(monkeypatch, seen)
+    contracts_api.CONFIG.llm_factory = lambda: _ClassifyLLM("unknown")
+    cid, c = _upload_without_kind(client)
+    assert client.post(f"/api/contracts/{cid}/concept-check", json={}).status_code == 200
+    assert seen["document_kind"] == "unknown" and "document_kind" not in c.facts
+
+
+def test_concept_check_legacy_none_kind_uses_labor_catalog(client, monkeypatch):
+    seen = {}
+    _stub_check(monkeypatch, seen)
+    cid, c = _upload_without_kind(client)
+    contracts_api.concept_check(cid, {}, document_kind=None)
+    assert "document_kind" not in seen and "probation.pay" in seen["catalog"].concepts
+
+
+def test_ask_on_contract_of_unknown_kind_is_400(client):
+    cid = upload(client).json()["contract_id"]
+    contracts_api.get(cid).facts = {**(contracts_api.get(cid).facts or {}), "document_kind": "unknown"}
+    contracts_api.CONFIG.legal_graph = lambda: None
+    r = client.post(f"/api/contracts/{cid}/ask/stream", json={"question": "q"})
+    last = _sse_events(r.text)[-1]
+    assert last["type"] == "error" and last["status"] == 400 and "không có gói" in last["error"]

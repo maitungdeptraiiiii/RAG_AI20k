@@ -46,16 +46,17 @@ class ContractGraphService:
             lock.release()
 
     def rebuild(self, contract_id: str, pages: list[PageText], oplog: OperationLog, *,
-                file_checksum: str, now: datetime) -> tuple[ContractDoc, dict]:
+                file_checksum: str, now: datetime, catalog=None) -> tuple[ContractDoc, dict]:
         """Dựng lại đồ thị; luôn trả ContractDoc, đồ thị lỗi/tắt chỉ báo trong trạng thái."""
-        _, doc, status = self.build_and_publish(contract_id, pages, oplog, file_checksum=file_checksum, now=now)
+        _, doc, status = self.build_and_publish(contract_id, pages, oplog, file_checksum=file_checksum, now=now,
+                                                catalog=catalog)
         return doc, status
 
     def build_and_publish(self, contract_id: str, pages: list[PageText], oplog: OperationLog, *,
-                          file_checksum: str, now: datetime) -> tuple[GraphBuild, ContractDoc, dict]:
+                          file_checksum: str, now: datetime, catalog=None) -> tuple[GraphBuild, ContractDoc, dict]:
         """Như `rebuild` nhưng trả cả bản dựng, để đọc lại bằng `open_view` khi chưa/không công bố được."""
         build, doc = build_graph(contract_id, pages, oplog,
-                                 file_checksum=file_checksum, built_at=now)
+                                 file_checksum=file_checksum, built_at=now, catalog=catalog)
         problems = list(build.problems)
         status = {"enabled": self.store is not None, "build_id": build.build_id,
                   "published": False, "problems": problems, "error": None,

@@ -73,8 +73,9 @@ def graph_mask_state(doc: ContractDoc) -> MaskState:
 
 
 def build_graph(contract_id: str, pages: list[PageText], oplog: OperationLog, *,
-                file_checksum: str, built_at: datetime) -> tuple[GraphBuild, ContractDoc]:
-    """Dựng đồ thị thuần: cùng đầu vào cho cùng nút, cạnh và build_id."""
+                file_checksum: str, built_at: datetime, catalog=None) -> tuple[GraphBuild, ContractDoc]:
+    """Dựng đồ thị thuần: cùng đầu vào cho cùng nút, cạnh và build_id.
+    `catalog`: danh mục của gói đang dùng, chỉ để tra vai trò (holder) cho thao tác ASSERT cũ chưa ghi holder; None -> labor."""
     layout = oplog.layout()
     doc = parse_contract(pages, [PartSpec(**d) for d in layout] if layout else None)
     inputs = {"file_checksum": file_checksum, "parser_version": PARSER_VERSION,
@@ -120,7 +121,7 @@ def build_graph(contract_id: str, pages: list[PageText], oplog: OperationLog, *,
                 "raw": mask_text(a.raw, state=state).masked_text}))
             if a.valid_from is None:
                 notes.append(f"sửa đổi {a.src_uid} -> {a.dst_uid}: không rõ ngày hiệu lực")
-    _concept_layer(cid, common, oplog, nid, state, nodes, edges)
+    _concept_layer(cid, common, oplog, nid, state, nodes, edges, catalog)
 
     build = GraphBuild(build_id, cid, built_at, inputs, tuple(nodes), tuple(edges))
     return GraphBuild(build_id, cid, built_at, inputs, build.nodes, build.edges,
@@ -128,7 +129,7 @@ def build_graph(contract_id: str, pages: list[PageText], oplog: OperationLog, *,
 
 
 def _concept_layer(cid: str, common: dict, oplog: OperationLog, nid: dict[str, str], state: MaskState,
-                   nodes: list, edges: list) -> None:
+                   nodes: list, edges: list, catalog=None) -> None:
     """Nút Party / ConceptInstance từ các ASSERT đang hiệu lực (spec 2026-11-14-contract-concept-check §10)."""
     asserts = [o for o in oplog.active() if o.op_type == "ASSERT"]
     if not asserts:
@@ -161,7 +162,7 @@ def _concept_layer(cid: str, common: dict, oplog: OperationLog, nid: dict[str, s
             continue
         if concepts is None:
             from rag.bridge.catalog import load_catalog
-            concepts = load_catalog().concepts
+            concepts = (catalog or load_catalog()).concepts
         node_id = f"{cid}:ci:{o.op_id}"
         props = {**common, "concept_id": o.content["concept_id"], "op_id": o.op_id,
                  "found_by": o.content.get("found_by", ""),

@@ -28,10 +28,10 @@ _running: set[str] = set()
 
 def snapshot(cid: str) -> dict:
     c = api.get(cid)
+    catalog = api._catalog_or_labor(c)
     build, doc = build_graph(cid, c.page_texts, c.oplog,
-                            file_checksum=c.file_checksum or "", built_at=api._now())
+                            file_checksum=c.file_checksum or "", built_at=api._now(), catalog=catalog)
     state = graph_mask_state(doc)
-    catalog = load_catalog()
     # This API is for the owner viewing their uploaded document. Restore only
     # this contract's placeholders, as the existing graph Q&A UI does.
     def strings(value):
@@ -265,9 +265,9 @@ async def report_stream(request):
         if cached and not force:
             return {"markdown": cached, "cached": True, "llm_used": True}
 
-        catalog = load_catalog()
+        catalog = api._catalog_or_labor(c)
         _, doc = build_graph(cid, c.page_texts, c.oplog,
-                             file_checksum=c.file_checksum or "", built_at=api._now())
+                             file_checksum=c.file_checksum or "", built_at=api._now(), catalog=catalog)
         state = graph_mask_state(doc)
         llm_used = False
         markdown = ""

@@ -37,6 +37,7 @@ from contextlib import contextmanager
 from dataclasses import asdict
 from datetime import date, datetime, timezone
 from pathlib import Path
+from functools import lru_cache
 from types import SimpleNamespace
 from typing import Any
 
@@ -48,6 +49,7 @@ from rag.bridge.basis import AnchorLawBasis
 from rag.bridge.catalog import load_catalog
 from rag.bridge.check import check_contract, report_json, report_markdown
 from rag.bridge.view import result_views
+from rag.contracts.classify import AUTO_KIND, UNKNOWN, classify_contract
 from rag.contracts import review as rv
 from rag.contracts.doc import PageText, PartSpec, assemble
 from rag.contracts.export import report_docx, report_pdf
@@ -56,6 +58,7 @@ from rag.contracts.graph.oplog import OperationLog, human_op, machine_op
 from rag.contracts.graph.service import ContractGraphService, GraphBusy
 from rag.contracts.llm_json import ContractAIError
 from rag.contracts.models import Contract
+from rag.rules.loader import load_packs, packs_for_kind
 from rag.contracts import verify
 from rag.contracts.parts import detect_parts, heading_number
 from rag.contracts.store import ContractStore
@@ -196,10 +199,43 @@ def _human(c: Contract, op_type: str, target: str | None, content: dict, by: str
         c.oplog.supersede(old.op_id, new, by, "", now)
 
 
+def catalog_for(c: Contract):
+    """Danh mục của gói ứng với loại hợp đồng đã nhận diện (`facts["document_kind"]`). Chưa có loại: labor như trước (hợp đồng
+    đã lưu từ bản cũ). Loại không có gói: ValueError, không rơi về labor."""
+    kind = (c.facts or {}).get("document_kind")
+    return _catalog_of_kind(kind) if kind else load_catalog()
+
+
+def _catalog_of_kind(kind: str):
+    packs = packs_for_kind(kind)
+    if not packs:
+        raise ValueError(f"Loại hợp đồng {kind!r} không có gói luật")
+    return _packs_catalog(tuple(packs))
+
+
+@lru_cache(maxsize=16)
+def _packs_catalog(packs: tuple[str, ...]):
+    return load_packs(list(packs))
+
+
+def _resolve_kind(c: Contract, llm, document_kind: str | None) -> str | None:
+    """Loại hợp đồng để soát: tham số > đã lưu trong facts > nhận diện bằng LLM (một lần; chỉ lưu loại có gói).
+    `document_kind=None` = chế độ cũ (gói labor, không nhận diện)."""
+    if document_kind is None:
+        return None
+    kind = document_kind if document_kind != AUTO_KIND else (c.facts or {}).get("document_kind")
+    if kind:
+        return kind
+    kind = classify_contract(llm, c)["kind"]
+    if kind != UNKNOWN:
+        c.facts = {**(c.facts or {}), "document_kind": kind}
+    return kind
+
+
 def _rebuild(c: Contract, now: datetime) -> None:
     """Gọi trong writing(cid): tách lại + dựng / công bố đồ thị; đơn vị = đơn vị cấp cao nhất (không cắt)."""
     doc, status = _graph().rebuild(c.contract_id, c.page_texts, c.oplog, file_checksum=c.file_checksum or "",
-                                   now=now)
+                                   now=now, catalog=_catalog_or_labor(c))
     c.doc, c.units = doc, to_contract_units(doc)
     c.total_units, c.graph = len(c.units), status
     c.builds.append(status["record"])
@@ -428,14 +464,24 @@ def _default_tag_llm(model: str | None, temp: float | None):
     return OpenAIChatLLM(model, temperature=temp, base_url=OPENROUTER_URL, api_key=s.openrouter_api_key, cache=None)
 
 
+def _catalog_or_labor(c: Contract, kind: str | None = None):
+    """Danh mục cho chỗ chỉ tra vai trò / nhãn mà kết quả có thể rỗng (loại không có gói): không ném lỗi, rơi về labor.
+    `kind` cho trước (kể cả chưa lưu) thắng loại trong facts; kind None + facts không loại = labor."""
+    try:
+        return _catalog_of_kind(kind) if kind else catalog_for(c)
+    except ValueError:
+        return load_catalog()
+
+
 def concept_check(cid: str, user_facts: dict | None = None, *, tag_model: str | None = None,
-                  tag_temp: float | None = None, on_event=None) -> dict[str, Any]:
+                  tag_temp: float | None = None, on_event=None, document_kind: str | None = AUTO_KIND) -> dict[str, Any]:
     """Soát hợp đồng theo danh mục khái niệm; dựng lại đồ thị để có Party / ConceptInstance vừa gán.
     on_event nhận sự kiện tiến trình của check_contract; sự kiện `partial` được thêm `views` để trang vẽ."""
     c = get(cid)
     llm = CONFIG.llm_factory()
-    catalog = load_catalog()
     now = _now()
+    kind = _resolve_kind(c, llm, document_kind)      # chọn gói trước: nền luật (basis) phải dựng trên danh mục của gói đó
+    catalog = _catalog_or_labor(c, kind)
     tag_llm = (CONFIG.tag_llm or _default_tag_llm)(tag_model, tag_temp)
     legal_graph = (CONFIG.legal_graph or _default_legal_graph)()
 
@@ -446,7 +492,8 @@ def concept_check(cid: str, user_facts: dict | None = None, *, tag_model: str | 
             event = {**event, "views": result_views(event["results"], catalog, c, {})}
         on_event(event)
 
-    report = check_contract(llm, c, catalog=catalog, basis=AnchorLawBasis(catalog, legal_graph, on_event=relay if on_event else None), at=now,
+    which = {"catalog": catalog} if kind is None else {"document_kind": kind}
+    report = check_contract(llm, c, **which, basis=AnchorLawBasis(catalog, legal_graph, on_event=relay if on_event else None), at=now,
                             model=getattr(llm, "model_id", None), tag_llm=tag_llm,
                             tag_model=getattr(tag_llm, "model_id", None), user_facts=user_facts, graph=_graph(),
                             on_event=relay)
@@ -493,7 +540,7 @@ def _open_agent(c: Contract, catalog, legal, user_facts: dict | None):
     from rag.contracts.graph.build import graph_mask_state
     from rag.contracts.graph.tools import make_tools
     facts = user_fact_set(user_facts)
-    view, _, warnings, doc = contract_view(c, _graph(), _now())
+    view, _, warnings, doc = contract_view(c, _graph(), _now(), catalog)
     if not view.find("ConceptInstance"):
         raise NeedsConceptCheck()
     day = c.sign_date or catalog.law_values_valid_from
@@ -511,7 +558,7 @@ def contract_ask(cid: str, question: str, history: list | None = None, user_fact
     if not question:
         raise ValueError("Câu hỏi không được rỗng")
     c = get(cid)
-    catalog = load_catalog()
+    catalog = catalog_for(c)
     legal = (CONFIG.legal_graph or _default_legal_graph)()
     agent, day, warnings = _open_agent(c, catalog, legal, user_facts)
     a = agent.ask(question, history=history if isinstance(history, list) else None, on_step=on_event)

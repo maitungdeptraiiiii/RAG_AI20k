@@ -303,7 +303,7 @@ def ask_contract_graph(llm, contract, question: str, *, at, catalog: Catalog | N
     catalog = resolve_catalog(catalog, packs)
     report = check_contract(llm, contract, catalog=catalog, basis=AnchorLawBasis(catalog, legal), at=at, model=model,
                             tag_llm=tag_llm, user_facts=user_facts, graph=graph)
-    view, _, warnings, doc = contract_view(contract, graph, at)
+    view, _, warnings, doc = contract_view(contract, graph, at, catalog)
     tools = make_tools(view, catalog=catalog, day=report.day, sign_date=contract.sign_date, legal=legal,
                        user_facts=user_fact_set(user_facts, catalog.context))
     agent = GraphAgent(agent_llm or llm, tools, view, mask=graph_mask_state(doc),

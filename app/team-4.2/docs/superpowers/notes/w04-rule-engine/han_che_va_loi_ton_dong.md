@@ -303,7 +303,7 @@ rồi chọn gói; unknown -> không chạy gói nào (soát) / từ chối (h�
 | # | Mục | Trạng thái |
 |---|---|---|
 | K.1 | Chưa đo nhận diện trên hợp đồng mẫu ba miền bằng LLM thật (nghiệm thu H2 trong huy.md); test dùng LLM giả | Chờ có model |
-| K.2 | `check_contract` / `ask_contract_graph` KHÔNG truyền gì vẫn mặc định gói labor (tương thích); muốn nhận diện phải truyền `document_kind="auto"`. Đổi mặc định + truyền "auto" từ `ui/contracts_api.py`, `ui/contract_studio.py` thuộc D40 (UI, để sau) | Còn |
+| K.2 | `check_contract` / `ask_contract_graph` không truyền gì vẫn mặc định gói labor (tương thích). UI (`ui/contracts_api.py`, `ui/contract_studio.py`) nay chọn gói theo loại hợp đồng: `concept_check` nhận diện một lần (`classify_contract`), lưu `facts["document_kind"]`, các lần sau và hỏi đáp / báo cáo đọc lại từ đó; `catalog_for(c)`; hợp đồng cũ chưa có loại vẫn dùng labor; loại không có gói: hỏi đáp trả 400, soát trả báo cáo rỗng kèm cảnh báo. Loại nhận diện `unknown` không được lưu (lần sau thử lại). Hợp đồng nhận diện `unknown` thì không kiểm dữ kiện người dùng (không có gói để kiểm) | Đã sửa (D40) |
 | K.3 | Ngưỡng độ tin 0,6 đặt tay, chưa hiệu chỉnh (độ tin do model tự báo) | Còn |
 | K.4 | Chỉ đọc 8 đơn vị đầu (mỗi đơn vị 800 ký tự): hợp đồng có phần đầu dài (mục lục, định nghĩa) có thể thành unknown | Còn |
 | K.5 | Mặc định khi không có gói (`ctx` None) các prompt vẫn ghi "hợp đồng lao động" (tương thích luồng cũ); mọi luồng có gói đã lấy nhãn từ gói | Còn |
@@ -441,3 +441,5 @@ Kế hoạch: `app/team-4.2/docs/superpowers/plans/2026-11-23-khanh-ingest-bench
   một tiến trình; báo cáo K1 lấy ngày chạy nên số Điều có thể đổi; đệm classify không gắn phiên bản prompt (đổi prompt phải xóa đệm);
   cột net/ref kịch bản 1 vô nghĩa khi `reference` ≈ 0 ms. Lệnh gate có thêm `tests/test_legal_ingest_report.py tests/test_bench_*.py`
   (692 passed, 1 skipped, 1 xfailed, cả hai chế độ evaluator); `tests/test_agent_partial_review.py` lỗi import từ trước, không liên quan.
+
+- R.1 (D40) Sửa kèm: `check_contract(document_kind="auto")` ghi `facts["document_kind"]` trước bước trích nên hợp đồng chưa có dữ kiện bị bỏ qua bước trích; nay loại không tính là dữ kiện đã trích. UI nhận diện trước khi dựng nền luật (basis) vì `check_contract` tự dựng basis không có đồ thị luật.

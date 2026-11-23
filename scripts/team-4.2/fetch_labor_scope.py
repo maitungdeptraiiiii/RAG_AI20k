@@ -28,7 +28,9 @@ from rag.legal.text import html_to_legal_text
 
 DEFAULT_LEGAL = ROOT / 'app/team-4.2/data/team-4.2/legal'
 DEFAULT_QUEUE = ROOT / 'data/team-4.2/legal/labor-scope-fetch-queue.json'
-TYPES = {'luat': 'Luật', 'nghi-dinh': 'Nghị định', 'thong-tu': 'Thông tư', 'nghi-quyet': 'Nghị quyết'}
+TYPES = {'luat': 'Luật', 'nghi-dinh': 'Nghị định', 'thong-tu': 'Thông tư', 'nghi-quyet': 'Nghị quyết',
+         'quyet-dinh': 'Quyết định'}
+SCOPE = 'labor-scope-v1-26'
 FALLBACKS = {
     'thong-tu:59/2015/TT-BLĐTBXH': {
         'landing': 'https://congbao.chinhphu.vn/van-ban/thong-tu-so-59-2015-tt-bldtbxh-18869/13409.htm',
@@ -81,7 +83,7 @@ def checked_get(client, url):
     return client._call(request)
 
 
-def fetch_pdf_fallback(client, item, legal_dir, staging, detail=None):
+def fetch_pdf_fallback(client, item, legal_dir, staging, detail=None, discovered_via=SCOPE):
     """Explicit official-source fallback, never follow a related document as the target."""
     from datetime import date
     import pymupdf
@@ -128,7 +130,7 @@ def fetch_pdf_fallback(client, item, legal_dir, staging, detail=None):
     if detail is not None:
         if not identity_matches(detail, key):
             raise ValueError('Fallback API metadata identity mismatch')
-        doc = document_from_detail(detail, raw_path, body, discovered_via='labor-scope-v1-26')
+        doc = document_from_detail(detail, raw_path, body, discovered_via=discovered_via)
         doc = replace(doc, text_source='file', field_sources={'raw_text': {
             'source': 'file', 'at': now.isoformat(), 'detail': config['pdfs'][0]}})
         source_response = detail
@@ -139,7 +141,7 @@ def fetch_pdf_fallback(client, item, legal_dir, staging, detail=None):
             doc_number=number, issuer=None, issued_on=date.fromisoformat(config['issue_date']),
             vbpl_effective_from=date.fromisoformat(config['effective_from']), vbpl_effective_to=None,
             eff_status=None, is_consolidated=False, raw_text_path=str(raw_path), raw_checksum=checksum,
-            fetched_at=now, discovered_via='labor-scope-v1-26', text_source='file', source_verified=True,
+            fetched_at=now, discovered_via=discovered_via, text_source='file', source_verified=True,
             field_sources={'raw_text': {'source': 'file', 'at': now.isoformat(), 'detail': config['pdfs'][0]}})
         metadata = {'title': item['title'], 'doc_type': TYPES[kind], 'doc_number': number,
             'issue_date': config['issue_date'], 'effective_from': config['effective_from'],
@@ -160,7 +162,7 @@ def fetch_pdf_fallback(client, item, legal_dir, staging, detail=None):
         'import_status': 'staged_not_imported'}
 
 
-def fetch_one(client, item, legal_dir, staging):
+def fetch_one(client, item, legal_dir, staging, discovered_via=SCOPE):
     key = item['document_key']
     kind, number = key.split(':', 1)
     wanted = TYPES[kind]
@@ -178,7 +180,7 @@ def fetch_one(client, item, legal_dir, staging):
         text = html_to_legal_text(html)
         if len(text) < 500 or not re.search(r'\bĐiều\s+\d+', text):
             if key in FALLBACKS:
-                return fetch_pdf_fallback(client, item, legal_dir, staging, detail=detail)
+                return fetch_pdf_fallback(client, item, legal_dir, staging, detail=detail, discovered_via=discovered_via)
             problems.append('empty_or_incomplete_body')
             continue
         # Keep both the source HTML and a normalized JSON response, content addressed.
@@ -187,7 +189,7 @@ def fetch_one(client, item, legal_dir, staging):
         detail_path = immutable(staging / 'responses' / (sha(detail_bytes) + '.json'), detail_bytes)
         html_path = immutable(staging / 'html' / (sha(html_bytes) + '.html'), html_bytes)
         raw_path, _ = write_text(legal_dir / 'raw', key, text)
-        doc = document_from_detail(detail, raw_path, text, discovered_via='labor-scope-v1-26')
+        doc = document_from_detail(detail, raw_path, text, discovered_via=discovered_via)
         if doc.document_key != key or sha(raw_path.read_bytes()) != doc.raw_checksum:
             raise ValueError('Saved text identity/checksum mismatch')
         metadata = metadata_from_detail(detail)
@@ -202,7 +204,7 @@ def fetch_one(client, item, legal_dir, staging):
             'review_status': 'downloaded_not_legally_reviewed',
             'annex_status': 'not_assessed', 'import_status': 'staged_not_imported'}
     if not candidates and key in FALLBACKS:
-        return fetch_pdf_fallback(client, item, legal_dir, staging)
+        return fetch_pdf_fallback(client, item, legal_dir, staging, discovered_via=discovered_via)
     raise ValueError(f'No exact typed document with substantial legal text: {key}; candidates={len(candidates)}; {problems}')
 
 

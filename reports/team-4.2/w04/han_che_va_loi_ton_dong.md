@@ -323,10 +323,29 @@ kỳ giá trị) và mọi `value_sources` giải được trên đồ thị, ng
 |---|---|---|
 | G.1 | Neo4j không chạy trên máy: snapshot mới CHƯA đồng bộ vào Neo4j (`python -m rag.legal graph build` khi bật LEGAL_GRAPH=1); kiểm tra dùng bản dựng Python thuần | Còn |
 | G.2 | Quay lại snapshot cũ: ghi `s20261117024643-c06f0c` vào `app/team-4.2/data/team-4.2/legal/CURRENT` (dữ liệu gitignore, chỉ trên máy này) | Ghi chú |
-| G.3 | Luật Thương mại 36/2005 và Luật BVQLNTD 19/2023/QH15 (danh sách K1) chưa tải, chưa nạp; chưa gói nào dẫn tới | Còn (K1) |
+| G.3 | ~~Luật Thương mại 36/2005 và Luật BVQLNTD 19/2023/QH15 chưa tải~~ -> đã tải và nạp (mục K bên dưới) | Đã xử lý |
 | G.4 | 26 văn bản bổ sung lao động (`supplements/labor-scope-v1-26`) vẫn chưa nạp (README ghi cần duyệt PDF/phụ lục); không nạp ở đây | Còn |
 | G.5 | Kiểm "hiệu lực trong kỳ" chỉ cho nguồn của kỳ giá trị luật; neo thường chỉ kiểm có phiên bản (không gắn ngày) | Còn |
 | G.6 | Hai văn bản mới dựng phiên bản theo đường tự động (`build_all`); chưa ai duyệt mục cần duyệt của chúng (nếu có) trên trang /review | Còn |
+
+## K — tải luật còn thiếu cho gói thương mại / người tiêu dùng / dân sự (23/11)
+
+Script tải chung `scripts/team-4.2/fetch_scope.py --queue <hàng đợi> --staging <thư mục>` (dùng lại `fetch_one` của
+`fetch_labor_scope.py`; thêm loại `Quyết định`; `discovered_via` = `scope_version` của hàng đợi, không gán cứng).
+- Hàng đợi `commerce-consumer-scope-fetch-queue.json`: LTM 36/2005/QH11, Luật BVQLNTD 19/2023/QH15 -> snapshot
+  **s20261123065841-cadf82**.
+- Hàng đợi `contract-guidance-scope-fetch-queue.json`: NĐ 55/2024 (hướng dẫn BVQLNTD), QĐ 07/2024/QĐ-TTg (danh mục
+  phải đăng ký hợp đồng theo mẫu), Luật Trọng tài thương mại 54/2010, NQ 01/2014/NQ-HĐTP, Luật Quản lý ngoại thương
+  05/2017 (kiểm điều LTM bị bãi bỏ), NĐ 95/2024 (Luật Nhà ở), NĐ 96/2024 (KDBĐS) -> snapshot **s20261123071410-54f166**.
+- Quay lại: ghi `s20261123063951-32c3b6` (trước K) hoặc `s20261123065841-cadf82` vào `CURRENT`.
+
+| # | Mục | Trạng thái |
+|---|---|---|
+| K.1 | VBPL không có văn bản hợp nhất của LTM 36/2005. Đã kiểm Luật QLNT 05/2017 Đ113 k3: chỉ bãi bỏ k3 Đ28, k3 Đ29, k3 Đ30, Đ31, 33, 242–247 — không chạm phần hợp đồng (Đ24–87) và chế tài (Đ292–316). Các luật sửa đổi khác của LTM (nếu có) chưa rà | Còn (rà thêm) |
+| K.2 | QĐ 07/2024/QĐ-TTg: chỉ có thân văn bản; **danh mục** nằm ở phụ lục .docx mà API VBPL không trả nội dung -> chưa có danh mục ngành phải đăng ký hợp đồng theo mẫu | Còn |
+| K.3 | Luật Thương mại điện tử 122/2025/QH15 (hiệu lực 01/7/2026) chưa tải (giao kết hợp đồng trên sàn; không cần cho kiểm văn bản hợp đồng) | Có chủ ý |
+| K.4 | Neo4j vẫn chưa đồng bộ hai snapshot mới (G.1) | Còn |
+| K.5 | Văn bản nạp theo đường tự động `build_all`; chưa duyệt mục cần duyệt trên /review (như G.6) | Còn |
 
 ## Tồn đọng chung (môi trường, quy trình)
 

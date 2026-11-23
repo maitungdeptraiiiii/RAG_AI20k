@@ -1,0 +1,20 @@
+{
+  "scope_version": "contract-guidance-1.0",
+  "count": 7,
+  "documents": [
+    {"document_key": "nghi-dinh:55/2024/NĐ-CP", "title": "Nghị định 55/2024/NĐ-CP quy định chi tiết Luật Bảo vệ quyền lợi người tiêu dùng", "topic": "consumer", "use": "pack_source",
+     "note": "hợp đồng theo mẫu, điều kiện giao dịch chung: đăng ký, kiểm soát; giao dịch đặc thù"},
+    {"document_key": "quyet-dinh:07/2024/QĐ-TTG", "title": "Quyết định 07/2024/QĐ-TTg Danh mục sản phẩm, hàng hóa, dịch vụ phải đăng ký hợp đồng theo mẫu, điều kiện giao dịch chung", "topic": "consumer", "use": "pack_source",
+     "note": "danh mục ngành phải đăng ký hợp đồng theo mẫu (Đ25 Luật BVQLNTD)"},
+    {"document_key": "luat:54/2010/QH12", "title": "Luật Trọng tài thương mại 2010", "topic": "commerce", "use": "pack_source",
+     "note": "thỏa thuận trọng tài trong hợp đồng: hình thức (Đ16), quyền chọn của người tiêu dùng (Đ17), thỏa thuận vô hiệu (Đ18)"},
+    {"document_key": "nghi-quyet:01/2014/NQ-HĐTP", "title": "Nghị quyết 01/2014/NQ-HĐTP hướng dẫn Luật Trọng tài thương mại", "topic": "commerce", "use": "pack_source",
+     "note": "hướng dẫn thỏa thuận trọng tài vô hiệu, không thể thực hiện được"},
+    {"document_key": "luat:05/2017/QH14", "title": "Luật Quản lý ngoại thương 2017", "topic": "commerce", "use": "amendment_check",
+     "note": "bãi bỏ một số điều của Luật Thương mại 2005 (kiểm tra điều nào còn hiệu lực)"},
+    {"document_key": "nghi-dinh:95/2024/NĐ-CP", "title": "Nghị định 95/2024/NĐ-CP quy định chi tiết Luật Nhà ở", "topic": "lease", "use": "pack_source",
+     "note": "thuê nhà ở: nội dung hợp đồng, giao dịch về nhà ở"},
+    {"document_key": "nghi-dinh:96/2024/NĐ-CP", "title": "Nghị định 96/2024/NĐ-CP quy định chi tiết Luật Kinh doanh bất động sản", "topic": "lease", "use": "pack_source",
+     "note": "mẫu hợp đồng thuê nhà ở, thuê công trình xây dựng trong kinh doanh bất động sản"}
+  ]
+}

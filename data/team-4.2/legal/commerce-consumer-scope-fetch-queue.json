@@ -1,0 +1,20 @@
+{
+  "scope_version": "commerce-consumer-1.0",
+  "count": 2,
+  "documents": [
+    {
+      "document_key": "luat:36/2005/QH11",
+      "title": "Luật Thương mại 2005",
+      "topic": "commerce",
+      "use": "pack_source",
+      "note": "hợp đồng mua bán hàng hóa, dịch vụ giữa thương nhân: phạt vi phạm (Đ300–301), bồi thường (Đ302–303), miễn trách nhiệm (Đ294)"
+    },
+    {
+      "document_key": "luat:19/2023/QH15",
+      "title": "Luật Bảo vệ quyền lợi người tiêu dùng 2023",
+      "topic": "consumer",
+      "use": "pack_source",
+      "note": "hợp đồng giao kết với người tiêu dùng, hợp đồng theo mẫu, điều kiện giao dịch chung, điều khoản không có hiệu lực"
+    }
+  ]
+}

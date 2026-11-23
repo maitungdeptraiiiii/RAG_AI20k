@@ -4,7 +4,7 @@
 #
 # slot_kinds: LOẠI slot mà khái niệm thuộc kind phải có (không ép tên slot: tên slot là khóa dữ kiện). Danh sách rỗng khi
 #   các khái niệm của kind lấy giá trị từ dữ kiện cấp hợp đồng (vd. thời hạn hợp đồng, lương) hoặc có slot khác loại nhau.
-# domains: các miền đang dùng kind (labor, civil, loan, lease); test kiểm khớp với khái niệm thật. Kind chỉ một miền dùng
+# domains: các miền đang dùng kind (labor, civil, loan, lease, consumer, commercial); test kiểm khớp với khái niệm thật. Kind chỉ một miền dùng
 #   là kind riêng của miền đó; [] là kind đã có trong bản liệt kê nhưng chưa có khái niệm nào.
 kinds:
   required_content:
@@ -26,7 +26,7 @@ kinds:
   notice:
     describe: "Thời hạn báo trước / nghĩa vụ thông báo khi chấm dứt, hủy bỏ, đòi lại"
     slot_kinds: []
-    domains: [labor, civil, loan, consumer]
+    domains: [labor, civil, loan, consumer, commercial]
   prohibited_practice:
     describe: "Hành vi bị cấm ghi trong hợp đồng (slot bool = hợp đồng có hành vi đó)"
     slot_kinds: [bool]
@@ -42,7 +42,7 @@ kinds:
   rate_cap:
     describe: "Tỉ lệ có trần (lãi suất vay, lãi quá hạn, lãi chậm trả)"
     slot_kinds: [percent]
-    domains: [civil, loan]
+    domains: [civil, loan, commercial]
   termination:
     describe: "Quyền chấm dứt / đòi lại / trả trước hạn mà luật bảo vệ cho một bên (slot bool = điều khoản trái quyền đó)"
     slot_kinds: [bool]
@@ -50,7 +50,7 @@ kinds:
   penalty:
     describe: "Phạt vi phạm, bồi thường kèm phạt (BLDS Đ418; bản liệt kê civil_general)"
     slot_kinds: []
-    domains: []
+    domains: [commercial]
 
 # Khái niệm không vừa kind nào (không có kind trong concepts.yaml).
 not_fitting:

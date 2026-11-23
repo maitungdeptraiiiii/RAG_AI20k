@@ -1,0 +1,101 @@
+# Nhãn đúng cho hợp đồng thương mại mẫu. SINH từ labels.yaml (viết tay từ luật, trước khi chạy engine) bằng
+# scripts/team-4.2/gold_from_labels.py; câu căn cứ lấy từ docs/rule_inventory/commercial.yaml, civil_general.yaml. CHỜ TÙNG DUYỆT.
+dossier_id: commercial
+labeled_by: Claude (theo yêu cầu của Tùng) — CHỜ TÙNG DUYỆT
+expected:
+- rule: commercial.penalty_cap/r1
+  object: m1_mua_ban_hop_le
+  periods:
+  - from: '2025-03-05'
+    status: PASS
+  basis:
+    pid: luat:36/2005/QH11#d301
+    quote: Mức phạt đối với vi phạm nghĩa vụ hợp đồng hoặc tổng mức phạt đối với nhiều vi phạm do các bên thỏa thuận trong hợp đồng, nhưng không quá 8% giá trị phần nghĩa vụ hợp đồng bị vi phạm, trừ trường
+      hợp quy định tại Điều 266 của Luật này.
+  note: 8% = đúng trần Đ301
+- rule: commercial.sanction_notice/r1
+  object: m1_mua_ban_hop_le
+  periods:
+  - from: '2025-03-05'
+    status: PASS
+  basis:
+    pid: luat:36/2005/QH11#d315
+    quote: Bên tạm ngừng thực hiện hợp đồng, đình chỉ thực hiện hợp đồng hoặc hủy bỏ hợp đồng phải thông báo ngay cho bên kia biết về việc tạm ngừng, đình chỉ hoặc hủy bỏ hợp đồng.
+  note: thông báo ngay bằng văn bản
+- rule: commercial.late_payment_interest_ltm/r1
+  object: m1_mua_ban_hop_le
+  periods:
+  - from: '2025-03-05'
+    status: PASS
+  basis:
+    pid: luat:36/2005/QH11#d306
+    quote: Trường hợp bên vi phạm hợp đồng chậm thanh toán tiền hàng hay chậm thanh toán thù lao dịch vụ và các chi phí hợp lý khác thì bên bị vi phạm hợp đồng có quyền yêu cầu trả tiền lãi trên số tiền
+      chậm trả đó theo lãi suất nợ quá hạn trung bình trên thị trường tại thời điểm thanh toán tương ứng với thời gian chậm trả, trừ trường hợp có thoả thuận khác hoặc pháp luật có quy định khác.
+- rule: civil.late_payment_interest_cap/r1
+  object: m1_mua_ban_hop_le
+  periods:
+  - from: '2025-03-05'
+    status: NOT_APPLICABLE
+  basis:
+    pid: bo-luat:91/2015/QH13#d357.k2
+    quote: Lãi suất phát sinh do chậm trả tiền được xác định theo thỏa thuận của các bên nhưng không được vượt quá mức lãi suất được quy định tại khoản 1 Điều 468 của Bộ luật này
+  note: 'hợp đồng thương mại: lãi chậm trả theo LTM Đ306, không xét trần BLDS (cách đọc chờ duyệt)'
+- rule: commercial.penalty_cap/r1
+  object: m2_phat_vuot_tran
+  periods:
+  - from: '2024-11-20'
+    status: FAIL
+    finding: violation
+  basis:
+    pid: luat:36/2005/QH11#d301
+    quote: Mức phạt đối với vi phạm nghĩa vụ hợp đồng hoặc tổng mức phạt đối với nhiều vi phạm do các bên thỏa thuận trong hợp đồng, nhưng không quá 8% giá trị phần nghĩa vụ hợp đồng bị vi phạm, trừ trường
+      hợp quy định tại Điều 266 của Luật này.
+  note: 'Điều 3: phạt 12% > 8%'
+- rule: civil.late_payment_interest_cap/r1
+  object: m2_phat_vuot_tran
+  periods:
+  - from: '2024-11-20'
+    status: NOT_APPLICABLE
+  basis:
+    pid: bo-luat:91/2015/QH13#d357.k2
+    quote: Lãi suất phát sinh do chậm trả tiền được xác định theo thỏa thuận của các bên nhưng không được vượt quá mức lãi suất được quy định tại khoản 1 Điều 468 của Bộ luật này
+  note: 24%/năm vượt trần BLDS 20% nhưng hợp đồng thương mại theo LTM Đ306 (cách đọc chờ duyệt)
+- rule: commercial.penalty_cap/r1
+  object: m3_dich_vu_dinh_chi
+  periods:
+  - from: '2025-06-12'
+    status: PASS
+  basis:
+    pid: luat:36/2005/QH11#d301
+    quote: Mức phạt đối với vi phạm nghĩa vụ hợp đồng hoặc tổng mức phạt đối với nhiều vi phạm do các bên thỏa thuận trong hợp đồng, nhưng không quá 8% giá trị phần nghĩa vụ hợp đồng bị vi phạm, trừ trường
+      hợp quy định tại Điều 266 của Luật này.
+  note: 5% < 8%
+- rule: commercial.sanction_notice/r1
+  object: m3_dich_vu_dinh_chi
+  periods:
+  - from: '2025-06-12'
+    status: FAIL
+    finding: violation
+  basis:
+    pid: luat:36/2005/QH11#d315
+    quote: Bên tạm ngừng thực hiện hợp đồng, đình chỉ thực hiện hợp đồng hoặc hủy bỏ hợp đồng phải thông báo ngay cho bên kia biết về việc tạm ngừng, đình chỉ hoặc hủy bỏ hợp đồng.
+  note: 'Điều 4: đình chỉ ngay không cần thông báo'
+- rule: commercial.penalty_cap/r1
+  object: m4_tong_muc_phat
+  periods:
+  - from: '2025-07-18'
+    status: FAIL
+    finding: violation
+  basis:
+    pid: luat:36/2005/QH11#d301
+    quote: Mức phạt đối với vi phạm nghĩa vụ hợp đồng hoặc tổng mức phạt đối với nhiều vi phạm do các bên thỏa thuận trong hợp đồng, nhưng không quá 8% giá trị phần nghĩa vụ hợp đồng bị vi phạm, trừ trường
+      hợp quy định tại Điều 266 của Luật này.
+  note: 'Điều 3: tổng mức phạt 10% > 8% (Đ301 áp cả tổng mức phạt cho nhiều vi phạm)'
+- rule: commercial.sanction_notice/r1
+  object: m4_tong_muc_phat
+  periods:
+  - from: '2025-07-18'
+    status: PASS
+  basis:
+    pid: luat:36/2005/QH11#d315
+    quote: Bên tạm ngừng thực hiện hợp đồng, đình chỉ thực hiện hợp đồng hoặc hủy bỏ hợp đồng phải thông báo ngay cho bên kia biết về việc tạm ngừng, đình chỉ hoặc hủy bỏ hợp đồng.

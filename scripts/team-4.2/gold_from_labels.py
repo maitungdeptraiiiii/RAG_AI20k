@@ -1,10 +1,10 @@
 """Sinh gold.yaml từ bảng nhãn viết tay (người soạn quyết định trạng thái từ luật); câu căn cứ lấy từ bản liệt kê.
-python scripts/team-4.2/gold_from_labels.py <inventory.yaml> <facts.yaml> <labels.yaml> <out gold.yaml> <dossier_id> <header>"""
+python scripts/team-4.2/gold_from_labels.py <inventory.yaml[,inventory2.yaml...]> <facts.yaml> <labels.yaml> <out gold.yaml> <dossier_id> <header>"""
 import sys
 import yaml
 from pathlib import Path
 
-inv = {e["id"]: e for e in yaml.safe_load(Path(sys.argv[1]).read_text(encoding="utf-8"))}
+inv = {e["id"]: e for f in sys.argv[1].split(",") for e in yaml.safe_load(Path(f).read_text(encoding="utf-8"))}
 facts = yaml.safe_load(Path(sys.argv[2]).read_text(encoding="utf-8"))
 labels = yaml.safe_load(Path(sys.argv[3]).read_text(encoding="utf-8"))
 out = []

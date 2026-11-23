@@ -377,6 +377,18 @@ tệp bản liệt kê.
 | N.6 | Hợp đồng ký trước 01/07/2024 theo Luật BVQLNTD 59/2010/QH12 (chưa tải); gói không phân kỳ | Còn |
 | N.7 | Đ25.12 (chế tài bất lợi hơn) và c6 (mất cọc một chiều) là cách đọc của người soạn | Chờ duyệt |
 
+## O — gói `commercial` (Luật Thương mại 2005, 23/11)
+
+| # | Mục | Trạng thái |
+|---|---|---|
+| O.1 | Gói `commercial` (extends `civil_general`, loại `commercial_sale_contract`, `commercial_service_contract`): trần phạt 8% (Đ301), thông báo ngay khi tạm ngừng / đình chỉ / hủy bỏ (Đ315), lãi chậm thanh toán theo Đ306 là **ngoại lệ** của trần BLDS Đ357.2 (NQ 01/2019 Đ11) qua dữ kiện suy ra hằng `ltm_governs` | Xong (chờ duyệt) |
+| O.2 | Cách đọc "trần 20% BLDS không áp cho lãi chậm trả trong hợp đồng thương mại" là của người soạn theo NQ 01/2019 Đ11 | Chờ duyệt |
+| O.3 | Phần lớn LTM về mua bán (Đ34–62) và dịch vụ (Đ78–87) là mặc định hoặc sự kiện khi thực hiện: gói thương mại nhỏ (3 khái niệm) là đúng với luật, không phải thiếu sót; lý do từng điều ở cuối `docs/rule_inventory/commercial.yaml` | Ghi nhận |
+| O.4 | Phạt tính trên TOÀN BỘ giá trị hợp đồng hoặc phạt theo ngày không có trần: chưa kiểm (cần giá trị phần bị vi phạm / số ngày); ngoại lệ Đ266 (giám định) chưa làm | Còn |
+| O.5 | Luật Trọng tài thương mại: không có rule riêng cho thương mại (Đ16, 18 là sự kiện ngoài văn bản); Đ17 (người tiêu dùng vẫn được chọn Tòa án) gắn làm neo cho `consumer.complaint_right` | Ghi nhận |
+| O.6 | 4 hợp đồng mẫu m1–m4, 10 nhãn viết trước khi chạy engine | Chờ duyệt |
+| O.7 | Gộp `labor` / `civil_loan` với `commercial` (packs=[...]) sẽ gỡ trần lãi chậm trả BLDS cho cả hợp đồng đó: chỉ chồng `commercial` khi hợp đồng thật sự thuộc LTM | Ghi nhận |
+
 ## Tồn đọng chung (môi trường, quy trình)
 
 | # | Mục | Trạng thái |

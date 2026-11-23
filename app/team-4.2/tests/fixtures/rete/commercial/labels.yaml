@@ -1,0 +1,16 @@
+# Nhãn đúng viết tay từ luật (Luật Thương mại 2005, NQ 01/2019 Đ11) TRƯỚC khi chạy engine; gold.yaml sinh từ tệp này kèm
+# câu căn cứ trong docs/rule_inventory/commercial.yaml (và civil_general.yaml). Mỗi dòng: [rule, trạng thái, ghi chú]. CHỜ TÙNG DUYỆT.
+m1_mua_ban_hop_le:
+  - [commercial.penalty_cap/r1, PASS, "8% = đúng trần Đ301"]
+  - [commercial.sanction_notice/r1, PASS, "thông báo ngay bằng văn bản"]
+  - [commercial.late_payment_interest_ltm/r1, PASS]
+  - [civil.late_payment_interest_cap/r1, NOT_APPLICABLE, "hợp đồng thương mại: lãi chậm trả theo LTM Đ306, không xét trần BLDS (cách đọc chờ duyệt)"]
+m2_phat_vuot_tran:
+  - [commercial.penalty_cap/r1, FAIL, "Điều 3: phạt 12% > 8%"]
+  - [civil.late_payment_interest_cap/r1, NOT_APPLICABLE, "24%/năm vượt trần BLDS 20% nhưng hợp đồng thương mại theo LTM Đ306 (cách đọc chờ duyệt)"]
+m3_dich_vu_dinh_chi:
+  - [commercial.penalty_cap/r1, PASS, "5% < 8%"]
+  - [commercial.sanction_notice/r1, FAIL, "Điều 4: đình chỉ ngay không cần thông báo"]
+m4_tong_muc_phat:
+  - [commercial.penalty_cap/r1, FAIL, "Điều 3: tổng mức phạt 10% > 8% (Đ301 áp cả tổng mức phạt cho nhiều vi phạm)"]
+  - [commercial.sanction_notice/r1, PASS]

@@ -7,7 +7,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 INVENTORY = ROOT / "docs" / "rule_inventory"
 from legal_corpus import ROOTS, law_text  # noqa: E402
-FILES = ["labor_w04.yaml", "civil_general.yaml", "civil_loan.yaml", "civil_lease.yaml", "consumer.yaml"]
+FILES = ["labor_w04.yaml", "civil_general.yaml", "civil_loan.yaml", "civil_lease.yaml", "consumer.yaml", "commercial.yaml"]
 TYPES = {"threshold", "required", "prohibited", "default", "derived", "exception"}
 DEROGATIONS = {"mandatory", "floor", "ceiling", "default"}
 SILENCE = {"missing_content", "hidden_right", "default_applies", "none"}
@@ -43,13 +43,13 @@ def test_every_quote_is_verbatim_in_the_corpus(name, entry):
 def test_entry_shape(name, entry):
     assert REQUIRED <= set(entry), REQUIRED - set(entry)
     assert entry["type"] in TYPES and entry["derogation"] in DEROGATIONS and entry["on_silence"] in SILENCE
-    assert entry["id"].split(".")[0] in {"labor", "civil", "civil_loan", "civil_lease", "consumer"}
+    assert entry["id"].split(".")[0] in {"labor", "civil", "civil_loan", "civil_lease", "consumer", "commercial"}
     assert "#d" in entry["source"]["pid"] and entry["source"]["quote"].strip()
     for x in entry["exceptions"]:
         assert {"pid", "quote", "condition"} <= set(x)
     for f in entry["facts_needed"]:
         assert {"name", "kind", "from"} <= set(f) and f["from"] in {"contract", "user", "dossier", "derived"}
-    if entry["type"] != "derived":
+    if entry["type"] not in {"derived", "exception"}:   # ngoại lệ chỉ gỡ rule khác, tự nó không kết luận vi phạm
         expected = {ex["expected"] for ex in entry["examples"]}
         assert {"PASS", "FAIL", "UNKNOWN"} <= expected, (entry["id"], expected)
     for ex in entry["examples"]:

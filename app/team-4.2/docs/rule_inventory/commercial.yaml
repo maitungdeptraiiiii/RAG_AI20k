@@ -1,0 +1,93 @@
+# Bản liệt kê rule hợp đồng thương mại (mua bán hàng hóa, cung ứng dịch vụ giữa thương nhân): Luật Thương mại 36/2005/QH11
+# (hiệu lực 01/01/2006; Luật Quản lý ngoại thương 05/2017 Đ113.3 chỉ bãi bỏ k3 Đ28–30, Đ31, 33, 242–247, không chạm phần
+# hợp đồng và chế tài), NQ 01/2019/NQ-HĐTP Đ11, Luật Trọng tài thương mại 54/2010/QH12.
+# Người soạn: Claude theo yêu cầu của Tùng (23/11) — CẦN TÙNG DUYỆT.
+# Đã đọc: LTM Đ1–3, 24–62 (mua bán hàng hóa), 74–87 (dịch vụ), 266, 292–319 (chế tài, giải quyết tranh chấp); Luật TTTM
+# Đ16–19; NQ 01/2014/NQ-HĐTP Đ2–4. Phần lớn quy định mua bán / dịch vụ là mặc định ("trừ trường hợp có thoả thuận khác")
+# hoặc sự kiện khi thực hiện: không làm rule, lý do ở cuối tệp.
+
+- id: commercial.penalty_cap
+  source:
+    pid: "luat:36/2005/QH11#d301"
+    quote: "Mức phạt đối với vi phạm nghĩa vụ hợp đồng hoặc tổng mức phạt đối với nhiều vi phạm do các bên thỏa thuận trong hợp đồng, nhưng không quá 8% giá trị phần nghĩa vụ hợp đồng bị vi phạm, trừ trường hợp quy định tại Điều 266 của Luật này."
+  type: threshold
+  kind: penalty
+  derogation: mandatory
+  applies_when: "Hợp đồng thương mại có điều khoản phạt vi phạm"
+  facts_needed:
+    - {name: penalty_pct, kind: percent, unit: percent, from: contract, note: "mức phạt tính trên giá trị phần nghĩa vụ bị vi phạm"}
+  threshold: {value: 8, unit: percent}
+  exceptions:
+    - pid: "luat:36/2005/QH11#d266.k1"
+      quote: "Mức phạt do các bên thỏa thuận, nhưng không vượt quá mười lần thù lao dịch vụ giám định."
+      condition: "Dịch vụ giám định cấp chứng thư sai do lỗi vô ý (trần riêng)"
+  conclusion: "Mức phạt (hoặc tổng mức phạt) vượt 8% giá trị phần nghĩa vụ bị vi phạm trái Đ301"
+  on_silence: none
+  derived_from: []
+  yaml_rule: commercial.penalty_cap/r1
+  examples:
+    - {facts: {penalty_pct: 8}, expected: PASS}
+    - {facts: {penalty_pct: 12}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "bước trích chưa đọc được mức phạt"}
+  open_questions:
+    - "Điều khoản phạt tính trên TOÀN BỘ giá trị hợp đồng (không phải phần bị vi phạm) hoặc phạt theo ngày không có mức trần: slot chỉ nhận mức tính trên phần bị vi phạm; hai dạng kia chưa kiểm (cần giá trị phần vi phạm / số ngày)."
+    - "Ngoại lệ Đ266 (dịch vụ giám định) chưa làm rule ngoại lệ."
+
+- id: commercial.sanction_notice
+  source:
+    pid: "luat:36/2005/QH11#d315"
+    quote: "Bên tạm ngừng thực hiện hợp đồng, đình chỉ thực hiện hợp đồng hoặc hủy bỏ hợp đồng phải thông báo ngay cho bên kia biết về việc tạm ngừng, đình chỉ hoặc hủy bỏ hợp đồng."
+  type: required
+  kind: notice
+  derogation: mandatory
+  applies_when: "Hợp đồng thương mại có điều khoản tạm ngừng, đình chỉ, hủy bỏ hợp đồng"
+  facts_needed:
+    - {name: sanction_without_notice, kind: bool, from: contract}
+  exceptions: []
+  conclusion: "Điều khoản cho một bên tạm ngừng / đình chỉ / hủy bỏ hợp đồng mà không cần thông báo cho bên kia trái Đ315"
+  on_silence: none
+  derived_from: []
+  yaml_rule: commercial.sanction_notice/r1
+  examples:
+    - {facts: {sanction_without_notice: false}, expected: PASS}
+    - {facts: {sanction_without_notice: true}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "bước trích chưa đọc được điều khoản"}
+  open_questions:
+    - "Như civil.unilateral_termination (BLDS Đ428.2): hệ quả luật nêu là bồi thường khi gây thiệt hại; xếp vi phạm là cách đọc của người soạn."
+
+- id: commercial.late_payment_interest_ltm
+  source:
+    pid: "luat:36/2005/QH11#d306"
+    quote: "Trường hợp bên vi phạm hợp đồng chậm thanh toán tiền hàng hay chậm thanh toán thù lao dịch vụ và các chi phí hợp lý khác thì bên bị vi phạm hợp đồng có quyền yêu cầu trả tiền lãi trên số tiền chậm trả đó theo lãi suất nợ quá hạn trung bình trên thị trường tại thời điểm thanh toán tương ứng với thời gian chậm trả, trừ trường hợp có thoả thuận khác hoặc pháp luật có quy định khác."
+  type: exception
+  kind: rate_cap
+  derogation: default
+  applies_when: "Hợp đồng thương mại có điều khoản lãi chậm thanh toán"
+  facts_needed:
+    - {name: ltm_governs, kind: bool, from: derived, note: "gói commercial: hằng đúng"}
+    - {name: late_interest_rate, kind: percent, unit: percent_per_year, from: contract}
+  exceptions:
+    - pid: "nghi-quyet:01/2019/NQ-HĐTP#d11"
+      quote: "Trường hợp hợp đồng thuộc phạm vi điều chỉnh tại Điều 306 của Luật Thương mại năm 2005 thì khi xác định lãi suất chậm trả đối với số tiền chậm trả, Tòa án căn cứ vào mức lãi suất nợ quá hạn trung bình trên thị trường"
+      condition: "Hợp đồng thương mại: lãi chậm trả theo LTM Đ306 (thỏa thuận hoặc lãi nợ quá hạn trung bình), không theo trần BLDS Đ357.2"
+  conclusion: "Với hợp đồng thương mại, trần 20%/năm của BLDS Đ357.2 (civil.late_payment_interest_cap) không áp; lãi chậm trả do các bên thỏa thuận"
+  on_silence: none
+  derived_from: []
+  yaml_rule: "commercial.late_payment_interest_ltm/r1 (ngoại lệ của civil.late_payment_interest_cap/r1)"
+  examples:
+    - {facts: {late_interest_rate: 24}, expected: PASS, why: "ngoại lệ áp dụng: không xét trần BLDS"}
+    - {facts: {late_interest_rate: 10}, expected: PASS}
+  open_questions:
+    - "CÁCH ĐỌC CẦN TÙNG DUYỆT: NQ 01/2019 Đ11 hướng dẫn tính lãi chậm trả hợp đồng thương mại theo LTM Đ306, 'trừ trường hợp các bên có thoả thuận khác'; người soạn đọc là trần BLDS Đ357.2 không áp cho hợp đồng thương mại. Có quan điểm khác cho rằng BLDS vẫn là trần chung."
+    - "Mục này không có ví dụ FAIL / UNKNOWN: nó chỉ gỡ rule trần BLDS, tự nó không kết luận vi phạm."
+
+# ── Đã đọc, không làm rule:
+# LTM Đ24, 27.2, 74 (hình thức: hợp đồng đã là văn bản); Đ34–62, 78–87 (nghĩa vụ giao hàng, kiểm tra, bảo hành, thanh toán,
+#   chuyển rủi ro, nghĩa vụ cung ứng dịch vụ: mặc định "trừ trường hợp có thoả thuận khác" hoặc sự kiện khi thực hiện);
+#   Đ293, 299.1, 306, 307 (mặc định); Đ294–296 (miễn trách, bất khả kháng: sự kiện; Đ296.1 chỉ áp khi các bên không thỏa
+#   thuận); Đ297.2 câu cuối (không thay bằng tiền / hàng khác nếu bên bị vi phạm không chấp thuận: chấp thuận có thể có
+#   trong hợp đồng, chưa rõ có trái không); Đ302–305 (bồi thường: sự kiện); Đ318 (thời hạn khiếu nại do các bên thỏa thuận);
+#   Đ319 (thời hiệu 02 năm: không có câu cấm thỏa thuận khác).
+# Luật TTTM Đ16 (thỏa thuận trọng tài bằng văn bản: hợp đồng đã là văn bản), Đ18 (vô hiệu: thẩm quyền, năng lực, lừa dối —
+#   sự kiện ngoài văn bản); NQ 01/2014 Đ2.4 (vừa chọn Trọng tài vừa chọn Tòa án: quy tắc xử lý khi tranh chấp, không phải
+#   vi phạm). Luật TTTM Đ17 (người tiêu dùng vẫn được chọn Tòa án) gắn vào gói consumer (consumer.complaint_right).

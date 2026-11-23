@@ -1,0 +1,75 @@
+# Khái niệm hợp đồng thương mại. Nguồn và trích dẫn: docs/rule_inventory/commercial.yaml.
+version: "0.1"
+law_values_valid_from: "2006-01-01"     # LTM 2005 có hiệu lực từ 01/01/2006
+roles:
+  - {id: BEN_BAN, label: "Bên bán / bên cung ứng dịch vụ", aliases: ["bên bán", "bên cung ứng", "bên cung cấp"]}
+  - {id: BEN_MUA, label: "Bên mua / khách hàng", aliases: ["bên mua", "khách hàng", "bên sử dụng dịch vụ"]}
+concepts:
+  - id: commercial.penalty_cap
+    kind: penalty
+    label: Mức phạt vi phạm không quá 8% phần nghĩa vụ bị vi phạm
+    scope: core
+    phase: P0
+    holder: BEN_MUA
+    counterparty: BEN_BAN
+    applies_to: [BEN_MUA, BEN_BAN]
+    describe: "Điều khoản phạt vi phạm hợp đồng ghi mức phạt theo phần trăm giá trị phần nghĩa vụ bị vi phạm (hoặc tổng mức phạt cho nhiều vi phạm). Không gồm lãi chậm thanh toán và bồi thường thiệt hại."
+    phrasing: ["phạt vi phạm", "mức phạt", "chịu phạt", "giá trị phần nghĩa vụ bị vi phạm", "tiền phạt"]
+    slots:
+      penalty_pct: {kind: percent, unit: percent}
+    anchors:
+      - {pid: "luat:36/2005/QH11#d301", role: basis}
+      - {pid: "luat:36/2005/QH11#d266.k1", role: exception, note: "dịch vụ giám định: trần riêng mười lần thù lao"}
+      - {pid: "bo-luat:91/2015/QH13#d418.k2", role: context, note: "BLDS: mức phạt do các bên thỏa thuận, trừ luật liên quan quy định khác"}
+    rules:
+      - id: r1
+        mode: threshold
+        law:
+          max_penalty:
+            unit: percent
+            periods: [{valid_from: "2006-01-01", value: 8, source: "luat:36/2005/QH11#d301"}]
+        check: {fact: penalty_pct, op: lte, law: max_penalty}
+        derogation: mandatory
+        on_silence: none
+        outcome: {legality: illegal, party_impact: unfavorable}
+
+  - id: commercial.sanction_notice
+    kind: notice
+    label: Tạm ngừng, đình chỉ, hủy bỏ hợp đồng phải thông báo ngay
+    scope: core
+    phase: P0
+    holder: BEN_MUA
+    counterparty: BEN_BAN
+    applies_to: [BEN_MUA, BEN_BAN]
+    describe: "Điều khoản cho một bên tạm ngừng thực hiện, đình chỉ thực hiện hoặc hủy bỏ hợp đồng mà không phải thông báo cho bên kia."
+    phrasing: ["tạm ngừng thực hiện hợp đồng", "đình chỉ thực hiện hợp đồng", "hủy bỏ hợp đồng", "không cần thông báo"]
+    slots:
+      sanction_without_notice: {kind: bool, unit: null}
+    anchors:
+      - {pid: "luat:36/2005/QH11#d315", role: basis}
+    rules:
+      - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
+         check: {fact: sanction_without_notice, op: eq, value: false},
+         outcome: {legality: illegal, party_impact: unfavorable}}
+
+  - id: commercial.late_payment_interest_ltm
+    kind: rate_cap
+    label: Lãi chậm thanh toán trong thương mại theo LTM Đ306 (không áp trần BLDS)
+    scope: core
+    phase: P0
+    holder: BEN_MUA
+    counterparty: BEN_BAN
+    applies_to: [BEN_MUA]
+    describe: "Điều khoản ghi LÃI phải trả khi chậm thanh toán tiền hàng, thù lao dịch vụ trong hợp đồng thương mại."
+    phrasing: ["lãi chậm thanh toán", "lãi chậm trả", "lãi suất nợ quá hạn", "chậm thanh toán"]
+    slots:
+      late_interest_rate: {kind: percent, unit: percent_per_year}
+    anchors:
+      - {pid: "luat:36/2005/QH11#d306", role: basis}
+      - {pid: "nghi-quyet:01/2019/NQ-HĐTP#d11", role: basis, note: "hợp đồng thương mại: lãi chậm trả theo LTM Đ306"}
+    rules:
+      # Ngoại lệ của trần BLDS Đ357.2 (gói cha civil_general): hợp đồng thương mại theo LTM Đ306, thỏa thuận được.
+      - {id: r1, mode: required, derogation: default, on_silence: none,
+         exception_of: civil.late_payment_interest_cap/r1,
+         applicability: {fact: ltm_governs, op: eq, value: true},
+         outcome: {legality: illegal, party_impact: neutral}}

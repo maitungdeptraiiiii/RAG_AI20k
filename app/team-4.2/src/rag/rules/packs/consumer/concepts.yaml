@@ -78,6 +78,9 @@ concepts:
   - pid: luat:19/2023/QH15#d67.k2
     role: context
     note: 'điều khoản trọng tài trong hợp đồng mẫu: người tiêu dùng vẫn được chọn cách giải quyết khác'
+  - pid: luat:54/2010/QH12#d17
+    role: context
+    note: 'Luật TTTM: điều khoản trọng tài trong điều kiện chung do nhà cung cấp soạn — người tiêu dùng vẫn được chọn Tòa án'
   rules:
   - id: r1
     mode: prohibited

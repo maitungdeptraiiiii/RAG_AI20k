@@ -22,7 +22,8 @@ from rag.rules.loader import load_packs, packs_for_kind
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = Path(__file__).parent / "fixtures" / "rete"
 # thư mục mẫu -> (gói, loại văn bản, bản liệt kê)
-SUITES = {"consumer": ("consumer", "consumer_contract", "consumer.yaml")}
+SUITES = {"consumer": ("consumer", "consumer_contract", "consumer.yaml"),
+          "commercial": ("commercial", "commercial_sale_contract", "commercial.yaml")}
 
 
 def _norm(s: str) -> str:

@@ -1,0 +1,34 @@
+# Gói hợp đồng thương mại: mua bán hàng hóa và cung ứng dịch vụ giữa thương nhân (Luật Thương mại 36/2005/QH11).
+# Thừa kế khái niệm dân sự chung của civil_general (BLDS là luật chung); quy định riêng của LTM được ưu tiên — vd. lãi chậm
+# thanh toán theo LTM Đ306 là ngoại lệ của trần BLDS Đ357.2 (NQ 01/2019/NQ-HĐTP Đ11).
+# Bản liệt kê có trích dẫn: docs/rule_inventory/commercial.yaml.
+id: commercial
+version: "0.1"
+extends: [civil_general]
+document_kinds: [commercial_sale_contract, commercial_service_contract]
+document_labels:
+  commercial_sale_contract: "hợp đồng mua bán hàng hóa giữa thương nhân (doanh nghiệp, hộ kinh doanh) nhằm mục đích kinh doanh"
+  commercial_service_contract: "hợp đồng cung ứng dịch vụ giữa thương nhân (doanh nghiệp, hộ kinh doanh) nhằm mục đích kinh doanh"
+
+units: [hour, day, month, vnd, percent]
+conversions:
+  hour:  {base: hour, factor: 1}
+  day:   {base: hour, factor: 24}
+  month: {base: hour, factor: 720}
+
+document_facts:
+  contract_value_vnd: {unit: vnd, from: value, parse: money}
+  contract_term_months: {unit: month, from: term, parse: duration_to_unit}
+
+extract_fields: []
+user_facts: []
+findings: []
+
+# Gói được chọn nghĩa là hợp đồng thuộc phạm vi Luật Thương mại (LTM Đ1–2): dùng để gỡ các quy định BLDS mà LTM thay thế.
+derived:
+  - fact: ltm_governs
+    unit: null
+    definitions:
+      - id: base
+        value: true
+        anchors: [{pid: "luat:36/2005/QH11#d1", role: basis}]

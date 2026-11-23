@@ -18,7 +18,8 @@ from rag.rules.semantics import Fact
 ROOT = Path(__file__).resolve().parents[1]
 INVENTORY = ROOT / "docs" / "rule_inventory"
 PACK_OF = {"civil_general.yaml": "civil_general", "civil_loan.yaml": "civil_loan", "civil_lease.yaml": "civil_lease",
-           "consumer.yaml": "consumer"}
+           "consumer.yaml": "consumer",
+           "commercial.yaml": "commercial"}
 DAY = date(2025, 3, 1)
 
 

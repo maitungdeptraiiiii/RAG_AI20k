@@ -1,0 +1,46 @@
+# Dữ kiện mà bước trích phải lấy được từ từng hợp đồng thương mại mẫu, kèm câu trích nguyên văn (định dạng ../lease/facts.yaml).
+m1_mua_ban_hop_le:
+  sign_date: 2025-03-05
+  document:
+    value: ["1.500.000.000 đồng", "tổng giá trị 1.500.000.000 đồng."]
+  slots:
+    commercial.penalty_cap:
+      penalty_pct: ["8%", "Bên vi phạm nghĩa vụ hợp đồng chịu phạt 8% giá trị phần nghĩa vụ hợp đồng bị vi phạm."]
+    commercial.sanction_notice:
+      sanction_without_notice: [false, "Bên tạm ngừng, đình chỉ hoặc hủy bỏ hợp đồng do bên kia vi phạm cơ bản phải thông báo ngay bằng văn bản cho bên kia."]
+    commercial.late_payment_interest_ltm:
+      late_interest_rate: ["15%/năm", "Bên B chậm thanh toán phải trả lãi chậm thanh toán 15%/năm trên số tiền chậm trả."]
+    civil.late_payment_interest_cap:
+      late_interest_rate: ["15%/năm", "Bên B chậm thanh toán phải trả lãi chậm thanh toán 15%/năm trên số tiền chậm trả."]
+
+m2_phat_vuot_tran:
+  sign_date: 2024-11-20
+  document:
+    value: ["600.000.000 đồng", "tổng giá trị 600.000.000 đồng."]
+  slots:
+    commercial.penalty_cap:
+      penalty_pct: ["12%", "Bên nào vi phạm nghĩa vụ giao hàng hoặc thanh toán phải chịu phạt 12% giá trị phần nghĩa vụ hợp đồng bị vi phạm."]
+    commercial.late_payment_interest_ltm:
+      late_interest_rate: ["24%/năm", "Bên B phải trả lãi chậm thanh toán 24%/năm trên số tiền chậm trả."]
+    civil.late_payment_interest_cap:
+      late_interest_rate: ["24%/năm", "Bên B phải trả lãi chậm thanh toán 24%/năm trên số tiền chậm trả."]
+
+m3_dich_vu_dinh_chi:
+  sign_date: 2025-06-12
+  document:
+    term: ["12 tháng", "tối thiểu 04 chuyến mỗi tháng trong 12 tháng."]
+  slots:
+    commercial.penalty_cap:
+      penalty_pct: ["5%", "Bên vi phạm nghĩa vụ hợp đồng chịu phạt 5% giá trị phần nghĩa vụ hợp đồng bị vi phạm."]
+    commercial.sanction_notice:
+      sanction_without_notice: [true, "Khi Bên B chậm thanh toán quá 15 ngày, Bên A có quyền đình chỉ thực hiện hợp đồng ngay mà không cần thông báo cho Bên B."]
+
+m4_tong_muc_phat:
+  sign_date: 2025-07-18
+  document:
+    value: ["450.000.000 đồng", "tổng giá trị 450.000.000 đồng."]
+  slots:
+    commercial.penalty_cap:
+      penalty_pct: ["10%", "Tổng mức phạt đối với các vi phạm của một bên trong hợp đồng này là 10% giá trị phần nghĩa vụ hợp đồng bị vi phạm."]
+    commercial.sanction_notice:
+      sanction_without_notice: [false, "Bên bị vi phạm cơ bản có quyền hủy bỏ hợp đồng và phải thông báo ngay bằng văn bản cho bên kia."]

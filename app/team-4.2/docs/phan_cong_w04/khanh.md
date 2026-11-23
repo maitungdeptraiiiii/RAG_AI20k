@@ -128,3 +128,4 @@ sàng thì chỉ đổi import, không đổi khung.
 -
 
 **Trạng thái (23/11):** K1–K3 do Claude làm theo yêu cầu Tùng (kế hoạch `docs/superpowers/plans/2026-11-23-khanh-ingest-bench-eval.md`, kết quả ở `evals/team-4.2/results/w04-rule-engine/`, hạn chế ở mục Q của `app/team-4.2/docs/superpowers/notes/w04-rule-engine/han_che_va_loi_ton_dong.md`). K4 (router chat) chưa làm.
+**K1 nghiệm thu (23/11):** 11/11 văn bản có trong kho, ngày hiệu lực khớp (kể cả NQ 01/2014: 02/07/2014), đồ thị luật dựng được cả 11 (0 lỗi kiểm tra). Còn: chuỗi sửa đổi LTM 36/2005, NĐ 95/2024, NĐ 96/2024 (cần crawl vbpl.vn, chưa chạy), kiểm phía Neo4j thật.

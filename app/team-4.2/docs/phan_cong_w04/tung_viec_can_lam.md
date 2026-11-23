@@ -133,7 +133,7 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
       truyền gì vẫn dùng gói labor — chuyển tiếp, xem E5.)*
 - [x] D33. `party_impact` trung tính: YAML mới dùng `outcome.party_impact`; bộ nạp nhận `employee_impact` cũ; thêm
       `RuleResult.outcome` (dict) đúng spec §5.2; `employee_impact` giữ làm tên tương thích. *(Xong 23/11: `tests/test_party_impact.py`.)*
-- [ ] D34. *(UI — để sau, 23/11)* Nhãn hiển thị theo gói: `bridge/view.py` (`VERDICTS`, `FACT_LABELS` viết cứng "người lao động") lấy từ
+- [x] D34. *(Xong 23/11: `labels` trong `pack.yaml`, `Catalog.verdict_label` / `fact_label`; `tests/test_pack_labels.py`. Nhãn của 5 gói ngoài labor do Claude viết, chờ Tùng duyệt chữ.)* Nhãn hiển thị theo gói: `bridge/view.py` (`VERDICTS`, `FACT_LABELS` viết cứng "người lao động") lấy từ
       `pack.yaml` (`findings` kèm nhãn, `user_fact_questions` / nhãn dữ kiện).
 - [x] D35. `kind` chung: sửa `kinds.yaml` theo B1, khai `kind` cho concept dân sự (`civil.unilateral_termination` → notice),
       test mọi concept của mọi gói có kind hoặc nằm trong "không vừa".
@@ -144,7 +144,7 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
       "30%/năm" ra UNKNOWN rỗng `missing_facts` (thử nghiệm 23/11).
 - [x] D39. `document_facts` của gói khai cách trích (`pack.yaml`: khóa trường trích + bộ chuẩn hóa trong sổ đăng ký);
       `facts_map._CONTRACT_MAP` (7 dữ kiện lao động viết cứng) đọc từ gói; gói không khai thì không có dữ kiện hợp đồng.
-- [ ] D40. Gói được chọn đi suốt luồng: `ui/contracts_api.py` (dòng 437, 514), `ui/contract_studio.py` (34, 268) và
+- [x] D40. *(Xong 23/11: `contracts_api.catalog_for`, `concept_check` nhận diện loại một lần rồi lưu `facts["document_kind"]`; `tests/test_contracts_pack_flow.py`, `tests/test_contracts_api.py`.)* Gói được chọn đi suốt luồng: `ui/contracts_api.py` (dòng 437, 514), `ui/contract_studio.py` (34, 268) và
       `contracts/graph/build.py:164` gọi `load_catalog()` (labor) không `packs`; đồ thị bỏ cạnh `HOLDER` im lặng cho khái
       niệm gói khác. Truyền `catalog` / `packs` từ `check_contract` xuống.
       *(Phần logic xong: vai trò các bên theo `roles` của gói, ASSERT khái niệm ghi `holder`, đồ thị nối `HOLDER` cho mọi
@@ -160,7 +160,7 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
 - [x] E1. `check_contract`: tham số `packs=`, `evaluator=` (mặc định `network`), biến môi trường
       `RAG_RULE_EVALUATOR`; sau recheck chỉ `update` dữ kiện mới. *(phần `packs=` chưa làm: giai đoạn 5)*
 - [x] E2. `tools.check_concept` + `ask_contract_graph` dùng session.
-- [ ] E3. Endpoint SSE trong `ui/contract_studio.py`: chạy hồ sơ / kịch bản, phát `evaluation_diff`, trả `explain`,
+- [x] E3. *(Xong 23/11: `rag/rules/scenario.py` + route trong `ui/contracts_api.py`; mô tả ở `app/team-4.2/docs/superpowers/notes/w04-rule-engine/engine_interface.md`; `tests/test_scenario_runner.py`, `tests/test_dossier_sse.py`. Hồ sơ vay / thuê chỉ có bộ lẻ, chưa có `scenario.yaml` nên chưa chạy được bằng route này.)* Endpoint SSE: chạy hồ sơ / kịch bản, phát `evaluation_diff`, trả `explain`,
       `next_questions`, nhận `answer`. Chạy được hồ sơ của cả ba miền.
 - [x] E5. Nối `classify_contract` (Huy) vào `check_contract` / `ask_contract_graph` theo D32. → Huy *(23/11: Tùng làm; `document_kind="auto"`; đổi mặc định ở UI thuộc D40, mục K.2)*
 - [x] E4. Báo Khánh engine thật sẵn sàng. → Khánh (`app/team-4.2/docs/superpowers/notes/w04-rule-engine/engine_interface.md`; cần gửi cho Khánh và Huy)
@@ -191,7 +191,7 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
 - [x] H1. Ngày 2: Khánh nạp xong BLDS (cần cho B4–B5 có pid). *(23/11: BLDS, Luật Nhà ở đã có trong snapshot; Tùng nạp thêm Luật TCTD 32/2024 + NQ 01/2019 (snapshot s20261123063951-32c3b6); LTM 36/2005, Luật BVQLNTD 19/2023 chưa tải — mục G.3)*
 - [x] H2. Ngày 3: Huy `dossier_objects` chạy trên a1, b1–b5 (cần cho D25–D28). *(23/11: Tùng nhận, `src/rag/contracts/dossier.py`; ra đúng bảng của 7 hồ sơ. Hạn chế: mục O trong file hạn chế.)*
 - [x] H3. Ngày 3–4: Huy tagger theo kind + nhận diện loại hợp đồng trên C3. *(23/11: Tùng làm `classify_contract` + `kind` trong tagger; chưa đo bằng LLM thật, mục K.1)*
-- [ ] H4. Ngày 5: Khánh bảng benchmark + eval.
+- [x] H4. Ngày 5: Khánh bảng benchmark + eval. *(23/11: Claude làm K1–K3 theo yêu cầu Tùng; `evals/team-4.2/results/w04-rule-engine/`.)*
 
 ## Tổng
 

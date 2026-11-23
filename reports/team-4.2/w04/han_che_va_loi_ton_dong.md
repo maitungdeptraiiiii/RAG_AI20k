@@ -431,3 +431,11 @@ Kế hoạch: `app/team-4.2/docs/superpowers/plans/2026-11-23-khanh-ingest-bench
 - Q.5 (K3) Nhận diện loại bằng `classify_contract` (model thật, 23/11): 34 văn bản chính, 33 lần gọi LLM (hai văn bản trùng nội dung),
   0 chọn sai miền. Đệm ở `reports/team-4.2/w04/eval/classify_cache.json`. Mẫu nhỏ và mỗi miền chỉ có văn bản "đúng kiểu", chưa có
   văn bản lai (vd. hợp đồng thuê có một bên là người tiêu dùng) — Còn.
+- Q.6 (K2) `reports/team-4.2/w04/bench/`: chạy đầy đủ seed 0 (260 dòng, 0 ca lệch giữa hai evaluator). Network nhanh hơn rõ ở cập nhật tăng dần
+  (≈100× ở 10.000 rule, 1 dữ kiện) và `next_questions` (≈20×); ngang `reference` ở lần đánh giá đầu và khi dùng chung cho nhiều hồ sơ; tốn
+  chi phí biên dịch (140–160 ms ở 10.000 rule). Một lần chạy trên một máy, chưa lặp nhiều lần — Còn. Lỗi nhỏ để lại: kịch bản 4 của gói
+  `labor` lặp ~15 hồ sơ mẫu cho đủ 100; "tính lại" gồm cả lần khởi động; gold bộ hợp đồng lẻ trỏ sai tên/nhiều kỳ bị bỏ không báo; eval
+  chưa đếm FAIL ngoài gold; bảng chọn gói chỉ nhận hợp đồng chính đầu tiên của hồ sơ; tính lặp lại của bảng bench mới kiểm trong cùng
+  một tiến trình; báo cáo K1 lấy ngày chạy nên số Điều có thể đổi; đệm classify không gắn phiên bản prompt (đổi prompt phải xóa đệm);
+  cột net/ref kịch bản 1 vô nghĩa khi `reference` ≈ 0 ms. Lệnh gate có thêm `tests/test_legal_ingest_report.py tests/test_bench_*.py`
+  (692 passed, 1 skipped, 1 xfailed, cả hai chế độ evaluator); `tests/test_agent_partial_review.py` lỗi import từ trước, không liên quan.

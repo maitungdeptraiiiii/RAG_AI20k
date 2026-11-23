@@ -126,3 +126,5 @@ sàng thì chỉ đổi import, không đổi khung.
 ## 6. Câu hỏi mở (ghi vào đây, Tùng trả lời)
 
 -
+
+**Trạng thái (23/11):** K1–K3 do Claude làm theo yêu cầu Tùng (kế hoạch `docs/superpowers/plans/2026-11-23-khanh-ingest-bench-eval.md`, kết quả ở `reports/team-4.2/w04/`, hạn chế ở mục Q của `han_che_va_loi_ton_dong.md`). K4 (router chat) chưa làm.

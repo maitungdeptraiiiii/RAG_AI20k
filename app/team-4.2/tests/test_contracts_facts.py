@@ -200,3 +200,36 @@ def test_end_date_is_extracted_as_iso_with_checked_quote():
     facts = extract_facts(llm, contract())
     assert facts["candidates"]["end_date"][0]["value"] == "2025-03-31"
     assert '"end_date"' in llm.calls[0][0]
+
+
+EXTRA = {"key": "zz_field", "label": "Trường thêm của gói", "kind": "text"}
+
+
+def test_extract_facts_records_fields_tried():
+    facts = extract_facts(FakeLLM(facts_reply), contract(), extra_fields=[EXTRA])
+    assert "zz_field" in facts["fields_tried"] and "sign_date" in facts["fields_tried"]
+
+
+def test_extract_more_fields_only_asks_missing():
+    """Hạn chế R.6: sau khi chọn gói, chỉ hỏi thêm trường của gói chưa trích; không đụng bên / ngày ký."""
+    from rag.contracts.facts import extract_more_fields
+    c = contract()
+    extract_facts(FakeLLM(facts_reply), c)
+    parties, sign = list(c.facts["parties"]), c.sign_date
+    assert "zz_field" not in c.facts["fields_tried"]
+    llm = FakeLLM(lambda p: {"fields": {"zz_field": {"value": "12.000.000 đồng/tháng", "unit": "u5",
+                                                     "quote": "Giá thuê là 12.000.000 đồng/tháng"}}})
+    assert extract_more_fields(llm, c, [EXTRA]) == ["zz_field"]
+    wanted = [[f["key"] for f in json.loads(u)["fields_wanted"]] for _, u in llm.calls]
+    assert wanted and all(w == ["zz_field"] for w in wanted)
+    assert c.facts["candidates"]["zz_field"][0]["value"] == "12.000.000 đồng/tháng"
+    assert c.facts["parties"] == parties and c.sign_date == sign and "zz_field" in c.facts["fields_tried"]
+
+
+def test_extract_more_fields_llm_error_keeps_fields_untried():
+    from rag.contracts.facts import extract_more_fields
+    c = contract()
+    extract_facts(FakeLLM(facts_reply), c)
+    with pytest.raises(ContractAIError):
+        extract_more_fields(FakeLLM("không phải JSON"), c, [EXTRA])
+    assert "zz_field" not in c.facts["fields_tried"]

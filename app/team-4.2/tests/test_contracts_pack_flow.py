@@ -58,3 +58,68 @@ def test_auto_kind_still_extracts_facts_when_contract_has_none(monkeypatch):
     check_contract(cases.ScriptedLoanLLM(), contract, at=cases.AT, document_kind="auto",
                    user_facts={"special_law_applies": False})
     assert calls
+
+
+def _pack_cases():
+    import importlib.util
+    import pathlib
+    spec = importlib.util.spec_from_file_location("pack_cases_mod", pathlib.Path(__file__).with_name("pack_cases.py"))
+    cases = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cases)
+    return cases
+
+
+def _loan_catalog_with_extra():
+    """Gói vay + một trường trích riêng của gói KHÔNG có trong danh mục chung fact_catalog.json (như gói mới cắm vào)."""
+    import dataclasses
+    cat = load_packs(["civil_loan"])
+    extra = {"key": "zz_pack_only", "label": "Trường riêng của gói", "kind": "text"}
+    return dataclasses.replace(cat, context=dataclasses.replace(
+        cat.context, extract_fields=(*cat.context.extract_fields, extra)))
+
+
+def test_pack_fields_extracted_after_kind_is_known():
+    """Hạn chế R.6: UI trích dữ kiện lúc tải lên theo danh mục chung (chưa biết gói); khi soát bằng gói, trường riêng của
+    gói chưa hỏi được trích bổ sung đúng một lần."""
+    import json
+    from rag.contracts.facts import extract_facts
+    cases = _pack_cases()
+
+    class LoanLLM(cases.ScriptedLoanLLM):
+        def __init__(self):
+            super().__init__()
+            self.more = 0
+
+        def complete(self, system, user):
+            payload = json.loads(user)
+            if [f["key"] for f in payload.get("fields_wanted") or []] == ["zz_pack_only"]:
+                self.more += 1
+                return json.dumps({"fields": {"zz_pack_only": {"value": "30%/năm", "unit": "p0.d2",
+                                                               "quote": "Lãi suất vay là 30%/năm"}}}, ensure_ascii=False)
+            return super().complete(system, user)
+
+    llm, contract, cat = LoanLLM(), cases.loan_contract(), _loan_catalog_with_extra()
+    extract_facts(llm, contract)                                  # lúc tải lên: danh mục chung
+    assert "zz_pack_only" not in contract.facts["fields_tried"] and "loan_interest" in contract.facts["fields_tried"]
+    check_contract(llm, contract, at=cases.AT, catalog=cat, user_facts={"special_law_applies": False})
+    assert llm.more >= 1 and contract.facts["candidates"]["zz_pack_only"][0]["value"] == "30%/năm"
+    calls = llm.more
+    check_contract(llm, contract, at=cases.AT, catalog=cat, user_facts={"special_law_applies": False})
+    assert llm.more == calls                                      # đã thử: không trích lại
+
+
+def test_pack_fields_extraction_error_warns_and_review_continues(monkeypatch):
+    import rag.bridge.check as check
+    from rag.contracts.facts import extract_facts
+    from rag.contracts.llm_json import ContractAIError
+    cases = _pack_cases()
+    llm, contract = cases.ScriptedLoanLLM(), cases.loan_contract()
+    extract_facts(llm, contract)
+
+    def boom(*a, **k):
+        raise ContractAIError()
+    monkeypatch.setattr(check, "extract_more_fields", boom)
+    report = check_contract(llm, contract, at=cases.AT, catalog=_loan_catalog_with_extra(),
+                            user_facts={"special_law_applies": False})
+    assert report.results and any("zz_pack_only" in w for w in report.warnings)
+    assert "zz_pack_only" not in contract.facts["fields_tried"]

@@ -181,6 +181,54 @@ def _items(raw: Any) -> list:
     return raw if isinstance(raw, list) else [raw]
 
 
+def _field_candidates(contract: Contract, batch: Batch, data: dict, specs: dict[str, dict],
+                      cands: dict[str, list[dict]]) -> None:
+    """Ứng viên của các trường trong `specs` mà lô trả ở `fields` (trích dẫn phải có thật trong lô)."""
+    fields = data.get("fields") if isinstance(data.get("fields"), dict) else {}
+    for key, raw in fields.items():
+        item = _checked(contract, raw, batch) if key in specs else None
+        if item is not None:
+            value = normalize_value(specs[key], item.get("value"), contract)
+            _add(cands, key, item | {"value": value} if value is not None else None)
+
+
+def tried_fields(facts: dict | None) -> set[str]:
+    """Trường đã hỏi LLM; dữ kiện cũ chưa ghi `fields_tried` coi như đã hỏi danh mục chung."""
+    tried = (facts or {}).get("fields_tried")
+    return set(tried) if tried is not None else {s["key"] for s in all_specs()}
+
+
+def extract_more_fields(llm, contract: Contract, fields: Sequence[dict], *, on_event=None) -> list[str]:
+    """Trích bổ sung các trường `fields` (thường là `extract_fields` của gói, khi loại hợp đồng mới biết sau lần trích
+    đầu): chỉ hỏi những trường này, gộp ứng viên vào `facts["candidates"]`, không đụng bên / ngày ký / trường đã có.
+    Trả về khóa đã hỏi (ghi vào `fields_tried`). Không lô nào đọc được -> ContractAIError, không ghi gì."""
+    specs = {f["key"]: dict(f) for f in fields}
+    if not specs:
+        return []
+    facts = dict(contract.facts or {})
+    known = list(facts.get("parties") or [])
+
+    def read(batch: Batch) -> dict:
+        if on_event:
+            on_event({"type": "fact_batch", "status": "start", "uids": batch.uids, "batch": batch.index})
+        data = ask_json(llm, FACTS_PROMPT, _payload(batch, known, list(specs.values())), contract.mask_state)
+        if on_event:
+            on_event({"type": "fact_batch", "status": "done", "uids": batch.uids, "batch": batch.index})
+        return data
+
+    run = run_batches(make_batches(contract), read, workers=1)
+    if not run.results:
+        raise ContractAIError()
+    cands = {k: list(v) for k, v in (facts.get("candidates") or {}).items()}
+    for batch, data in run.results:
+        _field_candidates(contract, batch, data, specs, cands)
+    facts["candidates"] = cands
+    facts["fields_tried"] = list(dict.fromkeys([*tried_fields(facts), *specs]))
+    facts["warnings"] = [*(facts.get("warnings") or []), *run.warnings()]
+    contract.facts = facts
+    return list(specs)
+
+
 def extract_facts(llm, contract: Contract, *, on_event=None, extra_fields: Sequence[dict] = ()) -> dict:
     """`extra_fields`: trường các gói đang dùng khai thêm (`pack.yaml` extract_fields), trích cùng danh mục chung."""
     specs = {s["key"]: s for s in all_specs()}
@@ -221,12 +269,7 @@ def extract_facts(llm, contract: Contract, *, on_event=None, extra_fields: Seque
                     item = item | {"value": _iso(item.get("value")).isoformat()} if _iso(item.get("value")) else None
                 _add(cands, key, item)
         other += [d for d in (_checked(contract, x, batch) for x in data.get("other_dates") or []) if d]
-        fields = data.get("fields") if isinstance(data.get("fields"), dict) else {}
-        for key, raw in fields.items():
-            item = _checked(contract, raw, batch) if key in specs else None
-            if item is not None:
-                value = normalize_value(specs[key], item.get("value"), contract)
-                _add(cands, key, item | {"value": value} if value is not None else None)
+        _field_candidates(contract, batch, data, specs, cands)
 
     facts: dict[str, Any] = {"type": types[0] if types else "chưa rõ", "parties": parties, "other_dates": other}
     for key in _SCALARS:                                   # dạng cũ: giá trị duy nhất, nhiều giá trị -> ứng viên đầu
@@ -235,6 +278,7 @@ def extract_facts(llm, contract: Contract, *, on_event=None, extra_fields: Seque
         # mỗi lô tự đoán loại từ đoạn nó đọc: lấy loại của lô đầu tiên (có phần mở đầu), không coi là mâu thuẫn
         cands["type"] = [{"value": types[0]}]
     facts["candidates"] = cands
+    facts["fields_tried"] = list(specs)                    # trường đã hỏi: trích bổ sung sau chỉ hỏi trường khác (R.6)
     facts["questions"] = list(contract.facts.get("questions") or [])
     facts["coverage"] = {"read": len(run.read_uids), "total": len(contract.units)}
     if (contract.facts or {}).get("document_kind"):            # loại đã nhận diện (classify_contract) giữ qua lần trích
@@ -249,4 +293,6 @@ def extract_facts(llm, contract: Contract, *, on_event=None, extra_fields: Seque
     return facts
 
 
-__all__ = ["FACTS_PROMPT", "extract_facts"]
+INTERNAL_FACT_KEYS = frozenset({"document_kind", "fields_tried"})   # sổ sách của luồng soát, không phải dữ kiện hợp đồng
+
+__all__ = ["FACTS_PROMPT", "INTERNAL_FACT_KEYS", "extract_facts", "extract_more_fields", "tried_fields"]

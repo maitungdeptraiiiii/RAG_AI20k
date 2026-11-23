@@ -18,7 +18,8 @@ from rag.bridge.facts_map import fact_ops, party_ops
 from rag.bridge.graph_facts import factset_from_graph
 from rag.bridge.recheck import needs_recheck, recheck
 from rag.bridge.tagger import tag_contract
-from rag.contracts.facts import extract_facts
+from rag.contracts.facts import INTERNAL_FACT_KEYS, extract_facts, extract_more_fields, tried_fields
+from rag.contracts.llm_json import ContractAIError
 from rag.contracts.doc import ContractDoc
 from rag.contracts.graph.build import build_graph
 from rag.contracts.graph.view import ContractGraphView, open_view
@@ -156,9 +157,17 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
     tag_model = tag_model or model
     warnings: list[str] = []
     stage("facts", "start")
-    if not {k: v for k, v in (contract.facts or {}).items() if k != "document_kind"}:   # loại đã nhận diện không phải dữ kiện đã trích
+    if not {k: v for k, v in (contract.facts or {}).items() if k not in INTERNAL_FACT_KEYS}:   # sổ sách (loại đã nhận diện...) không phải dữ kiện đã trích
         extract_facts(llm, contract, extra_fields=catalog.context.extract_fields,
                       **({"on_event": emit} if on_event else {}))
+    else:                                 # đã trích trước khi biết gói (UI tải lên): bổ sung trường của gói chưa hỏi (R.6)
+        tried = tried_fields(contract.facts)
+        todo = [f for f in catalog.context.extract_fields if f["key"] not in tried]
+        if todo:
+            try:
+                extract_more_fields(llm, contract, todo, **({"on_event": emit} if on_event else {}))
+            except ContractAIError:
+                warnings.append("Không trích được trường của gói: " + ", ".join(f["key"] for f in todo))
     stage("facts", "done")
     warnings += list(contract.facts.get("warnings") or [])
 

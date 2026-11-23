@@ -83,11 +83,14 @@ def _legacy(kind: str, text: str, unit: str | None, ctx) -> tuple[Any, str] | No
 
 def _typed(kind: str, norm: Any, unit: str | None, ctx, evidence: str) -> tuple[Any, str] | None:
     """Dạng có kiểu LLM trả -> (giá trị, đơn vị): kiểm hợp lệ, kiểm căn cứ từng số, code cộng / quy đổi."""
-    units = (ctx if ctx is not None else _labor_ctx()).units
+    pack = ctx if ctx is not None else _labor_ctx()
+    units, forms = pack.units, dict(getattr(pack, "unit_forms", {}) or {})
     if kind == "duration":
         parts = q.duration_parts(norm)
         if parts is None or not all(q.grounded(n, evidence) for n, _ in parts):
             return None
+        if not all(q.named((*q.DURATION_WORDS[u], *forms.get(u, ())), evidence) for _, u in parts):
+            return None                                   # đơn vị LLM ghi không có trong câu trích (V.9)
         return q.sum_duration(parts, unit, units)
     if kind == "money":
         mv = q.money_value(norm)
@@ -103,6 +106,8 @@ def _typed(kind: str, norm: Any, unit: str | None, ctx, evidence: str) -> tuple[
     per_unit = f"percent_per_{per}" if per else None
     if per_unit is None or per_unit not in units.names or units.convert(1, per_unit, unit) is None:
         return None                                                    # không ghi kỳ / kỳ gói không có: không đoán
+    if forms.get(per_unit) and not q.named(forms[per_unit], evidence):
+        return None                                                    # kỳ LLM ghi không có trong câu trích (V.9)
     return value, per_unit
 
 

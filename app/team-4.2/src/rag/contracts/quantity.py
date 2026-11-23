@@ -142,6 +142,20 @@ def plain(d: Decimal) -> int | float:
 # ── dạng có kiểu ──
 DURATION_UNITS = frozenset({"hour", "day", "workday", "week", "month", "year"})
 PERIODS = frozenset({"day", "month", "year"})
+# Cách viết đơn vị thời hạn trong văn bản (lõi; gói thêm cách viết khác bằng `unit_forms`): dùng để kiểm đơn vị LLM ghi
+# trong `norm` có trong câu trích (hạn chế V.9), không dùng để đọc số.
+DURATION_WORDS = {"hour": ("giờ",), "day": ("ngày",), "workday": ("ngày làm việc",), "week": ("tuần",),
+                  "month": ("tháng",), "year": ("năm",)}
+
+
+def _flat(text: str) -> str:
+    return " ".join(str(text).casefold().split())
+
+
+def named(forms, text: str) -> bool:
+    """Một trong các cách viết `forms` có trong `text` (không phân biệt hoa thường, khoảng trắng)."""
+    flat = _flat(text)
+    return any(_flat(f) in flat for f in forms if str(f).strip())
 
 
 def duration_parts(norm: Any) -> list[tuple[Decimal, str]] | None:
@@ -194,5 +208,5 @@ def percent_value(norm: Any) -> tuple[Decimal, str | None] | None:
     return v, per
 
 
-__all__ = ["DURATION_UNITS", "PERIODS", "duration_parts", "grounded", "money_value", "numbers_in", "percent_value",
+__all__ = ["DURATION_UNITS", "DURATION_WORDS", "PERIODS", "named", "duration_parts", "grounded", "money_value", "numbers_in", "percent_value",
            "plain", "read_vi_number", "sum_duration", "to_number"]

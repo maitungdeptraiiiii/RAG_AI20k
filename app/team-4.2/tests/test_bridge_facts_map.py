@@ -145,3 +145,29 @@ def test_fact_ops_one_candidate_many_names():
     ops = fact_ops({"candidates": {"probation_period": [cand("02 tháng", "p0.d6")]}}, "c1", at=AT)
     assert {(o.content["name"], o.content["value"], o.content["unit"]) for o in ops} == {
         ("has_probation", True, None), ("probation_length", 2, "month")}
+
+
+# ── V.9: đơn vị LLM ghi trong `norm` phải có trong câu trích ──
+def _loan_ctx():
+    from rag.rules.loader import load_packs
+    return load_packs(["civil_loan"]).context
+
+
+def test_duration_unit_must_be_named_in_quote():
+    from rag.bridge.facts_map import read_quantity
+    norm = {"parts": [{"n": 8, "unit": "month"}]}
+    assert read_quantity("duration", "08", norm, unit="day", evidence="thử việc 08 ngày") is None
+    assert read_quantity("duration", "08", norm, unit="day", evidence="thử việc 08 tháng") == (8, "month")
+    two = {"parts": [{"n": 2, "unit": "year"}, {"n": 6, "unit": "month"}]}
+    assert read_quantity("duration", "", two, unit="month", evidence="thời hạn 2 năm 6 tháng") == (30, "month")
+    assert read_quantity("duration", "", two, unit="month", evidence="thời hạn 2 tuần 6 tháng") is None
+
+
+def test_percent_period_must_be_named_in_quote_when_pack_declares_forms():
+    from rag.bridge.facts_map import read_quantity
+    ctx = _loan_ctx()
+    norm = {"value": 2, "per": "month"}
+    got = read_quantity("percent", "", norm, unit="percent_per_year", ctx=ctx, evidence="lãi suất 2%/năm")
+    assert got is None                                               # LLM ghi /tháng cho câu "/năm"
+    ok = read_quantity("percent", "", norm, unit="percent_per_year", ctx=ctx, evidence="lãi suất 2% mỗi tháng")
+    assert ok == (2, "percent_per_month")

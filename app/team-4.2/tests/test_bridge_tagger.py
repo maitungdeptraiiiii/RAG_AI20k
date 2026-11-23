@@ -54,7 +54,7 @@ def test_payload_carries_not_about_and_prompt_explains_it():
     na = p["termination.employee_unilateral"]["not_about"]
     assert any("training.cost_repayment" in s for s in na)
     assert "not_about" not in p["leave.annual"]
-    assert "not_about" in TAG_PROMPT and TAG_PROMPT_VERSION == "concept-tag-4"
+    assert "not_about" in TAG_PROMPT and TAG_PROMPT_VERSION == "concept-tag-5"
 
 
 def test_valid_item_becomes_assert():

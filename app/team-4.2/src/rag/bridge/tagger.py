@@ -15,7 +15,7 @@ from rag.contracts.graph.oplog import GraphOperation, machine_op
 from rag.contracts.llm_json import _norm, ask_json, quote_ok
 from rag.contracts.models import Contract
 
-TAG_PROMPT_VERSION = "concept-tag-4"
+TAG_PROMPT_VERSION = "concept-tag-5"
 BATCH_BUDGET = BUDGET
 _TEXT_SLOTS = ("duration", "percent", "money")
 
@@ -24,8 +24,13 @@ _TAG_PROMPT_TEMPLATE = """Bạn đọc MỘT PHẦN của một <<DOCUMENT>> ti�
 
 "concepts" là danh sách khái niệm cố định. Với MỖI đơn vị trong "units", tìm những khái niệm mà đơn vị đó NÓI TỚI
 (dựa vào "describe" và "phrasing"). Một đơn vị có thể nói tới nhiều khái niệm; một khái niệm có thể ở nhiều đơn vị.
-"kind" là loại khái niệm dùng chung cho mọi loại hợp đồng (vd. rate_cap = tỉ lệ có trần, notice = báo trước,
-time_limit = khoảng thời gian có giới hạn): các khái niệm cùng "kind" đọc slot theo cùng cách.
+"kind" là loại khái niệm dùng chung cho mọi loại hợp đồng: các khái niệm cùng "kind" đọc slot theo cùng cách.
+  rate_cap = tỉ lệ có trần; time_limit = khoảng thời gian có giới hạn; notice = báo trước / thông báo;
+  required_content = nội dung hợp đồng phải ghi; payment = khoản tiền hoặc tỉ lệ tiền phải trả; penalty = phạt vi phạm;
+  leave_entitlement = số ngày nghỉ; count_limit = giới hạn số lần;
+  prohibited_practice, void_term, termination = điều khoản có thể trái luật, slot bool là true khi hợp đồng CÓ điều
+  khoản đúng như slot mô tả, false khi hợp đồng nói ngược lại (vd. loại trừ trách nhiệm, bên bán được đổi giá, bên
+  cho thuê được vào nhà không báo trước).
 "not_about" của một khái niệm liệt kê những nội dung KHÔNG thuộc khái niệm đó (kèm khái niệm đúng sau "→"):
 đơn vị chỉ nói tới nội dung như vậy thì không gán khái niệm đó.
 

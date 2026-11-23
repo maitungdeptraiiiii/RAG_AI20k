@@ -402,3 +402,14 @@ tệp bản liệt kê.
 | E.7 | Chưa merge, chưa push; việc tích hợp là quyết định của người dùng | Chờ quyết định |
 | E.8 | Nhánh có thay đổi cũ không phải của phiên này (`reports/week-02`, `week-03` README, các thư mục dữ liệu chưa theo dõi); không đưa vào commit nào | Có chủ ý |
 | E.9 | Giai đoạn 6 (benchmark) chờ Khánh; giai đoạn 7 đã xong phần engine | Chờ |
+
+## P. Prompt và danh mục dữ kiện theo kịp các gói (23/11)
+
+- Các prompt (gán khái niệm, kiểm lại, agent) đã được tham số hóa theo `document_label` của gói từ trước; không còn chữ "lao động" cứng.
+- Đã sửa: `fact_catalog.json` thiếu `consumer_contract`, `commercial_*` nên hợp đồng loại này rơi về đoán theo chữ loại (một hợp đồng
+  tiêu dùng có chữ "thuê" sẽ bị gán trường của hợp đồng thuê nhà). Nay ánh xạ về `common`.
+- Đã sửa: prompt gán khái niệm chỉ nêu 3 kind; nay nêu đủ kind đang dùng và cách đọc slot bool của `prohibited_practice`, `void_term`,
+  `termination`. `TAG_PROMPT_VERSION` = `concept-tag-5`.
+- CHƯA có: kiểm bằng model thật. Test chỉ kiểm nội dung prompt và ánh xạ, không chạy LLM trên 13 hợp đồng mẫu mới; chất lượng gán khái
+  niệm của gói `consumer` (26 khái niệm) và `commercial` còn phải đo bằng model thật.
+- `verify.catalog_type` vẫn đoán theo chữ "lao động" / "thuê" khi không có loại do `classify_contract` nhận diện (cách cũ, giữ nguyên).

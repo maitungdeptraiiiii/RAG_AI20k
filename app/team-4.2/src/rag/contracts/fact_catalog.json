@@ -5,7 +5,7 @@
     "common": [
       {"key": "party", "label": "Bạn là bên nào", "kind": "enum", "required": true, "hint": "lựa chọn lấy từ các bên"},
       {"key": "sign_date", "label": "Ngày ký", "kind": "date", "required": true, "hint": "ngày các bên ký hợp đồng"},
-      {"key": "type", "label": "Loại hợp đồng", "kind": "text", "required": true, "hint": "vd. Hợp đồng lao động, Hợp đồng thuê nhà ở"},
+      {"key": "type", "label": "Loại hợp đồng", "kind": "text", "required": true, "hint": "vd. Hợp đồng lao động, Hợp đồng thuê nhà ở, Hợp đồng vay, Hợp đồng mua bán hàng hóa, Hợp đồng cung ứng dịch vụ"},
       {"key": "effective_date", "label": "Ngày có hiệu lực", "kind": "date", "required": false, "hint": "ngày hợp đồng bắt đầu có hiệu lực"},
       {"key": "term", "label": "Thời hạn hợp đồng", "kind": "duration", "required": false, "hint": "vd. 24 tháng"},
       {"key": "value", "label": "Giá trị hợp đồng", "kind": "money", "required": false, "hint": "tổng giá trị hoặc giá theo kỳ"}
@@ -33,5 +33,6 @@
       {"key": "repayment", "label": "Thời hạn và cách trả nợ", "kind": "text", "required": false, "hint": "trả một lần / trả dần, ngày trả"}
     ]
   },
-  "document_kinds": {"labor_contract": "labor", "lease_contract": "lease", "loan_contract": "loan", "civil_contract": "common"}
+  "document_kinds": {"labor_contract": "labor", "lease_contract": "lease", "loan_contract": "loan", "civil_contract": "common",
+                    "consumer_contract": "common", "commercial_sale_contract": "common", "commercial_service_contract": "common"}
 }

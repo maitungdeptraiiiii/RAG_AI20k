@@ -254,6 +254,21 @@ trả khái niệm lao động, và hai gói dân sự không khai `document_fac
 | H.6 | r1: `civil_lease` chưa khai `object_types` nên `refs` (`lessor`, `lessee`) không đối chiếu được với gói; hồ sơ chỉ kiểm rule trên dữ kiện phẳng theo thời gian | Ghi nhận (D37: không có rule xuyên văn bản) |
 | H.7 | b4: bổ sung HĐ bị sót làm kết luận trung gian rút lại NHƯNG HĐ2 thành lần ký xác định thời hạn thứ ba (vi phạm Đ20.2.c) — cách đọc "HĐ bị sót 02 tháng cũng tính một lần ký" cần Tùng xác nhận | Chờ Tùng duyệt |
 
+## Chuẩn hóa giá trị bằng regex sau bước LLM (23/11, nghiên cứu regex → LLM)
+
+Luồng thật đã là lai: LLM trích chuỗi `value` kèm câu trích (`facts.py`, kiểm `quote_ok`), rồi regex trong `contracts/values.py`
+đổi chuỗi đó thành số + đơn vị (`facts_map.py`: `_duration`, `_salary`, `_percent`). Đo thử bằng 40 cách viết (kịch bản ở
+`reports/team-4.2/w04/regex_vs_llm_plan.md`); chưa sửa gì. Chưa có số đo trên dữ liệu thật vì bộ fixture chỉ ghi sẵn "đầu ra lý tưởng" của LLM.
+
+| # | Mục | Trạng thái |
+|---|---|---|
+| R.1 | **Sai im lặng:** "2 năm 6 tháng" -> 24 tháng (mất 6 tháng; đúng là 30). `_duration` chỉ lấy đơn vị đầu tiên. Dẫn tới so sai ngưỡng mà không báo | Chưa sửa |
+| R.2 | Số kèm chữ trong ngoặc, cách viết rất phổ biến trong hợp đồng Việt: "24 (hai mươi bốn) tháng", "100.000.000 (một trăm triệu) đồng", "ba mươi (30) ngày" -> không đọc được (None, giá trị bị bỏ). Trong kho mẫu hiện có chỉ vài ca ("02 (hai)", "01 (một)"), nên chưa biết tần suất thật | Chưa sửa |
+| R.3 | Số bằng chữ ("hai mươi bốn tháng", "một trăm triệu đồng", "một năm", "một phẩy năm phần trăm"), "5tr", "100.000.000đ", "20 phần trăm", "1,5 năm" -> None | Chưa sửa |
+| R.4 | Ngày: "01.03.2024", "mùng 1 tháng 3 năm 2024", "tháng 3 năm 2024", "March 1, 2024" không đọc được | Chưa sửa |
+| R.5 | Lỗi R.1 và các None ở R.2–R.4 làm dữ kiện biến mất (UNKNOWN) hoặc sai; chưa có cảnh báo cho người dùng khi câu trích có số mà chuẩn hóa thất bại | Chưa sửa |
+| R.6 | Chưa đo LLM thật (không có model chạy trong phiên); mọi nhận định về Qwen nhỏ hay model lớn chỉ dựa tài liệu ngoài, chưa có bài đo tiếng Việt | Chờ |
+
 ## Tồn đọng chung (môi trường, quy trình)
 
 | # | Mục | Trạng thái |

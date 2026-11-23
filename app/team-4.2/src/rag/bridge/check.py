@@ -17,7 +17,8 @@ from rag.bridge.engine import Fact, Facts, RuleResult
 from rag.bridge.facts_map import fact_ops, party_ops
 from rag.bridge.graph_facts import factset_from_graph
 from rag.bridge.recheck import needs_recheck, recheck
-from rag.bridge.tagger import tag_contract
+from rag.bridge.tagger import TagRun, tag_contract
+from rag.bridge.user_form import question_payload
 from rag.contracts.facts import INTERNAL_FACT_KEYS, extract_facts, extract_more_fields, tried_fields
 from rag.contracts.llm_json import ContractAIError
 from rag.contracts.doc import ContractDoc
@@ -28,6 +29,7 @@ from rag.rules.events import diff_event
 from rag.rules.evaluator import default_kind, evaluator_for
 from rag.contracts.classify import AUTO_KIND, classify_contract
 from rag.rules.loader import packs_for_kind
+from rag.rules.questions import next_questions
 
 _ORDER = ("violation", "missing_content", "hidden_right", "conflict", "possible_right", "needs_facts")
 _TITLES = {
@@ -50,6 +52,7 @@ class CheckReport:
     tag_rejected: list[dict] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     stats: dict = field(default_factory=dict)
+    questions: list[dict] = field(default_factory=list)   # câu hỏi gợi ý cho kết quả UNKNOWN (user_form.question_payload)
 
 
 class _CountingLLM:
@@ -123,10 +126,12 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
                    at: datetime, model: str | None = None, tag_llm=None, tag_model: str | None = None,
                    user_facts: dict | None = None, graph=None, evaluator: str | None = None,
                    packs: Sequence[str] | None = None, document_kind: str | None = None,
-                   on_event: Callable[[dict], None] | None = None) -> CheckReport:
+                   rules_only: bool = False, on_event: Callable[[dict], None] | None = None) -> CheckReport:
     """tag_llm / tag_model: model riêng cho bước gán khái niệm (so model); None -> dùng llm / model.
     evaluator: "reference" | "network"; None -> RAG_RULE_EVALUATOR (spec 2026-11-22-rete-rule-engine-design §7).
     graph: ContractGraphService để công bố và đọc từ Neo4j; None -> đọc bản dựng trong bộ nhớ.
+    rules_only: chỉ đọc lại đồ thị đã có trong oplog rồi chạy rule với `user_facts` mới: không trích dữ kiện, không gán khái niệm,
+    không kiểm lại, không gọi LLM (dùng khi người dùng trả lời câu hỏi gợi ý).
     on_event: nhận sự kiện tiến trình {type: stage|progress|partial, ...} (spec 2026-11-17-concept-check-streaming-ui §2)."""
     emit = on_event or (lambda e: None)
 
@@ -156,19 +161,20 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
     tagger = _CountingLLM(tag_llm) if tag_llm is not None else llm
     tag_model = tag_model or model
     warnings: list[str] = []
-    stage("facts", "start")
-    if not {k: v for k, v in (contract.facts or {}).items() if k not in INTERNAL_FACT_KEYS}:   # sổ sách (loại đã nhận diện...) không phải dữ kiện đã trích
-        extract_facts(llm, contract, extra_fields=catalog.context.extract_fields,
-                      **({"on_event": emit} if on_event else {}))
-    else:                                 # đã trích trước khi biết gói (UI tải lên): bổ sung trường của gói chưa hỏi (R.6)
-        tried = tried_fields(contract.facts)
-        todo = [f for f in catalog.context.extract_fields if f["key"] not in tried]
-        if todo:
-            try:
-                extract_more_fields(llm, contract, todo, **({"on_event": emit} if on_event else {}))
-            except ContractAIError:
-                warnings.append("Không trích được trường của gói: " + ", ".join(f["key"] for f in todo))
-    stage("facts", "done")
+    if not rules_only:
+        stage("facts", "start")
+        if not {k: v for k, v in (contract.facts or {}).items() if k not in INTERNAL_FACT_KEYS}:   # sổ sách (loại đã nhận diện...) không phải dữ kiện đã trích
+            extract_facts(llm, contract, extra_fields=catalog.context.extract_fields,
+                          **({"on_event": emit} if on_event else {}))
+        else:                                 # đã trích trước khi biết gói (UI tải lên): bổ sung trường của gói chưa hỏi (R.6)
+            tried = tried_fields(contract.facts)
+            todo = [f for f in catalog.context.extract_fields if f["key"] not in tried]
+            if todo:
+                try:
+                    extract_more_fields(llm, contract, todo, **({"on_event": emit} if on_event else {}))
+                except ContractAIError:
+                    warnings.append("Không trích được trường của gói: " + ", ".join(f["key"] for f in todo))
+        stage("facts", "done")
     warnings += list(contract.facts.get("warnings") or [])
 
     day = contract.sign_date
@@ -176,15 +182,17 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
         day = catalog.law_values_valid_from
         warnings.append(f"Không có ngày ký: tạm dùng giá trị luật từ {day.isoformat()}")
 
-    _add_ops(contract, party_ops(contract.facts, contract.contract_id, at=at, roles=catalog.roles))
-    _add_ops(contract, fact_ops(contract.facts, contract.contract_id, at=at, ctx=catalog.context))
-    stage("tag", "start")
-    tag = tag_contract(tagger, contract, catalog, at=at, model=tag_model,
-                       on_progress=lambda done, total: emit({"type": "progress", "stage": "tag", "done": done,
-                                                             "total": total}), **({"on_event": emit} if on_event else {}))
-    stage("tag", "done")
-    warnings += tag.warnings
-    _add_ops(contract, tag.ops)
+    tag = TagRun()
+    if not rules_only:
+        _add_ops(contract, party_ops(contract.facts, contract.contract_id, at=at, roles=catalog.roles))
+        _add_ops(contract, fact_ops(contract.facts, contract.contract_id, at=at, ctx=catalog.context))
+        stage("tag", "start")
+        tag = tag_contract(tagger, contract, catalog, at=at, model=tag_model,
+                           on_progress=lambda done, total: emit({"type": "progress", "stage": "tag", "done": done,
+                                                                 "total": total}), **({"on_event": emit} if on_event else {}))
+        stage("tag", "done")
+        warnings += tag.warnings
+        _add_ops(contract, tag.ops)
 
     session_state: dict = {}              # phiên đánh giá và dữ kiện đã đưa vào: lần đọc sau recheck chỉ update phần đổi
 
@@ -222,7 +230,7 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
     view, build_id, factset, results, graph_warnings = read_graph()
     stage("evaluate", "done")
     emit({"type": "partial", "results": [asdict(x) for x in results]})
-    todo = needs_recheck(results, factset)
+    todo = [] if rules_only else needs_recheck(results, factset)
     if todo:
         stage("recheck", "start")
         _add_ops(contract, recheck(llm, contract, catalog, todo, at=at, model=model, **({"on_event": emit} if on_event else {})))
@@ -245,7 +253,10 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
     stage("basis", "start")
     law_basis = {cid: basis.concept_basis(cid, day) for cid in reported}
     stage("basis", "done")
-    return CheckReport(contract.contract_id, day, catalog.version, results, law_basis, tag.rejected, warnings, stats)
+    session = session_state.get("session")
+    questions = [question_payload(catalog, q) for q in next_questions(catalog, session)] if session is not None else []
+    return CheckReport(contract.contract_id, day, catalog.version, results, law_basis, tag.rejected, warnings, stats,
+                       questions)
 
 
 def _key(x: RuleResult) -> str:
@@ -276,7 +287,7 @@ def presence_only(results: Sequence[RuleResult], catalog: Catalog) -> list[str]:
 def report_json(r: CheckReport) -> dict:
     return {"contract_id": r.contract_id, "day": r.day.isoformat(), "catalog_version": r.catalog_version,
             "results": [asdict(x) for x in r.results], "basis": r.basis, "tag_rejected": r.tag_rejected,
-            "warnings": r.warnings, "stats": r.stats, "shared_clauses": shared_clauses(r.results)}
+            "warnings": r.warnings, "stats": r.stats, "shared_clauses": shared_clauses(r.results), "questions": r.questions}
 
 
 def _law_text(values: dict) -> str:

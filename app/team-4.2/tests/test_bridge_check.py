@@ -185,3 +185,35 @@ def test_check_contract_emits_events():
     for js in (plain, streamed):
         js["stats"].pop("seconds")
     assert streamed == plain
+
+
+def test_report_has_questions_for_unknown_results():
+    r = check_contract(ScriptLLM(), contract(), at=AT)
+    unknown_facts = {f for x in r.results if x.status == "UNKNOWN" for f in x.missing_facts}
+    assert r.questions and {q["fact"] for q in r.questions} <= unknown_facts & set(CAT.context.questions)
+    top = next(q for q in r.questions if q["fact"] == "wage_region")
+    assert top["question"] == CAT.context.questions["wage_region"].question and top["guaranteed"] >= 1
+    assert [o["value"] for o in top["options"]] == ["I", "II", "III", "IV"]
+    assert top["options"][0]["label"] == "Vùng I" and top["options"][0]["resolves"] >= 1
+    assert report_json(r)["questions"] == r.questions
+    json.dumps(report_json(r), ensure_ascii=False)
+
+
+def test_rules_only_makes_no_llm_calls_and_applies_answers():
+    c = contract()
+    first = check_contract(ScriptLLM(), c, at=AT)
+    unknown_before = sum(x.status == "UNKNOWN" for x in first.results)
+    llm = ScriptLLM()
+    again = check_contract(llm, c, at=AT, rules_only=True, user_facts={"wage_region": "I", "job_level": "cao_dang_tro_len"})
+    assert llm.calls == [] and again.stats["llm_calls"] == 0
+    by = {(x.concept_id, x.rule_id): x for x in again.results}
+    assert by[("wage.minimum_regional", "r1")].finding == "ok"
+    assert by[("content.raise_policy", "r1")].finding == "missing_content"       # khái niệm vắng mặt vẫn được giữ
+    assert sum(x.status == "UNKNOWN" for x in again.results) < unknown_before
+    assert again.day == first.day and "wage_region" not in {q["fact"] for q in again.questions}
+
+
+def test_questions_same_for_both_evaluators():
+    ref = check_contract(ScriptLLM(), contract(), at=AT, evaluator="reference")
+    net = check_contract(ScriptLLM(), contract(), at=AT, evaluator="network")
+    assert ref.questions == net.questions and ref.questions

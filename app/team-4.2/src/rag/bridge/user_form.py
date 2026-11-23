@@ -4,7 +4,9 @@ Tên dữ kiện, câu hỏi, giá trị và nhãn đều lấy từ gói; UI ch
 câu hỏi vẫn được nhập: có đơn vị thì là số, không thì là chữ."""
 from __future__ import annotations
 
+from rag.bridge.view import format_value
 from rag.rules.model import Catalog
+from rag.rules.questions import Question
 
 
 def _kind(question, unit) -> str:
@@ -38,4 +40,20 @@ def user_fact_fields(catalog: Catalog) -> list[dict]:
     return out
 
 
-__all__ = ["user_fact_fields"]
+def _option_label(value, unit, labels: dict) -> str:
+    if value in labels:
+        return labels[value]
+    if isinstance(value, bool):
+        return "Có" if value else "Không"
+    return format_value(value, unit) if isinstance(value, (int, float)) else str(value)
+
+
+def question_payload(catalog: Catalog, q: Question) -> dict:
+    """Câu hỏi gợi ý (`next_questions`) dạng gửi cho UI: mỗi lựa chọn có nhãn và số kết quả UNKNOWN nó giải quyết (`resolves`)."""
+    spec = catalog.context.questions[q.fact]
+    labels = dict(spec.labels)
+    return {"fact": q.fact, "question": q.question, "unit": q.unit, "guaranteed": q.guaranteed, "possible": q.possible,
+            "options": [{"value": v, "label": _option_label(v, q.unit, labels), "resolves": n} for v, n in q.outcomes]}
+
+
+__all__ = ["question_payload", "user_fact_fields"]

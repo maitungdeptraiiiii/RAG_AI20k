@@ -240,7 +240,7 @@ trả khái niệm lao động, và hai gói dân sự không khai `document_fac
 | L.12 | `RuleResult.party_impact` chưa ghi bất lợi cho BÊN nào (spec G10: vai trò `holder`); người đọc lấy `holder` từ khái niệm. UI vẫn đọc `employee_impact` (D34, để sau) | Còn |
 | L.13 | `appendix.states_change/r1` (Đ22.2 câu 2) cần hai thuộc tính phụ lục `states_target_clause`, `states_valid_from`; `rag.contracts.amendments` đã bắt được dẫn chiếu và câu "hiệu lực kể từ ngày" nhưng chưa có bước nào ghi chúng vào đối tượng Amendment (việc `dossier_objects` của Huy). Thiếu thì rule ra UNKNOWN, không ra vi phạm | Còn (Huy) |
 | L.14 | t7 (mẫu thật) có điều khoản chưa kiểm vì chưa có rule có căn cứ: bên cho thuê điều chỉnh giá khi "thị trường thay đổi" (Điều 4.3), vào nhà không báo trước (6.3), bên thuê chỉ có một căn cứ chấm dứt và mất cọc (9.2) | Còn (cần đọc thêm luật) |
-| L.11 | Bộ test đầy đủ sau gói thuê nhà: 35 failed (đúng số baseline, toàn agent / conversation / warehouse / pipeline), 2264 passed | Ghi nhận |
+| L.11 | Bộ test đầy đủ sau gói thuê nhà: 35 failed (đúng số baseline, toàn agent / conversation / warehouse / pipeline), 2264 passed; sau D33, D16, hồ sơ a1–r1, B6 (23/11): 35 failed (cùng 6 file baseline), 2340 passed | Ghi nhận |
 
 ## Hồ sơ nhiều văn bản a1, b1–b5, r1 (23/11)
 

@@ -21,7 +21,7 @@ dossier_id: b1
 review_date: 2024-03-01            # ngày soát mặc định (kịch bản có thể đổi)
 packs: [labor]                     # bỏ trống -> chọn theo loại văn bản (packs_for_kind / classify_contract)
 parties:                           # role = id vai trò trong `roles` của gói (labor: NLD / NSDLD; thuê nhà: BEN_CHO_THUE / BEN_THUE)
-  - {id: e1, role: NLD, name: "Nguyễn Văn Mẫu"}
+  - {id: e1, role: NLD, name: "Nguyễn Văn Mẫu", continuous_employment: true}   # tùy chọn: NLĐ làm liên tục (văn bản không ghi)
   - {id: c1, role: NSDLD, name: "Công ty TNHH Mẫu"}
 documents:                         # kind = một document_kinds của gói, hoặc `amendment` (phụ lục; refs.contract bắt buộc)
   - {doc_id: hd1_2022, file: hd1_2022.txt, kind: labor_contract, refs: {employee: e1, employer: c1}}
@@ -31,6 +31,10 @@ user_facts: {wage_region: I}       # dữ kiện người dùng trả lời (tê
 
 `refs` trỏ tới `id` của một bên hoặc `doc_id` của một văn bản. Tên khóa của `refs` là tên `refs` trong `object_types`
 của gói (labor: Contract `employee`, Amendment `contract`). Không dùng dữ liệu cá nhân thật.
+
+`continuous_employment` (tùy chọn, Tùng duyệt 23/11): người dùng khai NLĐ làm việc liên tục suốt hồ sơ. Chỉ khi có cờ
+này `dossier_objects` mới tính số ngày làm tiếp trong khoảng trống giữa hai hợp đồng; hai hợp đồng nối liền -> 0 ngày
+không cần cờ; không có cờ -> thuộc tính vắng (UNKNOWN).
 
 ## 2. Văn bản `.txt`
 
@@ -55,6 +59,12 @@ phải ra đúng bảng này. Mỗi văn bản là một đối tượng cùng i
 ```
 
 Thuộc tính không có câu trích (vd. số ngày làm tiếp sau khi hết hạn: suy từ ngày của hai văn bản) ghi `why`.
+`job` là chức danh nguyên văn đã chuẩn hóa (hoa thường, khoảng trắng). Bảng này là đáp án của `rag.contracts.dossier`
+(`tests/test_dossier_objects.py`); cách dựng mỗi kiểu khai trong `object_types` của gói (`documents`, `from_facts`,
+`gap_after_end`, `amends`, `states_target`, `states_valid_from`, `modifies`).
+
+`extracted.yaml`: kết quả bước trích (LLM, `facts.py`) GIẢ cho từng bộ hợp đồng chính + phụ lục, mỗi giá trị có câu trích
+nguyên văn và `part` (0 = hợp đồng chính, i = phụ lục thứ i) — đầu vào test `dossier_objects` không cần LLM.
 
 ## 4. `facts.yaml` — dữ kiện cấp hợp đồng theo thời gian (khi cần)
 

@@ -1,0 +1,37 @@
+# Kết quả bước trích (LLM, facts.py) GIẢ cho test dossier_objects: mỗi văn bản chính + phụ lục của nó là một lần
+# trích; `part` = thứ tự văn bản trong bộ (0 = hợp đồng chính, i = phụ lục thứ i theo dossier.yaml). Câu trích nguyên văn.
+hd_2023:
+  sign_date:
+  - part: 0
+    value: '2023-02-20'
+    quote: Hôm nay, ngày 20 tháng 02 năm 2023
+  labor_kind:
+  - part: 0
+    value: Hợp đồng lao động xác định thời hạn 36 tháng
+    quote: 'Loại hợp đồng: Hợp đồng lao động xác định thời hạn 36 tháng.'
+  start_date:
+  - part: 0
+    value: '2023-03-01'
+    quote: 'Thời hạn hợp đồng: từ ngày 01/03/2023 đến ngày 28/02/2026'
+  end_date:
+  - part: 0
+    value: '2026-02-28'
+    quote: 'Thời hạn hợp đồng: từ ngày 01/03/2023 đến ngày 28/02/2026'
+  term:
+  - part: 0
+    value: từ ngày 01/03/2023 đến ngày 28/02/2026
+    quote: 'Thời hạn hợp đồng: từ ngày 01/03/2023 đến ngày 28/02/2026'
+  job_title:
+  - part: 0
+    value: Nhân viên kinh doanh
+    quote: 'Chức danh chuyên môn: Nhân viên kinh doanh.'
+  effective_date:
+  - part: 1
+    value: '2024-09-01'
+    quote: Phụ lục này có hiệu lực kể từ ngày 01/09/2024
+  - part: 2
+    value: '2025-02-01'
+    quote: Phụ lục này có hiệu lực kể từ ngày 01/02/2025
+  - part: 3
+    value: '2025-08-01'
+    quote: Phụ lục này có hiệu lực kể từ ngày 01/08/2025

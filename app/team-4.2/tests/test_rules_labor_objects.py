@@ -62,12 +62,17 @@ def test_b2_exception_and_unknown_exception():
 
 
 def test_b3_expired_contract_still_working_converts_per_contract():
-    b3 = [contract("h1", end=date(2024, 12, 31), worked_after_expiry_days=45, new_contract_signed=False)]
+    b3 = [contract("h1", end=date(2024, 12, 31), worked_after_expiry_days=45)]
     r = run(b3)[("content.term/r6", "employee=E1")]
     assert (r.status, r.finding) == ("FAIL", "violation") and r.legality == "unknown"
-    late = [contract("h1", end=date(2024, 12, 31), worked_after_expiry_days=20, new_contract_signed=False)]
+    late = [contract("h1", end=date(2024, 12, 31), worked_after_expiry_days=20)]
     assert run(late)[("content.term/r6", "employee=E1")].status == "PASS"
-    unknown = [contract("h1", end=date(2024, 12, 31), worked_after_expiry_days=45)]
+    # số ngày làm tiếp tính tới khi ký HĐ mới: 45 > 30 đã đủ (không cần new_contract_signed, Tùng duyệt 23/11);
+    # chưa biết số ngày -> UNKNOWN
+    assert run([contract("h1", end=date(2024, 12, 31), worked_after_expiry_days=45)])[
+        ("content.term/r6", "employee=E1")].status == "FAIL"
+    unknown = [contract("h1", end=date(2024, 12, 31))]
+    del unknown[0].attrs["worked_after_expiry_days"]
     assert run(unknown)[("content.term/r6", "employee=E1")].status == "UNKNOWN"
 
 

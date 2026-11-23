@@ -1,4 +1,4 @@
-# Bảng đối tượng kỳ vọng (README §3): đầu vào engine và đáp án cho dossier_objects (Huy, H1).
+# Bảng đối tượng kỳ vọng (README §3): đầu vào engine và đáp án cho dossier_objects (H1).
 - id: hd1_2022
   type: Contract
   valid_from: '2022-01-01'
@@ -13,15 +13,12 @@
       value: 0
       unit: day
       why: HĐ2 có hiệu lực ngay ngày hôm sau
-    new_contract_signed:
-      value: true
-      why: HĐ2 ký trước ngày hết hạn
     has_probation:
       value: true
       quote: 'Thời gian thử việc: 02 tháng, hưởng 85% mức lương chính.'
     job:
-      value: ke_toan
-      quote: '3. Chức danh chuyên môn: Nhân viên kế toán.'
+      value: nhân viên kế toán
+      quote: 'Chức danh chuyên môn: Nhân viên kế toán.'
 - id: hd2_2023
   type: Contract
   valid_from: '2023-01-01'
@@ -36,5 +33,5 @@
       value: true
       quote: 'Thời gian thử việc: 01 tháng, hưởng 85% mức lương chính.'
     job:
-      value: ke_toan
-      quote: '3. Chức danh chuyên môn: Nhân viên kế toán.'
+      value: nhân viên kế toán
+      quote: 'Chức danh chuyên môn: Nhân viên kế toán.'

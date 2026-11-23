@@ -1,0 +1,77 @@
+# Kết quả bước trích (LLM, facts.py) GIẢ cho test dossier_objects: mỗi văn bản chính + phụ lục của nó là một lần
+# trích; `part` = thứ tự văn bản trong bộ (0 = hợp đồng chính, i = phụ lục thứ i theo dossier.yaml). Câu trích nguyên văn.
+hd1_2022:
+  sign_date:
+  - part: 0
+    value: '2021-12-28'
+    quote: Hôm nay, ngày 28 tháng 12 năm 2021
+  labor_kind:
+  - part: 0
+    value: Hợp đồng lao động xác định thời hạn 12 tháng
+    quote: 'Loại hợp đồng: Hợp đồng lao động xác định thời hạn 12 tháng.'
+  start_date:
+  - part: 0
+    value: '2022-01-01'
+    quote: 'Thời hạn hợp đồng: từ ngày 01/01/2022 đến ngày 31/12/2022'
+  end_date:
+  - part: 0
+    value: '2022-12-31'
+    quote: 'Thời hạn hợp đồng: từ ngày 01/01/2022 đến ngày 31/12/2022'
+  term:
+  - part: 0
+    value: từ ngày 01/01/2022 đến ngày 31/12/2022
+    quote: 'Thời hạn hợp đồng: từ ngày 01/01/2022 đến ngày 31/12/2022'
+  job_title:
+  - part: 0
+    value: Nhân viên kế toán
+    quote: 'Chức danh chuyên môn: Nhân viên kế toán.'
+hd2_2023:
+  sign_date:
+  - part: 0
+    value: '2022-12-26'
+    quote: Hôm nay, ngày 26 tháng 12 năm 2022
+  labor_kind:
+  - part: 0
+    value: Hợp đồng lao động xác định thời hạn 12 tháng
+    quote: 'Loại hợp đồng: Hợp đồng lao động xác định thời hạn 12 tháng.'
+  start_date:
+  - part: 0
+    value: '2023-01-01'
+    quote: 'Thời hạn hợp đồng: từ ngày 01/01/2023 đến ngày 31/12/2023'
+  end_date:
+  - part: 0
+    value: '2023-12-31'
+    quote: 'Thời hạn hợp đồng: từ ngày 01/01/2023 đến ngày 31/12/2023'
+  term:
+  - part: 0
+    value: từ ngày 01/01/2023 đến ngày 31/12/2023
+    quote: 'Thời hạn hợp đồng: từ ngày 01/01/2023 đến ngày 31/12/2023'
+  job_title:
+  - part: 0
+    value: Nhân viên kế toán
+    quote: 'Chức danh chuyên môn: Nhân viên kế toán.'
+hd3_2024:
+  sign_date:
+  - part: 0
+    value: '2023-12-27'
+    quote: Hôm nay, ngày 27 tháng 12 năm 2023
+  labor_kind:
+  - part: 0
+    value: Hợp đồng lao động xác định thời hạn 12 tháng
+    quote: 'Loại hợp đồng: Hợp đồng lao động xác định thời hạn 12 tháng.'
+  start_date:
+  - part: 0
+    value: '2024-01-01'
+    quote: 'Thời hạn hợp đồng: từ ngày 01/01/2024 đến ngày 31/12/2024'
+  end_date:
+  - part: 0
+    value: '2024-12-31'
+    quote: 'Thời hạn hợp đồng: từ ngày 01/01/2024 đến ngày 31/12/2024'
+  term:
+  - part: 0
+    value: từ ngày 01/01/2024 đến ngày 31/12/2024
+    quote: 'Thời hạn hợp đồng: từ ngày 01/01/2024 đến ngày 31/12/2024'
+  job_title:
+  - part: 0
+    value: Nhân viên kế toán
+    quote: 'Chức danh chuyên môn: Nhân viên kế toán.'

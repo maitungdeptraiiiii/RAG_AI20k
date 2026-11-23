@@ -189,7 +189,7 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
 ## H. Theo dõi người khác
 
 - [ ] H1. Ngày 2: Khánh nạp xong BLDS (cần cho B4–B5 có pid).
-- [ ] H2. Ngày 3: Huy `dossier_objects` chạy trên a1, b1–b5 (cần cho D25–D28).
+- [x] H2. Ngày 3: Huy `dossier_objects` chạy trên a1, b1–b5 (cần cho D25–D28). *(23/11: Tùng nhận, `src/rag/contracts/dossier.py`; ra đúng bảng của 7 hồ sơ. Hạn chế: mục O trong file hạn chế.)*
 - [ ] H3. Ngày 3–4: Huy tagger theo kind + nhận diện loại hợp đồng trên C3.
 - [ ] H4. Ngày 5: Khánh bảng benchmark + eval.
 

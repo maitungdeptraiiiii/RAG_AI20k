@@ -207,6 +207,7 @@ _PARSERS = {
     "flag": lambda c, spec, ctx: (True, None),
     "enum": _p_enum,
     "contains": _p_contains,
+    "text": lambda c, spec, ctx: (" ".join(_text(c).split()).casefold() or None, None) if _text(c).strip() else None,
 }
 
 

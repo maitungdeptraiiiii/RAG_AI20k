@@ -1,4 +1,4 @@
-# Bảng đối tượng kỳ vọng (README §3): đầu vào engine và đáp án cho dossier_objects (Huy, H1).
+# Bảng đối tượng kỳ vọng (README §3): đầu vào engine và đáp án cho dossier_objects (H1).
 - id: hd_2023
   type: Contract
   valid_from: '2023-03-01'
@@ -9,6 +9,9 @@
     kind:
       value: xac_dinh_thoi_han
       quote: 'Loại hợp đồng: Hợp đồng lao động xác định thời hạn 36 tháng.'
+    job:
+      value: nhân viên kinh doanh
+      quote: 'Chức danh chuyên môn: Nhân viên kinh doanh.'
 - id: hd_2023_pl1
   type: Amendment
   valid_from: '2024-09-01'

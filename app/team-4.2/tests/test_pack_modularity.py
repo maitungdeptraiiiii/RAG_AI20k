@@ -112,7 +112,7 @@ def test_labor_document_facts_declared_in_pack_and_unchanged():
     from rag.bridge.facts_map import contract_facts
     labor = load_catalog().context
     assert set(labor.document_specs) == {"contract_kind", "term_months", "base_salary_vnd", "has_probation",
-                                         "probation_length", "probation_pay_pct", "job_level"}
+                                         "probation_length", "probation_pay_pct", "job_level", "job_title"}
     facts = {"candidates": {
         "labor_kind": [{"value": "Không xác định thời hạn", "unit": "p0.d1", "quote": "q"}],
         "term": [{"value": "12 tháng", "unit": "p0.d1", "quote": "q"}],

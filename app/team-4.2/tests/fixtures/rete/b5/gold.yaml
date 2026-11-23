@@ -3,7 +3,7 @@ dossier_id: b5
 labeled_by: Claude theo yêu cầu của Tùng, viết từ luật TRƯỚC khi chạy engine trên hồ sơ — cần Tùng duyệt
 expected:
 - rule: probation.once/r2
-  object: employee=e1,job=ke_toan
+  object: employee=e1,job=nhân viên kế toán
   periods:
   - from: '2022-01-01'
     status: PASS

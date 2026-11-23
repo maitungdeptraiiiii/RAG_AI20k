@@ -26,6 +26,7 @@ FACT_LABELS: dict[str, str] = {
     "probation_length": "Thời gian thử việc",
     "probation_pay_pct": "Lương thử việc (% lương chính thức)",
     "job_level": "Trình độ / tính chất công việc",
+    "job_title": "Chức danh chuyên môn",
     "sign_date": "Ngày ký",
     # dữ kiện về người lao động
     "work_condition": "Điều kiện làm việc",

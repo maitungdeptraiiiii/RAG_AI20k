@@ -10,7 +10,7 @@ def test_labor_pack_declarations_match_legacy_constants():
     p = load_pack("labor")
     assert p.document_facts == {"contract_kind": None, "term_months": "month", "base_salary_vnd": "vnd",
                                 "has_probation": None, "probation_length": "day", "probation_pay_pct": "percent",
-                                "job_level": None, "sign_date": None}
+                                "job_level": None, "job_title": None, "sign_date": None}
     assert p.user_facts == frozenset({"work_condition", "pregnant", "pregnancy_month", "child_under_12_months",
                                       "employee_consent", "medical_certificate", "wage_region",
                                       "employee_is_female", "worked_after_expiry_days", "new_contract_signed",

@@ -26,7 +26,7 @@ Trả JSON:
  "parties": [{"name": "tên đầy đủ của bên", "role": "vai trò trong hợp đồng, vd. Bên cho thuê", "unit": "uid", "quote": "trích nguyên văn"}],
  "sign_date": {"value": "YYYY-MM-DD", "unit": "uid", "quote": "trích nguyên văn"}, hoặc danh sách [{...}, {...}] khi
    hợp đồng ghi nhiều ngày ký khác nhau, hoặc null,
- "effective_date": {...} hoặc null, "value": {"value": "...", "unit": "uid", "quote": "..."} hoặc null,
+ "effective_date": {...} hoặc null, "end_date": {...} hoặc null (ngày hết hạn ghi rõ của CHÍNH hợp đồng), "value": {"value": "...", "unit": "uid", "quote": "..."} hoặc null,
  "term": {...} hoặc null,
  "other_dates": [{"label": "...", "value": "YYYY-MM-DD", "unit": "uid", "quote": "..."}],
  "fields": {"<key trong fields_wanted>": {"value": "...", "unit": "uid", "quote": "trích nguyên văn"}}}
@@ -49,7 +49,7 @@ Không tìm thấy thì để null / bỏ khóa, không suy đoán. Ngày dạng
 - term: thời hạn của CHÍNH hợp đồng (từ khi có hiệu lực tới khi hết hạn), không phải thời hạn của một nghĩa vụ, bảo
   hành, giấy phép, thử việc hay cam kết không cạnh tranh."""
 
-_SCALARS = ("sign_date", "effective_date", "value", "term")
+_SCALARS = ("sign_date", "effective_date", "end_date", "value", "term")
 _BRACKETS = re.compile(r"\([^)]*\)")
 _QUOTED = re.compile(r"[\"“”'‘’]")
 _ROLE_SPLIT = re.compile(r"[/;,()]|\s[-–—]\s")
@@ -217,7 +217,7 @@ def extract_facts(llm, contract: Contract, *, on_event=None, extra_fields: Seque
         for key in _SCALARS:
             for raw in _items(data.get(key)):
                 item = _checked(contract, raw, batch)
-                if item and key in ("sign_date", "effective_date"):
+                if item and key in ("sign_date", "effective_date", "end_date"):
                     item = item | {"value": _iso(item.get("value")).isoformat()} if _iso(item.get("value")) else None
                 _add(cands, key, item)
         other += [d for d in (_checked(contract, x, batch) for x in data.get("other_dates") or []) if d]

@@ -275,11 +275,28 @@ Luồng thật đã là lai: LLM trích chuỗi `value` kèm câu trích (`facts
 | V.11 | Ngoài phạm vi: bộ đọc `contains` / `enum` (phân loại theo cụm chữ trong pack.yaml, vd. `has_interest`), nhận bí danh bên, `AMEND_RE`, cắt "lên/thành" của `_salary` khi không có `norm` | Còn |
 | V.12 | **Làm sau (Tùng chốt 23/11):** V.9 (kiểm thêm ĐƠN VỊ LLM ghi có trong câu trích, dùng `unit_forms` của gói) trước, rồi V.11 (phân loại theo cụm chữ: `contains`/`enum`, bí danh bên, `AMEND_RE`) | Ghi để làm sau |
 
+## H1 — `dossier_objects` (23/11, Tùng nhận phần của Huy)
+
+`src/rag/contracts/dossier.py`: `load_dossier`, `bundle`, `extract_dossier_facts` (LLM thật), `dossier_objects`. Cách dựng
+khai trong `object_types` của gói. Ra đúng bảng `objects.yaml` của 7 hồ sơ (`tests/test_dossier_objects.py`, 26 test).
+Năm quyết định Tùng duyệt: khai cách dựng trong gói; thêm `end_date`; cờ `continuous_employment`; bỏ
+`new_contract_signed` khỏi đối tượng; chi tiết phụ lục không tìm thấy -> UNKNOWN chứ không false.
+
+| # | Mục | Trạng thái |
+|---|---|---|
+| O.1 | Test dùng kết quả trích GIẢ (`extracted.yaml`); chưa chạy LLM thật trên hồ sơ (cùng V.6) | Chờ có model |
+| O.2 | Hợp đồng cuối của NLĐ không có văn bản kế tiếp: `worked_after_expiry_days` vắng kể cả khi NLĐ vẫn làm sau hết hạn (giá trị phụ thuộc ngày soát; chưa tính) | Còn |
+| O.3 | Dò điều khoản bị sửa và ngày hiệu lực của phụ lục vẫn dùng `amendments.py` (regex cũ, V.11); bỏ sót -> UNKNOWN, không ra vi phạm giả | Còn |
+| O.4 | Gom văn bản theo chủ thể vẫn khai tay trong dossier.yaml (bước 2 tự nhận diện theo CCCD/tên chưa làm) | Còn (theo huy.md) |
+| O.5 | `new_contract_signed` bỏ khỏi đối tượng; dữ kiện phẳng cùng tên (người dùng trả lời) vẫn giữ cho `contract_kind_effective` | Có chủ ý |
+| O.6 | Nhãn nhóm b5 đổi `job=ke_toan` -> `job=nhân viên kế toán` (giá trị `job` là chức danh nguyên văn); trạng thái gold không đổi | Có chủ ý |
+| O.7 | Ngày bắt đầu lấy `start_date` -> `effective_date` -> `sign_date`; gói thuê nhà / vay chưa khai `object_types` nên chưa có đối tượng | Còn |
+
 ## Tồn đọng chung (môi trường, quy trình)
 
 | # | Mục | Trạng thái |
 |---|---|---|
-| E.1 | Toàn bộ suite có **35 test fail có sẵn** (lần chạy sau sửa đọc giá trị có kiểu 23/11: 35 fail cùng 6 file, 2404 pass) từ trước (nhóm `test_agent_stability`, `test_answer_presentation`, `test_conversation`, `test_dated_agent_e2e`, `test_pipeline`, `test_warehouse_migration`); danh sách tên ở `phase1_baseline.md`. Số fail không đổi sau giai đoạn 1, 2, 3 | Còn, không phải do engine |
+| E.1 | Toàn bộ suite có **35 test fail có sẵn** (lần chạy sau H1 dossier_objects 23/11: 35 fail cùng 6 file sau khi sửa 2 test do dữ kiện mới job_title) từ trước (nhóm `test_agent_stability`, `test_answer_presentation`, `test_conversation`, `test_dated_agent_e2e`, `test_pipeline`, `test_warehouse_migration`); danh sách tên ở `phase1_baseline.md`. Số fail không đổi sau giai đoạn 1, 2, 3 | Còn, không phải do engine |
 | E.2 | `tests/test_agent_partial_review.py` lỗi import có sẵn; phải chạy với `--ignore` | Còn |
 | E.3 | `test_warehouse_migration.py::test_both_modes_fail_closed_if_catalog_is_unavailable` chỉ fail khi chạy chung nhóm (phụ thuộc thứ tự), riêng thì pass | Còn |
 | E.4 | `test_bridge_tagger.py::test_failed_batch_warns_and_others_continue` fail một lần khi chạy nhóm với `RAG_RULE_EVALUATOR=reference`; sau đó xanh 3 lần riêng và 2 lần nhóm (flaky) | Còn |

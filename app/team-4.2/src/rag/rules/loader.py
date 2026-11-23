@@ -281,7 +281,7 @@ def load_pack(pack_id: str, *, root: Path = PACKS_ROOT) -> PackSpec:
             attrs, refs = [], []
         if BUILTIN_ATTRS & set(attrs):
             problems.append(f"object_types: {tname!r} khai thuộc tính dựng sẵn {sorted(BUILTIN_ATTRS & set(attrs))}")
-        object_types[tname] = ObjectType(tname, frozenset(attrs), frozenset(refs))
+        object_types[tname] = _object_type(tname, spec, attrs, refs, kinds, document_facts, problems)
     unit_forms: dict[str, tuple[str, ...]] = {}
     raw_forms = data.get("unit_forms") or {}
     if not isinstance(raw_forms, dict):
@@ -307,6 +307,43 @@ def load_pack(pack_id: str, *, root: Path = PACKS_ROOT) -> PackSpec:
     return PackSpec(pack_id, str(data.get("version")), tuple(extends), tuple(kinds), Units(names, factors),
                     document_facts, user_facts, findings, silences, derived, dict(user_fact_units), questions,
                     concept_kinds, object_types, unit_forms, document_specs, extract_fields, dict(labels), label)
+
+
+def _object_type(tname: str, spec: dict, attrs: list, refs: list, kinds, document_facts, problems: list[str]) -> ObjectType:
+    """Kiểu đối tượng + cách dựng từ văn bản (rag.contracts.dossier, H1): mọi tên trỏ tới phải đã khai."""
+    where = f"object_types: {tname!r}"
+    docs = spec.get("documents") or []
+    if not isinstance(docs, list) or any(d != "amendment" and d not in kinds for d in docs):
+        problems.append(f"{where}: documents phải là danh sách document_kinds của gói (hoặc 'amendment'), gặp {docs!r}")
+        docs = []
+    from_facts = spec.get("from_facts") or {}
+    if not isinstance(from_facts, dict):
+        problems.append(f"{where}: from_facts phải là dict {{thuộc tính: dữ kiện}}")
+        from_facts = {}
+    for a, f in from_facts.items():
+        if a not in attrs:
+            problems.append(f"{where}: from_facts: {a!r} không có trong attrs")
+        if f not in document_facts:
+            problems.append(f"{where}: from_facts: dữ kiện {f!r} không có trong document_facts")
+    gap = spec.get("gap_after_end")
+    if gap is not None:
+        if not isinstance(gap, dict) or gap.get("attr") not in attrs or gap.get("ref") not in refs:
+            problems.append(f"{where}: gap_after_end cần {{attr: <trong attrs>, ref: <trong refs>}}, gặp {gap!r}")
+            gap = None
+        else:
+            gap = (gap["attr"], gap["ref"])
+    amends = spec.get("amends")
+    if amends is not None and amends not in refs:
+        problems.append(f"{where}: amends {amends!r} không có trong refs")
+    for key in ("states_target", "states_valid_from"):
+        if spec.get(key) is not None and spec[key] not in attrs:
+            problems.append(f"{where}: {key} {spec[key]!r} không có trong attrs")
+    modifies = spec.get("modifies") or {}
+    if not isinstance(modifies, dict) or any(a not in attrs for a in modifies):
+        problems.append(f"{where}: modifies phải là dict {{thuộc tính trong attrs: trường trích}}")
+        modifies = {}
+    return ObjectType(tname, frozenset(attrs), frozenset(refs), tuple(docs), dict(from_facts), gap, amends,
+                      spec.get("states_target"), spec.get("states_valid_from"), dict(modifies))
 
 
 # ── concepts.yaml ──

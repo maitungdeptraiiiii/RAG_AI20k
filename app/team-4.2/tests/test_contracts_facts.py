@@ -188,3 +188,15 @@ def test_typed_value_survives_into_candidates_and_prompt_asks_for_it():
     facts = extract_facts(llm, contract())
     assert facts["candidates"]["term"][0]["norm"] == {"parts": [{"n": 24, "unit": "month"}]}
     assert '"norm"' in llm.calls[0][0] and '"parts"' in llm.calls[0][0]
+
+
+def test_end_date_is_extracted_as_iso_with_checked_quote():
+    """H1: ngày hết hạn ghi rõ (dựng `valid_to` của đối tượng hồ sơ); như effective_date: ISO, có câu trích kiểm được."""
+    def reply(p):
+        data = facts_reply(p)
+        data["end_date"] = {"value": "2025-03-31", "unit": "u4", "quote": "Thời hạn thuê là 24 tháng"}
+        return data
+    llm = FakeLLM(reply)
+    facts = extract_facts(llm, contract())
+    assert facts["candidates"]["end_date"][0]["value"] == "2025-03-31"
+    assert '"end_date"' in llm.calls[0][0]

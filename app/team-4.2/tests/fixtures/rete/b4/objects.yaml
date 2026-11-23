@@ -1,4 +1,4 @@
-# Bảng đối tượng kỳ vọng (README §3): đầu vào engine và đáp án cho dossier_objects (Huy, H1).
+# Bảng đối tượng kỳ vọng (README §3): đầu vào engine và đáp án cho dossier_objects (H1).
 - id: hd1_2022
   type: Contract
   valid_from: '2022-01-01'
@@ -13,9 +13,9 @@
       value: 9
       unit: day
       why: NLĐ làm tiếp từ 01/01/2023 tới khi ký HĐ bị sót ngày 10/01/2023 (9 ngày)
-    new_contract_signed:
-      value: true
-      why: HĐ 013/2023 ký ngày 10/01/2023, trong 30 ngày kể từ ngày hết hạn
+    job:
+      value: kỹ thuật viên
+      quote: 'Chức danh chuyên môn: Kỹ thuật viên.'
 - id: hd_sot_2023
   type: Contract
   valid_from: '2023-01-10'
@@ -30,9 +30,9 @@
       value: 0
       unit: day
       why: HĐ2 có hiệu lực ngay ngày hôm sau
-    new_contract_signed:
-      value: true
-      why: HĐ2 ký ngày 15/03/2023
+    job:
+      value: kỹ thuật viên
+      quote: 'Chức danh chuyên môn: Kỹ thuật viên.'
 - id: hd2_2023
   type: Contract
   valid_from: '2023-03-15'
@@ -43,3 +43,6 @@
     kind:
       value: xac_dinh_thoi_han
       quote: 'Loại hợp đồng: Hợp đồng lao động xác định thời hạn'
+    job:
+      value: kỹ thuật viên
+      quote: 'Chức danh chuyên môn: Kỹ thuật viên.'

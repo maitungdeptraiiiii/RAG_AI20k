@@ -5,6 +5,7 @@ packs:
 parties:
 - id: e1
   role: NLD
+  continuous_employment: true   # NLĐ làm việc liên tục suốt hồ sơ (văn bản không ghi; người dùng khai)
   name: Đỗ Văn Dũng
 - id: c1
   role: NSDLD

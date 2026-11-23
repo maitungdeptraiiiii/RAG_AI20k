@@ -51,7 +51,7 @@ class DerivedFact:
 
 
 # Bộ đọc giá trị cho dữ kiện cấp hợp đồng (cài ở rag.bridge.facts_map); gói chọn theo tên, không viết code mới.
-DOCUMENT_PARSERS = frozenset({"duration", "duration_to_unit", "money", "percent", "flag", "enum", "contains"})
+DOCUMENT_PARSERS = frozenset({"duration", "duration_to_unit", "money", "percent", "flag", "enum", "contains", "text"})
 
 
 @dataclass(frozen=True)
@@ -70,6 +70,14 @@ class ObjectType:
     name: str
     attrs: frozenset[str]
     refs: frozenset[str]
+    # Cách rag.contracts.dossier dựng đối tượng từ văn bản (H1); bỏ trống -> kiểu chỉ dùng được với đối tượng cấp sẵn.
+    documents: tuple[str, ...] = ()                      # loại văn bản (document_kind, hoặc "amendment") ứng với kiểu
+    from_facts: Mapping[str, str] = field(default_factory=dict)   # thuộc tính -> dữ kiện cấp hợp đồng (document_facts)
+    gap_after_end: tuple[str, str] | None = None         # (thuộc tính, ref): số ngày từ hết hạn tới văn bản kế tiếp cùng ref
+    amends: str | None = None                            # ref trỏ tới đối tượng được phụ lục sửa
+    states_target: str | None = None                     # thuộc tính: phụ lục ghi rõ điều khoản sửa
+    states_valid_from: str | None = None                 # thuộc tính: phụ lục ghi thời điểm hiệu lực
+    modifies: Mapping[str, str] = field(default_factory=dict)     # thuộc tính -> trường trích: phụ lục sửa đúng điều khoản chứa trường đó
 
 
 @dataclass(frozen=True)

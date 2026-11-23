@@ -76,7 +76,7 @@ def _combine(results: Sequence[object]) -> object:
     return None
 
 
-def _own(d: Definition, df: DerivedFact, facts: Facts) -> object:
+def _own(d: Definition, df: DerivedFact, facts: Facts, ctx: Context) -> object:
     if d.from_fact is None:
         return Fact(d.value, df.unit, source="derived", derived_by=d.id)
     src = facts.get(d.from_fact)
@@ -84,7 +84,14 @@ def _own(d: Definition, df: DerivedFact, facts: Facts) -> object:
         return None                                    # `from` thiếu: không áp dụng
     if is_unresolved(src):
         return src                                     # CONFLICT / UNKNOWN giữ nguyên
+    if df.unit is not None and src.unit is not None and src.unit != df.unit:   # về đơn vị đã khai (hạn chế 3.11)
+        value = ctx.units.convert(src.value, src.unit, df.unit) if _number(src.value) else None
+        return UNKNOWN if value is None else Fact(value, df.unit, source="derived", derived_by=d.id)
     return Fact(src.value, src.unit, source="derived", derived_by=d.id)
+
+
+def _number(x) -> bool:
+    return isinstance(x, (int, float)) and not isinstance(x, bool)
 
 
 def eval_derived(df: DerivedFact, facts: Facts, ctx: Context) -> Fact | object | None:
@@ -102,7 +109,7 @@ def eval_derived(df: DerivedFact, facts: Facts, ctx: Context) -> Fact | object |
             return None
         if when == "U":
             return UNKNOWN
-        return _own(d, df, facts)
+        return _own(d, df, facts, ctx)
 
     return _combine([node(d) for d in children.get(None, ())])
 
@@ -126,15 +133,15 @@ def derive_all(ctx: Context, facts: Facts) -> Facts:
     return out
 
 
-def missing_inputs(names: Iterable[str], facts: Facts, ctx: Context) -> tuple[str, ...]:
-    """Dữ kiện đầu vào còn thiếu để quyết định `names`: dữ kiện thường thiếu -> chính nó; dữ kiện suy ra thiếu / UNKNOWN
-    -> mở thành dữ kiện đầu vào thiếu của các định nghĩa chưa quyết định (đệ quy qua dữ kiện suy ra khác)."""
+def _inputs_where(names: Iterable[str], facts: Facts, ctx: Context, pick) -> tuple[str, ...]:
+    """Dữ kiện đầu vào thỏa `pick` của `names`: dữ kiện thường -> chính nó; dữ kiện suy ra chưa có giá trị (vắng / UNKNOWN)
+    -> mở thành dữ kiện đầu vào của các định nghĩa chưa quyết định (đệ quy qua dữ kiện suy ra khác)."""
     out: dict[str, None] = {}
 
     def visit(n: str) -> None:
         got = facts.get(n)
         if n not in ctx.derived:
-            if got is None:
+            if pick(got):
                 out[n] = None
             return
         if got is not None and got is not UNKNOWN:
@@ -152,3 +159,13 @@ def missing_inputs(names: Iterable[str], facts: Facts, ctx: Context) -> tuple[st
     for n in names:
         visit(n)
     return tuple(out)
+
+
+def missing_inputs(names: Iterable[str], facts: Facts, ctx: Context) -> tuple[str, ...]:
+    """Dữ kiện đầu vào còn thiếu để quyết định `names` (người dùng / hợp đồng có thể bổ sung)."""
+    return _inputs_where(names, facts, ctx, lambda got: got is None)
+
+
+def conflicted_inputs(names: Iterable[str], facts: Facts, ctx: Context) -> tuple[str, ...]:
+    """Dữ kiện đầu vào mâu thuẫn (CONFLICT) làm dữ kiện suy ra trong `names` chưa xác định (hạn chế 3.7)."""
+    return _inputs_where(names, facts, ctx, lambda got: got is CONFLICT)

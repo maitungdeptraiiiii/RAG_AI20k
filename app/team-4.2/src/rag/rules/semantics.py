@@ -301,6 +301,9 @@ def decide_rule(concept_id: str, rule: Rule, facts: Facts, present: bool, eviden
         if rule.unstated_false and facts.get(rule.check["fact"]) is None:
             return out("PASS", "ok", law, (*reasons, "restriction_not_stated"))
         conflict = any(facts.get(n) is CONFLICT for n in fact_names(rule.check))
+        if not conflict and ctx.derived:
+            from rag.rules.derived import conflicted_inputs    # nạp muộn: derived.py import lại semantics
+            conflict = bool(conflicted_inputs(fact_names(rule.check), facts, ctx))
         if law_st == "U":
             return out("UNKNOWN", "conflict" if conflict else "needs_facts", law, reasons)
         st = inputs.check_st

@@ -10,7 +10,7 @@ import yaml
 
 from rag.rules.derived import definition_inputs, find_cycle
 from rag.rules.objects import BUILTIN_ATTRS, COUNT_OPS
-from rag.rules.model import (CORE_FINDINGS, DOCUMENT_PARSERS, CORE_SILENCES, DEROGATIONS, EARLIER_CONTRACTS, MODES, OPS, SLOT_KINDS, Catalog, CatalogError,
+from rag.rules.model import (CORE_FACT_LABELS, CORE_FINDINGS, DOCUMENT_PARSERS, CORE_SILENCES, DEROGATIONS, EARLIER_CONTRACTS, MODES, OPS, SLOT_KINDS, Catalog, CatalogError,
                              Concept, Definition, DerivedFact, DocumentFact, ObjectType, PackSpec, Rule, Silence, Slot, UserQuestion, leaves)
 from rag.rules.units import Units
 
@@ -77,6 +77,8 @@ def _derived(data: dict, units: frozenset[str], inputs: set[str], problems: list
             has_from, has_value = raw.get("from") is not None, "value" in raw
             if has_from == has_value:
                 problems.append(f"{where}: cần đúng một trong `from` và `value`")
+            elif has_value and raw["value"] is None:
+                problems.append(f"{where}: value null không phải giá trị (bỏ định nghĩa nếu không áp dụng)")
             for leaf in leaves(when):
                 if leaf.get("op") not in OPS:
                     problems.append(f"{where}: toán tử {leaf.get('op')!r} không hợp lệ")
@@ -96,6 +98,18 @@ def _derived(data: dict, units: frozenset[str], inputs: set[str], problems: list
             otype = None
         out[name] = DerivedFact(name, unit, tuple(defs), otype)
     return out
+
+
+def _check_from_units(derived: Mapping[str, DerivedFact], input_units: Mapping[str, str | None], units: Units,
+                      problems: list[str]) -> None:
+    """Dữ kiện suy ra có `unit` lấy giá trị `from` một dữ kiện có đơn vị: hai đơn vị phải quy đổi được (hạn chế 3.11)."""
+    known = {**input_units, **{n: d.unit for n, d in derived.items()}}
+    for df in derived.values():
+        for d in df.definitions:
+            src = known.get(d.from_fact) if d.from_fact else None
+            if df.unit is not None and src is not None and units.convert(1, src, df.unit) is None:
+                problems.append(f"derived {df.fact!r} định nghĩa {d.id!r}: đơn vị {src!r} của {d.from_fact!r} không quy "
+                                f"đổi được sang {df.unit!r}")
 
 
 def _document_facts(raw: object, units: frozenset[str], problems: list[str]):
@@ -183,11 +197,31 @@ def _shared_kinds(root: Path, problems: list[str]) -> dict[str, tuple[str, ...]]
     return _kind_specs(data.get("kinds") or {}, "kinds.yaml", problems)
 
 
+def _read_mapping(path: Path) -> dict:
+    data = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+    if not isinstance(data, dict):
+        raise CatalogError([f"{path}: nội dung phải là dict YAML, gặp {type(data).__name__}"])
+    return data
+
+
+def _shape_guard(path: Path, parse):
+    """Ranh giới YAML: hình dạng sai mà các phép kiểm cụ thể chưa bắt (dict thay list, chuỗi thay dict...) thành
+    CatalogError nêu tên tệp, không để AttributeError / TypeError / KeyError lọt ra (hạn chế 1.4)."""
+    try:
+        return parse()
+    except (AttributeError, TypeError, KeyError) as e:
+        raise CatalogError([f"{path}: YAML sai hình dạng ({type(e).__name__}: {e})"]) from e
+
+
 def load_pack(pack_id: str, *, root: Path = PACKS_ROOT) -> PackSpec:
     path = Path(root) / pack_id / "pack.yaml"
     if not path.is_file():
         raise CatalogError([f"pack {pack_id!r} không có ({path})"])
-    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    data = _read_mapping(path)
+    return _shape_guard(path, lambda: _load_pack(pack_id, data, Path(root)))
+
+
+def _load_pack(pack_id: str, data: dict, root: Path) -> PackSpec:
     problems: list[str] = []
     if data.get("id") != pack_id:
         problems.append(f"id {data.get('id')!r} không khớp tên thư mục {pack_id!r}")
@@ -245,6 +279,7 @@ def load_pack(pack_id: str, *, root: Path = PACKS_ROOT) -> PackSpec:
             problems.append(f"user_fact_units: {name!r} không có trong user_facts")
         if unit not in names:
             problems.append(f"user_fact_units: dữ kiện {name!r} có đơn vị lạ {unit!r}")
+    _check_from_units(derived, {**document_facts, **user_fact_units}, Units(names, factors), problems)
     questions: dict[str, UserQuestion] = {}
     raw_q = data.get("user_fact_questions") or {}
     if not isinstance(raw_q, dict):
@@ -597,7 +632,21 @@ def _with_in_force(rule: Rule, start: date, earlier: str, *, explicit: bool) -> 
 
 def load_concepts(path: Path, pack: PackSpec) -> Catalog:
     """Nạp một concepts.yaml, kiểm theo khai báo của `pack`. Lỗi nào cũng dừng, báo hết một lần."""
-    data = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+    data = _read_mapping(path)
+    raw = data.get("concepts") or []
+    if not isinstance(raw, list) or not all(isinstance(c, dict) for c in raw):
+        raise CatalogError([f"{path}: concepts phải là danh sách các khái niệm (dict)"])
+    for c in raw:
+        for key, typ in (("slots", dict), ("rules", list), ("anchors", list)):
+            if c.get(key) is not None and not isinstance(c[key], typ):
+                raise CatalogError([f"{path}: {c.get('id')}: {key} phải là {typ.__name__}"])
+        if not all(isinstance(r, dict) for r in c.get("rules") or []) or not all(
+                isinstance(v, dict) for v in (c.get("slots") or {}).values()):
+            raise CatalogError([f"{path}: {c.get('id')}: mỗi rule / slot phải là dict"])
+    return _shape_guard(path, lambda: _load_concepts(data, pack))
+
+
+def _load_concepts(data: dict, pack: PackSpec) -> Catalog:
     problems: list[str] = []
     roles = {r["id"]: r for r in data.get("roles") or []}
     for r in roles.values():
@@ -757,16 +806,21 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
 def packs_for_kind(document_kind: str, *, root: Path = PACKS_ROOT) -> list[str]:
     """Gói (có concepts.yaml) khai `document_kind` trong `document_kinds`, theo tên thư mục. Không gói nào -> []
     (người gọi không chạy rule nào thay vì rơi về một gói mặc định; spec bản 3 G9)."""
-    out = []
-    for d in sorted(p for p in Path(root).iterdir() if (p / "pack.yaml").is_file() and (p / "concepts.yaml").is_file()):
-        if document_kind in load_pack(d.name, root=root).document_kinds:
-            out.append(d.name)
-    return out
+    dirs = sorted(p for p in Path(root).iterdir() if (p / "pack.yaml").is_file() and (p / "concepts.yaml").is_file())
+    stamp = tuple((d.name, (d / "pack.yaml").stat().st_mtime_ns) for d in dirs)
+    key = str(Path(root).resolve())
+    cached = _KINDS_CACHE.get(key)
+    if cached is None or cached[0] != stamp:       # đệm theo thời điểm sửa pack.yaml: sửa tệp thì đọc lại (R.8)
+        cached = _KINDS_CACHE[key] = (stamp, {d.name: load_pack(d.name, root=root).document_kinds for d in dirs})
+    return [pid for pid, kinds in cached[1].items() if document_kind in kinds]
+
+
+_KINDS_CACHE: dict[str, tuple[tuple, dict[str, tuple[str, ...]]]] = {}
 
 
 def load_packs(pack_ids: Sequence[str], *, root: Path = PACKS_ROOT) -> Catalog:
     """Nạp và gộp nhiều gói. Gói cha (`extends`) nạp trước; gói con thấy khai báo của cha. Lỗi nào cũng dừng, báo hết.
-    Một gói: giữ nguyên `version` của concepts.yaml; nhiều gói: `<gói>@<version>` nối bằng `+`;
+    `version`: `<gói>@<version pack.yaml>/<version concepts.yaml>` nối bằng `+`;
     `law_values_valid_from` lấy ngày lớn nhất."""
     problems: list[str] = []
     specs: dict[str, PackSpec] = {}
@@ -821,9 +875,16 @@ def load_packs(pack_ids: Sequence[str], *, root: Path = PACKS_ROOT) -> Catalog:
                 problems.append(f"role {rid!r}: khai báo khác nhau giữa các gói")
             roles.setdefault(rid, r)
     _check_exceptions(concepts, problems, strict=True)
+    known_facts = ({n for c in concepts.values() for n in c.slots} | set(merged.document_facts) | merged.user_facts
+                   | set(merged.derived) | {a for t in merged.object_types.values() for a in t.attrs}
+                   | BUILTIN_ATTRS | set(CORE_FACT_LABELS))
+    for name in (merged.labels.get("facts") or {}):
+        if name not in known_facts:
+            problems.append(f"labels.facts: {name!r} không phải dữ kiện của gói (slot, dữ kiện hợp đồng / người dùng, "
+                            "dữ kiện suy ra, thuộc tính đối tượng)")
     if not catalogs:
         problems.append("không gói nào có concepts.yaml")
     if problems:
         raise CatalogError(list(dict.fromkeys(problems)))
-    version = catalogs[0][1].version if len(catalogs) == 1 else "+".join(f"{pid}@{c.version}" for pid, c in catalogs)
+    version = "+".join(f"{pid}@{specs[pid].version}/{c.version}" for pid, c in catalogs)   # pack.yaml / concepts.yaml
     return Catalog(version, max(c.law_values_valid_from for _, c in catalogs), roles, concepts, merged.context())

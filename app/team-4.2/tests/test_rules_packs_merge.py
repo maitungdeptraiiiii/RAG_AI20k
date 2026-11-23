@@ -48,7 +48,7 @@ def test_child_sees_parent_declarations_and_parent_loads_first(tmp_path):
     cat = load_packs(["kid"], root=tmp_path)
     assert list(cat.concepts) == ["b.one", "k.one"]
     assert cat.context.units.convert(1, "day", "hour") == 24
-    assert cat.version == "base@b1+kid@k1"
+    assert cat.version == "base@1/b1+kid@1/k1"           # <gói>@<version pack.yaml>/<version concepts.yaml>
 
 
 def test_duplicate_concept_id_across_packs_rejected(tmp_path):

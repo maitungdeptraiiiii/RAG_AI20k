@@ -118,3 +118,17 @@ def test_two_sibling_exceptions_one_unknown_never_turns_into_violation(tmp_path)
     assert status({"kind": "k0", "a": 1, "b": 1}) == "UNKNOWN"          # hai ngoại lệ khác giá trị: CONFLICT
     assert status({"kind": "k0", "a": 1}) == "UNKNOWN"                   # y chưa biết: không được ra FAIL
     assert status({"kind": "k0", "a": 1, "b": 2}) == "FAIL"             # y đã loại: x thắng, v1 != k0
+
+
+@pytest.mark.parametrize("kind", ["reference", "network"])
+def test_derived_unknown_from_conflict_reports_conflict(cat, kind):
+    """Hạn chế 3.7: dữ kiện suy ra UNKNOWN chỉ vì đầu vào CONFLICT -> finding `conflict`, không phải `needs_facts` rỗng."""
+    from rag.rules.evaluator import evaluator_for
+    from rag.rules.semantics import CONFLICT
+    facts = {"kind": Fact("k1"), "a": CONFLICT, "b": Fact(1)}
+    s = evaluator_for(cat, kind).session(day=DAY, facts=facts, present={"c.a", "c.b", "c.c"}, evidence={})
+    r = {f"{x.concept_id}/{x.rule_id}": x for x in s.results()}["c.a/uses"]
+    assert (r.status, r.finding, r.missing_facts) == ("UNKNOWN", "conflict", ())
+    s.update({"a": Fact(2)})
+    r = {f"{x.concept_id}/{x.rule_id}": x for x in s.results()}["c.a/uses"]
+    assert (r.status, r.finding) == ("PASS", "ok")

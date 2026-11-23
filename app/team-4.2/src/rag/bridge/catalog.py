@@ -4,6 +4,7 @@ Nạp và kiểm nằm ở `rag.rules.loader`; file này giữ các tên công k
 from __future__ import annotations
 
 from functools import lru_cache
+import dataclasses
 from pathlib import Path
 
 from typing import Sequence
@@ -32,7 +33,9 @@ UNITS = labor_pack().units.names
 
 
 def load_catalog(path: Path = DEFAULT_PATH) -> Catalog:
-    return load_concepts(path, labor_pack())
+    pack = labor_pack()
+    cat = load_concepts(path, pack)
+    return dataclasses.replace(cat, version=f"{pack.id}@{pack.version}/{cat.version}")   # cùng dạng load_packs (1.5)
 
 
 def resolve_catalog(catalog: Catalog | None, packs: Sequence[str] | None) -> Catalog:

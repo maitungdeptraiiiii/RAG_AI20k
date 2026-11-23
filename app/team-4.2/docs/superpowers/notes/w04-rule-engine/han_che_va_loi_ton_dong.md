@@ -127,7 +127,7 @@ có chi phí nếu sai). Nhánh `feat/team-4.2/w04-rules-engine`, chưa merge. T
 | 7.18 | `explain(obj=None)` trên rule nhiều nhóm âm thầm lấy nhóm đầu; nay `KeyError` liệt kê các nhóm | Đã sửa |
 | 7.19 | `packs=[]` âm thầm rơi về gói labor; nay `ValueError` | Đã sửa |
 | 7.20 | `group_by` nhiều khóa: ứng viên biết `employee` mà thiếu `job` vẫn cộng U vào nhóm của người lao động khác (đúng chữ spec, sinh UNKNOWN thừa) | Còn |
-| 7.21 | Đ428.2 chỉ quy định nghĩa vụ "thông báo ngay" và bồi thường nếu gây thiệt hại; gắn `legality: illegal` cho điều khoản "chấm dứt không cần thông báo" có thể quá tay | Còn (cần người làm pháp lý xem) |
+| 7.21 | Đ428.2 chỉ quy định nghĩa vụ "thông báo ngay" và bồi thường nếu gây thiệt hại; gắn `legality: illegal` cho điều khoản "chấm dứt không cần thông báo" có thể quá tay | Đã duyệt (Tùng, 24/11) |
 | 7.22 | `r1_special_law` luôn PASS khi concept có mặt (nhiễu như 3.9) | Còn |
 | 7.23 | Hợp đồng vay ký trước 2017 vẫn bị soát theo Đ468 BLDS 2015: `law_values_valid_from` không áp lên giá trị luật không có kỳ | Còn |
 | 7.24 | Bảng dữ kiện phẳng: HĐ xác định thời hạn đang hiệu lực mà thiếu `worked_after_expiry_days` cho `content.term/r4` UNKNOWN (hỏi người dùng). Gói phẳng không có `expired` vì không có ngày hết hạn ở dạng đối tượng | Còn |
@@ -193,7 +193,7 @@ ngoại lệ, đơn vị, kiểu đối tượng, `kind`. Nhưng một loại h�
 | M.2 | Đã sửa: `document_facts` khai `from` + `parse`; `extract_fields`; gói labor chuyển sang khai báo, kết quả giữ nguyên | 50aed8a |
 | M.3 | Đã sửa phần nhãn loại văn bản: `document_labels`; ba prompt điền theo gói, gói labor ra đúng văn bản cũ. Phần prompt dựng theo `kind` vẫn là của Huy (H2) | 9c2fdc3 |
 | M.4 | Phần logic đã sửa: vai trò các bên theo `roles` (+ `aliases`) của gói; ASSERT khái niệm ghi `holder`; đồ thị nối `HOLDER` cho mọi gói. **Còn** `ui/contracts_api.py`, `ui/contract_studio.py` (UI, để sau) | 9bf2816 |
-| M.5 | **Còn** (UI, để sau): `bridge/view.py` | — |
+| M.5 | Đã sửa (D34): `bridge/view.py` lấy nhãn từ `labels` trong `pack.yaml` (R.2); M.4 phần UI cũng đã sửa (D40, K.2) | 9045bb0, a76806f |
 | M.6 | Phía engine đã sửa: `packs_for_kind`, `check_contract(document_kind=)`, loại không có gói → không chạy rule nào, không gọi LLM. **Còn** `classify_contract` (Huy) và việc bỏ mặc định labor khi không truyền gì (chuyển tiếp) | 1ae4ee3 |
 | M.7 | Test chặn tái phát: `tests/test_pack_plugin.py` (gói giả chạy hết luồng; đã thử ba đột biến, đều bị bắt) | (commit này) |
 | M.8 | Mới thấy khi sửa M.1: slot không chuẩn hóa được làm thao tác ASSERT thành `pending` (chờ duyệt), khái niệm coi như chưa có mặt cho tới khi duyệt; với rule `on_silence: none` kết quả tạm là PASS. Đây là hành vi có sẵn cho mọi gói, không mới, nhưng với "lãi 30%" không ghi kỳ thì kết quả tạm PASS dễ gây hiểu nhầm | Còn |
@@ -216,7 +216,7 @@ trả khái niệm lao động, và hai gói dân sự không khai `document_fac
 | # | Mục | Trạng thái |
 |---|---|---|
 | V.1 | Gói `civil_loan` từ 1 lên 5 khái niệm: trần lãi theo ngày ký (BLDS 2005 Đ476 trước 2017, BLDS 2015 Đ468.1 từ 2017), lãi nợ gốc quá hạn ≤ 30%/năm (NQ 01/2019 Đ5.2.c), lãi chậm trả ≤ 20%/năm (Đ357.2), bên cho vay không đòi trước hạn tùy ý (Đ465.3, ngoại lệ Đ467), bên vay được trả trước hạn khoản vay không lãi (Đ470.1) | Xong |
-| V.2 | 7 hợp đồng vay mẫu + nhãn đúng (12 nhãn) viết trước khi chạy engine; engine khớp cả 12 ở hai evaluator. Nhãn do Claude gắn, **cần Tùng duyệt** | Xong (chờ duyệt) |
+| V.2 | 7 hợp đồng vay mẫu + nhãn đúng (12 nhãn) viết trước khi chạy engine; engine khớp cả 12 ở hai evaluator. Nhãn do Claude gắn, **cần Tùng duyệt** | Xong, đã duyệt (tùng, 24/11) |
 | V.3 | Trần trước 01/01/2017 = 13,5%/năm lấy từ ví dụ trong NQ 01/2019 (lãi suất cơ bản 9%/năm theo QĐ 2868/QĐ-NHNN); QĐ 2868 không có trong kho; trước 01/12/2010 chưa có giá trị (ra UNKNOWN) | Còn |
 | V.4 | NQ 01/2019 Đ2.1 (hợp đồng trước 2017 đang thực hiện mà lãi phù hợp BLDS 2015 thì từ 01/01/2017 áp BLDS 2015): engine soát theo ngày ký, chưa chia theo khoảng thực hiện. Gold `l6_truoc_2017` ghi rõ | Còn |
 | V.5 | Ngoại lệ tổ chức tín dụng vẫn qua dữ kiện người dùng chung `special_law_applies`; chưa tự nhận ra bên cho vay là tổ chức tín dụng | Còn |
@@ -227,11 +227,11 @@ trả khái niệm lao động, và hai gói dân sự không khai `document_fac
 
 | # | Mục | Trạng thái |
 |---|---|---|
-| L.1 | Bản liệt kê `civil_lease.yaml`: 9 quy định, mỗi quy định trích nguyên văn theo kỳ (`periods`: Luật Nhà ở 65/2014 từ 01/07/2015, 27/2023 từ 01/08/2024); test kiểm mọi câu trích | Xong (chờ duyệt) |
+| L.1 | Bản liệt kê `civil_lease.yaml`: 9 quy định, mỗi quy định trích nguyên văn theo kỳ (`periods`: Luật Nhà ở 65/2014 từ 01/07/2015, 27/2023 từ 01/08/2024); test kiểm mọi câu trích | Xong, đã duyệt (tùng, 24/11) |
 | L.2 | Sửa nhận định cũ: Luật Nhà ở 27/2023 hiệu lực **01/08/2024** (Luật 43/2024/QH15 Đ2 sửa khoản 1 Điều 197), không phải 01/01/2025 | Đã sửa |
 | L.3 | Gói `civil_lease`: 6 khái niệm (3 nội dung bắt buộc Đ163, lấy lại nhà tùy ý Đ172.1, nợ tiền thuê từ 03 tháng Đ172.2.b theo kỳ, tước quyền chấm dứt của bên thuê Đ172.3). Không sửa code engine | Xong |
-| L.4 | 6 hợp đồng thuê mẫu, 11 nhãn viết trước khi chạy engine, khớp cả hai evaluator; test không báo FAIL ngoài gold; `check_contract(document_kind="lease_contract")` chạy đầu-cuối không có chữ "lao động" | Xong (nhãn chờ duyệt) |
-| L.5 | Danh sách kind chung `src/rag/rules/packs/kinds.yaml`, bộ nạp đọc cho mọi gói; gói không được khai lại kind chung khác đi; 46/51 khái niệm có kind, 5 khái niệm thai sản "không vừa" có lý do; 4 kind dùng ở ≥ 2 miền. Bản nháp `docs/rule_inventory/kinds.yaml` đã gộp và xóa | Xong (chờ duyệt) |
+| L.4 | 6 hợp đồng thuê mẫu, 11 nhãn viết trước khi chạy engine, khớp cả hai evaluator; test không báo FAIL ngoài gold; `check_contract(document_kind="lease_contract")` chạy đầu-cuối không có chữ "lao động" | Xong, nhãn đã duyệt (tùng, 24/11) |
+| L.5 | Danh sách kind chung `src/rag/rules/packs/kinds.yaml`, bộ nạp đọc cho mọi gói; gói không được khai lại kind chung khác đi; 46/51 khái niệm có kind, 5 khái niệm thai sản "không vừa" có lý do; 4 kind dùng ở ≥ 2 miền. Bản nháp `docs/rule_inventory/kinds.yaml` đã gộp và xóa | Xong, đã duyệt (tùng, 24/11) |
 | L.6 | Nhiều kind có `slot_kinds: []` (required_content, time_limit, payment, notice, count_limit, penalty) vì khái niệm lấy giá trị từ dữ kiện cấp hợp đồng hoặc có slot khác loại: kiểm theo loại slot chỉ còn ý nghĩa với leave_entitlement, prohibited_practice, rate_cap, termination | Còn (hạn chế thiết kế) |
 | L.7 | `lease.tenant_termination_right` xếp vi phạm (mandatory) là cách đọc của người soạn: Đ172.3 trao quyền nhưng không nói điều khoản từ bỏ vô hiệu | Tùng duyệt (23/11) |
 | L.8 | D37 (rule xuyên văn bản thuê nhà: gia hạn, tăng giá giữa kỳ): giá mới "do các bên thỏa thuận" (Đ170.2) nên phụ lục hai bên ký là hợp lệ, chưa có rule vi phạm có căn cứ; chưa khai `object_types` Lease/Amendment | Tùng duyệt (23/11): không có rule; r1 chỉ là hồ sơ kiểm \"phụ lục hợp lệ không ra vi phạm\" |
@@ -246,13 +246,13 @@ trả khái niệm lao động, và hai gói dân sự không khai `document_fac
 
 | # | Hạn chế | Trạng thái |
 |---|---|---|
-| H.1 | Gold mới (a1, b1–b5, r1, lease t7) do Claude viết từ luật trước khi chạy engine; engine khớp ngay lần đầu | Chờ Tùng duyệt |
+| H.1 | Gold mới (a1, b1–b5, r1, lease t7) do Claude viết từ luật trước khi chạy engine; engine khớp ngay lần đầu | Đã duyệt (Tùng, 24/11) |
 | H.2 | Test dựng đối tượng từ `objects.yaml` viết tay và chọn dữ kiện theo `from` (thay cho `graph_facts`); luồng thật cần `dossier_objects` (Huy, H1) — `objects.yaml` là đáp án của H1 | Còn (Huy) |
 | H.3 | Thuộc tính suy từ nhiều văn bản (`worked_after_expiry_days`, `new_contract_signed`) không có câu trích, chỉ ghi `why`; `dossier_objects` phải tính từ ngày hết hạn / ngày ký của các HĐ | Còn (Huy) |
 | H.4 | "Không có FAIL ngoài gold" ở hồ sơ chỉ xét rule xuyên đối tượng và rule có dữ kiện trong `facts.yaml`; nội dung bắt buộc của từng HĐ kiểm ở bộ hợp đồng đơn lẻ | Ghi nhận |
 | H.5 | Bước `set_review_date` của kịch bản dựng phiên mới: phiên chưa có thao tác đổi ngày soát tăng dần (cần cho dòng thời gian F4 / E3) | Còn |
 | H.6 | r1: `civil_lease` chưa khai `object_types` nên `refs` (`lessor`, `lessee`) không đối chiếu được với gói; hồ sơ chỉ kiểm rule trên dữ kiện phẳng theo thời gian | Ghi nhận (D37: không có rule xuyên văn bản) |
-| H.7 | b4: bổ sung HĐ bị sót làm kết luận trung gian rút lại NHƯNG HĐ2 thành lần ký xác định thời hạn thứ ba (vi phạm Đ20.2.c) — cách đọc "HĐ bị sót 02 tháng cũng tính một lần ký" cần Tùng xác nhận | Chờ Tùng duyệt |
+| H.7 | b4: bổ sung HĐ bị sót làm kết luận trung gian rút lại NHƯNG HĐ2 thành lần ký xác định thời hạn thứ ba (vi phạm Đ20.2.c) — cách đọc "HĐ bị sót 02 tháng cũng tính một lần ký" cần Tùng xác nhận | Đã duyệt (Tùng, 24/11) |
 
 ## Chuẩn hóa giá trị bằng regex sau bước LLM (23/11, nghiên cứu regex → LLM)
 
@@ -356,11 +356,11 @@ tệp bản liệt kê.
 
 | # | Mục | Trạng thái |
 |---|---|---|
-| M.1 | `civil_general`: 1 -> 5 khái niệm / 6 rule: hủy bỏ phải thông báo (Đ423.3), hợp đồng theo mẫu / điều kiện giao dịch chung miễn trách bên soạn (Đ405.3, Đ406.3; hỏi người dùng có phải hợp đồng mẫu không), sửa đổi theo hình thức ban đầu (Đ421.3), lãi chậm trả (Đ357.2) | Xong (chờ duyệt) |
+| M.1 | `civil_general`: 1 -> 5 khái niệm / 6 rule: hủy bỏ phải thông báo (Đ423.3), hợp đồng theo mẫu / điều kiện giao dịch chung miễn trách bên soạn (Đ405.3, Đ406.3; hỏi người dùng có phải hợp đồng mẫu không), sửa đổi theo hình thức ban đầu (Đ421.3), lãi chậm trả (Đ357.2) | Xong, đã duyệt (tùng, 24/11) |
 | M.2 | `loan.late_interest_cap` **đổi tên** thành `civil.late_payment_interest_cap` và chuyển lên gói chung (Đ357 áp mọi nghĩa vụ trả tiền, cả tiền thuê). Nhãn gold vay chỉ đổi tên rule, không đổi kết luận | Xong (báo Tùng) |
 | M.3 | `civil_loan`: thêm vay không kỳ hạn có lãi phải báo trước khi đòi (Đ469.2); trỏ lại các mục bản liệt kê đã có rule; Đ470.2 (cấm trả trước hạn khoản vay có lãi) chưa làm, chờ Tùng chọn cách đọc | Xong / chờ |
-| M.4 | `civil_lease`: thêm họ tên + địa chỉ các bên (Đ163.1), ngày ký (Đ163.10), bên cho thuê sửa hư hỏng lớn (BLDS Đ477.1), bảo đảm sử dụng ổn định (BLDS Đ478.1). Hai rule BLDS là **cách đọc của người soạn** (luật không nói điều khoản trái là vô hiệu): cần Tùng duyệt | Chờ duyệt |
-| M.5 | Hợp đồng thuê mẫu t1–t6 thêm dòng địa chỉ giả cho các bên (không đổi câu trích cũ); thêm t8–t10; gold thuê 30 -> 52 nhãn (22 nhãn mới chờ duyệt); t7 thêm 1 vi phạm (vào nhà không báo trước) | Chờ duyệt |
+| M.4 | `civil_lease`: thêm họ tên + địa chỉ các bên (Đ163.1), ngày ký (Đ163.10), bên cho thuê sửa hư hỏng lớn (BLDS Đ477.1), bảo đảm sử dụng ổn định (BLDS Đ478.1). Hai rule BLDS là **cách đọc của người soạn** (luật không nói điều khoản trái là vô hiệu): cần Tùng duyệt | Đã duyệt (Tùng, 24/11) |
+| M.5 | Hợp đồng thuê mẫu t1–t6 thêm dòng địa chỉ giả cho các bên (không đổi câu trích cũ); thêm t8–t10; gold thuê 30 -> 52 nhãn (22 nhãn mới chờ duyệt); t7 thêm 1 vi phạm (vào nhà không báo trước) | Đã duyệt (Tùng, 24/11) |
 | M.6 | Ví dụ bản liệt kê cũ viết lỏng (thiếu đơn vị, tên dữ kiện không khớp slot, ngày ghi thành dữ kiện) đã sửa theo quy ước của test mới; kết luận pháp lý không đổi | Xong |
 | M.7 | Không làm rule (đã ghi lý do): giao kết, giải thích hợp đồng, công khai mẫu, thời hiệu Đ429, nội dung k6–k9, k11 Đ163, trả nhà 'như mới' (Đ482.1 cho thỏa thuận), mất cọc khi chấm dứt đúng căn cứ (L.14) | Ghi nhận |
 | M.8 | Rule BLDS (Đ477, Đ478, Đ357) gắn với BLDS 2015; hợp đồng thuê ký trước 01/01/2017 vẫn được xét theo câu chữ BLDS 2015 (rule không có giá trị theo kỳ) | Còn |
@@ -369,24 +369,24 @@ tệp bản liệt kê.
 
 | # | Mục | Trạng thái |
 |---|---|---|
-| N.1 | Gói `consumer` (extends `civil_general`): 26 khái niệm / 26 rule: 14 điều khoản cấm Đ25.1–14, 10 nội dung cơ bản của hợp đồng theo mẫu Đ23.3 (chỉ áp khi người dùng xác nhận là hợp đồng mẫu), dịch vụ liên tục: ngừng dịch vụ (Đ41.3), báo trước khi hết hạn (Đ42.2.đ, e) | Xong (chờ duyệt) |
-| N.2 | 6 hợp đồng mẫu c1–c6, 52 nhãn viết tay ở `labels.yaml` trước khi chạy engine; gold sinh bằng `scripts/team-4.2/gold_from_labels.py`; test chung `tests/test_rete_pack_fixtures.py` (dùng lại cho gói thương mại) | Chờ duyệt |
+| N.1 | Gói `consumer` (extends `civil_general`): 26 khái niệm / 26 rule: 14 điều khoản cấm Đ25.1–14, 10 nội dung cơ bản của hợp đồng theo mẫu Đ23.3 (chỉ áp khi người dùng xác nhận là hợp đồng mẫu), dịch vụ liên tục: ngừng dịch vụ (Đ41.3), báo trước khi hết hạn (Đ42.2.đ, e) | Xong, đã duyệt (tùng, 24/11) |
+| N.2 | 6 hợp đồng mẫu c1–c6, 52 nhãn viết tay ở `labels.yaml` trước khi chạy engine; gold sinh bằng `scripts/team-4.2/gold_from_labels.py`; test chung `tests/test_rete_pack_fixtures.py` (dùng lại cho gói thương mại) | Đã duyệt (Tùng, 24/11) |
 | N.3 | Nhận diện tự động chọn MỘT loại hợp đồng: gói `consumer` chỉ tự chạy khi văn bản được nhận là `consumer_contract`; chồng lên thuê / vay phải truyền `packs=[..., "consumer"]` | Còn (thiết kế) |
 | N.4 | Cùng một điều khoản có thể ra hai FAIL: `civil.standard_terms_exemption` (BLDS Đ405.3 / 406.3) và `consumer.liability_exclusion` (Đ25.1) — hai căn cứ cùng đúng; chưa gộp | Còn |
 | N.5 | Không làm: Đ25.15 (thiện chí, tiêu chí chung), Đ23.2 + NĐ 55/2024 Đ6 (tiếng Việt, cỡ chữ 12, màu tương phản), đăng ký hợp đồng mẫu (Đ28, danh mục QĐ 07/2024 ở phụ lục chưa tải được), ngoại lệ "pháp luật liên quan cho phép" của Đ25.1, 6, 11 | Ghi nhận |
 | N.6 | Hợp đồng ký trước 01/07/2024 theo Luật BVQLNTD 59/2010/QH12 (chưa tải); gói không phân kỳ | Còn |
-| N.7 | Đ25.12 (chế tài bất lợi hơn) và c6 (mất cọc một chiều) là cách đọc của người soạn | Chờ duyệt |
+| N.7 | Đ25.12 (chế tài bất lợi hơn) và c6 (mất cọc một chiều) là cách đọc của người soạn | Đã duyệt (Tùng, 24/11) |
 
 ## O — gói `commercial` (Luật Thương mại 2005, 23/11)
 
 | # | Mục | Trạng thái |
 |---|---|---|
-| O.1 | Gói `commercial` (extends `civil_general`, loại `commercial_sale_contract`, `commercial_service_contract`): trần phạt 8% (Đ301), thông báo ngay khi tạm ngừng / đình chỉ / hủy bỏ (Đ315), lãi chậm thanh toán theo Đ306 là **ngoại lệ** của trần BLDS Đ357.2 (NQ 01/2019 Đ11) qua dữ kiện suy ra hằng `ltm_governs` | Xong (chờ duyệt) |
-| O.2 | Cách đọc "trần 20% BLDS không áp cho lãi chậm trả trong hợp đồng thương mại" là của người soạn theo NQ 01/2019 Đ11 | Chờ duyệt |
+| O.1 | Gói `commercial` (extends `civil_general`, loại `commercial_sale_contract`, `commercial_service_contract`): trần phạt 8% (Đ301), thông báo ngay khi tạm ngừng / đình chỉ / hủy bỏ (Đ315), lãi chậm thanh toán theo Đ306 là **ngoại lệ** của trần BLDS Đ357.2 (NQ 01/2019 Đ11) qua dữ kiện suy ra hằng `ltm_governs` | Xong, đã duyệt (tùng, 24/11) |
+| O.2 | Cách đọc "trần 20% BLDS không áp cho lãi chậm trả trong hợp đồng thương mại" là của người soạn theo NQ 01/2019 Đ11 | Đã duyệt (Tùng, 24/11) |
 | O.3 | Phần lớn LTM về mua bán (Đ34–62) và dịch vụ (Đ78–87) là mặc định hoặc sự kiện khi thực hiện: gói thương mại nhỏ (3 khái niệm) là đúng với luật, không phải thiếu sót; lý do từng điều ở cuối `docs/rule_inventory/commercial.yaml` | Ghi nhận |
 | O.4 | Phạt tính trên TOÀN BỘ giá trị hợp đồng hoặc phạt theo ngày không có trần: chưa kiểm (cần giá trị phần bị vi phạm / số ngày); ngoại lệ Đ266 (giám định) chưa làm | Còn |
 | O.5 | Luật Trọng tài thương mại: không có rule riêng cho thương mại (Đ16, 18 là sự kiện ngoài văn bản); Đ17 (người tiêu dùng vẫn được chọn Tòa án) gắn làm neo cho `consumer.complaint_right` | Ghi nhận |
-| O.6 | 4 hợp đồng mẫu m1–m4, 10 nhãn viết trước khi chạy engine | Chờ duyệt |
+| O.6 | 4 hợp đồng mẫu m1–m4, 10 nhãn viết trước khi chạy engine | Đã duyệt (Tùng, 24/11) |
 | O.7 | Gộp `labor` / `civil_loan` với `commercial` (packs=[...]) sẽ gỡ trần lãi chậm trả BLDS cho cả hợp đồng đó: chỉ chồng `commercial` khi hợp đồng thật sự thuộc LTM | Ghi nhận |
 
 ## Tồn đọng chung (môi trường, quy trình)
@@ -428,8 +428,8 @@ Kế hoạch: `app/team-4.2/docs/superpowers/plans/2026-11-23-khanh-ingest-bench
   Chưa kiểm phía Neo4j thật (cần LEGAL_GRAPH=1) — Còn. Chuỗi sửa đổi (Q.2): crawl vbpl.vn cần người dùng cho phép — chưa chạy.
 - Q.4 (K3) `evals/team-4.2/results/w04-rule-engine/eval/summary.md`: 11 thư mục hồ sơ mẫu, 166 nhãn gold. `reference` và `network` đúng 166/166.
   Engine cũ (`rag.bridge.engine.evaluate`) thiếu 18 nhãn, toàn là rule xuyên đối tượng (nó không nhận đối tượng hồ sơ) — đúng thiết kế,
-  không phải lỗi. Lưu ý: 0 ca sai một phần do gold được viết song song với engine mới; gold của a1, b1–b5, commercial (và consumer)
-  vẫn chờ Tùng duyệt, nên "đúng 100%" chưa phải số cuối.
+  không phải lỗi. Lưu ý: 0 ca sai một phần do gold được viết song song với engine mới. Tùng đã duyệt gold a1, b1–b5, vay, thuê,
+  consumer, commercial (24/11); gói vay (12 nhãn) và thương mại (10 nhãn) vẫn mỏng, cần thêm ca khó.
 - Q.5 (K3) Nhận diện loại bằng `classify_contract` (model thật, 23/11): 34 văn bản chính, 33 lần gọi LLM (hai văn bản trùng nội dung),
   0 chọn sai miền. Đệm ở `evals/team-4.2/results/w04-rule-engine/eval/classify_cache.json`. Mẫu nhỏ và mỗi miền chỉ có văn bản "đúng kiểu", chưa có
   văn bản lai (vd. hợp đồng thuê có một bên là người tiêu dùng) — Còn.
@@ -443,7 +443,7 @@ Kế hoạch: `app/team-4.2/docs/superpowers/plans/2026-11-23-khanh-ingest-bench
   (692 passed, 1 skipped, 1 xfailed, cả hai chế độ evaluator); `tests/test_agent_partial_review.py` lỗi import từ trước, không liên quan.
 
 - R.1 (D40) Sửa kèm: `check_contract(document_kind="auto")` ghi `facts["document_kind"]` trước bước trích nên hợp đồng chưa có dữ kiện bị bỏ qua bước trích; nay loại không tính là dữ kiện đã trích. UI nhận diện trước khi dựng nền luật (basis) vì `check_contract` tự dựng basis không có đồ thị luật.
-- R.2 (D34) Nhãn dữ kiện / kết luận nằm trong `labels` của `pack.yaml`; nhãn của `civil_general`, `civil_loan`, `civil_lease`, `consumer`, `commercial` do Claude viết từ tên dữ kiện và câu hỏi của gói — chờ Tùng duyệt chữ. Studio: dữ kiện không có nhãn hiện trống (như cũ) trong sơ đồ, hiện tên gốc trong báo cáo — Còn (chưa đồng nhất).
+- R.2 (D34) Nhãn dữ kiện / kết luận nằm trong `labels` của `pack.yaml`; nhãn của `civil_general`, `civil_loan`, `civil_lease`, `consumer`, `commercial` do Claude viết từ tên dữ kiện và câu hỏi của gói — Tùng đã duyệt (24/11). Studio: dữ kiện không có nhãn hiện trống (như cũ) trong sơ đồ, hiện tên gốc trong báo cáo — Còn (chưa đồng nhất).
 - R.3 (E3) `rag/rules/scenario.py` đọc hồ sơ từ `tests/fixtures/rete` (mặc định) — chạy ngoài môi trường dev cần đổi `DOSSIER_ROOT`. Bản đọc hồ sơ trùng logic với `tests/test_rete_dossiers.py` (chưa gộp). Hồ sơ vay / thuê / tiêu dùng / thương mại là bộ lẻ, chưa có `scenario.yaml` nên chưa chạy bằng route này — Còn.
 - R.4 (K1) Chuỗi sửa đổi LTM 36/2005, NĐ 95/2024, NĐ 96/2024: cần `python -m rag.legal crawl` (tải vbpl.vn, ghi snapshot mới vào kho dùng chung), chưa chạy vì cần Tùng cho phép — Còn. Đồ thị luật chỉ kiểm bản dựng trong bộ nhớ, chưa kiểm với Neo4j thật — Còn.
 - R.5 Gate sau D34/D40/E3 (`tests/test_rules_*`, `test_bridge_*`, các test contract/graph/pack, `test_contract_studio`, `test_rete_dossiers`, `test_scenario_runner`, `test_dossier_sse`, `test_legal_ingest_report`, `test_bench_*`): 1017 passed, 2 skipped, 16 xfailed ở cả hai chế độ (network và reference).

@@ -880,6 +880,27 @@ async def handle_ask_stream(request: Request) -> Response:
                                           body.get("history"), facts if isinstance(facts, dict) else {}))
 
 
+def scenario_events(dossier_id: str, evaluator: str = "network") -> "queue.Queue":
+    """E3: chạy kịch bản của một hồ sơ mẫu, mỗi sự kiện (step / evaluation / evaluation_diff / explain / expect / questions) một dòng SSE."""
+    from rag.rules.scenario import run_scenario
+
+    def run(emit) -> dict:
+        for event in run_scenario(dossier_id, evaluator=evaluator):
+            emit(event)
+        return {}
+    return _events(run, f"scenario-{dossier_id}")
+
+
+async def handle_dossiers(request: Request) -> Response:
+    from rag.rules.scenario import list_dossiers
+    return JSONResponse({"dossiers": list_dossiers()})
+
+
+async def handle_scenario_stream(request: Request) -> Response:
+    body = await _json(request)
+    return _sse_queue(scenario_events(request.path_params["did"], str(body.get("evaluator") or "network")))
+
+
 def _sse_queue(q: "queue.Queue") -> Response:
     loop = asyncio.get_running_loop()
 
@@ -915,5 +936,7 @@ routes = [
     Route("/api/contracts/{cid}/concept-check/last", handle_concept_check_last, methods=["GET"]),
     Route("/api/contracts/{cid}/concept-check/stream", handle_concept_check_stream, methods=["POST"]),
     Route("/api/contracts/{cid}/ask/stream", handle_ask_stream, methods=["POST"]),
+    Route("/api/rules/dossiers", handle_dossiers, methods=["GET"]),
+    Route("/api/rules/dossiers/{did}/scenario/stream", handle_scenario_stream, methods=["POST"]),
     Route("/api/contracts/{cid}/reports/{rid}.{fmt}", handle_download, methods=["GET"]),
 ]

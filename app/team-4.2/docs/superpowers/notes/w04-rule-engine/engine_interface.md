@@ -53,3 +53,12 @@ Ngày, đơn vị phải đúng (vd. `worked_after_expiry_days` đơn vị `day`
 - `rag.rules.events.diff_event(diff, stats)`: sự kiện `evaluation_diff` cho UI.
 - Gói có sẵn: `labor` (39 concept, 54 rule, 4 rule xuyên đối tượng), `civil_general`, `civil_loan`.
 - Không có `network+beta` (D30, Could): chưa làm.
+
+## SSE chạy hồ sơ / kịch bản (E3, 23/11)
+
+- `GET /api/rules/dossiers` → `{dossiers: [{dossier_id, packs, has_scenario}]}` (đọc `tests/fixtures/rete`, đổi bằng `rag.rules.scenario.DOSSIER_ROOT`).
+- `POST /api/rules/dossiers/{did}/scenario/stream` body `{evaluator?: "network" | "reference"}` → SSE, mỗi dòng `data: {json}`:
+  `step {index, do, say, dossier, review_date}` → `evaluation {step, results}` (bước load) hoặc `evaluation_diff {step, cause, changes, stats}`
+  → `explain {step, concept_id, rule_id, object, tree}` (mỗi rule vừa đổi; `tree` = `ExplanationNode.to_json()`) → `expect {step, results: [{key, expected, got, ok}]}`
+  → `questions {step, items: [Question]}`; cuối luồng `done {}` hoặc `error {error, status}`. Hồ sơ lạ / evaluator lạ / thao tác lạ: `error` 400.
+- Không có lệnh "trả lời" riêng: bước `answer` nằm trong `scenario.yaml`. Logic ở `rag.rules.scenario.run_scenario` (không phụ thuộc UI).

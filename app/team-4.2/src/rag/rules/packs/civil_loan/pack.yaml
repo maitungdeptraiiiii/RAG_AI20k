@@ -32,3 +32,10 @@ extract_fields:
 user_facts: []
 findings: []
 # Loại khái niệm: dùng danh sách kind chung packs/kinds.yaml (spec bản 3 §5.5), gói không khai riêng.
+
+# Nhãn hiển thị (D34). Chờ Tùng duyệt chữ.
+labels:
+  facts:
+    loan_amount_vnd: "Số tiền vay"
+    loan_term_months: "Thời hạn vay"
+    has_interest: "Có tính lãi"

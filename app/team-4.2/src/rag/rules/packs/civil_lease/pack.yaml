@@ -22,3 +22,9 @@ extract_fields: []
 user_facts: []
 findings: []
 # Loại khái niệm: dùng danh sách kind chung packs/kinds.yaml (spec bản 3 §5.5), gói không khai riêng.
+
+# Nhãn hiển thị (D34). Chờ Tùng duyệt chữ.
+labels:
+  facts:
+    rent_vnd: "Giá thuê"
+    lease_term_months: "Thời hạn thuê"

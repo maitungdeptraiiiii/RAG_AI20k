@@ -8,6 +8,15 @@ from typing import Any, Literal, Mapping
 from rag.rules.units import Units
 
 CORE_FINDINGS = frozenset({"ok", "violation", "needs_facts", "conflict", "missing_content"})
+# Nhãn hiển thị trung tính của finding lõi và dữ kiện dùng chung; gói thêm / ghi đè bằng khóa `labels` trong pack.yaml.
+CORE_FINDING_LABELS: dict[str, str] = {
+    "ok": "Hợp đồng phù hợp với luật ở điểm này",
+    "violation": "Hợp đồng trái luật ở điểm này",
+    "needs_facts": "Chưa kết luận được — cần thêm dữ kiện",
+    "conflict": "Hợp đồng ghi mâu thuẫn ở điểm này",
+    "missing_content": "Hợp đồng thiếu nội dung mà luật bắt buộc phải có"
+}
+CORE_FACT_LABELS: dict[str, str] = {"sign_date": "Ngày ký"}
 
 
 class CatalogError(ValueError):
@@ -102,6 +111,8 @@ class Context:
     document_specs: Mapping[str, DocumentFact] = field(default_factory=dict)  # dữ kiện cấp hợp đồng -> cách trích
     extract_fields: tuple[dict, ...] = ()        # trường cần LLM trích thêm (ngoài contracts/fact_catalog.json)
     document_label: str = "hợp đồng"             # tên loại văn bản cho prompt / hiển thị (vd. "hợp đồng vay tài sản")
+    finding_labels: Mapping[str, str] = field(default_factory=dict)   # finding -> câu kết luận (ngoài lõi)
+    fact_labels: Mapping[str, str] = field(default_factory=dict)      # dữ kiện -> nhãn hiển thị
 
     @property
     def reported(self) -> frozenset[str]:
@@ -131,11 +142,13 @@ class PackSpec:
     extract_fields: tuple[dict, ...] = ()
     document_labels: Mapping[str, str] = field(default_factory=dict)    # document_kind -> nhãn
     document_label: str = "hợp đồng"
+    labels: Mapping[str, Mapping[str, str]] = field(default_factory=dict)   # {"findings": {...}, "facts": {...}}
 
     def context(self) -> Context:
         inputs = {**{n: None for n in self.user_facts}, **dict(self.user_fact_units), **dict(self.document_facts)}
         return Context(self.units, frozenset(self.document_facts), self.silences, self.derived, self.user_fact_questions,
-                       inputs, self.unit_forms, self.document_specs, self.extract_fields, self.document_label)
+                       inputs, self.unit_forms, self.document_specs, self.extract_fields, self.document_label,
+                       dict(self.labels.get("findings", {})), dict(self.labels.get("facts", {})))
 
 
 # ── danh mục khái niệm (concepts.yaml) ──
@@ -202,6 +215,13 @@ class Catalog:
     roles: dict[str, dict]
     concepts: dict[str, Concept]
     context: Context
+
+    def verdict_label(self, finding: str) -> str:
+        """Câu kết luận hiển thị của một finding: nhãn của gói, rồi nhãn lõi trung tính, không có thì giữ tên."""
+        return self.context.finding_labels.get(finding) or CORE_FINDING_LABELS.get(finding, finding)
+
+    def fact_label(self, name: str) -> str:
+        return self.context.fact_labels.get(name) or CORE_FACT_LABELS.get(name, name)
 
 
 def leaves(cond: Any) -> list[dict]:

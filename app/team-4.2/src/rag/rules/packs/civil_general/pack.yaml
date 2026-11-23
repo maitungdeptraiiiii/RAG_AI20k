@@ -40,3 +40,10 @@ user_fact_questions:
     values: [true, false]
 
 findings: []
+
+# Nhãn hiển thị (D34). Chờ Tùng duyệt chữ.
+labels:
+  facts:
+    special_law_applies: "Giao dịch chịu luật chuyên ngành quy định khác Bộ luật Dân sự"
+    is_adhesion_contract: "Hợp đồng theo mẫu do một bên soạn sẵn"
+    uses_general_conditions: "Áp dụng điều kiện giao dịch chung do một bên công bố"

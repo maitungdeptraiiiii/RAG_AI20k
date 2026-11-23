@@ -29,3 +29,10 @@ user_fact_questions:
     question: "Đây có phải hợp đồng cung cấp dịch vụ liên tục (thời hạn từ 03 tháng trở lên hoặc không xác định thời hạn, vd. internet, điện thoại, phòng tập) không?"
     values: [true, false]
 findings: []
+
+# Nhãn hiển thị (D34). Chờ Tùng duyệt chữ.
+labels:
+  facts:
+    contract_value_vnd: "Giá trị hợp đồng"
+    contract_term_months: "Thời hạn hợp đồng"
+    is_continuous_service: "Dịch vụ cung cấp liên tục (từ 03 tháng hoặc không xác định thời hạn)"

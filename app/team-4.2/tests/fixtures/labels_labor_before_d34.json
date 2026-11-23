@@ -1,0 +1,37 @@
+{
+ "verdicts": {
+  "violation": "Hợp đồng trái luật ở điểm này",
+  "missing_content": "Hợp đồng thiếu nội dung mà luật bắt buộc phải có",
+  "hidden_right": "Hợp đồng không nhắc, nhưng người lao động vẫn có quyền này theo luật",
+  "conflict": "Hợp đồng ghi mâu thuẫn ở điểm này",
+  "possible_right": "Có thể có quyền này — cần thêm thông tin về người lao động",
+  "needs_facts": "Chưa kết luận được — cần thêm dữ kiện",
+  "ok": "Hợp đồng phù hợp với luật ở điểm này"
+ },
+ "facts": {
+  "contract_kind": "Loại hợp đồng",
+  "term_months": "Thời hạn hợp đồng",
+  "base_salary_vnd": "Mức lương",
+  "has_probation": "Có thử việc",
+  "probation_length": "Thời gian thử việc",
+  "probation_pay_pct": "Lương thử việc (% lương chính thức)",
+  "job_level": "Trình độ / tính chất công việc",
+  "job_title": "Chức danh chuyên môn",
+  "sign_date": "Ngày ký",
+  "work_condition": "Điều kiện làm việc",
+  "pregnant": "Đang mang thai",
+  "pregnancy_month": "Tháng thai kỳ",
+  "child_under_12_months": "Nuôi con dưới 12 tháng",
+  "employee_consent": "Người lao động đồng ý",
+  "medical_certificate": "Giấy xác nhận của cơ sở y tế",
+  "wage_region": "Vùng lương tối thiểu",
+  "employee_is_female": "Người lao động là nữ",
+  "worked_after_expiry_days": "Số ngày làm việc tiếp sau khi hợp đồng hết hạn",
+  "new_contract_signed": "Hai bên đã ký hợp đồng lao động mới",
+  "fixed_term_contract_count": "Số hợp đồng xác định thời hạn đã ký liên tiếp (kể cả hợp đồng này)",
+  "is_state_enterprise_director": "Được thuê làm giám đốc doanh nghiệp có vốn nhà nước",
+  "is_elderly_employee": "Người lao động cao tuổi",
+  "is_foreign_employee": "Người lao động nước ngoài",
+  "is_union_leader_in_term": "Thành viên ban lãnh đạo tổ chức đại diện người lao động tại cơ sở, đang trong nhiệm kỳ"
+ }
+}

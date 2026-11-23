@@ -16,6 +16,7 @@ Thiết kế: `docs/superpowers/specs/2026-11-22-rete-rule-engine-design.md` §5
 | `extract_fields` | trường cần LLM trích thêm (nếu chưa có trong `contracts/fact_catalog.json`) | `[{key: rent, label: "Giá thuê", kind: text}]` |
 | `user_facts`, `user_fact_units`, `user_fact_questions` | dữ kiện người dùng trả lời, đơn vị mặc định, câu hỏi gợi ý | |
 | `findings`, `silences` | kết quả thêm ngoài lõi; kết quả khi hợp đồng không nói tới khái niệm | |
+| `labels` | nhãn hiển thị (D34): `findings: {finding: câu kết luận}` cho finding thêm ngoài lõi, `facts: {dữ kiện: nhãn}`; không khai thì dùng nhãn lõi trung tính (`ok`, `violation`, …) hoặc giữ tên dữ kiện; hai gói khai nhãn khác nhau cho cùng một tên thì lỗi nạp | |
 | `derived` | dữ kiện suy ra (cây ngoại lệ, §5.3); `object_type` nếu theo đối tượng hồ sơ | |
 | `object_types` | kiểu đối tượng cho hồ sơ nhiều văn bản (§5.6) | `Lease: {attrs: [...], refs: [tenant]}` |
 | `concept_kinds` | CHỈ kind riêng của gói; kind chung nằm ở `packs/kinds.yaml` (mọi gói thấy, không được khai lại khác đi). Mỗi khái niệm khai `kind:` hoặc nằm trong `not_fitting` của `kinds.yaml` (test `tests/test_kinds.py`) | `my_kind: {slot_kinds: [bool]}` |

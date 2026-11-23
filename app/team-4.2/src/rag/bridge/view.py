@@ -7,45 +7,6 @@ from __future__ import annotations
 from rag.bridge.catalog import Catalog
 from rag.contracts.models import Contract
 
-VERDICTS: dict[str, str] = {
-    "violation": "Hợp đồng trái luật ở điểm này",
-    "missing_content": "Hợp đồng thiếu nội dung mà luật bắt buộc phải có",
-    "hidden_right": "Hợp đồng không nhắc, nhưng người lao động vẫn có quyền này theo luật",
-    "conflict": "Hợp đồng ghi mâu thuẫn ở điểm này",
-    "possible_right": "Có thể có quyền này — cần thêm thông tin về người lao động",
-    "needs_facts": "Chưa kết luận được — cần thêm dữ kiện",
-    "ok": "Hợp đồng phù hợp với luật ở điểm này",
-}
-
-FACT_LABELS: dict[str, str] = {
-    # dữ kiện cấp hợp đồng
-    "contract_kind": "Loại hợp đồng",
-    "term_months": "Thời hạn hợp đồng",
-    "base_salary_vnd": "Mức lương",
-    "has_probation": "Có thử việc",
-    "probation_length": "Thời gian thử việc",
-    "probation_pay_pct": "Lương thử việc (% lương chính thức)",
-    "job_level": "Trình độ / tính chất công việc",
-    "job_title": "Chức danh chuyên môn",
-    "sign_date": "Ngày ký",
-    # dữ kiện về người lao động
-    "work_condition": "Điều kiện làm việc",
-    "pregnant": "Đang mang thai",
-    "pregnancy_month": "Tháng thai kỳ",
-    "child_under_12_months": "Nuôi con dưới 12 tháng",
-    "employee_consent": "Người lao động đồng ý",
-    "medical_certificate": "Giấy xác nhận của cơ sở y tế",
-    "wage_region": "Vùng lương tối thiểu",
-    "employee_is_female": "Người lao động là nữ",
-    "worked_after_expiry_days": "Số ngày làm việc tiếp sau khi hợp đồng hết hạn",
-    "new_contract_signed": "Hai bên đã ký hợp đồng lao động mới",
-    "fixed_term_contract_count": "Số hợp đồng xác định thời hạn đã ký liên tiếp (kể cả hợp đồng này)",
-    "is_state_enterprise_director": "Được thuê làm giám đốc doanh nghiệp có vốn nhà nước",
-    "is_elderly_employee": "Người lao động cao tuổi",
-    "is_foreign_employee": "Người lao động nước ngoài",
-    "is_union_leader_in_term": "Thành viên ban lãnh đạo tổ chức đại diện người lao động tại cơ sở, đang trong nhiệm kỳ",
-}
-
 _UNITS = {"percent": "%", "day": " ngày", "workday": " ngày làm việc", "minute": " phút", "hour": " giờ",
           "month": " tháng", "vnd": " đồng"}
 
@@ -69,10 +30,10 @@ def _law_value_text(v) -> str:
     return str(v)
 
 
-def _missing_label(name: str, concept) -> str:
+def _missing_label(name: str, concept, catalog: Catalog) -> str:
     if concept is not None and name in concept.slots:
         return f"{concept.label} (nội dung trong hợp đồng)"
-    return FACT_LABELS.get(name, name)
+    return catalog.fact_label(name)
 
 
 def citation_text(cite) -> str | None:
@@ -127,15 +88,15 @@ def result_views(results: list[dict], catalog: Catalog, contract: Contract, basi
             "title": concept.label if concept else r["concept_id"],
             "meaning": concept.describe if concept else "",
             "holder": holder,
-            "verdict": VERDICTS.get(r["finding"], r["finding"]),
+            "verdict": catalog.verdict_label(r["finding"]),
             "law_values": [{"key": k, "text": _law_value_text(v)} for k, v in (r.get("law_values") or {}).items()],
             "law": law,
             "contract": [{"label": labels.get(e.get("uid"), e.get("uid")), "quote": e.get("quote")}
                          for e in r.get("evidence") or []],
-            "missing": [_missing_label(n, concept) for n in r.get("missing_facts") or []],
+            "missing": [_missing_label(n, concept, catalog) for n in r.get("missing_facts") or []],
         }
         out.append({**r, "view": view})
     return out
 
 
-__all__ = ["FACT_LABELS", "VERDICTS", "citation_text", "format_value", "law_entry", "result_views"]
+__all__ = ["citation_text", "format_value", "law_entry", "result_views"]

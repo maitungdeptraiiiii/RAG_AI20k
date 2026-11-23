@@ -32,3 +32,9 @@ derived:
       - id: base
         value: true
         anchors: [{pid: "luat:36/2005/QH11#d1", role: basis}]
+
+# Nhãn hiển thị (D34). Chờ Tùng duyệt chữ.
+labels:
+  facts:
+    contract_value_vnd: "Giá trị hợp đồng"
+    contract_term_months: "Thời hạn hợp đồng"

@@ -19,11 +19,15 @@ import contracts_api as api
 from rag.contracts import verify
 from rag.contracts.graph.build import build_graph, graph_mask_state
 from rag.bridge.catalog import load_catalog
-from rag.bridge.view import FACT_LABELS, VERDICTS
 
 DIST = Path(__file__).resolve().parent.parent / "contract-studio" / "dist"
 _locks_guard = threading.Lock()
 _running: set[str] = set()
+
+
+def _fact_label_or_blank(catalog, name) -> str:
+    label = catalog.fact_label(name) if name else ""
+    return "" if label == name else label
 
 
 def snapshot(cid: str) -> dict:
@@ -50,7 +54,7 @@ def snapshot(cid: str) -> dict:
                       "nodes": [{"node_id": n.node_id, "node_type": n.label, **strings(n.props),
                                  "display_label": (catalog.concepts[n.props["concept_id"]].label
                                                    if n.props.get("concept_id") in catalog.concepts else
-                                                   FACT_LABELS.get(n.props.get("name"), ""))} for n in build.nodes],
+                                                   _fact_label_or_blank(catalog, n.props.get("name")))} for n in build.nodes],
                       "edges": [strings(asdict(e)) for e in build.edges]},
             "last_check": api.last_concept_check(cid) if c.concept_check else None}
 
@@ -159,7 +163,7 @@ def _fallback_structured_report(c, res: dict, catalog) -> str:
         for item in issues:
             v = item.get("view") or {}
             title = v.get("title") or item.get("concept_id")
-            verdict = VERDICTS.get(item.get("finding"), item.get("finding"))
+            verdict = catalog.verdict_label(item.get("finding"))
             quotes = "; ".join(
                 f"[{ct.get('label') or 'Đoạn'}] “{ct.get('quote')}”"
                 for ct in (v.get("contract") or []) if ct.get("quote")
@@ -200,7 +204,7 @@ def _fallback_structured_report(c, res: dict, catalog) -> str:
     return "\n".join(lines)
 
 
-def _compact_report_payload(c, res: dict, mask_state) -> str:
+def _compact_report_payload(c, res: dict, mask_state, catalog) -> str:
     rep = res.get("report") or {}
     views = res.get("views") or []
     compact_findings = []
@@ -214,7 +218,7 @@ def _compact_report_payload(c, res: dict, mask_state) -> str:
             continue
         compact_findings.append({
             "muc": title,
-            "ket_luan": VERDICTS.get(finding, finding),
+            "ket_luan": catalog.verdict_label(finding),
             "y_nghia": v.get("meaning") or "",
             "hop_dong_ghi": [
                 {"dieu_khoan": ct.get("label"), "trich_doan": (ct.get("quote") or "")[:240]}
@@ -236,7 +240,7 @@ def _compact_report_payload(c, res: dict, mask_state) -> str:
         "ten_hop_dong": c.filename,
         "ngay_ap_luat": rep.get("day"),
         "du_kien_xac_nhan": {
-            FACT_LABELS.get(k, k): (f"{val.get('value')}" if isinstance(val, dict) else val)
+            catalog.fact_label(k): (f"{val.get('value')}" if isinstance(val, dict) else val)
             for k, val in (c.facts or {}).items()
             if k not in ("parties", "error") and val is not None
         },
@@ -276,7 +280,7 @@ async def report_stream(request):
             if llm is not None:
                 user_prompt = (
                     "Dưới đây là dữ liệu rà soát hợp đồng đã trích xuất. Hãy viết báo cáo hoàn chỉnh:\n"
-                    + _compact_report_payload(c, res, state)
+                    + _compact_report_payload(c, res, state, catalog)
                 )
                 if hasattr(llm, "stream"):
                     buf = ""

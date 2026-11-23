@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 import pytest
 
 from rag.bridge.catalog import CONTRACT_FACTS, USER_FACTS, load_catalog
-from rag.bridge.view import FACT_LABELS, VERDICTS, format_value, law_entry, result_views
+from rag.bridge.view import format_value, law_entry, result_views
 from rag.contracts.models import Contract, ContractUnit
 
 CAT = load_catalog()
@@ -30,12 +30,12 @@ def test_format_value(value, unit, text):
 
 
 def test_fact_labels_cover_catalog():
-    assert set(FACT_LABELS) >= set(USER_FACTS) | set(CONTRACT_FACTS)
+    assert {n for n in set(USER_FACTS) | set(CONTRACT_FACTS) if CAT.fact_label(n) == n} == set()
 
 
 def test_verdicts_cover_findings():
-    assert set(VERDICTS) == {"ok", "violation", "missing_content", "hidden_right", "possible_right", "needs_facts",
-                             "conflict"}
+    findings = {"ok", "violation", "missing_content", "hidden_right", "possible_right", "needs_facts", "conflict"}
+    assert all(CAT.verdict_label(f) != f for f in findings)
 
 
 def test_view_for_hidden_right():
@@ -47,7 +47,7 @@ def test_view_for_hidden_right():
     assert out["concept_id"] == "probation.cancel_no_notice"
     assert v["title"] == concept.label and v["meaning"] == concept.describe
     assert v["holder"] == "Người lao động"
-    assert v["verdict"] == VERDICTS["hidden_right"]
+    assert v["verdict"] == CAT.verdict_label("hidden_right")
     assert v["contract"] == []
     assert v["law"] == [{"pid": PID, "citation": provision["citation"], "text": provision["text"], "in_force": True,
                          "source_url": None, "valid_from": None, "valid_to": None, "note": None}]
@@ -74,7 +74,7 @@ def test_missing_slot_and_fact_labels():
     slot = next(iter(concept.slots))
     r = _result(missing_facts=[slot, "pregnant"])
     [out] = result_views([r], CAT, _contract(), {})
-    assert out["view"]["missing"] == [f"{concept.label} (nội dung trong hợp đồng)", FACT_LABELS["pregnant"]]
+    assert out["view"]["missing"] == [f"{concept.label} (nội dung trong hợp đồng)", CAT.fact_label("pregnant")]
 
 
 def test_citation_from_legal_graph_dict():

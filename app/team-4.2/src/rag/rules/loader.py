@@ -302,11 +302,32 @@ def load_pack(pack_id: str, *, root: Path = PACKS_ROOT) -> PackSpec:
         if k not in kinds:
             problems.append(f"document_labels: {k!r} không có trong document_kinds")
     label = next((labels[k] for k in kinds if k in labels), "hợp đồng")
+    pack_labels = _labels(data.get("labels"), findings, problems)
     if problems:
         raise CatalogError(problems)
     return PackSpec(pack_id, str(data.get("version")), tuple(extends), tuple(kinds), Units(names, factors),
                     document_facts, user_facts, findings, silences, derived, dict(user_fact_units), questions,
-                    concept_kinds, object_types, unit_forms, document_specs, extract_fields, dict(labels), label)
+                    concept_kinds, object_types, unit_forms, document_specs, extract_fields, dict(labels), label, pack_labels)
+
+
+def _labels(raw, findings, problems: list[str]) -> dict:
+    """`labels: {findings: {finding: câu}, facts: {dữ kiện: nhãn}}` (D34); finding phải là finding lõi hoặc khai ở `findings`."""
+    if raw is None:
+        return {}
+    if not isinstance(raw, dict) or set(raw) - {"findings", "facts"}:
+        problems.append("labels: chỉ có hai khóa findings và facts")
+        return {}
+    out: dict[str, dict[str, str]] = {}
+    for group in ("findings", "facts"):
+        items = raw.get(group) or {}
+        if not isinstance(items, dict) or not all(isinstance(k, str) and isinstance(v, str) and v.strip() for k, v in items.items()):
+            problems.append(f"labels.{group} phải là dict {{tên: nhãn}}")
+            continue
+        out[group] = dict(items)
+    for f in out.get("findings", {}):
+        if f not in CORE_FINDINGS and f not in findings:
+            problems.append(f"labels.findings: {f!r} không phải finding lõi và không khai trong findings")
+    return out
 
 
 def _object_type(tname: str, spec: dict, attrs: list, refs: list, kinds, document_facts, problems: list[str]) -> ObjectType:
@@ -682,10 +703,17 @@ def _merge_packs(specs: list[PackSpec], problems: list[str]) -> PackSpec:
     leaves = [s for s in specs if s.id not in parents]           # gói lá: miền cụ thể (civil_loan), không phải gói cha
     label = leaves[0].document_label if len(leaves) == 1 else "hợp đồng"
     labels = {k: v for s in specs for k, v in s.document_labels.items()}
+    pack_labels: dict[str, dict[str, str]] = {"findings": {}, "facts": {}}
+    for s in specs:
+        for group, items in s.labels.items():
+            for name, text in items.items():
+                if pack_labels[group].get(name, text) != text:
+                    problems.append(f"labels.{group}: {name!r} có nhãn khác nhau giữa các gói")
+                pack_labels[group][name] = text
     return PackSpec("+".join(s.id for s in specs), "+".join(f"{s.id}@{s.version}" for s in specs), (), tuple(kinds),
                     Units(frozenset(names), factors), document_facts, frozenset(user_facts), frozenset(findings),
                     silences, derived, user_fact_units, questions, concept_kinds, object_types, unit_forms,
-                    document_specs, tuple(extract_fields.values()), labels, label)
+                    document_specs, tuple(extract_fields.values()), labels, label, pack_labels)
 
 
 def packs_for_kind(document_kind: str, *, root: Path = PACKS_ROOT) -> list[str]:

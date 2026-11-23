@@ -20,9 +20,20 @@ def events(response):
     return [json.loads(line[6:]) for line in response.text.splitlines() if line.startswith("data: ")]
 
 
+class ClassifyingScriptLLM(ScriptLLM):
+    """ScriptLLM cộng bước nhận diện loại (D40: phân tích tự nhận diện loại rồi chọn gói): nhận ra hợp đồng lao động."""
+
+    def complete(self, system, user):
+        if system.startswith("Bạn đọc PHẦN ĐẦU"):
+            unit = json.loads(user)["units"][0]
+            return json.dumps({"kind": "labor_contract", "confidence": 0.95, "unit": unit["uid"],
+                               "quote": unit["text"][:40]}, ensure_ascii=False)
+        return super().complete(system, user)
+
+
 @pytest.fixture
 def studio_client(client, monkeypatch):
-    monkeypatch.setattr(api.CONFIG, "llm_factory", ScriptLLM)
+    monkeypatch.setattr(api.CONFIG, "llm_factory", ClassifyingScriptLLM)
     monkeypatch.setattr(api.CONFIG, "tag_llm", lambda *args: None)
     monkeypatch.setattr(api.CONFIG, "legal_graph", lambda: None)
     return TestClient(Starlette(routes=[*studio.routes, *api.routes]))

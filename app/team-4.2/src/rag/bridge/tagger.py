@@ -15,7 +15,7 @@ from rag.contracts.graph.oplog import GraphOperation, machine_op
 from rag.contracts.llm_json import _norm, ask_json, quote_ok
 from rag.contracts.models import Contract
 
-TAG_PROMPT_VERSION = "concept-tag-2"
+TAG_PROMPT_VERSION = "concept-tag-3"
 BATCH_BUDGET = BUDGET
 _TEXT_SLOTS = ("duration", "percent", "money")
 
@@ -30,8 +30,12 @@ _TAG_PROMPT_TEMPLATE = """Bạn đọc MỘT PHẦN của một <<DOCUMENT>> ti�
 Trả về {"items": [{"concept": <id>, "uid": <uid của đơn vị>, "quote": <câu chép NGUYÊN VĂN từ đơn vị>,
 "slots": {<tên slot>: <giá trị>}}]}.
 - "quote": chép đúng từng chữ, không sửa, không tóm tắt; đủ dài để thấy nội dung khái niệm.
-- slot kiểu duration / percent / money: chép NGUYÊN cụm chứa con số trong quote (vd. "08 ngày", "150%",
-  "15.000.000 đồng"). Không đổi đơn vị, không tính toán.
+- slot kiểu duration / percent / money: {"text": <cụm chứa con số, chép NGUYÊN VĂN trong quote>, "norm": <giá trị đọc
+  ra>}. "norm" ghi đúng từng con số như điều khoản viết (bằng chữ số hay bằng chữ đều đọc ra số), KHÔNG cộng, KHÔNG
+  đổi đơn vị:
+  duration: {"parts": [{"n": <số>, "unit": "hour|day|workday|week|month|year"}, ...]} ("2 năm 6 tháng" -> hai phần;
+    "ngày làm việc" -> workday); money: {"amount": <số đồng>, "currency": "VND|USD"};
+  percent: {"value": <số>, "per": "day|month|year" hoặc null nếu không ghi kỳ}.
 - slot kiểu bool: true hoặc false theo đúng điều khoản nói. slot kiểu enum: một giá trị trong "options".
 - Chỉ điền slot khi điều khoản nói rõ; không có thì bỏ.
 - Không đánh giá điều khoản đúng hay sai luật.
@@ -94,9 +98,10 @@ def check_item(contract: Contract, batch_uids: list[str], item: Any, catalog: Ca
     slots, bad = {}, []
     for name, raw in raw_slots.items():
         slot = concept.slots[name]
-        if slot.kind in _TEXT_SLOTS and _norm(str(raw)) not in _norm(quote):
+        text = str(raw.get("text") or "") if isinstance(raw, dict) else str(raw)
+        if slot.kind in _TEXT_SLOTS and (not _norm(text) or _norm(text) not in _norm(quote)):
             return None, "slot_not_in_quote"
-        f = normalize_slot(slot, raw, catalog.context)
+        f = normalize_slot(slot, raw, catalog.context, quote=quote)
         if f is None:
             bad.append(name)
         else:

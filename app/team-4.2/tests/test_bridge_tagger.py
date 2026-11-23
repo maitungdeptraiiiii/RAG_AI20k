@@ -53,7 +53,7 @@ def test_payload_carries_not_about_and_prompt_explains_it():
     na = p["termination.employee_unilateral"]["not_about"]
     assert any("training.cost_repayment" in s for s in na)
     assert "not_about" not in p["leave.annual"]
-    assert "not_about" in TAG_PROMPT and TAG_PROMPT_VERSION == "concept-tag-2"
+    assert "not_about" in TAG_PROMPT and TAG_PROMPT_VERSION == "concept-tag-3"
 
 
 def test_valid_item_becomes_assert():
@@ -110,6 +110,24 @@ def test_unparsable_slot_is_pending():
     run = tag_contract(FakeLLM([{"items": [it]}]), contract((U1, words)), CAT, at=AT)
     assert run.ops[0].status == "pending" and run.ops[0].status_reasons == ("slot_unparsable:annual_leave",)
     assert "annual_leave" not in run.ops[0].content["slots"]
+
+
+def test_typed_slot_reads_written_words_and_rejects_invented_numbers():
+    """Slot dạng có kiểu (spec 2026-11-23): 'tám ngày' đọc được qua norm; số không có trong câu trích -> chờ duyệt."""
+    words = ContractUnit("u2", "Điều 2", "Điều 2. Người lao động được nghỉ phép tám ngày mỗi năm.")
+    ok = item(quote="được nghỉ phép tám ngày mỗi năm",
+              slots={"annual_leave": {"text": "tám ngày", "norm": {"parts": [{"n": 8, "unit": "day"}]}}})
+    run = tag_contract(FakeLLM([{"items": [ok]}]), contract((U1, words)), CAT, at=AT)
+    assert run.ops[0].status == "auto_accepted"
+    assert run.ops[0].content["slots"]["annual_leave"] == {"value": 8, "unit": "day"}
+    bad = item(quote="được nghỉ phép tám ngày mỗi năm",
+               slots={"annual_leave": {"text": "tám ngày", "norm": {"parts": [{"n": 12, "unit": "day"}]}}})
+    run = tag_contract(FakeLLM([{"items": [bad]}]), contract((U1, words)), CAT, at=AT)
+    assert run.ops[0].status == "pending" and "annual_leave" not in run.ops[0].content["slots"]
+    missing = item(quote="được nghỉ phép tám ngày mỗi năm",
+                   slots={"annual_leave": {"text": "mười hai ngày", "norm": {"parts": [{"n": 12, "unit": "day"}]}}})
+    run = tag_contract(FakeLLM([{"items": [missing]}]), contract((U1, words)), CAT, at=AT)
+    assert run.ops == [] and run.rejected[0]["reason"] == "slot_not_in_quote"
 
 
 def test_bool_and_enum_slots_need_not_be_in_quote():

@@ -176,3 +176,15 @@ def test_multiple_signing_dates_require_verification():
     assert c.sign_date is None
     signing = next(f for f in verify.summary(c)["fields"] if f["key"] == "sign_date")
     assert signing["status"] == "conflict"
+
+
+def test_typed_value_survives_into_candidates_and_prompt_asks_for_it():
+    """Spec 2026-11-23: ứng viên giữ `norm` (dạng có kiểu) để bộ đọc dữ kiện dùng; prompt xin `norm` cho giá trị số."""
+    def reply(p):
+        data = facts_reply(p)
+        data["term"]["norm"] = {"parts": [{"n": 24, "unit": "month"}]}
+        return data
+    llm = FakeLLM(reply)
+    facts = extract_facts(llm, contract())
+    assert facts["candidates"]["term"][0]["norm"] == {"parts": [{"n": 24, "unit": "month"}]}
+    assert '"norm"' in llm.calls[0][0] and '"parts"' in llm.calls[0][0]

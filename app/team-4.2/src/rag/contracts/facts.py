@@ -30,6 +30,11 @@ Trả JSON:
  "term": {...} hoặc null,
  "other_dates": [{"label": "...", "value": "YYYY-MM-DD", "unit": "uid", "quote": "..."}],
  "fields": {"<key trong fields_wanted>": {"value": "...", "unit": "uid", "quote": "trích nguyên văn"}}}
+Giá trị là con số (tiền, thời hạn, tỉ lệ — vd. "value", "term", tiền thuê, lương, lãi suất): thêm "norm" là giá trị
+đọc ra, ghi đúng từng con số như văn bản viết (bằng chữ số hay bằng chữ đều đọc ra số), KHÔNG cộng, KHÔNG đổi đơn vị:
+ thời hạn {"parts": [{"n": <số>, "unit": "hour|day|workday|week|month|year"}, ...]} ("2 năm 6 tháng" -> hai phần);
+ tiền {"amount": <số đồng>, "currency": "VND|USD"}; tỉ lệ {"value": <số>, "per": "day|month|year" hoặc null}.
+ Có nhiều con số khác loại (lương và phụ cấp) thì "norm" chỉ là giá trị của đúng trường được hỏi.
 Quy tắc: "quote" phải là đoạn chép NGUYÊN VĂN từ đơn vị "unit"; "unit" phải là một uid trong "units".
 Không tìm thấy thì để null / bỏ khóa, không suy đoán. Ngày dạng YYYY-MM-DD. Trường có "options": "value" phải là
 đúng một lựa chọn trong đó.
@@ -141,7 +146,7 @@ def _checked(contract: Contract, item: Any, batch: Batch) -> dict | None:
         if home is None:
             return None
         item = item | {"unit": home}
-    return {k: item.get(k) for k in ("value", "label", "name", "role", "unit", "quote") if item.get(k) is not None}
+    return {k: item.get(k) for k in ("value", "norm", "label", "name", "role", "unit", "quote") if item.get(k) is not None}
 
 
 def _iso(value: Any) -> date | None:
@@ -168,7 +173,7 @@ def _add(cands: dict[str, list[dict]], key: str, item: dict | None) -> None:
         return
     bucket = cands.setdefault(key, [])
     if not any(_norm(c["value"]) == _norm(item["value"]) for c in bucket):
-        bucket.append({k: item[k] for k in ("value", "unit", "quote") if k in item})
+        bucket.append({k: item[k] for k in ("value", "norm", "unit", "quote") if k in item})
 
 
 def _items(raw: Any) -> list:

@@ -10,7 +10,7 @@ Nghĩa là câu hỏi đúng không phải "bỏ regex" mà là "chỗ nào chu�
 
 ## 2. Đo thử cách viết (chạy `app/team-4.2/scripts/probe_value_forms.py`)
 
-Thất bại có thật (xem `han_che_va_loi_ton_dong.md` R.1–R.5): "2 năm 6 tháng" ra 24 tháng (sai im lặng);
+Thất bại có thật (xem `han_che_va_loi_ton_dong.md` V.1–V.5): "2 năm 6 tháng" ra 24 tháng (sai im lặng);
 "24 (hai mươi bốn) tháng", "100.000.000 (một trăm triệu) đồng", số bằng chữ, "5tr", "100.000.000đ", "20 phần trăm",
 ngày "01.03.2024" / "mùng 1 tháng 3 năm 2024" đều không đọc được.
 Giới hạn: đây là 40 cách viết do mình nghĩ ra, không phải mẫu từ hợp đồng thật; tần suất thật chưa biết.
@@ -31,7 +31,10 @@ Chỉ số: đúng / sai / bỏ sót / UNKNOWN cho từng trường; riêng "sai
 Model thử: Qwen nhỏ cục bộ (cấu hình riêng như ghi chú 12/11) so với một model lớn làm mốc; chọn theo số đo, không theo bảng xếp hạng.
 Việc cần trước khi đo: có model chạy được (chưa có trong phiên này) và thêm 20–30 chuỗi nhãn tay từ hợp đồng thật.
 
-## 5. Sửa không cần LLM (đề xuất, chờ duyệt)
+## 5. Đã làm (23/11, Tùng duyệt: sửa tổng quát, không vá theo cách viết)
 
-R.1 (cộng nhiều đơn vị) và R.2 (số kèm chữ trong ngoặc) là lỗi bộ đọc xác định, sửa được bằng quy tắc thuần và có test; không cần chờ đo LLM.
-Số bằng chữ (R.3) thì LLM chuẩn hóa hợp lý hơn thêm regex (đúng hướng "không thêm mẫu mới": để LLM đọc, kiểm bằng `quote_ok`).
+Spec `app/team-4.2/docs/superpowers/specs/2026-11-23-typed-value-reading-design.md`. LLM trả dạng có kiểu (`norm`:
+thời hạn là danh sách phần, tiền, tỉ lệ + kỳ); code cộng / quy đổi; mỗi số phải có căn cứ trong câu trích (bộ quét số
+chữ số + chữ, `contracts/quantity.py`); regex cũ chỉ còn kiểm chéo và dự phòng khi chuỗi có đúng một giá trị.
+Test: `tests/test_typed_values.py` (61), thêm ở `test_bridge_tagger.py`, `test_contracts_facts.py`, `test_bridge_facts_map.py`.
+Còn lại: V.5–V.11 trong `han_che_va_loi_ton_dong.md`; phép đo A/B/C ở mục 4 vẫn chờ có model.

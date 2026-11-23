@@ -17,8 +17,11 @@ def cand(value, uid="p0.d1"):
 FACTS = {"candidates": {
     "labor_kind": [cand("Xác định thời hạn")],
     "term": [cand("12 tháng (từ 02/01/2025 đến 01/01/2026)")],
-    "salary": [cand("15.000.000 đồng/tháng lương căn bản; phụ cấp 1.000.000 đồng/tháng", "p0.d2"),
-               cand("Lương căn bản 17.000.000 đồng/tháng; phụ cấp trách nhiệm 500.000 đồng/tháng", "p2.d1")],
+    # chuỗi có cả lương và phụ cấp: LLM chỉ rõ giá trị của trường bằng `norm` (spec 2026-11-23 typed value)
+    "salary": [cand("15.000.000 đồng/tháng lương căn bản; phụ cấp 1.000.000 đồng/tháng", "p0.d2")
+               | {"norm": {"amount": 15000000, "currency": "VND"}},
+               cand("Lương căn bản 17.000.000 đồng/tháng; phụ cấp trách nhiệm 500.000 đồng/tháng", "p2.d1")
+               | {"norm": {"amount": 17000000, "currency": "VND"}}],
     "probation_period": [cand("02 tháng")],
     "probation_salary": [cand("85% mức lương căn bản quy định tại Điều 2")],
     "job_level": [cand("Công việc cần trình độ cao đẳng trở lên")],
@@ -61,6 +64,12 @@ def test_same_part_or_no_amend_wording_stays_conflict():
     assert contract_facts(same, sign_date=None)["base_salary_vnd"] is CONFLICT
     back = {"candidates": {"salary": [cand(AMEND, "p0.d2"), cand("15.000.000 đồng/tháng", "p2.d1")]}}
     assert contract_facts(back, sign_date=None)["base_salary_vnd"] is CONFLICT   # phụ lục không nói sửa đổi
+
+
+def test_salary_and_allowance_without_typed_value_is_not_guessed():
+    """Trước đây lấy số tiền đầu tiên; nay hai số tiền khác nhau mà không có `norm` -> không đọc (UNKNOWN)."""
+    facts = {"candidates": {"salary": [cand("15.000.000 đồng/tháng lương căn bản; phụ cấp 1.000.000 đồng/tháng")]}}
+    assert "base_salary_vnd" not in contract_facts(facts, sign_date=None)
 
 
 def test_contract_facts_single_salary_and_workdays():

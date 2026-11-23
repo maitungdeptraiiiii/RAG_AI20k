@@ -262,18 +262,23 @@ Luồng thật đã là lai: LLM trích chuỗi `value` kèm câu trích (`facts
 
 | # | Mục | Trạng thái |
 |---|---|---|
-| R.1 | **Sai im lặng:** "2 năm 6 tháng" -> 24 tháng (mất 6 tháng; đúng là 30). `_duration` chỉ lấy đơn vị đầu tiên. Dẫn tới so sai ngưỡng mà không báo | Chưa sửa |
-| R.2 | Số kèm chữ trong ngoặc, cách viết rất phổ biến trong hợp đồng Việt: "24 (hai mươi bốn) tháng", "100.000.000 (một trăm triệu) đồng", "ba mươi (30) ngày" -> không đọc được (None, giá trị bị bỏ). Trong kho mẫu hiện có chỉ vài ca ("02 (hai)", "01 (một)"), nên chưa biết tần suất thật | Chưa sửa |
-| R.3 | Số bằng chữ ("hai mươi bốn tháng", "một trăm triệu đồng", "một năm", "một phẩy năm phần trăm"), "5tr", "100.000.000đ", "20 phần trăm", "1,5 năm" -> None | Chưa sửa |
-| R.4 | Ngày: "01.03.2024", "mùng 1 tháng 3 năm 2024", "tháng 3 năm 2024", "March 1, 2024" không đọc được | Chưa sửa |
-| R.5 | Lỗi R.1 và các None ở R.2–R.4 làm dữ kiện biến mất (UNKNOWN) hoặc sai; chưa có cảnh báo cho người dùng khi câu trích có số mà chuẩn hóa thất bại | Chưa sửa |
-| R.6 | Chưa đo LLM thật (không có model chạy trong phiên); mọi nhận định về Qwen nhỏ hay model lớn chỉ dựa tài liệu ngoài, chưa có bài đo tiếng Việt | Chờ |
+| V.1 | **Sai im lặng:** "2 năm 6 tháng" -> 24 tháng (mất 6 tháng; đúng là 30); bộ đọc cũ lấy giá trị đầu tiên | **Đã sửa tổng quát** (spec `app/team-4.2/docs/superpowers/specs/2026-11-23-typed-value-reading-design.md`): LLM trả các phần `{n, unit}`, code cộng; chuỗi nhiều giá trị không có dạng có kiểu -> không đọc |
+| V.2 | Số kèm chữ trong ngoặc ("24 (hai mươi bốn) tháng", "100.000.000 (một trăm triệu) đồng", "ba mươi (30) ngày") không đọc được | **Đã sửa tổng quát**: đọc qua dạng có kiểu; căn cứ kiểm bằng bộ quét số (chữ số + chữ) |
+| V.3 | Số bằng chữ ("hai mươi bốn tháng", "một trăm triệu đồng", "một phẩy năm phần trăm"), "5tr", "100.000.000đ", "20 phần trăm", "1,5 năm" -> None | **Đã sửa tổng quát**: bộ đọc số tiếng Việt theo ngữ pháp đóng chỉ để kiểm căn cứ; cho phép nhân nghìn / triệu / tỷ |
+| V.4 | Ngày: "01.03.2024", "mùng 1 tháng 3 năm 2024", "tháng 3 năm 2024", "March 1, 2024" regex không đọc | Ngày ký / hiệu lực đã do LLM trả ISO (không qua regex); regex ngày chỉ còn ở chỗ khác (ingest, agent) — ngoài phạm vi |
+| V.5 | Không có cảnh báo khi câu trích có số mà chuẩn hóa thất bại | Sai im lặng đã chặn: slot -> `pending` (`slot_unparsable`); dữ kiện cấp hợp đồng bị bỏ -> UNKNOWN. Dữ kiện cấp hợp đồng bị bỏ **chưa có cảnh báo riêng** — còn |
+| V.6 | Chưa đo LLM thật: chưa biết model có trả `norm` đúng không (prompt `facts.py` mới, `concept-tag-3`); nhận định về Qwen nhỏ chỉ dựa tài liệu ngoài | Chờ có model |
+| V.7 | Cái giá của V.1: dữ liệu cũ (không có `norm`) mà chuỗi có hai giá trị cùng loại (lương + phụ cấp, "12 tháng, gia hạn 6 tháng") nay là UNKNOWN thay vì lấy số đầu | Có chủ ý |
+| V.8 | Ca còn lọt ở đường dự phòng (không có `norm`): chuỗi trộn chữ số và chữ như "2 năm sáu tháng" — regex chỉ thấy "2 năm" -> 24 tháng. Đường chính (có `norm`) không bị | Còn |
+| V.9 | Căn cứ chỉ kiểm SỐ có trong câu trích, không kiểm ĐƠN VỊ: LLM ghi 8 "month" cho "8 ngày" vẫn qua nếu regex không đọc được chuỗi để đối chiếu (đọc được thì mâu thuẫn bị chặn) | Còn |
+| V.10 | Model nhỏ cần constrained decoding (JSON schema) để trả `norm` ổn định — chưa làm; `ask_json` vẫn tìm `{`/`}` | Còn |
+| V.11 | Ngoài phạm vi: bộ đọc `contains` / `enum` (phân loại theo cụm chữ trong pack.yaml, vd. `has_interest`), nhận bí danh bên, `AMEND_RE`, cắt "lên/thành" của `_salary` khi không có `norm` | Còn |
 
 ## Tồn đọng chung (môi trường, quy trình)
 
 | # | Mục | Trạng thái |
 |---|---|---|
-| E.1 | Toàn bộ suite có **35 test fail có sẵn** từ trước (nhóm `test_agent_stability`, `test_answer_presentation`, `test_conversation`, `test_dated_agent_e2e`, `test_pipeline`, `test_warehouse_migration`); danh sách tên ở `phase1_baseline.md`. Số fail không đổi sau giai đoạn 1, 2, 3 | Còn, không phải do engine |
+| E.1 | Toàn bộ suite có **35 test fail có sẵn** (lần chạy sau sửa đọc giá trị có kiểu 23/11: 35 fail cùng 6 file, 2404 pass) từ trước (nhóm `test_agent_stability`, `test_answer_presentation`, `test_conversation`, `test_dated_agent_e2e`, `test_pipeline`, `test_warehouse_migration`); danh sách tên ở `phase1_baseline.md`. Số fail không đổi sau giai đoạn 1, 2, 3 | Còn, không phải do engine |
 | E.2 | `tests/test_agent_partial_review.py` lỗi import có sẵn; phải chạy với `--ignore` | Còn |
 | E.3 | `test_warehouse_migration.py::test_both_modes_fail_closed_if_catalog_is_unavailable` chỉ fail khi chạy chung nhóm (phụ thuộc thứ tự), riêng thì pass | Còn |
 | E.4 | `test_bridge_tagger.py::test_failed_batch_warns_and_others_continue` fail một lần khi chạy nhóm với `RAG_RULE_EVALUATOR=reference`; sau đó xanh 3 lần riêng và 2 lần nhóm (flaky) | Còn |

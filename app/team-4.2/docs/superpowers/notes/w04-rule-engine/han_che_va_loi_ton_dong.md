@@ -209,7 +209,7 @@ trả khái niệm lao động, và hai gói dân sự không khai `document_fac
 | K.1 | Các bản trước (bản liệt kê T1, câu trả lời 23/11) ghi "kho không có NĐ 145/2020 và nghị định lương tối thiểu". **Sai**: mình kiểm `data/team-4.2/legal/raw/` ở gốc repo (bản cũ, ít văn bản), còn kho ứng dụng dùng là `app/team-4.2/data/team-4.2/legal/raw/` (120 văn bản, có NĐ 145/2020, 38/2022, 74/2024, 293/2025). Test trích dẫn giờ đọc kho ứng dụng trước (`tests/legal_corpus.py`) | Đã sửa |
 | K.2 | Mức lương tối thiểu vùng trong gói labor (12 số) khớp đúng bảng của ba nghị định; thay ghi chú "số người viết nhớ" bằng test đối chiếu | Đã sửa |
 | K.3 | NĐ 145/2020 có trong kho nhưng chưa đọc phần liên quan Đ20, Đ22, Đ25 (B3) | Còn |
-| K.4 | Crawl thêm cho gói vay: Luật Các tổ chức tín dụng 32/2024/QH15, Nghị quyết 01/2019/NQ-HĐTP (API công khai VBPL, `scripts/team-4.2/fetch_loan_scope.py`); mới vào `raw/` + `supplements/loan-scope-v1/`, chưa nhập snapshot, chưa dựng đồ thị luật (việc của Khánh / Huy) | Còn |
+| K.4 | Crawl thêm cho gói vay: Luật Các tổ chức tín dụng 32/2024/QH15, Nghị quyết 01/2019/NQ-HĐTP (API công khai VBPL, `scripts/team-4.2/fetch_loan_scope.py`); mới vào `raw/` + `supplements/loan-scope-v1/`, chưa nhập snapshot, chưa dựng đồ thị luật (việc của Khánh / Huy) | Đã đồng bộ (S.22) |
 
 ## Làm đầy gói vay (23/11)
 
@@ -321,7 +321,7 @@ kỳ giá trị) và mọi `value_sources` giải được trên đồ thị, ng
 
 | # | Mục | Trạng thái |
 |---|---|---|
-| G.1 | Neo4j không chạy trên máy: snapshot mới CHƯA đồng bộ vào Neo4j (`python -m rag.legal graph build` khi bật LEGAL_GRAPH=1); kiểm tra dùng bản dựng Python thuần | Còn |
+| G.1 | Neo4j không chạy trên máy: snapshot mới CHƯA đồng bộ vào Neo4j (`python -m rag.legal graph build` khi bật LEGAL_GRAPH=1); kiểm tra dùng bản dựng Python thuần | Đã đồng bộ (S.22) |
 | G.2 | Quay lại snapshot cũ: ghi `s20261117024643-c06f0c` vào `app/team-4.2/data/team-4.2/legal/CURRENT` (dữ liệu gitignore, chỉ trên máy này) | Ghi chú |
 | G.3 | ~~Luật Thương mại 36/2005 và Luật BVQLNTD 19/2023/QH15 chưa tải~~ -> đã tải và nạp (mục K bên dưới) | Đã xử lý |
 | G.4 | 26 văn bản bổ sung lao động (`supplements/labor-scope-v1-26`) vẫn chưa nạp (README ghi cần duyệt PDF/phụ lục); không nạp ở đây | Còn |
@@ -476,3 +476,4 @@ Kế hoạch: `app/team-4.2/docs/superpowers/plans/2026-11-23-khanh-ingest-bench
 | S.19 | P / V.6 (Tùng cho phép chạy LLM thật 24/11): `scripts/eval_concept_tagging.py` chạy `check_contract(packs=[gói])` thật (trích dữ kiện: LLM app `gpt-6-luna`; gán khái niệm: `anthropic/claude-haiku-5.5`) trên 10 hợp đồng mẫu, so với `facts.yaml` + `gold.yaml`. Kết quả ở `evals/team-4.2/results/w04-rule-engine/tagging/summary.md`. commercial (4): recall khái niệm 1.0, precision 0.786, slot 11/11, rule 10/10, 0 FAIL thừa. consumer (6): recall 1.0, slot 18/18, rule **50/52 -> 52/52** sau khi thêm `not_about` cho `consumer.content_termination` (Haiku gán nhầm câu "không được chấm dứt khi đổi giá" và câu "kết thúc khi hoàn thành nghĩa vụ"); 2 FAIL ngoài gold còn lại là hai căn cứ cùng đúng cho một điều khoản (c3 Đ25.3 + Đ25.7, c6 Đ25.1 + Đ25.9 — kiểu N.4, báo cáo đã nhóm `shared_clauses`) | Đã đo |
 | S.20 | Precision khái niệm thấp (consumer 0.651) chủ yếu vì gold chỉ liệt kê khái niệm có rule áp dụng: hợp đồng không phải mẫu (c2, c5, c6) có điều khoản `content_*` thật nhưng gold không ghi. Mỗi hợp đồng chạy **một lần** (LLM không tất định), một cặp model; chưa thử model nhỏ (Qwen) theo định hướng trích bằng model nhỏ; đệm LLM theo prompt nên đổi prompt / gói là gọi lại | Còn |
 | S.21 | Gold `facts.yaml` ghi chữ gốc ("12%"); chấm slot phải chuẩn hóa gold bằng `normalize_slot` như luồng thật (lần chấm đầu so chữ với số nên ra 3/11 sai) | Ghi nhận |
+| S.22 | Neo4j (G.1, K.4, R.4) đồng bộ 24/11: `python -m rag.legal graph build` từ snapshot s20261123190511-f86917 (graph_build 5ce182835181db9e, stale=false); `graph check`: 0 lỗi, 0 vấn đề. Cạnh: 53 AMENDS, 55 REPLACES, 74 REPEALS, 38 GUIDES, 20250 REFERS_TO (1187 trỏ văn bản chưa có trong kho, 1223 không tìm thấy điều). Test neo gói / báo cáo K1 xanh. Kiểm tra với Neo4j thật là lần đầu, trước đó chỉ dựng trong bộ nhớ | Đã sửa |

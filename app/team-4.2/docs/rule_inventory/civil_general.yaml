@@ -1,5 +1,6 @@
 # Bản liệt kê rule dân sự chung về hợp đồng (phần Tuấn, T2; BLDS 91/2015/QH13).
 # Chỉ lấy quy định kiểm được trên văn bản hợp đồng. Người soạn: Claude theo yêu cầu của Tùng — CẦN TÙNG DUYỆT.
+# Mở rộng 23/11 (xây gói đầy đủ): đã đọc BLDS Đ385–429 và Đ351–357; quy định không làm rule ghi lý do ở cuối tệp.
 
 - id: civil.form_required_by_law
   source:
@@ -42,7 +43,7 @@
   conclusion: "Phụ lục trái hợp đồng: điều khoản phụ lục không có hiệu lực, trừ khi các bên chấp nhận (khi đó coi như sửa hợp đồng)"
   on_silence: none
   derived_from: []
-  yaml_rule: "chưa có"
+  yaml_rule: "chưa có (cần phụ lục là đối tượng riêng trong hồ sơ và đối chiếu từng điều khoản với hợp đồng gốc; để sau)"
   examples:
     - {facts: {appendix_contradicts_contract: false}, expected: PASS}
     - {facts: {appendix_contradicts_contract: true, parties_accepted_change: false}, expected: FAIL}
@@ -60,7 +61,7 @@
   applies_when: "Hợp đồng theo mẫu"
   facts_needed:
     - {name: is_adhesion_contract, kind: bool, from: user}
-    - {name: drafter_exempts_own_liability, kind: bool, from: contract}
+    - {name: one_sided_standard_term, kind: bool, from: contract}
   exceptions:
     - pid: "bo-luat:91/2015/QH13#d405.k3"
       quote: "trừ trường hợp có thỏa thuận khác"
@@ -68,11 +69,11 @@
   conclusion: "Điều khoản miễn trách nhiệm cho bên soạn mẫu / tăng trách nhiệm / bỏ quyền lợi bên kia không có hiệu lực"
   on_silence: none
   derived_from: []
-  yaml_rule: "chưa có"
+  yaml_rule: civil.standard_terms_exemption/r1
   examples:
-    - {facts: {is_adhesion_contract: true, drafter_exempts_own_liability: false}, expected: PASS}
-    - {facts: {is_adhesion_contract: true, drafter_exempts_own_liability: true}, expected: FAIL}
-    - {facts: {drafter_exempts_own_liability: true}, expected: UNKNOWN, why: "chưa biết có phải hợp đồng theo mẫu không"}
+    - {facts: {is_adhesion_contract: true, one_sided_standard_term: false}, expected: PASS}
+    - {facts: {is_adhesion_contract: true, one_sided_standard_term: true}, expected: FAIL}
+    - {facts: {one_sided_standard_term: true}, expected: UNKNOWN, why: "chưa biết có phải hợp đồng theo mẫu không"}
   open_questions:
     - "'Trừ trường hợp có thỏa thuận khác' trong hợp đồng theo mẫu khó phân biệt với chính điều khoản mẫu; cần người làm pháp lý xem."
 
@@ -86,7 +87,7 @@
   applies_when: "Hợp đồng dẫn chiếu điều kiện giao dịch chung"
   facts_needed:
     - {name: uses_general_conditions, kind: bool, from: contract}
-    - {name: drafter_exempts_own_liability, kind: bool, from: contract}
+    - {name: one_sided_standard_term, kind: bool, from: contract}
   exceptions:
     - pid: "bo-luat:91/2015/QH13#d406.k3"
       quote: "trừ trường hợp có thỏa thuận khác"
@@ -94,11 +95,11 @@
   conclusion: "Như civil.adhesion_exemption_void, áp cho điều kiện giao dịch chung"
   on_silence: none
   derived_from: []
-  yaml_rule: "chưa có"
+  yaml_rule: civil.standard_terms_exemption/r2
   examples:
-    - {facts: {uses_general_conditions: true, drafter_exempts_own_liability: false}, expected: PASS}
-    - {facts: {uses_general_conditions: true, drafter_exempts_own_liability: true}, expected: FAIL}
-    - {facts: {drafter_exempts_own_liability: true}, expected: UNKNOWN, why: "chưa biết có dùng điều kiện giao dịch chung không"}
+    - {facts: {uses_general_conditions: true, one_sided_standard_term: false}, expected: PASS}
+    - {facts: {uses_general_conditions: true, one_sided_standard_term: true}, expected: FAIL}
+    - {facts: {one_sided_standard_term: true}, expected: UNKNOWN, why: "chưa biết có dùng điều kiện giao dịch chung không"}
   open_questions: []
 
 - id: civil.penalty_amount
@@ -119,13 +120,13 @@
   conclusion: "BLDS không đặt trần phạt; chỉ kiểm được khi luật chuyên ngành có trần"
   on_silence: none
   derived_from: []
-  yaml_rule: "chưa có"
+  yaml_rule: "không làm ở gói dân sự: BLDS không đặt trần; trần 8% của Luật Thương mại Đ301 làm ở gói commercial"
   examples:
     - {facts: {penalty_pct: 5, special_law_penalty_cap: 8}, expected: PASS}
     - {facts: {penalty_pct: 12, special_law_penalty_cap: 8}, expected: FAIL}
     - {facts: {penalty_pct: 12}, expected: UNKNOWN, why: "chưa biết có luật chuyên ngành đặt trần không"}
   open_questions:
-    - "Luật Thương mại 36/2005/QH11 chưa có trong kho đã đọc (thư mục luat_36_2005_QH11 không có) — không trích được trần 8%."
+    - "Đã tải LTM 36/2005 (23/11, snapshot s20261123065841-cadf82): trần 8% Đ301 làm ở gói commercial."
 
 - id: civil.penalty_and_damages
   source:
@@ -142,7 +143,7 @@
   conclusion: "Không thỏa thuận cộng dồn thì chỉ chịu phạt, không đòi thêm bồi thường"
   on_silence: default_applies
   derived_from: []
-  yaml_rule: "chưa có"
+  yaml_rule: "không làm rule: quy tắc mặc định để giải thích hệ quả khi hợp đồng im lặng, không có điều khoản nào trái luật"
   examples:
     - {facts: {has_penalty_clause: true, penalty_plus_damages_agreed: true, claims_both: true}, expected: PASS}
     - {facts: {has_penalty_clause: true, penalty_plus_damages_agreed: false, claims_both: true}, expected: FAIL}
@@ -207,9 +208,67 @@
   conclusion: "Như civil.unilateral_termination_notice, áp cho hủy bỏ hợp đồng"
   on_silence: none
   derived_from: []
-  yaml_rule: "chưa có"
+  yaml_rule: civil.rescission_notice/r1
   examples:
     - {facts: {rescinds_without_notice: false}, expected: PASS}
     - {facts: {rescinds_without_notice: true}, expected: FAIL}
     - {facts: {}, expected: UNKNOWN, why: "chưa đọc được điều khoản"}
   open_questions: []
+
+- id: civil.amendment_form
+  source:
+    pid: "bo-luat:91/2015/QH13#d421.k3"
+    quote: "Hợp đồng sửa đổi phải tuân theo hình thức của hợp đồng ban đầu."
+  type: prohibited
+  kind: prohibited_practice
+  derogation: mandatory
+  applies_when: "Hợp đồng có điều khoản về cách sửa đổi hợp đồng"
+  facts_needed:
+    - {name: amendment_allowed_in_lesser_form, kind: bool, from: contract, note: "cho sửa đổi bằng hình thức thấp hơn hợp đồng ban đầu: bằng lời nói khi hợp đồng bằng văn bản; không công chứng khi hợp đồng có công chứng"}
+  exceptions: []
+  conclusion: "Điều khoản cho sửa hợp đồng văn bản bằng lời nói (hoặc bỏ công chứng khi hợp đồng gốc có công chứng) trái Đ421.3"
+  on_silence: none
+  derived_from: []
+  yaml_rule: civil.amendment_form/r1
+  examples:
+    - {facts: {amendment_allowed_in_lesser_form: false}, expected: PASS}
+    - {facts: {amendment_allowed_in_lesser_form: true}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "có điều khoản sửa đổi nhưng bước trích chưa đọc được hình thức cho phép"}
+  open_questions:
+    - "Thông điệp dữ liệu (email, tin nhắn) được coi là văn bản (Đ119.1): sửa bằng email không phải hình thức thấp hơn."
+
+- id: civil.late_payment_interest_cap
+  source:
+    pid: "bo-luat:91/2015/QH13#d357.k2"
+    quote: "Lãi suất phát sinh do chậm trả tiền được xác định theo thỏa thuận của các bên nhưng không được vượt quá mức lãi suất được quy định tại khoản 1 Điều 468 của Bộ luật này"
+  type: threshold
+  kind: rate_cap
+  derogation: mandatory
+  applies_when: "Mọi hợp đồng có nghĩa vụ trả tiền (tiền thuê, tiền hàng, trả nợ) và có điều khoản lãi chậm trả"
+  facts_needed:
+    - {name: late_interest_rate, kind: percent, unit: percent_per_year, from: contract}
+  exceptions: []
+  conclusion: "Lãi chậm trả không vượt quá 20%/năm (mức Đ468.1)"
+  on_silence: none
+  derived_from: []
+  yaml_rule: civil.late_payment_interest_cap/r1
+  examples:
+    - {facts: {late_interest_rate: 10}, expected: PASS}
+    - {facts: {late_interest_rate: 36}, expected: FAIL, why: "0,1%/ngày = 36%/năm"}
+    - {facts: {late_interest_rate: [2, null]}, expected: UNKNOWN, why: "không ghi theo tháng hay theo năm"}
+  open_questions:
+    - "Chuyển từ gói vay (loan.late_interest_cap, 23/11) lên gói chung vì Đ357 áp cho mọi nghĩa vụ trả tiền; nhãn gold của hợp đồng vay chỉ đổi tên rule."
+    - "Phạt vi phạm khi chậm thanh toán (Đ418) KHÔNG phải lãi chậm trả: BLDS không đặt trần phạt; khái niệm chỉ nhận câu nói 'lãi'."
+
+# ── Quy định đã đọc nhưng KHÔNG làm rule (không kiểm được trên văn bản hợp đồng, hoặc chỉ là quy tắc mặc định / giải thích) ──
+# Đ385–397, 399–400 (giao kết, đề nghị, chấp nhận): quá trình giao kết, không phải nội dung hợp đồng.
+# Đ398 (nội dung "có thể có"): không bắt buộc.
+# Đ401.1 (hiệu lực từ giao kết, trừ thỏa thuận khác): mặc định.
+# Đ404 (giải thích hợp đồng), Đ405.2: quy tắc giải thích khi tranh chấp, không có vi phạm.
+# Đ405.1, Đ406.2 (công khai mẫu / điều kiện chung): sự kiện ngoài văn bản.
+# Đ407–408 (vô hiệu, đối tượng không thực hiện được): cần sự kiện ngoài văn bản.
+# Đ409–417 (thực hiện, hoãn, cầm giữ, người thứ ba): quyền mặc định hoặc sự kiện khi thực hiện.
+# Đ419, 420.4 (bồi thường, hoàn cảnh thay đổi): xảy ra khi thực hiện; Đ420.4 "trừ có thỏa thuận khác".
+# Đ422, 424–427 (chấm dứt, hủy bỏ do chậm / không thực hiện / mất tài sản, hậu quả): sự kiện khi thực hiện.
+# Đ429 (thời hiệu 03 năm): BLDS không có câu cấm thỏa thuận khác về thời hiệu trong phần đã đọc; chưa làm rule.
+# Đ351.2 (bất khả kháng, "trừ có thỏa thuận khác"): mặc định.

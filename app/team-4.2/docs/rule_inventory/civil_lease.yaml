@@ -5,6 +5,7 @@
 # sửa khoản 1 Điều 197, trước đó là 01/01/2025).
 # BLDS Đ472: "Hợp đồng thuê nhà ở ... được thực hiện theo quy định của Bộ luật này, Luật nhà ở" — quy định riêng của Luật
 # Nhà ở được ưu tiên cho nhà ở. `periods`: cùng quy định ở bản luật trước, kỳ cuối là `source` (soát theo ngày ký).
+# Rà đủ 23/11 (xây gói đầy đủ): Luật Nhà ở 2023 Đ163–164, 170, 172–173; BLDS Đ472–482. Thêm 4 mục cuối tệp (CẦN TÙNG DUYỆT).
 
 - id: civil_lease.content_property
   source:
@@ -238,3 +239,107 @@
 
 # Không ghi mục riêng: Luật Nhà ở 27/2023 Đ164.2 (2014: Đ122.2) — thuê nhà ở không bắt buộc công chứng, chứng thực,
 # hiệu lực theo thỏa thuận hoặc ngày ký; không có trường hợp vi phạm (xem civil.form_required_by_law trong civil_general.yaml).
+
+- id: civil_lease.content_parties
+  source:
+    pid: "luat:27/2023/QH15#d163.k1"
+    quote: "Họ và tên của cá nhân, tên của tổ chức và địa chỉ của các bên;"
+  periods:
+    - {valid_from: "2015-07-01", pid: "luat:65/2014/QH13#d121.k1", quote: "Họ và tên của cá nhân, tên của tổ chức và địa chỉ của các bên;"}
+    - {valid_from: "2024-08-01", pid: "luat:27/2023/QH15#d163.k1", quote: "Họ và tên của cá nhân, tên của tổ chức và địa chỉ của các bên;"}
+  type: required
+  kind: required_content
+  derogation: mandatory
+  applies_when: "Mọi hợp đồng thuê nhà ở"
+  facts_needed:
+    - {name: present, kind: bool, from: contract, note: "hợp đồng ghi họ tên VÀ địa chỉ của cả hai bên"}
+  exceptions: []
+  conclusion: "Thiếu họ tên hoặc địa chỉ của một bên: thiếu nội dung bắt buộc"
+  on_silence: missing_content
+  derived_from: []
+  yaml_rule: "lease.content_parties/r1"
+  examples:
+    - {facts: {present: true}, expected: PASS}
+    - {facts: {present: false}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "bước trích chưa đọc được phần thông tin các bên"}
+  open_questions:
+    - "Hợp đồng mẫu t1–t6 ban đầu chỉ ghi họ tên và số CCCD, không ghi địa chỉ: đã thêm dòng địa chỉ giả (23/11) để giữ đúng ý 'hợp lệ' của từng mẫu; t8 là mẫu thiếu địa chỉ."
+
+- id: civil_lease.content_sign_date
+  source:
+    pid: "luat:27/2023/QH15#d163.k10"
+    quote: "Ngày, tháng, năm ký kết hợp đồng;"
+  periods:
+    - {valid_from: "2015-07-01", pid: "luat:65/2014/QH13#d121.k10", quote: "Ngày, tháng, năm ký kết hợp đồng;"}
+    - {valid_from: "2024-08-01", pid: "luat:27/2023/QH15#d163.k10", quote: "Ngày, tháng, năm ký kết hợp đồng;"}
+  type: required
+  kind: required_content
+  derogation: mandatory
+  applies_when: "Mọi hợp đồng thuê nhà ở"
+  facts_needed:
+    - {name: present, kind: bool, from: contract}
+  exceptions: []
+  conclusion: "Không ghi ngày ký: thiếu nội dung bắt buộc"
+  on_silence: missing_content
+  derived_from: []
+  yaml_rule: "lease.content_sign_date/r1"
+  examples:
+    - {facts: {present: true}, expected: PASS}
+    - {facts: {present: false}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "bước trích chưa đọc được phần mở đầu"}
+  open_questions:
+    - "Không làm k6 (quyền và nghĩa vụ), k7 (cam kết), k8 (thỏa thuận khác): mọi hợp đồng có câu nêu nghĩa vụ; không phân biệt được 'thiếu' trên văn bản. Không làm k9 (thời điểm hiệu lực): Đ164.2 bù khi im lặng (hiệu lực từ ngày ký). Không làm k11 (chữ ký): không đọc được chữ ký từ văn bản số hóa."
+
+- id: civil_lease.landlord_major_repairs
+  source:
+    pid: "bo-luat:91/2015/QH13#d477.k1"
+    quote: "Bên cho thuê phải bảo đảm tài sản thuê trong tình trạng như đã thoả thuận, phù hợp với mục đích thuê trong suốt thời gian cho thuê; phải sửa chữa những hư hỏng, khuyết tật của tài sản thuê, trừ hư hỏng nhỏ mà theo tập quán bên thuê phải tự sửa chữa."
+  type: prohibited
+  kind: prohibited_practice
+  derogation: mandatory
+  applies_when: "Hợp đồng thuê có điều khoản chia việc sửa chữa"
+  facts_needed:
+    - {name: tenant_bears_major_repairs, kind: bool, from: contract, note: "bên thuê phải tự sửa / chịu chi phí cả hư hỏng lớn, kết cấu, khuyết tật của nhà"}
+  exceptions:
+    - pid: "bo-luat:91/2015/QH13#d479.k1"
+      quote: "Bên thuê phải bảo quản tài sản thuê, phải bảo dưỡng và sửa chữa nhỏ; nếu làm mất, hư hỏng thì phải bồi thường."
+      condition: "Hư hỏng nhỏ, hoặc hư hỏng do bên thuê gây ra: bên thuê chịu"
+  conclusion: "Điều khoản đẩy toàn bộ sửa chữa hư hỏng lớn (không do lỗi bên thuê) sang bên thuê trái Đ477.1"
+  on_silence: none
+  derived_from: []
+  yaml_rule: "lease.landlord_major_repairs/r1"
+  examples:
+    - {facts: {tenant_bears_major_repairs: false}, expected: PASS}
+    - {facts: {tenant_bears_major_repairs: true}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "bước trích chưa đọc được điều khoản sửa chữa"}
+  open_questions:
+    - "CÁCH ĐỌC CẦN TÙNG DUYỆT: Đ477.1 không có câu 'trừ thỏa thuận khác' nhưng mở đầu bằng 'tình trạng như đã thoả thuận'. Người soạn đọc nghĩa vụ sửa hư hỏng lớn là bắt buộc; Luật Nhà ở 2023 Đ172.3.a cũng cho bên thuê chấm dứt khi bên cho thuê không sửa hư hỏng nặng."
+
+- id: civil_lease.quiet_enjoyment
+  source:
+    pid: "bo-luat:91/2015/QH13#d478.k1"
+    quote: "Bên cho thuê phải bảo đảm quyền sử dụng tài sản ổn định cho bên thuê."
+  type: prohibited
+  kind: prohibited_practice
+  derogation: mandatory
+  applies_when: "Hợp đồng thuê có điều khoản cho bên cho thuê can thiệp vào việc sử dụng nhà"
+  facts_needed:
+    - {name: landlord_may_disrupt_use, kind: bool, from: contract, note: "vào nhà bất cứ lúc nào không báo trước, cắt điện nước, khóa cửa, dọn đồ của bên thuê"}
+  exceptions: []
+  conclusion: "Điều khoản cho bên cho thuê tùy ý vào nhà, cắt điện nước hoặc khóa cửa trái nghĩa vụ bảo đảm sử dụng ổn định"
+  on_silence: none
+  derived_from: []
+  yaml_rule: "lease.quiet_enjoyment/r1"
+  examples:
+    - {facts: {landlord_may_disrupt_use: false}, expected: PASS}
+    - {facts: {landlord_may_disrupt_use: true}, expected: FAIL}
+    - {facts: {}, expected: UNKNOWN, why: "bước trích chưa đọc được điều khoản"}
+  open_questions:
+    - "CÁCH ĐỌC CẦN TÙNG DUYỆT: Đ478.1 là nghĩa vụ chung, không liệt kê hành vi. Người soạn xếp 'vào kiểm tra bất cứ lúc nào không cần báo trước' (t7 Điều 6.3) và 'cắt điện nước, khóa cửa' là trái; vào kiểm tra CÓ báo trước là hợp lệ."
+
+# ── Đã đọc, không làm rule thêm: BLDS Đ473–474 (giá, thời hạn: mặc định), Đ475 (cho thuê lại: sự kiện), Đ476
+#    (giao tài sản: sự kiện), Đ479.2, 480 (sự kiện), Đ481.2 (ba kỳ: mặc định, nhà ở theo Đ172.2.b), Đ482 (trả lại: 'hoặc
+#    theo đúng như tình trạng đã thoả thuận' nên điều khoản 'trả nhà như mới' không trái); Luật Nhà ở 2023 Đ170.1 (giá Nhà
+#    nước quy định: nhà ở xã hội, cần dữ kiện người dùng), Đ173 (tiếp tục thuê: 'trừ có thỏa thuận khác').
+# ── Chưa có căn cứ rõ, để Tùng xem (L.14): bên thuê mất cọc khi chấm dứt đúng căn cứ (BLDS Đ428.1 'không phải bồi thường'
+#    nhưng không nói thỏa thuận trái là vô hiệu); bên cho thuê điều chỉnh giá khi 'thị trường thay đổi'.

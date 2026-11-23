@@ -347,6 +347,24 @@ Script tải chung `scripts/team-4.2/fetch_scope.py --queue <hàng đợi> --sta
 | K.4 | Neo4j vẫn chưa đồng bộ hai snapshot mới (G.1) | Còn |
 | K.5 | Văn bản nạp theo đường tự động `build_all`; chưa duyệt mục cần duyệt trên /review (như G.6) | Còn |
 
+## M — xây gói luật đầy đủ: phần dân sự (23/11)
+
+Cách làm mỗi quy định: đọc nguyên văn điều luật -> mục bản liệt kê (trích nguyên văn, ngoại lệ, ví dụ) -> YAML -> hợp đồng
+mẫu + nhãn đúng viết trước khi chạy engine. Thêm test `tests/test_rule_inventory_examples.py`: mọi ví dụ của bản liệt kê
+(viết từ luật) chạy qua engine thật (reference + network). Quy định đã đọc mà không làm rule được ghi lý do ở cuối từng
+tệp bản liệt kê.
+
+| # | Mục | Trạng thái |
+|---|---|---|
+| M.1 | `civil_general`: 1 -> 5 khái niệm / 6 rule: hủy bỏ phải thông báo (Đ423.3), hợp đồng theo mẫu / điều kiện giao dịch chung miễn trách bên soạn (Đ405.3, Đ406.3; hỏi người dùng có phải hợp đồng mẫu không), sửa đổi theo hình thức ban đầu (Đ421.3), lãi chậm trả (Đ357.2) | Xong (chờ duyệt) |
+| M.2 | `loan.late_interest_cap` **đổi tên** thành `civil.late_payment_interest_cap` và chuyển lên gói chung (Đ357 áp mọi nghĩa vụ trả tiền, cả tiền thuê). Nhãn gold vay chỉ đổi tên rule, không đổi kết luận | Xong (báo Tùng) |
+| M.3 | `civil_loan`: thêm vay không kỳ hạn có lãi phải báo trước khi đòi (Đ469.2); trỏ lại các mục bản liệt kê đã có rule; Đ470.2 (cấm trả trước hạn khoản vay có lãi) chưa làm, chờ Tùng chọn cách đọc | Xong / chờ |
+| M.4 | `civil_lease`: thêm họ tên + địa chỉ các bên (Đ163.1), ngày ký (Đ163.10), bên cho thuê sửa hư hỏng lớn (BLDS Đ477.1), bảo đảm sử dụng ổn định (BLDS Đ478.1). Hai rule BLDS là **cách đọc của người soạn** (luật không nói điều khoản trái là vô hiệu): cần Tùng duyệt | Chờ duyệt |
+| M.5 | Hợp đồng thuê mẫu t1–t6 thêm dòng địa chỉ giả cho các bên (không đổi câu trích cũ); thêm t8–t10; gold thuê 30 -> 52 nhãn (22 nhãn mới chờ duyệt); t7 thêm 1 vi phạm (vào nhà không báo trước) | Chờ duyệt |
+| M.6 | Ví dụ bản liệt kê cũ viết lỏng (thiếu đơn vị, tên dữ kiện không khớp slot, ngày ghi thành dữ kiện) đã sửa theo quy ước của test mới; kết luận pháp lý không đổi | Xong |
+| M.7 | Không làm rule (đã ghi lý do): giao kết, giải thích hợp đồng, công khai mẫu, thời hiệu Đ429, nội dung k6–k9, k11 Đ163, trả nhà 'như mới' (Đ482.1 cho thỏa thuận), mất cọc khi chấm dứt đúng căn cứ (L.14) | Ghi nhận |
+| M.8 | Rule BLDS (Đ477, Đ478, Đ357) gắn với BLDS 2015; hợp đồng thuê ký trước 01/01/2017 vẫn được xét theo câu chữ BLDS 2015 (rule không có giá trị theo kỳ) | Còn |
+
 ## Tồn đọng chung (môi trường, quy trình)
 
 | # | Mục | Trạng thái |

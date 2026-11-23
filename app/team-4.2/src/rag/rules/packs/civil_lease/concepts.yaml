@@ -129,3 +129,79 @@ concepts:
       - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
          check: {fact: tenant_barred_from_unilateral_termination, op: eq, value: false},
          outcome: {legality: illegal, party_impact: unfavorable}}
+
+  # ───────────── 3. NỘI DUNG BẮT BUỘC THÊM (23/11): các bên, ngày ký ─────────────
+  - id: lease.content_parties
+    kind: required_content
+    label: Họ tên và địa chỉ các bên
+    scope: core
+    phase: P0
+    holder: BEN_THUE
+    counterparty: BEN_CHO_THUE
+    applies_to: [BEN_THUE]
+    describe: "Phần ghi họ tên (tên tổ chức) VÀ địa chỉ của cả bên cho thuê lẫn bên thuê. Chỉ có họ tên mà không có địa chỉ thì không đủ."
+    phrasing: ["bên cho thuê", "bên thuê", "địa chỉ", "thường trú", "trụ sở"]
+    anchors:
+      - {pid: "luat:27/2023/QH15#d163.k1", role: basis}
+      - {pid: "luat:65/2014/QH13#d121.k1", role: basis, note: "hợp đồng ký trước 01/08/2024"}
+    rules:
+      - {id: r1, mode: required, derogation: mandatory, on_silence: missing_content,
+         outcome: {legality: illegal, party_impact: neutral}}
+
+  - id: lease.content_sign_date
+    kind: required_content
+    label: Ngày, tháng, năm ký hợp đồng
+    scope: core
+    phase: P0
+    holder: BEN_THUE
+    counterparty: BEN_CHO_THUE
+    applies_to: [BEN_THUE]
+    describe: "Câu ghi ngày, tháng, năm ký kết hợp đồng (thường ở phần mở đầu 'Hôm nay, ngày ...')."
+    phrasing: ["hôm nay, ngày", "ngày ký", "ký ngày", "lập ngày"]
+    anchors:
+      - {pid: "luat:27/2023/QH15#d163.k10", role: basis}
+      - {pid: "luat:65/2014/QH13#d121.k10", role: basis, note: "hợp đồng ký trước 01/08/2024"}
+    rules:
+      - {id: r1, mode: required, derogation: mandatory, on_silence: missing_content,
+         outcome: {legality: illegal, party_impact: neutral}}
+
+  # ───────────── 4. NGHĨA VỤ CỦA BÊN CHO THUÊ (BLDS Đ477, Đ478) ─────────────
+  - id: lease.landlord_major_repairs
+    kind: prohibited_practice
+    label: Bên cho thuê phải sửa hư hỏng lớn
+    scope: core
+    phase: P0
+    holder: BEN_THUE
+    counterparty: BEN_CHO_THUE
+    applies_to: [BEN_THUE]
+    describe: "Điều khoản bắt bên thuê tự sửa hoặc chịu chi phí sửa cả hư hỏng lớn, hư hỏng kết cấu, khuyết tật của nhà không do bên thuê gây ra. Bên thuê tự sửa hư hỏng nhỏ hoặc hư hỏng do mình gây ra thì không thuộc khái niệm này."
+    phrasing: ["sửa chữa", "hư hỏng", "chi phí sửa chữa", "kết cấu", "bảo trì"]
+    slots:
+      tenant_bears_major_repairs: {kind: bool, unit: null}
+    anchors:
+      - {pid: "bo-luat:91/2015/QH13#d477.k1", role: basis}
+      - {pid: "bo-luat:91/2015/QH13#d479.k1", role: exception, note: "bên thuê sửa chữa nhỏ, bồi thường hư hỏng do mình gây ra"}
+      - {pid: "luat:27/2023/QH15#d172.k3.a", role: context, note: "bên thuê được chấm dứt khi bên cho thuê không sửa hư hỏng nặng"}
+    rules:
+      - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
+         check: {fact: tenant_bears_major_repairs, op: eq, value: false},
+         outcome: {legality: illegal, party_impact: unfavorable}}
+
+  - id: lease.quiet_enjoyment
+    kind: prohibited_practice
+    label: Bên cho thuê bảo đảm việc sử dụng nhà ổn định
+    scope: core
+    phase: P0
+    holder: BEN_THUE
+    counterparty: BEN_CHO_THUE
+    applies_to: [BEN_THUE]
+    describe: "Điều khoản cho bên cho thuê tùy ý can thiệp việc sử dụng nhà: vào nhà bất cứ lúc nào không cần báo trước, cắt điện nước, khóa cửa, dọn đồ của bên thuê. Vào kiểm tra CÓ báo trước thì không thuộc khái niệm này."
+    phrasing: ["vào kiểm tra", "không cần báo trước", "cắt điện", "cắt nước", "khóa cửa"]
+    slots:
+      landlord_may_disrupt_use: {kind: bool, unit: null}
+    anchors:
+      - {pid: "bo-luat:91/2015/QH13#d478.k1", role: basis}
+    rules:
+      - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
+         check: {fact: landlord_may_disrupt_use, op: eq, value: false},
+         outcome: {legality: illegal, party_impact: unfavorable}}

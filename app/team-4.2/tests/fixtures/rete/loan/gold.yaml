@@ -31,7 +31,7 @@ expected:
     periods: [{from: 2023-08-01, status: PASS}]
     basis: {pid: "nghi-quyet:01/2019/NQ-HĐTP#d5.k2.c", quote: "Mức lãi suất trên nợ gốc quá hạn do các bên thỏa thuận không được vượt quá 150% mức lãi suất quy định tại khoản 1 Điều 468 Bộ luật Dân sự năm 2015."}
     note: "27%/năm ≤ 30%/năm"
-  - rule: loan.late_interest_cap/r1
+  - rule: civil.late_payment_interest_cap/r1
     object: l3_lai_nam_hop_le
     periods: [{from: 2023-08-01, status: PASS}]
     basis: {pid: "bo-luat:91/2015/QH13#d357.k2", quote: "Lãi suất phát sinh do chậm trả tiền được xác định theo thỏa thuận của các bên nhưng không được vượt quá mức lãi suất được quy định tại khoản 1 Điều 468 của Bộ luật này"}

@@ -31,7 +31,7 @@ l3_lai_nam_hop_le:
   slots:
     loan.interest_cap: {interest_rate: ["18%/năm", "Lãi suất vay là 18%/năm."]}
     loan.overdue_interest_cap: {overdue_rate: ["27%/năm", "Nợ gốc quá hạn chịu lãi suất 27%/năm."]}
-    loan.late_interest_cap: {late_interest_rate: ["10%/năm", "lãi chậm trả 10%/năm"]}
+    civil.late_payment_interest_cap: {late_interest_rate: ["10%/năm", "lãi chậm trả 10%/năm"]}
   user_facts: {special_law_applies: false}
 
 l4_khong_lai_cam_tra_truoc:

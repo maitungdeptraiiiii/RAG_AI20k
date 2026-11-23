@@ -7,6 +7,8 @@ t1_hop_le:
     value: ["8.000.000 đồng", "Giá thuê nhà là 8.000.000 đồng/tháng."]
     term: ["12 tháng", "Thời hạn thuê là 12 tháng."]
   slots:
+    lease.content_parties: {}
+    lease.content_sign_date: {}
     lease.content_property: {}
     lease.content_rent_payment: {}
     lease.content_term_handover: {}
@@ -15,6 +17,8 @@ t1_hop_le:
     lease.nonpayment_termination:
       nonpayment_months_before_termination: ["03 tháng", "nếu Bên B không trả đủ tiền thuê từ 03 tháng trở lên"]
   present_quotes:
+    lease.content_parties: "BÊN CHO THUÊ (Bên A): Ông Nguyễn Văn Một, sinh năm 1970, số CCCD 001099100001 (số giả dùng cho thử nghiệm), địa chỉ thường trú: số giả định, phường Thử Nghiệm."
+    lease.content_sign_date: "Hôm nay, ngày 01 tháng 03 năm 2025"
     lease.content_property: "Bên A cho Bên B thuê căn nhà tại địa chỉ số 12 ngõ 34 phố Giả Định"
     lease.content_rent_payment: "Bên B trả tiền thuê hằng tháng bằng chuyển khoản vào tài khoản của Bên A trước ngày 05 của tháng."
     lease.content_term_handover: "Bên A giao nhà cho Bên B vào ngày 05/03/2025."
@@ -25,6 +29,8 @@ t2_lay_nha_tuy_y:
     value: ["5.000.000 đồng", "Giá thuê nhà là 5.000.000 đồng/tháng."]
     term: ["24 tháng", "Thời hạn thuê là 24 tháng."]
   slots:
+    lease.content_parties: {}
+    lease.content_sign_date: {}
     lease.content_property: {}
     lease.content_rent_payment: {}
     lease.content_term_handover: {}
@@ -37,6 +43,8 @@ t3_no_mot_thang:
     value: ["7.000.000 đồng", "Giá thuê nhà là 7.000.000 đồng/tháng."]
     term: ["12 tháng", "Thời hạn thuê là 12 tháng."]
   slots:
+    lease.content_parties: {}
+    lease.content_sign_date: {}
     lease.content_property: {}
     lease.content_rent_payment: {}
     lease.content_term_handover: {}
@@ -49,6 +57,8 @@ t4_cam_ben_thue_cham_dut:
     value: ["6.000.000 đồng", "Giá thuê nhà là 6.000.000 đồng/tháng."]
     term: ["36 tháng", "Thời hạn thuê là 36 tháng."]
   slots:
+    lease.content_parties: {}
+    lease.content_sign_date: {}
     lease.content_property: {}
     lease.content_rent_payment: {}
     lease.content_term_handover: {}
@@ -60,6 +70,8 @@ t5_thieu_thoi_han:
   document:
     value: ["4.000.000 đồng", "Giá thuê nhà là 4.000.000 đồng/tháng."]
   slots:
+    lease.content_parties: {}
+    lease.content_sign_date: {}
     lease.content_property: {}
     lease.content_rent_payment: {}
 
@@ -69,6 +81,8 @@ t6_truoc_2024:
     value: ["3.500.000 đồng", "Giá thuê nhà là 3.500.000 đồng/tháng."]
     term: ["24 tháng", "Thời hạn thuê là 24 tháng."]
   slots:
+    lease.content_parties: {}
+    lease.content_sign_date: {}
     lease.content_property: {}
     lease.content_rent_payment: {}
     lease.content_term_handover: {}
@@ -82,6 +96,8 @@ t7_mau_2023:
     value: ["12.000.000 đồng", "Giá thuê là 12.000.000 đồng/tháng"]
     term: ["24 tháng", "Thời hạn thuê là 24 tháng"]
   slots:
+    lease.content_parties: {}
+    lease.content_sign_date: {}
     lease.content_property: {}
     lease.content_rent_payment: {}
     lease.content_term_handover: {}
@@ -89,9 +105,74 @@ t7_mau_2023:
       landlord_may_terminate_at_will: [true, "Bên A được quyền đơn phương chấm dứt hợp đồng bất cứ lúc nào mà không cần báo trước và không phải bồi thường cho Bên B."]
     lease.nonpayment_termination:
       nonpayment_months_before_termination: ["30 ngày", "Trường hợp Bên B chậm thanh toán tiền thuê theo Điều 4 quá 30 ngày, Bên A được chấm dứt hợp đồng theo khoản 1 Điều này."]
+    lease.quiet_enjoyment:
+      landlord_may_disrupt_use: [true, "Được vào kiểm tra nhà bất cứ lúc nào mà không cần báo trước."]
     lease.tenant_termination_right:
       tenant_barred_from_unilateral_termination: [false, "Bên B được đơn phương chấm dứt hợp đồng nếu Bên A vi phạm nghiêm trọng nghĩa vụ giao nhà theo Điều 6"]
   present_quotes:
+    lease.content_parties: "Địa chỉ thường trú: số 12 ngõ 45 phố Hoàng Hoa Thám, quận Ba Đình, Hà Nội"
+    lease.content_sign_date: "Hôm nay, ngày 15 tháng 3 năm 2023"
     lease.content_property: "Bên A đồng ý cho Bên B thuê căn hộ số 805, tầng 8, nhà chung cư số 20 phố Liễu Giai"
     lease.content_rent_payment: "Bên B thanh toán tiền thuê theo từng quý, thanh toán đúng hạn bằng chuyển khoản vào tài khoản của Bên A."
     lease.content_term_handover: "Thời hạn thuê là 24 tháng, kể từ ngày 01 tháng 4 năm 2023 đến hết ngày 31 tháng 3 năm 2025."
+
+# Thêm 23/11 (xây gói đầy đủ): nội dung bắt buộc về các bên / ngày ký, nghĩa vụ sửa chữa và bảo đảm sử dụng ổn định.
+t8_thieu_dia_chi_ngay_ky:
+  sign_date: 2025-06-01            # ngày soát (hợp đồng không ghi ngày ký)
+  document:
+    value: ["6.500.000 đồng", "Giá thuê nhà là 6.500.000 đồng/tháng."]
+    term: ["12 tháng", "Thời hạn thuê là 12 tháng."]
+  slots:
+    lease.content_property: {}
+    lease.content_rent_payment: {}
+    lease.content_term_handover: {}
+    lease.landlord_termination:
+      landlord_may_terminate_at_will: [false, "Trong thời hạn thuê, Bên A không được đơn phương chấm dứt hợp đồng, trừ các trường hợp pháp luật về nhà ở cho phép."]
+  present_quotes:
+    lease.content_property: "Bên A cho Bên B thuê căn nhà tại địa chỉ số 31 phố Giả Định"
+    lease.content_rent_payment: "Bên B trả tiền thuê hằng tháng bằng tiền mặt cho Bên A trước ngày 10 của tháng."
+    lease.content_term_handover: "Bên A giao nhà cho Bên B vào ngày đầu tiên của thời hạn thuê."
+
+t9_ben_thue_sua_lon:
+  sign_date: 2025-04-20
+  document:
+    value: ["9.000.000 đồng", "Giá thuê nhà là 9.000.000 đồng/tháng."]
+    term: ["24 tháng", "Thời hạn thuê là 24 tháng."]
+  slots:
+    lease.content_parties: {}
+    lease.content_sign_date: {}
+    lease.content_property: {}
+    lease.content_rent_payment: {}
+    lease.content_term_handover: {}
+    lease.landlord_major_repairs:
+      tenant_bears_major_repairs: [true, "Bên B tự chịu toàn bộ chi phí sửa chữa mọi hư hỏng của nhà, kể cả hư hỏng về kết cấu, mái, tường chịu lực và hệ thống điện nước âm tường."]
+    lease.landlord_termination:
+      landlord_may_terminate_at_will: [false, "Trong thời hạn thuê, Bên A không được đơn phương chấm dứt hợp đồng, trừ các trường hợp pháp luật về nhà ở cho phép."]
+  present_quotes:
+    lease.content_parties: "BÊN CHO THUÊ (Bên A): Ông Tạ Văn Mười Lăm, số CCCD 001099100015 (số giả dùng cho thử nghiệm), địa chỉ thường trú: số giả định, phường Thử Nghiệm."
+    lease.content_sign_date: "Hôm nay, ngày 20 tháng 04 năm 2025"
+    lease.content_property: "Bên A cho Bên B thuê căn nhà tại địa chỉ số 45 phố Giả Định"
+    lease.content_rent_payment: "Bên B trả tiền thuê hằng tháng bằng chuyển khoản vào tài khoản của Bên A trước ngày 05 của tháng."
+    lease.content_term_handover: "Bên A giao nhà cho Bên B vào ngày 01/05/2025."
+
+t10_cat_dien_nuoc:
+  sign_date: 2025-06-05
+  document:
+    value: ["2.500.000 đồng", "Giá thuê là 2.500.000 đồng/tháng."]
+    term: ["06 tháng", "Thời hạn thuê là 06 tháng."]
+  slots:
+    lease.content_parties: {}
+    lease.content_sign_date: {}
+    lease.content_property: {}
+    lease.content_rent_payment: {}
+    lease.content_term_handover: {}
+    lease.quiet_enjoyment:
+      landlord_may_disrupt_use: [true, "Bên A được quyền cắt điện, cắt nước và khóa cửa phòng bất cứ lúc nào nếu Bên B trả tiền thuê chậm, không cần báo trước."]
+    lease.nonpayment_termination:
+      nonpayment_months_before_termination: ["03 tháng", "Bên A chỉ được đơn phương chấm dứt hợp đồng nếu Bên B không trả đủ tiền thuê từ 03 tháng trở lên mà không có lý do đã được thỏa thuận."]
+  present_quotes:
+    lease.content_parties: "BÊN CHO THUÊ (Bên A): Ông Kiều Văn Mười Bảy, số CCCD 001099100017 (số giả dùng cho thử nghiệm), địa chỉ thường trú: số giả định, phường Thử Nghiệm."
+    lease.content_sign_date: "Hôm nay, ngày 05 tháng 06 năm 2025"
+    lease.content_property: "Bên A cho Bên B thuê phòng số 3 tại nhà số 7 đường Giả Định"
+    lease.content_rent_payment: "Bên B trả tiền thuê hằng tháng bằng tiền mặt cho Bên A trước ngày 05 của tháng."
+    lease.content_term_handover: "Bên A giao phòng cho Bên B vào ngày 10/06/2025."

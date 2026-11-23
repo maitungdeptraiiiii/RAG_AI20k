@@ -69,33 +69,6 @@ concepts:
         on_silence: none
         outcome: {legality: illegal, party_impact: unfavorable}
 
-  - id: loan.late_interest_cap
-    kind: rate_cap
-    label: Lãi chậm trả không vượt trần lãi
-    scope: core
-    phase: P0
-    holder: BEN_VAY
-    counterparty: BEN_CHO_VAY
-    applies_to: [BEN_VAY]
-    describe: "Điều khoản ghi lãi phải trả khi chậm trả tiền (chậm trả lãi hoặc khoản tiền đến hạn)."
-    phrasing: ["chậm trả", "lãi chậm trả", "lãi trên nợ lãi", "chậm thanh toán"]
-    slots:
-      late_interest_rate: {kind: percent, unit: percent_per_year}
-    anchors:
-      - {pid: "bo-luat:91/2015/QH13#d357.k2", role: basis, note: "không vượt quá mức Đ468.1; không thỏa thuận thì theo Đ468.2"}
-      - {pid: "nghi-quyet:01/2019/NQ-HĐTP#d5.k2.b", role: basis, note: "lãi trên nợ lãi theo Đ468.2, trừ thỏa thuận khác"}
-    rules:
-      - id: r1
-        mode: threshold
-        law:
-          max_late:
-            unit: percent_per_year
-            periods: [{valid_from: "2017-01-01", value: 20, source: "bo-luat:91/2015/QH13#d357.k2"}]
-        check: {fact: late_interest_rate, op: lte, law: max_late}
-        derogation: mandatory
-        on_silence: none
-        outcome: {legality: illegal, party_impact: unfavorable}
-
   - id: loan.lender_early_recall
     kind: termination
     label: Bên cho vay không được đòi trước hạn tùy ý
@@ -140,4 +113,25 @@ concepts:
       - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
          applicability: {fact: has_interest, op: eq, value: khong_lai},
          check: {fact: borrower_barred_from_early_repayment, op: eq, value: false},
+         outcome: {legality: illegal, party_impact: unfavorable}}
+
+  - id: loan.demand_loan_notice
+    kind: notice
+    label: Vay không kỳ hạn có lãi - bên cho vay đòi lại phải báo trước
+    scope: core
+    phase: P0
+    holder: BEN_VAY
+    counterparty: BEN_CHO_VAY
+    applies_to: [BEN_VAY]
+    describe: "Điều khoản cho bên cho vay đòi lại tiền vay ngay, không phải báo trước cho bên vay (hợp đồng vay không ghi thời hạn trả)."
+    phrasing: ["đòi lại bất cứ lúc nào", "không cần báo trước", "yêu cầu trả ngay", "trả ngay khi bên cho vay yêu cầu"]
+    slots:
+      lender_demands_without_notice: {kind: bool, unit: null}
+    anchors:
+      - {pid: "bo-luat:91/2015/QH13#d469.k2", role: basis}
+      - {pid: "bo-luat:91/2015/QH13#d469.k1", role: exception, note: "vay không lãi: được thỏa thuận khác"}
+    rules:
+      - {id: r1, mode: required, derogation: mandatory, on_silence: none,
+         applicability: {all: [{fact: has_interest, op: eq, value: co_lai}, {fact: loan_term_months, op: absent}]},
+         check: {fact: lender_demands_without_notice, op: eq, value: false},
          outcome: {legality: illegal, party_impact: unfavorable}}

@@ -24,13 +24,17 @@ kinds:
     slot_kinds: []
     domains: [labor]
   notice:
-    describe: "Thời hạn báo trước / nghĩa vụ thông báo khi chấm dứt"
+    describe: "Thời hạn báo trước / nghĩa vụ thông báo khi chấm dứt, hủy bỏ, đòi lại"
     slot_kinds: []
-    domains: [labor, civil]
+    domains: [labor, civil, loan]
   prohibited_practice:
     describe: "Hành vi bị cấm ghi trong hợp đồng (slot bool = hợp đồng có hành vi đó)"
     slot_kinds: [bool]
-    domains: [labor]
+    domains: [labor, civil, lease]
+  void_term:
+    describe: "Điều khoản luật tuyên không có hiệu lực vì bất công với bên không soạn (hợp đồng theo mẫu, điều kiện giao dịch chung: BLDS Đ405.3, Đ406.3; Luật BVQLNTD Đ25)"
+    slot_kinds: [bool]
+    domains: [civil]
   count_limit:
     describe: "Giới hạn số lần (ký hợp đồng xác định thời hạn, thử việc một lần)"
     slot_kinds: []
@@ -38,7 +42,7 @@ kinds:
   rate_cap:
     describe: "Tỉ lệ có trần (lãi suất vay, lãi quá hạn, lãi chậm trả)"
     slot_kinds: [percent]
-    domains: [loan]
+    domains: [civil, loan]
   termination:
     describe: "Quyền chấm dứt / đòi lại / trả trước hạn mà luật bảo vệ cho một bên (slot bool = điều khoản trái quyền đó)"
     slot_kinds: [bool]

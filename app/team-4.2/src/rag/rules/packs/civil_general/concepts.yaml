@@ -23,3 +23,94 @@ concepts:
       - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
          check: {fact: terminates_without_notice, op: eq, value: false},
          outcome: {legality: illegal, party_impact: unfavorable}}
+
+  - id: civil.rescission_notice
+    kind: notice
+    label: Hủy bỏ hợp đồng phải thông báo
+    scope: core
+    phase: P0
+    holder: BEN_A
+    counterparty: BEN_B
+    applies_to: [BEN_A, BEN_B]
+    describe: "Điều khoản cho một bên hủy bỏ hợp đồng mà không phải thông báo cho bên kia."
+    phrasing: ["hủy bỏ hợp đồng", "huỷ bỏ hợp đồng", "không cần thông báo", "không phải thông báo"]
+    slots:
+      rescinds_without_notice: {kind: bool, unit: null}
+    anchors:
+      - {pid: "bo-luat:91/2015/QH13#d423.k3", role: basis}
+    rules:
+      - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
+         check: {fact: rescinds_without_notice, op: eq, value: false},
+         outcome: {legality: illegal, party_impact: unfavorable}}
+
+  - id: civil.standard_terms_exemption
+    kind: void_term
+    label: Hợp đồng theo mẫu / điều kiện giao dịch chung không được miễn trách cho bên soạn
+    scope: core
+    phase: P0
+    holder: BEN_B
+    counterparty: BEN_A
+    applies_to: [BEN_B]
+    describe: "Điều khoản do bên soạn sẵn đưa ra (hợp đồng theo mẫu hoặc điều kiện giao dịch chung) miễn trách nhiệm cho chính bên soạn, tăng trách nhiệm hoặc loại bỏ quyền lợi chính đáng của bên kia."
+    phrasing: ["không chịu trách nhiệm", "miễn trách nhiệm", "không có quyền khiếu nại", "từ bỏ quyền", "trong mọi trường hợp"]
+    slots:
+      one_sided_standard_term: {kind: bool, unit: null}
+    anchors:
+      - {pid: "bo-luat:91/2015/QH13#d405.k3", role: basis, note: "hợp đồng theo mẫu"}
+      - {pid: "bo-luat:91/2015/QH13#d406.k3", role: basis, note: "điều kiện giao dịch chung"}
+    rules:
+      - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
+         applicability: {fact: is_adhesion_contract, op: eq, value: true},
+         check: {fact: one_sided_standard_term, op: eq, value: false},
+         outcome: {legality: illegal, party_impact: unfavorable}}
+      - {id: r2, mode: prohibited, derogation: mandatory, on_silence: none,
+         applicability: {fact: uses_general_conditions, op: eq, value: true},
+         check: {fact: one_sided_standard_term, op: eq, value: false},
+         outcome: {legality: illegal, party_impact: unfavorable}}
+
+  - id: civil.amendment_form
+    kind: prohibited_practice
+    label: Sửa đổi hợp đồng phải theo hình thức của hợp đồng ban đầu
+    scope: core
+    phase: P0
+    holder: BEN_A
+    counterparty: BEN_B
+    applies_to: [BEN_A, BEN_B]
+    describe: "Điều khoản cho phép sửa đổi hợp đồng bằng hình thức thấp hơn hợp đồng ban đầu: bằng lời nói khi hợp đồng lập bằng văn bản, hoặc không công chứng khi hợp đồng có công chứng. Sửa bằng email, tin nhắn (thông điệp dữ liệu) vẫn là văn bản."
+    phrasing: ["sửa đổi hợp đồng", "thỏa thuận bằng lời nói", "thông báo miệng", "không cần lập văn bản", "không cần công chứng"]
+    slots:
+      amendment_allowed_in_lesser_form: {kind: bool, unit: null}
+    anchors:
+      - {pid: "bo-luat:91/2015/QH13#d421.k3", role: basis}
+      - {pid: "bo-luat:91/2015/QH13#d119.k1", role: context, note: "thông điệp dữ liệu được coi là văn bản"}
+    rules:
+      - {id: r1, mode: prohibited, derogation: mandatory, on_silence: none,
+         check: {fact: amendment_allowed_in_lesser_form, op: eq, value: false},
+         outcome: {legality: illegal, party_impact: neutral}}
+
+  - id: civil.late_payment_interest_cap
+    kind: rate_cap
+    label: Lãi chậm trả tiền không vượt trần lãi
+    scope: core
+    phase: P0
+    holder: BEN_B
+    counterparty: BEN_A
+    applies_to: [BEN_B]
+    describe: "Điều khoản ghi LÃI phải trả khi chậm trả một khoản tiền (tiền thuê, tiền hàng, tiền lãi hoặc khoản đến hạn). Không gồm tiền PHẠT vi phạm khi chậm thanh toán."
+    phrasing: ["chậm trả", "lãi chậm trả", "lãi trên nợ lãi", "chậm thanh toán", "lãi suất chậm thanh toán"]
+    slots:
+      late_interest_rate: {kind: percent, unit: percent_per_year}
+    anchors:
+      - {pid: "bo-luat:91/2015/QH13#d357.k2", role: basis, note: "không vượt quá mức Đ468.1; không thỏa thuận thì theo Đ468.2"}
+      - {pid: "nghi-quyet:01/2019/NQ-HĐTP#d5.k2.b", role: basis, note: "lãi trên nợ lãi theo Đ468.2, trừ thỏa thuận khác"}
+    rules:
+      - id: r1
+        mode: threshold
+        law:
+          max_late:
+            unit: percent_per_year
+            periods: [{valid_from: "2017-01-01", value: 20, source: "bo-luat:91/2015/QH13#d357.k2"}]
+        check: {fact: late_interest_rate, op: lte, law: max_late}
+        derogation: mandatory
+        on_silence: none
+        outcome: {legality: illegal, party_impact: unfavorable}

@@ -24,8 +24,17 @@ unit_forms:
   percent_per_month: ["/tháng", "/ tháng", "một tháng", "mỗi tháng", "/1 tháng", "trên tháng"]
 
 # Dữ kiện người dùng xác nhận.
-user_facts: [special_law_applies]    # có luật chuyên ngành quy định khác (vd. tổ chức tín dụng) mà BLDS cho phép (Đ468.1)
+user_facts:
+  - special_law_applies    # có luật chuyên ngành quy định khác (vd. tổ chức tín dụng) mà BLDS cho phép (Đ468.1)
+  - is_adhesion_contract   # hợp đồng theo mẫu do một bên soạn sẵn (BLDS Đ405)
+  - uses_general_conditions  # hợp đồng áp điều kiện giao dịch chung do một bên công bố (BLDS Đ406)
 user_fact_questions:
+  is_adhesion_contract:
+    question: "Hợp đồng này có phải hợp đồng theo mẫu do một bên soạn sẵn để bên kia chỉ chấp nhận hoặc không (không thương lượng từng điều khoản) không?"
+    values: [true, false]
+  uses_general_conditions:
+    question: "Hợp đồng có áp dụng điều kiện giao dịch chung do một bên công bố sẵn để dùng chung cho mọi khách hàng không?"
+    values: [true, false]
   special_law_applies:
     question: "Giao dịch này có chịu một luật chuyên ngành quy định mức khác với Bộ luật Dân sự không (ví dụ cho vay của tổ chức tín dụng)?"
     values: [true, false]

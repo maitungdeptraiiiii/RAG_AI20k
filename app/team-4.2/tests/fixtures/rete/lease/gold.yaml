@@ -90,3 +90,151 @@ expected:
     periods: [{from: 2023-03-15, status: PASS}]
     basis: {pid: "luat:65/2014/QH13#d132.k3", quote: "Bên thuê nhà ở có quyền đơn phương chấm dứt thực hiện hợp đồng thuê nhà ở khi bên cho thuê nhà ở có một trong các hành vi sau đây:"}
     note: "bên thuê vẫn có một căn cứ chấm dứt (Điều 9.2) nên không phải 'cấm trong mọi trường hợp'; việc thu hẹp căn cứ và mất cọc chưa có rule (L.14)"
+
+  # ── Thêm 23/11 (xây gói đầy đủ). Viết từ luật TRƯỚC khi chạy engine — CHỜ TÙNG DUYỆT. ──
+  - rule: lease.content_parties/r1
+    object: t1_hop_le
+    periods: [{from: 2025-03-01, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k1", quote: "Họ và tên của cá nhân, tên của tổ chức và địa chỉ của các bên;"}
+  - rule: lease.content_sign_date/r1
+    object: t1_hop_le
+    periods: [{from: 2025-03-01, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k10", quote: "Ngày, tháng, năm ký kết hợp đồng;"}
+  - rule: lease.content_parties/r1
+    object: t2_lay_nha_tuy_y
+    periods: [{from: 2024-10-01, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k1", quote: "Họ và tên của cá nhân, tên của tổ chức và địa chỉ của các bên;"}
+  - rule: lease.content_sign_date/r1
+    object: t2_lay_nha_tuy_y
+    periods: [{from: 2024-10-01, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k10", quote: "Ngày, tháng, năm ký kết hợp đồng;"}
+  - rule: lease.content_parties/r1
+    object: t3_no_mot_thang
+    periods: [{from: 2025-01-15, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k1", quote: "Họ và tên của cá nhân, tên của tổ chức và địa chỉ của các bên;"}
+  - rule: lease.content_sign_date/r1
+    object: t3_no_mot_thang
+    periods: [{from: 2025-01-15, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k10", quote: "Ngày, tháng, năm ký kết hợp đồng;"}
+  - rule: lease.content_parties/r1
+    object: t4_cam_ben_thue_cham_dut
+    periods: [{from: 2024-09-10, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k1", quote: "Họ và tên của cá nhân, tên của tổ chức và địa chỉ của các bên;"}
+  - rule: lease.content_sign_date/r1
+    object: t4_cam_ben_thue_cham_dut
+    periods: [{from: 2024-09-10, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k10", quote: "Ngày, tháng, năm ký kết hợp đồng;"}
+  - rule: lease.content_parties/r1
+    object: t5_thieu_thoi_han
+    periods: [{from: 2025-05-01, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k1", quote: "Họ và tên của cá nhân, tên của tổ chức và địa chỉ của các bên;"}
+  - rule: lease.content_sign_date/r1
+    object: t5_thieu_thoi_han
+    periods: [{from: 2025-05-01, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k10", quote: "Ngày, tháng, năm ký kết hợp đồng;"}
+  - rule: lease.content_parties/r1
+    object: t6_truoc_2024
+    periods: [{from: 2020-06-01, status: PASS}]
+    basis: {pid: "luat:65/2014/QH13#d121.k1", quote: "Họ và tên của cá nhân, tên của tổ chức và địa chỉ của các bên;"}
+  - rule: lease.content_sign_date/r1
+    object: t6_truoc_2024
+    periods: [{from: 2020-06-01, status: PASS}]
+    basis: {pid: "luat:65/2014/QH13#d121.k10", quote: "Ngày, tháng, năm ký kết hợp đồng;"}
+  - rule: lease.content_parties/r1
+    object: t7_mau_2023
+    periods: [{from: 2023-03-15, status: PASS}]
+    basis: {pid: "luat:65/2014/QH13#d121.k1", quote: "Họ và tên của cá nhân, tên của tổ chức và địa chỉ của các bên;"}
+  - rule: lease.content_sign_date/r1
+    object: t7_mau_2023
+    periods: [{from: 2023-03-15, status: PASS}]
+    basis: {pid: "luat:65/2014/QH13#d121.k10", quote: "Ngày, tháng, năm ký kết hợp đồng;"}
+  - rule: lease.content_parties/r1
+    object: t8_thieu_dia_chi_ngay_ky
+    periods: [{from: 2025-06-01, status: FAIL, finding: missing_content}]
+    basis: {pid: "luat:27/2023/QH15#d163.k1", quote: "Họ và tên của cá nhân, tên của tổ chức và địa chỉ của các bên;"}
+    note: "chỉ có họ tên và số CCCD, không có địa chỉ của các bên"
+  - rule: lease.content_sign_date/r1
+    object: t8_thieu_dia_chi_ngay_ky
+    periods: [{from: 2025-06-01, status: FAIL, finding: missing_content}]
+    basis: {pid: "luat:27/2023/QH15#d163.k10", quote: "Ngày, tháng, năm ký kết hợp đồng;"}
+    note: "phần mở đầu không ghi ngày ký"
+  - rule: lease.content_parties/r1
+    object: t9_ben_thue_sua_lon
+    periods: [{from: 2025-04-20, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k1", quote: "Họ và tên của cá nhân, tên của tổ chức và địa chỉ của các bên;"}
+  - rule: lease.content_sign_date/r1
+    object: t9_ben_thue_sua_lon
+    periods: [{from: 2025-04-20, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k10", quote: "Ngày, tháng, năm ký kết hợp đồng;"}
+  - rule: lease.content_parties/r1
+    object: t10_cat_dien_nuoc
+    periods: [{from: 2025-06-05, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k1", quote: "Họ và tên của cá nhân, tên của tổ chức và địa chỉ của các bên;"}
+  - rule: lease.content_sign_date/r1
+    object: t10_cat_dien_nuoc
+    periods: [{from: 2025-06-05, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k10", quote: "Ngày, tháng, năm ký kết hợp đồng;"}
+  - rule: lease.quiet_enjoyment/r1
+    object: t7_mau_2023
+    periods: [{from: 2023-03-15, status: FAIL, finding: violation}]
+    basis: {pid: "bo-luat:91/2015/QH13#d478.k1", quote: "Bên cho thuê phải bảo đảm quyền sử dụng tài sản ổn định cho bên thuê."}
+    note: "Điều 6.3: vào kiểm tra nhà bất cứ lúc nào không cần báo trước (cách đọc chờ Tùng duyệt)"
+  - rule: lease.landlord_major_repairs/r1
+    object: t9_ben_thue_sua_lon
+    periods: [{from: 2025-04-20, status: FAIL, finding: violation}]
+    basis: {pid: "bo-luat:91/2015/QH13#d477.k1", quote: "phải sửa chữa những hư hỏng, khuyết tật của tài sản thuê, trừ hư hỏng nhỏ mà theo tập quán bên thuê phải tự sửa chữa."}
+    note: "bên thuê chịu cả hư hỏng kết cấu, mái, tường chịu lực (cách đọc chờ Tùng duyệt)"
+  - rule: lease.landlord_termination/r1
+    object: t9_ben_thue_sua_lon
+    periods: [{from: 2025-04-20, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d172.k1", quote: "bên cho thuê không được đơn phương chấm dứt thực hiện hợp đồng thuê nhà ở và thu hồi nhà ở đang cho thuê, trừ trường hợp quy định tại khoản 2 Điều này."}
+  - rule: lease.landlord_termination/r1
+    object: t8_thieu_dia_chi_ngay_ky
+    periods: [{from: 2025-06-01, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d172.k1", quote: "bên cho thuê không được đơn phương chấm dứt thực hiện hợp đồng thuê nhà ở và thu hồi nhà ở đang cho thuê, trừ trường hợp quy định tại khoản 2 Điều này."}
+  - rule: lease.quiet_enjoyment/r1
+    object: t10_cat_dien_nuoc
+    periods: [{from: 2025-06-05, status: FAIL, finding: violation}]
+    basis: {pid: "bo-luat:91/2015/QH13#d478.k1", quote: "Bên cho thuê phải bảo đảm quyền sử dụng tài sản ổn định cho bên thuê."}
+    note: "cắt điện nước, khóa cửa bất cứ lúc nào không báo trước (cách đọc chờ Tùng duyệt)"
+  - rule: lease.nonpayment_termination/r1
+    object: t10_cat_dien_nuoc
+    periods: [{from: 2025-06-05, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d172.k2.b", quote: "Bên thuê không trả đủ tiền thuê nhà ở theo thỏa thuận trong hợp đồng từ 03 tháng trở lên"}
+    note: "03 tháng = đúng mức luật"
+  - rule: lease.content_property/r1
+    object: t8_thieu_dia_chi_ngay_ky
+    periods: [{from: 2025-06-01, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k2", quote: "Mô tả đặc điểm của nhà ở giao dịch và đặc điểm của thửa đất ở gắn với nhà ở đó."}
+  - rule: lease.content_rent_payment/r1
+    object: t8_thieu_dia_chi_ngay_ky
+    periods: [{from: 2025-06-01, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k4", quote: "Thời hạn và phương thức thanh toán tiền nếu là trường hợp mua bán, cho thuê mua, cho thuê nhà ở;"}
+  - rule: lease.content_term_handover/r1
+    object: t8_thieu_dia_chi_ngay_ky
+    periods: [{from: 2025-06-01, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k5", quote: "thời hạn cho thuê mua, cho thuê, thế chấp, cho mượn, cho ở nhờ, ủy quyền quản lý nhà ở"}
+  - rule: lease.content_property/r1
+    object: t9_ben_thue_sua_lon
+    periods: [{from: 2025-04-20, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k2", quote: "Mô tả đặc điểm của nhà ở giao dịch và đặc điểm của thửa đất ở gắn với nhà ở đó."}
+  - rule: lease.content_rent_payment/r1
+    object: t9_ben_thue_sua_lon
+    periods: [{from: 2025-04-20, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k4", quote: "Thời hạn và phương thức thanh toán tiền nếu là trường hợp mua bán, cho thuê mua, cho thuê nhà ở;"}
+  - rule: lease.content_term_handover/r1
+    object: t9_ben_thue_sua_lon
+    periods: [{from: 2025-04-20, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k5", quote: "thời hạn cho thuê mua, cho thuê, thế chấp, cho mượn, cho ở nhờ, ủy quyền quản lý nhà ở"}
+  - rule: lease.content_property/r1
+    object: t10_cat_dien_nuoc
+    periods: [{from: 2025-06-05, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k2", quote: "Mô tả đặc điểm của nhà ở giao dịch và đặc điểm của thửa đất ở gắn với nhà ở đó."}
+  - rule: lease.content_rent_payment/r1
+    object: t10_cat_dien_nuoc
+    periods: [{from: 2025-06-05, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k4", quote: "Thời hạn và phương thức thanh toán tiền nếu là trường hợp mua bán, cho thuê mua, cho thuê nhà ở;"}
+  - rule: lease.content_term_handover/r1
+    object: t10_cat_dien_nuoc
+    periods: [{from: 2025-06-05, status: PASS}]
+    basis: {pid: "luat:27/2023/QH15#d163.k5", quote: "thời hạn cho thuê mua, cho thuê, thế chấp, cho mượn, cho ở nhờ, ủy quyền quản lý nhà ở"}

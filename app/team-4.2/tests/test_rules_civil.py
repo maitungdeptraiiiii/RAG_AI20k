@@ -30,7 +30,9 @@ def test_civil_loan_extends_civil_general_and_loads_both_concept_sets():
     assert LOAN.context.units.convert(2, "percent_per_month", "percent_per_year") == 24
     assert LOAN.context.units.convert(1, "year", "month") == 12
     assert "special_law_applies" in load_packs(["civil_general"]).context.questions
-    assert load_packs(["civil_general"]).concepts.keys() == {"civil.unilateral_termination"}
+    general = load_packs(["civil_general"]).concepts.keys()
+    assert {"civil.unilateral_termination", "civil.late_payment_interest_cap"} <= general
+    assert all(cid.startswith("civil.") for cid in general) and general <= LOAN.concepts.keys()
 
 
 def test_civil_and_labor_load_together_without_clashes():
@@ -183,8 +185,8 @@ def test_overdue_principal_interest_cap_150_percent_of_468(rate, status):
 
 @pytest.mark.parametrize("rate,status", [(10, "PASS"), (24, "FAIL")])
 def test_late_payment_interest_cap_art_357(rate, status):
-    r = _loan({"late_interest_rate": Fact(rate, "percent_per_year")}, ["loan.late_interest_cap"])
-    assert r["loan.late_interest_cap/r1"].status == status
+    r = _loan({"late_interest_rate": Fact(rate, "percent_per_year")}, ["civil.late_payment_interest_cap"])
+    assert r["civil.late_payment_interest_cap/r1"].status == status
 
 
 def test_lender_early_recall_prohibited_unless_tied_to_misuse():

@@ -3,6 +3,7 @@
 # Quan hệ với Luật các tổ chức tín dụng: chỉ ghi nhận là ngoại lệ (Đ468.1 "trừ trường hợp luật khác có liên quan quy định khác").
 # Bổ sung 23/11 (văn bản tải thêm qua scripts/team-4.2/fetch_loan_scope.py): Luật Các TCTD 32/2024/QH15 Đ100;
 # Nghị quyết 01/2019/NQ-HĐTP (hướng dẫn lãi, lãi suất); BLDS 2005 Đ476 cho hợp đồng xác lập trước 01/01/2017.
+# Rà lại đủ Đ463–471 ngày 23/11 (xây gói đầy đủ): thêm civil_loan.demand_loan_notice; lãi chậm trả chuyển lên gói chung.
 
 - id: civil_loan.interest_cap
   source:
@@ -52,7 +53,7 @@
   conclusion: "Kết luận trung gian: lãi suất có hiệu lực = min(lãi thỏa thuận, 20%/năm); hợp đồng không vô hiệu toàn bộ"
   on_silence: none
   derived_from: [civil_loan.interest_cap]
-  yaml_rule: "chưa có (đề xuất: derived effective_interest_rate)"
+  yaml_rule: "không làm rule: hệ quả (phần vượt không có hiệu lực), đã nằm trong kết luận FAIL của loan.interest_cap/r1"
   examples:
     - {facts: {interest_rate: 24}, expected: 20}
     - {facts: {interest_rate: 15}, expected: 15}
@@ -72,7 +73,7 @@
   conclusion: "Hợp đồng không thỏa thuận lãi thì bên vay không phải trả lãi (trừ pháp luật quy định, vd. lãi chậm trả Đ466.4)"
   on_silence: default_applies
   derived_from: []
-  yaml_rule: "chưa có"
+  yaml_rule: "không làm rule: quy tắc mặc định khi hợp đồng im lặng, không có điều khoản trái luật"
   examples:
     - {facts: {interest_agreed: true}, expected: PASS}
     - {facts: {interest_agreed: false, lender_demands_interest: true}, expected: FAIL}
@@ -95,7 +96,7 @@
   conclusion: "Kết luận trung gian: lãi suất áp dụng = 10%/năm (50% của 20%)"
   on_silence: none
   derived_from: [civil_loan.interest_cap]
-  yaml_rule: "chưa có"
+  yaml_rule: "không làm rule: chỉ dùng khi có tranh chấp về lãi (sự kiện ngoài văn bản)"
   examples:
     - {facts: {interest_agreed: true, interest_dispute: true}, expected: 10}
     - {facts: {interest_agreed: true, interest_rate: 12, interest_dispute: true}, expected: 12}
@@ -119,7 +120,7 @@
   conclusion: "Không thỏa thuận: lãi chậm trả theo 50% trần; có thỏa thuận: theo thỏa thuận nhưng không vượt trần (Đ357.2)"
   on_silence: default_applies
   derived_from: [civil_loan.unclear_rate_half_cap]
-  yaml_rule: "chưa có"
+  yaml_rule: "không làm rule riêng: mức thỏa thuận đã kiểm bởi civil.late_payment_interest_cap/r1; mức mặc định không có vi phạm"
   examples:
     - {facts: {late_interest_rate: 10}, expected: PASS}
     - {facts: {late_interest_rate: 25}, expected: FAIL}
@@ -141,11 +142,11 @@
   conclusion: "Lãi chậm trả thỏa thuận vượt 20%/năm là vượt trần Đ357.2"
   on_silence: none
   derived_from: []
-  yaml_rule: "chưa có"
+  yaml_rule: civil.late_payment_interest_cap/r1
   examples:
     - {facts: {late_interest_rate: 15}, expected: PASS}
     - {facts: {late_interest_rate: 30}, expected: FAIL}
-    - {facts: {late_interest_rate: 2}, expected: UNKNOWN, why: "không ghi theo tháng hay theo năm"}
+    - {facts: {late_interest_rate: [2, null]}, expected: UNKNOWN, why: "không ghi theo tháng hay theo năm"}
   open_questions: []
 
 - id: civil_loan.overdue_principal_150
@@ -166,7 +167,7 @@
   conclusion: "Không thỏa thuận: lãi nợ gốc quá hạn = 150% lãi vay; mức thỏa thuận có trần riêng (civil_loan.overdue_principal_cap)"
   on_silence: default_applies
   derived_from: []
-  yaml_rule: "chưa có"
+  yaml_rule: "không làm rule riêng: mức thỏa thuận đã kiểm bởi loan.overdue_interest_cap/r1"
   examples:
     - {facts: {interest_rate: 12, overdue_principal_rate: 18}, expected: PASS}
     - {facts: {interest_rate: 12, overdue_principal_rate: 18, agreed_otherwise: false, applied_rate: 24}, expected: FAIL}
@@ -190,7 +191,7 @@
   conclusion: "Bên vay được trả trước hạn; mặc định vẫn phải trả toàn bộ lãi theo kỳ hạn"
   on_silence: default_applies
   derived_from: []
-  yaml_rule: "chưa có"
+  yaml_rule: "chưa có: chờ Tùng chọn cách đọc (open_questions)"
   examples:
     - {facts: {borrower_may_repay_early: true}, expected: PASS}
     - {facts: {borrower_may_repay_early: false}, expected: FAIL}
@@ -212,10 +213,10 @@
   conclusion: "Điều khoản cho bên cho vay đòi lại trước hạn mà không cần bên vay đồng ý là trái Đ470.1"
   on_silence: none
   derived_from: []
-  yaml_rule: "chưa có"
+  yaml_rule: "loan.lender_early_recall/r1 (bên cho vay) và loan.borrower_early_repayment/r1 (bên vay)"
   examples:
     - {facts: {lender_may_recall_early_without_consent: false}, expected: PASS}
-    - {facts: {lender_may_recall_early_without_consent: true}, expected: FAIL}
+    - {facts: {lender_may_recall_early_without_consent: true, recall_only_on_misuse: false}, expected: FAIL}
     - {facts: {}, expected: UNKNOWN, why: "chưa xác định hợp đồng có lãi hay không"}
   open_questions:
     - "Đ470.1 không ghi 'trừ trường hợp có thỏa thuận khác'; vẫn cần xác nhận đây là quy định bắt buộc."
@@ -237,10 +238,10 @@
   conclusion: "Bên cho vay không được đòi trước hạn, trừ các trường hợp luật cho phép"
   on_silence: none
   derived_from: []
-  yaml_rule: "chưa có"
+  yaml_rule: "loan.lender_early_recall/r1 (+ r1_misuse)"
   examples:
     - {facts: {lender_may_recall_early_without_consent: false}, expected: PASS}
-    - {facts: {lender_may_recall_early_without_consent: true, misuse_after_warning_clause: false}, expected: FAIL}
+    - {facts: {lender_may_recall_early_without_consent: true, recall_only_on_misuse: false}, expected: FAIL}
     - {facts: {lender_may_recall_early_without_consent: true}, expected: UNKNOWN, why: "chưa biết điều khoản có gắn với dùng sai mục đích không"}
   open_questions: []
 
@@ -287,9 +288,9 @@
   derived_from: []
   yaml_rule: "loan.interest_cap/r1 (giá trị luật theo kỳ: từ 01/12/2010 13,5; từ 01/01/2017 20)"
   examples:
-    - {facts: {interest_rate: 12, sign_date: "2016-06-01"}, expected: PASS}
-    - {facts: {interest_rate: 15, sign_date: "2016-06-01"}, expected: FAIL}
-    - {facts: {interest_rate: 15, sign_date: "2009-06-01"}, expected: UNKNOWN, why: "trước 01/12/2010 lãi suất cơ bản khác, chưa có trong gói"}
+    - {facts: {interest_rate: 12, special_law_applies: false}, day: "2016-06-01", expected: PASS}
+    - {facts: {interest_rate: 15, special_law_applies: false}, day: "2016-06-01", expected: FAIL}
+    - {facts: {interest_rate: 15, special_law_applies: false}, day: "2009-06-01", expected: UNKNOWN, why: "trước 01/12/2010 lãi suất cơ bản khác, chưa có trong gói"}
   open_questions:
     - "QĐ 2868/QĐ-NHNN không có trong kho; con số 9%/năm lấy từ ví dụ của NQ 01/2019. Trước 01/12/2010 chưa có giá trị."
     - "NQ 01/2019 Đ2.1: hợp đồng xác lập trước 2017 nhưng đang thực hiện, lãi phù hợp BLDS 2015 thì phần thời gian từ 01/01/2017 áp BLDS 2015. Engine soát theo ngày ký, chưa chia theo khoảng thời gian thực hiện."
@@ -313,7 +314,7 @@
   examples:
     - {facts: {overdue_rate: 27}, expected: PASS}
     - {facts: {overdue_rate: 36}, expected: FAIL}
-    - {facts: {overdue_rate: 3}, expected: UNKNOWN, why: "không ghi theo tháng hay theo năm"}
+    - {facts: {overdue_rate: [3, null]}, expected: UNKNOWN, why: "không ghi theo tháng hay theo năm"}
   open_questions: []
 
 - id: civil_loan.lender_early_recall
@@ -341,3 +342,33 @@
     - {facts: {lender_may_recall_early_without_consent: true}, expected: UNKNOWN, why: "chưa biết điều khoản có gắn với dùng sai mục đích không"}
   open_questions:
     - "Trùng nội dung với civil_loan.lender_no_early_demand (mục cũ); giữ mục này làm nguồn của rule, mục cũ để tham chiếu."
+
+- id: civil_loan.demand_loan_notice
+  source:
+    pid: "bo-luat:91/2015/QH13#d469.k2"
+    quote: "Đối với hợp đồng vay không kỳ hạn và có lãi thì bên cho vay có quyền đòi lại tài sản bất cứ lúc nào, nhưng phải báo trước cho bên vay một thời gian hợp lý và được trả lãi đến thời điểm nhận lại tài sản"
+  type: required
+  kind: notice
+  derogation: mandatory
+  applies_when: "Vay không kỳ hạn và có lãi"
+  facts_needed:
+    - {name: has_interest, kind: enum, from: contract}
+    - {name: loan_term_months, kind: duration, from: contract, note: "không có = vay không kỳ hạn"}
+    - {name: lender_demands_without_notice, kind: bool, from: contract}
+  exceptions: []
+  conclusion: "Vay không kỳ hạn có lãi: điều khoản cho bên cho vay đòi lại ngay, không báo trước, trái Đ469.2"
+  on_silence: none
+  derived_from: []
+  yaml_rule: loan.demand_loan_notice/r1
+  examples:
+    - {facts: {has_interest: co_lai, lender_demands_without_notice: false}, expected: PASS}
+    - {facts: {has_interest: co_lai, lender_demands_without_notice: true}, expected: FAIL}
+    - {facts: {has_interest: khong_lai, lender_demands_without_notice: true}, expected: NOT_APPLICABLE, why: "Đ469.1 (không lãi) có 'trừ trường hợp có thoả thuận khác'"}
+    - {facts: {has_interest: co_lai, loan_term_months: 12, lender_demands_without_notice: true}, expected: NOT_APPLICABLE, why: "vay có kỳ hạn: xét ở loan.lender_early_recall"}
+    - {facts: {lender_demands_without_notice: true}, expected: UNKNOWN, why: "chưa biết khoản vay có lãi hay không"}
+  open_questions:
+    - "Đ469.2 không có câu 'trừ trường hợp có thỏa thuận khác' (khác Đ469.1): đọc là bắt buộc."
+    - "Chưa làm vế bên vay (Đ469.2: chỉ trả lãi đến thời điểm trả nợ) vì chưa có hợp đồng mẫu nào ghi trái."
+
+# ── Đã đọc, không làm rule: Đ463–464 (khái niệm, sở hữu), Đ465.1–2 (giao tài sản, sự kiện khi thực hiện), Đ466.1–3
+#    (mặc định, "trừ có thỏa thuận khác"), Đ469.1 (mặc định), Đ471 họ/hụi (ngoài phạm vi: không phải hợp đồng vay hai bên).

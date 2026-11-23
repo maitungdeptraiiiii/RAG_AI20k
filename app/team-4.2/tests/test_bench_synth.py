@@ -73,3 +73,47 @@ def test_update_batches_have_size_and_deletions(tmp_path):
     batches = update_batches(cat, SPEC, random.Random(0), size=5, count=20)
     assert len(batches) == 20 and all(len(b) == 5 for b in batches)
     assert any(v is None for b in batches for v in b.values())
+
+
+# ───────────────────────────── trục 2 (Task 5) ─────────────────────────────
+from rag.rules.bench.synth import ObjSpec, load_object_pack, object_changes, random_objects  # noqa: E402
+
+
+def _canon(cat, objs, kind):
+    return json.dumps([dataclasses.asdict(r) for r in evaluator_for(cat, kind).session(
+        day=DAY, facts={}, present=set(), evidence={}, objects=objs).results()], default=str, sort_keys=True)
+
+
+def test_object_pack_has_three_cross_rule_shapes(tmp_path):
+    cat = load_object_pack(ObjSpec(20, 6, 0), tmp_path)
+    rules = [r for c in cat.concepts.values() for r in c.rules if r.over is not None]
+    assert len(rules) == 6
+    assert any(len(r.group_by) == 2 for r in rules)
+    assert {next(iter(r.check)) for r in rules} == {"count", "not_exists"}
+
+
+def test_objects_evaluate_and_agree(tmp_path):
+    spec = ObjSpec(20, 6, 0)
+    cat = load_object_pack(spec, tmp_path)
+    objs = random_objects(spec, random.Random(0))
+    assert len(objs) == 20
+    ref, net = _canon(cat, objs, "reference"), _canon(cat, objs, "network")
+    assert ref == net and '"object": "employee=' in ref
+    assert '"status": "FAIL"' in ref and '"status": "PASS"' in ref
+
+
+def test_some_attributes_are_unknown():
+    objs = random_objects(ObjSpec(50, 5, 0), random.Random(0))
+    contracts = [o for o in objs if o.type == "Contract"]
+    assert any(len(o.attrs) < 4 for o in contracts) and any(len(o.attrs) == 4 for o in contracts)
+
+
+def test_object_changes_cover_add_remove_modify():
+    objs = random_objects(ObjSpec(5, 5, 0), random.Random(0))
+    ids = {o.id for o in objs}
+    add = object_changes(objs, random.Random(1), "add")
+    rem = object_changes(objs, random.Random(1), "remove")
+    mod = object_changes(objs, random.Random(1), "modify")
+    assert len(add.added) == 1 and add.added[0].id not in ids
+    assert len(rem.removed) == 1 and rem.removed[0] in ids
+    assert len(mod.changed) == 1 and mod.changed[0].id in ids and mod.changed[0] not in objs

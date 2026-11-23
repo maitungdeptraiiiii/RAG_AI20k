@@ -142,5 +142,90 @@ class ObjSpec:
         return f"synth_obj_r{self.n_cross_rules}_x{self.seed}"
 
 
-__all__ = ["AXIS1_SIZES", "AXIS2_RULES", "AXIS2_SIZES", "ObjSpec", "REAL_AXIS1", "RuleSpec", "load_rule_pack",
+_JOBS = ("ke_toan", "lai_xe", "ban_hang")
+_START = date(2000, 1, 1)
+
+
+def write_object_pack(spec: ObjSpec, root: Path) -> str:
+    """Rule xuyên đối tượng chia đều ba dạng spec §5.6: đếm theo người, ghép cặp (người, công việc), phủ định trên phụ lục."""
+    rng = random.Random(spec.seed)
+    pid = spec.pack_id
+    concepts = []
+    for i in range(spec.n_cross_rules):
+        shape = i % 3
+        if shape == 0:      # đếm: số hợp đồng có giá trị >= t của một người không quá k
+            rule = {"over": {"c": {"type": "Contract", "history": True,
+                                   "where": {"fact": "amount", "op": "gte", "value": rng.randint(0, 60)}}},
+                    "group_by": {"employee": "c.refs.employee"},
+                    "check": {"count": {"of": "c", "op": "lte", "value": rng.randint(1, 4)}}}
+        elif shape == 1:    # ghép cặp: mỗi (người, công việc) tối đa k hợp đồng có thử việc
+            rule = {"over": {"c": {"type": "Contract", "history": True,
+                                   "where": {"all": [{"fact": "has_probation", "op": "eq", "value": True},
+                                                     {"fact": "amount", "op": "gte", "value": rng.randint(0, 40)}]}}},
+                    "group_by": {"employee": "c.refs.employee", "job": "c.job"},
+                    "check": {"count": {"of": "c", "op": "lte", "value": 1}}}
+        else:               # phủ định: không có phụ lục sửa thời hạn (theo hợp đồng)
+            rule = {"over": {"a": {"type": "Amendment", "history": True,
+                                   "where": {"all": [{"fact": "modifies_term", "op": "eq", "value": True},
+                                                     {"fact": "amount", "op": "gte", "value": rng.randint(0, 60)}]}}},
+                    "group_by": {"contract": "a.refs.contract"}, "check": {"not_exists": "a"}}
+        rule = {"id": "r1", "mode": "prohibited" if shape == 2 else "threshold", "derogation": "mandatory",
+                "on_silence": "none", **rule, "outcome": _OUTCOME}
+        concepts.append(_concept(f"synth.o{i}", [rule]))
+    pack = {"object_types": {
+        "Contract": {"documents": [f"{pid}_contract"], "attrs": ["kind", "job", "has_probation", "amount"],
+                     "refs": ["employee"]},
+        "Amendment": {"documents": ["amendment"], "amends": "contract", "attrs": ["modifies_term", "amount"],
+                      "refs": ["contract"]}}}
+    return _write(root, pid, pack, concepts)
+
+
+def load_object_pack(spec: ObjSpec, root: Path) -> Catalog:
+    return load_packs([write_object_pack(spec, root)], root=root)
+
+
+def _contract(i: int, rng: random.Random, start: date) -> WorkingObject:
+    attrs = {"kind": Fact(rng.choice(("xac_dinh_thoi_han", "khong_xac_dinh_thoi_han"))), "job": Fact(rng.choice(_JOBS)),
+             "has_probation": Fact(rng.random() < 0.5), "amount": Fact(rng.randint(0, 100))}
+    for name in sorted(attrs):            # ~20% thuộc tính chưa biết (vắng -> UNKNOWN)
+        if rng.random() < 0.2:
+            del attrs[name]
+    return WorkingObject(f"c{i}", "Contract", attrs, start, start + timedelta(days=364), {"employee": "E1"})
+
+
+def random_objects(spec: ObjSpec, rng: random.Random) -> list[WorkingObject]:
+    """`n_objects` đối tượng của một người: ~2/3 hợp đồng nối tiếp mỗi năm, còn lại phụ lục trỏ tới một hợp đồng đã có."""
+    out, contracts = [], []
+    for i in range(spec.n_objects):
+        if not contracts or rng.random() < 2 / 3:
+            c = _contract(i, rng, _START + timedelta(days=365 * len(contracts)))
+            contracts.append(c)
+            out.append(c)
+        else:
+            target = rng.choice(contracts)
+            attrs = {"modifies_term": Fact(rng.random() < 0.3), "amount": Fact(rng.randint(0, 100))}
+            if rng.random() < 0.2:
+                del attrs["amount"]
+            out.append(WorkingObject(f"a{i}", "Amendment", attrs, target.valid_from, None, {"contract": target.id}))
+    return out
+
+
+def object_changes(objects: list[WorkingObject], rng: random.Random,
+                   kind: Literal["add", "remove", "modify"]) -> ObjectChanges:
+    """Một thay đổi đối tượng cho kịch bản 6: thêm một hợp đồng mới, xóa một đối tượng, hoặc đổi một thuộc tính."""
+    if kind == "add":
+        n = sum(o.type == "Contract" for o in objects)
+        return ObjectChanges(added=(_contract(len(objects), rng, _START + timedelta(days=365 * n)),))
+    target = rng.choice(objects)
+    if kind == "remove":
+        return ObjectChanges(removed=(target.id,))
+    name = "amount"
+    old = target.attrs.get(name)
+    value = (old.value + 37) % 101 if old is not None else rng.randint(0, 100)
+    return ObjectChanges(changed=(WorkingObject(target.id, target.type, {**target.attrs, name: Fact(value)},
+                                                target.valid_from, target.valid_to, dict(target.refs)),))
+
+
+__all__ = ["AXIS1_SIZES", "AXIS2_RULES", "AXIS2_SIZES", "ObjSpec", "REAL_AXIS1", "RuleSpec", "load_object_pack",
+           "load_rule_pack", "object_changes", "random_objects", "write_object_pack",
            "present_all", "random_facts", "update_batches", "write_rule_pack"]

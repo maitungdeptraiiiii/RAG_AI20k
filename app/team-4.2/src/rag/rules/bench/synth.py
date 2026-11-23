@@ -29,6 +29,7 @@ REAL_AXIS1: dict[str, list[str]] = {"labor": ["labor"], "ba_mien": ["labor", "ci
 AXIS1_SIZES = (500, 2000, 10000)
 AXIS2_SIZES = (1, 5, 20, 100)
 AXIS2_RULES = (5, 50)
+N_QUESTIONS = 20
 _ROLES = [{"id": "A", "label": "Bên A"}, {"id": "B", "label": "Bên B"}]
 _OUTCOME = {"legality": "illegal", "party_impact": "unfavorable"}
 
@@ -94,7 +95,11 @@ def write_rule_pack(spec: RuleSpec, root: Path) -> str:
         rule = {"id": "r1", "mode": "threshold", "derogation": "mandatory", "on_silence": "none", "applicability": app,
                 "check": {"fact": rng.choice(facts), "op": "lte", "value": rng.randint(30, 90)}, "outcome": _OUTCOME}
         concepts.append(_concept(f"synth.c{i}", [rule]))
-    pack = {"user_facts": facts}
+    # next_questions chỉ hỏi dữ kiện có trong user_fact_questions: khai cho N_QUESTIONS dữ kiện đầu (kịch bản 5 có việc
+    # thật để làm: mỗi câu hỏi fork phiên và thử 3 giá trị). Giới hạn số câu để reference ở 10.000 rule còn chạy xong.
+    pack = {"user_facts": facts,
+            "user_fact_questions": {f: {"question": f"Giá trị của {f}?", "values": [5, 50, 95]}
+                                    for f in facts[:N_QUESTIONS]}}
     if spec.depth:
         pack["derived"] = _derived_chain(spec.depth)
     return _write(root, spec.pack_id, pack, concepts)
@@ -213,9 +218,10 @@ def random_objects(spec: ObjSpec, rng: random.Random) -> list[WorkingObject]:
 def object_changes(objects: list[WorkingObject], rng: random.Random,
                    kind: Literal["add", "remove", "modify"]) -> ObjectChanges:
     """Một thay đổi đối tượng cho kịch bản 6: thêm một hợp đồng mới, xóa một đối tượng, hoặc đổi một thuộc tính."""
-    if kind == "add":
+    if kind == "add":                     # id mới = lớn nhất hiện có + 1: không trùng đối tượng đang có trong hồ sơ
         n = sum(o.type == "Contract" for o in objects)
-        return ObjectChanges(added=(_contract(len(objects), rng, _START + timedelta(days=365 * n)),))
+        nxt = 1 + max((int(o.id[1:]) for o in objects), default=-1)
+        return ObjectChanges(added=(_contract(nxt, rng, _START + timedelta(days=365 * n)),))
     target = rng.choice(objects)
     if kind == "remove":
         return ObjectChanges(removed=(target.id,))

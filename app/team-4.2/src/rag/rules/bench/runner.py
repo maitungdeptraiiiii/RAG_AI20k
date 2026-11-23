@@ -59,6 +59,11 @@ class EvaluatorMismatch(Exception):
     """`reference` và `network` ra kết quả khác nhau trên cùng đầu vào: lỗi engine, báo Tùng (không bỏ qua)."""
 
 
+class DegenerateScenario(Exception):
+    """Kịch bản ra đầu ra rỗng ở mọi bước (không kết quả / không câu hỏi / không thay đổi nào): số đo vô nghĩa và phép so
+    hai evaluator đúng một cách tầm thường — dừng thay vì in số."""
+
+
 def measure(fn: Callable[[], object], *, repeats: int = 20, warmup: int = 1) -> Timing:
     for _ in range(warmup):
         fn()
@@ -109,6 +114,8 @@ def _check(outs: dict[str, list[str]], scenario: int, size: str, seed: int, deta
             if len(outs["reference"]) == len(outs["network"]) else -1
         raise EvaluatorMismatch(f"kịch bản {scenario}, {size}, seed {seed}, bước {i}: reference và network khác nhau. "
                                 f"Đầu vào: {detail[:2000]}")
+    if all(o == "[]" for o in outs["reference"]):
+        raise DegenerateScenario(f"kịch bản {scenario}, {size}, seed {seed}: cả hai evaluator ra rỗng ở mọi bước")
     return _digest(outs["reference"])
 
 
@@ -145,11 +152,13 @@ def _real_updates(base: _Input, n: int, count: int, rng: random.Random) -> list[
     return out
 
 
-def run_axis1(spec: RuleSpec | list[str], *, seed: int, repeats: int, root: Path) -> list[Row]:
+def run_axis1(spec: RuleSpec | list[str], *, seed: int, repeats: int, root: Path, sink: list | None = None) -> list[Row]:
+    """`sink`: danh sách nhận từng dòng ngay khi đo xong (lỗi giữa chừng vẫn giữ các dòng đã đo)."""
     rng = random.Random(seed)
     t0 = time.perf_counter()
     if isinstance(spec, RuleSpec):
         cat = load_rule_pack(spec, root)
+        load_s = time.perf_counter() - t0
         label = f"r{spec.n_rules}_s{round(spec.shared_ratio * 100)}_d{spec.depth}_f{spec.n_facts}"
         present = present_all(cat)
         base = _Input(DAY, random_facts(cat, spec, rng, missing=0.2), present)
@@ -158,14 +167,15 @@ def run_axis1(spec: RuleSpec | list[str], *, seed: int, repeats: int, root: Path
         unknown = _Input(DAY, random_facts(cat, spec, rng, missing=0.7), present)
     else:
         cat = load_packs(spec)
+        load_s = time.perf_counter() - t0
         label = "+".join(spec) if len(spec) == 1 else "ba_mien"
         base, dossiers = _real_inputs(spec, seed)
         updates = {n: _real_updates(base, n, repeats + 1, rng) for n in UPDATE_SIZES}
         names = sorted(base.facts)
         drop = set(rng.sample(names, round(0.7 * len(names))))
         unknown = _Input(base.day, {k: v for k, v in base.facts.items() if k not in drop}, base.present, base.objects)
-    load_note = f"nạp YAML {time.perf_counter() - t0:.1f} s; {sum(len(c.rules) for c in cat.concepts.values())} rule"
-    rows: list[Row] = []
+    load_note = f"nạp YAML {load_s:.1f} s; {sum(len(c.rules) for c in cat.concepts.values())} rule"
+    rows: list[Row] = sink if sink is not None else []
 
     # 1. biên dịch
     for kind in KINDS:
@@ -232,14 +242,14 @@ def _apply(objects: list, ch) -> list:
     return [o for o in objects if o.id not in gone] + list(ch.changed) + list(ch.added)
 
 
-def run_axis2(spec: ObjSpec, *, seed: int, repeats: int, root: Path) -> list[Row]:
+def run_axis2(spec: ObjSpec, *, seed: int, repeats: int, root: Path, sink: list | None = None) -> list[Row]:
     rng = random.Random(seed)
     cat = load_object_pack(spec, root)
     objs = tuple(random_objects(spec, rng))
     base = _Input(DAY, {}, set(), objs)
     label = f"o{spec.n_objects}_r{spec.n_cross_rules}"
     evs = {k: evaluator_for(cat, k) for k in KINDS}
-    rows: list[Row] = []
+    rows: list[Row] = sink if sink is not None else []
 
     outs, timing, stats = {}, {}, {}
     for kind, ev in evs.items():
@@ -250,9 +260,10 @@ def run_axis2(spec: ObjSpec, *, seed: int, repeats: int, root: Path) -> list[Row
     rows += [_row(2, 2, label, k, timing[k], peak_kb(lambda: _session(evs[k], base).results()), stats[k], d) for k in KINDS]
 
     for change in ("add", "remove", "modify"):
-        seq, cur, crng = [], list(objs), random.Random(seed * 1000 + len(change))
-        for i in range(repeats + 1):        # thay đổi nối tiếp trên trạng thái đang chạy; xóa xen kẽ thêm lại để hồ sơ không cạn
+        seq, cur, crng, fallback = [], list(objs), random.Random(seed * 1000 + len(change)), 0
+        for i in range(repeats + 1):        # thay đổi nối tiếp trên trạng thái đang chạy; hồ sơ còn 1 đối tượng thì thêm
             kind_i = change if not (change == "remove" and len(cur) <= 1) else "add"
+            fallback += kind_i != change
             ch = object_changes(cur, crng, kind_i)
             seq.append(ch)
             cur = _apply(cur, ch)
@@ -270,8 +281,9 @@ def run_axis2(spec: ObjSpec, *, seed: int, repeats: int, root: Path) -> list[Row
             probe = _session(ev, base)
             peaks[kind] = peak_kb(lambda: probe.update({}, objects=seq[0]))
         d = _check(outs, 6, f"{label}/{change}", seed, repr(seq[:3]))
-        rows += [_row(6, 2, f"{label}/{change}", k, timing[k], peaks[k], rec[k], d) for k in KINDS]
+        note = f"{fallback}/{len(seq)} bước xóa đổi thành thêm (hồ sơ còn 1 đối tượng)" if fallback else ""
+        rows += [_row(6, 2, f"{label}/{change}", k, timing[k], peaks[k], rec[k], d, note) for k in KINDS]
     return rows
 
 
-__all__ = ["EvaluatorMismatch", "Row", "Timing", "measure", "peak_kb", "run_axis1", "run_axis2"]
+__all__ = ["DegenerateScenario", "EvaluatorMismatch", "Row", "Timing", "measure", "peak_kb", "run_axis1", "run_axis2"]

@@ -31,13 +31,41 @@ def test_axis2_has_scenario_2_and_6(tmp_path):
     assert {r.size.split("/")[-1] for r in rows if r.scenario == 6} == {"add", "remove", "modify"}
 
 
-def test_digest_same_for_both_evaluators(tmp_path):
-    rows = run_axis1(RuleSpec(30, 0.5, 0, 50, 0), seed=0, repeats=3, root=tmp_path)
-    rows += run_axis2(ObjSpec(5, 5, 0), seed=0, repeats=3, root=tmp_path)
-    by = {}
-    for r in rows:
-        by.setdefault((r.axis, r.scenario, r.size), set()).add(r.digest)
-    assert all(len(v) == 1 for k, v in by.items() if k[1] != 1)
+def test_empty_output_on_both_sides_is_an_error_not_a_pass():
+    import rag.rules.bench.runner as R
+    with pytest.raises(R.DegenerateScenario):
+        R._check({"reference": ["[]"], "network": ["[]"]}, 5, "x", 0, "")
+    with pytest.raises(R.DegenerateScenario):
+        R._check({"reference": ["[]", "[]"], "network": ["[]", "[]"]}, 3, "x", 0, "")
+    assert R._check({"reference": ["[]", "[1]"], "network": ["[]", "[1]"]}, 3, "x", 0, "")
+
+
+def test_scenario5_asks_questions_on_synthetic_and_real_packs(tmp_path, monkeypatch):
+    import rag.rules.bench.runner as R
+    seen = []
+    real = R.next_questions
+    monkeypatch.setattr(R, "next_questions", lambda cat, s: seen.append(len(real(cat, s))) or real(cat, s))
+    run_axis1(RuleSpec(30, 0.5, 3, 50, 0), seed=0, repeats=1, root=tmp_path)
+    run_axis1(["labor"], seed=0, repeats=1, root=tmp_path)
+    assert seen and min(seen) > 0
+
+
+def test_load_note_times_only_the_loader(tmp_path, monkeypatch):
+    import rag.rules.bench.runner as R
+    import time
+    slow = R._real_inputs
+    monkeypatch.setattr(R, "_real_inputs", lambda *a: (time.sleep(1.5), slow(*a))[1])
+    note = next(r.note for r in run_axis1(["labor"], seed=0, repeats=1, root=tmp_path) if r.scenario == 1)
+    assert float(note.split("nạp YAML ")[1].split(" s")[0]) < 1.5
+
+
+def test_rows_survive_an_error_mid_config(tmp_path, monkeypatch):
+    import rag.rules.bench.runner as R
+    monkeypatch.setattr(R, "next_questions", lambda *a: 1 / 0)
+    sink = []
+    with pytest.raises(ZeroDivisionError):
+        run_axis1(RuleSpec(10, 0.5, 0, 50, 0), seed=0, repeats=1, root=tmp_path, sink=sink)
+    assert {r.scenario for r in sink} == {1, 2, 3, 4}
 
 
 def test_mismatch_raises(monkeypatch, tmp_path):
@@ -81,3 +109,18 @@ def test_summary_has_machine_six_scenarios_two_axes_and_charts(tmp_path):
     assert "Python" in md and "CPU" in md and "RAM" in md
     assert all(f"Kịch bản {i}" in md for i in range(1, 7)) and "Trục 1" in md and "Trục 2" in md
     assert (tmp_path / "axis1.png").exists() and (tmp_path / "axis2.png").exists()
+
+
+def test_unexpected_error_still_writes_partial_output(tmp_path, monkeypatch):
+    mod = _script()
+    calls = []
+
+    def boom(spec, **kw):
+        if calls:
+            raise KeyError("x")
+        calls.append(1)
+        return run_axis2(ObjSpec(1, 5, 0), seed=0, repeats=1, root=kw["root"], sink=kw["sink"])
+    monkeypatch.setattr(mod, "run_axis1", boom)
+    assert mod.main(["--quick", "--seed", "0", "--out", str(tmp_path)]) == 2
+    data = json.loads(next(tmp_path.glob("*.json")).read_text(encoding="utf-8"))
+    assert "KeyError" in data["error"] and data["rows"]

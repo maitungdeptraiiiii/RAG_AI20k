@@ -117,3 +117,20 @@ def test_object_changes_cover_add_remove_modify():
     assert len(add.added) == 1 and add.added[0].id not in ids
     assert len(rem.removed) == 1 and rem.removed[0] in ids
     assert len(mod.changed) == 1 and mod.changed[0].id in ids and mod.changed[0] not in objs
+
+
+def test_object_ids_stay_unique_over_a_change_sequence():
+    from rag.rules.bench.runner import _apply
+    rng, cur = random.Random(3), random_objects(ObjSpec(1, 5, 0), random.Random(0))
+    for i in range(40):
+        ch = object_changes(cur, rng, ("add", "remove", "remove")[i % 3] if len(cur) > 1 else "add")
+        cur = _apply(cur, ch)
+        assert len({o.id for o in cur}) == len(cur), i
+
+
+def test_synth_pack_declares_questions_so_next_questions_has_work(tmp_path):
+    from rag.rules.questions import next_questions
+    cat = load_rule_pack(SPEC, tmp_path)
+    s = evaluator_for(cat, "network").session(day=DAY, facts=random_facts(cat, SPEC, random.Random(0), missing=0.7),
+                                               present=present_all(cat), evidence={})
+    assert next_questions(cat, s)

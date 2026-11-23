@@ -22,7 +22,7 @@ REPO = APP.parents[1]
 if str(APP / "src") not in sys.path:
     sys.path.insert(0, str(APP / "src"))
 
-from rag.rules.bench.runner import EvaluatorMismatch, Row, run_axis1, run_axis2  # noqa: E402
+from rag.rules.bench.runner import Row, run_axis1, run_axis2  # noqa: E402
 from rag.rules.bench.synth import AXIS1_SIZES, AXIS2_RULES, AXIS2_SIZES, REAL_AXIS1, ObjSpec, RuleSpec  # noqa: E402
 
 SCENARIOS = {1: "Biên dịch mạng (evaluator_for)", 2: "Lần đánh giá đầu của một hợp đồng",
@@ -78,7 +78,8 @@ def render_summary(rows: list[Row], mach: dict, params: dict, error: str | None 
            "Thời gian: trung vị / p95, mili giây. `net/ref` < 1 nghĩa là network nhanh hơn. Bộ nhớ đỉnh: KB (tracemalloc). "
            "`tính lại`: số node (trục 1) / đối tượng (trục 2) network tính lại, trung vị.", ""]
     if error:
-        out += ["## LỖI: hai evaluator khác nhau — báo Tùng", "", "```", error, "```", ""]
+        out += ["## LỖI — chạy dừng giữa chừng; bảng dưới chỉ gồm phần đã đo (EvaluatorMismatch: báo Tùng)", "",
+                "```", error, "```", ""]
     for axis, name in ((1, "Trục 1 — số rule"), (2, "Trục 2 — số đối tượng mỗi hồ sơ")):
         out += [f"## {name}", ""]
         for sc in (1, 2, 3, 4, 5, 6):
@@ -170,12 +171,12 @@ def main(argv: list[str] | None = None) -> int:
         try:
             for spec in axis1:
                 print(f"trục 1: {spec}", flush=True)
-                rows += run_axis1(spec, seed=args.seed, repeats=repeats, root=Path(tmp))
+                run_axis1(spec, seed=args.seed, repeats=repeats, root=Path(tmp), sink=rows)
             for spec in axis2:
                 print(f"trục 2: {spec}", flush=True)
-                rows += run_axis2(spec, seed=args.seed, repeats=repeats, root=Path(tmp))
-        except EvaluatorMismatch as e:
-            error = str(e)
+                run_axis2(spec, seed=args.seed, repeats=repeats, root=Path(tmp), sink=rows)
+        except Exception as e:  # noqa: BLE001 — mọi lỗi: vẫn ghi phần đã đo, báo lỗi, thoát mã 2
+            error = f"{type(e).__name__}: {e}"
             print(f"LỖI: {error}", file=sys.stderr)
     args.out.mkdir(parents=True, exist_ok=True)
     mach = machine()

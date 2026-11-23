@@ -9,7 +9,7 @@ from rag.rules.loader import PACKS_ROOT, CatalogError, load_pack, load_packs
 
 ROOT = Path(__file__).resolve().parents[1]
 SHARED = yaml.safe_load((PACKS_ROOT / "kinds.yaml").read_text(encoding="utf-8"))
-DOMAINS = {"labor": "labor", "civil_general": "civil", "civil_loan": "loan", "civil_lease": "lease"}
+DOMAINS = {"labor": "labor", "civil_general": "civil", "civil_loan": "loan", "civil_lease": "lease", "consumer": "consumer"}
 
 
 def _concepts_by_domain():

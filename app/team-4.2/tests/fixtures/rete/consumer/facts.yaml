@@ -1,0 +1,130 @@
+# Dữ kiện mà bước trích (facts.py + tagger) phải lấy được từ từng hợp đồng người tiêu dùng mẫu, kèm câu trích nguyên văn.
+# Định dạng như ../lease/facts.yaml; user_facts: câu trả lời của người dùng cho câu hỏi của gói (hợp đồng mẫu? dịch vụ liên tục?).
+c1_internet_hop_le:
+  sign_date: 2025-02-10
+  user_facts: {is_adhesion_contract: true, is_continuous_service: true}
+  document:
+    value: ["220.000 đồng", "Giá cước là 220.000 đồng/tháng, đã bao gồm thuế giá trị gia tăng."]
+    term: ["12 tháng", "Hợp đồng có hiệu lực kể từ ngày ký và có thời hạn 12 tháng."]
+  slots:
+    consumer.content_parties: {}
+    consumer.content_product: {}
+    consumer.content_price_quality: {}
+    consumer.content_payment: {}
+    consumer.content_delivery: {}
+    consumer.content_data_protection: {}
+    consumer.content_termination: {}
+    consumer.content_force_majeure: {}
+    consumer.content_dispute: {}
+    consumer.content_time_term: {}
+    consumer.service_expiry_notice: {}
+    consumer.service_price_change_without_exit:
+      service_price_change_without_exit_right: [false, "nếu không đồng ý với giá mới, Bên B có quyền chấm dứt hợp đồng mà không phải chịu phí."]
+    consumer.service_suspension_notice:
+      trader_may_suspend_without_notice: [false, "Khi cần bảo trì, Bên A thông báo cho Bên B thời gian ngừng và thời gian cung cấp lại dịch vụ chậm nhất 03 ngày làm việc trước ngày ngừng, trừ trường hợp bất khả kháng."]
+    consumer.complaint_right:
+      restricts_consumer_complaint_or_lawsuit: [false, "Bên B có quyền khiếu nại tới cơ quan bảo vệ người tiêu dùng hoặc khởi kiện tại Tòa án có thẩm quyền."]
+  present_quotes:
+    consumer.content_parties: "KHÁCH HÀNG (Bên B): Ông Nguyễn Văn Khách (tên giả dùng cho thử nghiệm), địa chỉ: số 2 ngõ Thử Nghiệm, Hà Nội, điện thoại: 0900 000 001."
+    consumer.content_product: "Bên A cung cấp cho Bên B dịch vụ internet cáp quang gói Gia Đình 100 Mbps"
+    consumer.content_price_quality: "Giá cước là 220.000 đồng/tháng, đã bao gồm thuế giá trị gia tăng."
+    consumer.content_payment: "Bên B thanh toán hằng tháng bằng chuyển khoản hoặc tiền mặt trước ngày 15 của tháng sử dụng."
+    consumer.content_delivery: "Bên A lắp đặt và bắt đầu cung cấp dịch vụ trong vòng 03 ngày làm việc kể từ ngày ký hợp đồng"
+    consumer.content_data_protection: "Bên A có trách nhiệm bảo mật thông tin cá nhân của Bên B"
+    consumer.content_termination: "Bên B có quyền chấm dứt hợp đồng bất cứ lúc nào bằng cách thông báo cho Bên A và chỉ thanh toán cước của thời gian đã sử dụng."
+    consumer.content_force_majeure: "Bên nào không thực hiện được nghĩa vụ do sự kiện bất khả kháng theo quy định của pháp luật thì không phải chịu trách nhiệm"
+    consumer.content_dispute: "Tranh chấp được giải quyết bằng thương lượng"
+    consumer.content_time_term: "Hợp đồng có hiệu lực kể từ ngày ký và có thời hạn 12 tháng."
+    consumer.service_expiry_notice: "Bên A thông báo cho Bên B thời điểm kết thúc hợp đồng và việc nộp cước để tiếp tục sử dụng dịch vụ tối thiểu 07 ngày làm việc trước ngày hợp đồng kết thúc"
+
+c2_dien_may_mien_tru:
+  sign_date: 2025-09-03
+  user_facts: {is_adhesion_contract: false, is_continuous_service: false}
+  document:
+    value: ["15.000.000 đồng", "Bên A bán cho Bên B 01 tủ lạnh hai cánh dung tích 400 lít, mới 100%, giá 15.000.000 đồng."]
+  slots:
+    consumer.liability_exclusion:
+      excludes_trader_legal_liability: [true, "Bên A không chịu trách nhiệm đối với bất kỳ hư hỏng, lỗi kỹ thuật nào của hàng hóa sau khi đã giao, trong mọi trường hợp."]
+    consumer.complaint_right:
+      restricts_consumer_complaint_or_lawsuit: [true, "Bên B không được khiếu nại hoặc khởi kiện về chất lượng hàng hóa sau khi đã ký biên bản nhận hàng."]
+    consumer.trader_interprets:
+      trader_interprets_contract: [true, "Trường hợp có cách hiểu khác nhau về nội dung hợp đồng, Bên A có quyền giải thích cuối cùng."]
+
+c3_phong_tap_gia_han:
+  sign_date: 2025-08-15
+  user_facts: {is_adhesion_contract: true, is_continuous_service: true}
+  document:
+    value: ["6.000.000 đồng", "Phí hội viên là 6.000.000 đồng cho 12 tháng"]
+    term: ["12 tháng", "gói 12 tháng"]
+  slots:
+    consumer.content_parties: {}
+    consumer.content_product: {}
+    consumer.content_price_quality: {}
+    consumer.content_payment: {}
+    consumer.content_delivery: {}
+    consumer.content_time_term: {}
+    consumer.auto_renewal:
+      auto_renewal_without_notice_or_choice: [true, "Khi hết thời hạn, hợp đồng được tự động gia hạn thêm 12 tháng và Bên A tự động trừ phí gia hạn vào thẻ thanh toán của Bên B."]
+    consumer.service_price_change_without_exit:
+      service_price_change_without_exit_right: [true, "Bên A có quyền điều chỉnh phí hội viên trong thời gian sử dụng dịch vụ; Bên B phải thanh toán phần chênh lệch và không được chấm dứt hợp đồng vì lý do này."]
+    consumer.service_suspension_notice:
+      trader_may_suspend_without_notice: [true, "Bên A có quyền tạm ngừng hoạt động phòng tập bất cứ lúc nào để sửa chữa, nâng cấp mà không cần thông báo cho hội viên."]
+  present_quotes:
+    consumer.content_parties: "HỘI VIÊN (Bên B): Anh Trần Văn Tập (tên giả dùng cho thử nghiệm), địa chỉ: số 4 đường Thử Nghiệm, Đà Nẵng, điện thoại: 0900 000 003."
+    consumer.content_product: "Bên A cung cấp cho Bên B quyền sử dụng phòng tập và các lớp nhóm"
+    consumer.content_price_quality: "Phí hội viên là 6.000.000 đồng cho 12 tháng"
+    consumer.content_payment: "thanh toán một lần khi ký hợp đồng bằng chuyển khoản."
+    consumer.content_delivery: "tại cơ sở số 3 đường Thử Nghiệm, Đà Nẵng, gói 12 tháng."
+    consumer.content_time_term: "Hợp đồng có hiệu lực kể từ ngày ký."
+
+c4_mau_thieu_noi_dung:
+  sign_date: 2025-10-20
+  user_facts: {is_adhesion_contract: true, is_continuous_service: false}
+  document:
+    value: ["35.000.000 đồng", "giá 35.000.000 đồng đã bao gồm thuế."]
+  slots:
+    consumer.content_parties: {}
+    consumer.content_product: {}
+    consumer.content_price_quality: {}
+    consumer.content_payment: {}
+    consumer.content_delivery: {}
+    consumer.content_time_term: {}
+  present_quotes:
+    consumer.content_parties: "BÊN MUA (Bên B): Chị Phạm Thị Xe (tên giả dùng cho thử nghiệm), địa chỉ: số 8 đường Thử Nghiệm, Hải Phòng, điện thoại: 0900 000 004."
+    consumer.content_product: "Bên A bán cho Bên B 01 xe máy tay ga mới 100%, màu trắng, dung tích 125 cm3"
+    consumer.content_price_quality: "giá 35.000.000 đồng đã bao gồm thuế."
+    consumer.content_payment: "Bên B thanh toán toàn bộ bằng tiền mặt hoặc chuyển khoản trước khi nhận xe."
+    consumer.content_delivery: "Bên A giao xe tại cửa hàng số 6 đường Thử Nghiệm, Hải Phòng trong 05 ngày kể từ ngày Bên B thanh toán."
+    consumer.content_time_term: "Hợp đồng có hiệu lực kể từ ngày ký và kết thúc khi hai bên hoàn thành nghĩa vụ."
+
+c5_khoa_hoc_du_lieu:
+  sign_date: 2025-11-01
+  user_facts: {is_adhesion_contract: false, is_continuous_service: false}
+  document:
+    value: ["12.000.000 đồng", "Học phí là 12.000.000 đồng"]
+  slots:
+    consumer.data_consent_condition:
+      data_consent_required_to_contract: [true, "Để được ký hợp đồng này, Bên B phải đồng ý cho Bên A thu thập, lưu trữ và chia sẻ thông tin cá nhân của Bên B cho các đối tác của Bên A vì mục đích quảng cáo."]
+    consumer.unilateral_change:
+      trader_may_change_contract_unilaterally: [true, "Bên A có quyền thay đổi lịch học, giáo viên và nội dung hợp đồng này bất cứ lúc nào mà không cần sự đồng ý của Bên B."]
+    consumer.harsher_sanctions:
+      sanctions_harsher_for_consumer: [true, "Nếu Bên B chấm dứt hợp đồng vì bất kỳ lý do gì, Bên B mất toàn bộ học phí đã đóng. Nếu Bên A chấm dứt hợp đồng, Bên A chỉ hoàn lại học phí của các buổi chưa học."]
+
+c6_noi_that_gia_giao:
+  sign_date: 2025-09-12
+  user_facts: {is_adhesion_contract: false, is_continuous_service: false}
+  document:
+    value: ["40.000.000 đồng", "Giá tạm tính là 40.000.000 đồng"]
+  slots:
+    consumer.price_at_delivery:
+      price_set_at_delivery: [true, "giá thanh toán chính thức tính theo giá bán của Bên A tại thời điểm giao hàng."]
+    consumer.third_party_exclusion:
+      excludes_liability_via_third_party: [true, "Bên A không chịu trách nhiệm đối với hư hỏng, mất mát hàng hóa do đơn vị vận chuyển đối tác gây ra."]
+    consumer.consumer_bound_despite_breach:
+      consumer_bound_despite_trader_breach: [true, "Bên B vẫn phải thanh toán đủ số tiền còn lại kể cả khi Bên A giao hàng chậm hoặc giao thiếu."]
+    consumer.trader_decides_breach:
+      trader_decides_consumer_breach: [true, "Bên A toàn quyền xác định Bên B có vi phạm nghĩa vụ hay không"]
+    consumer.transfer_without_consent:
+      trader_transfers_obligations_without_consent: [true, "Bên A được chuyển giao việc thực hiện hợp đồng này cho một đơn vị khác mà không cần sự đồng ý của Bên B."]
+    consumer.harsher_sanctions:
+      sanctions_harsher_for_consumer: [true, "khi Bên A xác định Bên B vi phạm, Bên B mất khoản tiền đặt trước."]

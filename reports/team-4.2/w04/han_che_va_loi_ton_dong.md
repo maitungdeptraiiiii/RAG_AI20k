@@ -365,6 +365,18 @@ tệp bản liệt kê.
 | M.7 | Không làm rule (đã ghi lý do): giao kết, giải thích hợp đồng, công khai mẫu, thời hiệu Đ429, nội dung k6–k9, k11 Đ163, trả nhà 'như mới' (Đ482.1 cho thỏa thuận), mất cọc khi chấm dứt đúng căn cứ (L.14) | Ghi nhận |
 | M.8 | Rule BLDS (Đ477, Đ478, Đ357) gắn với BLDS 2015; hợp đồng thuê ký trước 01/01/2017 vẫn được xét theo câu chữ BLDS 2015 (rule không có giá trị theo kỳ) | Còn |
 
+## N — gói `consumer` (Luật BVQLNTD 2023, 23/11)
+
+| # | Mục | Trạng thái |
+|---|---|---|
+| N.1 | Gói `consumer` (extends `civil_general`): 26 khái niệm / 26 rule: 14 điều khoản cấm Đ25.1–14, 10 nội dung cơ bản của hợp đồng theo mẫu Đ23.3 (chỉ áp khi người dùng xác nhận là hợp đồng mẫu), dịch vụ liên tục: ngừng dịch vụ (Đ41.3), báo trước khi hết hạn (Đ42.2.đ, e) | Xong (chờ duyệt) |
+| N.2 | 6 hợp đồng mẫu c1–c6, 52 nhãn viết tay ở `labels.yaml` trước khi chạy engine; gold sinh bằng `scripts/team-4.2/gold_from_labels.py`; test chung `tests/test_rete_pack_fixtures.py` (dùng lại cho gói thương mại) | Chờ duyệt |
+| N.3 | Nhận diện tự động chọn MỘT loại hợp đồng: gói `consumer` chỉ tự chạy khi văn bản được nhận là `consumer_contract`; chồng lên thuê / vay phải truyền `packs=[..., "consumer"]` | Còn (thiết kế) |
+| N.4 | Cùng một điều khoản có thể ra hai FAIL: `civil.standard_terms_exemption` (BLDS Đ405.3 / 406.3) và `consumer.liability_exclusion` (Đ25.1) — hai căn cứ cùng đúng; chưa gộp | Còn |
+| N.5 | Không làm: Đ25.15 (thiện chí, tiêu chí chung), Đ23.2 + NĐ 55/2024 Đ6 (tiếng Việt, cỡ chữ 12, màu tương phản), đăng ký hợp đồng mẫu (Đ28, danh mục QĐ 07/2024 ở phụ lục chưa tải được), ngoại lệ "pháp luật liên quan cho phép" của Đ25.1, 6, 11 | Ghi nhận |
+| N.6 | Hợp đồng ký trước 01/07/2024 theo Luật BVQLNTD 59/2010/QH12 (chưa tải); gói không phân kỳ | Còn |
+| N.7 | Đ25.12 (chế tài bất lợi hơn) và c6 (mất cọc một chiều) là cách đọc của người soạn | Chờ duyệt |
+
 ## Tồn đọng chung (môi trường, quy trình)
 
 | # | Mục | Trạng thái |

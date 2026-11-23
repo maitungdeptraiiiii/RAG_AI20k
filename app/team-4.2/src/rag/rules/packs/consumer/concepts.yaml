@@ -1,0 +1,810 @@
+# Khái niệm hợp đồng giao kết với người tiêu dùng. Nguồn và trích dẫn: docs/rule_inventory/consumer.yaml.
+# Sinh từ bảng trong lần soạn 23/11; từ nay sửa trực tiếp tệp này.
+version: '0.1'
+law_values_valid_from: '2024-07-01'
+roles:
+- id: BEN_KINH_DOANH
+  label: Tổ chức, cá nhân kinh doanh
+  aliases:
+  - bên bán
+  - bên cung cấp
+  - công ty
+- id: NGUOI_TIEU_DUNG
+  label: Người tiêu dùng
+  aliases:
+  - khách hàng
+  - bên mua
+  - thuê bao
+concepts:
+- id: consumer.liability_exclusion
+  kind: void_term
+  label: Không hạn chế, loại trừ trách nhiệm luật định của bên kinh doanh
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: &id001
+  - NGUOI_TIEU_DUNG
+  describe: Điều khoản hạn chế hoặc loại trừ trách nhiệm mà pháp luật đặt cho bên kinh doanh (bảo hành, bồi thường do hàng có khuyết tật, giao đúng chất lượng...), vd. 'không chịu trách nhiệm trong mọi
+    trường hợp', 'không bảo hành'.
+  phrasing:
+  - không chịu trách nhiệm
+  - miễn trừ trách nhiệm
+  - không bảo hành
+  - trong mọi trường hợp
+  - không bồi thường
+  slots:
+    excludes_trader_legal_liability:
+      kind: bool
+      unit: null
+  anchors:
+  - pid: luat:19/2023/QH15#d25.k1
+    role: basis
+  rules:
+  - id: r1
+    mode: prohibited
+    derogation: mandatory
+    on_silence: none
+    check:
+      fact: excludes_trader_legal_liability
+      op: eq
+      value: false
+    outcome: &id002
+      legality: illegal
+      party_impact: unfavorable
+- id: consumer.complaint_right
+  kind: void_term
+  label: Không hạn chế quyền khiếu nại, khởi kiện của người tiêu dùng
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: 'Điều khoản hạn chế hoặc loại bỏ quyền khiếu nại, khởi kiện của người tiêu dùng: ''không được khiếu nại sau khi nhận hàng'', ''chỉ giải quyết bằng trọng tài, không được khởi kiện ra Tòa'', thời
+    hạn khiếu nại quá ngắn.'
+  phrasing:
+  - khiếu nại
+  - khởi kiện
+  - không được khiếu nại
+  - trọng tài
+  - từ bỏ quyền
+  slots:
+    restricts_consumer_complaint_or_lawsuit:
+      kind: bool
+      unit: null
+  anchors:
+  - pid: luat:19/2023/QH15#d25.k2
+    role: basis
+  - pid: luat:19/2023/QH15#d67.k2
+    role: context
+    note: 'điều khoản trọng tài trong hợp đồng mẫu: người tiêu dùng vẫn được chọn cách giải quyết khác'
+  rules:
+  - id: r1
+    mode: prohibited
+    derogation: mandatory
+    on_silence: none
+    check:
+      fact: restricts_consumer_complaint_or_lawsuit
+      op: eq
+      value: false
+    outcome: *id002
+- id: consumer.unilateral_change
+  kind: void_term
+  label: Bên kinh doanh không được đơn phương sửa hợp đồng
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Điều khoản cho bên kinh doanh tự ý thay đổi nội dung hợp đồng đã ký với người tiêu dùng (không cần người tiêu dùng đồng ý).
+  phrasing:
+  - có quyền thay đổi
+  - đơn phương thay đổi
+  - điều chỉnh nội dung hợp đồng
+  - sửa đổi mà không cần
+  slots:
+    trader_may_change_contract_unilaterally:
+      kind: bool
+      unit: null
+  anchors:
+  - pid: luat:19/2023/QH15#d25.k3
+    role: basis
+  rules:
+  - id: r1
+    mode: prohibited
+    derogation: mandatory
+    on_silence: none
+    check:
+      fact: trader_may_change_contract_unilaterally
+      op: eq
+      value: false
+    outcome: *id002
+- id: consumer.gtc_change_without_exit
+  kind: void_term
+  label: Đổi điều kiện giao dịch chung phải cho người tiêu dùng quyền chấm dứt
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Điều khoản cho bên kinh doanh thay đổi điều kiện giao dịch chung mà KHÔNG cho người tiêu dùng quyền chấm dứt hợp đồng khi không đồng ý. Có cho quyền chấm dứt thì không thuộc khái niệm này.
+  phrasing:
+  - điều kiện giao dịch chung
+  - thay đổi điều kiện
+  - cập nhật điều khoản
+  - điều khoản sử dụng
+  slots:
+    gtc_change_without_exit_right:
+      kind: bool
+      unit: null
+  anchors:
+  - pid: luat:19/2023/QH15#d25.k4
+    role: basis
+  rules:
+  - id: r1
+    mode: prohibited
+    derogation: mandatory
+    on_silence: none
+    check:
+      fact: gtc_change_without_exit_right
+      op: eq
+      value: false
+    outcome: *id002
+- id: consumer.trader_decides_breach
+  kind: void_term
+  label: Bên kinh doanh không tự kết luận người tiêu dùng vi phạm
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Điều khoản cho bên kinh doanh một mình quyết định người tiêu dùng đã vi phạm / không thực hiện nghĩa vụ (vd. 'theo đánh giá của công ty', 'quyết định của công ty là cuối cùng').
+  phrasing:
+  - theo đánh giá của
+  - quyết định cuối cùng
+  - toàn quyền xác định
+  - được coi là vi phạm
+  slots:
+    trader_decides_consumer_breach:
+      kind: bool
+      unit: null
+  anchors:
+  - pid: luat:19/2023/QH15#d25.k5
+    role: basis
+  rules:
+  - id: r1
+    mode: prohibited
+    derogation: mandatory
+    on_silence: none
+    check:
+      fact: trader_decides_consumer_breach
+      op: eq
+      value: false
+    outcome: *id002
+- id: consumer.price_at_delivery
+  kind: void_term
+  label: Không định lại giá lúc giao hàng
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Điều khoản cho bên kinh doanh định giá hoặc đổi giá vào lúc giao hàng / cung cấp dịch vụ (vd. 'giá tính theo giá tại thời điểm giao hàng').
+  phrasing:
+  - giá tại thời điểm giao
+  - giá có thể thay đổi
+  - điều chỉnh giá khi giao
+  - giá thực tế lúc giao
+  slots:
+    price_set_at_delivery:
+      kind: bool
+      unit: null
+  anchors:
+  - pid: luat:19/2023/QH15#d25.k6
+    role: basis
+  rules:
+  - id: r1
+    mode: prohibited
+    derogation: mandatory
+    on_silence: none
+    check:
+      fact: price_set_at_delivery
+      op: eq
+      value: false
+    outcome: *id002
+- id: consumer.service_price_change_without_exit
+  kind: void_term
+  label: Đổi giá dịch vụ liên tục phải cho quyền chấm dứt
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Điều khoản cho bên kinh doanh tăng / đổi giá trong khi đang cung cấp dịch vụ liên tục mà KHÔNG cho người tiêu dùng quyền chấm dứt hợp đồng.
+  phrasing:
+  - điều chỉnh giá cước
+  - thay đổi giá dịch vụ
+  - tăng phí
+  - biểu phí mới
+  slots:
+    service_price_change_without_exit_right:
+      kind: bool
+      unit: null
+  anchors:
+  - pid: luat:19/2023/QH15#d25.k7
+    role: basis
+  rules:
+  - id: r1
+    mode: prohibited
+    derogation: mandatory
+    on_silence: none
+    check:
+      fact: service_price_change_without_exit_right
+      op: eq
+      value: false
+    outcome: *id002
+- id: consumer.trader_interprets
+  kind: void_term
+  label: Bên kinh doanh không giữ quyền giải thích hợp đồng
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Điều khoản dành cho bên kinh doanh quyền giải thích hợp đồng khi có cách hiểu khác nhau (vd. 'công ty có quyền giải thích cuối cùng').
+  phrasing:
+  - quyền giải thích
+  - giải thích cuối cùng
+  - cách hiểu của công ty
+  slots:
+    trader_interprets_contract:
+      kind: bool
+      unit: null
+  anchors:
+  - pid: luat:19/2023/QH15#d25.k8
+    role: basis
+  - pid: luat:19/2023/QH15#d24
+    role: context
+    note: hiểu khác nhau thì giải thích có lợi cho người tiêu dùng
+  rules:
+  - id: r1
+    mode: prohibited
+    derogation: mandatory
+    on_silence: none
+    check:
+      fact: trader_interprets_contract
+      op: eq
+      value: false
+    outcome: *id002
+- id: consumer.third_party_exclusion
+  kind: void_term
+  label: Không loại trừ trách nhiệm khi bán qua bên thứ ba
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Điều khoản nói bên kinh doanh không chịu trách nhiệm khi hàng / dịch vụ được giao, lắp đặt, cung cấp qua đại lý, đơn vị vận chuyển hoặc bên thứ ba khác.
+  phrasing:
+  - bên thứ ba
+  - đơn vị vận chuyển
+  - đại lý
+  - đối tác
+  - không chịu trách nhiệm
+  slots:
+    excludes_liability_via_third_party:
+      kind: bool
+      unit: null
+  anchors:
+  - pid: luat:19/2023/QH15#d25.k9
+    role: basis
+  rules:
+  - id: r1
+    mode: prohibited
+    derogation: mandatory
+    on_silence: none
+    check:
+      fact: excludes_liability_via_third_party
+      op: eq
+      value: false
+    outcome: *id002
+- id: consumer.consumer_bound_despite_breach
+  kind: void_term
+  label: Người tiêu dùng không bị buộc thực hiện khi bên kinh doanh chưa làm
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Điều khoản buộc người tiêu dùng vẫn phải trả tiền / thực hiện nghĩa vụ kể cả khi bên kinh doanh không giao hàng, không cung cấp dịch vụ hoặc cung cấp không đúng.
+  phrasing:
+  - vẫn phải thanh toán
+  - kể cả khi
+  - dù bên
+  - không được từ chối thanh toán
+  slots:
+    consumer_bound_despite_trader_breach:
+      kind: bool
+      unit: null
+  anchors:
+  - pid: luat:19/2023/QH15#d25.k10
+    role: basis
+  rules:
+  - id: r1
+    mode: prohibited
+    derogation: mandatory
+    on_silence: none
+    check:
+      fact: consumer_bound_despite_trader_breach
+      op: eq
+      value: false
+    outcome: *id002
+- id: consumer.transfer_without_consent
+  kind: void_term
+  label: Không chuyển nghĩa vụ cho bên thứ ba khi người tiêu dùng chưa đồng ý
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Điều khoản cho bên kinh doanh chuyển giao hợp đồng / nghĩa vụ của mình cho bên khác mà không cần người tiêu dùng đồng ý.
+  phrasing:
+  - chuyển giao
+  - chuyển nhượng hợp đồng
+  - không cần sự đồng ý
+  - đơn vị khác thực hiện
+  slots:
+    trader_transfers_obligations_without_consent:
+      kind: bool
+      unit: null
+  anchors:
+  - pid: luat:19/2023/QH15#d25.k11
+    role: basis
+  rules:
+  - id: r1
+    mode: prohibited
+    derogation: mandatory
+    on_silence: none
+    check:
+      fact: trader_transfers_obligations_without_consent
+      op: eq
+      value: false
+    outcome: *id002
+- id: consumer.harsher_sanctions
+  kind: void_term
+  label: Chế tài không bất lợi hơn cho người tiêu dùng
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Điều khoản phạt, mất cọc, bồi thường khi vi phạm hoặc chấm dứt hợp đồng mà người tiêu dùng chịu nặng hơn bên kinh doanh (vd. người tiêu dùng mất toàn bộ tiền đã trả, bên kinh doanh vi phạm chỉ
+    hoàn tiền).
+  phrasing:
+  - phạt
+  - mất cọc
+  - không hoàn lại
+  - bồi thường
+  - chấm dứt hợp đồng
+  slots:
+    sanctions_harsher_for_consumer:
+      kind: bool
+      unit: null
+  anchors:
+  - pid: luat:19/2023/QH15#d25.k12
+    role: basis
+  rules:
+  - id: r1
+    mode: prohibited
+    derogation: mandatory
+    on_silence: none
+    check:
+      fact: sanctions_harsher_for_consumer
+      op: eq
+      value: false
+    outcome: *id002
+- id: consumer.auto_renewal
+  kind: void_term
+  label: Gia hạn tự động phải báo trước và cho người tiêu dùng chọn
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Điều khoản tự động gia hạn hợp đồng mà không báo trước cho người tiêu dùng hoặc không cho họ chọn gia hạn hay chấm dứt.
+  phrasing:
+  - tự động gia hạn
+  - gia hạn tự động
+  - tự động tiếp tục
+  - tự động trừ tiền
+  slots:
+    auto_renewal_without_notice_or_choice:
+      kind: bool
+      unit: null
+  anchors:
+  - pid: luat:19/2023/QH15#d25.k13
+    role: basis
+  rules:
+  - id: r1
+    mode: prohibited
+    derogation: mandatory
+    on_silence: none
+    check:
+      fact: auto_renewal_without_notice_or_choice
+      op: eq
+      value: false
+    outcome: *id002
+- id: consumer.data_consent_condition
+  kind: void_term
+  label: Không buộc đồng ý thu thập thông tin để được giao kết
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Điều khoản buộc người tiêu dùng đồng ý cho thu thập, lưu trữ, sử dụng (chia sẻ) thông tin cá nhân thì mới được ký hợp đồng / dùng dịch vụ.
+  phrasing:
+  - thông tin cá nhân
+  - dữ liệu cá nhân
+  - đồng ý cho
+  - chia sẻ thông tin
+  - điều kiện để
+  slots:
+    data_consent_required_to_contract:
+      kind: bool
+      unit: null
+  anchors:
+  - pid: luat:19/2023/QH15#d25.k14
+    role: basis
+  rules:
+  - id: r1
+    mode: prohibited
+    derogation: mandatory
+    on_silence: none
+    check:
+      fact: data_consent_required_to_contract
+      op: eq
+      value: false
+    outcome: *id002
+- id: consumer.content_parties
+  kind: required_content
+  label: Tên, địa chỉ, số điện thoại các bên
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Phần ghi tên, địa chỉ, số điện thoại (phương thức liên hệ) của bên kinh doanh và người tiêu dùng.
+  phrasing:
+  - địa chỉ
+  - điện thoại
+  - email
+  - thông tin khách hàng
+  anchors:
+  - pid: luat:19/2023/QH15#d23.k3.a
+    role: basis
+  rules:
+  - id: r1
+    mode: required
+    derogation: mandatory
+    on_silence: missing_content
+    applicability:
+      fact: is_adhesion_contract
+      op: eq
+      value: true
+    outcome: *id002
+- id: consumer.content_product
+  kind: required_content
+  label: Thông tin về hàng hóa, dịch vụ
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Điều khoản mô tả hàng hóa / dịch vụ được bán, cung cấp.
+  phrasing:
+  - hàng hóa
+  - dịch vụ
+  - gói cước
+  - sản phẩm
+  anchors:
+  - pid: luat:19/2023/QH15#d23.k3.b
+    role: basis
+  rules:
+  - id: r1
+    mode: required
+    derogation: mandatory
+    on_silence: missing_content
+    applicability:
+      fact: is_adhesion_contract
+      op: eq
+      value: true
+    outcome: *id002
+- id: consumer.content_price_quality
+  kind: required_content
+  label: Số lượng, chất lượng, giá
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Điều khoản ghi số lượng / khối lượng, chất lượng và giá của hàng hóa, dịch vụ.
+  phrasing:
+  - giá
+  - số lượng
+  - chất lượng
+  - đơn giá
+  - cước phí
+  anchors:
+  - pid: luat:19/2023/QH15#d23.k3.c
+    role: basis
+  rules:
+  - id: r1
+    mode: required
+    derogation: mandatory
+    on_silence: missing_content
+    applicability:
+      fact: is_adhesion_contract
+      op: eq
+      value: true
+    outcome: *id002
+- id: consumer.content_payment
+  kind: required_content
+  label: Phương thức, thời hạn thanh toán
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Điều khoản ghi cách thanh toán và hạn thanh toán.
+  phrasing:
+  - thanh toán
+  - hạn thanh toán
+  - chuyển khoản
+  - trả góp
+  anchors:
+  - pid: luat:19/2023/QH15#d23.k3.d
+    role: basis
+  rules:
+  - id: r1
+    mode: required
+    derogation: mandatory
+    on_silence: missing_content
+    applicability:
+      fact: is_adhesion_contract
+      op: eq
+      value: true
+    outcome: *id002
+- id: consumer.content_delivery
+  kind: required_content
+  label: Thời gian, địa điểm, cách giao / cung cấp
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Điều khoản ghi thời gian, địa điểm và cách giao hàng hoặc cung cấp dịch vụ.
+  phrasing:
+  - giao hàng
+  - địa điểm
+  - thời gian cung cấp
+  - lắp đặt
+  anchors:
+  - pid: luat:19/2023/QH15#d23.k3.đ
+    role: basis
+  rules:
+  - id: r1
+    mode: required
+    derogation: mandatory
+    on_silence: missing_content
+    applicability:
+      fact: is_adhesion_contract
+      op: eq
+      value: true
+    outcome: *id002
+- id: consumer.content_data_protection
+  kind: required_content
+  label: Trách nhiệm bảo vệ thông tin người tiêu dùng
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Điều khoản về trách nhiệm của bên kinh doanh trong việc bảo vệ thông tin (dữ liệu cá nhân) của người tiêu dùng.
+  phrasing:
+  - bảo mật thông tin
+  - bảo vệ thông tin
+  - dữ liệu cá nhân
+  anchors:
+  - pid: luat:19/2023/QH15#d23.k3.g
+    role: basis
+  rules:
+  - id: r1
+    mode: required
+    derogation: mandatory
+    on_silence: missing_content
+    applicability:
+      fact: is_adhesion_contract
+      op: eq
+      value: true
+    outcome: *id002
+- id: consumer.content_termination
+  kind: required_content
+  label: Trường hợp chấm dứt và trách nhiệm khi chấm dứt
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Điều khoản nêu các trường hợp chấm dứt hợp đồng và trách nhiệm phát sinh khi chấm dứt.
+  phrasing:
+  - chấm dứt hợp đồng
+  - đơn phương chấm dứt
+  - hoàn tiền
+  anchors:
+  - pid: luat:19/2023/QH15#d23.k3.h
+    role: basis
+  rules:
+  - id: r1
+    mode: required
+    derogation: mandatory
+    on_silence: missing_content
+    applicability:
+      fact: is_adhesion_contract
+      op: eq
+      value: true
+    outcome: *id002
+- id: consumer.content_force_majeure
+  kind: required_content
+  label: Trường hợp bất khả kháng
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Điều khoản về sự kiện bất khả kháng.
+  phrasing:
+  - bất khả kháng
+  - thiên tai
+  - sự kiện khách quan
+  anchors:
+  - pid: luat:19/2023/QH15#d23.k3.i
+    role: basis
+  rules:
+  - id: r1
+    mode: required
+    derogation: mandatory
+    on_silence: missing_content
+    applicability:
+      fact: is_adhesion_contract
+      op: eq
+      value: true
+    outcome: *id002
+- id: consumer.content_dispute
+  kind: required_content
+  label: Phương thức giải quyết tranh chấp
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Điều khoản về cách giải quyết tranh chấp (thương lượng, hòa giải, trọng tài, Tòa án).
+  phrasing:
+  - giải quyết tranh chấp
+  - tòa án
+  - thương lượng
+  - trọng tài
+  anchors:
+  - pid: luat:19/2023/QH15#d23.k3.k
+    role: basis
+  rules:
+  - id: r1
+    mode: required
+    derogation: mandatory
+    on_silence: missing_content
+    applicability:
+      fact: is_adhesion_contract
+      op: eq
+      value: true
+    outcome: *id002
+- id: consumer.content_time_term
+  kind: required_content
+  label: Thời điểm giao kết, thời hạn hợp đồng
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Câu ghi thời điểm giao kết (ngày ký) và thời hạn của hợp đồng.
+  phrasing:
+  - thời hạn hợp đồng
+  - có hiệu lực
+  - ngày ký
+  - kể từ ngày
+  anchors:
+  - pid: luat:19/2023/QH15#d23.k3.l
+    role: basis
+  rules:
+  - id: r1
+    mode: required
+    derogation: mandatory
+    on_silence: missing_content
+    applicability:
+      fact: is_adhesion_contract
+      op: eq
+      value: true
+    outcome: *id002
+- id: consumer.service_suspension_notice
+  kind: notice
+  label: 'Dịch vụ liên tục: không ngừng tùy ý, báo trước 03 ngày làm việc'
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Điều khoản cho bên cung cấp dịch vụ liên tục ngừng cung cấp hoặc chấm dứt hợp đồng tùy ý, hoặc ngừng để bảo trì mà không báo trước ít nhất 03 ngày làm việc (trừ bất khả kháng).
+  phrasing:
+  - tạm ngừng cung cấp
+  - ngừng dịch vụ
+  - bảo trì
+  - không cần thông báo
+  - cắt dịch vụ
+  slots:
+    trader_may_suspend_without_notice:
+      kind: bool
+      unit: null
+  anchors:
+  - pid: luat:19/2023/QH15#d41.k3
+    role: basis
+  - pid: luat:19/2023/QH15#d3.k6
+    role: context
+    note: 'dịch vụ liên tục: từ 03 tháng hoặc không xác định thời hạn'
+  rules:
+  - id: r1
+    mode: prohibited
+    derogation: mandatory
+    on_silence: none
+    applicability:
+      fact: is_continuous_service
+      op: eq
+      value: true
+    check:
+      fact: trader_may_suspend_without_notice
+      op: eq
+      value: false
+    outcome: *id002
+- id: consumer.service_expiry_notice
+  kind: required_content
+  label: 'Dịch vụ liên tục: báo trước 07 ngày làm việc khi sắp hết hạn'
+  scope: core
+  phase: P0
+  holder: NGUOI_TIEU_DUNG
+  counterparty: BEN_KINH_DOANH
+  applies_to: *id001
+  describe: Điều khoản cam kết thông báo cho người tiêu dùng ít nhất 07 ngày làm việc trước khi hợp đồng kết thúc hoặc trước hạn phải nộp phí để tiếp tục dùng dịch vụ.
+  phrasing:
+  - thông báo trước
+  - hết hạn
+  - gia hạn
+  - 07 ngày làm việc
+  - nộp phí
+  anchors:
+  - pid: luat:19/2023/QH15#d42.k2.e
+    role: basis
+  - pid: luat:19/2023/QH15#d42.k2.đ
+    role: basis
+    note: báo nộp phí gia hạn
+  rules:
+  - id: r1
+    mode: required
+    derogation: mandatory
+    on_silence: missing_content
+    applicability:
+      all:
+      - fact: is_continuous_service
+        op: eq
+        value: true
+      - fact: is_adhesion_contract
+        op: eq
+        value: true
+    outcome: *id002

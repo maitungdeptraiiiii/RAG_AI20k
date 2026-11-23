@@ -7,7 +7,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 INVENTORY = ROOT / "docs" / "rule_inventory"
 from legal_corpus import ROOTS, law_text  # noqa: E402
-FILES = ["labor_w04.yaml", "civil_general.yaml", "civil_loan.yaml", "civil_lease.yaml"]
+FILES = ["labor_w04.yaml", "civil_general.yaml", "civil_loan.yaml", "civil_lease.yaml", "consumer.yaml"]
 TYPES = {"threshold", "required", "prohibited", "default", "derived", "exception"}
 DEROGATIONS = {"mandatory", "floor", "ceiling", "default"}
 SILENCE = {"missing_content", "hidden_right", "default_applies", "none"}
@@ -43,7 +43,7 @@ def test_every_quote_is_verbatim_in_the_corpus(name, entry):
 def test_entry_shape(name, entry):
     assert REQUIRED <= set(entry), REQUIRED - set(entry)
     assert entry["type"] in TYPES and entry["derogation"] in DEROGATIONS and entry["on_silence"] in SILENCE
-    assert entry["id"].split(".")[0] in {"labor", "civil", "civil_loan", "civil_lease"}
+    assert entry["id"].split(".")[0] in {"labor", "civil", "civil_loan", "civil_lease", "consumer"}
     assert "#d" in entry["source"]["pid"] and entry["source"]["quote"].strip()
     for x in entry["exceptions"]:
         assert {"pid", "quote", "condition"} <= set(x)

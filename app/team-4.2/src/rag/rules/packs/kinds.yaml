@@ -10,7 +10,7 @@ kinds:
   required_content:
     describe: "Nội dung bắt buộc phải có trong hợp đồng (BLLĐ Đ21.1; Luật Nhà ở Đ163); vi phạm = thiếu nội dung"
     slot_kinds: []
-    domains: [labor, lease]
+    domains: [labor, lease, consumer]
   time_limit:
     describe: "Khoảng thời gian có trần / sàn luật định (thời hạn, thử việc, giờ làm, kỳ trả lương, số tháng nợ tiền thuê)"
     slot_kinds: []
@@ -26,7 +26,7 @@ kinds:
   notice:
     describe: "Thời hạn báo trước / nghĩa vụ thông báo khi chấm dứt, hủy bỏ, đòi lại"
     slot_kinds: []
-    domains: [labor, civil, loan]
+    domains: [labor, civil, loan, consumer]
   prohibited_practice:
     describe: "Hành vi bị cấm ghi trong hợp đồng (slot bool = hợp đồng có hành vi đó)"
     slot_kinds: [bool]
@@ -34,7 +34,7 @@ kinds:
   void_term:
     describe: "Điều khoản luật tuyên không có hiệu lực vì bất công với bên không soạn (hợp đồng theo mẫu, điều kiện giao dịch chung: BLDS Đ405.3, Đ406.3; Luật BVQLNTD Đ25)"
     slot_kinds: [bool]
-    domains: [civil]
+    domains: [civil, consumer]
   count_limit:
     describe: "Giới hạn số lần (ký hợp đồng xác định thời hạn, thử việc một lần)"
     slot_kinds: []

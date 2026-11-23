@@ -1,0 +1,31 @@
+# Gói hợp đồng giao kết với người tiêu dùng (Luật Bảo vệ quyền lợi người tiêu dùng 19/2023/QH15, hiệu lực 01/07/2024;
+# NĐ 55/2024/NĐ-CP). Thừa kế đơn vị, dữ kiện và khái niệm dân sự chung của civil_general (BLDS Đ405, 406, 357...).
+# Bản liệt kê có trích dẫn: docs/rule_inventory/consumer.yaml.
+# Dùng hai cách: (1) loại văn bản `consumer_contract` (hợp đồng mua hàng / dùng dịch vụ của cá nhân, gia đình);
+# (2) chồng lên gói khác khi một bên là người tiêu dùng, vd. packs=["civil_lease", "consumer"] (nhận diện tự động chỉ chọn
+# MỘT loại nên chưa tự chồng: xem reports/team-4.2/w04/han_che_va_loi_ton_dong.md mục N).
+id: consumer
+version: "0.1"
+extends: [civil_general]
+document_kinds: [consumer_contract]
+document_labels:
+  consumer_contract: "hợp đồng giữa tổ chức, cá nhân kinh doanh với người tiêu dùng (mua hàng, dùng dịch vụ cho sinh hoạt cá nhân, gia đình)"
+
+units: [hour, day, month, vnd]
+conversions:
+  hour:  {base: hour, factor: 1}
+  day:   {base: hour, factor: 24}
+  month: {base: hour, factor: 720}
+
+document_facts:
+  contract_value_vnd: {unit: vnd, from: value, parse: money}
+  contract_term_months: {unit: month, from: term, parse: duration_to_unit}
+
+extract_fields: []
+user_facts:
+  - is_continuous_service    # dịch vụ có thời hạn từ 03 tháng trở lên hoặc không xác định thời hạn (Luật BVQLNTD Đ3.6)
+user_fact_questions:
+  is_continuous_service:
+    question: "Đây có phải hợp đồng cung cấp dịch vụ liên tục (thời hạn từ 03 tháng trở lên hoặc không xác định thời hạn, vd. internet, điện thoại, phòng tập) không?"
+    values: [true, false]
+findings: []

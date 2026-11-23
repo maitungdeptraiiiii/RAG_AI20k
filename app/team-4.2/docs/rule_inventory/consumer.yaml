@@ -1,0 +1,869 @@
+# Bản liệt kê rule hợp đồng giao kết với người tiêu dùng (Luật Bảo vệ quyền lợi người tiêu dùng 19/2023/QH15, hiệu lực
+# 01/07/2024; NĐ 55/2024/NĐ-CP). Người soạn: Claude theo yêu cầu của Tùng (23/11) — CẦN TÙNG DUYỆT.
+# Đã đọc: Luật Đ3, 21–29, 37–42, 67; NĐ 55/2024 Đ6–16. Quy định không làm rule ghi lý do ở cuối tệp.
+
+- id: consumer.liability_exclusion
+  source:
+    pid: luat:19/2023/QH15#d25.k1
+    quote: Hạn chế, loại trừ trách nhiệm được pháp luật quy định của tổ chức, cá nhân kinh doanh đối với người tiêu dùng, trừ trường hợp pháp luật liên quan quy định trách nhiệm đó được hạn chế, loại trừ;
+  type: prohibited
+  kind: void_term
+  derogation: mandatory
+  applies_when: Hợp đồng giao kết với người tiêu dùng, hợp đồng theo mẫu, điều kiện giao dịch chung
+  facts_needed:
+  - name: excludes_trader_legal_liability
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Bên kinh doanh không được quy định điều khoản này (Đ25.1)
+  on_silence: none
+  derived_from: []
+  yaml_rule: consumer.liability_exclusion/r1
+  examples:
+  - facts:
+      excludes_trader_legal_liability: false
+    expected: PASS
+  - facts:
+      excludes_trader_legal_liability: true
+    expected: FAIL
+  - facts: {}
+    expected: UNKNOWN
+    why: bước trích chưa đọc được điều khoản
+  open_questions:
+  - 'Ngoại lệ ''pháp luật liên quan quy định trách nhiệm đó được hạn chế'' (vd. Đ35 miễn trách hàng khuyết tật) chưa làm rule ngoại lệ: cần dữ kiện về luật chuyên ngành.'
+- id: consumer.complaint_right
+  source:
+    pid: luat:19/2023/QH15#d25.k2
+    quote: Hạn chế, loại trừ quyền khiếu nại, khởi kiện của người tiêu dùng;
+  type: prohibited
+  kind: void_term
+  derogation: mandatory
+  applies_when: Hợp đồng giao kết với người tiêu dùng, hợp đồng theo mẫu, điều kiện giao dịch chung
+  facts_needed:
+  - name: restricts_consumer_complaint_or_lawsuit
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Bên kinh doanh không được quy định điều khoản này (Đ25.2)
+  on_silence: none
+  derived_from: []
+  yaml_rule: consumer.complaint_right/r1
+  examples:
+  - facts:
+      restricts_consumer_complaint_or_lawsuit: false
+    expected: PASS
+  - facts:
+      restricts_consumer_complaint_or_lawsuit: true
+    expected: FAIL
+  - facts: {}
+    expected: UNKNOWN
+    why: bước trích chưa đọc được điều khoản
+  open_questions: []
+- id: consumer.unilateral_change
+  source:
+    pid: luat:19/2023/QH15#d25.k3
+    quote: Cho phép tổ chức, cá nhân kinh doanh đơn phương thay đổi quy định của hợp đồng đã giao kết với người tiêu dùng;
+  type: prohibited
+  kind: void_term
+  derogation: mandatory
+  applies_when: Hợp đồng giao kết với người tiêu dùng, hợp đồng theo mẫu, điều kiện giao dịch chung
+  facts_needed:
+  - name: trader_may_change_contract_unilaterally
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Bên kinh doanh không được quy định điều khoản này (Đ25.3)
+  on_silence: none
+  derived_from: []
+  yaml_rule: consumer.unilateral_change/r1
+  examples:
+  - facts:
+      trader_may_change_contract_unilaterally: false
+    expected: PASS
+  - facts:
+      trader_may_change_contract_unilaterally: true
+    expected: FAIL
+  - facts: {}
+    expected: UNKNOWN
+    why: bước trích chưa đọc được điều khoản
+  open_questions: []
+- id: consumer.gtc_change_without_exit
+  source:
+    pid: luat:19/2023/QH15#d25.k4
+    quote: Cho phép tổ chức, cá nhân kinh doanh đơn phương thay đổi điều kiện giao dịch chung mà không quy định quyền chấm dứt thực hiện hợp đồng cho người tiêu dùng;
+  type: prohibited
+  kind: void_term
+  derogation: mandatory
+  applies_when: Hợp đồng giao kết với người tiêu dùng, hợp đồng theo mẫu, điều kiện giao dịch chung
+  facts_needed:
+  - name: gtc_change_without_exit_right
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Bên kinh doanh không được quy định điều khoản này (Đ25.4)
+  on_silence: none
+  derived_from: []
+  yaml_rule: consumer.gtc_change_without_exit/r1
+  examples:
+  - facts:
+      gtc_change_without_exit_right: false
+    expected: PASS
+  - facts:
+      gtc_change_without_exit_right: true
+    expected: FAIL
+  - facts: {}
+    expected: UNKNOWN
+    why: bước trích chưa đọc được điều khoản
+  open_questions: []
+- id: consumer.trader_decides_breach
+  source:
+    pid: luat:19/2023/QH15#d25.k5
+    quote: Cho phép tổ chức, cá nhân kinh doanh đơn phương xác định người tiêu dùng không thực hiện một hoặc một số trách nhiệm;
+  type: prohibited
+  kind: void_term
+  derogation: mandatory
+  applies_when: Hợp đồng giao kết với người tiêu dùng, hợp đồng theo mẫu, điều kiện giao dịch chung
+  facts_needed:
+  - name: trader_decides_consumer_breach
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Bên kinh doanh không được quy định điều khoản này (Đ25.5)
+  on_silence: none
+  derived_from: []
+  yaml_rule: consumer.trader_decides_breach/r1
+  examples:
+  - facts:
+      trader_decides_consumer_breach: false
+    expected: PASS
+  - facts:
+      trader_decides_consumer_breach: true
+    expected: FAIL
+  - facts: {}
+    expected: UNKNOWN
+    why: bước trích chưa đọc được điều khoản
+  open_questions: []
+- id: consumer.price_at_delivery
+  source:
+    pid: luat:19/2023/QH15#d25.k6
+    quote: Cho phép tổ chức, cá nhân kinh doanh quy định hoặc thay đổi giá tại thời điểm giao sản phẩm, hàng hóa, cung cấp dịch vụ, trừ trường hợp pháp luật có quy định khác;
+  type: prohibited
+  kind: void_term
+  derogation: mandatory
+  applies_when: Hợp đồng giao kết với người tiêu dùng, hợp đồng theo mẫu, điều kiện giao dịch chung
+  facts_needed:
+  - name: price_set_at_delivery
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Bên kinh doanh không được quy định điều khoản này (Đ25.6)
+  on_silence: none
+  derived_from: []
+  yaml_rule: consumer.price_at_delivery/r1
+  examples:
+  - facts:
+      price_set_at_delivery: false
+    expected: PASS
+  - facts:
+      price_set_at_delivery: true
+    expected: FAIL
+  - facts: {}
+    expected: UNKNOWN
+    why: bước trích chưa đọc được điều khoản
+  open_questions:
+  - Ngoại lệ 'pháp luật có quy định khác' (giá Nhà nước định) chưa làm rule ngoại lệ.
+- id: consumer.service_price_change_without_exit
+  source:
+    pid: luat:19/2023/QH15#d25.k7
+    quote: Cho phép tổ chức, cá nhân kinh doanh thay đổi giá trong quá trình cung cấp dịch vụ liên tục mà không quy định quyền chấm dứt thực hiện hợp đồng cho người tiêu dùng;
+  type: prohibited
+  kind: void_term
+  derogation: mandatory
+  applies_when: Hợp đồng giao kết với người tiêu dùng, hợp đồng theo mẫu, điều kiện giao dịch chung
+  facts_needed:
+  - name: service_price_change_without_exit_right
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Bên kinh doanh không được quy định điều khoản này (Đ25.7)
+  on_silence: none
+  derived_from: []
+  yaml_rule: consumer.service_price_change_without_exit/r1
+  examples:
+  - facts:
+      service_price_change_without_exit_right: false
+    expected: PASS
+  - facts:
+      service_price_change_without_exit_right: true
+    expected: FAIL
+  - facts: {}
+    expected: UNKNOWN
+    why: bước trích chưa đọc được điều khoản
+  open_questions: []
+- id: consumer.trader_interprets
+  source:
+    pid: luat:19/2023/QH15#d25.k8
+    quote: Cho phép tổ chức, cá nhân kinh doanh giải thích hợp đồng, điều kiện giao dịch chung trong trường hợp điều khoản của hợp đồng, điều kiện giao dịch chung được hiểu khác nhau;
+  type: prohibited
+  kind: void_term
+  derogation: mandatory
+  applies_when: Hợp đồng giao kết với người tiêu dùng, hợp đồng theo mẫu, điều kiện giao dịch chung
+  facts_needed:
+  - name: trader_interprets_contract
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Bên kinh doanh không được quy định điều khoản này (Đ25.8)
+  on_silence: none
+  derived_from: []
+  yaml_rule: consumer.trader_interprets/r1
+  examples:
+  - facts:
+      trader_interprets_contract: false
+    expected: PASS
+  - facts:
+      trader_interprets_contract: true
+    expected: FAIL
+  - facts: {}
+    expected: UNKNOWN
+    why: bước trích chưa đọc được điều khoản
+  open_questions: []
+- id: consumer.third_party_exclusion
+  source:
+    pid: luat:19/2023/QH15#d25.k9
+    quote: Loại trừ trách nhiệm của tổ chức, cá nhân kinh doanh trong trường hợp tổ chức, cá nhân kinh doanh bán sản phẩm, hàng hóa, cung cấp dịch vụ thông qua bên thứ ba;
+  type: prohibited
+  kind: void_term
+  derogation: mandatory
+  applies_when: Hợp đồng giao kết với người tiêu dùng, hợp đồng theo mẫu, điều kiện giao dịch chung
+  facts_needed:
+  - name: excludes_liability_via_third_party
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Bên kinh doanh không được quy định điều khoản này (Đ25.9)
+  on_silence: none
+  derived_from: []
+  yaml_rule: consumer.third_party_exclusion/r1
+  examples:
+  - facts:
+      excludes_liability_via_third_party: false
+    expected: PASS
+  - facts:
+      excludes_liability_via_third_party: true
+    expected: FAIL
+  - facts: {}
+    expected: UNKNOWN
+    why: bước trích chưa đọc được điều khoản
+  open_questions: []
+- id: consumer.consumer_bound_despite_breach
+  source:
+    pid: luat:19/2023/QH15#d25.k10
+    quote: Bắt buộc người tiêu dùng phải tuân thủ trách nhiệm khi tổ chức, cá nhân kinh doanh không hoàn thành trách nhiệm của mình;
+  type: prohibited
+  kind: void_term
+  derogation: mandatory
+  applies_when: Hợp đồng giao kết với người tiêu dùng, hợp đồng theo mẫu, điều kiện giao dịch chung
+  facts_needed:
+  - name: consumer_bound_despite_trader_breach
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Bên kinh doanh không được quy định điều khoản này (Đ25.10)
+  on_silence: none
+  derived_from: []
+  yaml_rule: consumer.consumer_bound_despite_breach/r1
+  examples:
+  - facts:
+      consumer_bound_despite_trader_breach: false
+    expected: PASS
+  - facts:
+      consumer_bound_despite_trader_breach: true
+    expected: FAIL
+  - facts: {}
+    expected: UNKNOWN
+    why: bước trích chưa đọc được điều khoản
+  open_questions: []
+- id: consumer.transfer_without_consent
+  source:
+    pid: luat:19/2023/QH15#d25.k11
+    quote: Cho phép tổ chức, cá nhân kinh doanh chuyển giao trách nhiệm cho bên thứ ba mà không được người tiêu dùng đồng ý, trừ trường hợp pháp luật có quy định khác;
+  type: prohibited
+  kind: void_term
+  derogation: mandatory
+  applies_when: Hợp đồng giao kết với người tiêu dùng, hợp đồng theo mẫu, điều kiện giao dịch chung
+  facts_needed:
+  - name: trader_transfers_obligations_without_consent
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Bên kinh doanh không được quy định điều khoản này (Đ25.11)
+  on_silence: none
+  derived_from: []
+  yaml_rule: consumer.transfer_without_consent/r1
+  examples:
+  - facts:
+      trader_transfers_obligations_without_consent: false
+    expected: PASS
+  - facts:
+      trader_transfers_obligations_without_consent: true
+    expected: FAIL
+  - facts: {}
+    expected: UNKNOWN
+    why: bước trích chưa đọc được điều khoản
+  open_questions: []
+- id: consumer.harsher_sanctions
+  source:
+    pid: luat:19/2023/QH15#d25.k12
+    quote: Quy định về chế tài theo hướng bất lợi hơn cho người tiêu dùng do vi phạm hoặc chấm dứt thực hiện hợp đồng;
+  type: prohibited
+  kind: void_term
+  derogation: mandatory
+  applies_when: Hợp đồng giao kết với người tiêu dùng, hợp đồng theo mẫu, điều kiện giao dịch chung
+  facts_needed:
+  - name: sanctions_harsher_for_consumer
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Bên kinh doanh không được quy định điều khoản này (Đ25.12)
+  on_silence: none
+  derived_from: []
+  yaml_rule: consumer.harsher_sanctions/r1
+  examples:
+  - facts:
+      sanctions_harsher_for_consumer: false
+    expected: PASS
+  - facts:
+      sanctions_harsher_for_consumer: true
+    expected: FAIL
+  - facts: {}
+    expected: UNKNOWN
+    why: bước trích chưa đọc được điều khoản
+  open_questions:
+  - So sánh 'bất lợi hơn' cần nhìn chế tài của cả hai bên; bước trích phải đọc cả hai vế.
+- id: consumer.auto_renewal
+  source:
+    pid: luat:19/2023/QH15#d25.k13
+    quote: Cho phép tổ chức, cá nhân kinh doanh gia hạn hợp đồng đã thỏa thuận với người tiêu dùng mà không quy định trách nhiệm thông báo trước hoặc không có cơ chế để người tiêu dùng lựa chọn gia hạn
+      hay chấm dứt thực hiện hợp đồng;
+  type: prohibited
+  kind: void_term
+  derogation: mandatory
+  applies_when: Hợp đồng giao kết với người tiêu dùng, hợp đồng theo mẫu, điều kiện giao dịch chung
+  facts_needed:
+  - name: auto_renewal_without_notice_or_choice
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Bên kinh doanh không được quy định điều khoản này (Đ25.13)
+  on_silence: none
+  derived_from: []
+  yaml_rule: consumer.auto_renewal/r1
+  examples:
+  - facts:
+      auto_renewal_without_notice_or_choice: false
+    expected: PASS
+  - facts:
+      auto_renewal_without_notice_or_choice: true
+    expected: FAIL
+  - facts: {}
+    expected: UNKNOWN
+    why: bước trích chưa đọc được điều khoản
+  open_questions: []
+- id: consumer.data_consent_condition
+  source:
+    pid: luat:19/2023/QH15#d25.k14
+    quote: Quy định người tiêu dùng phải đồng ý cho tổ chức, cá nhân kinh doanh thu thập, lưu trữ, sử dụng thông tin của người tiêu dùng là điều kiện để giao kết hợp đồng, điều kiện giao dịch chung, trừ
+      trường hợp pháp luật có quy định khác;
+  type: prohibited
+  kind: void_term
+  derogation: mandatory
+  applies_when: Hợp đồng giao kết với người tiêu dùng, hợp đồng theo mẫu, điều kiện giao dịch chung
+  facts_needed:
+  - name: data_consent_required_to_contract
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Bên kinh doanh không được quy định điều khoản này (Đ25.14)
+  on_silence: none
+  derived_from: []
+  yaml_rule: consumer.data_consent_condition/r1
+  examples:
+  - facts:
+      data_consent_required_to_contract: false
+    expected: PASS
+  - facts:
+      data_consent_required_to_contract: true
+    expected: FAIL
+  - facts: {}
+    expected: UNKNOWN
+    why: bước trích chưa đọc được điều khoản
+  open_questions: []
+- id: consumer.content_parties
+  source:
+    pid: luat:19/2023/QH15#d23.k3.a
+    quote: 'Thông tin của các bên trong hợp đồng bao gồm: tên, địa chỉ, số điện thoại, phương thức liên hệ khác (nếu có);'
+  type: required
+  kind: required_content
+  derogation: mandatory
+  applies_when: Hợp đồng theo mẫu giao kết với người tiêu dùng
+  facts_needed:
+  - name: is_adhesion_contract
+    kind: bool
+    from: user
+  - name: present
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Hợp đồng theo mẫu thiếu nội dung cơ bản Đ23.3.a
+  on_silence: missing_content
+  derived_from: []
+  yaml_rule: consumer.content_parties/r1
+  examples:
+  - facts:
+      is_adhesion_contract: true
+      present: true
+    expected: PASS
+  - facts:
+      is_adhesion_contract: true
+      present: false
+    expected: FAIL
+  - facts:
+      is_adhesion_contract: false
+      present: false
+    expected: NOT_APPLICABLE
+  - facts:
+      present: false
+    expected: UNKNOWN
+    why: chưa biết có phải hợp đồng theo mẫu không
+  open_questions: []
+- id: consumer.content_product
+  source:
+    pid: luat:19/2023/QH15#d23.k3.b
+    quote: Thông tin về sản phẩm, hàng hóa, dịch vụ được bán, cung cấp theo hợp đồng;
+  type: required
+  kind: required_content
+  derogation: mandatory
+  applies_when: Hợp đồng theo mẫu giao kết với người tiêu dùng
+  facts_needed:
+  - name: is_adhesion_contract
+    kind: bool
+    from: user
+  - name: present
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Hợp đồng theo mẫu thiếu nội dung cơ bản Đ23.3.b
+  on_silence: missing_content
+  derived_from: []
+  yaml_rule: consumer.content_product/r1
+  examples:
+  - facts:
+      is_adhesion_contract: true
+      present: true
+    expected: PASS
+  - facts:
+      is_adhesion_contract: true
+      present: false
+    expected: FAIL
+  - facts:
+      is_adhesion_contract: false
+      present: false
+    expected: NOT_APPLICABLE
+  - facts:
+      present: false
+    expected: UNKNOWN
+    why: chưa biết có phải hợp đồng theo mẫu không
+  open_questions: []
+- id: consumer.content_price_quality
+  source:
+    pid: luat:19/2023/QH15#d23.k3.c
+    quote: Đo lường, số lượng, khối lượng, chất lượng, công dụng, giá của sản phẩm, hàng hóa, dịch vụ được bán, cung cấp
+  type: required
+  kind: required_content
+  derogation: mandatory
+  applies_when: Hợp đồng theo mẫu giao kết với người tiêu dùng
+  facts_needed:
+  - name: is_adhesion_contract
+    kind: bool
+    from: user
+  - name: present
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Hợp đồng theo mẫu thiếu nội dung cơ bản Đ23.3.c
+  on_silence: missing_content
+  derived_from: []
+  yaml_rule: consumer.content_price_quality/r1
+  examples:
+  - facts:
+      is_adhesion_contract: true
+      present: true
+    expected: PASS
+  - facts:
+      is_adhesion_contract: true
+      present: false
+    expected: FAIL
+  - facts:
+      is_adhesion_contract: false
+      present: false
+    expected: NOT_APPLICABLE
+  - facts:
+      present: false
+    expected: UNKNOWN
+    why: chưa biết có phải hợp đồng theo mẫu không
+  open_questions: []
+- id: consumer.content_payment
+  source:
+    pid: luat:19/2023/QH15#d23.k3.d
+    quote: Phương thức, thời hạn thanh toán;
+  type: required
+  kind: required_content
+  derogation: mandatory
+  applies_when: Hợp đồng theo mẫu giao kết với người tiêu dùng
+  facts_needed:
+  - name: is_adhesion_contract
+    kind: bool
+    from: user
+  - name: present
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Hợp đồng theo mẫu thiếu nội dung cơ bản Đ23.3.d
+  on_silence: missing_content
+  derived_from: []
+  yaml_rule: consumer.content_payment/r1
+  examples:
+  - facts:
+      is_adhesion_contract: true
+      present: true
+    expected: PASS
+  - facts:
+      is_adhesion_contract: true
+      present: false
+    expected: FAIL
+  - facts:
+      is_adhesion_contract: false
+      present: false
+    expected: NOT_APPLICABLE
+  - facts:
+      present: false
+    expected: UNKNOWN
+    why: chưa biết có phải hợp đồng theo mẫu không
+  open_questions: []
+- id: consumer.content_delivery
+  source:
+    pid: luat:19/2023/QH15#d23.k3.đ
+    quote: Thời gian, địa điểm, phương thức bán, cung cấp sản phẩm, hàng hóa, dịch vụ;
+  type: required
+  kind: required_content
+  derogation: mandatory
+  applies_when: Hợp đồng theo mẫu giao kết với người tiêu dùng
+  facts_needed:
+  - name: is_adhesion_contract
+    kind: bool
+    from: user
+  - name: present
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Hợp đồng theo mẫu thiếu nội dung cơ bản Đ23.3.đ
+  on_silence: missing_content
+  derived_from: []
+  yaml_rule: consumer.content_delivery/r1
+  examples:
+  - facts:
+      is_adhesion_contract: true
+      present: true
+    expected: PASS
+  - facts:
+      is_adhesion_contract: true
+      present: false
+    expected: FAIL
+  - facts:
+      is_adhesion_contract: false
+      present: false
+    expected: NOT_APPLICABLE
+  - facts:
+      present: false
+    expected: UNKNOWN
+    why: chưa biết có phải hợp đồng theo mẫu không
+  open_questions: []
+- id: consumer.content_data_protection
+  source:
+    pid: luat:19/2023/QH15#d23.k3.g
+    quote: Trách nhiệm bảo vệ thông tin của người tiêu dùng;
+  type: required
+  kind: required_content
+  derogation: mandatory
+  applies_when: Hợp đồng theo mẫu giao kết với người tiêu dùng
+  facts_needed:
+  - name: is_adhesion_contract
+    kind: bool
+    from: user
+  - name: present
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Hợp đồng theo mẫu thiếu nội dung cơ bản Đ23.3.g
+  on_silence: missing_content
+  derived_from: []
+  yaml_rule: consumer.content_data_protection/r1
+  examples:
+  - facts:
+      is_adhesion_contract: true
+      present: true
+    expected: PASS
+  - facts:
+      is_adhesion_contract: true
+      present: false
+    expected: FAIL
+  - facts:
+      is_adhesion_contract: false
+      present: false
+    expected: NOT_APPLICABLE
+  - facts:
+      present: false
+    expected: UNKNOWN
+    why: chưa biết có phải hợp đồng theo mẫu không
+  open_questions: []
+- id: consumer.content_termination
+  source:
+    pid: luat:19/2023/QH15#d23.k3.h
+    quote: Trường hợp chấm dứt thực hiện hợp đồng và trách nhiệm phát sinh do chấm dứt thực hiện hợp đồng;
+  type: required
+  kind: required_content
+  derogation: mandatory
+  applies_when: Hợp đồng theo mẫu giao kết với người tiêu dùng
+  facts_needed:
+  - name: is_adhesion_contract
+    kind: bool
+    from: user
+  - name: present
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Hợp đồng theo mẫu thiếu nội dung cơ bản Đ23.3.h
+  on_silence: missing_content
+  derived_from: []
+  yaml_rule: consumer.content_termination/r1
+  examples:
+  - facts:
+      is_adhesion_contract: true
+      present: true
+    expected: PASS
+  - facts:
+      is_adhesion_contract: true
+      present: false
+    expected: FAIL
+  - facts:
+      is_adhesion_contract: false
+      present: false
+    expected: NOT_APPLICABLE
+  - facts:
+      present: false
+    expected: UNKNOWN
+    why: chưa biết có phải hợp đồng theo mẫu không
+  open_questions: []
+- id: consumer.content_force_majeure
+  source:
+    pid: luat:19/2023/QH15#d23.k3.i
+    quote: Trường hợp bất khả kháng theo quy định của pháp luật;
+  type: required
+  kind: required_content
+  derogation: mandatory
+  applies_when: Hợp đồng theo mẫu giao kết với người tiêu dùng
+  facts_needed:
+  - name: is_adhesion_contract
+    kind: bool
+    from: user
+  - name: present
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Hợp đồng theo mẫu thiếu nội dung cơ bản Đ23.3.i
+  on_silence: missing_content
+  derived_from: []
+  yaml_rule: consumer.content_force_majeure/r1
+  examples:
+  - facts:
+      is_adhesion_contract: true
+      present: true
+    expected: PASS
+  - facts:
+      is_adhesion_contract: true
+      present: false
+    expected: FAIL
+  - facts:
+      is_adhesion_contract: false
+      present: false
+    expected: NOT_APPLICABLE
+  - facts:
+      present: false
+    expected: UNKNOWN
+    why: chưa biết có phải hợp đồng theo mẫu không
+  open_questions: []
+- id: consumer.content_dispute
+  source:
+    pid: luat:19/2023/QH15#d23.k3.k
+    quote: Phương thức giải quyết tranh chấp;
+  type: required
+  kind: required_content
+  derogation: mandatory
+  applies_when: Hợp đồng theo mẫu giao kết với người tiêu dùng
+  facts_needed:
+  - name: is_adhesion_contract
+    kind: bool
+    from: user
+  - name: present
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Hợp đồng theo mẫu thiếu nội dung cơ bản Đ23.3.k
+  on_silence: missing_content
+  derived_from: []
+  yaml_rule: consumer.content_dispute/r1
+  examples:
+  - facts:
+      is_adhesion_contract: true
+      present: true
+    expected: PASS
+  - facts:
+      is_adhesion_contract: true
+      present: false
+    expected: FAIL
+  - facts:
+      is_adhesion_contract: false
+      present: false
+    expected: NOT_APPLICABLE
+  - facts:
+      present: false
+    expected: UNKNOWN
+    why: chưa biết có phải hợp đồng theo mẫu không
+  open_questions: []
+- id: consumer.content_time_term
+  source:
+    pid: luat:19/2023/QH15#d23.k3.l
+    quote: Thời điểm giao kết hợp đồng, thời hạn của hợp đồng.
+  type: required
+  kind: required_content
+  derogation: mandatory
+  applies_when: Hợp đồng theo mẫu giao kết với người tiêu dùng
+  facts_needed:
+  - name: is_adhesion_contract
+    kind: bool
+    from: user
+  - name: present
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Hợp đồng theo mẫu thiếu nội dung cơ bản Đ23.3.l
+  on_silence: missing_content
+  derived_from: []
+  yaml_rule: consumer.content_time_term/r1
+  examples:
+  - facts:
+      is_adhesion_contract: true
+      present: true
+    expected: PASS
+  - facts:
+      is_adhesion_contract: true
+      present: false
+    expected: FAIL
+  - facts:
+      is_adhesion_contract: false
+      present: false
+    expected: NOT_APPLICABLE
+  - facts:
+      present: false
+    expected: UNKNOWN
+    why: chưa biết có phải hợp đồng theo mẫu không
+  open_questions: []
+- id: consumer.service_suspension_notice
+  source:
+    pid: luat:19/2023/QH15#d41.k3
+    quote: Không được đơn phương chấm dứt thực hiện hợp đồng, ngừng cung cấp dịch vụ không đúng hợp đồng hoặc trái quy định của pháp luật. Trường hợp cần sửa chữa, bảo trì hoặc vì lý do khác bắt buộc phải
+      ngừng cung cấp dịch vụ, tổ chức, cá nhân kinh doanh cung cấp dịch vụ phải thông báo trước cho người tiêu dùng về thời gian ngừng cung cấp dịch vụ và thời gian cung cấp lại dịch vụ chậm nhất là 03
+      ngày làm việc trước ngày ngừng cung cấp dịch vụ, trừ trường hợp bất khả kháng.
+  type: prohibited
+  kind: notice
+  derogation: mandatory
+  applies_when: Hợp đồng cung cấp dịch vụ liên tục (từ 03 tháng hoặc không xác định thời hạn, Đ3.6)
+  facts_needed:
+  - name: is_continuous_service
+    kind: bool
+    from: user
+  - name: trader_may_suspend_without_notice
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Điều khoản cho bên cung cấp ngừng dịch vụ / chấm dứt tùy ý hoặc không báo trước 03 ngày làm việc trái Đ41.3
+  on_silence: none
+  derived_from: []
+  yaml_rule: consumer.service_suspension_notice/r1
+  examples:
+  - facts:
+      is_continuous_service: true
+      trader_may_suspend_without_notice: false
+    expected: PASS
+  - facts:
+      is_continuous_service: true
+      trader_may_suspend_without_notice: true
+    expected: FAIL
+  - facts:
+      trader_may_suspend_without_notice: true
+    expected: UNKNOWN
+    why: chưa biết có phải dịch vụ liên tục không
+  open_questions:
+  - 'Ngoại lệ bất khả kháng: điều khoản chỉ cho ngừng khi bất khả kháng thì không thuộc khái niệm.'
+- id: consumer.service_expiry_notice
+  source:
+    pid: luat:19/2023/QH15#d42.k2.e
+    quote: Thông báo cho người tiêu dùng về thời điểm kết thúc hợp đồng theo cách thức đã được thỏa thuận tối thiểu 07 ngày làm việc trước ngày hợp đồng kết thúc.
+  type: required
+  kind: required_content
+  derogation: mandatory
+  applies_when: Hợp đồng theo mẫu cung cấp dịch vụ liên tục
+  facts_needed:
+  - name: is_continuous_service
+    kind: bool
+    from: user
+  - name: is_adhesion_contract
+    kind: bool
+    from: user
+  - name: present
+    kind: bool
+    from: contract
+  exceptions: []
+  conclusion: Hợp đồng mẫu dịch vụ liên tục phải có điều khoản báo trước tối thiểu 07 ngày làm việc trước khi hết hạn / phải nộp phí gia hạn
+  on_silence: missing_content
+  derived_from: []
+  yaml_rule: consumer.service_expiry_notice/r1
+  examples:
+  - facts:
+      is_continuous_service: true
+      is_adhesion_contract: true
+      present: true
+    expected: PASS
+  - facts:
+      is_continuous_service: true
+      is_adhesion_contract: true
+      present: false
+    expected: FAIL
+  - facts:
+      is_adhesion_contract: true
+      present: false
+    expected: UNKNOWN
+    why: chưa biết có phải dịch vụ liên tục không
+  open_questions:
+  - Gộp điểm đ (báo nộp phí gia hạn) và e (báo kết thúc hợp đồng) Đ42.2 vào một khái niệm 'báo trước khi hết hạn'; điểm a–d Đ42.2 trùng phần lớn Đ23.3 nên không làm riêng.
+
+# ── Đã đọc, không làm rule (không kiểm được trên văn bản hợp đồng, hoặc mặc định):
+# Luật Đ23.1 (hình thức theo BLDS), Đ23.2 + NĐ 55/2024 Đ6 (tiếng Việt, cỡ chữ tối thiểu 12, màu chữ tương phản: không đọc
+#   được từ văn bản đã số hóa), Đ23.3.e (quyền và nghĩa vụ: mọi hợp đồng đều có câu nêu nghĩa vụ), Đ24 (giải thích có lợi cho
+#   người tiêu dùng: quy tắc khi tranh chấp; điều khoản trái ở Đ25.8), Đ25.15 (trái nguyên tắc thiện chí: tiêu chí chung, không
+#   kiểm được bằng một dữ kiện), Đ26–27 (thời gian nghiên cứu, lưu giữ, công khai: sự kiện ngoài văn bản), Đ28 + NĐ 55/2024
+#   Đ7–16 + QĐ 07/2024/QĐ-TTg (đăng ký hợp đồng theo mẫu: thủ tục hành chính; danh mục nằm ở phụ lục chưa tải được, K.2),
+#   Đ29 (hóa đơn, chứng từ), Đ37–38 (giao dịch từ xa: nghĩa vụ cung cấp thông tin), Đ41.2 và Đ42.3 ('trừ trường hợp các
+#   bên có thỏa thuận khác'), Đ42.1 (lập văn bản, đưa 01 bản: sự kiện), Đ67.1 (thông báo điều khoản trọng tài: sự kiện).
+# Hợp đồng ký trước 01/07/2024 theo Luật BVQLNTD 59/2010/QH12 (chưa tải); gói không phân kỳ.

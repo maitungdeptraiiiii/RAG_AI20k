@@ -1,0 +1,476 @@
+# Nhãn đúng cho hợp đồng người tiêu dùng mẫu. SINH từ labels.yaml (viết tay từ luật, trước khi chạy engine) bằng
+# scripts/team-4.2/gold_from_labels.py; câu căn cứ lấy từ docs/rule_inventory/consumer.yaml. CHỜ TÙNG DUYỆT.
+dossier_id: consumer
+labeled_by: Claude (theo yêu cầu của Tùng) — CHỜ TÙNG DUYỆT
+expected:
+- rule: consumer.content_parties/r1
+  object: c1_internet_hop_le
+  periods:
+  - from: '2025-02-10'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.a
+    quote: 'Thông tin của các bên trong hợp đồng bao gồm: tên, địa chỉ, số điện thoại, phương thức liên hệ khác (nếu có);'
+- rule: consumer.content_product/r1
+  object: c1_internet_hop_le
+  periods:
+  - from: '2025-02-10'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.b
+    quote: Thông tin về sản phẩm, hàng hóa, dịch vụ được bán, cung cấp theo hợp đồng;
+- rule: consumer.content_price_quality/r1
+  object: c1_internet_hop_le
+  periods:
+  - from: '2025-02-10'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.c
+    quote: Đo lường, số lượng, khối lượng, chất lượng, công dụng, giá của sản phẩm, hàng hóa, dịch vụ được bán, cung cấp
+- rule: consumer.content_payment/r1
+  object: c1_internet_hop_le
+  periods:
+  - from: '2025-02-10'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.d
+    quote: Phương thức, thời hạn thanh toán;
+- rule: consumer.content_delivery/r1
+  object: c1_internet_hop_le
+  periods:
+  - from: '2025-02-10'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.đ
+    quote: Thời gian, địa điểm, phương thức bán, cung cấp sản phẩm, hàng hóa, dịch vụ;
+- rule: consumer.content_data_protection/r1
+  object: c1_internet_hop_le
+  periods:
+  - from: '2025-02-10'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.g
+    quote: Trách nhiệm bảo vệ thông tin của người tiêu dùng;
+- rule: consumer.content_termination/r1
+  object: c1_internet_hop_le
+  periods:
+  - from: '2025-02-10'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.h
+    quote: Trường hợp chấm dứt thực hiện hợp đồng và trách nhiệm phát sinh do chấm dứt thực hiện hợp đồng;
+- rule: consumer.content_force_majeure/r1
+  object: c1_internet_hop_le
+  periods:
+  - from: '2025-02-10'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.i
+    quote: Trường hợp bất khả kháng theo quy định của pháp luật;
+- rule: consumer.content_dispute/r1
+  object: c1_internet_hop_le
+  periods:
+  - from: '2025-02-10'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.k
+    quote: Phương thức giải quyết tranh chấp;
+- rule: consumer.content_time_term/r1
+  object: c1_internet_hop_le
+  periods:
+  - from: '2025-02-10'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.l
+    quote: Thời điểm giao kết hợp đồng, thời hạn của hợp đồng.
+- rule: consumer.service_expiry_notice/r1
+  object: c1_internet_hop_le
+  periods:
+  - from: '2025-02-10'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d42.k2.e
+    quote: Thông báo cho người tiêu dùng về thời điểm kết thúc hợp đồng theo cách thức đã được thỏa thuận tối thiểu 07 ngày làm việc trước ngày hợp đồng kết thúc.
+  note: báo trước 07 ngày làm việc qua tin nhắn
+- rule: consumer.service_price_change_without_exit/r1
+  object: c1_internet_hop_le
+  periods:
+  - from: '2025-02-10'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d25.k7
+    quote: Cho phép tổ chức, cá nhân kinh doanh thay đổi giá trong quá trình cung cấp dịch vụ liên tục mà không quy định quyền chấm dứt thực hiện hợp đồng cho người tiêu dùng;
+  note: đổi giá thì khách được chấm dứt không mất phí
+- rule: consumer.service_suspension_notice/r1
+  object: c1_internet_hop_le
+  periods:
+  - from: '2025-02-10'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d41.k3
+    quote: Không được đơn phương chấm dứt thực hiện hợp đồng, ngừng cung cấp dịch vụ không đúng hợp đồng hoặc trái quy định của pháp luật. Trường hợp cần sửa chữa, bảo trì hoặc vì lý do khác bắt buộc phải
+      ngừng cung cấp dịch vụ, tổ chức, cá nhân kinh doanh cung cấp dịch vụ phải thông báo trước cho người tiêu dùng về thời gian ngừng cung cấp dịch vụ và thời gian cung cấp lại dịch vụ chậm nhất là 03
+      ngày làm việc trước ngày ngừng cung cấp dịch vụ, trừ trường hợp bất khả kháng.
+  note: bảo trì báo trước 03 ngày làm việc
+- rule: consumer.complaint_right/r1
+  object: c1_internet_hop_le
+  periods:
+  - from: '2025-02-10'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d25.k2
+    quote: Hạn chế, loại trừ quyền khiếu nại, khởi kiện của người tiêu dùng;
+- rule: consumer.liability_exclusion/r1
+  object: c2_dien_may_mien_tru
+  periods:
+  - from: '2025-09-03'
+    status: FAIL
+    finding: violation
+  basis:
+    pid: luat:19/2023/QH15#d25.k1
+    quote: Hạn chế, loại trừ trách nhiệm được pháp luật quy định của tổ chức, cá nhân kinh doanh đối với người tiêu dùng, trừ trường hợp pháp luật liên quan quy định trách nhiệm đó được hạn chế, loại trừ;
+  note: 'Điều 3: không chịu trách nhiệm mọi hư hỏng sau khi giao, trong mọi trường hợp'
+- rule: consumer.complaint_right/r1
+  object: c2_dien_may_mien_tru
+  periods:
+  - from: '2025-09-03'
+    status: FAIL
+    finding: violation
+  basis:
+    pid: luat:19/2023/QH15#d25.k2
+    quote: Hạn chế, loại trừ quyền khiếu nại, khởi kiện của người tiêu dùng;
+  note: 'Điều 4: không được khiếu nại, khởi kiện sau khi nhận hàng'
+- rule: consumer.trader_interprets/r1
+  object: c2_dien_may_mien_tru
+  periods:
+  - from: '2025-09-03'
+    status: FAIL
+    finding: violation
+  basis:
+    pid: luat:19/2023/QH15#d25.k8
+    quote: Cho phép tổ chức, cá nhân kinh doanh giải thích hợp đồng, điều kiện giao dịch chung trong trường hợp điều khoản của hợp đồng, điều kiện giao dịch chung được hiểu khác nhau;
+  note: 'Điều 5: bên bán giải thích cuối cùng'
+- rule: consumer.content_parties/r1
+  object: c2_dien_may_mien_tru
+  periods:
+  - from: '2025-09-03'
+    status: NOT_APPLICABLE
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.a
+    quote: 'Thông tin của các bên trong hợp đồng bao gồm: tên, địa chỉ, số điện thoại, phương thức liên hệ khác (nếu có);'
+  note: người dùng trả lời không phải hợp đồng theo mẫu
+- rule: consumer.content_parties/r1
+  object: c3_phong_tap_gia_han
+  periods:
+  - from: '2025-08-15'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.a
+    quote: 'Thông tin của các bên trong hợp đồng bao gồm: tên, địa chỉ, số điện thoại, phương thức liên hệ khác (nếu có);'
+- rule: consumer.content_product/r1
+  object: c3_phong_tap_gia_han
+  periods:
+  - from: '2025-08-15'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.b
+    quote: Thông tin về sản phẩm, hàng hóa, dịch vụ được bán, cung cấp theo hợp đồng;
+- rule: consumer.content_price_quality/r1
+  object: c3_phong_tap_gia_han
+  periods:
+  - from: '2025-08-15'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.c
+    quote: Đo lường, số lượng, khối lượng, chất lượng, công dụng, giá của sản phẩm, hàng hóa, dịch vụ được bán, cung cấp
+- rule: consumer.content_payment/r1
+  object: c3_phong_tap_gia_han
+  periods:
+  - from: '2025-08-15'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.d
+    quote: Phương thức, thời hạn thanh toán;
+- rule: consumer.content_delivery/r1
+  object: c3_phong_tap_gia_han
+  periods:
+  - from: '2025-08-15'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.đ
+    quote: Thời gian, địa điểm, phương thức bán, cung cấp sản phẩm, hàng hóa, dịch vụ;
+- rule: consumer.content_time_term/r1
+  object: c3_phong_tap_gia_han
+  periods:
+  - from: '2025-08-15'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.l
+    quote: Thời điểm giao kết hợp đồng, thời hạn của hợp đồng.
+- rule: consumer.content_data_protection/r1
+  object: c3_phong_tap_gia_han
+  periods:
+  - from: '2025-08-15'
+    status: FAIL
+    finding: missing_content
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.g
+    quote: Trách nhiệm bảo vệ thông tin của người tiêu dùng;
+  note: không có điều khoản bảo vệ thông tin
+- rule: consumer.content_termination/r1
+  object: c3_phong_tap_gia_han
+  periods:
+  - from: '2025-08-15'
+    status: FAIL
+    finding: missing_content
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.h
+    quote: Trường hợp chấm dứt thực hiện hợp đồng và trách nhiệm phát sinh do chấm dứt thực hiện hợp đồng;
+  note: không có trường hợp chấm dứt
+- rule: consumer.content_force_majeure/r1
+  object: c3_phong_tap_gia_han
+  periods:
+  - from: '2025-08-15'
+    status: FAIL
+    finding: missing_content
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.i
+    quote: Trường hợp bất khả kháng theo quy định của pháp luật;
+  note: không có bất khả kháng
+- rule: consumer.content_dispute/r1
+  object: c3_phong_tap_gia_han
+  periods:
+  - from: '2025-08-15'
+    status: FAIL
+    finding: missing_content
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.k
+    quote: Phương thức giải quyết tranh chấp;
+  note: không có cách giải quyết tranh chấp
+- rule: consumer.service_expiry_notice/r1
+  object: c3_phong_tap_gia_han
+  periods:
+  - from: '2025-08-15'
+    status: FAIL
+    finding: missing_content
+  basis:
+    pid: luat:19/2023/QH15#d42.k2.e
+    quote: Thông báo cho người tiêu dùng về thời điểm kết thúc hợp đồng theo cách thức đã được thỏa thuận tối thiểu 07 ngày làm việc trước ngày hợp đồng kết thúc.
+  note: không cam kết báo trước khi hết hạn / gia hạn
+- rule: consumer.auto_renewal/r1
+  object: c3_phong_tap_gia_han
+  periods:
+  - from: '2025-08-15'
+    status: FAIL
+    finding: violation
+  basis:
+    pid: luat:19/2023/QH15#d25.k13
+    quote: Cho phép tổ chức, cá nhân kinh doanh gia hạn hợp đồng đã thỏa thuận với người tiêu dùng mà không quy định trách nhiệm thông báo trước hoặc không có cơ chế để người tiêu dùng lựa chọn gia hạn
+      hay chấm dứt thực hiện hợp đồng;
+  note: 'Điều 3: tự động gia hạn và trừ tiền, không báo trước, không cho chọn'
+- rule: consumer.service_price_change_without_exit/r1
+  object: c3_phong_tap_gia_han
+  periods:
+  - from: '2025-08-15'
+    status: FAIL
+    finding: violation
+  basis:
+    pid: luat:19/2023/QH15#d25.k7
+    quote: Cho phép tổ chức, cá nhân kinh doanh thay đổi giá trong quá trình cung cấp dịch vụ liên tục mà không quy định quyền chấm dứt thực hiện hợp đồng cho người tiêu dùng;
+  note: 'Điều 4: đổi phí, không được chấm dứt'
+- rule: consumer.service_suspension_notice/r1
+  object: c3_phong_tap_gia_han
+  periods:
+  - from: '2025-08-15'
+    status: FAIL
+    finding: violation
+  basis:
+    pid: luat:19/2023/QH15#d41.k3
+    quote: Không được đơn phương chấm dứt thực hiện hợp đồng, ngừng cung cấp dịch vụ không đúng hợp đồng hoặc trái quy định của pháp luật. Trường hợp cần sửa chữa, bảo trì hoặc vì lý do khác bắt buộc phải
+      ngừng cung cấp dịch vụ, tổ chức, cá nhân kinh doanh cung cấp dịch vụ phải thông báo trước cho người tiêu dùng về thời gian ngừng cung cấp dịch vụ và thời gian cung cấp lại dịch vụ chậm nhất là 03
+      ngày làm việc trước ngày ngừng cung cấp dịch vụ, trừ trường hợp bất khả kháng.
+  note: 'Điều 5: ngừng bất cứ lúc nào không thông báo'
+- rule: consumer.content_parties/r1
+  object: c4_mau_thieu_noi_dung
+  periods:
+  - from: '2025-10-20'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.a
+    quote: 'Thông tin của các bên trong hợp đồng bao gồm: tên, địa chỉ, số điện thoại, phương thức liên hệ khác (nếu có);'
+- rule: consumer.content_product/r1
+  object: c4_mau_thieu_noi_dung
+  periods:
+  - from: '2025-10-20'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.b
+    quote: Thông tin về sản phẩm, hàng hóa, dịch vụ được bán, cung cấp theo hợp đồng;
+- rule: consumer.content_price_quality/r1
+  object: c4_mau_thieu_noi_dung
+  periods:
+  - from: '2025-10-20'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.c
+    quote: Đo lường, số lượng, khối lượng, chất lượng, công dụng, giá của sản phẩm, hàng hóa, dịch vụ được bán, cung cấp
+- rule: consumer.content_payment/r1
+  object: c4_mau_thieu_noi_dung
+  periods:
+  - from: '2025-10-20'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.d
+    quote: Phương thức, thời hạn thanh toán;
+- rule: consumer.content_delivery/r1
+  object: c4_mau_thieu_noi_dung
+  periods:
+  - from: '2025-10-20'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.đ
+    quote: Thời gian, địa điểm, phương thức bán, cung cấp sản phẩm, hàng hóa, dịch vụ;
+- rule: consumer.content_time_term/r1
+  object: c4_mau_thieu_noi_dung
+  periods:
+  - from: '2025-10-20'
+    status: PASS
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.l
+    quote: Thời điểm giao kết hợp đồng, thời hạn của hợp đồng.
+- rule: consumer.content_data_protection/r1
+  object: c4_mau_thieu_noi_dung
+  periods:
+  - from: '2025-10-20'
+    status: FAIL
+    finding: missing_content
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.g
+    quote: Trách nhiệm bảo vệ thông tin của người tiêu dùng;
+- rule: consumer.content_termination/r1
+  object: c4_mau_thieu_noi_dung
+  periods:
+  - from: '2025-10-20'
+    status: FAIL
+    finding: missing_content
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.h
+    quote: Trường hợp chấm dứt thực hiện hợp đồng và trách nhiệm phát sinh do chấm dứt thực hiện hợp đồng;
+- rule: consumer.content_force_majeure/r1
+  object: c4_mau_thieu_noi_dung
+  periods:
+  - from: '2025-10-20'
+    status: FAIL
+    finding: missing_content
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.i
+    quote: Trường hợp bất khả kháng theo quy định của pháp luật;
+- rule: consumer.content_dispute/r1
+  object: c4_mau_thieu_noi_dung
+  periods:
+  - from: '2025-10-20'
+    status: FAIL
+    finding: missing_content
+  basis:
+    pid: luat:19/2023/QH15#d23.k3.k
+    quote: Phương thức giải quyết tranh chấp;
+- rule: consumer.service_expiry_notice/r1
+  object: c4_mau_thieu_noi_dung
+  periods:
+  - from: '2025-10-20'
+    status: NOT_APPLICABLE
+  basis:
+    pid: luat:19/2023/QH15#d42.k2.e
+    quote: Thông báo cho người tiêu dùng về thời điểm kết thúc hợp đồng theo cách thức đã được thỏa thuận tối thiểu 07 ngày làm việc trước ngày hợp đồng kết thúc.
+  note: không phải dịch vụ liên tục
+- rule: consumer.data_consent_condition/r1
+  object: c5_khoa_hoc_du_lieu
+  periods:
+  - from: '2025-11-01'
+    status: FAIL
+    finding: violation
+  basis:
+    pid: luat:19/2023/QH15#d25.k14
+    quote: Quy định người tiêu dùng phải đồng ý cho tổ chức, cá nhân kinh doanh thu thập, lưu trữ, sử dụng thông tin của người tiêu dùng là điều kiện để giao kết hợp đồng, điều kiện giao dịch chung, trừ
+      trường hợp pháp luật có quy định khác;
+  note: 'Điều 3: phải đồng ý chia sẻ thông tin cho đối tác quảng cáo mới được ký'
+- rule: consumer.unilateral_change/r1
+  object: c5_khoa_hoc_du_lieu
+  periods:
+  - from: '2025-11-01'
+    status: FAIL
+    finding: violation
+  basis:
+    pid: luat:19/2023/QH15#d25.k3
+    quote: Cho phép tổ chức, cá nhân kinh doanh đơn phương thay đổi quy định của hợp đồng đã giao kết với người tiêu dùng;
+  note: 'Điều 4: bên cung cấp đổi nội dung hợp đồng bất cứ lúc nào'
+- rule: consumer.harsher_sanctions/r1
+  object: c5_khoa_hoc_du_lieu
+  periods:
+  - from: '2025-11-01'
+    status: FAIL
+    finding: violation
+  basis:
+    pid: luat:19/2023/QH15#d25.k12
+    quote: Quy định về chế tài theo hướng bất lợi hơn cho người tiêu dùng do vi phạm hoặc chấm dứt thực hiện hợp đồng;
+  note: 'Điều 5: học viên chấm dứt mất toàn bộ học phí; bên cung cấp chấm dứt chỉ hoàn phần chưa học'
+- rule: consumer.price_at_delivery/r1
+  object: c6_noi_that_gia_giao
+  periods:
+  - from: '2025-09-12'
+    status: FAIL
+    finding: violation
+  basis:
+    pid: luat:19/2023/QH15#d25.k6
+    quote: Cho phép tổ chức, cá nhân kinh doanh quy định hoặc thay đổi giá tại thời điểm giao sản phẩm, hàng hóa, cung cấp dịch vụ, trừ trường hợp pháp luật có quy định khác;
+  note: 'Điều 1: giá chính thức tính lúc giao hàng'
+- rule: consumer.third_party_exclusion/r1
+  object: c6_noi_that_gia_giao
+  periods:
+  - from: '2025-09-12'
+    status: FAIL
+    finding: violation
+  basis:
+    pid: luat:19/2023/QH15#d25.k9
+    quote: Loại trừ trách nhiệm của tổ chức, cá nhân kinh doanh trong trường hợp tổ chức, cá nhân kinh doanh bán sản phẩm, hàng hóa, cung cấp dịch vụ thông qua bên thứ ba;
+  note: 'Điều 3: không chịu trách nhiệm hư hỏng do đơn vị vận chuyển'
+- rule: consumer.consumer_bound_despite_breach/r1
+  object: c6_noi_that_gia_giao
+  periods:
+  - from: '2025-09-12'
+    status: FAIL
+    finding: violation
+  basis:
+    pid: luat:19/2023/QH15#d25.k10
+    quote: Bắt buộc người tiêu dùng phải tuân thủ trách nhiệm khi tổ chức, cá nhân kinh doanh không hoàn thành trách nhiệm của mình;
+  note: 'Điều 4: vẫn phải trả đủ kể cả khi giao chậm, giao thiếu'
+- rule: consumer.trader_decides_breach/r1
+  object: c6_noi_that_gia_giao
+  periods:
+  - from: '2025-09-12'
+    status: FAIL
+    finding: violation
+  basis:
+    pid: luat:19/2023/QH15#d25.k5
+    quote: Cho phép tổ chức, cá nhân kinh doanh đơn phương xác định người tiêu dùng không thực hiện một hoặc một số trách nhiệm;
+  note: 'Điều 5.1: bên bán toàn quyền xác định bên mua vi phạm'
+- rule: consumer.transfer_without_consent/r1
+  object: c6_noi_that_gia_giao
+  periods:
+  - from: '2025-09-12'
+    status: FAIL
+    finding: violation
+  basis:
+    pid: luat:19/2023/QH15#d25.k11
+    quote: Cho phép tổ chức, cá nhân kinh doanh chuyển giao trách nhiệm cho bên thứ ba mà không được người tiêu dùng đồng ý, trừ trường hợp pháp luật có quy định khác;
+  note: 'Điều 5.2: chuyển giao hợp đồng không cần bên mua đồng ý'
+- rule: consumer.harsher_sanctions/r1
+  object: c6_noi_that_gia_giao
+  periods:
+  - from: '2025-09-12'
+    status: FAIL
+    finding: violation
+  basis:
+    pid: luat:19/2023/QH15#d25.k12
+    quote: Quy định về chế tài theo hướng bất lợi hơn cho người tiêu dùng do vi phạm hoặc chấm dứt thực hiện hợp đồng;
+  note: 'Điều 5.1: bên mua mất tiền đặt trước khi vi phạm; không có chế tài tương ứng cho bên bán (cách đọc chờ duyệt)'

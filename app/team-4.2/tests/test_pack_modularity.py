@@ -260,3 +260,34 @@ def test_kind_selects_the_pack_and_conflicts_with_explicit_packs():
     assert all(c.startswith(("loan.", "civil.")) for c in concepts)          # không có khái niệm gói labor
     with pytest.raises(ValueError):
         check_contract(llm, cases.loan_contract(), at=cases.AT, document_kind="loan_contract", packs=["labor"])
+
+
+# ── E5: nhận diện loại (classify_contract) chọn gói ──
+def test_auto_kind_classifies_then_runs_only_that_pack():
+    from rag.bridge.check import check_contract
+    cases = _cases()
+    llm = cases.ScriptedLoanLLM()
+    report = check_contract(llm, cases.loan_contract(), at=cases.AT, document_kind="auto",
+                            user_facts={"special_law_applies": False})
+    assert report.stats["classification"]["kind"] == "loan_contract"
+    assert report.stats["packs"] == ["civil_loan"]
+    concepts = {r.concept_id for r in report.results}
+    assert "loan.interest_cap" in concepts and all(c.startswith(("loan.", "civil.")) for c in concepts)
+
+
+def test_auto_kind_unknown_runs_no_pack():
+    from rag.bridge.check import check_contract
+    cases = _cases()
+    llm = cases.ScriptedLoanLLM(kind="unknown")
+    report = check_contract(llm, cases.loan_contract(), at=cases.AT, document_kind="auto")
+    assert report.results == [] and report.catalog_version == "none"
+    assert report.stats["classification"]["kind"] == "unknown" and len(llm.systems) == 1   # chỉ lời gọi nhận diện
+    assert any("nhận diện" in w for w in report.warnings)
+
+
+def test_auto_kind_in_graph_agent_unknown_is_refused():
+    from rag.contracts.graph.agent import ask_contract_graph
+    cases = _cases()
+    with pytest.raises(ValueError):
+        ask_contract_graph(cases.ScriptedLoanLLM(kind="unknown"), cases.loan_contract(), "Lãi suất bao nhiêu?",
+                           at=cases.AT, document_kind="auto")

@@ -292,6 +292,24 @@ Năm quyết định Tùng duyệt: khai cách dựng trong gói; thêm `end_dat
 | O.6 | Nhãn nhóm b5 đổi `job=ke_toan` -> `job=nhân viên kế toán` (giá trị `job` là chức danh nguyên văn); trạng thái gold không đổi | Có chủ ý |
 | O.7 | Ngày bắt đầu lấy `start_date` -> `effective_date` -> `sign_date`; gói thuê nhà / vay chưa khai `object_types` nên chưa có đối tượng | Còn |
 
+## H2 + E5 — nhận diện loại hợp đồng, chọn gói (23/11, Tùng nhận phần của Huy)
+
+`src/rag/contracts/classify.py` `classify_contract`: LLM chọn một loại trong `document_kinds` của các gói (nhãn
+`document_labels`), câu trích kiểm `quote_ok`; câu trích bịa / loại không có gói / độ tin < 0,6 / lỗi gọi model / model
+trả unknown -> `unknown`. `check_contract(document_kind="auto")` và `ask_contract_graph(document_kind="auto")` nhận diện
+rồi chọn gói; unknown -> không chạy gói nào (soát) / từ chối (hỏi đáp). Danh mục dữ kiện thêm loại `loan` và bảng
+`document_kinds` -> danh mục; tagger gửi `kind` của khái niệm (`concept-tag-4`).
+
+| # | Mục | Trạng thái |
+|---|---|---|
+| K.1 | Chưa đo nhận diện trên hợp đồng mẫu ba miền bằng LLM thật (nghiệm thu H2 trong huy.md); test dùng LLM giả | Chờ có model |
+| K.2 | `check_contract` / `ask_contract_graph` KHÔNG truyền gì vẫn mặc định gói labor (tương thích); muốn nhận diện phải truyền `document_kind="auto"`. Đổi mặc định + truyền "auto" từ `ui/contracts_api.py`, `ui/contract_studio.py` thuộc D40 (UI, để sau) | Còn |
+| K.3 | Ngưỡng độ tin 0,6 đặt tay, chưa hiệu chỉnh (độ tin do model tự báo) | Còn |
+| K.4 | Chỉ đọc 8 đơn vị đầu (mỗi đơn vị 800 ký tự): hợp đồng có phần đầu dài (mục lục, định nghĩa) có thể thành unknown | Còn |
+| K.5 | Mặc định khi không có gói (`ctx` None) các prompt vẫn ghi "hợp đồng lao động" (tương thích luồng cũ); mọi luồng có gói đã lấy nhãn từ gói | Còn |
+| K.6 | "Tagger theo kind": prompt vẫn một mẫu chung, khái niệm mô tả bằng dữ liệu (đã vậy từ trước), nay kèm `kind`; chưa dựng slot từ kind (kinds.yaml chỉ có loại slot, không có tên slot) | Có chủ ý |
+| K.7 | Định dạng `fact_catalog.json` viết lại một dòng mỗi trường (nội dung cũ không đổi) | Có chủ ý |
+
 ## Tồn đọng chung (môi trường, quy trình)
 
 | # | Mục | Trạng thái |

@@ -40,8 +40,9 @@ def item(**kw):
 def test_catalog_payload_has_only_recognition_fields():
     p = catalog_payload(CAT)
     assert len(p) == 40
-    assert set(p[0]) <= {"id", "label", "describe", "phrasing", "slots", "not_about"}
+    assert set(p[0]) <= {"id", "kind", "label", "describe", "phrasing", "slots", "not_about"}
     leave = next(x for x in p if x["id"] == "leave.annual")
+    assert leave["kind"] == "leave_entitlement"                       # H2: loại khái niệm (kinds.yaml) đi cùng khái niệm
     assert leave["slots"] == {"annual_leave": {"kind": "duration", "unit": "day"}}
     text = json.dumps(p, ensure_ascii=False)
     assert "min_" not in text and "anchors" not in text and "rules" not in text and "bo-luat" not in text
@@ -53,7 +54,7 @@ def test_payload_carries_not_about_and_prompt_explains_it():
     na = p["termination.employee_unilateral"]["not_about"]
     assert any("training.cost_repayment" in s for s in na)
     assert "not_about" not in p["leave.annual"]
-    assert "not_about" in TAG_PROMPT and TAG_PROMPT_VERSION == "concept-tag-3"
+    assert "not_about" in TAG_PROMPT and TAG_PROMPT_VERSION == "concept-tag-4"
 
 
 def test_valid_item_becomes_assert():

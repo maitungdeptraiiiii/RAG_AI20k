@@ -16,12 +16,16 @@ LOAN_TEXT = ("Bên A: ông Trần Văn B, là Bên cho vay. Bên B: bà Lê Th�
 class ScriptedLoanLLM:
     """Trả lời theo nội dung payload (không theo câu chữ prompt), ghi lại mọi system prompt nhận được."""
 
-    def __init__(self):
+    def __init__(self, kind: str = "loan_contract"):
         self.systems: list[str] = []
+        self.kind = kind
 
     def complete(self, system, user):
         payload = json.loads(user)
         self.systems.append(system)
+        if "kinds" in payload:                              # nhận diện loại hợp đồng (classify_contract)
+            return json.dumps({"kind": self.kind, "confidence": 0.9, "unit": "p0.d1",
+                               "quote": "Bên A cho Bên B vay 100.000.000 đồng"}, ensure_ascii=False)
         if "fields_wanted" in payload:
             return json.dumps({"type": "Hợp đồng vay tiền",
                                "parties": [{"name": "Trần Văn B", "role": "Bên cho vay", "unit": "p0.pre",

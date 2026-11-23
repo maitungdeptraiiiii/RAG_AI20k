@@ -453,3 +453,15 @@ def test_text_aliases_only_take_defined_short_names():
     assert alias("Beta Tech, Inc.") == ["Beta", "Supplier"]
     assert alias("Công ty TNHH Sao Mai") == ["Bên A"] and alias("Ông Trần Văn Bình") == ["Bên B"]
     assert alias("Bà Lê Thu") == [] and alias("Không có trong văn bản") == []
+
+
+def test_recognized_document_kind_selects_catalog_unless_user_answered_type():
+    """H2: loại do classify_contract nhận diện (contract.facts["document_kind"]) chọn danh mục dữ kiện, kể cả loại vay;
+    người dùng đã trả lời loại thì câu trả lời thắng."""
+    c = labor_contract()
+    c.facts = {**c.facts, "document_kind": "loan_contract"}
+    s = verify.summary(c)
+    keys = [f["key"] for f in s["fields"]]
+    assert s["catalog_type"] == "loan" and "loan_interest" in keys and "job_title" not in keys
+    verify.apply_answers(c, {"type": {"action": "set", "value": "Hợp đồng thuê nhà ở"}}, "Lan", NOW)
+    assert verify.summary(c)["catalog_type"] == "lease"

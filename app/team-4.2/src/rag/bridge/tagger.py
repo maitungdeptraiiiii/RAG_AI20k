@@ -15,7 +15,7 @@ from rag.contracts.graph.oplog import GraphOperation, machine_op
 from rag.contracts.llm_json import _norm, ask_json, quote_ok
 from rag.contracts.models import Contract
 
-TAG_PROMPT_VERSION = "concept-tag-3"
+TAG_PROMPT_VERSION = "concept-tag-4"
 BATCH_BUDGET = BUDGET
 _TEXT_SLOTS = ("duration", "percent", "money")
 
@@ -24,6 +24,8 @@ _TAG_PROMPT_TEMPLATE = """Bạn đọc MỘT PHẦN của một <<DOCUMENT>> ti�
 
 "concepts" là danh sách khái niệm cố định. Với MỖI đơn vị trong "units", tìm những khái niệm mà đơn vị đó NÓI TỚI
 (dựa vào "describe" và "phrasing"). Một đơn vị có thể nói tới nhiều khái niệm; một khái niệm có thể ở nhiều đơn vị.
+"kind" là loại khái niệm dùng chung cho mọi loại hợp đồng (vd. rate_cap = tỉ lệ có trần, notice = báo trước,
+time_limit = khoảng thời gian có giới hạn): các khái niệm cùng "kind" đọc slot theo cùng cách.
 "not_about" của một khái niệm liệt kê những nội dung KHÔNG thuộc khái niệm đó (kèm khái niệm đúng sau "→"):
 đơn vị chỉ nói tới nội dung như vậy thì không gán khái niệm đó.
 
@@ -63,6 +65,8 @@ def catalog_payload(catalog: Catalog, ids: list[str] | None = None) -> list[dict
         if ids is not None and cid not in ids:
             continue
         d: dict[str, Any] = {"id": cid, "label": c.label, "describe": c.describe, "phrasing": list(c.phrasing)}
+        if c.kind:
+            d["kind"] = c.kind                  # loại khái niệm chung các miền (kinds.yaml): khái niệm cùng loại có slot cùng kiểu
         if c.not_about:
             d["not_about"] = [f"{x['text']} → {x['see']}" for x in c.not_about]
         if c.slots:

@@ -162,7 +162,7 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
 - [x] E2. `tools.check_concept` + `ask_contract_graph` dùng session.
 - [ ] E3. Endpoint SSE trong `ui/contract_studio.py`: chạy hồ sơ / kịch bản, phát `evaluation_diff`, trả `explain`,
       `next_questions`, nhận `answer`. Chạy được hồ sơ của cả ba miền.
-- [ ] E5. Nối `classify_contract` (Huy) vào `check_contract` / `ask_contract_graph` theo D32. → Huy
+- [x] E5. Nối `classify_contract` (Huy) vào `check_contract` / `ask_contract_graph` theo D32. → Huy *(23/11: Tùng làm; `document_kind="auto"`; đổi mặc định ở UI thuộc D40, mục K.2)*
 - [x] E4. Báo Khánh engine thật sẵn sàng. → Khánh (`reports/team-4.2/w04/engine_interface.md`; cần gửi cho Khánh và Huy)
 
 ## F. UI Contract Studio (phần Tú)
@@ -190,7 +190,7 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
 
 - [ ] H1. Ngày 2: Khánh nạp xong BLDS (cần cho B4–B5 có pid).
 - [x] H2. Ngày 3: Huy `dossier_objects` chạy trên a1, b1–b5 (cần cho D25–D28). *(23/11: Tùng nhận, `src/rag/contracts/dossier.py`; ra đúng bảng của 7 hồ sơ. Hạn chế: mục O trong file hạn chế.)*
-- [ ] H3. Ngày 3–4: Huy tagger theo kind + nhận diện loại hợp đồng trên C3.
+- [x] H3. Ngày 3–4: Huy tagger theo kind + nhận diện loại hợp đồng trên C3. *(23/11: Tùng làm `classify_contract` + `kind` trong tagger; chưa đo bằng LLM thật, mục K.1)*
 - [ ] H4. Ngày 5: Khánh bảng benchmark + eval.
 
 ## Tổng

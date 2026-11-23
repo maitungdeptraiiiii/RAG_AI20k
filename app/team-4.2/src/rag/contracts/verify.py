@@ -98,8 +98,18 @@ def normalize_value(spec: dict, value: Any, contract) -> str | None:
     return text
 
 
+def contract_catalog_type(contract) -> str:
+    """Danh mục dữ kiện của hợp đồng: người dùng đã trả lời loại -> theo câu trả lời; không thì loại do
+    classify_contract nhận diện (`facts["document_kind"]`, H2); không thì theo chữ loại LLM trích (cách cũ)."""
+    op = _answer(contract, "type")
+    if op is not None and op.content.get("action") != "unknown":
+        return catalog_type(op.content.get("value"))
+    known = catalog().get("document_kinds", {}).get((contract.facts or {}).get("document_kind"))
+    return known or catalog_type(current_type(contract))
+
+
 def specs_for(contract) -> list[dict]:
-    kind = catalog_type(current_type(contract))
+    kind = contract_catalog_type(contract)
     specs = [_resolve(s) for s in catalog()["types"]["common"]]
     if kind != "common":
         specs += [_resolve(s) for s in catalog()["types"][kind]]
@@ -187,7 +197,7 @@ def summary(contract) -> dict:
     rows = fields(contract)
     pending = [f for f in rows if f["required"] and f["status"] not in VERIFIED]
     return {"fields": rows, "pending": [{"key": f["key"], "label": f["label"]} for f in pending],
-            "complete": not pending, "catalog_type": catalog_type(current_type(contract)),
+            "complete": not pending, "catalog_type": contract_catalog_type(contract),
             "questions": questions(contract), "coverage": contract.facts.get("coverage"),
             "warnings": list(contract.facts.get("warnings") or [])}
 

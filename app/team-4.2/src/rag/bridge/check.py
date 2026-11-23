@@ -25,6 +25,7 @@ from rag.contracts.graph.view import ContractGraphView, open_view
 from rag.contracts.models import Contract
 from rag.rules.events import diff_event
 from rag.rules.evaluator import default_kind, evaluator_for
+from rag.contracts.classify import AUTO_KIND, classify_contract
 from rag.rules.loader import packs_for_kind
 
 _ORDER = ("violation", "missing_content", "hidden_right", "conflict", "possible_right", "needs_facts")
@@ -119,14 +120,21 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
     def stage(name: str, status: str) -> None:
         emit({"type": "stage", "stage": name, "status": status})
     t0 = time.monotonic()
+    classification = None
     if document_kind is not None:
         if catalog is not None or packs is not None:
             raise ValueError("document_kind chọn gói: không truyền kèm catalog hoặc packs")
+        if document_kind == AUTO_KIND:   # E5: LLM nhận diện loại trong document_kinds của các gói (classify_contract)
+            classification = classify_contract(llm, contract)
+            document_kind = classification["kind"]
+            contract.facts = {**(contract.facts or {}), "document_kind": document_kind}
         packs = packs_for_kind(document_kind)
-        if not packs:                    # loại không nhận diện được: không soát bằng gói nào, không gọi LLM
+        if not packs:                    # loại không nhận diện được: không soát bằng gói nào, không gọi LLM nữa
+            why = (f"Không nhận diện được loại hợp đồng ({classification.get('reason')})" if classification
+                   else f"Loại hợp đồng {document_kind!r} không có gói luật")
             return CheckReport(contract.contract_id, contract.sign_date or at.date(), "none", [], {},
-                               warnings=[f"Loại hợp đồng {document_kind!r} không có gói luật: không chạy rule nào"],
-                               stats={"packs": []})
+                               warnings=[f"{why}: không chạy rule nào"],
+                               stats={"packs": [], **({"classification": classification} if classification else {})})
     catalog = resolve_catalog(catalog, packs)
     user = user_fact_set(user_facts, catalog.context)
     rule_evaluator = evaluator_for(catalog, evaluator or default_kind())      # tên lạ -> ValueError trước mọi lời gọi LLM
@@ -209,7 +217,8 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
             kinds[key] = kinds.get(key, 0) + 1
     stats = {"llm_calls": llm.calls + (tagger.calls if tagger is not llm else 0), "tag_model": tag_model, "recheck_concepts": len(todo), "tag_ops": len(tag.ops),
              "tag_rejected": len(tag.rejected), "assert_ops": kinds, "seconds": round(time.monotonic() - t0, 1),
-             "graph_backend": view.backend, "build_id": build_id}
+             "graph_backend": view.backend, "build_id": build_id, "packs": list(packs) if packs else None,
+             **({"classification": classification} if classification else {})}
     stage("basis", "start")
     law_basis = {cid: basis.concept_basis(cid, day) for cid in reported}
     stage("basis", "done")

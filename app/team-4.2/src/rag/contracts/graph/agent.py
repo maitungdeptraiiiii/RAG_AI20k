@@ -293,7 +293,10 @@ def ask_contract_graph(llm, contract, question: str, *, at, catalog: Catalog | N
     from rag.contracts.graph.build import graph_mask_state
     from rag.contracts.graph.tools import make_tools
     if document_kind is not None and catalog is None and packs is None:
+        from rag.contracts.classify import AUTO_KIND, classify_contract
         from rag.rules.loader import packs_for_kind
+        if document_kind == AUTO_KIND:          # E5: nhận diện loại; unknown -> không có gói -> từ chối như loại lạ
+            document_kind = classify_contract(llm, contract)["kind"]
         packs = packs_for_kind(document_kind) or None
         if packs is None:
             raise ValueError(f"Loại hợp đồng {document_kind!r} không có gói luật")

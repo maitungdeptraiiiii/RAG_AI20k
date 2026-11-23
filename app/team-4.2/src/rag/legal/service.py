@@ -90,7 +90,8 @@ class LegalService:
             return []
         provisions = self.provisions_for(source_key)
         effectivity = parse_effectivity(provisions)
-        directives = parse_directives(provisions, default_target=_target_law(doc.title))
+        directives = parse_directives(provisions, default_target=_target_law(doc.title),
+                                      source_text=self.text_for(source_key))
         documents = self.store.documents()
         indexes = {d.document_key: index_provisions(self.provisions_for(d.document_key))
                    for d in documents if not d.is_consolidated}

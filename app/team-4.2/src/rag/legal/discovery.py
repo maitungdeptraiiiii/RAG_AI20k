@@ -83,7 +83,7 @@ def _confirm(relation: str, text: str, key: str, title: str, base: LegalDocument
     provisions = parse_structure(text, key)
     if relation == "SUA_DOI_BO_SUNG":
         default = _target_law(title)
-        for d in parse_directives(provisions, default_target=default):
+        for d in parse_directives(provisions, default_target=default, source_text=text):
             by_number = d.target_law_number and normalize_number(d.target_law_number) == base.doc_number
             by_name = d.target_law_name and law_name(d.target_law_name) == law_name(base.title) \
                 and (d.target_law_number is None or by_number)

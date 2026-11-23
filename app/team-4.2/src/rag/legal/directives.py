@@ -343,8 +343,44 @@ def _header_and_content(text: str) -> tuple[str, str]:
     return first, "\n".join(lines[1:])
 
 
+_CHAPTER_LINE = re.compile(r"^\s*Chương\s+[IVXLC\d]+\s*$", re.IGNORECASE)
+_CHAPTER_TARGET = re.compile(_LEGAL_KIND + r"\s+(?:\S+\s+){0,12}?số\s+(\d+/\d{4}/[A-Z0-9Đ]+(?:-[A-Z0-9Đ]+)*)",
+                             re.IGNORECASE)
+_ARTICLE_LINE = re.compile(r"^\s*Điều\s+(\d+[a-zđ]?)\s*[.:]", re.IGNORECASE)
+
+
+def chapter_targets(text: str) -> dict[str, tuple[str | None, str | None]]:
+    """Điều -> văn bản đích nêu ở tiêu đề Chương chứa nó ("Chương II / SỬA ĐỔI, BỔ SUNG MỘT SỐ ĐIỀU CỦA NGHỊ ĐỊNH SỐ
+    95/2024/NĐ-CP ..."): văn bản sửa nhiều văn bản ghi đích ở chương, Điều chỉ ghi "Sửa đổi Điều 7". `parse_structure`
+    không giữ Chương nên đọc từ chữ gốc. Chương không nêu đích -> Điều trong đó không có mục."""
+    out: dict[str, tuple[str | None, str | None]] = {}
+    current: tuple[str | None, str | None] = (None, None)
+    heading: list[str] | None = None
+    for line in text.splitlines():
+        if _CHAPTER_LINE.match(line):
+            heading = []
+            continue
+        art = _ARTICLE_LINE.match(line)
+        if art:
+            if heading is not None:
+                title = " ".join(heading)
+                hit = _CHAPTER_TARGET.search(title) if _ACTION.search(title) else None
+                current = (None, hit.group(1)) if hit else (None, None)   # chỉ nhận đích có số hiệu
+                heading = None
+            if current != (None, None):
+                out[art.group(1)] = current
+            continue
+        if heading is not None:
+            heading.append(line.strip())
+    return out
+
+
 def parse_directives(provisions: Sequence[Provision], *,
-                     default_target: tuple[str | None, str | None] = (None, None)) -> list[ParsedDirective]:
+                     default_target: tuple[str | None, str | None] = (None, None),
+                     source_text: str = "") -> list[ParsedDirective]:
+    """`source_text`: chữ gốc của văn bản, để lấy văn bản đích ở tiêu đề Chương (`chapter_targets`); đích ở tiêu đề
+    Điều / khoản vẫn ưu tiên hơn."""
+    chapters = chapter_targets(source_text) if source_text else {}
     articles = [p for p in provisions if p.kind == "article"]
     titles = {p.address.article: p.text for p in provisions if p.kind == "article_title"}
     out: list[ParsedDirective] = []
@@ -389,7 +425,7 @@ def parse_directives(provisions: Sequence[Provision], *,
         title = titles.get(art.address.article, "")
         if not (_ACTION_START.match(title) or _PASSIVE.match(title)):
             continue
-        art_law = law_for(title, default_target)
+        art_law = law_for(title, chapters.get(art.address.article, default_target))
         clauses = [p for p in provisions if p.kind == "clause" and p.parent_id == art.provision_id]
         a_no = art.address.article
         if not clauses:
@@ -423,4 +459,4 @@ def parse_directives(provisions: Sequence[Provision], *,
     return out
 
 
-__all__ = ["ParsedDirective", "parse_directives", "strip_quotes"]
+__all__ = ["ParsedDirective", "chapter_targets", "parse_directives", "strip_quotes"]

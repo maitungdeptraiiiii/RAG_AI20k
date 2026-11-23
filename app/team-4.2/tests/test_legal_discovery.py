@@ -291,3 +291,17 @@ def test_multi_target_amendment_found_by_number_and_confirmed_by_content(tmp_pat
     assert [(k, r) for k, r, _ in report.added] == [("nghi-dinh:54/2026/NĐ-CP", "SUA_DOI_BO_SUNG")]
     assert dict(report.rejected)[UNRELATED["title"]] == "discovery.not_confirmed_by_content"
     assert store.document("nghi-dinh:60/2026/NĐ-CP") is None
+
+
+def test_chapter_style_multi_target_amendment_confirmed(tmp_path):
+    """Q.2: NĐ 54/2026 thật ghi văn bản đích ở tiêu đề Chương; discovery xác nhận được bằng nội dung."""
+    body = ("Chương I\nSỬA ĐỔI, BỔ SUNG MỘT SỐ ĐIỀU CỦA NGHỊ ĐỊNH SỐ\n95/2024/NĐ-CP NGÀY 24 THÁNG 7 NĂM 2024 CỦA CHÍNH PHỦ\n"
+            "QUY ĐỊNH CHI TIẾT MỘT SỐ ĐIỀU CỦA LUẬT NHÀ Ở\nĐiều 1. Sửa đổi Điều 2\nSửa đổi khoản 1 Điều 2 như sau:\n"
+            "“1. Cá nhân, tổ chức.”.\nBãi bỏ khoản 2 Điều 2.\nChương II\nHIỆU LỰC THI HÀNH\nĐiều 2. Hiệu lực thi hành\n"
+            "Nghị định này có hiệu lực thi hành từ ngày 09 tháng 02 năm 2026.")
+    amend = vb("55", "Nghị định", "54/2026/NĐ-CP", "Nghị định sửa đổi, bổ sung một số điều của các Nghị định trong lĩnh "
+               "vực nhà ở, kinh doanh bất động sản", "2026-02-10", body + "\n(dẫn chiếu 95/2024/NĐ-CP)")
+    store = LegalStore(tmp_path / "c.sqlite")
+    report = discover(NumberSearchClient([DECREE, amend]), store, [Seed("Nghị định", "95/2024/NĐ-CP")],
+                      tmp_path / "raw", now=NOW)
+    assert [(k, r) for k, r, _ in report.added] == [("nghi-dinh:54/2026/NĐ-CP", "SUA_DOI_BO_SUNG")]

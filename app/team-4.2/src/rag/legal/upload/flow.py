@@ -227,11 +227,12 @@ def _effectivity(provisions, info: EffectivityInfo, has_ops: bool) -> dict:
             "exceptions": exceptions, "conditional_units": conditional, "flags_vi": flags_vi}
 
 
-def _amended_laws(store: LegalStore, doc: LegalDocument, provisions) -> list[tuple[str, str | None, str | None, Any]]:
+def _amended_laws(store: LegalStore, doc: LegalDocument, provisions,
+                  text: str = "") -> list[tuple[str, str | None, str | None, Any]]:
     """(tên, số hiệu, document_key trong kho | None, chỉ dẫn đầu tiên) cho mỗi luật bị văn bản này sửa."""
     documents = [d for d in store.documents() if d.document_key != doc.document_key]
     seen: dict[tuple, tuple] = {}
-    for d in parse_directives(provisions, default_target=_target_law(doc.title)):
+    for d in parse_directives(provisions, default_target=_target_law(doc.title), source_text=text):
         ident = (d.target_law_name, d.target_law_number and normalize_number(d.target_law_number))
         if ident in seen or ident == (None, None):
             continue
@@ -446,7 +447,7 @@ class UploadService:
                                     name=h.target_name or "Luật", number=h.target_number or "")})
         else:
             kind = "amending" if re.search(r"sửa\s+đổi", doc.title, re.IGNORECASE) else "base"
-            for name, number, k, _ in _amended_laws(svc.store, doc, provisions):
+            for name, number, k, _ in _amended_laws(svc.store, doc, provisions, d.text):
                 targets.append({"document_key": k, "name": name, "number": number, "in_store": k is not None,
                                 "warning": None if k else MISSING_BASE_LAW.format(name=name, number=number or "")})
         operations = [{"operation_id": o.operation_id, "source_locator": o.source_locator, "description": _describe(o),
@@ -577,7 +578,7 @@ class UploadService:
                                      "confirmed")] if k else []
         provisions = parse_structure(text, key)
         out = [DocumentRelation(key, k, "SUA_DOI_BO_SUNG", f"{dv.source_locator}: {dv.operation_type}", "confirmed")
-               for _, _, k, dv in _amended_laws(store, doc, provisions) if k]
+               for _, _, k, dv in _amended_laws(store, doc, provisions, text) if k]
         for r in parse_effectivity(provisions).repeals:
             k = _resolve(store, r.target_name, r.target_number, doc.issued_on, key) if not r.units else None
             if k:

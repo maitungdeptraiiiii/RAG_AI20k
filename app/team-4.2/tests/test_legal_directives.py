@@ -300,3 +300,36 @@ def test_inner_closing_quote_does_not_end_block():
              '2. Bãi bỏ khoản 1 Điều 12.')
     assert ops(ds) == [("REPLACE_ARTICLE", Address("10"), None), ("DELETE_CLAUSE", Address("12", "1"), None)]
     assert "3. Khoản ba." in ds[0].new_text
+
+
+MULTI = """Chương I
+SỬA ĐỔI, BỔ SUNG MỘT SỐ ĐIỀU CỦA NGHỊ ĐỊNH SỐ
+96/2024/NĐ-CP NGÀY 24 THÁNG 7 NĂM 2024 CỦA CHÍNH PHỦ
+QUY ĐỊNH CHI TIẾT MỘT SỐ ĐIỀU CỦA LUẬT KINH DOANH BẤT ĐỘNG SẢN
+Điều 1. Sửa đổi, bổ sung Điều 8
+Sửa đổi, bổ sung khoản 1 Điều 8 như sau:
+“1. Nội dung mới của Nghị định 96.”.
+Bãi bỏ khoản 3 Điều 8.
+Chương II
+SỬA ĐỔI, BỔ SUNG MỘT SỐ ĐIỀU CỦA NGHỊ ĐỊNH SỐ
+95/2024/NĐ-CP NGÀY 24 THÁNG 7 NĂM 2024 CỦA CHÍNH PHỦ
+Điều 2. Sửa đổi Điều 7
+Sửa đổi khoản 2 Điều 7 như sau:
+“2. Nội dung mới của Nghị định 95.”.
+Bãi bỏ khoản 4 Điều 7.
+Chương III
+HIỆU LỰC THI HÀNH
+Điều 3. Hiệu lực thi hành
+Nghị định này có hiệu lực thi hành từ ngày 09 tháng 02 năm 2026."""
+
+
+def test_target_from_chapter_title_in_multi_target_amendment():
+    """Q.2: văn bản sửa nhiều văn bản (NĐ 54/2026) nêu văn bản đích ở tiêu đề Chương, Điều chỉ ghi "Sửa đổi Điều 7"."""
+    ds = parse_directives(parse_structure(MULTI, "nghi-dinh:54/2026/NĐ-CP"), source_text=MULTI)
+    got = {(d.source_locator.split(" >")[0], d.target_law_number) for d in ds}
+    assert got == {("Điều 1", "96/2024/NĐ-CP"), ("Điều 2", "95/2024/NĐ-CP")}
+    assert {d.target.article for d in ds} == {"8", "7"}
+
+
+def test_without_source_text_behaviour_unchanged():
+    assert parse_directives(parse_structure(MULTI, "nghi-dinh:54/2026/NĐ-CP")) == []

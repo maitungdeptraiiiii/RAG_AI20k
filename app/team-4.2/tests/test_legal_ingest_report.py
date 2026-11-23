@@ -51,3 +51,29 @@ def test_markdown_names_snapshot_and_every_row(store):
 def test_targets_cover_the_four_main_laws():
     keys = {t.key for t in TARGETS}
     assert {"bo-luat:91/2015/QH13", "luat:36/2005/QH11", "luat:19/2023/QH15", "luat:27/2023/QH15"} <= keys
+
+
+# ───────────── nghiệm thu K1: Huy dựng được đồ thị từ văn bản đã nạp ─────────────
+from types import SimpleNamespace  # noqa: E402
+
+
+def _build(*doc_keys):
+    return SimpleNamespace(nodes=tuple(SimpleNamespace(props={"document_key": k}) for k in doc_keys))
+
+
+def test_row_counts_graph_nodes_of_its_document(store):
+    graph = _build(KEY, KEY, KEY, "luat:khac")
+    rows = ingest_rows(store, [Target(KEY, "BVQLNTD", None), Target("luat:99/2099/QH99", "X", None)], day=DAY, graph=graph)
+    assert rows[0].graph_nodes == 3 and rows[1].graph_nodes is None
+
+
+def test_document_without_graph_nodes_is_flagged_in_markdown(store):
+    rows = ingest_rows(store, [Target(KEY, "BVQLNTD", None)], day=DAY, graph=_build("luat:khac"))
+    assert rows[0].graph_nodes == 0
+    assert "đồ thị" in render_markdown(rows, snapshot_id="s1", day=DAY) and f"`{KEY}`: không có node nào trong đồ thị" in render_markdown(rows, snapshot_id="s1", day=DAY)
+
+
+def test_markdown_has_graph_column_only_when_graph_given(store):
+    plain = render_markdown(ingest_rows(store, [Target(KEY, "B", None)], day=DAY), snapshot_id="s1", day=DAY)
+    withg = render_markdown(ingest_rows(store, [Target(KEY, "B", None)], day=DAY, graph=_build(KEY)), snapshot_id="s1", day=DAY)
+    assert "Node đồ thị" not in plain and "Node đồ thị" in withg

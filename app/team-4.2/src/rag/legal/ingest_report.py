@@ -24,7 +24,7 @@ TARGETS: tuple[Target, ...] = (
     Target("nghi-dinh:55/2024/NĐ-CP", "NĐ 55/2024 hướng dẫn Luật BVQLNTD", date(2024, 7, 1)),
     Target("quyet-dinh:07/2024/QĐ-TTG", "QĐ 07/2024 danh mục hợp đồng theo mẫu phải đăng ký", date(2024, 7, 1)),
     Target("luat:54/2010/QH12", "Luật Trọng tài thương mại 2010", date(2011, 1, 1)),
-    Target("nghi-quyet:01/2014/NQ-HĐTP", "NQ 01/2014 hướng dẫn Luật Trọng tài thương mại", None),
+    Target("nghi-quyet:01/2014/NQ-HĐTP", "NQ 01/2014 hướng dẫn Luật Trọng tài thương mại", date(2014, 7, 2)),
     Target("luat:05/2017/QH14", "Luật Quản lý ngoại thương 2017", date(2018, 1, 1)),
     Target("nghi-dinh:95/2024/NĐ-CP", "NĐ 95/2024 hướng dẫn Luật Nhà ở", date(2024, 8, 1)),
     Target("nghi-dinh:96/2024/NĐ-CP", "NĐ 96/2024 hướng dẫn Luật Kinh doanh bất động sản", date(2024, 8, 1)),
@@ -44,9 +44,16 @@ class IngestRow:
     articles: int = 0
     amended_by: list[str] = field(default_factory=list)
     built: bool = False
+    graph_nodes: int | None = None     # số node của văn bản trong đồ thị luật (None: không kiểm)
 
 
-def ingest_rows(store: LegalStore, targets, *, day: date) -> list[IngestRow]:
+def ingest_rows(store: LegalStore, targets, *, day: date, graph=None) -> list[IngestRow]:
+    """`graph`: LegalGraphBuild của snapshot (rag.legal.graph.service.build_current) để đếm node mỗi văn bản; None: bỏ cột."""
+    per_doc: dict[str, int] = {}
+    for n in (graph.nodes if graph is not None else ()):
+        k = n.props.get("document_key")
+        if k:
+            per_doc[k] = per_doc.get(k, 0) + 1
     rows = []
     for t in targets:
         doc = store.document(t.key)
@@ -60,7 +67,7 @@ def ingest_rows(store: LegalStore, targets, *, day: date) -> list[IngestRow]:
         articles = sum(p.kind == "article" for p in store.provisions_as_of(t.key, day)) if built else 0
         rows.append(IngestRow(t.key, t.name, True, doc.title, doc.eff_status, eff, t.expected_from,
                               None if t.expected_from is None or eff is None else eff == t.expected_from,
-                              articles, sorted(sources), built))
+                              articles, sorted(sources), built, per_doc.get(t.key, 0) if graph is not None else None))
     return rows
 
 
@@ -69,16 +76,20 @@ def _d(v: date | None) -> str:
 
 
 def render_markdown(rows: list[IngestRow], *, snapshot_id: str, day: date) -> str:
+    with_graph = any(r.graph_nodes is not None for r in rows)
     out = [f"# Kho luật cho các gói hợp đồng mới (K1)", "",
            f"Snapshot: **{snapshot_id}** · đếm Điều tại ngày {day.isoformat()} · sinh bằng `scripts/legal_ingest_report.py`.", "",
-           "| Văn bản | Khóa | Có trong kho | Trạng thái (vbpl) | Hiệu lực trong kho | Hiệu lực kỳ vọng | Khớp | Số Điều | Sửa đổi / quan hệ |",
-           "|---|---|---|---|---|---|---|---|---|"]
+           "| Văn bản | Khóa | Có trong kho | Trạng thái (vbpl) | Hiệu lực trong kho | Hiệu lực kỳ vọng | Khớp | Số Điều | Sửa đổi / quan hệ |"
+           + (" Node đồ thị |" if with_graph else ""),
+           "|---|---|---|---|---|---|---|---|---|" + ("---|" if with_graph else "")]
     notes = []
     for r in rows:
         ok = {True: "✓", False: "LỆCH", None: "chưa đối chiếu"}[r.date_ok]
         out.append(f"| {r.name} | `{r.key}` | {'có' if r.present else 'THIẾU'} | {r.status or '—'} | {_d(r.effective_from)} | "
                    f"{_d(r.expected_from)} | {ok if r.present else '—'} | {r.articles if r.present else '—'} | "
-                   f"{', '.join(r.amended_by) or '—'} |")
+                   f"{', '.join(r.amended_by) or '—'} |" + (f" {'—' if r.graph_nodes is None else r.graph_nodes} |" if with_graph else ""))
+        if with_graph and r.present and r.graph_nodes == 0:
+            notes.append(f"- `{r.key}`: không có node nào trong đồ thị luật (Huy không dựng được đồ thị từ văn bản này).")
         if not r.present:
             notes.append(f"- `{r.key}` ({r.name}): THIẾU trong kho.")
         elif r.date_ok is False:

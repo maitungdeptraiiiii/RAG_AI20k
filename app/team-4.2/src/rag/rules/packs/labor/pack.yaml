@@ -78,6 +78,20 @@ user_fact_questions:
   is_elderly_employee: {question: "Người lao động là người lao động cao tuổi?", values: [true, false]}
   is_foreign_employee: {question: "Người lao động là người nước ngoài làm việc tại Việt Nam?", values: [true, false]}
   is_union_leader_in_term: {question: "Người lao động là thành viên ban lãnh đạo tổ chức đại diện người lao động tại cơ sở, đang trong nhiệm kỳ?", values: [true, false]}
+  # Các dữ kiện còn lại của người lao động: giá trị là mã mà concepts.yaml so (work_condition, wage_region) hoặc đại diện
+  # cho từng khoảng quanh ngưỡng luật (pregnancy_month: ngưỡng gte 7, Đ137 BLLĐ).
+  work_condition:
+    question: "Điều kiện làm việc của người lao động?"
+    values: [binh_thuong, nang_nhoc_doc_hai, dac_biet_nang_nhoc]
+    labels: {binh_thuong: "Bình thường", nang_nhoc_doc_hai: "Nặng nhọc, độc hại, nguy hiểm",
+             dac_biet_nang_nhoc: "Đặc biệt nặng nhọc, độc hại, nguy hiểm"}
+  wage_region:
+    question: "Nơi làm việc thuộc vùng lương tối thiểu nào?"
+    values: [I, II, III, IV]
+    labels: {I: "Vùng I", II: "Vùng II", III: "Vùng III", IV: "Vùng IV"}
+  pregnancy_month:
+    question: "Người lao động đang mang thai tháng thứ mấy?"
+    values: [3, 8]
 
 # Finding thêm ngoài tập chung của lõi (ok, violation, needs_facts, conflict, missing_content).
 findings: [hidden_right, possible_right]

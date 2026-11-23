@@ -87,3 +87,15 @@ def test_loader_validates_user_fact_questions(tmp_path):
     assert "question" in _bad(tmp_path, {"a": {"values": [1]}})
     assert "lightyear" in _bad(tmp_path, {"a": {"question": "?", "values": [1], "unit": "lightyear"}})
     assert "dict" in _bad(tmp_path, ["a"])
+
+
+def test_question_labels_are_loaded(tmp_path):
+    write_pack(tmp_path, {"user_facts": ["a"], "user_fact_questions": {
+        "a": {"question": "A?", "values": ["x", "y"], "labels": {"x": "Nhãn X"}}}}, pack_id="lbl")
+    q = load_pack("lbl", root=tmp_path).user_fact_questions["a"]
+    assert q.labels == (("x", "Nhãn X"),)
+
+
+def test_question_label_for_value_not_in_values_is_rejected(tmp_path):
+    assert "'z'" in _bad(tmp_path, {"a": {"question": "?", "values": ["x"], "labels": {"z": "Z"}}})
+    assert "labels" in _bad(tmp_path, {"a": {"question": "?", "values": ["x"], "labels": ["x"]}})

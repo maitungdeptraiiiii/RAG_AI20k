@@ -91,11 +91,13 @@ class ObjectType:
 
 @dataclass(frozen=True)
 class UserQuestion:
-    """Câu hỏi cho một dữ kiện người dùng (spec §8): `values` là miền giá trị khả dĩ để `next_questions` thử."""
+    """Câu hỏi cho một dữ kiện người dùng (spec §8): `values` là miền giá trị khả dĩ để `next_questions` thử;
+    `labels` là cặp (giá trị, nhãn hiển thị) cho giá trị cần chữ dễ đọc hơn mã, rỗng thì hiện chính giá trị."""
     fact: str
     question: str
     values: tuple
     unit: str | None = None
+    labels: tuple[tuple[Any, str], ...] = ()
 
 
 @dataclass(frozen=True)

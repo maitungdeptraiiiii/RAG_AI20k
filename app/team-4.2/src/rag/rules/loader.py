@@ -296,7 +296,15 @@ def _load_pack(pack_id: str, data: dict, root: Path) -> PackSpec:
             problems.append(f"{where}: values phải là danh sách không rỗng")
         if q.get("unit") is not None and q["unit"] not in names:
             problems.append(f"{where}: đơn vị lạ {q['unit']!r}")
-        questions[name] = UserQuestion(name, str(q.get("question")), tuple(q.get("values") or ()), q.get("unit"))
+        raw_labels = q.get("labels") or {}
+        if not isinstance(raw_labels, dict) or not all(isinstance(t, str) for t in raw_labels.values()):
+            problems.append(f"{where}: labels phải là dict {{giá trị: nhãn}}")
+            raw_labels = {}
+        for value in raw_labels:
+            if value not in (q.get("values") or ()):
+                problems.append(f"{where}: labels có giá trị {value!r} không nằm trong values")
+        questions[name] = UserQuestion(name, str(q.get("question")), tuple(q.get("values") or ()), q.get("unit"),
+                                       tuple(raw_labels.items()))
     shared = _shared_kinds(Path(root), problems)
     concept_kinds: dict[str, tuple[str, ...]] = dict(shared)
     for kind, sk in _kind_specs(data.get("concept_kinds"), "concept_kinds", problems).items():

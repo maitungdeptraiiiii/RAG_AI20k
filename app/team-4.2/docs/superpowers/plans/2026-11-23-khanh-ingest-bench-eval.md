@@ -14,7 +14,7 @@ qua `SnapshotManager(...).store()`.
 **Tech Stack:** Python 3 (`.venv`), pytest, PyYAML, `tracemalloc`, matplotlib (thêm làm phụ thuộc tùy chọn nhóm `bench`).
 
 **Spec:** `docs/phan_cong_w04/khanh.md` (§1 K1–K3, §3 Không được làm, §4 Nghiệm thu) + `docs/superpowers/specs/2026-11-22-rete-rule-engine-design.md`
-§7 Interface, §9 Benchmark, §10 Kiểm thử. Cách gọi engine: `reports/team-4.2/w04/engine_interface.md` (gốc repo).
+§7 Interface, §9 Benchmark, §10 Kiểm thử. Cách gọi engine: `reports/week-04/team-4.2/engine_interface.md` (gốc repo).
 
 ## Global Constraints
 
@@ -28,8 +28,8 @@ qua `SnapshotManager(...).store()`.
 - `summary.md` của benchmark ghi cấu hình máy (CPU, số lõi, RAM, phiên bản Python, hệ điều hành).
 - Eval: miền chưa có gold phải có dòng trong `summary.md`; mỗi ca sai dẫn tới thư mục hồ sơ + rule.
 - Nhận diện loại hợp đồng dùng LLM thật (`classify_contract`; Tùng đồng ý 23/11 vì rẻ: chỉ gửi ≤8 đơn vị đầu × ≤800 ký tự, ~40 hợp đồng chính).
-  Kết quả lưu đệm theo sha256(văn bản) + model ở `reports/team-4.2/w04/eval/classify_cache.json`: chạy lại không gọi LLM. `--no-classify` để bỏ.
-- Mỗi task cập nhật `reports/team-4.2/w04/han_che_va_loi_ton_dong.md` (mục mới "Q. Đo và eval (phần Khánh)") với hạn chế phát hiện được.
+  Kết quả lưu đệm theo sha256(văn bản) + model ở `reports/week-04/team-4.2/eval/classify_cache.json`: chạy lại không gọi LLM. `--no-classify` để bỏ.
+- Mỗi task cập nhật `reports/week-04/team-4.2/han_che_va_loi_ton_dong.md` (mục mới "Q. Đo và eval (phần Khánh)") với hạn chế phát hiện được.
 - Commit kết thúc bằng `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`; không push, không merge.
 
 ## Review Focus
@@ -47,11 +47,11 @@ qua `SnapshotManager(...).store()`.
 | File | Trách nhiệm |
 |---|---|
 | `src/rag/legal/ingest_report.py` | K1: đọc kho luật, đối chiếu danh sách văn bản mục tiêu, dựng bảng + markdown |
-| `scripts/legal_ingest_report.py` | K1: chạy trên snapshot hiện tại, ghi `reports/team-4.2/w04/legal_ingest.md` |
+| `scripts/legal_ingest_report.py` | K1: chạy trên snapshot hiện tại, ghi `reports/week-04/team-4.2/legal_ingest.md` |
 | `src/rag/rules/bench/__init__.py` | gói rỗng |
 | `src/rag/rules/bench/cases.py` | K3: đọc `tests/fixtures/rete/*` (hai dạng) thành `Case` |
 | `src/rag/rules/bench/evalrun.py` | K3: chạy 3 engine, chấm theo gold, bảng chọn gói, markdown |
-| `scripts/eval_rule_engine.py` | K3: CLI, ghi `reports/team-4.2/w04/eval/summary.md` |
+| `scripts/eval_rule_engine.py` | K3: CLI, ghi `reports/week-04/team-4.2/eval/summary.md` |
 | `src/rag/rules/bench/synth.py` | K2: sinh gói YAML tổng hợp (trục 1, trục 2), dữ kiện, đối tượng, chuỗi cập nhật |
 | `src/rag/rules/bench/runner.py` | K2: đo thời gian/bộ nhớ, 6 kịch bản, so hai evaluator |
 | `scripts/bench_rule_engine.py` | K2: CLI, ghi `<timestamp>.json`, `summary.md`, `axis1.png`, `axis2.png` |
@@ -63,7 +63,7 @@ qua `SnapshotManager(...).store()`.
 
 **Files:**
 - Create: `src/rag/legal/ingest_report.py`, `scripts/legal_ingest_report.py`, `tests/test_legal_ingest_report.py`
-- Output: `reports/team-4.2/w04/legal_ingest.md`
+- Output: `reports/week-04/team-4.2/legal_ingest.md`
 
 **Interfaces:**
 - Consumes: `rag.legal.store.LegalStore` (`document(key)`, `relations(key)`, `operations(target_key=...)`, `latest_build(key)`, `provisions_as_of(key, day)`), `rag.legal.snapshots.SnapshotManager(path).current()/.store()`.
@@ -103,7 +103,7 @@ def test_markdown_names_snapshot_and_every_row():
   `amended_by` = khóa nguồn của `operations(target_key=key)` (duy nhất, sắp xếp). Markdown: bảng một dòng mỗi văn bản + mục "Ghi chú" cho dòng thiếu/lệch ngày.
 - [ ] **Step 4:** chạy lại test → PASS.
 - [ ] **Step 5: Script** `scripts/legal_ingest_report.py [--out PATH] [--day YYYY-MM-DD]`: lấy kho như `rag.legal.__main__._snapshots()`, in `snapshot_id`, ghi markdown.
-  Chạy: `.venv/Scripts/python.exe scripts/legal_ingest_report.py` → có file `reports/team-4.2/w04/legal_ingest.md`. Đọc bảng; dòng nào thiếu/lệch ngày → ghi vào mục Q của file hạn chế (không tự tải thêm luật).
+  Chạy: `.venv/Scripts/python.exe scripts/legal_ingest_report.py` → có file `reports/week-04/team-4.2/legal_ingest.md`. Đọc bảng; dòng nào thiếu/lệch ngày → ghi vào mục Q của file hạn chế (không tự tải thêm luật).
   Nếu `CURRENT` của kho không phải snapshot 23/11 → báo trong mục Q và trong câu trả lời, không đổi `CURRENT`.
 - [ ] **Step 6: Commit** `feat(team-4.2): báo cáo kho luật cho các luật hợp đồng mới (K1)`.
 
@@ -159,7 +159,7 @@ def test_flat_cases_match_existing_fixture_test_on_network():
 
 **Files:**
 - Create: `src/rag/rules/bench/evalrun.py`, `scripts/eval_rule_engine.py`, `tests/test_bench_evalrun.py`
-- Output: `reports/team-4.2/w04/eval/summary.md`
+- Output: `reports/week-04/team-4.2/eval/summary.md`
 
 **Interfaces:**
 - Consumes: Task 2 (`Case`, `Expect`, `load_cases`, `result_key`); `rag.bridge.engine.evaluate(catalog, facts, present, evidence, day)`; `rag.rules.evaluator.evaluator_for`; `rag.rules.explain.explain(catalog, session, concept_id, rule_id, obj)`; `rag.contracts.classify.classify_contract(llm, contract)`.
@@ -209,7 +209,7 @@ def test_summary_lists_missing_gold_and_every_engine():
   có khóa thì trả ngay, không thì gọi `classify_contract` rồi ghi file. Mỗi văn bản chỉ phân loại một lần dù nhiều ca (hồ sơ nhiều kỳ).
   Test (LLM giả đếm số lần gọi): hai ca cùng văn bản → 1 lần gọi; chạy lại với cùng file đệm → 0 lần gọi; LLM lỗi → kind `unknown`, `wrong_domain=True`.
 - [ ] **Step 6: Script** `scripts/eval_rule_engine.py [--out DIR] [--no-classify]`; LLM tạo như `scripts/bench_contract_agent.py:_nocache_llm`.
-  Chạy `.venv/Scripts/python.exe scripts/eval_rule_engine.py` → ghi `reports/team-4.2/w04/eval/summary.md` + `classify_cache.json`;
+  Chạy `.venv/Scripts/python.exe scripts/eval_rule_engine.py` → ghi `reports/week-04/team-4.2/eval/summary.md` + `classify_cache.json`;
   in số lần gọi LLM. Mong đợi reference/network 0 ca sai, legacy có MISSING ở rule xuyên đối tượng; ca phân loại sai → nêu trong summary và mục Q (không sửa prompt trong kế hoạch này).
 - [ ] **Step 7: Commit** `feat(team-4.2): harness eval rule engine theo gói, 3 engine, nhận diện loại bằng LLM có đệm (K3)`.
 
@@ -376,7 +376,7 @@ def test_mismatch_raises(monkeypatch, tmp_path):
 
 **Files:**
 - Create: `scripts/bench_rule_engine.py`; Modify: `pyproject.toml` (nhóm tùy chọn `bench = ["matplotlib"]`), `tests/test_bench_runner.py`
-- Output: `reports/team-4.2/w04/bench/<YYYYmmdd-HHMMSS>.json`, `summary.md`, `axis1.png`, `axis2.png`
+- Output: `reports/week-04/team-4.2/bench/<YYYYmmdd-HHMMSS>.json`, `summary.md`, `axis1.png`, `axis2.png`
 
 **Interfaces:**
 - Consumes: Task 6 (`run_axis1`, `run_axis2`, `Row`, `EvaluatorMismatch`), Task 4–5 (`REAL_AXIS1`, `AXIS1_SIZES`, `AXIS2_SIZES`, `AXIS2_RULES`).

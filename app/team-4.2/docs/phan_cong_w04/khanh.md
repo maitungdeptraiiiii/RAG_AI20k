@@ -20,7 +20,7 @@
 
 BLDS 91/2015/QH13, Luật Thương mại 36/2005/QH11, Luật Bảo vệ quyền lợi người tiêu dùng 19/2023/QH15, Luật Nhà ở
 27/2023/QH15 (+ văn bản sửa đổi nếu có). Dùng đường nạp sẵn có (`src/rag/legal/`, trang `/review`). Kiểm: đủ Điều,
-đúng ngày hiệu lực, chuỗi sửa đổi đúng. Ghi danh sách văn bản + trạng thái vào `reports/team-4.2/w04/legal_ingest.md`.
+đúng ngày hiệu lực, chuỗi sửa đổi đúng. Ghi danh sách văn bản + trạng thái vào `reports/week-04/team-4.2/legal_ingest.md`.
 
 ### K2 — Benchmark rule engine (ngày 2–4)
 
@@ -49,7 +49,7 @@ Sáu kịch bản (spec §9), chạy **cả hai** evaluator `reference` và `net
 (`tracemalloc`). **Mỗi lần chạy phải kiểm hai evaluator ra kết quả bằng nhau** — khác nhau thì in ca lỗi (seed + dữ
 kiện) và báo Tùng ngay, không "bỏ qua".
 
-Đầu ra: `reports/team-4.2/w04/bench/<timestamp>.json` + `summary.md` (bảng) + biểu đồ PNG: thời gian theo số rule
+Đầu ra: `reports/week-04/team-4.2/bench/<timestamp>.json` + `summary.md` (bảng) + biểu đồ PNG: thời gian theo số rule
 (trục 1) và theo số đối tượng (trục 2), mỗi kịch bản một đường cho reference và network, trục log.
 
 *Could* (chỉ khi còn thời gian, hỏi Tùng trước): chạy thêm evaluator `network+beta` nếu Tùng cung cấp, để so trên trục 2.
@@ -65,7 +65,7 @@ kiện) và báo Tùng ngay, không "bỏ qua".
 - Báo theo pack và theo loại rule: đúng / sai / UNKNOWN so với gold; ma trận nhầm PASS/FAIL/UNKNOWN; danh sách ca
   sai kèm `explain()` của engine (nếu có).
 - Ngày 1–3 chạy trên stub để dựng khung; số thật lấy ngày 4–5.
-- Đầu ra: `reports/team-4.2/w04/eval/summary.md`.
+- Đầu ra: `reports/week-04/team-4.2/eval/summary.md`.
 
 ### K4 — Router + guardrail chat cho luật mới (ngày 4–5, sau K1–K3)
 
@@ -127,4 +127,4 @@ sàng thì chỉ đổi import, không đổi khung.
 
 -
 
-**Trạng thái (23/11):** K1–K3 do Claude làm theo yêu cầu Tùng (kế hoạch `docs/superpowers/plans/2026-11-23-khanh-ingest-bench-eval.md`, kết quả ở `reports/team-4.2/w04/`, hạn chế ở mục Q của `han_che_va_loi_ton_dong.md`). K4 (router chat) chưa làm.
+**Trạng thái (23/11):** K1–K3 do Claude làm theo yêu cầu Tùng (kế hoạch `docs/superpowers/plans/2026-11-23-khanh-ingest-bench-eval.md`, kết quả ở `reports/week-04/team-4.2/`, hạn chế ở mục Q của `han_che_va_loi_ton_dong.md`). K4 (router chat) chưa làm.

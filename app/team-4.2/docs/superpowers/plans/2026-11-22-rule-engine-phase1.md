@@ -70,7 +70,7 @@ git switch -c feat/team-4.2/w04-rules-engine
 cd app/team-4.2
 .venv/Scripts/python.exe -m pytest tests/test_bridge_*.py tests/test_contract_graph_tools.py tests/test_ask_contract_graph.py tests/test_contract_graph_agent.py tests/test_contracts_api.py -q
 ```
-Ghi số "passed / skipped / xfailed" của GATE vào `reports/team-4.2/w04/phase1_baseline.md` (đã đo trên 11 file bridge: 261 passed, 1 skipped, 1 xfailed; GATE rộng hơn nên số sẽ lớn hơn). Chạy một lần toàn bộ: `.venv/Scripts/python.exe -m pytest -q --ignore=tests/test_agent_partial_review.py -rf` và lưu các dòng `FAILED` vào cùng file (đã đo: 35 failed, 1755 passed, 22 skipped, 16 xfailed; `test_agent_partial_review.py` lỗi import từ trước nên bị bỏ qua).
+Ghi số "passed / skipped / xfailed" của GATE vào `reports/week-04/team-4.2/phase1_baseline.md` (đã đo trên 11 file bridge: 261 passed, 1 skipped, 1 xfailed; GATE rộng hơn nên số sẽ lớn hơn). Chạy một lần toàn bộ: `.venv/Scripts/python.exe -m pytest -q --ignore=tests/test_agent_partial_review.py -rf` và lưu các dòng `FAILED` vào cùng file (đã đo: 35 failed, 1755 passed, 22 skipped, 16 xfailed; `test_agent_partial_review.py` lỗi import từ trước nên bị bỏ qua).
 
 - [ ] **Step 2: Viết `golden_cases` và `run_case`**
 
@@ -98,7 +98,7 @@ Expected: 3 passed. Kiểm tra `git diff --stat` chỉ có file mới, không fi
 - [ ] **Step 5: Commit**
 
 ```bash
-git add tests/rules_golden_cases.py tests/test_rules_golden.py tests/fixtures/rules reports/team-4.2/w04/phase1_baseline.md
+git add tests/rules_golden_cases.py tests/test_rules_golden.py tests/fixtures/rules reports/week-04/team-4.2/phase1_baseline.md
 git commit -m "test(team-4.2): đóng băng kết quả rule engine cũ làm golden"
 ```
 
@@ -491,7 +491,7 @@ def test_load_packs_labor_only_equals_load_catalog():               # concepts, 
 - Modify: `docs/phan_cong_w04/tung_viec_can_lam.md` (đánh dấu A3–A5, D1–D7 đã xong)
 
 - [ ] **Step 1: Chạy GATE** → số passed bằng baseline Task 1, 0 fail mới.
-- [ ] **Step 2: Chạy toàn bộ** `.venv/Scripts/python.exe -m pytest -q --ignore=tests/test_agent_partial_review.py -rf` → đúng 35 test fail như baseline (so tên với `reports/team-4.2/w04/phase1_baseline.md`; thêm test mới của giai đoạn 1 đều passed).
+- [ ] **Step 2: Chạy toàn bộ** `.venv/Scripts/python.exe -m pytest -q --ignore=tests/test_agent_partial_review.py -rf` → đúng 35 test fail như baseline (so tên với `reports/week-04/team-4.2/phase1_baseline.md`; thêm test mới của giai đoạn 1 đều passed).
 - [ ] **Step 3: Chạy golden lần cuối** `pytest tests/test_rules_golden.py -q` → 4 passed (bridge API và rules.reference).
 - [ ] **Step 4: Kiểm không còn tham chiếu cũ**: `grep -rn "bridge/concepts" src ui scripts` không ra kết quả; `git status` không có file lạ.
 - [ ] **Step 5: Cập nhật checklist, commit** — `docs(team-4.2): giai đoạn 1 rule engine hoàn tất`. Mở PR từ `feat/team-4.2/w04-rules-engine`.

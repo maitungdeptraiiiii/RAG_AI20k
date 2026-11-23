@@ -31,7 +31,7 @@ rules) như gói `labor`. Mỗi rule viết sau khi đọc văn bản luật; tr
 `outcome: {legality: illegal|unknown, party_impact: unfavorable|neutral}` — `party_impact` là tác động lên bên giữ quyền
 (`holder`); tên cũ `employee_impact` vẫn được nhận và đổi thành `party_impact` (`tests/test_party_impact.py`).
 
-## Còn phải sửa code ở đâu (chưa là module — xem `reports/team-4.2/w04/han_che_va_loi_ton_dong.md` mục M)
+## Còn phải sửa code ở đâu (chưa là module — xem `reports/week-04/team-4.2/han_che_va_loi_ton_dong.md` mục M)
 
 - Giao diện: `ui/contracts_api.py`, `ui/contract_studio.py` gọi gói labor; `bridge/view.py` nhãn hiển thị tĩnh.
 - Nhận diện loại hợp đồng tự động (`classify_contract`, Huy): hiện người gọi truyền `document_kind` hoặc `packs`.

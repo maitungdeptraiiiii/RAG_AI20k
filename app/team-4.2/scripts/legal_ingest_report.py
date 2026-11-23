@@ -1,4 +1,4 @@
-"""K1: ghi reports/team-4.2/w04/legal_ingest.md từ kho luật có phiên bản hiện tại (chỉ đọc kho).
+"""K1: ghi reports/week-04/team-4.2/legal_ingest.md từ kho luật có phiên bản hiện tại (chỉ đọc kho).
 
 Chạy từ app/team-4.2: .venv/Scripts/python.exe scripts/legal_ingest_report.py [--out PATH] [--day YYYY-MM-DD]"""
 from __future__ import annotations
@@ -16,7 +16,7 @@ def main(argv: list[str] | None = None) -> int:
     from rag.legal.ingest_report import TARGETS, ingest_rows, render_markdown
 
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--out", type=Path, default=REPO / "reports" / "team-4.2" / "w04" / "legal_ingest.md")
+    ap.add_argument("--out", type=Path, default=REPO / "reports" / "week-04" / "team-4.2" / "legal_ingest.md")
     ap.add_argument("--day", type=date.fromisoformat, default=date.today())
     args = ap.parse_args(argv)
     manager = _snapshots()

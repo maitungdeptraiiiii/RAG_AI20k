@@ -258,7 +258,7 @@ trả khái niệm lao động, và hai gói dân sự không khai `document_fac
 
 Luồng thật đã là lai: LLM trích chuỗi `value` kèm câu trích (`facts.py`, kiểm `quote_ok`), rồi regex trong `contracts/values.py`
 đổi chuỗi đó thành số + đơn vị (`facts_map.py`: `_duration`, `_salary`, `_percent`). Đo thử bằng 40 cách viết (kịch bản ở
-`reports/team-4.2/w04/regex_vs_llm_plan.md`); chưa sửa gì. Chưa có số đo trên dữ liệu thật vì bộ fixture chỉ ghi sẵn "đầu ra lý tưởng" của LLM.
+`reports/week-04/team-4.2/regex_vs_llm_plan.md`); chưa sửa gì. Chưa có số đo trên dữ liệu thật vì bộ fixture chỉ ghi sẵn "đầu ra lý tưởng" của LLM.
 
 | # | Mục | Trạng thái |
 |---|---|---|
@@ -418,20 +418,20 @@ tệp bản liệt kê.
 
 Kế hoạch: `app/team-4.2/docs/superpowers/plans/2026-11-23-khanh-ingest-bench-eval.md`. K4 (router chat) không làm.
 
-- Q.1 (K1) `reports/team-4.2/w04/legal_ingest.md`: snapshot `s20261123071410-54f166`, 11/11 văn bản có trong kho, ngày hiệu lực khớp.
+- Q.1 (K1) `reports/week-04/team-4.2/legal_ingest.md`: snapshot `s20261123071410-54f166`, 11/11 văn bản có trong kho, ngày hiệu lực khớp.
   Kho nằm ở `app/team-4.2/data/team-4.2/legal` (script phải chạy từ `app/team-4.2`); `data/team-4.2/legal/CURRENT` ở gốc repo là
   bản cũ chưa theo dõi, không dùng.
 - Q.2 (K1) Chuỗi sửa đổi chưa đủ: vbpl ghi LTM 36/2005, NĐ 95/2024, NĐ 96/2024 "hết hiệu lực một phần" nhưng kho chưa có thao tác hay
   quan hệ nào trỏ tới (chưa nạp văn bản sửa đổi). Các điều đang dùng (LTM Đ301, 306, 315) có thể đã bị sửa mà kho chưa biết — Còn.
 - Q.3 (K1) NQ 01/2014 chưa đối chiếu ngày hiệu lực với văn bản (kho ghi 2014-07-02). Chưa kiểm "Huy dựng được đồ thị" (nghiệm thu K1).
-- Q.4 (K3) `reports/team-4.2/w04/eval/summary.md`: 11 thư mục hồ sơ mẫu, 166 nhãn gold. `reference` và `network` đúng 166/166.
+- Q.4 (K3) `reports/week-04/team-4.2/eval/summary.md`: 11 thư mục hồ sơ mẫu, 166 nhãn gold. `reference` và `network` đúng 166/166.
   Engine cũ (`rag.bridge.engine.evaluate`) thiếu 18 nhãn, toàn là rule xuyên đối tượng (nó không nhận đối tượng hồ sơ) — đúng thiết kế,
   không phải lỗi. Lưu ý: 0 ca sai một phần do gold được viết song song với engine mới; gold của a1, b1–b5, commercial (và consumer)
   vẫn chờ Tùng duyệt, nên "đúng 100%" chưa phải số cuối.
 - Q.5 (K3) Nhận diện loại bằng `classify_contract` (model thật, 23/11): 34 văn bản chính, 33 lần gọi LLM (hai văn bản trùng nội dung),
-  0 chọn sai miền. Đệm ở `reports/team-4.2/w04/eval/classify_cache.json`. Mẫu nhỏ và mỗi miền chỉ có văn bản "đúng kiểu", chưa có
+  0 chọn sai miền. Đệm ở `reports/week-04/team-4.2/eval/classify_cache.json`. Mẫu nhỏ và mỗi miền chỉ có văn bản "đúng kiểu", chưa có
   văn bản lai (vd. hợp đồng thuê có một bên là người tiêu dùng) — Còn.
-- Q.6 (K2) `reports/team-4.2/w04/bench/`: chạy đầy đủ seed 0 (260 dòng, 0 ca lệch giữa hai evaluator). Network nhanh hơn rõ ở cập nhật tăng dần
+- Q.6 (K2) `reports/week-04/team-4.2/bench/`: chạy đầy đủ seed 0 (260 dòng, 0 ca lệch giữa hai evaluator). Network nhanh hơn rõ ở cập nhật tăng dần
   (≈100× ở 10.000 rule, 1 dữ kiện) và `next_questions` (≈20×); ngang `reference` ở lần đánh giá đầu và khi dùng chung cho nhiều hồ sơ; tốn
   chi phí biên dịch (140–160 ms ở 10.000 rule). Một lần chạy trên một máy, chưa lặp nhiều lần — Còn. Lỗi nhỏ để lại: kịch bản 4 của gói
   `labor` lặp ~15 hồ sơ mẫu cho đủ 100; "tính lại" gồm cả lần khởi động; gold bộ hợp đồng lẻ trỏ sai tên/nhiều kỳ bị bỏ không báo; eval

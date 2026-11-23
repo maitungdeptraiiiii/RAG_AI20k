@@ -17,7 +17,7 @@
 - Bất biến: thiếu dữ kiện không bao giờ thành `FAIL`. Dữ kiện suy ra `UNKNOWN` xử lý như `CONFLICT` ở lá (mọi so sánh ra `U`).
 - Dữ kiện đầu vào truyền vào có trùng tên dữ kiện suy ra thì bị bỏ qua (cả hai evaluator); dữ kiện suy ra luôn do định nghĩa quyết định.
 - Thông báo lỗi, docstring, ghi chú: tiếng Việt, như code hiện có. Không thêm regex hay heuristic mới.
-- Gate: `uv run pytest tests/test_rules_*.py tests/test_bridge_*.py tests/test_contract_graph_tools.py tests/test_ask_contract_graph.py tests/test_contract_graph_agent.py tests/test_contracts_api.py -q -p no:cacheprovider`, chạy cả với `RAG_RULE_EVALUATOR=reference`. Xanh trước mỗi commit (cơ sở: 424 passed, 1 skipped, 1 xfailed). Toàn bộ suite có 35 test fail có sẵn (`reports/team-4.2/w04/phase1_baseline.md`), chạy với `--ignore=tests/test_agent_partial_review.py`.
+- Gate: `uv run pytest tests/test_rules_*.py tests/test_bridge_*.py tests/test_contract_graph_tools.py tests/test_ask_contract_graph.py tests/test_contract_graph_agent.py tests/test_contracts_api.py -q -p no:cacheprovider`, chạy cả với `RAG_RULE_EVALUATOR=reference`. Xanh trước mỗi commit (cơ sở: 424 passed, 1 skipped, 1 xfailed). Toàn bộ suite có 35 test fail có sẵn (`reports/week-04/team-4.2/phase1_baseline.md`), chạy với `--ignore=tests/test_agent_partial_review.py`.
 
 ## Quyết định của kế hoạch (ghi vào ledger là `Ruling:` khi thực hiện)
 
@@ -234,10 +234,10 @@
 ### Task 7: Tài liệu, checklist và kiểm toàn bộ
 
 **Files:**
-- Modify: `app/team-4.2/docs/phan_cong_w04/tung_viec_can_lam.md`, `app/team-4.2/docs/superpowers/specs/2026-11-22-rete-rule-engine-design.md` (§5.3, §5.4: ghi các quyết định ở đầu kế hoạch này), `reports/team-4.2/w04/` (thêm `phase3_notes.md` ngắn: số liệu và ca biên)
+- Modify: `app/team-4.2/docs/phan_cong_w04/tung_viec_can_lam.md`, `app/team-4.2/docs/superpowers/specs/2026-11-22-rete-rule-engine-design.md` (§5.3, §5.4: ghi các quyết định ở đầu kế hoạch này), `reports/week-04/team-4.2/` (thêm `phase3_notes.md` ngắn: số liệu và ca biên)
 
 - [ ] **Step 1: Cập nhật spec §5.3 / §5.4** với các quyết định đã chốt (CONFLICT thắng giá trị anh em; "áp dụng" của rule ngoại lệ; ngoại lệ lồng nhau tính qua cây; `evaluate_concept` chỉ ngoại lệ cùng concept; dữ kiện trùng tên bị bỏ qua) và §12 nếu cần.
 - [ ] **Step 2: Tick checklist** D13, D14, D15, D16 (ghi rõ Đ22.2 và Đ25 một lần một công việc chuyển sang 7b, kèm lý do); ghi vào D16 các user fact mới để Tú / Huy biết cần hỏi người dùng.
 - [ ] **Step 3: Chạy Gate hai chế độ và toàn bộ suite** (`uv run pytest tests -q -p no:cacheprovider --ignore=tests/test_agent_partial_review.py`, chạy nền vì mất ~10 phút). Expected: chỉ 35 test fail của cơ sở, không test mới fail.
 - [ ] **Step 3b: Đo nhanh** thời gian tạo phiên và `update` trên catalog labor sau giai đoạn này (cùng script đã dùng ở giai đoạn 2) và ghi vào `phase3_notes.md`.
-- [ ] **Step 4: Commit** — `git add app/team-4.2/docs reports/team-4.2/w04/phase3_notes.md && git commit -m "docs(team-4.2): giai đoạn 3 - cập nhật spec, checklist, ghi chú số liệu"`.
+- [ ] **Step 4: Commit** — `git add app/team-4.2/docs reports/week-04/team-4.2/phase3_notes.md && git commit -m "docs(team-4.2): giai đoạn 3 - cập nhật spec, checklist, ghi chú số liệu"`.

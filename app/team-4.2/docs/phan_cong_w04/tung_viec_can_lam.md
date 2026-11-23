@@ -163,7 +163,7 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
 - [ ] E3. Endpoint SSE trong `ui/contract_studio.py`: chạy hồ sơ / kịch bản, phát `evaluation_diff`, trả `explain`,
       `next_questions`, nhận `answer`. Chạy được hồ sơ của cả ba miền.
 - [x] E5. Nối `classify_contract` (Huy) vào `check_contract` / `ask_contract_graph` theo D32. → Huy *(23/11: Tùng làm; `document_kind="auto"`; đổi mặc định ở UI thuộc D40, mục K.2)*
-- [x] E4. Báo Khánh engine thật sẵn sàng. → Khánh (`reports/team-4.2/w04/engine_interface.md`; cần gửi cho Khánh và Huy)
+- [x] E4. Báo Khánh engine thật sẵn sàng. → Khánh (`reports/week-04/team-4.2/engine_interface.md`; cần gửi cho Khánh và Huy)
 
 ## F. UI Contract Studio (phần Tú)
 

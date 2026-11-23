@@ -211,7 +211,7 @@ def test_unknown_evaluator_name_rejected():                      # evaluator="kh
 
 - [ ] **Step 1: Viết test thất bại** — `test_default_evaluator_is_network`: không đặt biến môi trường → `default_kind() == "network"`; đặt `RAG_RULE_EVALUATOR=reference` → `"reference"`; giá trị lạ → `ValueError`.
 - [ ] **Step 2–4:** fail → đổi mặc định → `pytest tests/test_rules_*.py -q` + Gate với mặc định `network`; chạy bộ test Gate thêm một lần với `RAG_RULE_EVALUATOR=reference` → hai lần đều xanh, số passed bằng nhau.
-- [ ] **Step 5: Chạy toàn bộ suite** `pytest -q --ignore=tests/test_agent_partial_review.py -rf` → đúng 35 test fail như baseline (`reports/team-4.2/w04/phase1_baseline.md`), test mới đều passed. Commit — `feat(team-4.2): evaluator mặc định là network; giai đoạn 2 hoàn tất`.
+- [ ] **Step 5: Chạy toàn bộ suite** `pytest -q --ignore=tests/test_agent_partial_review.py -rf` → đúng 35 test fail như baseline (`reports/week-04/team-4.2/phase1_baseline.md`), test mới đều passed. Commit — `feat(team-4.2): evaluator mặc định là network; giai đoạn 2 hoàn tất`.
 
 ---
 

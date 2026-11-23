@@ -46,3 +46,38 @@ def test_mismatch_raises(monkeypatch, tmp_path):
     with pytest.raises(R.EvaluatorMismatch) as e:
         run_axis1(RuleSpec(10, 0.5, 0, 50, 0), seed=7, repeats=1, root=tmp_path)
     assert "seed 7" in str(e.value)
+
+
+# ───────────────────────────── script (Task 7) ─────────────────────────────
+import importlib.util  # noqa: E402
+import json  # noqa: E402
+from pathlib import Path  # noqa: E402
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def _script():
+    spec = importlib.util.spec_from_file_location("bench_rule_engine", ROOT / "scripts" / "bench_rule_engine.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _strip(out: Path):
+    data = json.loads(next(out.glob("*.json")).read_text(encoding="utf-8"))
+    return [{k: v for k, v in r.items() if k not in ("median_ms", "p95_ms", "peak_kb", "note")} for r in data["rows"]]
+
+
+def test_quick_run_twice_same_table_except_timing(tmp_path):
+    main = _script().main
+    assert main(["--quick", "--seed", "0", "--out", str(tmp_path / "a")]) == 0
+    assert main(["--quick", "--seed", "0", "--out", str(tmp_path / "b")]) == 0
+    assert _strip(tmp_path / "a") == _strip(tmp_path / "b")
+
+
+def test_summary_has_machine_six_scenarios_two_axes_and_charts(tmp_path):
+    _script().main(["--quick", "--seed", "0", "--out", str(tmp_path)])
+    md = (tmp_path / "summary.md").read_text(encoding="utf-8")
+    assert "Python" in md and "CPU" in md and "RAM" in md
+    assert all(f"Kịch bản {i}" in md for i in range(1, 7)) and "Trục 1" in md and "Trục 2" in md
+    assert (tmp_path / "axis1.png").exists() and (tmp_path / "axis2.png").exists()

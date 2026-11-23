@@ -273,6 +273,7 @@ Luồng thật đã là lai: LLM trích chuỗi `value` kèm câu trích (`facts
 | V.9 | Căn cứ chỉ kiểm SỐ có trong câu trích, không kiểm ĐƠN VỊ: LLM ghi 8 "month" cho "8 ngày" vẫn qua nếu regex không đọc được chuỗi để đối chiếu (đọc được thì mâu thuẫn bị chặn) | Còn |
 | V.10 | Model nhỏ cần constrained decoding (JSON schema) để trả `norm` ổn định — chưa làm; `ask_json` vẫn tìm `{`/`}` | Còn |
 | V.11 | Ngoài phạm vi: bộ đọc `contains` / `enum` (phân loại theo cụm chữ trong pack.yaml, vd. `has_interest`), nhận bí danh bên, `AMEND_RE`, cắt "lên/thành" của `_salary` khi không có `norm` | Còn |
+| V.12 | **Làm sau (Tùng chốt 23/11):** V.9 (kiểm thêm ĐƠN VỊ LLM ghi có trong câu trích, dùng `unit_forms` của gói) trước, rồi V.11 (phân loại theo cụm chữ: `contains`/`enum`, bí danh bên, `AMEND_RE`) | Ghi để làm sau |
 
 ## Tồn đọng chung (môi trường, quy trình)
 

@@ -197,6 +197,7 @@ def discover(client: Any, store: LegalStore, seeds: Sequence[Seed], raw_dir: Pat
 
         # ứng viên theo tiêu đề: tìm theo tên và theo số hiệu
         candidates: dict[str, dict] = {}
+        by_number: set[str] = set()          # tìm theo số hiệu: vbpl khớp cả nội dung
         # văn bản dưới luật: tên hiển thị chỉ là "Nghị định" / "Thông tư" -> chỉ tìm theo số hiệu
         subordinate = base.doc_type.casefold() not in _LAW_MAKERS
         for keyword in dict.fromkeys([base.doc_number] if subordinate else [_display_name(base.title), base.doc_number]):
@@ -204,15 +205,20 @@ def discover(client: Any, store: LegalStore, seeds: Sequence[Seed], raw_dir: Pat
                 items = client.list_page(page, page_size, keyword=keyword).get("items") or []
                 for item in items:
                     candidates.setdefault(str(item.get("id")), item)
+                    if keyword == base.doc_number:
+                        by_number.add(str(item.get("id")))
                 if len(items) < page_size:
                     break
-        for item in candidates.values():
+        for item_id, item in candidates.items():
             number = normalize_number(item.get("docNum") or "")
             title = item.get("title") or ""
             issued = _day(item.get("issueDate"))
             if number == base.doc_number or (issued and base.issued_on and issued <= base.issued_on):
                 continue
-            if law_name(base.title) not in title.casefold() and base.doc_number not in normalize_number(title):
+            # văn bản sửa nhiều văn bản ("sửa đổi ... các Nghị định trong lĩnh vực nhà ở") không nêu văn bản gốc ở tiêu
+            # đề: ứng viên tìm theo số hiệu vẫn được xét, nội dung (_confirm) quyết định
+            if (law_name(base.title) not in title.casefold() and base.doc_number not in normalize_number(title)
+                    and item_id not in by_number):
                 continue
             relation = _classify(item, base)
             if relation is None:

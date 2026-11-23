@@ -261,3 +261,33 @@ def test_decree_can_be_amended_by_decree_but_not_by_circular(tmp_path):
                       tmp_path / "raw", now=NOW)
     assert [(k, r) for k, r, _ in report.added] == [("nghi-dinh:54/2026/NĐ-CP", "SUA_DOI_BO_SUNG")]
     assert dict(report.rejected)[CIRCULAR["title"]] == "discovery.subordinate_document"
+
+
+class NumberSearchClient(FakeClient):
+    """Như vbpl: tìm theo số hiệu trả cả văn bản chỉ nhắc số hiệu trong nội dung; tìm theo tên chỉ khớp tiêu đề."""
+
+    def iter_list(self, *, keyword=None, **_):
+        for d in self.docs.values():
+            body = d["documentContent"]["content"]
+            if keyword is None or keyword in d["title"] or keyword in body:
+                yield self._item(d)
+
+
+MULTI_AMEND = vb("53", "Nghị định", "54/2026/NĐ-CP", "Nghị định sửa đổi, bổ sung một số điều của các Nghị định trong "
+                 "lĩnh vực nhà ở, kinh doanh bất động sản", "2026-02-10",
+                 DECREE_AMEND["documentContent"]["content"].replace("<p>", "").replace("</p>", "\n"))
+UNRELATED = vb("54", "Nghị định", "60/2026/NĐ-CP", "Nghị định sửa đổi, bổ sung một số điều của Nghị định về chợ",
+               "2026-03-10", "Điều 1. Sửa đổi, bổ sung một số điều của Nghị định số 02/2003/NĐ-CP\n"
+               "1. Sửa đổi khoản 1 Điều 2 như sau:\n“1. Chợ.”.\nĐiều 2. Hiệu lực thi hành\n"
+               "Nghị định này có hiệu lực thi hành từ ngày 01 tháng 4 năm 2026. Thay thế quy định tại 95/2024/NĐ-CP.")
+
+
+def test_multi_target_amendment_found_by_number_and_confirmed_by_content(tmp_path):
+    """Q.2: văn bản sửa nhiều văn bản có tiêu đề không nêu văn bản gốc (NĐ 54/2026 sửa NĐ 95/2024): tìm theo số hiệu thì
+    vẫn xét, nội dung xác nhận mới thêm; văn bản chỉ nhắc số hiệu mà không sửa thì bị loại."""
+    store = LegalStore(tmp_path / "c.sqlite")
+    report = discover(NumberSearchClient([DECREE, MULTI_AMEND, UNRELATED]), store, [Seed("Nghị định", "95/2024/NĐ-CP")],
+                      tmp_path / "raw", now=NOW)
+    assert [(k, r) for k, r, _ in report.added] == [("nghi-dinh:54/2026/NĐ-CP", "SUA_DOI_BO_SUNG")]
+    assert dict(report.rejected)[UNRELATED["title"]] == "discovery.not_confirmed_by_content"
+    assert store.document("nghi-dinh:60/2026/NĐ-CP") is None

@@ -645,6 +645,9 @@ concepts:
   - chấm dứt hợp đồng
   - đơn phương chấm dứt
   - hoàn tiền
+  not_about:   # lần chạy thật 24/11 (Haiku, c3 / c4): hai câu dưới bị gán vào đây, làm thiếu nội dung Đ23.3.h ra PASS
+  - {text: "bên tiêu dùng không được chấm dứt hợp đồng khi bên kinh doanh đổi giá / điều kiện", see: consumer.service_price_change_without_exit}
+  - {text: "hợp đồng có hiệu lực từ ngày ký và kết thúc khi hết hạn / khi các bên hoàn thành nghĩa vụ", see: consumer.content_time_term}
   anchors:
   - pid: luat:19/2023/QH15#d23.k3.h
     role: basis

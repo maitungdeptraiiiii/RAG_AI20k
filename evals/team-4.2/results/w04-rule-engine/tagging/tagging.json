@@ -1,0 +1,261 @@
+{
+ "app_model": "gpt-6-luna",
+ "tag_model": "anthropic/claude-haiku-5.5",
+ "suites": {
+  "commercial": {
+   "summary": {
+    "docs": 4,
+    "concept_precision": 0.786,
+    "concept_recall": 1.0,
+    "slots": "11/11",
+    "rules": "10/10",
+    "false_fail": 0,
+    "missed_fail": 0
+   },
+   "docs": [
+    {
+     "doc": "m1_mua_ban_hop_le",
+     "missing": [],
+     "extra": [
+      "civil.rescission_notice",
+      "civil.unilateral_termination"
+     ],
+     "pending": [],
+     "slot_errors": [],
+     "rule_errors": [],
+     "false_fail": [],
+     "missed_fail": [],
+     "quotes_to_review": {
+      "civil.rescission_notice": [
+       "Bên tạm ngừng, đình chỉ hoặc hủy bỏ hợp đồng do bên kia vi phạm cơ bản phải thông báo ngay bằng văn bản cho bên kia."
+      ],
+      "civil.unilateral_termination": [
+       "Bên tạm ngừng, đình chỉ hoặc hủy bỏ hợp đồng do bên kia vi phạm cơ bản phải thông báo ngay bằng văn bản cho bên kia."
+      ]
+     }
+    },
+    {
+     "doc": "m2_phat_vuot_tran",
+     "missing": [],
+     "extra": [],
+     "pending": [],
+     "slot_errors": [],
+     "rule_errors": [],
+     "false_fail": [],
+     "missed_fail": [],
+     "quotes_to_review": {}
+    },
+    {
+     "doc": "m3_dich_vu_dinh_chi",
+     "missing": [],
+     "extra": [],
+     "pending": [],
+     "slot_errors": [],
+     "rule_errors": [],
+     "false_fail": [],
+     "missed_fail": [],
+     "quotes_to_review": {}
+    },
+    {
+     "doc": "m4_tong_muc_phat",
+     "missing": [],
+     "extra": [
+      "civil.rescission_notice"
+     ],
+     "pending": [],
+     "slot_errors": [],
+     "rule_errors": [],
+     "false_fail": [],
+     "missed_fail": [],
+     "quotes_to_review": {
+      "civil.rescission_notice": [
+       "Bên bị vi phạm cơ bản có quyền hủy bỏ hợp đồng và phải thông báo ngay bằng văn bản cho bên kia."
+      ]
+     }
+    }
+   ]
+  },
+  "consumer": {
+   "summary": {
+    "docs": 6,
+    "concept_precision": 0.651,
+    "concept_recall": 1.0,
+    "slots": "18/18",
+    "rules": "52/52",
+    "false_fail": 2,
+    "missed_fail": 0
+   },
+   "docs": [
+    {
+     "doc": "c1_internet_hop_le",
+     "missing": [],
+     "extra": [],
+     "pending": [],
+     "slot_errors": [],
+     "rule_errors": [],
+     "false_fail": [],
+     "missed_fail": [],
+     "quotes_to_review": {}
+    },
+    {
+     "doc": "c2_dien_may_mien_tru",
+     "missing": [],
+     "extra": [
+      "civil.standard_terms_exemption",
+      "consumer.content_delivery",
+      "consumer.content_parties",
+      "consumer.content_payment",
+      "consumer.content_price_quality",
+      "consumer.content_product",
+      "consumer.content_time_term"
+     ],
+     "pending": [],
+     "slot_errors": [],
+     "rule_errors": [],
+     "false_fail": [],
+     "missed_fail": [],
+     "quotes_to_review": {
+      "civil.standard_terms_exemption": [
+       "Bên A không chịu trách nhiệm đối với bất kỳ hư hỏng, lỗi kỹ thuật nào của hàng hóa sau khi đã giao, trong mọi trường hợp.",
+       "Bên B không được khiếu nại hoặc khởi kiện về chất lượng hàng hóa sau khi đã ký biên bản nhận hàng."
+      ],
+      "consumer.content_delivery": [
+       "Bên A giao hàng tại nhà Bên B trong 02 ngày kể từ ngày thanh toán."
+      ],
+      "consumer.content_parties": [
+       "BÊN BÁN (Bên A): Công ty Cổ phần Điện Máy Giả Định (tên giả dùng cho thử nghiệm), địa chỉ: số 9 đường Thử Nghiệm, TP. Hồ Chí Minh, điện thoại: 028 0000 0000."
+      ],
+      "consumer.content_payment": [
+       "Bên B thanh toán toàn bộ bằng chuyển khoản khi ký hợp đồng."
+      ],
+      "consumer.content_price_quality": [
+       "Bên A bán cho Bên B 01 tủ lạnh hai cánh dung tích 400 lít, mới 100%, giá 15.000.000 đồng."
+      ],
+      "consumer.content_product": [
+       "Bên A bán cho Bên B 01 tủ lạnh hai cánh dung tích 400 lít, mới 100%, giá 15.000.000 đồng."
+      ],
+      "consumer.content_time_term": [
+       "Hợp đồng có hiệu lực kể từ ngày ký."
+      ]
+     }
+    },
+    {
+     "doc": "c3_phong_tap_gia_han",
+     "missing": [],
+     "extra": [
+      "consumer.unilateral_change"
+     ],
+     "pending": [],
+     "slot_errors": [],
+     "rule_errors": [],
+     "false_fail": [
+      "consumer.unilateral_change/r1"
+     ],
+     "missed_fail": [],
+     "quotes_to_review": {
+      "consumer.unilateral_change": [
+       "Bên A có quyền điều chỉnh phí hội viên trong thời gian sử dụng dịch vụ; Bên B phải thanh toán phần chênh lệch và không được chấm dứt hợp đồng vì lý do này."
+      ]
+     }
+    },
+    {
+     "doc": "c4_mau_thieu_noi_dung",
+     "missing": [],
+     "extra": [],
+     "pending": [],
+     "slot_errors": [],
+     "rule_errors": [],
+     "false_fail": [],
+     "missed_fail": [],
+     "quotes_to_review": {}
+    },
+    {
+     "doc": "c5_khoa_hoc_du_lieu",
+     "missing": [],
+     "extra": [
+      "consumer.content_delivery",
+      "consumer.content_parties",
+      "consumer.content_payment",
+      "consumer.content_price_quality",
+      "consumer.content_product",
+      "consumer.content_termination",
+      "consumer.content_time_term"
+     ],
+     "pending": [],
+     "slot_errors": [],
+     "rule_errors": [],
+     "false_fail": [],
+     "missed_fail": [],
+     "quotes_to_review": {
+      "consumer.content_delivery": [
+       "Bên A cung cấp cho Bên B khóa học tiếng Anh giao tiếp 48 buổi, học trực tiếp tại cơ sở số 10 phố Thử Nghiệm, Hà Nội, khai giảng ngày 15/11/2025."
+      ],
+      "consumer.content_parties": [
+       "BÊN CUNG CẤP (Bên A): Công ty Cổ phần Giáo Dục Giả Định (tên giả dùng cho thử nghiệm), địa chỉ: số 10 phố Thử Nghiệm, Hà Nội, điện thoại: 024 0000 0000."
+      ],
+      "consumer.content_payment": [
+       "Học phí là 12.000.000 đồng, thanh toán một lần khi ký hợp đồng bằng chuyển khoản."
+      ],
+      "consumer.content_price_quality": [
+       "Học phí là 12.000.000 đồng, thanh toán một lần khi ký hợp đồng bằng chuyển khoản."
+      ],
+      "consumer.content_product": [
+       "Bên A cung cấp cho Bên B khóa học tiếng Anh giao tiếp 48 buổi, học trực tiếp tại cơ sở số 10 phố Thử Nghiệm, Hà Nội, khai giảng ngày 15/11/2025."
+      ],
+      "consumer.content_termination": [
+       "Nếu Bên B chấm dứt hợp đồng vì bất kỳ lý do gì, Bên B mất toàn bộ học phí đã đóng. Nếu Bên A chấm dứt hợp đồng, Bên A chỉ hoàn lại học phí của các buổi chưa học."
+      ],
+      "consumer.content_time_term": [
+       "Hôm nay, ngày 01 tháng 11 năm 2025, tại Hà Nội, chúng tôi gồm:",
+       "Hợp đồng có hiệu lực kể từ ngày ký đến khi kết thúc khóa học."
+      ]
+     }
+    },
+    {
+     "doc": "c6_noi_that_gia_giao",
+     "missing": [],
+     "extra": [
+      "consumer.content_delivery",
+      "consumer.content_parties",
+      "consumer.content_payment",
+      "consumer.content_price_quality",
+      "consumer.content_product",
+      "consumer.content_time_term",
+      "consumer.liability_exclusion"
+     ],
+     "pending": [],
+     "slot_errors": [],
+     "rule_errors": [],
+     "false_fail": [
+      "consumer.liability_exclusion/r1"
+     ],
+     "missed_fail": [],
+     "quotes_to_review": {
+      "consumer.content_delivery": [
+       "Bên A giao hàng tại nhà Bên B trong 30 ngày qua đơn vị vận chuyển đối tác."
+      ],
+      "consumer.content_parties": [
+       "BÊN BÁN (Bên A): Công ty TNHH Nội Thất Giả Định (tên giả dùng cho thử nghiệm), địa chỉ: số 14 đường Thử Nghiệm, Cần Thơ, điện thoại: 0292 000 000."
+      ],
+      "consumer.content_payment": [
+       "Bên B đặt trước 20.000.000 đồng khi ký hợp đồng và thanh toán phần còn lại khi nhận hàng."
+      ],
+      "consumer.content_price_quality": [
+       "Giá tạm tính là 40.000.000 đồng"
+      ],
+      "consumer.content_product": [
+       "Bên A bán cho Bên B 01 bộ sofa gỗ sồi và 01 bàn ăn 6 ghế theo mẫu trong catalogue."
+      ],
+      "consumer.content_time_term": [
+       "Hôm nay, ngày 12 tháng 09 năm 2025, tại Cần Thơ, chúng tôi gồm:",
+       "Hợp đồng có hiệu lực kể từ ngày ký."
+      ],
+      "consumer.liability_exclusion": [
+       "Bên A không chịu trách nhiệm đối với hư hỏng, mất mát hàng hóa do đơn vị vận chuyển đối tác gây ra."
+      ]
+     }
+    }
+   ]
+  }
+ }
+}

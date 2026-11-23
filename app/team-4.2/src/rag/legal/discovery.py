@@ -220,9 +220,9 @@ def discover(client: Any, store: LegalStore, seeds: Sequence[Seed], raw_dir: Pat
             doc_type = _type_name(item.get("docType")).casefold()
             if relation == "HOP_NHAT" and "VBHN-VPQH" not in number:
                 continue                     # VBHN của luật do Văn phòng Quốc hội ban hành; VBHN-Bộ là văn bản dưới luật
-            if relation != "HOP_NHAT" and doc_type not in _LAW_MAKERS:
+            if relation != "HOP_NHAT" and doc_type not in _LAW_MAKERS and not (subordinate and doc_type == base.doc_type.casefold()):
                 report.rejected.append((title, "discovery.subordinate_document"))
-                continue                     # chỉ Luật/Bộ luật/Nghị quyết của Quốc hội sửa đổi, thay thế được luật
+                continue                     # luật: chỉ Luật/Bộ luật/NQ Quốc hội sửa được; văn bản dưới luật: thêm văn bản cùng loại
             cand_key = document_key(_type_name(item.get("docType")) or "Văn bản", number)
             if store.document(cand_key) is not None:
                 cand = store.document(cand_key)

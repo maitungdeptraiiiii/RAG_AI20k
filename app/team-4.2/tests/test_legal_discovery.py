@@ -241,3 +241,23 @@ def test_decree_replaced_by_decree_is_fetched_with_its_own_type(tmp_path):
     rels = [(r.source_key, r.relation, r.target_key) for r in store.relations("nghi-dinh:74/2024/NĐ-CP")]
     assert rels == [("nghi-dinh:293/2025/NĐ-CP", "THAY_THE", "nghi-dinh:74/2024/NĐ-CP")]
     assert ("nghi-dinh:74/2024/NĐ-CP", "THAY_THE", "hết hiệu lực: Nghị định số 74/2024/NĐ-CP") in report.added
+
+
+DECREE = vb("50", "Nghị định", "95/2024/NĐ-CP", "Nghị định quy định chi tiết một số điều của Luật Nhà ở số 95/2024/NĐ-CP",
+            "2024-07-24", "Điều 1. Phạm vi\nNội dung cũ.\nĐiều 2. Đối tượng\n1. Cá nhân.")
+DECREE_AMEND = vb("51", "Nghị định", "54/2026/NĐ-CP", "Nghị định sửa đổi, bổ sung một số điều của Nghị định số "
+                  "95/2024/NĐ-CP số 54/2026/NĐ-CP", "2026-02-10",
+                  "Điều 1. Sửa đổi, bổ sung một số điều của Nghị định số 95/2024/NĐ-CP\n"
+                  "1. Sửa đổi khoản 1 Điều 2 như sau:\n“1. Cá nhân, tổ chức.”.\n"
+                  "Điều 2. Hiệu lực thi hành\nNghị định này có hiệu lực thi hành từ ngày 01 tháng 3 năm 2026.")
+CIRCULAR = vb("52", "Thông tư", "05/2026/TT-BXD", "Thông tư sửa đổi, bổ sung Nghị định số 95/2024/NĐ-CP số "
+              "05/2026/TT-BXD", "2026-03-01", DECREE_AMEND["documentContent"]["content"].replace("<p>", "").replace("</p>", "\n"))
+
+
+def test_decree_can_be_amended_by_decree_but_not_by_circular(tmp_path):
+    """Q.2: văn bản gốc là nghị định thì nghị định (cùng cấp) hoặc văn bản của Quốc hội sửa được; thông tư thì không."""
+    store = LegalStore(tmp_path / "c.sqlite")
+    report = discover(FakeClient([DECREE, DECREE_AMEND, CIRCULAR]), store, [Seed("Nghị định", "95/2024/NĐ-CP")],
+                      tmp_path / "raw", now=NOW)
+    assert [(k, r) for k, r, _ in report.added] == [("nghi-dinh:54/2026/NĐ-CP", "SUA_DOI_BO_SUNG")]
+    assert dict(report.rejected)[CIRCULAR["title"]] == "discovery.subordinate_document"

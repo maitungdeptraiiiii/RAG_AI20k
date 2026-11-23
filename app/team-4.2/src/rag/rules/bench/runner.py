@@ -269,15 +269,21 @@ def run_axis2(spec: ObjSpec, *, seed: int, repeats: int, root: Path, sink: list 
             cur = _apply(cur, ch)
         outs, timing, rec, peaks = {}, {}, {}, {}
         for kind, ev in evs.items():
-            s, it, seen, recs = _session(ev, base), iter(seq), [], []
+            s, it, recs = _session(ev, base), iter(seq), []
 
             def step():
-                diff = s.update({}, objects=next(it))
-                seen.append(_canon(diff, kind))
+                s.update({}, objects=next(it))
                 if hasattr(s, "stats"):
                     recs.append(s.stats.get("objects_recomputed", 0))
             timing[kind] = measure(step, repeats=len(seq) - 1)
-            outs[kind], rec[kind] = seen, _median_stat(recs)
+            rec[kind] = _median_stat(recs)
+            # phát lại ngoài vòng đo để so: Diff + trạng thái kết quả sau mỗi bước (Diff rỗng là hợp lệ khi thay đổi
+            # không lật kết quả nào — vd thêm hợp đồng vào hồ sơ 100 hợp đồng — nên không thể chỉ so Diff)
+            r, seen = _session(ev, base), []
+            for ch in seq:
+                d, st = _canon(r.update({}, objects=ch), kind), _canon(r.results(), kind)
+                seen.append("[]" if d == st == "[]" else f"{d}\n{st}")   # rỗng cả hai -> "[]" để chặn đầu ra rỗng
+            outs[kind] = seen
             probe = _session(ev, base)
             peaks[kind] = peak_kb(lambda: probe.update({}, objects=seq[0]))
         d = _check(outs, 6, f"{label}/{change}", seed, repr(seq[:3]))

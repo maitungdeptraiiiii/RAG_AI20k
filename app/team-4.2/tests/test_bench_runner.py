@@ -124,3 +124,10 @@ def test_unexpected_error_still_writes_partial_output(tmp_path, monkeypatch):
     assert mod.main(["--quick", "--seed", "0", "--out", str(tmp_path)]) == 2
     data = json.loads(next(tmp_path.glob("*.json")).read_text(encoding="utf-8"))
     assert "KeyError" in data["error"] and data["rows"]
+
+
+def test_scenario6_compares_state_not_only_diffs(tmp_path):
+    # 100 hợp đồng: thêm một hợp đồng thường không đổi kết quả nào (Diff rỗng là hành vi đúng) — phép so phải dựa trên
+    # trạng thái kết quả sau mỗi bước, không dừng vì Diff rỗng
+    rows = run_axis2(ObjSpec(100, 5, 0), seed=0, repeats=5, root=tmp_path)
+    assert {r.size.split("/")[-1] for r in rows if r.scenario == 6} == {"add", "remove", "modify"}

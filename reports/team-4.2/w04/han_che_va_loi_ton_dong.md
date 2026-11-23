@@ -310,6 +310,24 @@ rồi chọn gói; unknown -> không chạy gói nào (soát) / từ chối (h�
 | K.6 | "Tagger theo kind": prompt vẫn một mẫu chung, khái niệm mô tả bằng dữ liệu (đã vậy từ trước), nay kèm `kind`; chưa dựng slot từ kind (kinds.yaml chỉ có loại slot, không có tên slot) | Có chủ ý |
 | K.7 | Định dạng `fact_catalog.json` viết lại một dòng mỗi trường (nội dung cũ không đổi) | Có chủ ý |
 
+## H3 — đồ thị luật cho luật mới (23/11, Tùng nhận phần của Huy)
+
+Đồ thị luật dựng tổng quát từ mọi văn bản trong snapshot (cấu trúc, `REFERS_TO`, `GUIDES`, phiên bản): BLDS 91/2015,
+33/2005, Luật Nhà ở 65/2014, 27/2023 đã có sẵn. Thiếu Luật Các TCTD 32/2024 và NQ 01/2019/NQ-HĐTP (gói vay dẫn tới):
+đã tải từ trước (`supplements/loan-scope-v1`) nhưng chưa nạp -> thêm `rag.legal.supplement.import_supplement` +
+lệnh `python -m rag.legal import-supplement <fetch-report.json>` và nạp vào snapshot **s20261123063951-32c3b6**
+(cha: s20261117024643-c06f0c, giữ nguyên). Test `tests/test_pack_anchors_legal_graph.py`: 114 tham chiếu (neo + nguồn
+kỳ giá trị) và mọi `value_sources` giải được trên đồ thị, nguồn kỳ giá trị có hiệu lực giao với kỳ. Neo phải sửa: 0.
+
+| # | Mục | Trạng thái |
+|---|---|---|
+| G.1 | Neo4j không chạy trên máy: snapshot mới CHƯA đồng bộ vào Neo4j (`python -m rag.legal graph build` khi bật LEGAL_GRAPH=1); kiểm tra dùng bản dựng Python thuần | Còn |
+| G.2 | Quay lại snapshot cũ: ghi `s20261117024643-c06f0c` vào `app/team-4.2/data/team-4.2/legal/CURRENT` (dữ liệu gitignore, chỉ trên máy này) | Ghi chú |
+| G.3 | Luật Thương mại 36/2005 và Luật BVQLNTD 19/2023/QH15 (danh sách K1) chưa tải, chưa nạp; chưa gói nào dẫn tới | Còn (K1) |
+| G.4 | 26 văn bản bổ sung lao động (`supplements/labor-scope-v1-26`) vẫn chưa nạp (README ghi cần duyệt PDF/phụ lục); không nạp ở đây | Còn |
+| G.5 | Kiểm "hiệu lực trong kỳ" chỉ cho nguồn của kỳ giá trị luật; neo thường chỉ kiểm có phiên bản (không gắn ngày) | Còn |
+| G.6 | Hai văn bản mới dựng phiên bản theo đường tự động (`build_all`); chưa ai duyệt mục cần duyệt của chúng (nếu có) trên trang /review | Còn |
+
 ## Tồn đọng chung (môi trường, quy trình)
 
 | # | Mục | Trạng thái |

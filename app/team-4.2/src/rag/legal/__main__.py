@@ -85,6 +85,8 @@ def main(argv: list[str] | None = None) -> int:
     show.add_argument("--as-of", required=True, type=date.fromisoformat)
     show.add_argument("--provision", help="vd. d60.k3")
     sub.add_parser("report", help="thống kê thao tác / phiên bản / mục duyệt")
+    supp = sub.add_parser("import-supplement", help="nạp văn bản đã tải (supplements/<phạm vi>/fetch-report.json) vào snapshot mới")
+    supp.add_argument("report", type=Path)
     graph = sub.add_parser("graph", help="đồ thị luật trong Neo4j: build (dựng + công bố), check (chỉ dựng), status")
     graph.add_argument("action", choices=["build", "check", "status"])
     fixture = sub.add_parser("fixture", help="lưu text của văn bản (Luật) làm fixture test")
@@ -116,6 +118,12 @@ def _run(args: argparse.Namespace) -> int:
         report = res.value
         print(json.dumps({"snapshot_id": res.snapshot.snapshot_id, "added": report.added, "rejected": report.rejected,
                           "suspicious": report.suspicious, "graph": _sync_graph()}, ensure_ascii=False, indent=2))
+    elif args.cmd == "import-supplement":
+        from rag.legal.supplement import import_supplement
+
+        res = import_supplement(_snapshots(), args.report, actor=_user())
+        print(json.dumps({"snapshot_id": res.snapshot.snapshot_id, **res.value, "graph": _sync_graph()},
+                         ensure_ascii=False, indent=2))
     elif args.cmd == "build":
         snapshots = _snapshots()
         res = snapshots.write("cli:build", _user(), lambda svc: None)

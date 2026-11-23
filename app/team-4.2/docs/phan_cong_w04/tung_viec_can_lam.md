@@ -188,7 +188,7 @@ conclusion, on_silence, ≥3 ví dụ (PASS / FAIL / UNKNOWN).
 
 ## H. Theo dõi người khác
 
-- [ ] H1. Ngày 2: Khánh nạp xong BLDS (cần cho B4–B5 có pid).
+- [x] H1. Ngày 2: Khánh nạp xong BLDS (cần cho B4–B5 có pid). *(23/11: BLDS, Luật Nhà ở đã có trong snapshot; Tùng nạp thêm Luật TCTD 32/2024 + NQ 01/2019 (snapshot s20261123063951-32c3b6); LTM 36/2005, Luật BVQLNTD 19/2023 chưa tải — mục G.3)*
 - [x] H2. Ngày 3: Huy `dossier_objects` chạy trên a1, b1–b5 (cần cho D25–D28). *(23/11: Tùng nhận, `src/rag/contracts/dossier.py`; ra đúng bảng của 7 hồ sơ. Hạn chế: mục O trong file hạn chế.)*
 - [x] H3. Ngày 3–4: Huy tagger theo kind + nhận diện loại hợp đồng trên C3. *(23/11: Tùng làm `classify_contract` + `kind` trong tagger; chưa đo bằng LLM thật, mục K.1)*
 - [ ] H4. Ngày 5: Khánh bảng benchmark + eval.

@@ -424,3 +424,10 @@ Kế hoạch: `app/team-4.2/docs/superpowers/plans/2026-11-23-khanh-ingest-bench
 - Q.2 (K1) Chuỗi sửa đổi chưa đủ: vbpl ghi LTM 36/2005, NĐ 95/2024, NĐ 96/2024 "hết hiệu lực một phần" nhưng kho chưa có thao tác hay
   quan hệ nào trỏ tới (chưa nạp văn bản sửa đổi). Các điều đang dùng (LTM Đ301, 306, 315) có thể đã bị sửa mà kho chưa biết — Còn.
 - Q.3 (K1) NQ 01/2014 chưa đối chiếu ngày hiệu lực với văn bản (kho ghi 2014-07-02). Chưa kiểm "Huy dựng được đồ thị" (nghiệm thu K1).
+- Q.4 (K3) `reports/team-4.2/w04/eval/summary.md`: 11 thư mục hồ sơ mẫu, 166 nhãn gold. `reference` và `network` đúng 166/166.
+  Engine cũ (`rag.bridge.engine.evaluate`) thiếu 18 nhãn, toàn là rule xuyên đối tượng (nó không nhận đối tượng hồ sơ) — đúng thiết kế,
+  không phải lỗi. Lưu ý: 0 ca sai một phần do gold được viết song song với engine mới; gold của a1, b1–b5, commercial (và consumer)
+  vẫn chờ Tùng duyệt, nên "đúng 100%" chưa phải số cuối.
+- Q.5 (K3) Nhận diện loại bằng `classify_contract` (model thật, 23/11): 34 văn bản chính, 33 lần gọi LLM (hai văn bản trùng nội dung),
+  0 chọn sai miền. Đệm ở `reports/team-4.2/w04/eval/classify_cache.json`. Mẫu nhỏ và mỗi miền chỉ có văn bản "đúng kiểu", chưa có
+  văn bản lai (vd. hợp đồng thuê có một bên là người tiêu dùng) — Còn.

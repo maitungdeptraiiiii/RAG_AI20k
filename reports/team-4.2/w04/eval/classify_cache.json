@@ -1,0 +1,200 @@
+{
+ "033b7cf4f5d3db8a90e63a3463ee0d2ff9776aeb1e1d8893437f78839be2193f:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "loan/l6_truoc_2017.txt",
+  "kind": "loan_contract",
+  "reason": null
+ },
+ "041ae82ce0d20130f6585058f0a3634aa1de2ef2a18d2122506d6dc482b3cfc4:gpt-6-luna": {
+  "confidence": 0.91,
+  "file": "consumer/c2_dien_may_mien_tru.txt",
+  "kind": "consumer_contract",
+  "reason": null
+ },
+ "04424a03a50e5db93ec34b86e3a55ed9a796d1d86c32174dc787540167ac85b3:gpt-6-luna": {
+  "confidence": 0.99,
+  "file": "consumer/c3_phong_tap_gia_han.txt",
+  "kind": "consumer_contract",
+  "reason": null
+ },
+ "09baa5d7de0d8c85096cc6503f53474c08555629d770d324ffc2412aefe19c6d:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "lease/t10_cat_dien_nuoc.txt",
+  "kind": "lease_contract",
+  "reason": null
+ },
+ "14bb12b472597d8257bae65bda2d2971e698897937f0e62abd6239459ebdeee0:gpt-6-luna": {
+  "confidence": 0.97,
+  "file": "consumer/c6_noi_that_gia_giao.txt",
+  "kind": "consumer_contract",
+  "reason": null
+ },
+ "1cbe0511bcf7f24c2b154faf26dfb3b74af89d85b05659699c7ccbc39150f50a:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "lease/t2_lay_nha_tuy_y.txt",
+  "kind": "lease_contract",
+  "reason": null
+ },
+ "23eed448d22c94dd06b5440a621dfaba4be2de65720979c1fec7f14d6ced545f:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "lease/t1_hop_le.txt",
+  "kind": "lease_contract",
+  "reason": null
+ },
+ "37fd102eedfb5781d3472c32ec8bfffadeabe6d6788f25ed5764459b3e725001:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "loan/l7_doi_truoc_han_sai_muc_dich.txt",
+  "kind": "loan_contract",
+  "reason": null
+ },
+ "4037c8bb74eaff7b7c93ff378be4cddd7ea2001f6d86bd6916e4b143eb3d1d5c:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "loan/l3_lai_nam_hop_le.txt",
+  "kind": "loan_contract",
+  "reason": null
+ },
+ "422f18738d54e3531a986a7e9d50aa30b97d6a422ad7f400fd1264d7ac3ed90b:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "b5/hd1_2022.txt",
+  "kind": "labor_contract",
+  "reason": null
+ },
+ "4f63ca1f975d393ff31e7aa6f4eb0e6e1bb116648f84c566d5adbddbc21d9d89:gpt-6-luna": {
+  "confidence": 0.99,
+  "file": "consumer/c5_khoa_hoc_du_lieu.txt",
+  "kind": "consumer_contract",
+  "reason": null
+ },
+ "4f7bf2a2d60b600aad2af2ad090eac313a12ecf78b21e663d4b36f3483779a4f:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "lease/t5_thieu_thoi_han.txt",
+  "kind": "lease_contract",
+  "reason": null
+ },
+ "57bbb4232194e45641c282d2927eb8dff297bb33a2d3fd2b974b2cb6d51dbc88:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "lease/t4_cam_ben_thue_cham_dut.txt",
+  "kind": "lease_contract",
+  "reason": null
+ },
+ "62cc71ceb760d3e747658a7647ed70e36410b6a352aedecc8dd570ed9bd131fe:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "b2/hd1_2022.txt",
+  "kind": "labor_contract",
+  "reason": null
+ },
+ "6444bcb9c7a5456cb7ea2d73b86503a07fad09b8684fecf994cfcee159b2f9f6:gpt-6-luna": {
+  "confidence": 0.99,
+  "file": "commercial/m2_phat_vuot_tran.txt",
+  "kind": "commercial_sale_contract",
+  "reason": null
+ },
+ "64728d55125ad6b3fb66cbeb959c4622a606e1b6bbb4dc60f9c44aedcebd3a3d:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "loan/l5_doi_truoc_han_tuy_y.txt",
+  "kind": "loan_contract",
+  "reason": null
+ },
+ "75344aa78cd1fa9c3f61892b5ed9c41bd286e870c647985893fbd1ab659da869:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "loan/l4_khong_lai_cam_tra_truoc.txt",
+  "kind": "loan_contract",
+  "reason": null
+ },
+ "7788a3f5e385b7d8f56336bfa31aae1f28643a5b60337944669471dbaaacef51:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "lease/t9_ben_thue_sua_lon.txt",
+  "kind": "lease_contract",
+  "reason": null
+ },
+ "86365950b77b2eea98c2b5e31d05ea76f930f6ea0b26ece5e9268dc8affa2730:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "lease/t3_no_mot_thang.txt",
+  "kind": "lease_contract",
+  "reason": null
+ },
+ "8c783f1bf53257b7408af471a92b4a8cdd8f6b018e3f9115bde20ff23f512bed:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "lease/t8_thieu_dia_chi_ngay_ky.txt",
+  "kind": "lease_contract",
+  "reason": null
+ },
+ "9e7e4e4d2db8e64739a5ba40487e7a970495f80d8fe2d277440315fd4dc3f6c8:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "loan/l2_vuot_tran.txt",
+  "kind": "loan_contract",
+  "reason": null
+ },
+ "a4dcfba532e4b08965ee0b55f65817649b3d954bbbe169883b0750fd59522f28:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "loan/l1_hop_le.txt",
+  "kind": "loan_contract",
+  "reason": null
+ },
+ "aea6a13bea5477a5c65dd1ffe05e976e12b2666e3c6b5c334e938c19ccdd77b0:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "lease/t7_mau_2023.txt",
+  "kind": "lease_contract",
+  "reason": null
+ },
+ "af0dcecb32b2224e5fd268290dd43308b2edae4af166cca6ef11828c8c27b8a8:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "a1/hd_2023.txt",
+  "kind": "labor_contract",
+  "reason": null
+ },
+ "b542795a698978a2dcf0ed5e0a03d4c15ad82b9e8b910e278ba21af29e7c4bfe:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "b1/hd1_2022.txt",
+  "kind": "labor_contract",
+  "reason": null
+ },
+ "bacc694005a8bc9b7d1de265dc8789ecf43363b887a8d411c3e6357923e1d0c4:gpt-6-luna": {
+  "confidence": 0.98,
+  "file": "commercial/m4_tong_muc_phat.txt",
+  "kind": "commercial_sale_contract",
+  "reason": null
+ },
+ "ccbcd78b38a9865ba0584657ccd233b1924d8ace04646076d59b922527fe2083:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "lease/t6_truoc_2024.txt",
+  "kind": "lease_contract",
+  "reason": null
+ },
+ "d2e83f30510598239763b183a27266ac95d0215925d9aa9325b42f9191677539:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "b3/hd1_2022.txt",
+  "kind": "labor_contract",
+  "reason": null
+ },
+ "e6c6978463f8295c77e13ede256a4e1fcc19d8902439ad960761dac2b9e2e3af:gpt-6-luna": {
+  "confidence": 0.99,
+  "file": "consumer/c1_internet_hop_le.txt",
+  "kind": "consumer_contract",
+  "reason": null
+ },
+ "e7f0263997b2a8a067a836821a32fa61d9fbb42b0193813ab985edc432135525:gpt-6-luna": {
+  "confidence": 0.91,
+  "file": "consumer/c4_mau_thieu_noi_dung.txt",
+  "kind": "consumer_contract",
+  "reason": null
+ },
+ "f586c2c95809a5ef58ad262b0f0c76dcd20fe4570ff6702cf2be7b1831404cd2:gpt-6-luna": {
+  "confidence": 0.99,
+  "file": "commercial/m3_dich_vu_dinh_chi.txt",
+  "kind": "commercial_service_contract",
+  "reason": null
+ },
+ "fa282ca839488ec597fbc71ed64c989c14ce97fa3bbd0d52de5380138380b272:gpt-6-luna": {
+  "confidence": 1.0,
+  "file": "r1/tn_2024.txt",
+  "kind": "lease_contract",
+  "reason": null
+ },
+ "febf36c25a86da320275a476b077dbd12ec38c7da15a98107d3cc6519f69eebc:gpt-6-luna": {
+  "confidence": 0.99,
+  "file": "commercial/m1_mua_ban_hop_le.txt",
+  "kind": "commercial_sale_contract",
+  "reason": null
+ }
+}

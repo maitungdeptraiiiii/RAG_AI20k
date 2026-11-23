@@ -413,3 +413,14 @@ tệp bản liệt kê.
 - CHƯA có: kiểm bằng model thật. Test chỉ kiểm nội dung prompt và ánh xạ, không chạy LLM trên 13 hợp đồng mẫu mới; chất lượng gán khái
   niệm của gói `consumer` (26 khái niệm) và `commercial` còn phải đo bằng model thật.
 - `verify.catalog_type` vẫn đoán theo chữ "lao động" / "thuê" khi không có loại do `classify_contract` nhận diện (cách cũ, giữ nguyên).
+
+## Q. Đo và eval (phần Khánh K1–K3, Claude làm theo yêu cầu Tùng, 23/11)
+
+Kế hoạch: `app/team-4.2/docs/superpowers/plans/2026-11-23-khanh-ingest-bench-eval.md`. K4 (router chat) không làm.
+
+- Q.1 (K1) `reports/team-4.2/w04/legal_ingest.md`: snapshot `s20261123071410-54f166`, 11/11 văn bản có trong kho, ngày hiệu lực khớp.
+  Kho nằm ở `app/team-4.2/data/team-4.2/legal` (script phải chạy từ `app/team-4.2`); `data/team-4.2/legal/CURRENT` ở gốc repo là
+  bản cũ chưa theo dõi, không dùng.
+- Q.2 (K1) Chuỗi sửa đổi chưa đủ: vbpl ghi LTM 36/2005, NĐ 95/2024, NĐ 96/2024 "hết hiệu lực một phần" nhưng kho chưa có thao tác hay
+  quan hệ nào trỏ tới (chưa nạp văn bản sửa đổi). Các điều đang dùng (LTM Đ301, 306, 315) có thể đã bị sửa mà kho chưa biết — Còn.
+- Q.3 (K1) NQ 01/2014 chưa đối chiếu ngày hiệu lực với văn bản (kho ghi 2014-07-02). Chưa kiểm "Huy dựng được đồ thị" (nghiệm thu K1).

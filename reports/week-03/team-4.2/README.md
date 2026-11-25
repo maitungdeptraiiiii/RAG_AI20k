@@ -1,12 +1,12 @@
 # Bài nộp tuần 3 — Team 4.2
 
-Trạng thái: chưa nộp. [Yêu cầu](../../../weeks/week-03/README.md).
+Trạng thái: Đã có báo cáo (chờ team xác nhận). [Yêu cầu](../../../weeks/week-03/README.md).
 
 Copy [mẫu báo cáo](../../../templates/WEEKLY-REPORT.md) thành `report.md` trong thư mục này. Bổ sung `slides.pdf` hoặc link slides và link video demo nếu có. Không commit dữ liệu nhạy cảm hoặc video dung lượng lớn.
 
 | Artifact | Đường dẫn | Commit/snapshot |
 |---|---|---|
-| Báo cáo | Chưa có | — |
+| Báo cáo | [report.md](report.md) | `2ec031a` (nhánh `feat/team-4.2/w03-labor-contract-kg-v2`) |
 | Evaluation/config | Chưa có | — |
 | Slides | Chưa có | — |
 | Demo/video | Chưa có | — |

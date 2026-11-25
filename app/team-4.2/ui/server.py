@@ -64,6 +64,7 @@ import contracts_api
 import legal_api
 import contract_studio
 import contract_dossier
+import contract_versions
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("rag.ui.server")
@@ -496,6 +497,13 @@ def _sync_temporal(query: str, qa, as_of, mask_state: MaskState) -> dict[str, An
     cited = {int(n) for n in _re.findall(r"\[(\d+)\]", result.answer.answer_markdown)}
     citations = [dict(s, quote=s["text"][:300]) for s in sources if s["n"] in cited]
     timeline = encode(result.timeline)
+    # Minh bạch đối chiếu: kết quả từng arm + kết quả cuối của lần tìm đầu tiên có dữ liệu (thường là mốc chính);
+    # lỗi arm (vd. Dense hết quota) của mọi mốc gộp lại để không bị che.
+    rows = getattr(getattr(qa, "index", None), "rows", None) or {}
+    first = next((r for r in result.retrievals if r.hits or any(r.arms.values())), None)
+    arms_data = {name: _format_hits(hits, rows, limit=5) for name, hits in first.arms.items()} if first else {}
+    final_hits = _format_hits(first.hits, rows, limit=5) if first else []
+    arm_errors = {k: v for r in result.retrievals for k, v in r.errors.items()}
     return {
         "query": query,
         "answer": result.answer.answer_markdown,
@@ -504,8 +512,9 @@ def _sync_temporal(query: str, qa, as_of, mask_state: MaskState) -> dict[str, An
         "citations": citations,
         "sources": sources,
         "trace": {"context_mode": "temporal", "n_context_blocks": len(sources),
-                  "retrieval": "hybrid" if getattr(getattr(qa, "index", None), "has_dense", False) else "bm25", "reranked": True, "errors": {},
-                  "arms": {}, "final_hits": []},
+                  "retrieval": "hybrid" if getattr(getattr(qa, "index", None), "has_dense", False) else "bm25",
+                  "reranked": bool(first.reranked) if first else False, "errors": arm_errors,
+                  "arms": arms_data, "final_hits": final_hits},
         "timeline": {"anchors": timeline["anchors"], "primary": timeline["primary"], "warnings": timeline["warnings"]},
         "issues": result.answer.issues,
         "certainty": result.answer.certainty,
@@ -1433,6 +1442,7 @@ routes = [
     *contracts_api.routes,
     *contract_studio.routes,
     *contract_dossier.routes,
+    *contract_versions.routes,
 ]
 
 middleware = [

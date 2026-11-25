@@ -229,6 +229,73 @@ def extract_more_fields(llm, contract: Contract, fields: Sequence[dict], *, on_e
     return list(specs)
 
 
+def extract_part_facts(llm, contract: Contract, part_id: str, *, extra_fields: Sequence[dict] = (),
+                       on_event=None) -> list[str]:
+    """Trích dữ kiện CHỈ trên phần mới `part_id` (phụ lục bổ sung): gộp ứng viên và bên vào `contract.facts`, giữ
+    nguyên dữ kiện phần cũ. Ngày ký / hiệu lực / loại của phụ lục không phải của hợp đồng: ghi riêng ở
+    `facts["appendix_dates"]`. Trả khóa trường có giá trị mới khác giá trị cũ. Không lô nào đọc được ->
+    ContractAIError, không ghi gì."""
+    units = [u for u in contract.units if u.uid.startswith(f"{part_id}.")]
+    if not units:
+        raise ValueError(f"Không có nội dung ở phần {part_id}")
+    specs = {s["key"]: s for s in all_specs()}
+    for item in extra_fields:
+        specs.setdefault(item["key"], dict(item))
+    facts = dict(contract.facts or {})
+    parties = [dict(p) for p in facts.get("parties") or []]
+
+    def merge(cands: dict, fresh: dict) -> None:
+        """Giá trị của phần mới được ghi khi khác giá trị MỚI NHẤT đã có (kể cả trùng một giá trị cũ hơn: phụ lục
+        đưa về mức cũ); nhắc lại đúng giá trị mới nhất thì không thêm."""
+        for key, items in fresh.items():
+            for item in items:
+                bucket = cands.setdefault(key, [])
+                if not bucket or _norm(bucket[-1]["value"]) != _norm(item["value"]):
+                    bucket.append(item)
+
+    def read(batch: Batch) -> dict:
+        if on_event:
+            on_event({"type": "fact_batch", "status": "start", "uids": batch.uids, "batch": batch.index})
+        data = ask_json(llm, FACTS_PROMPT, _payload(batch, parties, list(specs.values())), contract.mask_state)
+        for p in (_checked(contract, x, batch) for x in data.get("parties") or []):
+            if p and p.get("role"):
+                found = _text_aliases(contract, p)
+                _merge_party(parties, p | {"aliases": found} if found else p)
+        if on_event:
+            on_event({"type": "fact_batch", "status": "done", "uids": batch.uids, "batch": batch.index})
+        return data
+
+    run = run_batches(make_batches(contract, units), read, workers=1)
+    if not run.results:
+        raise ContractAIError()
+    _distinct_roles(parties)
+    old = facts.get("candidates") or {}
+    cands = {k: list(v) for k, v in old.items()}
+    fresh: dict[str, list[dict]] = {}
+    dates: dict[str, str | None] = {"sign_date": None, "effective_date": None}
+    other = list(facts.get("other_dates") or [])
+    for batch, data in run.results:
+        for key in _SCALARS:
+            for raw in _items(data.get(key)):
+                item = _checked(contract, raw, batch)
+                if item and key in ("sign_date", "effective_date", "end_date"):
+                    item = item | {"value": _iso(item.get("value")).isoformat()} if _iso(item.get("value")) else None
+                if key in dates:
+                    dates[key] = dates[key] or (item or {}).get("value")
+                else:
+                    _add(fresh, key, item)
+        other += [d for d in (_checked(contract, x, batch) for x in data.get("other_dates") or []) if d]
+        _field_candidates(contract, batch, data, specs, fresh)
+    merge(cands, fresh)
+    facts.update(parties=parties, candidates=cands, other_dates=other)
+    facts["appendix_dates"] = {**(facts.get("appendix_dates") or {}), part_id: dates}
+    facts["coverage"] = {"read": (facts.get("coverage") or {}).get("read", 0) + len(run.read_uids),
+                         "total": len(contract.units)}
+    facts["warnings"] = [*(facts.get("warnings") or []), *run.warnings()]
+    contract.facts = facts
+    return [k for k, v in cands.items() if len(v) > len(old.get(k) or [])]
+
+
 def extract_facts(llm, contract: Contract, *, on_event=None, extra_fields: Sequence[dict] = ()) -> dict:
     """`extra_fields`: trường các gói đang dùng khai thêm (`pack.yaml` extract_fields), trích cùng danh mục chung."""
     specs = {s["key"]: s for s in all_specs()}

@@ -16,7 +16,7 @@ from pathlib import Path
 
 from rag.contracts.doc import PageText, PartSpec
 from rag.contracts.graph.oplog import OperationLog
-from rag.contracts.models import Contract, ContractUnit
+from rag.contracts.models import Contract, ContractUnit, family_id, version_of
 from rag.contracts.structure import parse_contract, to_contract_units
 
 FORMAT = 2
@@ -57,6 +57,22 @@ class ContractStore:
         with self._lock:
             self._mem[cid] = contract
         return contract
+
+    def family(self, fid: str) -> list[Contract]:
+        """Bản gốc và các phiên bản `ready`, tăng dần theo version; không gồm nháp và hợp đồng thành viên."""
+        with self._lock:
+            ids = set(self._mem)
+        if self.root.is_dir():
+            ids |= {p.name for p in self.root.iterdir() if (p / "contract.json").is_file() and _ID.fullmatch(p.name)}
+        out = []
+        for cid in ids:
+            try:
+                c = self.get(cid)
+            except Exception:  # noqa: BLE001 — một file hỏng không làm hỏng cả họ
+                continue
+            if family_id(c) == fid and c.lineage.get("status", "ready") == "ready":
+                out.append(c)
+        return sorted(out, key=version_of)
 
     def original(self, cid: str) -> tuple[bytes, str] | None:
         folder = self._folder(cid)
@@ -103,7 +119,7 @@ def _dump(c: Contract) -> dict:
         "sign_date": c.sign_date.isoformat() if c.sign_date else None, "sign_date_source": c.sign_date_source,
         "reports": c.reports, "format": FORMAT, "page_texts": [asdict(p) for p in c.page_texts],
         "file_checksum": c.file_checksum, "operations": c.oplog.to_json(), "graph": c.graph, "builds": c.builds,
-        "concept_check": c.concept_check,
+        "concept_check": c.concept_check, "lineage": c.lineage,
     }
 
 
@@ -115,6 +131,7 @@ def _load(d: dict) -> Contract:
         date.fromisoformat(d["sign_date"]) if d.get("sign_date") else None, d.get("sign_date_source"),
         d.get("reports") or {},
     )
+    c.lineage = d.get("lineage") or {}
     if d.get("format") == FORMAT:
         c.page_texts = [PageText(**p) for p in d.get("page_texts") or []]
         c.file_checksum = d.get("file_checksum")

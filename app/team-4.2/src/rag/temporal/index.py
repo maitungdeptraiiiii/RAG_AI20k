@@ -130,10 +130,20 @@ class VersionedIndex:
         return {cid for cid, c in chunks.items()
                 if c.valid_from <= end and (c.valid_to is None or c.valid_to > start)}
 
+    @property
+    def rows(self) -> dict[str, Chunk]:
+        """chunk_id -> Chunk (nguồn/đoạn hiển thị) của trạng thái chỉ mục hiện tại."""
+        return self._state.rows
+
     def search(self, query: str, start: date, end: date, k: int) -> list[tuple[VersionedChunk, float]]:
+        return self.search_traced(query, start, end, k)[0]
+
+    def search_traced(self, query: str, start: date, end: date, k: int):
+        """Như `search`, kèm `RetrievalResult` của HybridRetriever (từng arm, kết quả cuối) để minh bạch; None
+        nếu không đi qua HybridRetriever (RRF đơn giản) hoặc không có gì để tìm."""
         st = self._state
         if not st.chunks or k < 1:
-            return []
+            return [], None
         allowed = self._allowed(st.chunks, start, end)
         if self.retriever_factory is not None:
             return self._hybrid_search(st, query, allowed, k)
@@ -149,13 +159,13 @@ class VersionedIndex:
                 rank += 1
                 scores[h.chunk_id] = scores.get(h.chunk_id, 0.0) + 1.0 / (RRF_K + rank)
         ranked = sorted(scores.items(), key=lambda kv: (-kv[1], kv[0]))[:k]
-        return [(st.chunks[cid], score) for cid, score in ranked]
+        return [(st.chunks[cid], score) for cid, score in ranked], None
 
-    def _hybrid_search(self, st: _State, query: str, allowed: set[str], k: int) -> list[tuple[VersionedChunk, float]]:
+    def _hybrid_search(self, st: _State, query: str, allowed: set[str], k: int):
         """HybridRetriever của pipeline chính; trả `k` Điều (mỗi Điều kèm mọi chunk đã gộp, kể cả phiên bản khác
-        của cùng Điều khi mốc là một khoảng), theo thứ tự rerank."""
+        của cùng Điều khi mốc là một khoảng), theo thứ tự rerank; kèm `RetrievalResult` gốc."""
         if not allowed:
-            return []
+            return [], None
         bm25 = ValidityFilteredArm(st.bm25, allowed, "bm25")
         dense = ValidityFilteredArm(st.dense if st.dense is not None else _EmptyArm(), allowed, "dense")
         retriever = self.retriever_factory(bm25, dense)
@@ -168,7 +178,7 @@ class VersionedIndex:
                 if cid in allowed and cid not in seen:
                     seen.add(cid)
                     out.append((st.chunks[cid], h.score))
-        return out
+        return out, result
 
     def versions_of(self, article_id: str, start: date, end: date) -> list[VersionedChunk]:
         chunks = self._state.chunks

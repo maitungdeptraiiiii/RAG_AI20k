@@ -49,6 +49,9 @@ class Contract:
     graph: dict[str, Any] = field(default_factory=dict)          # trạng thái bản dựng gần nhất
     builds: list[dict[str, Any]] = field(default_factory=list)   # bản ghi các bản dựng, mới nhất cuối
     concept_check: dict[str, Any] | None = None                  # kết quả Kiểm tra concept gần nhất, để xem lại
+    # Phiên bản khi bổ sung văn bản: {family_id, version, parent_id, status: draft|ready|member, linked, addition,
+    # compare}. Rỗng = hợp đồng gốc (version 1).
+    lineage: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if self.oplog is None:
@@ -56,3 +59,11 @@ class Contract:
 
     def unit(self, uid: str) -> ContractUnit | None:
         return next((u for u in self.units if u.uid == uid), None)
+
+
+def family_id(c: "Contract") -> str:
+    return c.lineage.get("family_id") or c.contract_id
+
+
+def version_of(c: "Contract") -> int:
+    return int(c.lineage.get("version") or 1)

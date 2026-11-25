@@ -113,7 +113,15 @@
     } catch (e) {
       notice(e.message);
     }
-    const got = new Set(state.cards.map(c => c.contract_id));
+    state.cards.forEach(c => (c.replaces || []).forEach(old => {          // có phiên bản mới: đổi id đã lưu
+      KEYS.forEach(k => {
+        const kept = storedIds(k);
+        if (!kept.includes(old)) return;
+        try { localStorage.setItem(k, JSON.stringify([...new Set(kept.map(i => (i === old ? c.contract_id : i)))])); }
+        catch (e) { /* bỏ qua */ }
+      });
+    }));
+    const got = new Set(state.cards.flatMap(c => [c.contract_id, ...(c.replaces || [])]));
     ids.filter(i => !got.has(i) && i !== want).forEach(dropId);          // id đã hết phiên
     if (want && !got.has(want)) {                                        // hợp đồng nạp tạm: không có trong ?ids=
       try { state.cards.unshift(await getJson('/' + encodeURIComponent(want))); }

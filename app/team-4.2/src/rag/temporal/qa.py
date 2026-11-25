@@ -32,6 +32,7 @@ class TemporalResult:
     log_id: str | None = None
     query_pii: dict[str, int] = field(default_factory=dict)
     llm_called: bool = False
+    retrievals: list = field(default_factory=list)   # RetrievalResult của HybridRetriever, mỗi mốc một cái (minh bạch)
 
 
 def _now() -> datetime:
@@ -49,8 +50,18 @@ class TemporalQA:
 
     # --- truy xuất ---------------------------------------------------------------------------
 
-    def _versioned(self, query: str, timeline: LegalTimeline) -> tuple[list[VersionedChunk], dict[str, set[str]],
-                                                                         dict[str, tuple[date, date]], bool]:
+    def _search(self, query: str, start: date, end: date, traces: list):
+        traced = getattr(self.index, "search_traced", None)
+        if traced is None:
+            return self.index.search(query, start, end, self.k_per_anchor)
+        found, trace = traced(query, start, end, self.k_per_anchor)
+        if trace is not None:
+            traces.append(trace)
+        return found
+
+    def _versioned(self, query: str, timeline: LegalTimeline, traces: list | None = None
+                   ) -> tuple[list[VersionedChunk], dict[str, set[str]], dict[str, tuple[date, date]], bool]:
+        traces = traces if traces is not None else []
         picked: dict[str, VersionedChunk] = {}
         roles: dict[str, set[str]] = {}
         window: dict[str, tuple[date, date]] = {}          # chunk_id -> khoảng của mốc đã lấy nó
@@ -59,7 +70,7 @@ class TemporalQA:
             if anchor.start is None:
                 continue
             end = anchor.end or anchor.start
-            for chunk, _ in self.index.search(query, anchor.start, end, self.k_per_anchor):
+            for chunk, _ in self._search(query, anchor.start, end, traces):
                 picked.setdefault(chunk.chunk_id, chunk)
                 roles.setdefault(chunk.chunk_id, set()).add(anchor.role)
                 window.setdefault(chunk.chunk_id, (anchor.start, end))
@@ -93,7 +104,8 @@ class TemporalQA:
         query_pii = {k: v - before.get(k, 0) for k, v in state.counts.items() if v - before.get(k, 0)}
 
         timeline = build_timeline(query, asked_at=asked_at, calendar_date=calendar_date, llm=self.llm)
-        chunks, roles, window, year_change = self._versioned(query, timeline)
+        traces: list = []
+        chunks, roles, window, year_change = self._versioned(query, timeline, traces)
         store = self.service.store
         titles = {d.document_key: d.title for d in store.documents()}
 
@@ -121,12 +133,13 @@ class TemporalQA:
         rules = collect_rules(self.service, chunks, timeline) if chunks else []
         if not items:
             answer = TemporalAnswer(REFUSAL, certainty="cannot_conclude", downgrade_reasons=["certainty.no_context"])
-            result = TemporalResult(timeline, items, rules, answer, query_pii=query_pii)
+            result = TemporalResult(timeline, items, rules, answer, query_pii=query_pii, retrievals=traces)
         else:
             system, user = build_messages(query, timeline, items, rules)
             raw = self.llm.complete(system, user)
             answer = enforce(parse_answer(raw), items, rules, timeline, year_change=year_change)
-            result = TemporalResult(timeline, items, rules, answer, query_pii=query_pii, llm_called=True)
+            result = TemporalResult(timeline, items, rules, answer, query_pii=query_pii, llm_called=True,
+                                    retrievals=traces)
         if self.log is not None:
             result.log_id = self.log.record({
                 "asked_at": asked_at.isoformat(), "question": query, "timeline": encode(timeline),

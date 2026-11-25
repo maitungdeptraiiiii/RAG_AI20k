@@ -133,7 +133,13 @@ def find_soft_span(quote: str, text: str) -> tuple[int, int] | None:
     return None
 
 
-def parse_quotes(value, bundle, allowed=None):
+def parse_quotes(value, bundle, allowed=None, rejected=None):
+    """Validate quotes against the bundle.
+
+    With ``rejected`` (a list), a quote that is not a real source span is dropped
+    and recorded instead of failing the whole run: the evidence it pointed at is
+    then simply not substantiated. Without it, the old fail-closed behaviour holds.
+    """
     evidence_ids = []
     quotes = {}
     intervals = {}
@@ -141,10 +147,16 @@ def parse_quotes(value, bundle, allowed=None):
         obj(row, ("id", "quote"))
         eid = row["id"]
         if not isinstance(eid, str) or eid not in bundle or (allowed is not None and eid not in allowed):
+            if rejected is not None:
+                rejected.append("quote_outside_bundle")
+                continue
             raise OutputError("Quote points outside the supplied evidence bundle")
         raw_quote = text(row["quote"], 2000)
         span = find_soft_span(raw_quote, bundle[eid].text)
         if span is None:
+            if rejected is not None:
+                rejected.append("quote_not_source_span")
+                continue
             raise OutputError("Quote is not an exact source span")
         start, end = span
         old_start, old_end = intervals.get(eid, (start, end))
@@ -153,6 +165,9 @@ def parse_quotes(value, bundle, allowed=None):
         # Several premises may come from separate clauses in the same article.
         # Keep their enclosing ORIGINAL span, never concatenate a fabricated quote.
         if "[...]" in bundle[eid].text[a:b]:
+            if rejected is not None:
+                rejected.append("quote_bridges_omission")
+                continue
             raise OutputError("A citation cannot bridge an omitted source segment")
         intervals[eid] = candidate_interval
         quotes[eid] = bundle[eid].text[a:b]
@@ -161,7 +176,7 @@ def parse_quotes(value, bundle, allowed=None):
     return tuple(evidence_ids), quotes
 
 
-def parse_assessment(data, requirements, bundle, available_xrefs, limit):
+def parse_assessment(data, requirements, bundle, available_xrefs, limit, warnings=None):
     obj(data, ("assessments", "followup_queries", "xref_ids"))
     req_ids = {r.id for r in requirements}
     seen, assessments = set(), []
@@ -173,15 +188,29 @@ def parse_assessment(data, requirements, bundle, available_xrefs, limit):
             raise OutputError("Missing, duplicate or unknown assessment")
         if not isinstance(row["status"], str) or row["status"] not in statuses:
             raise OutputError("Invalid assessment status")
-        eids, _ = parse_quotes(row["evidence"], bundle)
-        if row["status"] in {"supported", "partial", "conflicting"} and not eids:
-            raise OutputError("Assessment without supporting source spans")
+        rejected = []
+        eids, _ = parse_quotes(row["evidence"], bundle, rejected=rejected)
+        status = row["status"]
+        if status in {"supported", "partial", "conflicting"} and not eids:
+            # Every quote offered for this requirement was invalid: it is not
+            # substantiated. Downgrade it instead of discarding the whole run.
+            status = "missing"
+            rejected.append("assessment_downgraded_missing")
+        if rejected and warnings is not None:
+            warnings.append(f"assessment_{rid}_evidence_rejected")
         seen.add(rid)
-        assessments.append(Assessment(rid, row["status"], eids, text(row["reason"])))
+        assessments.append(Assessment(rid, status, eids, text(row["reason"])))
     if seen != req_ids:
         raise OutputError("Assessments must cover every requirement")
-    queries = parse_queries(data["followup_queries"], req_ids, limit)
-    xrefs = identifiers(data["xref_ids"], set(available_xrefs))
+    # Follow-up queries and xref choices are optional actions: malformed ones are
+    # discarded (and recorded) instead of aborting a run with good evidence.
+    try:
+        queries = parse_queries(data["followup_queries"], req_ids, limit)
+        xrefs = identifiers(data["xref_ids"], set(available_xrefs))
+    except OutputError:
+        queries, xrefs = [], ()
+        if warnings is not None:
+            warnings.append("invalid_assessor_followups_discarded")
     return assessments, queries, xrefs
 
 
@@ -206,7 +235,14 @@ def parse_claims(data, requirements, bundle):
     return claims
 
 
-def parse_verification(data, requirements, claims, bundle, limit, warnings=None):
+def parse_verification(data, requirements, claims, bundle, limit, warnings=None, *, degrade_invalid_claims=False):
+    """Validate a verifier report.
+
+    By default any invalid quote fails closed (OutputError). With
+    ``degrade_invalid_claims=True`` an invalid quote only marks its own claim
+    unsupported (recorded as ``claim_<i>_evidence_rejected``); it can never make a
+    claim supported, and other claims keep their own verdicts.
+    """
     obj(data, ("claims", "requirements", "facts_preserved", "scope_respected", "followup_queries"))
     for key in ("facts_preserved", "scope_respected"):
         if type(data[key]) is not bool:
@@ -223,7 +259,15 @@ def parse_verification(data, requirements, claims, bundle, limit, warnings=None)
             raise OutputError("Invalid claim index")
         if type(row["supported"]) is not bool:
             raise OutputError("Claim verdict must be boolean")
-        eids, spans = parse_quotes(row["evidence"], bundle, claims[idx].evidence_ids)
+        rejected = [] if degrade_invalid_claims else None
+        eids, spans = parse_quotes(row["evidence"], bundle, claims[idx].evidence_ids, rejected=rejected)
+        if rejected:
+            if warnings is not None:
+                warnings.append(f"claim_{idx}_evidence_rejected")
+            verdicts[idx] = False
+            text(row["reason"])
+            quotes[idx] = {}
+            continue
         if row["supported"] and set(eids) != set(claims[idx].evidence_ids):
             verdicts[idx] = False
         else:

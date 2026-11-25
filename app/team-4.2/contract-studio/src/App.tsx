@@ -10,6 +10,8 @@ import { QuestionsPanel } from "./components/QuestionsPanel";
 import { UserFactsForm } from "./components/UserFactsForm";
 import { ReportCanvasDrawer } from "./components/ReportCanvasDrawer";
 import { StageOutcomePanel } from "./components/StageOutcomePanel";
+import { AddDocumentPanel } from "./components/AddDocumentPanel";
+import { ComparePanel } from "./components/ComparePanel";
 import { buildHighlightTrace } from "./engine/pipelineState";
 import {
   applyEvent,
@@ -47,6 +49,9 @@ export default function App() {
   const [reportLoading, setReportLoading] = useState(false);
   const [reportLlmUsed, setReportLlmUsed] = useState(false);
   const [reportError, setReportError] = useState("");
+  const [versions, setVersions] = useState<any[]>([]);
+  const [compare, setCompare] = useState<any>(null);
+  const [adding, setAdding] = useState(false);
   const reportFetchingRef = useRef(false);
   const reportReqIdRef = useRef(0);
   useEffect(() => {
@@ -137,6 +142,38 @@ export default function App() {
         )[e.stage] || e.stage,
       );
   }
+  // Phiên bản của hợp đồng đang xem và bảng so với bản trước (v1 không có bảng so).
+  async function loadVersions(cid: string) {
+    const id = encodeURIComponent(cid);
+    try {
+      const list = (await request(`/api/contracts/${id}/versions`)).versions;
+      const mine = list.find((v: any) => v.contract_id === cid);
+      const diff = mine && mine.version > 1 ? await request(`/api/contracts/${id}/studio/compare`) : null;
+      if (!mounted.current) return;
+      setVersions(list);
+      setCompare(diff);
+    } catch (e: any) {
+      if (mounted.current) setError(e.message);
+    }
+  }
+  // Mở một phiên bản khác: bỏ báo cáo và câu trả lời của bản đang xem.
+  async function switchVersion(cid: string) {
+    if (operation.current) return;
+    setError("");
+    setSelected(null);
+    setAnswers({});
+    setAdding(false);
+    setShowVerify(false);
+    setReportCanvasOpen(false);
+    setReportMarkdown("");
+    setReportError("");
+    setReportLlmUsed(false);
+    setStages({});
+    current.current = emptyScenario();
+    sessionStorage.setItem("contract-studio-cid", cid);
+    history.replaceState(null, "", location.pathname + location.hash);
+    await open(cid);
+  }
   async function open(cid: string) {
     try {
       const data = await request(
@@ -145,6 +182,7 @@ export default function App() {
       if (!mounted.current) return;
       update((s) => applySnapshot(s, data));
       setCard(data.card);
+      void loadVersions(cid);
       setQuestions(data.last_check?.report?.questions || []);
       setUserFacts(data.last_check?.user_facts || {});
       setStep(data.last_check ? 8 : 1);
@@ -178,6 +216,9 @@ export default function App() {
     setBusy(true);
     setError("");
     setCard(null);
+    setVersions([]);
+    setCompare(null);
+    setAdding(false);
     setSelected(null);
     setAnswers({});
     setUserFacts({});
@@ -317,6 +358,11 @@ export default function App() {
         8: "done",
       }));
       setMessage("Hoàn tất tổng hợp báo cáo");
+      const id = encodeURIComponent(targetCard.contract_id);
+      const fresh = await request(`/api/contracts/${id}`);
+      if (!mounted.current) return;
+      setCard(fresh);
+      void loadVersions(targetCard.contract_id);
     } catch (e: any) {
       analyzingRef.current = false;
       setError(e.message);
@@ -460,6 +506,9 @@ export default function App() {
     s?.comparisons.at(-1) ||
     null;
   const factsConfirmed = !!card?.verification?.complete;
+  // Phiên bản đã có bản mới hơn: chỉ xem.
+  const isOldVersion =
+    versions.length > 1 && !versions.some((v) => v.latest && v.contract_id === card?.contract_id);
   const chooseClause = (uid: string) => {
     const finding = s?.findings.find((f) => f.contractClauseId === uid);
     if (finding) setSelected(finding.id);
@@ -559,7 +608,7 @@ export default function App() {
             statusMessage={message}
             factsConfirmed={factsConfirmed}
             canAnalyze={
-              factsConfirmed && !busy && Object.keys(answers).length === 0
+              factsConfirmed && !busy && !isOldVersion && Object.keys(answers).length === 0
             }
             hasLastCheck={Boolean(card?.last_check)}
             showVerify={showVerify}
@@ -584,7 +633,56 @@ export default function App() {
                 ))}
               </div>
             )}
-            {card && step >= 1 && (!factsConfirmed || showVerify) && (
+            {card && versions.length > 0 && (card.last_check || versions.length > 1) && !busy && (
+              <div className="flex flex-wrap items-center gap-3 text-xs">
+                {versions.length > 1 && (
+                  <label className="flex items-center gap-2">
+                    <span className="font-medium">Phiên bản</span>
+                    <select
+                      value={card.contract_id}
+                      onChange={(e) => void switchVersion(e.target.value)}
+                      className="border border-stone-300 rounded p-2 bg-white"
+                    >
+                      {versions.map((v) => (
+                        <option key={v.contract_id} value={v.contract_id}>
+                          v{v.version} · {v.addition?.filename ? `thêm ${v.addition.filename}` : v.filename}
+                          {v.latest ? " (mới nhất)" : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+                {versions.some((v) => v.latest && v.contract_id === card.contract_id) &&
+                  (card.last_check || s.findings.length > 0) && !adding && (
+                    <button
+                      onClick={() => setAdding(true)}
+                      className="px-4 py-2 rounded border border-[#1E3A5F] text-[#1E3A5F] font-semibold bg-white"
+                    >
+                      Bổ sung văn bản
+                    </button>
+                  )}
+              </div>
+            )}
+            {card && adding && (
+              <AddDocumentPanel
+                key={card.contract_id}
+                contractId={card.contract_id}
+                onClose={() => setAdding(false)}
+                onDone={(id) => void switchVersion(id)}
+              />
+            )}
+            {card && compare && !busy && (
+              <ComparePanel
+                compare={compare}
+                previousVersion={(versions.find((v) => v.contract_id === compare.against)?.version) || 1}
+              />
+            )}
+            {isOldVersion && (
+              <p role="status" className="text-xs text-stone-600">
+                Đang xem phiên bản cũ (chỉ đọc). Chọn phiên bản mới nhất để chỉnh sửa hoặc phân tích lại.
+              </p>
+            )}
+            {card && !isOldVersion && step >= 1 && (!factsConfirmed || showVerify) && (
               <motion.section
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -731,7 +829,7 @@ export default function App() {
                 </div>
               </motion.section>
             )}
-            {!busy && (
+            {!busy && !isOldVersion && (
               <QuestionsPanel
                 questions={questions}
                 disabled={busy}

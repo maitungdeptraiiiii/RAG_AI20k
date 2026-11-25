@@ -141,12 +141,15 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
                    at: datetime, model: str | None = None, tag_llm=None, tag_model: str | None = None,
                    user_facts: dict | None = None, graph=None, evaluator: str | None = None,
                    packs: Sequence[str] | None = None, document_kind: str | None = None,
-                   rules_only: bool = False, on_event: Callable[[dict], None] | None = None) -> CheckReport:
+                   rules_only: bool = False, on_event: Callable[[dict], None] | None = None,
+                only_units: Sequence[str] | None = None, day: date | None = None) -> CheckReport:
     """tag_llm / tag_model: model riêng cho bước gán khái niệm (so model); None -> dùng llm / model.
     evaluator: "reference" | "network"; None -> RAG_RULE_EVALUATOR (spec 2026-11-22-rete-rule-engine-design §7).
     graph: ContractGraphService để công bố và đọc từ Neo4j; None -> đọc bản dựng trong bộ nhớ.
     rules_only: chỉ đọc lại đồ thị đã có trong oplog rồi chạy rule với `user_facts` mới: không trích dữ kiện, không gán khái niệm,
     không kiểm lại, không gọi LLM (dùng khi người dùng trả lời câu hỏi gợi ý).
+    only_units: bổ sung văn bản: chỉ gán khái niệm trên các đơn vị này và chỉ ghi dữ kiện / bên mới từ chúng (dữ kiện
+    phải trích trước bằng extract_part_facts). day: ngày đánh giá thay cho ngày ký (sign_date không đổi).
     on_event: nhận sự kiện tiến trình {type: stage|progress|partial, ...} (spec 2026-11-17-concept-check-streaming-ui §2)."""
     emit = on_event or (lambda e: None)
 
@@ -192,19 +195,29 @@ def check_contract(llm, contract: Contract, *, catalog: Catalog | None = None, b
         stage("facts", "done")
     warnings += list(contract.facts.get("warnings") or [])
 
-    day = contract.sign_date
+    day = day or contract.sign_date
     if day is None:
         day = catalog.law_values_valid_from
         warnings.append(f"Không có ngày ký: tạm dùng giá trị luật từ {day.isoformat()}")
 
     tag = TagRun()
     if not rules_only:
-        _add_ops(contract, party_ops(contract.facts, contract.contract_id, at=at, roles=catalog.roles))
-        _add_ops(contract, fact_ops(contract.facts, contract.contract_id, at=at, ctx=catalog.context))
+        facts_for_ops = contract.facts
+        known: set = set()
+        if only_units is not None:      # phần cũ đã có thao tác: chỉ thêm từ ứng viên của phần mới, bên chưa có
+            tops = set(only_units)
+            known = {o.content.get("role") for o in contract.oplog.active() if o.content.get("kind") == "party"}
+            facts_for_ops = {**contract.facts, "candidates": {
+                k: [x for x in v if any(str(x.get("unit")) == u or str(x.get("unit")).startswith(f"{u}.") for u in tops)]
+                for k, v in (contract.facts.get("candidates") or {}).items()}}
+        _add_ops(contract, [o for o in party_ops(facts_for_ops, contract.contract_id, at=at, roles=catalog.roles)
+                            if o.content.get("role") not in known])
+        _add_ops(contract, fact_ops(facts_for_ops, contract.contract_id, at=at, ctx=catalog.context))
         stage("tag", "start")
         tag = tag_contract(tagger, contract, catalog, at=at, model=tag_model,
                            on_progress=lambda done, total: emit({"type": "progress", "stage": "tag", "done": done,
-                                                                 "total": total}), **({"on_event": emit} if on_event else {}))
+                                                                 "total": total}), units=only_units,
+                           **({"on_event": emit} if on_event else {}))
         stage("tag", "done")
         warnings += tag.warnings
         _add_ops(contract, tag.ops)

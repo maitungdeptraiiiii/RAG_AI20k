@@ -10,7 +10,7 @@ from dataclasses import dataclass, field, fields
 from typing import Any
 from threading import Lock
 
-from rag.generate.llm import BoundedCompletion
+from rag.generate.llm import BoundedCompletion, IncompleteCompletion
 from rag.schema import Chunk, Hit, LLM
 
 
@@ -165,6 +165,10 @@ class ModelGateway:
             record.update(status="ok", cache_hit=result.cache_hit)
             b.check()
             return result.text
+        except IncompleteCompletion as exc:
+            # Truncated model output is a contract violation, not a tool outage.
+            record.update(status="error", error="IncompleteCompletion")
+            raise OutputError(f"Model output truncated at {stage} ({exc})") from exc
         except Exception as exc:
             record.update(status="error", error=type(exc).__name__)
             raise

@@ -51,7 +51,7 @@ from rag.contracts.facts import extract_facts
 from rag.contracts.graph.oplog import OperationLog, human_op, machine_op
 from rag.contracts.graph.service import ContractGraphService, GraphBusy
 from rag.contracts.llm_json import ContractAIError
-from rag.contracts.models import Contract
+from rag.contracts.models import Contract, family_id, version_of
 from rag.rules.loader import load_packs, packs_for_kind
 from rag.contracts import verify
 from rag.contracts.parts import detect_parts, heading_number
@@ -129,6 +129,8 @@ def card(c: Contract) -> dict[str, Any]:
                       "build_id": g.get("build_id"), "error": g.get("error"),
                       "problems": list(g.get("problems") or [])},
             "verification": verify.summary(c),
+            "lineage": {"family_id": family_id(c), "version": version_of(c),
+                        "status": c.lineage.get("status", "ready")},
             "user_form": _user_form(c),
             "last_check": ({"checked_at": c.concept_check["checked_at"],
                             "stale": c.concept_check.get("facts_sig") != _facts_sig(c)} if c.concept_check else None),
@@ -260,10 +262,26 @@ def _restore(c: Contract, snap: dict[str, Any]) -> None:
     c.oplog = OperationLog.from_json(c.contract_id, snap["oplog"])
 
 
+OLD_VERSION = "Đây là phiên bản cũ, chỉ để xem. Hãy mở phiên bản mới nhất để chỉnh sửa hoặc phân tích lại."
+
+
+class OldVersion(ValueError):
+    """Thao tác ghi lên phiên bản đã có bản mới hơn."""
+
+
+def _check_writable(c: Contract) -> None:
+    if c.lineage.get("status", "ready") != "ready":
+        return                                        # nháp / hợp đồng thành viên không phải phiên bản đã công bố
+    family = store().family(family_id(c))
+    if len(family) > 1 and family[-1] is not c:
+        raise OldVersion(OLD_VERSION)
+
+
 def _change(c: Contract, apply) -> None:
     """Ghi thao tác + dựng lại + lưu (nếu "Lưu lại") trong khóa ghi của hợp đồng (GraphBusy -> 409).
     Trọn gói: lỗi ở bất kỳ bước nào -> hợp đồng trở lại đúng như trước rồi ném lỗi.
     Hợp đồng Phần 4 không còn file gốc chỉ ghi thao tác, không dựng."""
+    _check_writable(c)
     now = _now()
     with _graph().writing(c.contract_id):
         snap = _snapshot(c)
@@ -318,6 +336,28 @@ def create(data: bytes, filename: str, persist: bool, *, on_event=None) -> dict[
     store().add(c, original=data, suffix=Path(filename).suffix.lower())
     emit({"type": "stage", "stage": "read", "status": "done"})
     return card(c)
+
+
+def delete_contract(cid: str) -> dict[str, Any]:
+    """Xóa hợp đồng. Bản gốc -> cả họ phiên bản; bản mới nhất -> bản đó và hợp đồng nó thêm vào (quay về bản trước);
+    bản ở giữa -> từ chối."""
+    try:
+        c = store().get(cid)
+    except KeyError:
+        return {"status": "ok"}
+    family = store().family(family_id(c))
+    drop = [cid]
+    if c.lineage.get("status", "ready") == "ready" and len(family) > 1:
+        if cid == family_id(c):
+            drop = [x.contract_id for x in family] + [i for x in family for i in x.lineage.get("linked") or []]
+        elif family[-1] is not c:
+            raise ValueError("Chỉ xóa được phiên bản mới nhất, hoặc bản gốc (xóa mọi phiên bản)")
+        else:
+            other = (c.lineage.get("addition") or {}).get("other_contract_id")
+            drop += [other] if other else []
+    for item in dict.fromkeys(drop):
+        store().delete(item)
+    return {"status": "ok"}
 
 
 def _convert_part4(c: Contract) -> None:
@@ -450,11 +490,18 @@ def _catalog_or_labor(c: Contract, kind: str | None = None):
 
 def concept_check(cid: str, user_facts: dict | None = None, *, tag_model: str | None = None,
                   tag_temp: float | None = None, on_event=None, document_kind: str | None = AUTO_KIND,
-                  rules_only: bool = False) -> dict[str, Any]:
+                  rules_only: bool = False, only_units: list[str] | None = None,
+                  day: date | None = None) -> dict[str, Any]:
     """Soát hợp đồng theo danh mục khái niệm; dựng lại đồ thị để có Party / ConceptInstance vừa gán.
     on_event nhận sự kiện tiến trình của check_contract; sự kiện `partial` được thêm `views` để trang vẽ.
     rules_only: chỉ chạy lại rule trên đồ thị đã có (xem check_contract), dùng khi người dùng trả lời câu hỏi gợi ý."""
     c = get(cid)
+    _check_writable(c)
+    if c.lineage.get("status") == "ready" and version_of(c) > 1:
+        # Phiên bản đã công bố: không đọc / gán lại phần cũ, đánh giá đúng ngày của phiên bản.
+        rules_only = True
+        stored = (c.lineage.get("addition") or {}).get("check_day")
+        day = day or (date.fromisoformat(stored) if stored else None)
     llm = CONFIG.llm_factory()
     now = _now()
     kind, found = _resolve_kind(c, llm, document_kind)      # chọn gói trước: nền luật (basis) phải dựng trên danh mục của gói đó
@@ -473,7 +520,7 @@ def concept_check(cid: str, user_facts: dict | None = None, *, tag_model: str | 
     report = check_contract(llm, c, **which, basis=AnchorLawBasis(catalog, legal_graph, on_event=relay if on_event else None), at=now,
                             model=getattr(llm, "model_id", None), tag_llm=tag_llm,
                             tag_model=getattr(tag_llm, "model_id", None), user_facts=user_facts, graph=_graph(),
-                            rules_only=rules_only, on_event=relay)
+                            rules_only=rules_only, only_units=only_units, day=day, on_event=relay)
     if found is not None and found["kind"] == UNKNOWN:      # lý do nhận diện thất bại (check_contract chỉ thấy "unknown")
         report.warnings.append(f"Không nhận diện được loại hợp đồng ({found.get('reason')}): chọn loại thủ công để soát")
     with _graph().writing(c.contract_id):
@@ -534,7 +581,8 @@ def _open_agent(c: Contract, catalog, legal, user_facts: dict | None):
     view, _, warnings, doc = contract_view(c, _graph(), _now(), catalog)
     if not view.find("ConceptInstance"):
         raise NeedsConceptCheck()
-    day = c.sign_date or catalog.law_values_valid_from
+    stored = (c.lineage.get("addition") or {}).get("check_day")
+    day = date.fromisoformat(stored) if stored else c.sign_date or catalog.law_values_valid_from
     tools = make_tools(view, catalog=catalog, day=day, sign_date=c.sign_date, legal=legal, user_facts=facts)
     agent = GraphAgent(CONFIG.llm_factory(), tools, view, mask=graph_mask_state(doc),
                        context=agent_context(view, catalog, sign_date=c.sign_date))
@@ -619,6 +667,8 @@ def _error_status(exc: Exception) -> tuple[str, int]:
     if isinstance(exc, ContractAIError):
         return str(exc), 502
     if isinstance(exc, verify.NeedsVerification):
+        return str(exc), 409
+    if isinstance(exc, OldVersion):
         return str(exc), 409
     if isinstance(exc, ValueError):
         return str(exc), 400
@@ -731,6 +781,8 @@ async def _call(fn, *args) -> Response:
         return _error(NEEDS_CHECK, 409)
     except GraphBusy as e:
         return _error(str(e), 409)
+    except OldVersion as e:
+        return _error(str(e), 409)
     except ContractAIError as e:
         return _error(str(e), 502)
     except verify.NeedsVerification as e:
@@ -775,13 +827,28 @@ async def handle_list(request: Request) -> Response:
 
     def listed():
         out = []
+        seen: dict[str, dict] = {}      # mã thẻ -> thẻ đã thêm
         for cid in ids:                 # chỉ đọc thẻ: không chuyển bản Phần 4 (chuyển khi mở từng hợp đồng)
             try:
-                out.append(card(store().get(cid)))
+                c = store().get(cid)
+                if c.lineage.get("status", "ready") != "ready":
+                    continue            # nháp và hợp đồng thành viên không hiện thành mục riêng
+                family = store().family(family_id(c))
+                if len(family) > 1:     # một họ phiên bản hiện một thẻ: bản mới nhất
+                    c = family[-1]
+                entry = seen.get(c.contract_id)
+                if entry is None:
+                    entry = seen[c.contract_id] = card(c)
+                    out.append(entry)
+                if cid != c.contract_id:
+                    entry.setdefault("replaces", []).append(cid)
             except KeyError:
                 continue
             except Exception:  # noqa: BLE001 — một file hỏng không làm hỏng cả danh sách
                 log.warning("Bỏ qua hợp đồng không đọc được: %s", cid)
+        for entry in out:               # id được hỏi đã có sẵn bản mới nhất thì không cần đổi
+            if entry["contract_id"] in ids:
+                entry.pop("replaces", None)
         return {"contracts": out}
     return await _call(listed)
 
@@ -819,10 +886,7 @@ async def handle_save(request: Request) -> Response:
 
 
 async def handle_delete(request: Request) -> Response:
-    def drop():
-        store().delete(request.path_params["cid"])
-        return {"status": "ok"}
-    return await _call(drop)
+    return await _call(delete_contract, request.path_params["cid"])
 
 
 async def handle_concept_check(request: Request) -> Response:

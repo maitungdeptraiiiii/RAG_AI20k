@@ -25,6 +25,10 @@ from rag.schema import LLM
 log = logging.getLogger(__name__)
 
 
+class IncompleteCompletion(ValueError):
+    """The model stopped before finishing (e.g. output/reasoning token cap reached)."""
+
+
 @dataclass(frozen=True)
 class BoundedCompletion:
     text: str
@@ -158,7 +162,7 @@ class OpenAIChatLLM:
             params["temperature"] = self.temperature
         response = client.chat.completions.create(**params)
         if response.choices[0].finish_reason != "stop":
-            raise ValueError("Agent completion did not finish normally")
+            raise IncompleteCompletion(f"finish_reason={response.choices[0].finish_reason}")
         text = (response.choices[0].message.content or "").strip()
         usage = response.usage
         result = BoundedCompletion(

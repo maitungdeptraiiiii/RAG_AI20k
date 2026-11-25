@@ -226,7 +226,7 @@ class AgentPipeline:
         history = [{"query": str(h.get("query", ""))[:2000],
                     "assistant_context_unverified": str(h.get("answer", ""))[:250]}
                    for h in (history or [])[-3:] if isinstance(h, dict)]
-        reason, repair_used = "max_rounds", False
+        reason, repair_used, verify_schema_repaired = "max_rounds", False, False
         last_verified = None
         try:
             revision, chunks = self.retriever.capture_snapshot()
@@ -348,8 +348,11 @@ class AgentPipeline:
                 payload.update(available_xrefs=[edge.to_dict() for _, edge in xrefs.values()],
                                followup_limit=self.config.followup_searches, searched_queries=sorted(state.searched))
                 data = gateway.json("assess", prompts.ASSESS, payload)
+                assess_warnings = []
                 state.assessments, next_queries, selected_xrefs = parse_assessment(
-                    data, state.requirements, bundle, xrefs, self.config.followup_searches)
+                    data, state.requirements, bundle, xrefs, self.config.followup_searches, assess_warnings)
+                for warning in assess_warnings:
+                    state.errors[warning] = "discarded"
                 supported = {a.requirement_id for a in state.assessments if a.status == "supported"}
                 pending_queries = [(rid, q) for rid, q in next_queries if " ".join(nfc(q).casefold().split()) not in state.searched]
                 pending_xrefs = [xrefs[xid] for xid in selected_xrefs]
@@ -388,22 +391,51 @@ class AgentPipeline:
                     yield self._event(state, "verify", "Think · Đang kiểm chứng từng kết luận và trích dẫn…")
                     verification_payload = {**payload, "claims": [asdict(c) for c in claims],
                                             "followup_limit": self.config.followup_searches}
-                    report = gateway.json("verify", prompts.VERIFY, verification_payload, reserve_calls=0)
                     verification_warnings = []
-                    verdicts, coverage, quotes, verifier_queries = parse_verification(
-                        report, state.requirements, claims, bundle, self.config.followup_searches, verification_warnings)
+                    try:
+                        report = gateway.json("verify", prompts.VERIFY, verification_payload, reserve_calls=0)
+                        parsed = parse_verification(
+                            report, state.requirements, claims, bundle, self.config.followup_searches,
+                            verification_warnings, degrade_invalid_claims=True)
+                    except OutputError:
+                        # One bounded schema repair; invalid flags are never coerced.
+                        if verify_schema_repaired:
+                            raise
+                        verify_schema_repaired = True
+                        report = gateway.json("verify_schema_repair", prompts.VERIFY, {
+                            **verification_payload,
+                            "format_repair": "Use the exact schema: booleans must be JSON true/false, "
+                                             "cover every claim index and requirement exactly once.",
+                        }, reserve_calls=0)
+                        parsed = parse_verification(
+                            report, state.requirements, claims, bundle, self.config.followup_searches,
+                            verification_warnings, degrade_invalid_claims=True)
+                        state.errors["verify_schema_repaired"] = "recovered"
+                    verdicts, coverage, quotes, verifier_queries = parsed
                     for warning in verification_warnings:
                         state.errors[warning] = "discarded"
                     facts_ok = report["facts_preserved"] and report["scope_respected"]
-                    good = [claim for i, claim in enumerate(claims) if verdicts[i] and facts_ok]
-                    # A reported covered requirement must also have a supported claim
-                    # and supported dependencies, not just a model's boolean flag.
-                    covered_by_claims = {rid for claim in good for rid in claim.requirement_ids}
-                    checked_coverage = {r.id: bool(coverage[r.id] and r.id in covered_by_claims and r.id in supported)
-                                        for r in state.requirements}
-                    for r in state.requirements:
-                        checked_coverage[r.id] &= all(checked_coverage[d] for d in r.depends_on)
-                    good_quotes = {i: spans for i, spans in quotes.items() if verdicts[i] and facts_ok}
+                    kept = {i for i in range(len(claims)) if verdicts[i] and facts_ok}
+                    dependencies = {r.id: r.depends_on for r in state.requirements}
+                    # A reported covered requirement must also have a verified claim
+                    # (with literal source quotes) and covered dependencies, not just a
+                    # model's boolean flag. The verifier judges the final bundle, so an
+                    # earlier round's "partial" assessment does not veto its coverage.
+                    # A claim answering a requirement whose premise is not covered is
+                    # withheld; repeat until stable (premises only point backwards).
+                    while True:
+                        covered_by_claims = {rid for i in kept for rid in claims[i].requirement_ids}
+                        checked_coverage = {r.id: bool(coverage[r.id] and r.id in covered_by_claims)
+                                            for r in state.requirements}
+                        for r in state.requirements:
+                            checked_coverage[r.id] &= all(checked_coverage[d] for d in r.depends_on)
+                        still = {i for i in kept if all(checked_coverage[d] for rid in claims[i].requirement_ids
+                                                         for d in dependencies[rid])}
+                        if still == kept:
+                            break
+                        kept = still
+                    good = [claim for i, claim in enumerate(claims) if i in kept]
+                    good_quotes = {i: spans for i, spans in quotes.items() if i in kept}
                     if good:
                         last_verified = {
                             "claims": good, "quotes": good_quotes, "coverage": checked_coverage,
@@ -425,10 +457,16 @@ class AgentPipeline:
                         budget.model_calls + 2 <= self.config.max_model_calls):
                         repair_used = True
                         payload["verification_errors"] = report
-                        claims = parse_claims(gateway.json("repair", prompts.COMPOSE, payload, reserve_calls=1), state.requirements, bundle)
-                        if claims:
+                        try:
+                            repaired = parse_claims(gateway.json("repair", prompts.COMPOSE, payload, reserve_calls=1),
+                                                    state.requirements, bundle)
+                        except OutputError as exc:
+                            # A failed repair must not discard claims already verified above.
+                            state.errors["repair"] = str(exc)[:200]
+                            repaired = []
+                        if repaired:
+                            claims = repaired
                             continue
-                        good = []
                     status = "partial" if good else "abstain"
                     if not good:
                         reason = "verification_rejected"
@@ -452,7 +490,9 @@ class AgentPipeline:
             state.errors["agent"] = type(exc).__name__
             if isinstance(exc, OutputError):
                 state.errors["validation"] = str(exc)
-            if isinstance(exc, BudgetExceeded) and last_verified:
+            if last_verified and not isinstance(exc, CorpusChangedError):
+                # Whatever stopped the run (budget, malformed later output), claims
+                # verified earlier against literal source spans remain safe to show.
                 safe = dict(last_verified)
                 old_bundle = safe.pop("bundle")
                 yield {"type": "result", "result": self._finish(
@@ -464,5 +504,12 @@ class AgentPipeline:
         except Exception as exc:
             # Do not expose SDK exception bodies/URLs/credentials to users.
             state.errors["agent"] = type(exc).__name__
+            if last_verified:
+                safe = dict(last_verified)
+                old_bundle = safe.pop("bundle")
+                yield {"type": "result", "result": self._finish(
+                    query, state, budget, corpus, old_bundle, status="partial",
+                    reason=f"stopped_after_verification:{type(exc).__name__}", verified=True, **safe)}
+                return
             yield {"type": "result", "result": self._finish(
                 query, state, budget, corpus, bundle, status="error", reason="tool_failure")}

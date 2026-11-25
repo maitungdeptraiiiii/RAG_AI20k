@@ -493,3 +493,24 @@ Cải tiến 3 trước đây chỉ có ở backend (`rag.contracts.dossier`, `/
 | T.6 | Chưa chạy với LLM thật trên văn bản tải lên (PDF/DOCX); test dùng LLM giả. Câu hỏi gợi ý chỉ lấy câu hỏi có dữ kiện nằm trong `missing_facts` của kết quả cấp hồ sơ | Còn |
 | T.7 | Chạy thật hồ sơ demo `docs/demo/ho-so-lao-dong-demo-01` (25/11): (a) `extract_dossier_facts` trước đó vẫn đọc văn bản từ đĩa (test giả bước trích nên không bắt được) — đã sửa dùng `doc_text`. (b) Phụ lục sửa thời hạn ra UNKNOWN thay vì FAIL: LLM trích bộ hợp đồng + phụ lục chỉ giữ giá trị sau sửa (câu trích ở phụ lục), không còn ứng viên `term` ở part 0 nên `modifies` không xét được. Lần chạy đầu (thời hạn viết "xác định thời hạn 12 tháng" ở Khoản 1, phụ lục sửa Khoản 2) ra `modifies_term = false` sai vì ứng viên `term` nằm ở khoản khác khoản bị sửa. Hướng sửa cần quyết: coi phụ lục "sửa thời hạn" khi chính phụ lục ghi giá trị mới cho trường (`term` ở part i, trong đơn vị nguồn của thao tác sửa) | (a) Đã sửa; (b) Còn |
 | T.8 | Hợp đồng có thời hạn đã hết trước ngày soát và là HĐ cuối của hồ sơ: không biết NLĐ có làm tiếp không -> `kind_effective` chưa biết, đếm `count:2..3` (UNKNOWN). Đúng nguyên tắc; demo dùng HĐ cuối còn hiệu lực | Có chủ ý |
+
+## U — Contract Studio: bổ sung văn bản, phiên bản và đối chiếu (26/11)
+
+Spec `docs/superpowers/specs/2026-11-26-contract-versions-design.md`. Chạy thật với LLM (26/11, hợp đồng mẫu b4): (a)
+phụ lục nâng lương 9 -> 12 triệu: đổi đúng 1 mục (`wage.minimum_regional`), 54 mục giữ nguyên, 14 giây; (b) thêm
+HĐ 2023 rồi HĐ bị sót, ngày soát 01/06/2023: tính lại 3/55 rule; có đủ 4 dữ kiện người dùng thì `content.term/r6`
+vi phạm -> đạt và `r5` đạt -> vi phạm; không khai dữ kiện thì `r5` là "cần thêm dữ kiện". 35–41 giây mỗi lần.
+
+| # | Hạn chế | Trạng thái |
+|---|---|---|
+| U.1 | Phụ lục đưa giá trị khác mà không có câu sửa đổi nhận ra được (động từ + dẫn chiếu cùng dòng) -> "mâu thuẫn", không tự chọn | Theo thiết kế |
+| U.2 | Khái niệm do phụ lục thêm được coi là "có mặt" cả khi ngày đánh giá sớm hơn ngày phụ lục hiệu lực (chỉ giá trị mới xét theo ngày) | Còn |
+| U.3 | Rule liên hợp đồng dùng ứng viên đã trích, không dùng câu trả lời ở bảng xác minh; mọi tham chiếu bên gộp vào một bên `party1` | Còn |
+| U.4 | Trả lời câu hỏi gợi ý trên một phiên bản chỉ chạy lại rule của hợp đồng đó, bảng "So với bản trước" và rule liên hợp đồng không tính lại. Dữ kiện người dùng cho rule liên hợp đồng khai ở khung bổ sung | Còn |
+| U.5 | Phiên bản đã công bố: nút Phân tích chỉ chạy lại rule (không đọc lại văn bản); phiên bản cũ chỉ đọc | Theo thiết kế |
+| U.6 | Bảng đối chiếu không kèm lời văn căn cứ luật; mục mâu thuẫn không liệt kê các giá trị xung đột | Còn |
+| U.7 | Nháp tải lên và nháp phiên bản giữ trong bộ nhớ suốt đời tiến trình, mất khi khởi động lại; file "gốc" của phiên bản là file hợp đồng gốc, không giữ file phụ lục | Còn |
+| U.8 | Ghi đĩa khi công bố không trọn gói: lỗi giữa chừng có thể để lại hợp đồng thành viên trên đĩa | Còn |
+| U.9 | Xóa phiên bản giữa trả 400 (kế hoạch ghi 409); `GET /api/contracts?ids=` quét cả kho cho mỗi id; xóa bản mới nhất từ trang cũ thì trang đó không tự nhớ lại id bản trước | Còn |
+| U.10 | Khác người lao động: giao diện chỉ khóa nút khi chưa tick "cùng bên", không có thông báo riêng | Còn |
+| U.11 | Chưa thử giao diện bằng trình duyệt; chưa chạy thật với PDF/DOCX | Còn |

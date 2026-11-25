@@ -6,7 +6,7 @@ from __future__ import annotations
 import dataclasses
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any
+from typing import Sequence, Any
 
 from rag.bridge.catalog import Catalog
 from rag.bridge.facts_map import normalize_slot
@@ -134,8 +134,8 @@ def assert_op(contract: Contract, checked: dict, catalog: Catalog, *, at: dateti
 
 
 def tag_contract(llm, contract: Contract, catalog: Catalog, *, at: datetime, model: str | None = None,
-                 on_progress=None, on_event=None) -> TagRun:
-    """on_progress(xong, tổng): gọi sau mỗi lô."""
+                 on_progress=None, on_event=None, units: Sequence[str] | None = None) -> TagRun:
+    """on_progress(xong, tổng): gọi sau mỗi lô. units: chỉ gán trên các đơn vị này (None -> cả hợp đồng)."""
     concepts = catalog_payload(catalog)
     run = TagRun()
     seen: set[str] = set()
@@ -158,7 +158,8 @@ def tag_contract(llm, contract: Contract, catalog: Catalog, *, at: datetime, mod
             on_event({"type": "tag_batch", "status": "done", "batch": batch.index, "uids": batch.uids})
         return data
 
-    batches = run_batches(make_batches(contract, budget=BATCH_BUDGET), read, on_done=on_progress)
+    wanted = None if units is None else [u for u in contract.units if u.uid in set(units)]
+    batches = run_batches(make_batches(contract, wanted, budget=BATCH_BUDGET), read, on_done=on_progress)
     run.warnings += batches.warnings()
     for batch, data in batches.results:
         items = data.get("items") if isinstance(data.get("items"), list) else []

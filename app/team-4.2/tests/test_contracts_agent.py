@@ -215,3 +215,54 @@ def test_store_retriever_has_no_contract_source():
     r = ContractAgentRetriever(None, RUNTIME, {}, None, anchor=SIGNED)
     _, snap = r.capture_snapshot()
     assert snap and all(c.source.startswith(VERSIONED_PREFIX) for c in snap.values())
+
+
+def test_store_agent_uses_tool_agent_when_agent_impl_is_tools(monkeypatch):
+    from rag.contracts.agent_view import run_store_agent
+    from rag.contracts.models import new_mask_state
+
+    class ToolLLM:
+        model_id = "fixture-tool-agent"
+
+        def complete(self, system, user):
+            return json.dumps({"thought": "ngoài phạm vi", "action": "refuse", "args": {"reason": "x"}})
+
+    monkeypatch.setenv("AGENT_IMPL", "tools")
+    chunks, search = legacy()
+    out = run_store_agent(baseline(ToolLLM()), AgentConfig(), RUNTIME, chunks, search, "Hỏi?", [],
+                          anchor=date(2023, 3, 15), mask_state=new_mask_state())
+    assert out["trace"]["agent"]["impl"] == "tools" and out["status"] == "refused"
+
+
+def test_tool_agent_law_id_keeps_titles_with_slashes_distinct():
+    from rag.agent.tool_agent import law_id
+
+    assert law_id("bo_luat_dan_su_2015.txt") == "bo_luat_dan_su_2015"
+    a = law_id(VERSIONED_PREFIX + "Bộ luật Dân sự số 91/2015/QH13")
+    b = law_id(VERSIONED_PREFIX + "Bộ luật Hàng hải số 95/2015/QH13")
+    assert a != b and "Dân sự" in a
+
+
+def test_tool_agent_trace_has_article_names_and_followed_edges():
+    from rag.agent.tool_agent import ToolAgentPipeline
+
+    class PathLLM:
+        model_id = "fixture-tool-path"
+        steps = [{"action": "read_article", "args": {"law_id": "luat", "article": "9"}},
+                 {"action": "read_article", "args": {"law_id": "luat", "article": "4"}},
+                 {"action": "follow_references", "args": {"evidence_id": "E1"}},
+                 {"action": "refuse", "args": {"reason": "x"}}]
+
+        def complete(self, system, user):
+            return json.dumps(self.steps.pop(0))
+
+    chunks = {f"l{n}": Chunk(f"l{n}", "luat", "luat.txt", None, None, f"Điều {n}. Tiêu đề", text)
+              for n, text in ((4, "Điều 4. Tiêu đề\nNội dung."), (9, "Điều 9. Tiêu đề\nTheo Điều 4 của Luật này."))}
+    retriever = ContractAgentRetriever(None, None, chunks, None)
+    from rag.contracts.agent_view import AgentBaselineView
+    agent = ToolAgentPipeline(AgentBaselineView(baseline(PathLLM()), retriever), AgentConfig())
+    meta = agent.ask_debug("Hỏi?").agent
+    assert [(e["id"], e["law"], e["article"]) for e in meta["evidence"]] == [
+        ("E1", "luat.txt", "Điều 9. Tiêu đề"), ("E2", "luat.txt", "Điều 4. Tiêu đề")]
+    # E2 đã được đọc trước: cạnh dẫn chiếu E1 -> E2 vẫn phải còn trong vết.
+    assert meta["tool_calls"][2]["seen_ids"] == ["E2"] and meta["tool_calls"][2]["result_ids"] == []

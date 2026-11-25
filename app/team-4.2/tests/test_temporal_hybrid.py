@@ -86,6 +86,18 @@ def test_result_follows_reranker_order(hybrid):
     assert scores == sorted(scores, reverse=True) and scores[0] == 1.0     # điểm của SpyReranker, không phải RRF
 
 
+def test_search_traced_exposes_arms_and_final_hits(hybrid):
+    """Panel 'Minh bạch đối chiếu' đọc từng arm + kết quả cuối từ đây; `search` giữ nguyên kết quả."""
+    index, _, _ = hybrid
+    day = date(2023, 6, 15)
+    results, trace = index.search_traced(QUERY, day, day, k=5)
+    assert results == index.search(QUERY, day, day, k=5)
+    assert trace is not None and trace.hits
+    assert {"bm25", "dense"} <= set(trace.arms) and trace.arms["bm25"]
+    assert all(h.chunk_id in index.rows for h in trace.hits)          # server tra nguồn/đoạn từ index.rows
+    assert index.search_traced(QUERY, day, day, k=0) == ([], None)
+
+
 def test_year_range_keeps_both_versions_of_merged_article(hybrid):
     index, _, _ = hybrid
     results = index.search(QUERY, date(2024, 1, 1), date(2024, 12, 31), k=8)

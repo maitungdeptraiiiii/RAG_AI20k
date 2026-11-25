@@ -70,6 +70,12 @@
     concept_basis: a => `Lấy căn cứ luật (neo) của khái niệm ${a.concept_id || ''}`,
     check_concept: a => `Chạy bộ kiểm luật cho khái niệm ${a.concept_id || ''}`,
     cypher_query: () => 'Truy vấn Cypher chỉ đọc trên đồ thị hợp đồng',
+    search_law: a => a.query ? `Tìm luật: “${a.query}”` : 'Tìm luật',
+    read_article: a => `Đọc ${a.article ? 'Điều ' + String(a.article).replace(/^điều\s*/i, '') : 'một Điều'}${a.law_id ? ' · ' + String(a.law_id).replace(/^Luật có phiên bản: /, '') : ''}`,
+    follow_references: a => `Theo dẫn chiếu ${a.evidence_id ? 'từ ' + a.evidence_id : ''}`,
+    answer: () => 'Trả lời và kiểm chứng trích dẫn',
+    ask_user: a => a.question ? `Hỏi lại: ${a.question}` : 'Hỏi lại người dùng',
+    refuse: () => 'Từ chối trả lời',
   };
   const isAppendix = p => /^phụ lục/i.test(p.label || '');
   const typeVi = p => p.node_type === 'Unit' && isAppendix(p) ? 'Phụ lục' : (TYPE_VI[p.node_type] || p.node_type || 'Nút');
@@ -184,6 +190,7 @@
       const n = s.n || i + 1;
       const what = TOOL_VI[s.tool] ? TOOL_VI[s.tool](s.args || {}) : s.tool;
       const res = s.error ? `<span style="color:var(--critical-text)">✗ ${esc(s.error)}</span>`
+        : s.summary ? `<span class="text-neutral-500">→ ${esc(s.summary)}</span>`
         : s.n_nodes != null ? `<span class="text-neutral-500">→ ${s.n_nodes} nút</span>` : '';
       const mark = s.error ? '<span style="color:var(--critical-text)">✗</span>' : '<span style="color:var(--good-text)">✓</span>';
       return `<div class="border-l-2 border-neutral-200 pl-2">
@@ -191,11 +198,75 @@
         ${s.thought ? `<div class="text-neutral-500"><span class="text-neutral-400">Lý do agent nêu:</span> ${esc(s.thought)}</div>` : ''}
         <details><summary class="cursor-pointer list-none text-[11.5px] text-neutral-400">JSON thô ▸</summary>
           <pre class="text-[11.5px] whitespace-pre-wrap text-neutral-600">${esc(JSON.stringify({ tool: s.tool, args: s.args }, null, 1))}</pre>
-          <div class="text-[11.5px] text-neutral-400 break-all">${esc(s.result)}</div></details></div>`;
+          <div class="text-[11.5px] text-neutral-400 break-all">${esc(s.result || '')}</div></details></div>`;
     }).join('');
     return open ? `<div class="space-y-1.5 text-[12.5px]">${rows}</div>`
       : `<details class="text-[12.5px]"><summary class="cursor-pointer text-neutral-500 list-none"><span class="chev">▸</span> Các bước agent đã đi (${steps.length})</summary><div class="space-y-1.5 mt-1.5">${rows}</div></details>`;
   }
 
-  window.ContractQA = { esc, readSse, ask, answerHtml, stepsHtml, lawMeta };
+  // ---------------------------------------------------------------- đường đi của agent luật (chat Think tự do)
+  const lawName = s => String(s || '').replace(/^Luật có phiên bản: /, '');
+
+  // Dựng từ vết của agent chọn công cụ (trace.agent, impl "tools"). Chỉ vẽ cạnh dẫn chiếu agent thật sự đã đi qua
+  // follow_references; Điều tìm được bằng tìm kiếm đứng riêng.
+  function legalPathHtml(agent) {
+    const calls = agent.tool_calls || [], evidence = agent.evidence || [];
+    const byId = new Map(evidence.map(e => [e.id, e]));
+    const cited = new Set((agent.claims || []).flatMap(c => c.evidence_ids || []));
+    const children = new Map(), parents = new Map();
+    for (const c of calls) {
+      if (c.action !== 'follow_references') continue;
+      const from = (c.args || {}).evidence_id;
+      for (const to of [...(c.result_ids || []), ...(c.seen_ids || [])]) {
+        if (!byId.has(from) || !byId.has(to) || from === to) continue;
+        if (!children.has(from)) children.set(from, new Set());
+        if (!parents.has(to)) parents.set(to, new Set());
+        children.get(from).add(to); parents.get(to).add(from);
+      }
+    }
+    const onPath = new Set();
+    const up = id => { if (onPath.has(id) || !byId.has(id)) return; onPath.add(id); (parents.get(id) || []).forEach(up); };
+    cited.forEach(up);
+
+    const steps = calls.map(c => {
+      const got = c.result_ids || [], seen = c.seen_ids || [];
+      let summary = '';
+      if (c.claims) summary = `${c.claims.verified}/${c.claims.proposed} kết luận qua kiểm chứng`;
+      else if (got.length || seen.length) summary = [got.join(' '), seen.length ? `đã có: ${seen.join(' ')}` : ''].filter(Boolean).join(' · ');
+      else if (!['refuse', 'ask_user', 'answer'].includes(c.action)) summary = 'không có Điều mới';
+      return { n: c.step, tool: c.action, args: c.args, thought: c.thought, error: c.error, summary,
+        result: c.reason || (c.feedback && c.feedback.length ? JSON.stringify(c.feedback) : '') };
+    });
+
+    const how = e => (e.origins || []).slice(0, 1).map(o => o.type === 'search' ? 'tìm kiếm' : o.type === 'read_article' ? 'đọc trực tiếp'
+      : `dẫn chiếu từ ${o.from_evidence}`).join('') + (e.round ? ` · bước ${e.round}` : '');
+    const node = e => `<div class="rounded-lg border border-neutral-200 bg-white px-2 py-1.5">
+      <div class="flex flex-wrap items-baseline gap-x-2"><span class="chip">${esc(e.id)}</span><b>${esc(e.article || e.id)}</b>
+        <span class="text-[11.5px] text-neutral-400">${esc(how(e))}</span>
+        ${cited.has(e.id) ? '<span class="text-[11.5px]" style="color:var(--good-text)">★ được trích</span>' : ''}</div>
+      <div class="text-[12px] text-neutral-500">${esc(lawName(e.law))}</div></div>`;
+    const drawn = new Set();
+    const tree = id => {
+      if (drawn.has(id)) return '';
+      drawn.add(id);
+      const kids = [...(children.get(id) || [])].filter(k => onPath.has(k)).map(k => drawn.has(k)
+        ? `<div class="pl-3 py-0.5 text-[12px] text-neutral-600">│ <b>dẫn chiếu tới</b> ${esc(k)} (ở trên)</div>`
+        : `<div class="pl-3 py-0.5 text-[12px] text-neutral-600">│ <b>dẫn chiếu tới</b></div><div class="pl-5">${tree(k)}</div>`).join('');
+      return node(byId.get(id)) + kids;
+    };
+    const roots = [...onPath].filter(id => ![...(parents.get(id) || [])].some(p => onPath.has(p)));
+    let nodes = roots.map(tree).join('');
+    nodes += [...onPath].filter(id => !drawn.has(id)).map(tree).join('');        // vòng dẫn chiếu không có gốc
+    const unused = evidence.filter(e => !onPath.has(e.id));
+    const elapsed = (agent.budget || {}).elapsed_s;
+
+    return `<div class="space-y-3">
+      <section><div class="field-label mb-1">Các bước agent đã đi (${steps.length})${elapsed ? ` · ${Math.round(elapsed)} s` : ''}</div>${stepsHtml(steps, true)}</section>
+      ${nodes ? `<section><div class="field-label mb-1">Đường đi tới căn cứ được trích</div><div class="space-y-1">${nodes}</div></section>` : ''}
+      ${unused.length ? `<details class="text-[12.5px]"><summary class="cursor-pointer text-neutral-500 list-none"><span class="chev">▸</span> Đã xem nhưng không dùng (${unused.length})</summary>
+        <div class="flex flex-wrap gap-1.5 mt-1.5">${unused.map(e => `<span class="chip" title="${esc(lawName(e.law))}">${esc(e.id)}: ${esc(e.article || '')}</span>`).join('')}</div></details>` : ''}
+    </div>`;
+  }
+
+  window.ContractQA = { esc, readSse, ask, answerHtml, stepsHtml, lawMeta, legalPathHtml };
 })();

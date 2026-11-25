@@ -168,7 +168,9 @@ def test_invalid_model_output_is_rejected_without_draft_leak(failure):
 
     agent, _ = build_agent(FixtureLLM(hook))
     events = list(agent.ask_stream("Điều kiện và hồ sơ?"))
-    assert events[-1]["status"] == "error"
+    # An invented verifier quote only fails its own claim (and claims depending on
+    # it), so that case ends as a safe abstain rather than a run error.
+    assert events[-1]["status"] == ("abstain" if failure == "invented_quote" else "error")
     assert events[-1]["citations"] == []
     assert all("KHẲNG ĐỊNH BỊA" not in e.get("delta", "") for e in events)
     assert "Hồ sơ cần có giấy B" not in events[-1]["answer"]

@@ -13,12 +13,14 @@ Hậu kiểm: câu trả lời không trích được căn cứ luật có phiê
 
 from __future__ import annotations
 
+import os
 from collections.abc import Callable, Iterator, Mapping
 from datetime import date
 from itertools import zip_longest
 from typing import Any
 
 from rag.agent import AgentConfig, AgentPipeline
+from rag.agent.tool_agent import ToolAgentPipeline
 from rag.contracts.llm_json import mask_payload, unmask_payload
 from rag.contracts.models import Contract
 from rag.index.bm25_index import BM25Index
@@ -177,7 +179,9 @@ def run_store_agent(baseline, config: AgentConfig | None, runtime, doc_chunks: M
     """Think tự do sau đồng bộ: agent tìm trong luật có phiên bản tại `anchor` + tài liệu thường (kho cũ), câu hỏi và
     lịch sử che PII bằng `mask_state` của phiên chat, đầu ra mở che."""
     retriever = ContractAgentRetriever(None, runtime, doc_chunks, doc_search, anchor=anchor)
-    agent = AgentPipeline(AgentBaselineView(baseline, retriever), config or AgentConfig())
+    # AGENT_IMPL=tools: agent tự chọn công cụ (rag.agent.tool_agent); mặc định vẫn là agent nhiều vòng.
+    agent_class = ToolAgentPipeline if os.environ.get("AGENT_IMPL") == "tools" else AgentPipeline
+    agent = agent_class(AgentBaselineView(baseline, retriever), config or AgentConfig())
     masked_q = mask_text(question, state=mask_state).masked_text
     masked_h = mask_payload([h for h in (history or []) if isinstance(h, dict)], mask_state)
 

@@ -113,3 +113,34 @@ def test_concept_instances_feed_present_slots_and_absent():
     assert fs.facts["annual_leave"].value == 12 and fs.facts["annual_leave"].unit == "day"
     assert fs.evidence["leave.annual"][0]["uid"] == "p0.d2" and fs.evidence["leave.annual"][0]["op_id"]
     assert fs.absent_checked == frozenset({"content.raise_policy"})
+
+
+def leave(value, uid, quote):
+    return machine_op("c1", "ASSERT", f"concept:leave.annual:{uid}",
+                      {"kind": "concept", "concept_id": "leave.annual", "found_by": "tag",
+                       "slots": {"annual_leave": {"value": value, "unit": "day"}}},
+                      "llm", "auto_accepted", source_uid=uid, quote=(quote,), at=T)
+
+
+def amended_leave(verb_line, when="01/06/2025"):
+    ops = [leave(12, "p0.d1", "Lương 10.000.000 đồng"), leave(15, "p1.d1", verb_line)]
+    return view_for(MAIN + appendix(1, verb_line, when), [], ops)
+
+
+def test_concept_slot_amended_by_appendix_follows_effective_date():
+    v = amended_leave("Sửa đổi Điều 1 Hợp đồng lao động: nghỉ 15 ngày.")
+    before = factset_from_graph(v, day=date(2025, 5, 1), sign_date=SIGN)[0].facts["annual_leave"]
+    assert before.value == 12 and [a["value"] for a in before.later_amendments] == [15]
+    after = factset_from_graph(v, day=date(2025, 7, 1), sign_date=SIGN)[0].facts["annual_leave"]
+    assert after.value == 15 and [a["value"] for a in after.amended_from] == [12]
+
+
+def test_concept_slot_without_amend_wording_still_conflicts():
+    v = amended_leave("Nội dung khác của Điều 1 Hợp đồng lao động: nghỉ 15 ngày.", None)
+    assert factset_from_graph(v, day=date(2025, 7, 1), sign_date=SIGN)[0].facts["annual_leave"] is CONFLICT
+
+
+def test_concept_slot_repeating_the_old_value_is_not_a_conflict():
+    v = view_for(MAIN + appendix(1, "Nhắc lại nghỉ 12 ngày."), [],
+                 [leave(12, "p0.d1", "Lương 10.000.000 đồng"), leave(12, "p1.d1", "Nhắc lại nghỉ 12 ngày")])
+    assert factset_from_graph(v, day=date(2025, 7, 1), sign_date=SIGN)[0].facts["annual_leave"].value == 12

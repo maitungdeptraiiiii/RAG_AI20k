@@ -6,13 +6,10 @@
     POST   /api/contracts/{id}/party           {"party": "neutral" | vai trò}
     POST   /api/contracts/{id}/sign-date       {"date": "YYYY-MM-DD", "by"?} (nguồn: người dùng nhập)
     POST   /api/contracts/{id}/layout          {"parts": [{"start", "kind": "appendix", "title"}], "by"?} -> thẻ
-    POST   /api/contracts/{id}/facts           {"answers": {key | "q:<qid>": {"action": confirm|set|unknown, "value"?}},
+    POST   /api/contracts/{id}/facts           {"answers": {key: {"action": confirm|set|unknown, "value"?}},
                                                "by"?} -> thẻ (bảng xác minh, spec 2026-11-13)
     POST   /api/contracts/{id}/save            chuyển sang "Lưu lại"
     DELETE /api/contracts/{id}                 gỡ / xoá hẳn
-    POST   /api/contracts/{id}/run             {"op": summary|review|partial|law_changes|redline, unit_ids?, topics?}
-                                               soát khi còn dữ kiện bắt buộc chưa xác minh -> 409 {"error", "pending"}
-    GET    /api/contracts/{id}/reports/{rid}.docx|.pdf
 
 Hợp đồng không bao giờ đi /api/ingest hay vào kho tra cứu. Mỗi thao tác giữ một LegalRuntime (lease) suốt request.
 Mọi thay đổi (tạo, bên, ngày ký, bố cục, chuyển đổi bản Phần 4) ghi vào nhật ký thao tác rồi dựng lại đồ thị trong
@@ -28,10 +25,7 @@ import threading
 import copy
 import hashlib
 import logging
-import re
 import secrets
-import unicodedata
-from urllib.parse import quote as _urlquote
 import tempfile
 from contextlib import contextmanager
 from dataclasses import asdict
@@ -48,11 +42,11 @@ from starlette.routing import Route
 from rag.bridge.basis import AnchorLawBasis
 from rag.bridge.catalog import load_catalog
 from rag.bridge.check import check_contract, report_json, report_markdown
+from rag.bridge.user_form import user_fact_fields
 from rag.bridge.view import result_views
 from rag.contracts.classify import AUTO_KIND, UNKNOWN, classify_contract
-from rag.contracts import review as rv
+from rag.contracts import answer as contract_answer
 from rag.contracts.doc import PageText, PartSpec, assemble
-from rag.contracts.export import report_docx, report_pdf
 from rag.contracts.facts import extract_facts
 from rag.contracts.graph.oplog import OperationLog, human_op, machine_op
 from rag.contracts.graph.service import ContractGraphService, GraphBusy
@@ -69,7 +63,6 @@ log = logging.getLogger("rag.ui.contracts")
 MAX_BYTES = 50 * 1024 * 1024
 ALLOWED = {".pdf", ".docx", ".txt", ".md", ".png", ".jpg", ".jpeg", ".tif", ".tiff", ".webp"}
 GONE = "Hợp đồng này đã hết phiên — hãy đính kèm lại"
-OPS = ("summary", "review", "partial", "law_changes", "redline")
 MAX_PAGES = 150
 TOO_LONG = "Hợp đồng dài hơn 150 trang — chưa hỗ trợ"
 BAD_LAYOUT = "Vị trí phần không hợp lệ"
@@ -120,10 +113,6 @@ def _graph() -> ContractGraphService:
     return CONFIG.graph() if CONFIG.graph is not None else _no_graph
 
 
-def _ctx(runtime) -> rv.ReviewContext:
-    return rv.ReviewContext(CONFIG.llm_factory(), runtime, CONFIG.legacy_search, CONFIG.today())
-
-
 def card(c: Contract) -> dict[str, Any]:
     rep = c.doc.report if c.doc is not None else None
     g = c.graph or {}
@@ -133,7 +122,6 @@ def card(c: Contract) -> dict[str, Any]:
             "units": [{"uid": u.uid, "label": u.label} for u in c.units],
             "coverage": {"reviewed": len(c.units), "total": max(len(c.units), c.total_units)},
             "pages": c.pages,
-            "reports": [{"rid": r["rid"], "op": r["op"], "created_at": r["created_at"]} for r in c.reports.values()],
             "parts": [{"part_id": p.part_id, "kind": p.kind, "title": p.title} for p in c.doc.parts] if c.doc else [],
             "parse_report": {"counts": dict(rep.counts) if rep else {}, "gaps": list(rep.gaps) if rep else [],
                              "warnings": list(rep.warnings) if rep else []},
@@ -141,10 +129,20 @@ def card(c: Contract) -> dict[str, Any]:
                       "build_id": g.get("build_id"), "error": g.get("error"),
                       "problems": list(g.get("problems") or [])},
             "verification": verify.summary(c),
+            "user_form": _user_form(c),
             "last_check": ({"checked_at": c.concept_check["checked_at"],
                             "stale": c.concept_check.get("facts_sig") != _facts_sig(c)} if c.concept_check else None),
             "concepts": len({(o.content or {}).get("concept_id") for o in c.oplog.active()
                              if (o.content or {}).get("kind") == "concept"})}
+
+
+def _user_form(c: Contract) -> list[dict]:
+    """Biểu mẫu dữ kiện người dùng của gói ứng với loại đã nhận diện. Loại `unknown` / không có gói: rỗng, không rơi về
+    câu hỏi lao động. Hợp đồng lưu từ bản cũ (chưa có `document_kind`): labor như trước."""
+    kind = (c.facts or {}).get("document_kind")
+    if kind and not packs_for_kind(kind):
+        return []
+    return user_fact_fields(catalog_for(c))
 
 
 def _now() -> datetime:
@@ -248,13 +246,11 @@ def _rebuild(c: Contract, now: datetime) -> None:
 
 _SNAP = ("party", "sign_date", "sign_date_source", "page_texts", "file_checksum", "text", "pages", "units",
          "total_units", "doc", "graph", "builds")
-_MISSING = object()
 
 
 def _snapshot(c: Contract) -> dict[str, Any]:
     snap = {n: copy.copy(getattr(c, n)) for n in _SNAP}
     snap["oplog"] = c.oplog.to_json()
-    snap["pre_graph"] = {rid: r.get("pre_graph", _MISSING) for rid, r in c.reports.items()}
     return snap
 
 
@@ -262,12 +258,6 @@ def _restore(c: Contract, snap: dict[str, Any]) -> None:
     for n in _SNAP:
         setattr(c, n, snap[n])
     c.oplog = OperationLog.from_json(c.contract_id, snap["oplog"])
-    for rid, v in snap["pre_graph"].items():
-        if rid in c.reports:
-            if v is _MISSING:
-                c.reports[rid].pop("pre_graph", None)
-            else:
-                c.reports[rid]["pre_graph"] = v
 
 
 def _change(c: Contract, apply) -> None:
@@ -313,6 +303,9 @@ def create(data: bytes, filename: str, persist: bool, *, on_event=None) -> dict[
         emit({"type": "stage", "stage": "facts", "status": "done"})
     except ContractAIError as e:
         c.facts = {"type": "chưa rõ", "parties": [], "error": str(e)}
+    # Nhận diện loại ngay lúc upload: thẻ (biểu mẫu dữ kiện người dùng) và đồ thị theo gói đúng loại, không chờ bước soát.
+    # `unknown` được lưu nhưng không coi là đã nhận diện: lần soát sau nhận diện lại (xem _resolve_kind).
+    c.facts = {**c.facts, "document_kind": classify_contract(CONFIG.llm_factory(), c)["kind"]}
     kind = c.facts.get("type")
     fields = {"type": kind if kind and kind != "chưa rõ" else None,
               "sign_date": c.sign_date.isoformat() if c.sign_date else None}
@@ -329,7 +322,7 @@ def create(data: bytes, filename: str, persist: bool, *, on_event=None) -> dict[
 
 def _convert_part4(c: Contract) -> None:
     """Hợp đồng Phần 4 có file gốc: nạp lại trang (không gọi LLM), chuyển lựa chọn của người thành thao tác,
-    đánh dấu báo cáo cũ pre_graph, dựng đồ thị. Không đọc được file -> vẫn mở như Phần 4."""
+    dựng đồ thị. Không đọc được file -> vẫn mở như Phần 4."""
     orig = None if c.contract_id in _unconvertible else store().original(c.contract_id)
     if orig is None:
         return
@@ -347,8 +340,6 @@ def _convert_part4(c: Contract) -> None:
             _human(c, "SET_FIELD", "party", {"value": c.party}, CONVERTED, now)
         if c.sign_date and c.sign_date_source == "user":
             _human(c, "SET_FIELD", "sign_date", {"value": c.sign_date.isoformat()}, CONVERTED, now)
-        for r in c.reports.values():
-            r["pre_graph"] = True
     try:
         _change(c, apply)
     except GraphBusy:
@@ -422,27 +413,6 @@ def set_layout(cid: str, parts, by: str = USER) -> dict[str, Any]:
     return card(c)
 
 
-def run(cid: str, op: str, unit_ids=None, topics=None) -> dict[str, Any]:
-    if op not in OPS:
-        raise ValueError(f"Thao tác không hợp lệ: {op}")
-    c = get(cid)
-    verify.check_gate(c, op)
-    with CONFIG.lease() as runtime:
-        ctx = _ctx(runtime)
-        if op == "summary":
-            rep = rv.summarize(ctx, c)
-        elif op in ("review", "partial"):
-            if op == "partial" and not (unit_ids or topics):
-                raise ValueError("Hãy chọn điều khoản hoặc chủ đề cần soát")
-            rep = rv.review(ctx, c, unit_ids=unit_ids, topics=topics)
-        elif op == "law_changes":
-            rep = rv.law_changes_report(ctx, c)
-        else:
-            rep = rv.redline(ctx, c)
-    store().update(c)
-    return rep
-
-
 def _default_legal_graph():
     try:
         from rag.legal.graph.query import LegalGraph
@@ -479,9 +449,11 @@ def _catalog_or_labor(c: Contract, kind: str | None = None):
 
 
 def concept_check(cid: str, user_facts: dict | None = None, *, tag_model: str | None = None,
-                  tag_temp: float | None = None, on_event=None, document_kind: str | None = AUTO_KIND) -> dict[str, Any]:
+                  tag_temp: float | None = None, on_event=None, document_kind: str | None = AUTO_KIND,
+                  rules_only: bool = False) -> dict[str, Any]:
     """Soát hợp đồng theo danh mục khái niệm; dựng lại đồ thị để có Party / ConceptInstance vừa gán.
-    on_event nhận sự kiện tiến trình của check_contract; sự kiện `partial` được thêm `views` để trang vẽ."""
+    on_event nhận sự kiện tiến trình của check_contract; sự kiện `partial` được thêm `views` để trang vẽ.
+    rules_only: chỉ chạy lại rule trên đồ thị đã có (xem check_contract), dùng khi người dùng trả lời câu hỏi gợi ý."""
     c = get(cid)
     llm = CONFIG.llm_factory()
     now = _now()
@@ -501,7 +473,7 @@ def concept_check(cid: str, user_facts: dict | None = None, *, tag_model: str | 
     report = check_contract(llm, c, **which, basis=AnchorLawBasis(catalog, legal_graph, on_event=relay if on_event else None), at=now,
                             model=getattr(llm, "model_id", None), tag_llm=tag_llm,
                             tag_model=getattr(tag_llm, "model_id", None), user_facts=user_facts, graph=_graph(),
-                            on_event=relay)
+                            rules_only=rules_only, on_event=relay)
     if found is not None and found["kind"] == UNKNOWN:      # lý do nhận diện thất bại (check_contract chỉ thấy "unknown")
         report.warnings.append(f"Không nhận diện được loại hợp đồng ({found.get('reason')}): chọn loại thủ công để soát")
     with _graph().writing(c.contract_id):
@@ -513,9 +485,20 @@ def concept_check(cid: str, user_facts: dict | None = None, *, tag_model: str | 
            "graph": {k: g.get(k) for k in ("enabled", "published", "error")},
            "views": result_views(js["results"], catalog, c, report.basis)}
     # Lưu để xem lại không phải chạy lại (tốn LLM); facts_sig cho biết dữ kiện đã đổi sau lần kiểm tra này chưa.
-    c.concept_check = {"checked_at": now.isoformat(), "facts_sig": _facts_sig(c), "result": out}
+    c.concept_check = {"checked_at": now.isoformat(), "facts_sig": _facts_sig(c), "result": out,
+                       "user_facts": dict(user_facts or {})}      # câu trả lời sau này cộng thêm vào đây
     store().update(c)
     return out
+
+
+def answer_questions(cid: str, answers: dict) -> dict[str, Any]:
+    """Trả lời câu hỏi gợi ý của lần Kiểm tra concept trước: cộng vào dữ kiện người dùng đã có (câu sau thắng câu trước) rồi
+    chạy lại chỉ rule, không gọi LLM. Chưa kiểm tra lần nào: NeedsConceptCheck."""
+    c = get(cid)
+    if not c.concept_check:
+        raise NeedsConceptCheck()
+    merged = {**(c.concept_check.get("user_facts") or {}), **answers}
+    return concept_check(cid, merged, document_kind=(c.facts or {}).get("document_kind"), rules_only=True)
 
 
 def _facts_sig(c: Contract) -> str:
@@ -529,7 +512,8 @@ def last_concept_check(cid: str) -> dict[str, Any]:
     saved = c.concept_check
     if not saved:
         raise ValueError("Hợp đồng này chưa có kết quả Kiểm tra concept")
-    return {**saved["result"], "checked_at": saved["checked_at"], "stale": saved.get("facts_sig") != _facts_sig(c)}
+    return {**saved["result"], "checked_at": saved["checked_at"], "stale": saved.get("facts_sig") != _facts_sig(c),
+            "user_facts": dict(saved.get("user_facts") or {})}
 
 
 NEEDS_CHECK = "Hãy chạy Kiểm tra concept trước khi hỏi"
@@ -676,7 +660,8 @@ def chat_answer(cid: str, question: str, history: list[dict]) -> dict[str, Any]:
     """Hỏi với hợp đồng (không Think) — dạng trả về giống /api/chat để UI hiển thị chung."""
     c = get(cid)
     with CONFIG.lease() as runtime:
-        out = rv.answer(_ctx(runtime), c, question, history)
+        ctx = contract_answer.AnswerContext(CONFIG.llm_factory(), runtime, CONFIG.legacy_search)
+        out = contract_answer.answer(ctx, c, question, history)
     sources = [{"n": i, "chunk_id": e["eid"], "source": e["source_title"], "title": e["source_title"],
                 "section": e["section"], "page": None, "score": 0.0, "text": e["text"], "store": e["store"],
                 "valid_from": e["valid_from"], "valid_to": e["valid_to"], "provision_status": e["status"]}
@@ -731,28 +716,6 @@ def chat_think(cid: str, question: str, history: list[dict], stream: bool = Fals
     return events()
 
 
-def _disposition(stem: str, op: str, fmt: str) -> str:
-    """Header phải là latin-1: tên ASCII (bỏ dấu, đ -> d) + filename* UTF-8 cho trình duyệt hiển thị đúng tên."""
-    ascii_stem = unicodedata.normalize("NFKD", stem.replace("đ", "d").replace("Đ", "D"))
-    ascii_stem = re.sub(r"[^A-Za-z0-9._-]+", "_", ascii_stem.encode("ascii", "ignore").decode()).strip("_")[:60]
-    ascii_name = f"{ascii_stem or 'hop_dong'}_{op}.{fmt}"
-    utf8_name = f"{stem[:60] or 'hop_dong'}_{op}.{fmt}"
-    return f"attachment; filename=\"{ascii_name}\"; filename*=UTF-8''{_urlquote(utf8_name)}"
-
-
-def download(cid: str, rid: str, fmt: str) -> Response:
-    c = get(cid)
-    rep = c.reports.get(rid)
-    if rep is None:
-        raise KeyError(rid)
-    if fmt == "docx":
-        data, mime = report_docx(c, rep), "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    else:
-        data, mime = report_pdf(c, rep), "application/pdf"
-    return Response(data, media_type=mime,
-                    headers={"Content-Disposition": _disposition(Path(c.filename).stem, rep["op"], fmt)})
-
-
 # --- HTTP ----------------------------------------------------------------------------------------
 
 def _error(msg: str, status: int) -> JSONResponse:
@@ -764,6 +727,8 @@ async def _call(fn, *args) -> Response:
         result = await asyncio.get_running_loop().run_in_executor(None, fn, *args)
     except KeyError:
         return _error(GONE, 404)
+    except NeedsConceptCheck:
+        return _error(NEEDS_CHECK, 409)
     except GraphBusy as e:
         return _error(str(e), 409)
     except ContractAIError as e:
@@ -860,18 +825,16 @@ async def handle_delete(request: Request) -> Response:
     return await _call(drop)
 
 
-async def handle_run(request: Request) -> Response:
-    body = await _json(request)
-    unit_ids = [str(x) for x in body.get("unit_ids") or []] or None
-    topics = [str(x) for x in body.get("topics") or []] or None
-    return await _call(run, request.path_params["cid"], str(body.get("op") or ""), unit_ids, topics)
-
-
 async def handle_concept_check(request: Request) -> Response:
     body = await _json(request)
     facts = body.get("user_facts")
     return await _call(lambda cid, f, kind: concept_check(cid, f, document_kind=kind), request.path_params["cid"],
                        facts if isinstance(facts, dict) else {}, str(body.get("document_kind") or AUTO_KIND))
+
+
+async def handle_concept_check_answer(request: Request) -> Response:
+    answers = (await _json(request)).get("answers")
+    return await _call(answer_questions, request.path_params["cid"], answers if isinstance(answers, dict) else {})
 
 
 async def handle_concept_check_last(request: Request) -> Response:
@@ -928,13 +891,6 @@ def _sse_queue(q: "queue.Queue") -> Response:
                              headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
-async def handle_download(request: Request) -> Response:
-    fmt = request.path_params["fmt"]
-    if fmt not in ("docx", "pdf"):
-        return _error("Định dạng tải về: docx hoặc pdf", 400)
-    return await _call(download, request.path_params["cid"], request.path_params["rid"], fmt)
-
-
 routes = [
     Route("/api/contracts", handle_create, methods=["POST"]),
     Route("/api/contracts", handle_list, methods=["GET"]),
@@ -945,12 +901,11 @@ routes = [
     Route("/api/contracts/{cid}/save", handle_save, methods=["POST"]),
     Route("/api/contracts/{cid}/layout", handle_layout, methods=["POST"]),
     Route("/api/contracts/{cid}/facts", handle_facts, methods=["POST"]),
-    Route("/api/contracts/{cid}/run", handle_run, methods=["POST"]),
     Route("/api/contracts/{cid}/concept-check", handle_concept_check, methods=["POST"]),
+    Route("/api/contracts/{cid}/concept-check/answer", handle_concept_check_answer, methods=["POST"]),
     Route("/api/contracts/{cid}/concept-check/last", handle_concept_check_last, methods=["GET"]),
     Route("/api/contracts/{cid}/concept-check/stream", handle_concept_check_stream, methods=["POST"]),
     Route("/api/contracts/{cid}/ask/stream", handle_ask_stream, methods=["POST"]),
     Route("/api/rules/dossiers", handle_dossiers, methods=["GET"]),
     Route("/api/rules/dossiers/{did}/scenario/stream", handle_scenario_stream, methods=["POST"]),
-    Route("/api/contracts/{cid}/reports/{rid}.{fmt}", handle_download, methods=["GET"]),
 ]

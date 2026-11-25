@@ -1,11 +1,10 @@
 """Bảng xác minh dữ kiện (spec 2026-11-13 §3, §5, §6, §7).
 
 Bảng được dựng lại mỗi lần từ hai nguồn: ứng viên máy đọc (`facts["candidates"]`) và câu trả lời của người dùng trong
-nhật ký thao tác (`SET_FIELD` của người, đích `party` / `sign_date` / `type` / `fact:<key>` / `q:<qid>`).
+nhật ký thao tác (`SET_FIELD` của người, đích `party` / `sign_date` / `type` / `fact:<key>`).
 """
 from __future__ import annotations
 
-import hashlib
 import json
 import unicodedata
 from datetime import date, datetime
@@ -18,7 +17,7 @@ from rag.contracts.graph.oplog import human_op
 NEUTRAL = "neutral"
 NEUTRAL_LABEL = "Trung lập / tư vấn"
 VERIFIED = ("confirmed", "corrected", "unknown")
-GATED_OPS = ("review", "partial", "law_changes", "redline")
+GATED_OPS = ("review",)                        # kiểm tra hợp đồng (Contract Studio) cần dữ kiện đã xác minh
 _DIRECT = ("party", "sign_date", "type")       # đích SET_FIELD sẵn có (đồ thị đọc `type`, `sign_date`)
 
 
@@ -178,16 +177,6 @@ def fields(contract) -> list[dict]:
     return out
 
 
-def questions(contract) -> list[dict]:
-    out = []
-    for q in contract.facts.get("questions") or []:
-        op = _answer(contract, f"q:{q['qid']}")
-        answer = None if op is None or op.content.get("action") == "unknown" else op.content.get("value")
-        out.append(q | {"status": "open" if op is None else "answered", "answer": answer,
-                        "unknown": op is not None and op.content.get("action") == "unknown"})
-    return out
-
-
 def pending_required(contract) -> list[dict]:
     return [{"key": f["key"], "label": f["label"], "status": f["status"]}
             for f in fields(contract) if f["required"] and f["status"] not in VERIFIED]
@@ -198,7 +187,7 @@ def summary(contract) -> dict:
     pending = [f for f in rows if f["required"] and f["status"] not in VERIFIED]
     return {"fields": rows, "pending": [{"key": f["key"], "label": f["label"]} for f in pending],
             "complete": not pending, "catalog_type": contract_catalog_type(contract),
-            "questions": questions(contract), "coverage": contract.facts.get("coverage"),
+            "coverage": contract.facts.get("coverage"),
             "warnings": list(contract.facts.get("warnings") or [])}
 
 
@@ -209,15 +198,6 @@ def check_gate(contract, op: str) -> None:
             raise NeedsVerification(pending)
 
 
-def known_facts(contract) -> dict:
-    """Dữ kiện đã xác minh và câu hỏi đã trả lời, gửi kèm payload soát để LLM không hỏi lại."""
-    facts = {f["label"]: ("không biết" if f["status"] == "unknown" else f["value"])
-             for f in fields(contract) if f["status"] in VERIFIED}
-    answered = [{"question": q["question"], "answer": "không biết" if q["unknown"] else q["answer"]}
-                for q in questions(contract) if q["status"] == "answered"]
-    return {"facts": facts, "answered_questions": answered}
-
-
 def apply_answers(contract, answers: dict, by: str, now: datetime) -> list:
     """Kiểm và ghi câu trả lời thành thao tác của người (thay thế câu trả lời trước cùng đích). Trả các thao tác mới.
     Đồng bộ `contract.party`, `contract.sign_date` như các API cũ. Lỗi kiểu -> ValueError, không ghi gì."""
@@ -225,23 +205,11 @@ def apply_answers(contract, answers: dict, by: str, now: datetime) -> list:
         raise ValueError("Không có câu trả lời nào")
     rows = {f["key"]: f for f in fields(contract)}
     specs = {s["key"]: s for s in all_specs()}
-    qs = {q["qid"]: q for q in questions(contract)}
     planned: list[tuple[str, dict]] = []
     for key, ans in answers.items():
         if not isinstance(ans, dict) or ans.get("action") not in ("confirm", "set", "unknown"):
             raise ValueError(f"Câu trả lời không hợp lệ cho {key}")
         action = ans["action"]
-        if key.startswith("q:"):
-            q = qs.get(key[2:])
-            if q is None:
-                raise ValueError(f"Không có câu hỏi {key}")
-            if action == "confirm":
-                raise ValueError("Câu hỏi chỉ trả lời bằng 'set' hoặc 'unknown'")
-            value = None if action == "unknown" else " ".join(str(ans.get("value") or "").split())
-            if action == "set" and not value:
-                raise ValueError(f"Thiếu câu trả lời cho: {q['question']}")
-            planned.append((key, {"action": action, "value": value}))
-            continue
         if key not in rows:
             raise ValueError(f"Dữ kiện không có trong bảng xác minh: {key}")
         row = rows[key]
@@ -274,10 +242,6 @@ def apply_answers(contract, answers: dict, by: str, now: datetime) -> list:
     return new_ops
 
 
-def question_id(question: str) -> str:
-    return hashlib.sha1(_norm(question).encode("utf-8")).hexdigest()[:10]
-
-
 __all__ = ["GATED_OPS", "NEUTRAL", "NeedsVerification", "all_specs", "apply_answers", "catalog", "catalog_type",
-           "check_gate", "current_type", "fields", "known_facts", "normalize_value", "party_options",
-           "pending_required", "question_id", "questions", "specs_for", "summary"]
+           "check_gate", "current_type", "fields", "normalize_value", "party_options",
+           "pending_required", "specs_for", "summary"]

@@ -31,7 +31,7 @@
   // ------------------------------------------------------------------ danh sách
   function renderList() {
     if (!state.cards.length) {
-      $('list').innerHTML = '<div class="text-[13px] text-neutral-500 px-1">Chưa có hợp đồng. <a class="underline" href="/contracts">Nạp ở trang Soát hợp đồng</a> (chọn “Lưu để mở lại sau”).</div>';
+      $('list').innerHTML = '<div class="text-[13px] text-neutral-500 px-1">Chưa có hợp đồng. <a class="underline" href="/contract-studio/">Nạp ở trang Soát hợp đồng</a> (chọn “Lưu để mở lại sau”).</div>';
       return;
     }
     $('list').innerHTML = state.cards.map(c => {
@@ -40,7 +40,7 @@
         <button type="button" class="item ${c.contract_id === state.active ? 'on' : ''}" data-cid="${esc(c.contract_id)}" ${ready ? '' : 'disabled'}>
           <div class="text-[13.5px] font-medium truncate">${esc(c.filename)}</div>
           <div class="text-[11.5px] text-neutral-500">ký ${day(c.sign_date)} · ${ready ? `${c.concepts} khái niệm` : 'chưa dựng đồ thị'}</div></button>
-        ${ready ? '' : `<a class="block text-[11.5px] underline text-neutral-600 px-2.5 -mt-1 mb-1" href="/contracts?cid=${encodeURIComponent(c.contract_id)}">Kiểm tra concept →</a>`}</div>`;
+        ${ready ? '' : `<a class="block text-[11.5px] underline text-neutral-600 px-2.5 -mt-1 mb-1" href="/contract-studio/?contract=${encodeURIComponent(c.contract_id)}">Kiểm tra concept →</a>`}</div>`;
     }).join('');
   }
 

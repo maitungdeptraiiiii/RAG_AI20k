@@ -14,7 +14,7 @@ from rag.bridge.basis import AnchorLawBasis
 from rag.bridge.catalog import Catalog
 from rag.bridge.engine import CONFLICT, Facts
 from rag.bridge.graph_facts import factset_from_graph
-from rag.contracts.graph.view import ContractGraphView, run_cypher
+from rag.contracts.graph.view import UNIT_TEXT_LIMIT, ContractGraphView, run_cypher
 from rag.rules.evaluator import default_kind, evaluator_for
 
 OUTPUT_LIMIT = 3000
@@ -146,7 +146,7 @@ def make_tools(view: ContractGraphView, *, catalog: Catalog, day: date, sign_dat
             units = view.search_units(a["text"])
         elif "label" in a:
             want = " ".join(a["label"].casefold().split())
-            units = [u for u in view.find("Unit") if " ".join(str(u.get("label", "")).casefold().split())
+            units = [u for u in view.find("Unit", UNIT_TEXT_LIMIT) if " ".join(str(u.get("label", "")).casefold().split())
                      == want or str(u.get("label", "")).casefold().startswith(want + ":")
                      or str(u.get("label", "")).casefold().startswith(want + ".")]
         else:

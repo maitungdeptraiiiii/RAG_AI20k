@@ -92,7 +92,7 @@ def test_pack_fields_extracted_after_kind_is_known():
 
         def complete(self, system, user):
             payload = json.loads(user)
-            if [f["key"] for f in payload.get("fields_wanted") or []] == ["zz_pack_only"]:
+            if "zz_pack_only" in [f["key"] for f in payload.get("fields_wanted") or []]:   # lượt bổ sung gộp cả trường của gói dân sự chung
                 self.more += 1
                 return json.dumps({"fields": {"zz_pack_only": {"value": "30%/năm", "unit": "p0.d2",
                                                                "quote": "Lãi suất vay là 30%/năm"}}}, ensure_ascii=False)

@@ -1,4 +1,4 @@
-"""Soát một HĐLĐ theo danh mục khái niệm, đầu tới cuối (spec 2026-11-14-contract-concept-check §4):
+"""Soát một hợp đồng theo gói luật của loại văn bản, đầu tới cuối (spec 2026-11-14-contract-concept-check §4):
 dữ kiện -> bên ký -> gán khái niệm -> engine -> kiểm lại khái niệm im lặng -> engine -> căn cứ luật -> báo cáo.
 
 Engine đọc dữ kiện từ đồ thị hợp đồng (spec 2026-11-16-contract-graph-agent §5.5): mọi kết quả máy ghi vào oplog,
@@ -31,15 +31,30 @@ from rag.contracts.classify import AUTO_KIND, classify_contract
 from rag.rules.loader import packs_for_kind
 from rag.rules.questions import next_questions
 
-_ORDER = ("violation", "missing_content", "hidden_right", "conflict", "possible_right", "needs_facts")
+# Tiêu đề nhóm ngắn cho finding lõi; finding riêng của gói lấy nhãn của gói (`Catalog.verdict_label`).
+_CORE_ORDER = ("violation", "missing_content", "conflict")
 _TITLES = {
     "violation": "Vi phạm",
     "missing_content": "Thiếu nội dung bắt buộc",
-    "hidden_right": "Quyền mà hợp đồng không nhắc",
     "conflict": "Mâu thuẫn trong hợp đồng",
-    "possible_right": "Có thể có quyền (cần thêm thông tin về bạn)",
     "needs_facts": "Cần thêm dữ kiện",
 }
+_STATUS_RANK = {"FAIL": 0, "PASS": 1, "UNKNOWN": 2, "NOT_APPLICABLE": 3}
+
+
+def _finding_order(results: Sequence[RuleResult]) -> list[str]:
+    """Các finding khác `ok` có trong kết quả, nặng trước: theo status (FAIL, PASS, UNKNOWN), finding lõi trước finding
+    của gói, `needs_facts` cuối cùng."""
+    rank: dict[str, int] = {}
+    for x in results:
+        if x.finding != "ok":
+            rank[x.finding] = min(rank.get(x.finding, 9), _STATUS_RANK.get(x.status, 9))
+    core = {f: i for i, f in enumerate(_CORE_ORDER)}
+    return sorted(rank, key=lambda f: (rank[f], f == "needs_facts", core.get(f, len(core)), f))
+
+
+def _title(finding: str, catalog: Catalog) -> str:
+    return _TITLES.get(finding) or catalog.verdict_label(finding)
 
 
 @dataclass
@@ -304,11 +319,10 @@ def report_markdown(r: CheckReport, catalog: Catalog) -> str:
              f"Ngày áp luật: {r.day.isoformat()} · danh mục {r.catalog_version}", ""]
     if r.warnings:
         lines += ["**Cảnh báo:**", *[f"- {w}" for w in r.warnings], ""]
-    for finding in _ORDER:
+    silent = {s.applicable[1] for s in catalog.context.silences.values()} - {"ok"}   # HĐ im lặng, rule chắc áp dụng
+    for finding in _finding_order(r.results):
         group = [x for x in r.results if x.finding == finding]
-        if not group:
-            continue
-        lines += [f"## {_TITLES[finding]} ({len(group)})", ""]
+        lines += [f"## {_title(finding, catalog)} ({len(group)})", ""]
         for x in group:
             concept = catalog.concepts[x.concept_id]
             lines.append(f"- **{concept.label}** (`{x.concept_id}/{x.rule_id}`)")
@@ -323,7 +337,7 @@ def report_markdown(r: CheckReport, catalog: Catalog) -> str:
                 for new in v.get("later_amendments") or []:
                     lines.append(f"  - {name} từ {new['valid_from']}: {new['value']} {new.get('unit') or ''} "
                                  f"[{new.get('uid')}]")
-            if x.missing_facts and finding not in ("hidden_right", "missing_content"):   # HĐ im lặng: không có slot
+            if x.missing_facts and finding not in silent:   # HĐ im lặng: không có slot
                 lines.append(f"  - Thiếu dữ kiện: {', '.join(x.missing_facts)}")
             pids = [a["pid"] for a in r.basis.get(x.concept_id, {}).get("anchors", [])]
             if pids:

@@ -5,14 +5,14 @@ from types import SimpleNamespace
 
 import pytest
 
-from rag.contracts.evidence import find_evidence, law_changes
+from rag.contracts.evidence import find_evidence
 from rag.legal.snapshots import SnapshotManager
 from rag.schema import Chunk
 from rag.temporal.index import VersionedIndex
 
 ROOT = Path(__file__).resolve().parents[3]
 FIXTURES = Path(__file__).parent / "fixtures" / "legal" / "realestate"
-SIGNED, TODAY = date(2023, 3, 15), date(2026, 11, 11)
+SIGNED = date(2023, 3, 15)
 
 
 @pytest.fixture(scope="module")
@@ -52,20 +52,8 @@ def test_no_runtime_returns_only_legacy():
     assert [e.store for e in ev] == ["legacy"]
 
 
-def test_law_changes_reports_repeal_and_replacement(runtime):
-    ev = [e for e in find_evidence(runtime, lambda q, k: [], "đơn phương chấm dứt hợp đồng thuê nhà ở", SIGNED, k=4)
-          if e.document_key == "luat:65/2014/QH13"]
-    changes = law_changes(runtime, ev, TODAY)
-    row = changes[0]
-    assert row["status"] == "repealed"
-    assert row["replaced_by"]["document_key"] == "luat:27/2023/QH15"
-    assert row["replaced_from"] == "2024-08-01"
-    assert row["transition_articles"]                  # Luật Nhà ở 2023 có Điều chuyển tiếp
 
 
-def test_law_changes_marks_legacy_untracked():
-    ev = find_evidence(None, legacy_search, "phạt vi phạm", SIGNED)
-    assert law_changes(None, ev, TODAY)[0]["status"] == "untracked"
 
 
 def test_evidence_section_is_the_article_and_duplicates_merge(runtime):
@@ -74,9 +62,3 @@ def test_evidence_section_is_the_article_and_duplicates_merge(runtime):
     assert versioned and all(e.section.startswith("Điều ") for e in versioned)
     keys = [(e.document_key, e.section) for e in versioned]
     assert len(keys) == len(set(keys))
-
-
-def test_law_change_rows_are_unique_per_article(runtime):
-    ev = find_evidence(runtime, lambda q, k: [], "đơn phương chấm dứt hợp đồng thuê nhà ở", SIGNED, k=6)
-    rows = law_changes(runtime, ev + ev, TODAY)
-    assert len(rows) == len({(r["source_title"], r["section"]) for r in rows})

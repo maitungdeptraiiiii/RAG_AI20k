@@ -6,11 +6,14 @@ import { DocumentPanel } from "./components/DocumentPanel";
 import { InspectorPanel } from "./components/InspectorPanel";
 import { LegalChatPopup } from "./components/LegalChatPopup";
 import { PipelineHeaderRail } from "./components/PipelineHeaderRail";
+import { QuestionsPanel } from "./components/QuestionsPanel";
+import { UserFactsForm } from "./components/UserFactsForm";
 import { ReportCanvasDrawer } from "./components/ReportCanvasDrawer";
 import { StageOutcomePanel } from "./components/StageOutcomePanel";
 import { buildHighlightTrace } from "./engine/pipelineState";
 import {
   applyEvent,
+  applyReport,
   applySnapshot,
   emptyScenario,
   choreographyFor,
@@ -32,6 +35,8 @@ export default function App() {
   const [answers, setAnswers] = useState<
     Record<string, { action: string; value?: string }>
   >({});
+  const [userFacts, setUserFacts] = useState<Record<string, unknown>>({});
+  const [questions, setQuestions] = useState<any[]>([]);
   const [persist, setPersist] = useState(false);
   const [showVerify, setShowVerify] = useState(false);
   const [showAllFields, setShowAllFields] = useState(false);
@@ -92,6 +97,7 @@ export default function App() {
       setCard(e.card);
       sessionStorage.setItem("contract-studio-cid", e.card.contract_id);
     }
+    if (e.result?.report) setQuestions(e.result.report.questions || []);
     setStep((prev) => {
       const target = stepFor(e, prev);
       return analyzingRef.current ? 2 : target;
@@ -139,6 +145,8 @@ export default function App() {
       if (!mounted.current) return;
       update((s) => applySnapshot(s, data));
       setCard(data.card);
+      setQuestions(data.last_check?.report?.questions || []);
+      setUserFacts(data.last_check?.user_facts || {});
       setStep(data.last_check ? 8 : 1);
       setMessage(
         data.last_check
@@ -172,6 +180,8 @@ export default function App() {
     setCard(null);
     setSelected(null);
     setAnswers({});
+    setUserFacts({});
+    setQuestions([]);
     setReportCanvasOpen(false);
     setReportMarkdown("");
     setReportError("");
@@ -219,6 +229,7 @@ export default function App() {
     setBusy(true);
     setError("");
     setSelected(null);
+    setQuestions([]);
     setShowVerify(false);
     setReportCanvasOpen(false);
     setReportMarkdown("");
@@ -244,7 +255,7 @@ export default function App() {
     try {
       await stream(
         `/api/contracts/${encodeURIComponent(targetCard.contract_id)}/studio/analyze/stream`,
-        jsonBody({}),
+        jsonBody({ user_facts: userFacts }),
         receive,
       );
       if (!mounted.current) return;
@@ -314,6 +325,42 @@ export default function App() {
       );
     } finally {
       analyzingRef.current = false;
+      setBusy(false);
+      operation.current = false;
+    }
+  }
+  function setUserFact(key: string, value: unknown) {
+    setUserFacts((prev) => {
+      const next = { ...prev };
+      if (value === undefined) delete next[key];
+      else next[key] = value;
+      return next;
+    });
+  }
+  // Trả lời một câu hỏi gợi ý: server chỉ chạy lại luật (không gọi LLM), kết quả cập nhật tại chỗ.
+  async function answerQuestion(qi: number, oi: number) {
+    const q = questions[qi];
+    if (!q || !card || operation.current) return;
+    operation.current = true;
+    setBusy(true);
+    setError("");
+    try {
+      const value = q.options[oi].value;
+      const out = await request(
+        `/api/contracts/${encodeURIComponent(card.contract_id)}/concept-check/answer`,
+        jsonBody({ answers: { [q.fact]: value } }),
+      );
+      if (!mounted.current) return;
+      update((s) => applyReport(s, out));
+      setQuestions(out.report?.questions || []);
+      setUserFacts((prev) => ({ ...prev, [q.fact]: value }));
+      setReportMarkdown("");
+      setReportError("");
+      setMessage("Đã cập nhật kết quả theo câu trả lời");
+      if (reportCanvasOpen) void generateReport(card.contract_id, true);
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
       setBusy(false);
       operation.current = false;
     }
@@ -427,8 +474,12 @@ export default function App() {
           </p>
         </div>
         <div className="flex items-center gap-4 text-sm">
-          <a href="/contracts" className="text-stone-500 hover:underline">
-            Giao diện cũ
+          <a
+            href="#ho-so"
+            className="text-xs text-[#1E3A5F] hover:underline"
+            title="Tải nhiều văn bản (hợp đồng + phụ lục) và soát cả hồ sơ"
+          >
+            Hồ sơ nhiều văn bản
           </a>
           <label className="inline-flex items-center gap-2 text-xs">
             <input
@@ -646,6 +697,12 @@ export default function App() {
                     </label>
                   ))}
                 </div>
+                <UserFactsForm
+                  fields={card.user_form || []}
+                  values={userFacts}
+                  disabled={busy}
+                  onChange={setUserFact}
+                />
                 <div className="flex flex-wrap items-center gap-4 mt-4">
                   <button
                     disabled={busy}
@@ -673,6 +730,13 @@ export default function App() {
                   )}
                 </div>
               </motion.section>
+            )}
+            {!busy && (
+              <QuestionsPanel
+                questions={questions}
+                disabled={busy}
+                onAnswer={(qi, oi) => void answerQuestion(qi, oi)}
+              />
             )}
             <DualGraphCanvas
               scenario={s}

@@ -136,3 +136,16 @@ def test_open_view_falls_back_to_memory():
     b = demo_build()
     assert open_view(b, {"published": False}, None).backend == "memory"
     assert open_view(b, {"published": True}, None).backend == "memory"
+
+
+def test_search_units_matches_tail_of_long_unit():
+    """Từ khoá nằm sau ký tự 600 vẫn tìm thấy; lời văn trả về dài hơn TEXT_LIMIT nhưng không quá UNIT_TEXT_LIMIT."""
+    from rag.contracts.graph.view import TEXT_LIMIT, UNIT_TEXT_LIMIT
+    filler = "Người lao động thực hiện công việc theo phân công. " * 30
+    text = f"Điều 3. Điều kiện làm việc\n{filler}\nNgười sử dụng lao động cấp phát găng tay bảo hộ lao động miễn phí."
+    assert len(text) > TEXT_LIMIT
+    b, _ = build_graph("c8", [PageText(1, text)], OperationLog("c8"), file_checksum="x", built_at=T)
+    v = MemoryGraphView(b)
+    hits = v.search_units("găng tay bảo hộ")
+    assert hits and "găng tay bảo hộ" in hits[0]["text"] and len(hits[0]["text"]) <= UNIT_TEXT_LIMIT
+    assert all(len(n["text"]) <= TEXT_LIMIT for n in v.find("Unit") if "text" in n)

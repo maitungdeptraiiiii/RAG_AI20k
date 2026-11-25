@@ -1,7 +1,7 @@
 # Contract Studio
 
 UI React/Vite được tích hợp từ `Legal-contract-ui`, chạy tại **`/contract-studio/`**.
-Các trang `/`, `/contracts`, `/contracts/ask`, `/upload`, `/review` vẫn giữ nguyên.
+Các trang `/`, `/contracts/ask`, `/upload`, `/review` vẫn giữ nguyên. Trang soát cũ `/contracts` đã gỡ: đường dẫn này chuyển sang `/contract-studio/` (`?cid=<id>` thành `?contract=<id>`).
 
 ## Chạy
 

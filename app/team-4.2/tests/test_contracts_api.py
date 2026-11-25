@@ -37,7 +37,13 @@ def runtime(tmp_path_factory):
 
 
 class StageLLM:
+    kind = "labor_contract"            # loại trả ở lượt nhận diện lúc upload; các test hỏi đáp cũ giả định gói labor
+
     def complete(self, system, user):
+        if system.startswith("Bạn đọc PHẦN ĐẦU"):
+            unit = json.loads(user)["units"][0]
+            return json.dumps({"kind": self.kind, "confidence": 0.9, "unit": unit["uid"], "quote": unit["text"][:30]},
+                              ensure_ascii=False)
         stage = system.split("\n", 1)[0].removeprefix("BƯỚC:").strip() if system.startswith("BƯỚC:") else "facts"
         p = json.loads(user)
         if stage == "facts":
@@ -46,14 +52,6 @@ class StageLLM:
                 {"name": "B", "role": "Bên thuê", "unit": "u1", "quote": "BÊN THUÊ (Bên B)"}],
                 "sign_date": {"value": "2023-03-15", "unit": "u1", "quote": "Hôm nay, ngày 15 tháng 3 năm 2023"}},
                 ensure_ascii=False)
-        if stage == "find":
-            u9 = next(u["uid"] for u in p["units"] if u["label"] == "Điều 9")
-            return json.dumps({"findings": [{"unit": u9, "quote": "Bên A được quyền đơn phương chấm dứt hợp đồng",
-                                             "group": "illegal", "severity": "critical", "disadvantaged": "Bên thuê",
-                                             "explanation": "Đơn phương chấm dứt không báo trước.",
-                                             "legal_question": "đơn phương chấm dứt hợp đồng thuê nhà ở",
-                                             "law_hint": "Luật Nhà ở", "suggestion": "Báo trước 30 ngày."}]},
-                              ensure_ascii=False)
         if stage == "verify":
             return json.dumps({"results": [{"id": f["id"], "supporting": [c["eid"] for c in f["candidates"]
                                                                           if "Nhà ở" in c["source_title"]]}
@@ -121,22 +119,42 @@ def test_upload_returns_card(client):
     assert len(card["contract_id"]) >= 20
 
 
+def test_card_has_user_form_from_pack(client):
+    form = upload(client).json()["user_form"]
+    assert isinstance(form, list)
+    assert all({"key", "label", "kind"} <= set(f) and f["kind"] in ("bool", "number", "choice", "text") for f in form)
+    assert all(f["options"] for f in form if f["kind"] == "choice")
+
+
+class KindLLM(StageLLM):
+    """StageLLM nhận diện loại hợp đồng là `kind`."""
+
+    def __init__(self, kind):
+        self.kind = kind
+
+
+@pytest.mark.parametrize("kind, labor_form", [("labor_contract", True), ("lease_contract", False),
+                                               ("commercial_sale_contract", False)])
+def test_upload_detects_kind_and_user_form_follows_its_pack(client, kind, labor_form):
+    contracts_api.CONFIG.llm_factory = lambda: KindLLM(kind)
+    card = upload(client).json()
+    assert card["facts"]["document_kind"] == kind
+    assert ("wage_region" in {f["key"] for f in card["user_form"]}) is labor_form
+
+
+def test_upload_with_unknown_kind_shows_no_user_form_not_the_labor_one(client):
+    contracts_api.CONFIG.llm_factory = lambda: KindLLM("unknown")
+    card = upload(client).json()
+    assert card["facts"]["document_kind"] == "unknown"
+    assert card["user_form"] == []
+
+
 def test_session_upload_leaves_nothing_on_disk(client, tmp_path):
     upload(client)
     root = tmp_path / "contracts"
     assert not root.exists() or not any(root.iterdir())
 
 
-def test_review_report_and_downloads(client):
-    cid = upload(client).json()["contract_id"]
-    assert client.post(f"/api/contracts/{cid}/party", json={"party": "Bên thuê"}).status_code == 200
-    verify_all(client, cid)
-    rep = client.post(f"/api/contracts/{cid}/run", json={"op": "review"}).json()
-    f = rep["findings"][0]
-    assert f["legal_status"] == "concluded" and f["evidence"][0]["store"] == "versioned"
-    for fmt, magic in (("docx", b"PK"), ("pdf", b"%PDF")):
-        dl = client.get(f"/api/contracts/{cid}/reports/{rep['rid']}.{fmt}")
-        assert dl.status_code == 200 and dl.content[:4].startswith(magic)
 
 
 def test_sign_date_edit_and_bad_date(client):
@@ -167,23 +185,10 @@ def test_chat_with_contract_uses_contract_path(client):
     assert out["answer"].startswith("Theo Điều 9") and out["contract_id"] == cid
 
 
-def test_bad_op_and_unsupported_file(client):
-    cid = upload(client).json()["contract_id"]
-    assert client.post(f"/api/contracts/{cid}/run", json={"op": "xoa"}).status_code == 400
+def test_unsupported_file(client):
     assert upload(client, name="a.exe", data=b"MZ").status_code == 400
 
 
-def test_ai_failure_is_502(client):
-    cid = upload(client).json()["contract_id"]
-    verify_all(client, cid)
-
-    class Broken:
-        def complete(self, s, u):
-            return "không phải JSON"
-
-    contracts_api.CONFIG.llm_factory = Broken
-    r = client.post(f"/api/contracts/{cid}/run", json={"op": "review"})
-    assert r.status_code == 502 and "thử lại" in r.json()["error"]
 
 
 def _server():
@@ -238,7 +243,8 @@ def test_server_routes_contract_questions_to_contract_path(monkeypatch, stream):
 def test_server_registers_contract_routes():
     server = _server()
     paths = {getattr(r, "path", "") for r in server.app.routes}
-    assert "/api/contracts" in paths and "/api/contracts/{cid}/run" in paths
+    assert "/api/contracts" in paths and "/api/contracts/{cid}/concept-check/stream" in paths
+    assert "/api/contracts/{cid}/run" not in paths                          # luồng soát cũ đã gỡ
 
 
 @pytest.mark.parametrize("stream", [False, True])
@@ -327,12 +333,13 @@ def _stub_check(monkeypatch, seen):
 def test_concept_check_returns_report_and_markdown(client, monkeypatch):
     seen = {}
     _stub_check(monkeypatch, seen)
+    contracts_api.CONFIG.llm_factory = lambda: KindLLM("unknown")    # upload lưu `unknown`; lần soát nhận diện lại và vẫn không ra
     cid = upload(client).json()["contract_id"]
     r = client.post(f"/api/contracts/{cid}/concept-check", json={"user_facts": {"wage_region": "I"}})
     assert r.status_code == 200
     body = r.json()
     assert body["report"]["contract_id"] == cid
-    assert body["report"]["warnings"][0] == "w"                     # sau đó là cảnh báo nhận diện loại (StageLLM không nhận diện được)
+    assert body["report"]["warnings"][0] == "w"                     # sau đó là cảnh báo nhận diện loại (model trả unknown)
     assert "không nhận diện được loại" in body["report"]["warnings"][1].lower()
     assert isinstance(body["markdown"], str)
     assert body["labels"] == {}
@@ -392,6 +399,43 @@ def test_saved_concept_check_is_stale_after_facts_change(client, monkeypatch):
 
 def test_last_concept_check_gone_is_404(client):
     assert client.get("/api/contracts/nope/concept-check/last").status_code == 404
+
+
+def test_answer_runs_rules_only_and_accumulates_answers(client, monkeypatch):
+    seen = {}
+    _stub_check(monkeypatch, seen)
+    cid = upload(client).json()["contract_id"]
+    contracts_api.get(cid).facts["document_kind"] = "lease_contract"
+    assert client.post(f"/api/contracts/{cid}/concept-check", json={"user_facts": {"wage_region": "I"}}).status_code == 200
+    assert seen["rules_only"] is False
+    r = client.post(f"/api/contracts/{cid}/concept-check/answer", json={"answers": {"pregnant": True}})
+    assert r.status_code == 200, r.text
+    assert seen["rules_only"] is True and seen["user_facts"] == {"wage_region": "I", "pregnant": True}
+    client.post(f"/api/contracts/{cid}/concept-check/answer", json={"answers": {"pregnant": False}})
+    assert seen["user_facts"] == {"wage_region": "I", "pregnant": False}          # câu trả lời sau thắng, câu trước còn
+    last = client.get(f"/api/contracts/{cid}/concept-check/last").json()
+    assert last["report"]["contract_id"] == cid and last["user_facts"] == {"wage_region": "I", "pregnant": False}
+
+
+def test_answer_without_prior_check_is_409(client):
+    cid = upload(client).json()["contract_id"]
+    r = client.post(f"/api/contracts/{cid}/concept-check/answer", json={"answers": {"pregnant": True}})
+    assert r.status_code == 409 and r.json()["error"] == contracts_api.NEEDS_CHECK
+
+
+def test_answer_unknown_fact_is_400(client):
+    contracts_api.CONFIG.tag_llm = lambda model, temp: None
+    contracts_api.CONFIG.legal_graph = lambda: None
+    cid = upload(client).json()["contract_id"]
+    c = contracts_api.get(cid)
+    c.facts["document_kind"] = "lease_contract"
+    c.concept_check = {"checked_at": "2026-11-24T00:00:00+00:00", "facts_sig": "x", "result": {}, "user_facts": {}}
+    r = client.post(f"/api/contracts/{cid}/concept-check/answer", json={"answers": {"abc": 1}})
+    assert r.status_code == 400 and "abc" in r.json()["error"]
+
+
+def test_answer_gone_is_404(client):
+    assert client.post("/api/contracts/nope/concept-check/answer", json={"answers": {}}).status_code == 404
 
 
 def _sse_events(text):
@@ -605,6 +649,7 @@ def test_concept_check_classifies_once_then_passes_concrete_kind(client, monkeyp
     llm = _ClassifyLLM("lease_contract")
     contracts_api.CONFIG.llm_factory = lambda: llm
     cid, c = _upload_without_kind(client)
+    llm.calls = 0                                  # không tính lượt nhận diện lúc upload
     assert client.post(f"/api/contracts/{cid}/concept-check", json={}).status_code == 200
     assert seen["document_kind"] == "lease_contract" and "catalog" not in seen and c.facts["document_kind"] == "lease_contract"
     assert llm.calls == 1
@@ -619,6 +664,7 @@ def test_unknown_classification_is_stored_blocks_ask_and_is_retried(client, monk
     llm = _ClassifyLLM("unknown")
     contracts_api.CONFIG.llm_factory = lambda: llm
     cid, c = _upload_without_kind(client)
+    llm.calls = 0                                  # không tính lượt nhận diện lúc upload
     body = client.post(f"/api/contracts/{cid}/concept-check", json={}).json()
     assert seen["document_kind"] == "unknown" and c.facts["document_kind"] == "unknown"
     assert any("không nhận diện được loại" in w.lower() and "model_unknown" in w for w in body["report"]["warnings"])

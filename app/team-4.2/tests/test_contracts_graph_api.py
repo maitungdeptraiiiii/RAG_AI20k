@@ -18,7 +18,6 @@ UI = Path(__file__).resolve().parents[1] / "ui"
 if str(UI) not in sys.path:
     sys.path.insert(0, str(UI))
 import contracts_api  # noqa: E402
-from tests.test_contracts_api import verify_all  # noqa: E402
 
 LIMIT_MSG = "Hợp đồng dài hơn 150 trang — chưa hỗ trợ"
 
@@ -34,23 +33,21 @@ class FakeStore:
 
 
 class SimpleLLM:
-    """facts: loại + ngày ký; find: không có phát hiện. Ghi số đơn vị mỗi lượt nhận (SEEN)."""
+    """facts: loại + ngày ký; answer: trả lời ngắn. Ghi số đơn vị mỗi lượt nhận (SEEN)."""
 
     SEEN: dict[str, int] = {}
 
     def complete(self, system, user):
+        if system.startswith("Bạn đọc PHẦN ĐẦU"):            # nhận diện loại lúc upload: không tính vào SEEN
+            return json.dumps({"kind": "unknown"})
         stage = system.split("\n", 1)[0].removeprefix("BƯỚC:").strip() if system.startswith("BƯỚC:") else "facts"
         SimpleLLM.SEEN[stage] = len(json.loads(user).get("units") or [])
-        if stage == "summary":
-            return json.dumps({"sections": [{"title": "Giá", "items": [{"text": "Giá", "unit": "p0.d2"}]}]})
         if stage == "answer":
             return json.dumps({"answer": "Theo Điều 1.", "legal_conclusion": False, "law_ids": [], "units": []})
         if stage == "facts":
             return json.dumps({"type": "Hợp đồng dịch vụ", "parties": [],
                                "sign_date": {"value": "2023-03-15", "unit": "p0.d1",
                                              "quote": "ngày 15 tháng 3 năm 2023"}}, ensure_ascii=False)
-        if stage == "find":
-            return json.dumps({"findings": []})
         raise AssertionError(stage)
 
 
@@ -115,12 +112,6 @@ def test_over_150_pages_rejected(client, monkeypatch, tmp_path):
     assert contracts_api.store()._mem == {}
 
 
-def test_full_review_reads_every_unit_in_batches(client):
-    cid = upload(client, contract_text(40)).json()["contract_id"]
-    verify_all(client, cid)
-    rep = client.post(f"/api/contracts/{cid}/run", json={"op": "review"}).json()
-    assert rep["coverage"] == {"reviewed": 40, "total": 40} and rep["batches"] == 1
-    assert rep["warnings"] == []
 
 
 def test_sign_date_by_user_is_superseding_op(client):
@@ -191,13 +182,10 @@ def test_part4_contract_json_still_opens(client, tmp_path):
     assert r.status_code == 200, r.text
     assert all(u["uid"].startswith("p0.") for u in r.json()["units"])
     c = contracts_api.get("old1")
-    assert c.reports["r1"]["pre_graph"] is True
     assert c.oplog.field("sign_date") == "2023-04-01"
     assert [o.reviewer for o in c.oplog.all() if o.origin == "human"] == ["chuyển đổi"]
     saved = json.loads((folder / "contract.json").read_text(encoding="utf-8"))
-    assert saved["format"] == 2 and saved["reports"]["r1"]["pre_graph"] is True
-    dl = client.get("/api/contracts/old1/reports/r1.docx")
-    assert dl.status_code == 200 and dl.content[:2] == b"PK"
+    assert saved["format"] == 2
 
 
 def test_part4_contract_without_original_still_opens(client, tmp_path):
@@ -264,12 +252,11 @@ def test_failed_part4_conversion_is_retried(client, svc, monkeypatch, tmp_path):
     r = client.get("/api/contracts/old3")
     assert r.status_code == 200 and [u["uid"] for u in r.json()["units"]] == ["u1"]
     c = contracts_api.get("old3")
-    assert c.page_texts == [] and c.oplog.all() == [] and "pre_graph" not in c.reports["r1"]
+    assert c.page_texts == [] and c.oplog.all() == []
     assert (folder / "contract.json").read_text(encoding="utf-8") == raw
     monkeypatch.undo()
     r = client.get("/api/contracts/old3")
     assert r.status_code == 200 and r.json()["units"][0]["uid"].startswith("p0.")
-    assert contracts_api.get("old3").reports["r1"]["pre_graph"] is True
 
 
 def test_list_does_not_convert_and_skips_broken(client, tmp_path):
@@ -285,13 +272,12 @@ def test_list_does_not_convert_and_skips_broken(client, tmp_path):
     assert contracts_api.store().get("old4").page_texts == []
 
 
-def test_facts_read_every_unit_summary_and_answer_still_capped(client):
+def test_facts_read_every_unit_answer_still_capped(client):
     SimpleLLM.SEEN.clear()
     cid = upload(client, contract_text(40)).json()["contract_id"]
     assert SimpleLLM.SEEN["facts"] == 40
-    assert client.post(f"/api/contracts/{cid}/run", json={"op": "summary"}).status_code == 200
     contracts_api.chat_answer(cid, "Ký ngày nào?", [])
-    assert SimpleLLM.SEEN["summary"] == 30 and SimpleLLM.SEEN["answer"] == 30
+    assert SimpleLLM.SEEN["answer"] == 30
 
 
 APPENDIX_TEXT = ("Điều 1. A\nXem Phụ lục 1 và Phụ lục 2.\nĐiều 2. B\n\nPHỤ LỤC 01\nDanh mục tài sản kèm theo hợp đồng\n"
@@ -316,32 +302,8 @@ def test_layout_without_number_in_title_uses_position():
     assert [(p.part_id, p.number) for p in specs] == [("p0", None), ("p1", 5), ("p2", 2)]
 
 
-def test_redline_ignores_review_from_older_build(client):
-    text = contract_text(4)
-    cid = upload(client, text).json()["contract_id"]
-    verify_all(client, cid)
-    old = client.post(f"/api/contracts/{cid}/run", json={"op": "review"}).json()
-    assert old["build_id"] == contracts_api.get(cid).graph["build_id"]
-    same = client.post(f"/api/contracts/{cid}/run", json={"op": "redline"}).json()
-    assert same["based_on"] == old["rid"]
-    r = client.post(f"/api/contracts/{cid}/layout",
-                    json={"parts": [{"start": text.index("Điều 3"), "kind": "appendix", "title": "Phụ lục"}]})
-    assert r.status_code == 200, r.text
-    for op in ("redline", "law_changes"):
-        rep = client.post(f"/api/contracts/{cid}/run", json={"op": op}).json()
-        c = contracts_api.get(cid)
-        assert rep["based_on"] != old["rid"]
-        assert c.reports[rep["based_on"]]["build_id"] == c.graph["build_id"] != old["build_id"]
 
 
-def test_pre_graph_review_is_not_reused(client):
-    cid = upload(client, contract_text(4)).json()["contract_id"]
-    verify_all(client, cid)
-    c = contracts_api.get(cid)
-    c.reports["old"] = {"rid": "old", "op": "review", "created_at": "2999-01-01T00:00:00+00:00", "pre_graph": True,
-                        "build_id": c.graph["build_id"], "coverage": {"reviewed": 1, "total": 1}, "findings": []}
-    rep = client.post(f"/api/contracts/{cid}/run", json={"op": "redline"}).json()
-    assert rep["based_on"] != "old"
 
 
 def _docx_with_table() -> bytes:
@@ -379,14 +341,3 @@ def test_table_pages_do_not_trigger_page_warnings():
     body = "Điều %d. " + "chữ " * 300
     pages = [PageText(1, body % 1), PageText(2, body % 2), PageText(3, body % 3), PageText(2, "| a |", "TablePage")]
     assert parse_contract(pages).report.warn_pages == []
-
-
-def test_partial_review_reads_every_selected_unit(client):
-    SimpleLLM.SEEN.clear()
-    cid = upload(client, contract_text(40)).json()["contract_id"]
-    verify_all(client, cid)
-    ids = [u["uid"] for u in contracts_api.card(contracts_api.get(cid))["units"]][:35]
-    rep = client.post(f"/api/contracts/{cid}/run", json={"op": "partial", "unit_ids": ids}).json()
-    assert SimpleLLM.SEEN["find"] == 35
-    assert rep["coverage"] == {"reviewed": 35, "total": 40}
-    assert len(rep["scope"]) == 35

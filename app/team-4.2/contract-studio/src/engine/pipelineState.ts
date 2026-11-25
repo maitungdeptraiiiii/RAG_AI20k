@@ -1,5 +1,6 @@
 import type {
   AnalysisScenario,
+  ComparisonDetail,
   ExtractedFact,
   LegalVersionEntry,
   PipelineStepMeta,
@@ -314,3 +315,17 @@ export interface StepChoreographyState {
  * Pure choreography solver translating (stepIndex, stepElapsedMs, scenario, particles)
  * into deterministic micro-stage counts and active highlights across all 9 steps.
  */
+
+/**
+ * Các hạng mục ĐẠT: dòng `ok` bị loại khỏi `scenario.findings` (live/model.ts) nên chỉ còn trong
+ * `comparisons` với verdict "completed". Tách riêng để không lẫn với vi phạm / lưu ý.
+ */
+export function getPassedComparisons(scenario: {
+  findings: { id: string }[];
+  comparisons: ComparisonDetail[];
+}): ComparisonDetail[] {
+  const listed = new Set(scenario.findings.map((f) => f.id));
+  return scenario.comparisons.filter(
+    (c) => c.verdict === 'completed' && !listed.has(c.findingId),
+  );
+}

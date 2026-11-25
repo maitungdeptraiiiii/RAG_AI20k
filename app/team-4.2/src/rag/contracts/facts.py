@@ -279,7 +279,6 @@ def extract_facts(llm, contract: Contract, *, on_event=None, extra_fields: Seque
         cands["type"] = [{"value": types[0]}]
     facts["candidates"] = cands
     facts["fields_tried"] = list(specs)                    # trường đã hỏi: trích bổ sung sau chỉ hỏi trường khác (R.6)
-    facts["questions"] = list(contract.facts.get("questions") or [])
     facts["coverage"] = {"read": len(run.read_uids), "total": len(contract.units)}
     if (contract.facts or {}).get("document_kind"):            # loại đã nhận diện (classify_contract) giữ qua lần trích
         facts["document_kind"] = contract.facts["document_kind"]

@@ -116,7 +116,7 @@ def test_markdown_hidden_right_has_no_missing_facts_line_and_shows_amendment():
     import rag.bridge.check as chk
     r = check_contract(ScriptLLM(), contract(), at=AT)
     md = report_markdown(r, CAT)
-    hidden = md.split("## Quyền mà hợp đồng không nhắc")[1].split("\n## ")[0]
+    hidden = md.split(f"## {CAT.verdict_label('hidden_right')}")[1].split("\n## ")[0]
     assert "Thiếu dữ kiện" not in hidden
     x = next(x for x in r.results if x.concept_id == "wage.minimum_regional")
     x.facts_used["base_salary_vnd"] = {"value": 17000000, "unit": "vnd",

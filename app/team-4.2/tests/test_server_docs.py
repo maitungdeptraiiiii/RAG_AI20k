@@ -110,16 +110,18 @@ def test_chat_page_has_contract_hooks_and_script(client):
     js = client.get("/contracts.js")
     assert js.status_code == 200 and "javascript" in js.headers["content-type"]
     body = js.text
-    for needle in ("/api/contracts", "Hỏi tự do", "Hỏi với hợp đồng", "Đính kèm hợp đồng để soát", "Tải Word",
-                   "Tải PDF", "Đã soát", "hết phiên", "Trung lập", "/upload"):
+    for needle in ("/api/contracts", "Hỏi tự do", "Hỏi với hợp đồng", "Đính kèm hợp đồng để soát",
+                   "Hỏi về hợp đồng này", "hết phiên"):
         assert needle in body, needle
+    assert "/run" not in body and "/reports/" not in body                    # luồng soát cũ đã gỡ
 
 
-def test_contracts_page_served(client):
-    r = client.get("/contracts")
-    assert r.status_code == 200 and 'id="step-1"' in r.text
-    js = client.get("/contract_page.js")
-    assert js.status_code == 200 and "javascript" in js.headers["content-type"]
+def test_old_contracts_page_redirects_to_studio(client):
+    r = client.get("/contracts", follow_redirects=False)
+    assert r.status_code == 307 and r.headers["location"] == "/contract-studio/"
+    r = client.get("/contracts?cid=abc%20d", follow_redirects=False)
+    assert r.headers["location"] == "/contract-studio/?contract=abc%20d"              # id cũ mở được trong Studio
+    assert client.get("/contract_page.js").status_code == 404                           # trang cũ đã gỡ
 
 
 def test_contract_ask_page_served(client):

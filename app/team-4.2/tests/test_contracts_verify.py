@@ -207,8 +207,6 @@ def test_apply_answers_records_ops_and_syncs_party_and_date():
     assert row(c, "workplace")["quote"] is None and row(c, "job_title")["by"] == "Lan"
     targets = [o.target for o in c.oplog.active() if o.origin == "human"]
     assert "fact:job_title" in targets and "party" in targets and c.oplog.field("sign_date") == "2025-03-02"
-    known = verify.known_facts(c)["facts"]
-    assert known["Nhóm trình độ công việc"] == "không biết" and known["Chức danh / công việc"] == "Nhân viên IT"
     # trả lời lại: thay thế, không chồng
     verify.apply_answers(c, {"job_title": {"action": "set", "value": "Trưởng nhóm IT"}}, "Lan", NOW)
     assert row(c, "job_title")["value"] == "Trưởng nhóm IT"
@@ -222,7 +220,6 @@ def test_apply_answers_records_ops_and_syncs_party_and_date():
     ({"probation_period": {"action": "confirm"}}, "chưa có một giá trị"),
     ({"rent": {"action": "set", "value": "x"}}, "không có trong bảng"),
     ({"job_title": {"action": "maybe"}}, "không hợp lệ"),
-    ({"q:none": {"action": "set", "value": "x"}}, "Không có câu hỏi"),
     ({}, "Không có câu trả lời"),
 ])
 def test_apply_answers_rejects_bad_input_without_writing(answers, message):
@@ -252,27 +249,11 @@ def test_legacy_contract_builds_table_from_old_facts():
     assert row(c, "party")["status"] == "confirmed" or row(c, "party")["status"] == "corrected"
 
 
-# --- API + câu hỏi trong lúc soát ---------------------------------------------------------------
+# --- API: chặn kiểm tra khi chưa xác minh ---------------------------------------------------------
 
-def find_with_question(system, p):
-    stage = system.split("\n", 1)[0].removeprefix("BƯỚC:").strip() if system.startswith("BƯỚC:") else "facts"
-    if stage == "facts":
-        return labor_reply(system, p)
-    if stage == "find":
-        u3 = next(u["uid"] for u in p["units"] if u["label"] == "Điều 3")
-        known = p["known_facts"]
-        if any("trình độ" in q["question"] for q in known["answered_questions"]):
-            return {"findings": [], "questions": []}
-        return {"findings": [{"unit": u3, "quote": "Thử việc 90 ngày", "group": "unfavorable", "severity": "major",
-                              "disadvantaged": "Người lao động", "explanation": "Thử việc dài.", "legal_question": None,
-                              "law_hint": None, "suggestion": "Rút ngắn.", "needs_info": True,
-                              "cases": [{"if": "Công việc khác", "conclusion": "Vượt 6 ngày làm việc"},
-                                        {"if": "Người quản lý doanh nghiệp", "conclusion": "Hợp lệ"}]}],
-                "questions": [{"question": "Công việc của bạn cần trình độ nào?",
-                               "options": ["Cao đẳng trở lên", "Công việc khác"], "unit": u3,
-                               "quote": "Thử việc 90 ngày"},
-                              {"question": "Câu hỏi về đơn vị ngoài lô", "options": [], "unit": "p9.d9"}]}
-    raise AssertionError(stage)
+def facts_only(system, p):
+    assert not system.startswith("BƯỚC:"), "chỉ trích dữ kiện, không gọi bước soát nào"
+    return labor_reply(system, p)
 
 
 @pytest.fixture
@@ -282,7 +263,7 @@ def client(tmp_path):
         yield None
 
     contracts_api.CONFIG.root = tmp_path / "contracts"
-    contracts_api.CONFIG.llm_factory = lambda: ScriptLLM(find_with_question)
+    contracts_api.CONFIG.llm_factory = lambda: ScriptLLM(facts_only)
     contracts_api.CONFIG.lease = lease
     contracts_api.CONFIG.legacy_search = lambda q, k: []
     contracts_api.CONFIG.ocr_factory = lambda: None
@@ -295,13 +276,13 @@ def client(tmp_path):
     return TestClient(Starlette(routes=contracts_api.routes))
 
 
-def test_api_gate_answers_and_questions(client):
+def test_api_gate_and_answers(client):
     card = client.post("/api/contracts", files={"file": ("hd.txt", LABOR.encode("utf-8"))}, data={"persist": "0"}).json()
     cid = card["contract_id"]
     assert card["verification"]["complete"] is False and card["verification"]["catalog_type"] == "labor"
-    r = client.post(f"/api/contracts/{cid}/run", json={"op": "review"})
-    assert r.status_code == 409 and {p["key"] for p in r.json()["pending"]} >= {"party", "job_title"}
-    assert client.post(f"/api/contracts/{cid}/run", json={"op": "summary"}).status_code != 409
+    with pytest.raises(verify.NeedsVerification) as e:
+        verify.check_gate(contracts_api.get(cid), "review")
+    assert {p["key"] for p in e.value.pending} >= {"party", "job_title"}
     bad = client.post(f"/api/contracts/{cid}/facts", json={"answers": {"sign_date": {"action": "set", "value": "x"}}})
     assert bad.status_code == 400
     answers = {"party": {"action": "set", "value": "Người lao động"}, "sign_date": {"action": "confirm"},
@@ -309,26 +290,8 @@ def test_api_gate_answers_and_questions(client):
                "workplace": {"action": "confirm"}}
     card = client.post(f"/api/contracts/{cid}/facts", json={"answers": answers, "by": "Lan"}).json()
     assert card["verification"]["complete"] is True and card["party"] == "Người lao động"
-
-    rep = client.post(f"/api/contracts/{cid}/run", json={"op": "review"}).json()
-    f = rep["findings"][0]
-    assert f["needs_info"] is True and [c["if"] for c in f["cases"]] == ["Công việc khác", "Người quản lý doanh nghiệp"]
-    assert f["group_label"] == "Bất lợi? — tùy trường hợp, cần thêm thông tin"
-    assert [q["question"] for q in rep["questions"]] == ["Công việc của bạn cần trình độ nào?"]     # câu ngoài lô bị bỏ
-    qid = rep["questions"][0]["qid"]
-    assert f["questions"] == [qid]
-    card = client.get(f"/api/contracts/{cid}").json()
-    assert [q["status"] for q in card["verification"]["questions"]] == ["open"]
-
-    card = client.post(f"/api/contracts/{cid}/facts",
-                       json={"answers": {f"q:{qid}": {"action": "set", "value": "Công việc khác"}}}).json()
-    assert card["verification"]["questions"][0] | {} == card["verification"]["questions"][0]
-    assert card["verification"]["questions"][0]["answer"] == "Công việc khác"
-    again = client.post(f"/api/contracts/{cid}/run",
-                        json={"op": "partial", "unit_ids": [card["verification"]["questions"][0]["unit"]]}).json()
-    assert again["findings"] == [] and again["questions"] == []
-    llm_payloads = contracts_api.get(cid).facts["questions"]
-    assert len(llm_payloads) == 1                                            # không nhân bản câu hỏi
+    assert "questions" not in card["verification"]
+    verify.check_gate(contracts_api.get(cid), "review")                      # đã xác minh: không chặn
 
 
 # --- sửa sau lần đo CUAD 1 (notes/2026-11-13-cuad-facts-benchmark.md) ------------------------------

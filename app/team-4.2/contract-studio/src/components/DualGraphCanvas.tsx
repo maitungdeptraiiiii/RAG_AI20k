@@ -20,6 +20,7 @@ import {
   type SevenNodeSelection,
 } from '../engine/contractGraph';
 import {
+  getPassedComparisons,
   getSubPhasesForStep,
   type ActiveHighlightTrace,
   type ScreeningParticle,
@@ -269,14 +270,15 @@ export function DualGraphCanvas({
     const attentionCount = scenario.findings.filter(
       (f) => f.status === 'insufficient_data' || f.status === 'needs_confirmation'
     ).length;
-    const okCount = scenario.findings.length - issueCount - attentionCount;
+    const okCount =
+      scenario.findings.length - issueCount - attentionCount + getPassedComparisons(scenario).length;
     return {
       totalCount: scenario.findings.length,
       issueCount,
       attentionCount,
       okCount,
     };
-  }, [scenario.findings]);
+  }, [scenario]);
 
   const hasSelectedTrace =
     trace.findingId !== null ||

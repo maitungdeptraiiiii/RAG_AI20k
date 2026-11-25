@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import {
   computeComparisonRatios,
+  getPassedComparisons,
   type ActiveHighlightTrace,
   type StepChoreographyState,
 } from '../engine/pipelineState';
@@ -69,6 +70,8 @@ export function StageOutcomePanel({
   const spotlightComparison = selectedFinding?.comparisonId
     ? scenario.comparisons.find((c) => c.id === selectedFinding.comparisonId)
     : scenario.comparisons[activeCompIdx] ?? scenario.comparisons[0];
+
+  const passedItems = getPassedComparisons(scenario);
 
   const allClauses = scenario.sections.flatMap((sec) =>
     sec.clauses.map((cl) => ({
@@ -641,6 +644,45 @@ export function StageOutcomePanel({
                   <span>Nhấp vào một phát hiện để soi toàn bộ đường dẫn lập luận.</span>
                 </div>
               )}
+
+              {/* Tách riêng khỏi vấn đề: các hạng mục đã đối chiếu và đạt chuẩn */}
+              <div className="pt-2">
+                <div className="flex items-center justify-between text-[11px] mb-1">
+                  <span className="inline-flex items-center gap-1 font-semibold text-[#166534]">
+                    <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
+                    <span>Hạng mục đạt chuẩn</span>
+                  </span>
+                  <span className="font-mono font-semibold text-[#166534] tabular-nums">
+                    {passedItems.length}
+                  </span>
+                </div>
+                {passedItems.length > 0 ? (
+                  <div className="divide-y divide-emerald-100 border border-emerald-200 rounded bg-emerald-50/40 overflow-hidden">
+                    {passedItems.map((c) => (
+                      <div key={c.id} className="px-3 py-2">
+                        <div className="flex items-center justify-between gap-2 text-[11px]">
+                          <span className="font-semibold text-[#166534]">Đạt</span>
+                          <span className="font-mono text-stone-500 truncate">
+                            {c.contractClauseCode.split('→')[0]}
+                          </span>
+                        </div>
+                        <div className="text-xs font-semibold text-stone-900 mt-0.5 line-clamp-2">
+                          {c.conceptLabel}
+                        </div>
+                        {c.legalCitation && (
+                          <div className="text-[10.5px] text-stone-500 truncate mt-0.5">
+                            {c.legalCitation}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded bg-[#FAF9F6] border border-stone-200 p-2 text-[11px] text-stone-500">
+                    Chưa có hạng mục nào được xác nhận đạt chuẩn.
+                  </div>
+                )}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

@@ -10,7 +10,7 @@ Endpoints:
     GET  /upload     -> Trang nạp tài liệu + báo cáo chi tiết sau OCR (upload.html)
     GET  /api/ingest_reports            -> Danh sách báo cáo ingest đã lưu (tóm tắt)
     GET  /api/ingest_reports/{doc_id}   -> Báo cáo chi tiết: từng trang, độ tin cậy OCR, độ đầy đủ
-    GET  /contracts  -> Trang soát hợp đồng từng bước: nạp, dữ kiện, soát (contracts.html)
+    GET  /contracts  -> chuyển sang /contract-studio/ (trang soát hợp đồng cũ đã gỡ; ?cid=<id> thành ?contract=<id>)
     GET  /review     -> Trang duyệt kho luật có phiên bản (review.html)
     GET  /api/legal/reviews?status=open|resolved|all     -> Danh sách mục cần duyệt
     GET  /api/legal/reviews/{review_id}                  -> Chi tiết: chỉ dẫn gốc, thao tác, trước/sau
@@ -63,6 +63,7 @@ from rag.agent import AgentConfig, AgentPipeline
 import contracts_api
 import legal_api
 import contract_studio
+import contract_dossier
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("rag.ui.server")
@@ -74,8 +75,6 @@ UPLOAD_HTML_PATH = UI_DIR / "upload.html"
 UPLOAD_LEGAL_JS_PATH = UI_DIR / "upload_legal.js"
 CONTRACTS_JS_PATH = UI_DIR / "contracts.js"
 REVIEW_HTML_PATH = UI_DIR / "review.html"
-CONTRACTS_HTML_PATH = UI_DIR / "contracts.html"
-CONTRACT_PAGE_JS_PATH = UI_DIR / "contract_page.js"
 CONTRACT_ASK_HTML_PATH = UI_DIR / "contract_ask.html"
 CONTRACT_ASK_JS_PATH = UI_DIR / "contract_ask.js"
 CONTRACT_QA_JS_PATH = UI_DIR / "contract_qa.js"
@@ -1379,20 +1378,16 @@ async def handle_review_page(request: Request) -> HTMLResponse:
     return HTMLResponse(REVIEW_HTML_PATH.read_text(encoding="utf-8"))
 
 
-async def handle_contracts_page(request: Request) -> HTMLResponse:
-    if not CONTRACTS_HTML_PATH.exists():
-        return HTMLResponse("<h1>contracts.html chưa được tạo</h1>", status_code=404)
-    return HTMLResponse(CONTRACTS_HTML_PATH.read_text(encoding="utf-8"))
+async def handle_contracts_page(request: Request) -> RedirectResponse:
+    """Link và bookmark của trang soát cũ: chuyển sang Contract Studio, giữ id hợp đồng nếu có."""
+    cid = request.query_params.get("cid")
+    return RedirectResponse(f"/contract-studio/?contract={quote(cid, safe='')}" if cid else "/contract-studio/")
 
 
 def _js(path: Path) -> Response:
     if not path.exists():
         return Response("", status_code=404)
     return Response(path.read_text(encoding="utf-8"), media_type="text/javascript", headers={"Cache-Control": "no-cache"})
-
-
-async def handle_contract_page_js(request: Request) -> Response:
-    return _js(CONTRACT_PAGE_JS_PATH)
 
 
 async def handle_contract_ask_page(request: Request) -> HTMLResponse:
@@ -1421,7 +1416,6 @@ routes = [
     Route("/contracts.js", handle_contracts_js, methods=["GET"]),
     Route("/review", handle_review_page, methods=["GET"]),
     Route("/contracts", handle_contracts_page, methods=["GET"]),
-    Route("/contract_page.js", handle_contract_page_js, methods=["GET"]),
     Route("/contracts/ask", handle_contract_ask_page, methods=["GET"]),
     Route("/contract_ask.js", handle_contract_ask_js, methods=["GET"]),
     Route("/contract_qa.js", handle_contract_qa_js, methods=["GET"]),
@@ -1438,6 +1432,7 @@ routes = [
     *legal_api.routes,
     *contracts_api.routes,
     *contract_studio.routes,
+    *contract_dossier.routes,
 ]
 
 middleware = [

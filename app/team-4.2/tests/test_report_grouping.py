@@ -40,6 +40,21 @@ def test_presence_only_marks_pass_without_check():
     assert presence_only(rs, CAT) == [f"{no_check[0]}/{no_check[1]}"]
 
 
+def test_markdown_groups_follow_pack_findings():
+    """Finding riêng của gói có nhóm riêng với nhãn của gói; thứ tự: FAIL, PASS khác ok, UNKNOWN, needs_facts cuối."""
+    labor = load_packs(["labor"])
+    cids = list(labor.concepts)
+    rs = [res(cids[0], "r1", "UNKNOWN", "needs_facts"), res(cids[1], "r1", "UNKNOWN", "possible_right"),
+          res(cids[2], "r1", "UNKNOWN", "conflict"), res(cids[3], "r1", "PASS", "hidden_right"),
+          res(cids[4], "r1", "FAIL", "missing_content"), res(cids[5], "r1", "FAIL", "violation")]
+    md = report_markdown(CheckReport("c1", date(2025, 1, 1), "v", rs, {}), labor)
+    heads = [line[3:].rsplit(" (", 1)[0] for line in md.splitlines() if line.startswith("## ")]
+    assert heads == ["Vi phạm", "Thiếu nội dung bắt buộc", labor.verdict_label("hidden_right"), "Mâu thuẫn trong hợp đồng",
+                     labor.verdict_label("possible_right"), "Cần thêm dữ kiện"]
+    unknown_pack = report_markdown(CheckReport("c1", date(2025, 1, 1), "v", [res(cids[0], "r1", "UNKNOWN", "khac")], {}), labor)
+    assert "## khac (1)" in unknown_pack                   # finding lạ không bị bỏ khỏi báo cáo
+
+
 def test_markdown_counts_presence_only_passes():
     no_check = next((c.id, r.id) for c in CAT.concepts.values() for r in c.rules
                     if r.check is None and r.mode != "prohibited" and r.over is None)

@@ -82,6 +82,28 @@ def test_analysis_requires_verification_then_emits_actual_results(studio_client)
     assert studio_client.get(f"/api/contracts/{cid}/concept-check/last").json()["stale"] is False
 
 
+def test_analysis_sends_user_facts_and_answering_a_question_makes_no_llm_call(studio_client, monkeypatch):
+    cid = upload(studio_client)[-1]["card"]["contract_id"]
+    assert upload_form(studio_client, cid)                         # thẻ có biểu mẫu dữ kiện người dùng từ gói
+    verify_all(studio_client, cid)
+    stream = events(studio_client.post(f"/api/contracts/{cid}/studio/analyze/stream", json={"user_facts": {}}))
+    questions = stream[-1]["result"]["report"]["questions"]
+    assert questions and all(q["options"] for q in questions)
+    first = questions[0]
+    llm = ClassifyingScriptLLM()
+    monkeypatch.setattr(api.CONFIG, "llm_factory", lambda: llm)
+    r = studio_client.post(f"/api/contracts/{cid}/concept-check/answer",
+                           json={"answers": {first["fact"]: first["options"][0]["value"]}})
+    assert r.status_code == 200 and llm.calls == []
+    result = r.json()
+    assert first["fact"] not in {q["fact"] for q in result["report"]["questions"]}
+    assert result["views"] and studio_client.get(f"/api/contracts/{cid}/concept-check/last").json()["stale"] is False
+
+
+def upload_form(studio_client, cid):
+    return studio_client.get(f"/api/contracts/{cid}").json()["user_form"]
+
+
 def test_bad_upload_is_terminal_error(studio_client):
     stream = events(studio_client.post("/api/contract-studio/upload/stream", files={"file": ("empty.txt", b"")}))
     assert stream[-1]["type"] == "error"
@@ -121,7 +143,7 @@ def test_studio_serves_built_assets_without_changing_existing_routes():
         src = re.search(r'src="([^"]+\.js)"', response.text)[1]
         assert src.startswith("/contract-studio/assets/")
         assert client.get(src).status_code == 200
-    assert client.get("/contracts").status_code == 200
+    assert client.get("/contracts", follow_redirects=False).status_code == 307
     assert client.get("/contracts/ask").status_code == 200
 
 

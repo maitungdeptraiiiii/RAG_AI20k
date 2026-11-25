@@ -44,6 +44,7 @@ class DossierDoc:
     file: str
     kind: str                                    # document_kind của gói, hoặc "amendment"
     refs: Mapping[str, str] = field(default_factory=dict)
+    text: str | None = None                      # văn bản đã đọc sẵn (hồ sơ tải lên); None -> đọc `root / file`
 
 
 @dataclass(frozen=True)
@@ -88,8 +89,12 @@ def load_dossier(path: Path) -> Dossier:
                    dict(d.get("user_facts") or {}), path.parent)
 
 
+def doc_text(d: Dossier, x: DossierDoc) -> str:
+    return x.text if x.text is not None else (d.root / x.file).read_text(encoding="utf-8")
+
+
 def bundle(d: Dossier, main_id: str) -> ContractDoc:
-    pages = [PageText(i + 1, (d.root / x.file).read_text(encoding="utf-8")) for i, x in enumerate(d.parts(main_id))]
+    pages = [PageText(i + 1, doc_text(d, x)) for i, x in enumerate(d.parts(main_id))]
     return parse_contract(pages)
 
 
@@ -100,7 +105,7 @@ def extract_dossier_facts(llm, d: Dossier, *, extra_fields: Sequence[dict] = ())
     for main in (x for x in d.documents if x.kind != AMENDMENT):
         doc = bundle(d, main.doc_id)
         units = to_contract_units(doc)
-        text = "\n".join((d.root / x.file).read_text(encoding="utf-8") for x in d.parts(main.doc_id))
+        text = "\n".join(doc_text(d, x) for x in d.parts(main.doc_id))
         c = Contract(main.doc_id, main.file, False, datetime.now(timezone.utc), text, units, len(units), doc=doc)
         out[main.doc_id] = extract_facts(llm, c, extra_fields=extra_fields)
     return out
@@ -259,4 +264,4 @@ def dossier_objects(d: Dossier, facts_by_contract: Mapping[str, dict]) -> list[W
     return _gaps(d, objs, types)
 
 
-__all__ = ["Dossier", "DossierDoc", "Party", "bundle", "dossier_objects", "extract_dossier_facts", "load_dossier"]
+__all__ = ["AMENDMENT", "Dossier", "DossierDoc", "Party", "bundle", "doc_text", "dossier_objects", "extract_dossier_facts", "load_dossier"]

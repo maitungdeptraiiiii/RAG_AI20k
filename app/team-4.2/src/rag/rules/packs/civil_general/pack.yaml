@@ -16,7 +16,17 @@ conversions:
   percent_per_year:  {base: percent_per_year, factor: 1}
   percent_per_month: {base: percent_per_year, factor: 12}
 
-document_facts: {}
+# Hai dữ kiện dưới đây do LLM tìm dấu hiệu trong hợp đồng (`flag`: có câu trích thì là true). Không có dấu hiệu thì để trống
+# (không suy ra "không"), rule ở trạng thái UNKNOWN và câu hỏi gợi ý hỏi người dùng (user_fact_questions).
+document_facts:
+  is_adhesion_contract: {unit: null, from: adhesion_signal, parse: flag}
+  uses_general_conditions: {unit: null, from: general_conditions_signal, parse: flag}
+
+extract_fields:
+  - {key: adhesion_signal, label: "Dấu hiệu hợp đồng theo mẫu", kind: text,
+     hint: "chép câu cho thấy hợp đồng do một bên soạn sẵn để bên kia chỉ chấp nhận, không thương lượng từng điều khoản; không có câu nào nói rõ thì bỏ qua"}
+  - {key: general_conditions_signal, label: "Dấu hiệu điều kiện giao dịch chung", kind: text,
+     hint: "chép câu cho thấy hợp đồng áp dụng điều kiện giao dịch chung do một bên công bố sẵn để dùng cho nhiều khách hàng; không có câu nào nói rõ thì bỏ qua"}
 
 # Cách viết đơn vị ngay sau con số trong hợp đồng (bộ đọc slot dùng, không đoán): "30%/năm", "1,5% mỗi tháng".
 unit_forms:

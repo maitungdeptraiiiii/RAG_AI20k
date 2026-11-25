@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import type { AnalysisScenario } from "../types/contract";
 import { StatusBadge } from "./StatusBadge";
+import { getPassedComparisons } from "../engine/pipelineState";
 
 interface ReportCanvasDrawerProps {
   open: boolean;
@@ -215,6 +216,9 @@ export function ReportCanvasDrawer({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  // Dòng "ok" bị loại khỏi findings (live/model.ts) nhưng còn trong comparisons với verdict "completed".
+  const okItems = useMemo(() => getPassedComparisons(scenario), [scenario]);
+
   const counts = useMemo(() => {
     const issue = scenario.findings.filter(
       (f) => f.status === "issue" || f.status === "conflict",
@@ -222,9 +226,9 @@ export function ReportCanvasDrawer({
     const attention = scenario.findings.filter(
       (f) => f.status === "insufficient_data" || f.status === "needs_confirmation",
     ).length;
-    const ok = scenario.findings.length - issue - attention;
+    const ok = scenario.findings.length - issue - attention + okItems.length;
     return { issue, attention, ok };
-  }, [scenario.findings]);
+  }, [scenario.findings, okItems]);
 
   const handleCopy = () => {
     if (!markdown) return;
@@ -456,6 +460,46 @@ export function ReportCanvasDrawer({
                         </div>
                         <StatusBadge status={f.status} customLabel={f.severityLabel} compact />
                       </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Các mục hợp đồng đã đạt: để người dùng thấy hệ thống đã kiểm và không có vấn đề */}
+              {okItems.length > 0 && (
+                <div className="bg-white border border-stone-200 rounded-xl p-4 space-y-2.5">
+                  <div className="flex items-center justify-between text-xs font-semibold text-stone-800">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Check className="w-3.5 h-3.5 text-[#166534]" />
+                      <span>Hạng mục phù hợp ({okItems.length})</span>
+                    </span>
+                    <span className="text-[10.5px] font-normal text-stone-400">
+                      Đã đối chiếu, không phát hiện vấn đề
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {okItems.map((c) => (
+                      <div
+                        key={c.id}
+                        className="rounded-lg border border-emerald-100 bg-emerald-50/40 px-3 py-2"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="text-xs font-medium text-stone-900">
+                            {c.conceptLabel}
+                          </div>
+                          <span className="shrink-0 text-[10.5px] font-medium text-[#166534]">
+                            Đạt
+                          </span>
+                        </div>
+                        <div className="text-[10.5px] font-mono text-stone-500 truncate">
+                          {c.contractClauseCode} · {c.legalCitation}
+                        </div>
+                        {c.contractExcerpt && (
+                          <div className="mt-1 text-[11px] text-stone-600 line-clamp-2">
+                            “{c.contractExcerpt}”
+                          </div>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </div>

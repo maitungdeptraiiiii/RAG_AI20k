@@ -16,7 +16,8 @@ sys.path[:0] = [str(APP), str(APP / "ui"), str(APP / "src")]
 
 import server  # noqa: E402  — cấu hình contracts_api.CONFIG như khi chạy app
 import contracts_api as api  # noqa: E402
-from rag.contracts import review as rv  # noqa: E402
+from rag.contracts import answer as ca  # noqa: E402
+from rag.contracts import verify  # noqa: E402
 from rag.contracts.batches import make_batches  # noqa: E402
 from rag.contracts.graph.build import build_graph  # noqa: E402
 
@@ -44,7 +45,7 @@ class RecLLM:
 base_llm = server.get_pipeline()[0].llm
 api.CONFIG.llm_factory = lambda: RecLLM(base_llm)
 
-_find = rv.find_evidence
+_find = ca.find_evidence
 
 
 def rec_find(runtime, legacy, query, anchor, k=4):
@@ -58,7 +59,7 @@ def rec_find(runtime, legacy, query, anchor, k=4):
     return res
 
 
-rv.find_evidence = rec_find
+ca.find_evidence = rec_find
 
 data = src.read_bytes()
 
@@ -98,10 +99,10 @@ trace["steps"]["graph_sample_nodes"] = [{"id": n.node_id, "label": n.label,
                                         for n in build.nodes[:6]]
 trace["steps"]["card_verification"] = card["verification"]
 
-# --- Giai đoạn 2: thử chạy soát trước khi xác minh (phải bị chặn) ---
+# --- Giai đoạn 2: thử kiểm tra trước khi xác minh (phải bị chặn) ---
 stage["name"] = "gate"
 try:
-    api.run(cid, "review")
+    verify.check_gate(c, "review")
     trace["steps"]["gate"] = "KHÔNG bị chặn"
 except Exception as e:  # noqa: BLE001
     trace["steps"]["gate"] = {"error": type(e).__name__, "message": str(e), "pending": getattr(e, "pending", None)}
@@ -128,16 +129,14 @@ trace["steps"]["verification_after"] = card2["verification"]
 trace["steps"]["oplog_after_verify"] = c.oplog.to_json()
 trace["steps"]["build_after_verify"] = card2["graph"]
 
-# --- Giai đoạn 3 ---
-for op in ("review", "redline", "law_changes", "summary"):
-    stage["name"] = op
-    t0 = time.time()
-    try:
-        rep = api.run(cid, op)
-        trace["steps"][f"report_{op}"] = rep
-    except Exception as e:  # noqa: BLE001
-        trace["steps"][f"report_{op}"] = {"error": f"{type(e).__name__}: {e}"}
-    trace["steps"][f"{op}_seconds"] = round(time.time() - t0, 1)
+# --- Giai đoạn 3: kiểm tra concept (bộ máy luật) ---
+stage["name"] = "concept_check"
+t0 = time.time()
+try:
+    trace["steps"]["concept_check"] = api.concept_check(cid, {})
+except Exception as e:  # noqa: BLE001
+    trace["steps"]["concept_check"] = {"error": f"{type(e).__name__}: {e}"}
+trace["steps"]["concept_check_seconds"] = round(time.time() - t0, 1)
 
 stage["name"] = "chat_answer"
 q = sys.argv[3] if len(sys.argv) > 3 else "Bên cho thuê có được tự ý tăng giá thuê khi thị trường thay đổi không?"

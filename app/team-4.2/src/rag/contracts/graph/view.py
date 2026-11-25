@@ -14,6 +14,7 @@ from typing import Literal, Protocol, Sequence, TypedDict
 from rag.contracts.graph.build import SCHEMA, GraphBuild
 
 TEXT_LIMIT = 600
+UNIT_TEXT_LIMIT = 4000        # find_units: lời văn điều khoản đọc gần đủ; công cụ đi đồ thị vẫn cắt ở TEXT_LIMIT
 MAX_HOPS = 6
 _HIDDEN = ("contract_id", "build_id")
 Direction = Literal["out", "in", "both"]
@@ -51,12 +52,12 @@ def _clean(props: dict) -> dict:
     return {k: v for k, v in props.items() if v is not None}
 
 
-def _fmt(node_id: str, label: str, props: dict) -> dict:
+def _fmt(node_id: str, label: str, props: dict, limit: int | None = TEXT_LIMIT) -> dict:
     out = {"node_id": node_id, "node_type": label}
     out.update({k: v for k, v in _clean(props).items() if k not in _HIDDEN and k not in ("node_id", "node_type")})
     text = out.get("text")
-    if isinstance(text, str) and len(text) > TEXT_LIMIT:
-        out["text"], out["truncated"] = text[:TEXT_LIMIT], True
+    if isinstance(text, str) and limit is not None and len(text) > limit:
+        out["text"], out["truncated"] = text[:limit], True
     return out
 
 
@@ -73,7 +74,7 @@ class ContractGraphView(Protocol):
     backend: Literal["memory", "neo4j"]
 
     def node(self, node_id: str) -> dict | None: ...
-    def find(self, label: str, **props) -> list[dict]: ...
+    def find(self, label: str, _limit: int | None = ..., **props) -> list[dict]: ...
     def search_units(self, text: str, limit: int = 8) -> list[dict]: ...
     def neighbors(self, node_id: str, *, rel_types: Sequence[str] | None = None,
                   direction: Direction = "both") -> list[Hop]: ...
@@ -86,15 +87,22 @@ class ContractGraphView(Protocol):
 class _Base:
     contract_id: str
 
-    def _units(self) -> list[dict]:
+    def _units(self, text_limit: int | None = TEXT_LIMIT) -> list[dict]:
         raise NotImplementedError
 
     def search_units(self, text: str, limit: int = 8) -> list[dict]:
+        """Khớp trên lời văn ĐẦY ĐỦ (không phải bản đã cắt); trả về lời văn tới UNIT_TEXT_LIMIT."""
         q = _norm(text)
         if not q:
             return []
-        hits = [u for u in self._units() if q in _norm(u.get("text", "")) or q in _norm(u.get("label", ""))]
-        return sorted(hits, key=lambda u: u["node_id"])[:limit]
+        hits = [u for u in self._units(None) if q in _norm(u.get("text", "")) or q in _norm(u.get("label", ""))]
+        out = []
+        for u in sorted(hits, key=lambda u: u["node_id"])[:limit]:
+            t = u.get("text")
+            if isinstance(t, str) and len(t) > UNIT_TEXT_LIMIT:
+                u = {**u, "text": t[:UNIT_TEXT_LIMIT], "truncated": True}
+            out.append(u)
+        return out
 
     def subgraph(self, node_id: str, *, hops: int = 1, rel_types: Sequence[str] | None = None,
                  limit: int = 60) -> dict:
@@ -135,20 +143,20 @@ class MemoryGraphView(_Base):
             self._adj.setdefault(e.src, []).append((e.type, "out", e.dst, _clean(e.props)))
             self._adj.setdefault(e.dst, []).append((e.type, "in", e.src, _clean(e.props)))
 
-    def _out(self, node_id: str) -> dict:
+    def _out(self, node_id: str, limit: int | None = TEXT_LIMIT) -> dict:
         n = self._nodes[node_id]
-        return _fmt(n.node_id, n.label, n.props)
+        return _fmt(n.node_id, n.label, n.props, limit)
 
     def node(self, node_id: str) -> dict | None:
         return self._out(node_id) if node_id in self._nodes else None
 
-    def find(self, label: str, **props) -> list[dict]:
+    def find(self, label: str, _limit: int | None = TEXT_LIMIT, **props) -> list[dict]:
         _check_label(label)
-        return [self._out(i) for i in sorted(self._nodes) if self._nodes[i].label == label
+        return [self._out(i, _limit) for i in sorted(self._nodes) if self._nodes[i].label == label
                 and all(self._nodes[i].props.get(k) == v for k, v in props.items())]
 
-    def _units(self) -> list[dict]:
-        return self.find("Unit")
+    def _units(self, text_limit: int | None = TEXT_LIMIT) -> list[dict]:
+        return self.find("Unit", text_limit)
 
     def neighbors(self, node_id, *, rel_types=None, direction="both") -> list[Hop]:
         types = check_rel_types(rel_types)
@@ -190,9 +198,9 @@ class MemoryGraphView(_Base):
 _NODE = "{labels: labels(n), props: properties(n)}"
 
 
-def _from_row(row: dict) -> dict:
+def _from_row(row: dict, limit: int | None = TEXT_LIMIT) -> dict:
     label = next((x for x in row["labels"] if x != "CGNode"), "CGNode")
-    return _fmt(row["props"].get("node_id"), label, row["props"])
+    return _fmt(row["props"].get("node_id"), label, row["props"], limit)
 
 
 class Neo4jGraphView(_Base):
@@ -208,15 +216,15 @@ class Neo4jGraphView(_Base):
         rows = self._run(f"MATCH (n:CGNode {{node_id: $id, contract_id: $cid}}) RETURN {_NODE} AS n", id=node_id)
         return _from_row(rows[0]["n"]) if rows else None
 
-    def find(self, label: str, **props) -> list[dict]:
+    def find(self, label: str, _limit: int | None = TEXT_LIMIT, **props) -> list[dict]:
         _check_label(label)
         rows = self._run(f"MATCH (n:CGNode:{label} {{contract_id: $cid}}) "
                          "WHERE all(k IN keys($props) WHERE n[k] = $props[k]) "
                          f"RETURN {_NODE} AS n ORDER BY n.node_id", props=props)
-        return [_from_row(r["n"]) for r in rows]
+        return [_from_row(r["n"], _limit) for r in rows]
 
-    def _units(self) -> list[dict]:
-        return self.find("Unit")
+    def _units(self, text_limit: int | None = TEXT_LIMIT) -> list[dict]:
+        return self.find("Unit", text_limit)
 
     def neighbors(self, node_id, *, rel_types=None, direction="both") -> list[Hop]:
         types = check_rel_types(rel_types)

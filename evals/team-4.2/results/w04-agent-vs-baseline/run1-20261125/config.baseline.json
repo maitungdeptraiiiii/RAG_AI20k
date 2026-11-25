@@ -1,0 +1,15 @@
+{
+  "system": "baseline",
+  "dataset": "evals\\team-4.2\\datasets\\agent_vs_baseline_w04.jsonl",
+  "dataset_sha256": "d8ae0246f0a09e78454c64191bb9242a92d7f057f31030a1ff1706b1e3130261",
+  "split": "all",
+  "n": 60,
+  "llm_model": "gpt-6-luna",
+  "embed_model": "jina-embeddings-v5-text-small",
+  "advanced": "hyde",
+  "rerank_backend": "jev",
+  "top_k": 5,
+  "agent_config": null,
+  "started_at": "2026-11-25T20:19:01",
+  "workers": 1
+}

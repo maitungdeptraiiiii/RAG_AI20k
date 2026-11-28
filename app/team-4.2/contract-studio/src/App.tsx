@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FileUp, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { FileUp, Loader2, AlertCircle, CheckCircle2, Sparkles, Scale, GitBranch, ShieldCheck } from "lucide-react";
 import { motion } from "motion/react";
+import { AtelierHeader } from "./components/AtelierHeader";
 import { DualGraphCanvas } from "./components/DualGraphCanvas";
 import { DocumentPanel } from "./components/DocumentPanel";
 import { InspectorPanel } from "./components/InspectorPanel";
@@ -514,90 +515,116 @@ export default function App() {
     if (finding) setSelected(finding.id);
   };
   return (
-    <div className="min-h-screen bg-[#F7F6F2] text-stone-900">
-      <header className="h-16 border-b border-stone-200 bg-white px-6 flex items-center justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-xl font-semibold">PhápLý HợpĐồng</h1>
-          <p className="text-xs text-stone-500">
-            Contract Studio · Phân tích trực tiếp
-          </p>
-        </div>
-        <div className="flex items-center gap-4 text-sm">
-          <a
-            href="#ho-so"
-            className="text-xs text-[#1E3A5F] hover:underline"
-            title="Tải nhiều văn bản (hợp đồng + phụ lục) và soát cả hồ sơ"
-          >
-            Hồ sơ nhiều văn bản
-          </a>
-          <label className="inline-flex items-center gap-2 text-xs">
-            <input
-              type="checkbox"
-              checked={persist}
-              onChange={(e) => setPersist(e.target.checked)}
+    <div className="min-h-screen atelier-canvas text-[#141B29]">
+      <AtelierHeader
+        active="studio"
+        subtitle="Phân tích đa đồ thị & kiểm định hợp đồng"
+        actions={
+          <>
+            <label className="inline-flex items-center gap-2 text-xs text-[#475569] cursor-pointer select-none px-2.5 py-1.5 rounded-xl border border-[#E6E2D8] bg-white hover:bg-[#FAF8F5]">
+              <input
+                type="checkbox"
+                checked={persist}
+                onChange={(e) => setPersist(e.target.checked)}
+                disabled={busy}
+                className="accent-[#16325C]"
+              />
+              Lưu hợp đồng
+            </label>
+            <button
               disabled={busy}
+              onClick={() => input.current?.click()}
+              className="px-4 py-2 rounded-xl bg-[#16325C] hover:bg-[#1E437A] text-white inline-flex gap-2 items-center text-xs font-semibold shadow-[0_8px_20px_-6px_rgba(22,50,92,0.45)] transition-all disabled:opacity-50 cursor-pointer"
+            >
+              <FileUp size={15} />
+              Upload hợp đồng
+            </button>
+            <input
+              ref={input}
+              hidden
+              type="file"
+              accept=".pdf,.docx,.txt,.md,.png,.jpg,.jpeg,.webp,.tif,.tiff"
+              onChange={(e) => {
+                if (e.target.files?.[0]) void upload(e.target.files[0]);
+              }}
             />
-            Lưu hợp đồng
-          </label>
-          <button
-            disabled={busy}
-            onClick={() => input.current?.click()}
-            className="px-4 py-2 rounded bg-[#1E3A5F] text-white inline-flex gap-2 items-center disabled:opacity-50"
-          >
-            <FileUp size={15} />
-            Upload hợp đồng
-          </button>
-          <input
-            ref={input}
-            hidden
-            type="file"
-            accept=".pdf,.docx,.txt,.md,.png,.jpg,.jpeg,.webp,.tif,.tiff"
-            onChange={(e) => {
-              if (e.target.files?.[0]) void upload(e.target.files[0]);
-            }}
-          />
-        </div>
-      </header>
+          </>
+        }
+      />
       {!s ? (
-        <main className="max-w-3xl mx-auto mt-28 p-12 border border-dashed border-stone-300 bg-white text-center rounded relative overflow-hidden">
-          {busy ? (
-            <div className="py-6 space-y-4">
-              <Loader2 className="mx-auto text-[#1E3A5F] animate-spin" size={40} />
-              <h2 className="font-serif text-xl text-[#1E3A5F]">
-                Đang tải lên và phân tích cấu trúc hợp đồng...
-              </h2>
-              <p className="text-stone-500 text-sm">
-                {message || "Hệ thống đang đọc văn bản, OCR (nếu có) và trích xuất dữ kiện."}
-              </p>
-              <div className="max-w-md mx-auto h-1.5 bg-stone-100 rounded-full overflow-hidden">
-                <motion.div
-                  className="h-full w-1/2 bg-gradient-to-r from-[#1E3A5F] via-sky-600 to-[#1E3A5F] rounded-full"
-                  animate={{ x: ["-100%", "200%"] }}
-                  transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
-                />
+        <main className="max-w-4xl mx-auto px-4 pt-12 pb-16">
+          <div className="atelier-card p-10 sm:p-14 text-center relative overflow-hidden">
+            <div className="pointer-events-none absolute -top-24 -right-24 w-64 h-64 rounded-full bg-[#EEF4FF] blur-3xl opacity-80" />
+            <div className="pointer-events-none absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-[#FDF6E7] blur-3xl opacity-90" />
+            {busy ? (
+              <div className="relative py-8 space-y-4">
+                <div className="w-14 h-14 mx-auto rounded-2xl bg-[#EEF4FF] border border-[#BFDBFE] flex items-center justify-center">
+                  <Loader2 className="text-[#2563EB] animate-spin" size={28} />
+                </div>
+                <h2 className="font-serif text-2xl font-semibold text-[#16325C]">
+                  Đang tải lên và phân tích cấu trúc hợp đồng...
+                </h2>
+                <p className="text-[#64748B] text-sm max-w-md mx-auto">
+                  {message || "Hệ thống đang đọc văn bản, OCR (nếu có) và trích xuất dữ kiện."}
+                </p>
+                <div className="max-w-md mx-auto h-2 bg-[#F1EDE4] rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full w-1/2 bg-gradient-to-r from-[#16325C] via-[#2563EB] to-[#C68B2C] rounded-full"
+                    animate={{ x: ["-100%", "200%"] }}
+                    transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                </div>
               </div>
-            </div>
-          ) : (
-            <>
-              <FileUp className="mx-auto text-[#1E3A5F] mb-5" size={36} />
-              <h2 className="font-serif text-2xl">
-                Đọc và đối chiếu hợp đồng lao động
-              </h2>
-              <p className="text-stone-500 text-sm mt-3 mb-6">
-                Tải file hợp đồng và phụ lục trong cùng tài liệu. Xác nhận thông
-                tin, sau đó theo dõi quá trình phân tích và căn cứ được tìm thấy.
-              </p>
-              <button
-                onClick={() => input.current?.click()}
-                className="px-5 py-2 bg-[#1E3A5F] text-white rounded hover:bg-[#162d4b] transition-colors"
-              >
-                Chọn file hợp đồng
-              </button>
-              <p className="mt-4 text-xs text-stone-400">
-                PDF, DOCX, TXT, Markdown hoặc ảnh · Tối đa 50 MB, 150 trang
-              </p>
-            </>
-          )}
+            ) : (
+              <div className="relative">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FDF6E7] border border-[#F1DFB6] text-[#9A5B13] text-xs font-medium mb-6">
+                  <Sparkles size={13} />
+                  <span>Phân tích đa đồ thị · Neo4j Legal Graph</span>
+                </div>
+                <h2 className="font-serif text-3xl sm:text-4xl font-semibold text-[#16325C] tracking-tight">
+                  Đọc, đối chiếu &amp; kiểm định hợp đồng thông minh
+                </h2>
+                <p className="text-[#475569] text-[15px] mt-3.5 mb-8 max-w-2xl mx-auto leading-relaxed">
+                  Tải file hợp đồng và phụ lục trong cùng tài liệu. Hệ thống bóc tách cấu trúc, ánh xạ khái niệm và đối chiếu trực tiếp với kho luật có hiệu lực tại mốc ký.
+                </p>
+
+                <div className="flex flex-wrap justify-center gap-2.5 mb-8 text-xs text-[#334155]">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FAF8F5] border border-[#E6E2D8]">
+                    <GitBranch size={13} className="text-[#2563EB]" /> Contract Graph
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FAF8F5] border border-[#E6E2D8]">
+                    <Scale size={13} className="text-[#C68B2C]" /> Ánh xạ Concept
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FAF8F5] border border-[#E6E2D8]">
+                    <ShieldCheck size={13} className="text-[#0F766E]" /> Căn cứ Luật theo mốc ký
+                  </span>
+                </div>
+
+                <div className="border-2 border-dashed border-[#D8D2C5] hover:border-[#2563EB]/60 rounded-2xl p-7 bg-[#FAF8F5]/75 transition-colors max-w-xl mx-auto">
+                  <div className="w-12 h-12 mx-auto mb-3.5 rounded-2xl bg-white border border-[#E6E2D8] shadow-sm flex items-center justify-center text-[#16325C]">
+                    <FileUp size={22} />
+                  </div>
+                  <div className="flex flex-wrap items-center justify-center gap-3">
+                    <button
+                      onClick={() => input.current?.click()}
+                      className="px-6 py-2.5 bg-[#16325C] hover:bg-[#1E437A] text-white text-sm font-semibold rounded-xl shadow-[0_8px_20px_-6px_rgba(22,50,92,0.45)] transition-all cursor-pointer"
+                    >
+                      Chọn file hợp đồng
+                    </button>
+                    <a
+                      href="#ho-so"
+                      className="px-4 py-2.5 bg-white border border-[#E6E2D8] hover:border-[#C68B2C]/60 text-[#16325C] text-sm font-medium rounded-xl transition-colors"
+                    >
+                      Hoặc soát hồ sơ nhiều văn bản →
+                    </a>
+                  </div>
+                  <p className="mt-4 text-xs text-[#64748B]">
+                    Hỗ trợ PDF, DOCX, TXT, Markdown hoặc ảnh scan · Tối đa 50 MB, 150 trang
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </main>
       ) : (
         <>
@@ -687,9 +714,9 @@ export default function App() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                className="border border-stone-200 rounded bg-white p-4"
+                className="atelier-card p-6"
               >
-                <h3 className="font-semibold mb-2">
+                <h3 className="font-serif text-lg font-semibold text-[#16325C] mb-1">
                   Xác minh thông tin hợp đồng
                 </h3>
                 <p className="text-xs text-stone-500 mb-4">
@@ -876,7 +903,7 @@ export default function App() {
               hasNarrativeReport={Boolean(reportMarkdown)}
             />
             <div ref={details} className="grid lg:grid-cols-12 gap-4">
-              <div className="lg:col-span-3 h-[650px] overflow-y-auto thin-scroll bg-white border border-stone-200 rounded p-3">
+              <div className="lg:col-span-3 h-[650px] overflow-y-auto thin-scroll atelier-card p-4">
                 <StageOutcomePanel
                   scenario={s}
                   currentStepIndex={step}

@@ -2,7 +2,8 @@
 // thuộc hợp đồng nào, các bên -> server trích dữ kiện từng bộ, dựng đối tượng, chạy luật xuyên văn bản.
 // Danh sách loại, vai trò, dữ kiện người dùng đều do server dựng từ gói luật: UI không giữ danh sách cố định.
 import { useRef, useState } from "react";
-import { ArrowLeft, FileStack, Loader2, AlertCircle, Plus, Trash2, ChevronRight } from "lucide-react";
+import { FileStack, Loader2, AlertCircle, Plus, Trash2, ChevronRight, Sparkles } from "lucide-react";
+import { AtelierHeader } from "./components/AtelierHeader";
 import { request, stream, jsonBody } from "./live/api";
 import { UserFactsForm } from "./components/UserFactsForm";
 import { QuestionsPanel } from "./components/QuestionsPanel";
@@ -161,50 +162,48 @@ export default function DossierStudio({ onExit }: { onExit: () => void }) {
   const fileOf = (id: string) => docs.find((d) => d.doc_id === id)?.filename || id;
 
   return (
-    <div className="min-h-screen bg-[#F7F6F2] text-stone-900">
-      <header className="h-16 border-b border-stone-200 bg-white px-6 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <button onClick={onExit} className="p-1.5 rounded hover:bg-stone-100" title="Về soát một hợp đồng">
-            <ArrowLeft size={18} />
-          </button>
-          <div>
-            <h1 className="font-serif text-xl font-semibold">PhápLý HợpĐồng</h1>
-            <p className="text-xs text-stone-500">Contract Studio · Soát hồ sơ nhiều văn bản</p>
-          </div>
-        </div>
-        <button
-          disabled={busy}
-          onClick={() => input.current?.click()}
-          className="px-4 py-2 rounded bg-[#1E3A5F] text-white inline-flex gap-2 items-center disabled:opacity-50 text-sm"
-        >
-          <FileStack size={15} />
-          {draft ? "Tải hồ sơ khác" : "Tải các văn bản của hồ sơ"}
-        </button>
-        <input
-          ref={input}
-          hidden
-          multiple
-          type="file"
-          accept=".pdf,.docx,.txt,.md,.png,.jpg,.jpeg,.webp,.tif,.tiff"
-          onChange={(e) => {
-            if (e.target.files?.length) void upload(e.target.files);
-          }}
-        />
-      </header>
+    <div className="min-h-screen atelier-canvas text-[#141B29]">
+      <AtelierHeader
+        active="dossier"
+        subtitle="Soát hồ sơ nhiều văn bản & phụ lục"
+        onExitDossier={onExit}
+        actions={
+          <>
+            <button
+              disabled={busy}
+              onClick={() => input.current?.click()}
+              className="px-4 py-2 rounded-xl bg-[#16325C] hover:bg-[#1E437A] text-white inline-flex gap-2 items-center shadow-[0_8px_20px_-6px_rgba(22,50,92,0.45)] transition-all disabled:opacity-50 text-xs font-semibold cursor-pointer"
+            >
+              <FileStack size={15} />
+              {draft ? "Tải hồ sơ khác" : "Tải các văn bản của hồ sơ"}
+            </button>
+            <input
+              ref={input}
+              hidden
+              multiple
+              type="file"
+              accept=".pdf,.docx,.txt,.md,.png,.jpg,.jpeg,.webp,.tif,.tiff"
+              onChange={(e) => {
+                if (e.target.files?.length) void upload(e.target.files);
+              }}
+            />
+          </>
+        }
+      />
 
       <main className="max-w-6xl mx-auto p-6 space-y-5">
         {error && (
-          <div className="flex gap-2 items-start border border-red-200 bg-red-50 text-red-800 rounded p-3 text-sm">
+          <div className="flex gap-2 items-start border border-rose-200 bg-rose-50 text-rose-800 rounded-2xl p-4 text-sm">
             <AlertCircle size={16} className="mt-0.5 shrink-0" />
             {error}
           </div>
         )}
         {busy && (
-          <div className="border border-stone-200 bg-white rounded p-4 text-sm">
-            <div className="flex items-center gap-2 text-[#1E3A5F]">
-              <Loader2 size={16} className="animate-spin" /> Đang xử lý…
+          <div className="atelier-card p-5 text-sm">
+            <div className="flex items-center gap-2 text-[#16325C] font-medium">
+              <Loader2 size={16} className="animate-spin text-[#2563EB]" /> Đang xử lý…
             </div>
-            <ul className="mt-2 text-xs text-stone-500 space-y-0.5">
+            <ul className="mt-2 text-xs text-[#64748B] space-y-0.5">
               {progress.map((p, i) => (
                 <li key={i}>{p}</li>
               ))}
@@ -213,21 +212,35 @@ export default function DossierStudio({ onExit }: { onExit: () => void }) {
         )}
 
         {!draft && !busy && (
-          <section className="mt-16 p-12 border border-dashed border-stone-300 bg-white text-center rounded">
-            <FileStack className="mx-auto text-[#1E3A5F] mb-4" size={36} />
-            <h2 className="font-serif text-2xl">Soát cả hồ sơ: hợp đồng và các phụ lục</h2>
-            <p className="text-stone-500 text-sm mt-3 max-w-xl mx-auto">
-              Chọn cùng lúc mọi văn bản của một hồ sơ (các hợp đồng đã ký nối tiếp, phụ lục sửa đổi). Hệ thống đoán loại
-              từng văn bản; bạn xác nhận phụ lục thuộc hợp đồng nào và các bên, rồi soát các quy định chỉ thấy được khi
-              xét nhiều văn bản cùng nhau — như số lần ký hợp đồng xác định thời hạn, khoảng nghỉ giữa hai hợp đồng, nội
-              dung phụ lục được sửa.
-            </p>
+          <section className="mt-10 atelier-card p-10 sm:p-14 text-center relative overflow-hidden">
+            <div className="pointer-events-none absolute -top-24 -right-24 w-64 h-64 rounded-full bg-[#EEF4FF] blur-3xl opacity-80" />
+            <div className="pointer-events-none absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-[#FDF6E7] blur-3xl opacity-90" />
+            <div className="relative">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FDF6E7] border border-[#F1DFB6] text-[#9A5B13] text-xs font-medium mb-5">
+                <Sparkles size={13} />
+                <span>Kiểm định chuỗi hợp đồng &amp; phụ lục</span>
+              </div>
+              <h2 className="font-serif text-3xl font-semibold text-[#16325C]">
+                Soát cả hồ sơ: hợp đồng và các phụ lục
+              </h2>
+              <p className="text-[#475569] text-[15px] mt-3.5 max-w-xl mx-auto leading-relaxed">
+                Chọn cùng lúc mọi văn bản của một hồ sơ (các hợp đồng đã ký nối tiếp, phụ lục sửa đổi). Hệ thống đoán loại
+                từng văn bản; bạn xác nhận phụ lục thuộc hợp đồng nào và các bên, rồi soát các quy định xuyên văn bản.
+              </p>
+              <button
+                onClick={() => input.current?.click()}
+                className="mt-7 px-6 py-2.5 rounded-xl bg-[#16325C] hover:bg-[#1E437A] text-white text-sm font-semibold shadow-[0_8px_20px_-6px_rgba(22,50,92,0.45)] transition-all inline-flex items-center gap-2 cursor-pointer"
+              >
+                <FileStack size={16} />
+                Chọn nhiều văn bản trong hồ sơ
+              </button>
+            </div>
           </section>
         )}
 
         {draft && (
           <>
-            <section className="bg-white border border-stone-200 rounded p-4">
+            <section className="atelier-card p-5">
               <h2 className="font-semibold text-sm">1. Văn bản trong hồ sơ</h2>
               <p className="text-xs text-stone-500 mt-1">
                 Loại do hệ thống đoán từ phần đầu văn bản — sửa nếu sai. Phụ lục cần chỉ rõ hợp đồng mà nó sửa đổi.
@@ -320,8 +333,8 @@ export default function DossierStudio({ onExit }: { onExit: () => void }) {
               </table>
             </section>
 
-            <section className="bg-white border border-stone-200 rounded p-4">
-              <h2 className="font-semibold text-sm">2. Các bên và ngày soát</h2>
+            <section className="atelier-card p-5">
+              <h2 className="font-serif text-base font-semibold text-[#16325C]">2. Các bên và ngày soát</h2>
               <div className="mt-3 space-y-2">
                 {parties.map((p, i) => (
                   <div key={i} className="flex flex-wrap items-center gap-2 text-xs">
@@ -442,8 +455,8 @@ function Results({
   const objects = [...result.objects].sort((a: any, b: any) => (a.valid_from || "").localeCompare(b.valid_from || ""));
   return (
     <>
-      <section className="bg-white border border-stone-200 rounded p-4">
-        <h2 className="font-semibold text-sm">3. Hồ sơ theo thời gian</h2>
+      <section className="atelier-card p-5">
+        <h2 className="font-serif text-base font-semibold text-[#16325C]">3. Hồ sơ theo thời gian</h2>
         <p className="text-xs text-stone-500 mt-1">
           Mỗi văn bản là một đối tượng; thuộc tính lấy từ câu trích trong văn bản. Ô trống: văn bản không ghi hoặc chưa
           xác định được — luật coi là chưa biết, không phải vi phạm.
@@ -488,8 +501,8 @@ function Results({
 
       <QuestionsPanel questions={result.questions || []} disabled={disabled} onAnswer={onAnswer} />
 
-      <section className="bg-white border border-stone-200 rounded p-4">
-        <h2 className="font-semibold text-sm">4. Kết luận cấp hồ sơ (ngày soát {result.review_date})</h2>
+      <section className="atelier-card p-5">
+        <h2 className="font-serif text-base font-semibold text-[#16325C]">4. Kết luận cấp hồ sơ (ngày soát {result.review_date})</h2>
         {!results.length && (
           <p className="text-xs text-stone-500 mt-2">
             Không có quy định nào xét theo cả hồ sơ cho các văn bản này.

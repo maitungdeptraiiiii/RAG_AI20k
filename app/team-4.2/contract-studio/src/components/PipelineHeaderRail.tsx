@@ -34,12 +34,12 @@ export function PipelineHeaderRail({
   return (
     <section
       aria-label="Tiến trình phân tích 9 bước"
-      className="bg-white border-b border-stone-200 px-4 lg:px-8 py-3 relative overflow-hidden"
+      className="bg-white/95 backdrop-blur border-b border-[#E6E2D8] px-4 lg:px-8 py-3.5 relative overflow-hidden"
     >
       {isBusy && (
-        <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-stone-100 overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-[#EEF4FF] overflow-hidden">
           <motion.div
-            className="h-full w-1/3 bg-gradient-to-r from-transparent via-[#1E3A5F] to-transparent"
+            className="h-full w-1/3 bg-gradient-to-r from-transparent via-[#2563EB] to-transparent"
             animate={{ x: ['-100%', '300%'] }}
             transition={{ duration: 1.3, repeat: Infinity, ease: 'easeInOut' }}
           />
@@ -49,16 +49,16 @@ export function PipelineHeaderRail({
       <div className="max-w-[1520px] mx-auto flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 min-w-0 text-xs text-stone-600">
-            <span className="font-semibold whitespace-nowrap shrink-0 text-[#1E3A5F] inline-flex items-center gap-1.5">
-              {isBusy && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-              {isBusy ? statusMessage || 'Đang xử lý...' : 'Hồ sơ phân tích thực tế'}
+            <span className="font-semibold whitespace-nowrap shrink-0 text-[#16325C] bg-[#EEF4FF] border border-[#DBEAFE] px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5">
+              {isBusy && <Loader2 className="w-3.5 h-3.5 animate-spin text-[#2563EB]" />}
+              {isBusy ? statusMessage || 'Đang xử lý...' : 'Hồ sơ phân tích trực tiếp'}
             </span>
-            <span className="text-stone-300" aria-hidden="true">|</span>
-            <span className="font-serif text-sm font-semibold text-stone-900 truncate">
+            <span className="text-[#D8D2C5]" aria-hidden="true">|</span>
+            <span className="font-serif text-[15px] font-semibold text-[#141B29] truncate">
               {scenario.title}
             </span>
-            <span className="text-stone-300 hidden sm:inline" aria-hidden="true">·</span>
-            <span className="text-stone-500 truncate hidden sm:inline">
+            <span className="text-[#D8D2C5] hidden sm:inline" aria-hidden="true">·</span>
+            <span className="text-[#64748B] truncate hidden sm:inline">
               {scenario.subtitle}
             </span>
           </div>
@@ -68,7 +68,7 @@ export function PipelineHeaderRail({
               type="button"
               disabled={isBusy}
               onClick={onToggleVerify}
-              className="px-3 py-1.5 rounded border border-stone-200 text-xs font-medium text-stone-700 hover:bg-stone-50 disabled:opacity-40 transition-colors cursor-pointer"
+              className="px-3.5 py-1.5 rounded-xl border border-[#E6E2D8] bg-white text-xs font-medium text-[#334155] hover:bg-[#FAF8F5] hover:border-[#C68B2C]/50 disabled:opacity-40 transition-colors cursor-pointer"
             >
               {showVerify || !factsConfirmed ? 'Thu gọn xác minh' : 'Thông tin hợp đồng'}
             </button>
@@ -77,7 +77,7 @@ export function PipelineHeaderRail({
               type="button"
               disabled={!canAnalyze || isBusy}
               onClick={onAnalyze}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded text-xs font-semibold bg-[#1E3A5F] text-white hover:bg-[#162C49] disabled:opacity-40 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-semibold bg-[#16325C] text-white hover:bg-[#1E437A] shadow-sm disabled:opacity-40 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
             >
               {isBusy && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               <span>
@@ -111,21 +111,21 @@ export function PipelineHeaderRail({
                     type="button"
                     onClick={() => onSelectStep(idx)}
                     aria-current={isCurrent ? 'step' : undefined}
-                    className={`group relative flex items-center gap-2 px-2.5 py-1.5 rounded border text-left transition-colors duration-200 cursor-pointer whitespace-nowrap ${
+                    className={`group relative flex items-center gap-2 px-2.5 py-1.5 rounded-xl border text-left transition-all duration-200 cursor-pointer whitespace-nowrap ${
                       isCurrent
-                        ? 'bg-[#F5F7FA] border-[#1E3A5F] text-stone-900'
+                        ? 'bg-[#EEF4FF]/70 border-[#2563EB]/60 ring-2 ring-[#C68B2C]/25 text-[#141B29] shadow-xs'
                         : isPast
-                        ? 'bg-white border-stone-200 text-stone-800 hover:border-stone-300 hover:bg-stone-50'
-                        : 'bg-[#FAF9F6] border-stone-200/80 text-stone-400 hover:text-stone-700 hover:border-stone-300'
+                        ? 'bg-white border-[#E6E2D8] text-[#1E293B] hover:border-[#C68B2C]/50 hover:bg-[#FAF8F5]'
+                        : 'bg-[#FAF8F5] border-[#E6E2D8]/80 text-[#94A3B8] hover:text-[#475569] hover:border-[#CBD5E1]'
                     }`}
                   >
                     <span
-                      className={`w-5 h-5 rounded-sm flex items-center justify-center text-[11px] font-mono font-semibold shrink-0 transition-colors ${
+                      className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-mono font-semibold shrink-0 transition-colors ${
                         isCurrent
-                          ? 'bg-[#1E3A5F] text-white'
+                          ? 'bg-[#16325C] text-white'
                           : isPast
-                          ? 'bg-[#166534] text-white'
-                          : 'bg-stone-200/80 text-stone-500'
+                          ? 'bg-[#0F766E] text-white'
+                          : 'bg-[#ECE8DF] text-[#64748B]'
                       }`}
                     >
                       {isCurrent && isBusy ? (
@@ -141,10 +141,10 @@ export function PipelineHeaderRail({
                       <span
                         className={`text-xs font-medium ${
                           isCurrent
-                            ? 'text-stone-900 font-semibold'
+                            ? 'text-[#16325C] font-semibold'
                             : isPast
-                            ? 'text-stone-800'
-                            : 'text-stone-500'
+                            ? 'text-[#1E293B]'
+                            : 'text-[#64748B]'
                         }`}
                       >
                         {step.shortLabel.replace(/^\d+\.\s*/, '')}
@@ -162,7 +162,7 @@ export function PipelineHeaderRail({
 
                   {idx < PIPELINE_STEPS.length - 1 && (
                     <div className="relative flex-1 h-4 mx-1 flex items-center min-w-[14px]">
-                      <div className="w-full h-[1.5px] bg-stone-200 overflow-hidden">
+                      <div className="w-full h-[1.5px] bg-[#E6E2D8] overflow-hidden rounded-full">
                         <motion.div
                           initial={false}
                           animate={{
@@ -171,7 +171,7 @@ export function PipelineHeaderRail({
                           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                           style={{ transformOrigin: 'left center' }}
                           className={`h-full w-full ${
-                            isPast ? 'bg-[#166534]' : 'bg-[#1E3A5F]'
+                            isPast ? 'bg-[#0F766E]' : 'bg-[#2563EB]'
                           }`}
                         />
                       </div>

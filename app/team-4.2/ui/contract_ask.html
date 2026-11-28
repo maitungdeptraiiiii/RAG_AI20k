@@ -6,54 +6,85 @@
   <title>Hỏi đáp hợp đồng — Just-ice</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            serif: ['Source Serif 4', 'Noto Serif', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
   <style>
     :root {
-      --surface: #ffffff; --page: #ffffff; --ink: #0d0d0d; --ink-2: #525252; --hairline: #e5e5e5;
-      --good-text: #006300; --warning-text: #8a5a00; --critical-text: #b42318;
+      --surface: #ffffff; --page: #FAF8F5; --ink: #141B29; --ink-2: #475569; --hairline: #E6E2D8;
+      --good-text: #0F766E; --warning-text: #9A5B13; --critical-text: #BE123C;
     }
-    body { font-family: 'Inter', sans-serif; background: var(--page); color: var(--ink); font-size: 14px; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--page);
+      background-image:
+        radial-gradient(circle at 12% 0%, rgba(37, 99, 235, 0.055), transparent 40%),
+        radial-gradient(circle at 88% 6%, rgba(198, 139, 44, 0.075), transparent 36%);
+      color: var(--ink);
+      font-size: 14px;
+    }
+    .font-serif { font-family: 'Source Serif 4', 'Noto Serif', serif !important; }
     .chip { border: 1px solid var(--hairline); border-radius: 999px; padding: 2px 9px; font-size: 11.5px; color: var(--ink-2); background: var(--surface); }
-    .field-label { font-size: 11.5px; color: #737373; }
+    .field-label { font-size: 11.5px; color: #64748B; }
     details[open] > summary .chev { transform: rotate(90deg); }
     .chev { display: inline-block; transition: transform .15s; }
     summary::-webkit-details-marker { display: none; }
     .spin { display: inline-block; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .item { width: 100%; text-align: left; border-radius: 12px; padding: 8px 10px; }
-    .item:hover { background: #f5f5f5; }
-    .item.on { background: #f0f0f0; }
-    .sample { border: 1px solid var(--hairline); border-radius: 14px; padding: 10px 12px; text-align: left; font-size: 13.5px; }
-    .sample:hover { background: #fafafa; border-color: #d4d4d4; }
+    .item { width: 100%; text-align: left; border-radius: 12px; padding: 9px 11px; border: 1px solid transparent; transition: all .15s; }
+    .item:hover { background: #ffffff; border-color: var(--hairline); }
+    .item.on { background: #ffffff; border-color: #2563EB; box-shadow: 0 4px 12px -4px rgba(22, 50, 92, 0.12); }
+    .sample { border: 1px solid var(--hairline); border-radius: 16px; padding: 11px 14px; text-align: left; font-size: 13.5px; background: #ffffff; transition: all .15s; }
+    .sample:hover { background: #FDFBF7; border-color: #C68B2C; box-shadow: 0 6px 18px -6px rgba(22, 50, 92, 0.08); }
     #q { border: 0; outline: none; resize: none; background: transparent; }
   </style>
 </head>
 <body class="h-full flex flex-col">
-  <header class="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-neutral-200">
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 h-14 flex items-center gap-3">
-      <a href="/" class="flex items-center gap-1.5 text-[13px] text-neutral-600 hover:text-black rounded-lg px-2 py-1 hover:bg-neutral-100 flex-shrink-0">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-        <span>Quay lại chat</span>
-      </a>
-      <h1 class="text-[15px] font-semibold truncate">Hỏi đáp hợp đồng (đồ thị)</h1>
-      <a href="/contract-studio/" class="ml-auto text-[13px] text-neutral-600 hover:text-black rounded-lg px-2 py-1 hover:bg-neutral-100 flex-shrink-0">Soát hợp đồng →</a>
+  <header class="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-[#E6E2D8]">
+    <div class="max-w-[1320px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <a href="/" class="flex items-center gap-2 min-w-0 group">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-[#16325C] to-[#2563EB] text-white flex items-center justify-center shadow-sm flex-shrink-0">
+            <svg class="w-4 h-4 text-sky-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5L20 7V17L12 21.5L4 17V7L12 2.5Z"/><path d="M12 12V21.5"/><path d="M12 12L20 7"/><path d="M12 12L4 7"/></svg>
+          </div>
+          <h1 class="font-serif text-[17px] font-semibold text-[#16325C] truncate">Just-ice · Hỏi đáp Hợp đồng (Đồ thị)</h1>
+        </a>
+      </div>
+      <nav class="hidden md:flex items-center gap-1 p-1 rounded-full bg-[#F4F1EA] border border-[#E6E2D8] text-xs font-medium">
+        <a href="/" class="px-3 py-1 rounded-full text-[#475569] hover:text-[#16325C]">Hỏi đáp Luật</a>
+        <a href="/contract-studio/" class="px-3 py-1 rounded-full text-[#475569] hover:text-[#16325C]">Contract Studio</a>
+        <a href="/contracts/ask" class="px-3 py-1 rounded-full bg-[#16325C] text-white">Đồ thị Hợp đồng</a>
+        <a href="/upload" class="px-3 py-1 rounded-full text-[#475569] hover:text-[#16325C]">Nạp tài liệu</a>
+        <a href="/review" class="px-3 py-1 rounded-full text-[#475569] hover:text-[#16325C]">Duyệt kho luật</a>
+      </nav>
+      <a href="/contract-studio/" class="text-xs font-semibold text-[#16325C] bg-[#FDF6E7] border border-[#F1DFB6] hover:border-[#C68B2C] rounded-xl px-3 py-1.5 flex-shrink-0 transition-colors">Soát hợp đồng →</a>
     </div>
   </header>
 
-  <div class="flex-1 min-h-0 w-full max-w-[1200px] mx-auto md:grid md:grid-cols-[280px_1fr]">
-    <aside class="border-b md:border-b-0 md:border-r border-neutral-200 p-3 md:overflow-y-auto">
-      <div class="text-[12px] font-medium text-neutral-500 px-1 mb-2">Hợp đồng trên trình duyệt này</div>
-      <div id="list" class="space-y-1"></div>
+  <div class="flex-1 min-h-0 w-full max-w-[1320px] mx-auto md:grid md:grid-cols-[290px_1fr]">
+    <aside class="border-b md:border-b-0 md:border-r border-[#E6E2D8] bg-[#F4F1EA]/65 p-3.5 md:overflow-y-auto">
+      <div class="text-[12px] font-semibold text-[#16325C] px-1.5 mb-2">Hợp đồng trên trình duyệt này</div>
+      <div id="list" class="space-y-1.5"></div>
     </aside>
     <main class="min-h-0 flex flex-col">
-      <div id="notice" class="hidden mx-4 mt-3 text-[13px] rounded-xl px-3 py-2" style="background:#fff7e6;color:var(--warning-text)"></div>
+      <div id="notice" class="hidden mx-4 mt-3 text-[13px] rounded-xl px-3.5 py-2 border border-[#F1DFB6]" style="background:#FDF6E7;color:var(--warning-text)"></div>
       <div id="chat-head" class="px-4 sm:px-6 pt-4"></div>
       <div id="turns" class="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-5"></div>
       <div class="px-4 sm:px-6 pb-4">
-        <div class="w-full bg-white rounded-full border border-neutral-300 shadow-[0_2px_14px_rgba(0,0,0,0.06)] focus-within:border-neutral-400 p-2 pl-4 pr-2 flex items-center gap-2">
+        <div class="w-full bg-white rounded-full border border-[#E6E2D8] shadow-[0_10px_28px_-8px_rgba(22,50,92,0.12)] focus-within:border-[#2563EB] focus-within:ring-4 focus-within:ring-[#2563EB]/10 p-2 pl-4 pr-2 flex items-center gap-2 transition-all">
           <textarea id="q" rows="1" class="flex-1 min-w-0 max-h-[160px] text-[15px] py-1.5 leading-relaxed" placeholder="Hỏi về hợp đồng này…"></textarea>
-          <button type="button" id="send" class="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center disabled:opacity-30 flex-shrink-0" aria-label="Gửi câu hỏi">
+          <button type="button" id="send" class="w-9 h-9 rounded-full bg-[#16325C] hover:bg-[#2563EB] text-white flex items-center justify-center disabled:opacity-30 flex-shrink-0 transition-colors cursor-pointer" aria-label="Gửi câu hỏi">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m-6 6l6-6 6 6"/></svg>
           </button>
         </div>

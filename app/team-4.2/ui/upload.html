@@ -6,176 +6,290 @@
   <title>Nạp tài liệu — Just-ice</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            serif: ['Source Serif 4', 'Noto Serif', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
   <style>
     :root {
       --surface: #ffffff;
-      --page: #f7f7f8;
-      --ink: #0d0d0d;
-      --ink-2: #525252;
-      --ink-3: #8a8a8a;
-      --hairline: #e5e5e5;
+      --page: #FAF8F5;
+      --ink: #141B29;
+      --ink-2: #475569;
+      --ink-3: #94A3B8;
+      --hairline: #E6E2D8;
       /* status palette (dataviz): luôn đi kèm icon + nhãn, không dùng màu đơn lẻ */
-      --good: #0ca30c;
-      --good-track: #dcf3dc;
-      --warning: #fab219;
-      --warning-track: #fdf0d2;
-      --critical: #d03b3b;
-      --critical-track: #f8dddd;
-      --neutral-fill: #c3c2b7;
-      --good-text: #006300;
-      --warning-text: #8a5a00;
-      --critical-text: #b42318;
+      --good: #0F766E;
+      --good-track: #ECFDF5;
+      --warning: #C68B2C;
+      --warning-track: #FDF6E7;
+      --critical: #BE123C;
+      --critical-track: #FFF1F2;
+      --neutral-fill: #CBD5E1;
+      --good-text: #0F766E;
+      --warning-text: #9A5B13;
+      --critical-text: #BE123C;
     }
-    body { font-family: 'Inter', sans-serif; background: var(--page); color: var(--ink); font-size: 14px; }
-    .card { background: var(--surface); border: 1px solid var(--hairline); border-radius: 16px; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--page);
+      background-image:
+        radial-gradient(circle at 12% 0%, rgba(37, 99, 235, 0.055), transparent 40%),
+        radial-gradient(circle at 88% 6%, rgba(198, 139, 44, 0.075), transparent 36%);
+      color: var(--ink);
+      font-size: 14px;
+    }
+    .font-serif { font-family: 'Source Serif 4', 'Noto Serif', serif !important; }
+    .card { background: var(--surface); border: 1px solid var(--hairline); border-radius: 16px; box-shadow: 0 8px 28px -8px rgba(22, 50, 92, 0.06); }
     .tabular { font-variant-numeric: tabular-nums; }
-    .dropzone.drag { border-color: #0d0d0d; background: #f4f4f5; }
+    .dropzone.drag { border-color: #2563EB; background: #EEF4FF; }
     .page-cell { width: 18px; height: 18px; border-radius: 4px; cursor: pointer; outline-offset: 2px; }
-    .page-cell:focus-visible, .page-cell.active { outline: 2px solid var(--ink); }
+    .page-cell:focus-visible, .page-cell.active { outline: 2px solid #16325C; }
     .seg { height: 8px; border-radius: 999px; display: flex; gap: 2px; overflow: hidden; background: var(--surface); }
     .seg > div { height: 100%; border-radius: 999px; }
     .meter { height: 6px; border-radius: 999px; width: 72px; overflow: hidden; }
     .meter > div { height: 100%; border-radius: 999px; }
     .chip { border: 1px solid var(--hairline); border-radius: 999px; padding: 3px 10px; font-size: 12px; color: var(--ink-2); background: var(--surface); }
-    .chip.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .chip.on { background: #16325C; color: #fff; border-color: #16325C; }
     #tooltip { pointer-events: none; }
-    .report-item.active { background: #f0f0f1; }
-    .pending-tag { flex-shrink: 0; font-size: 10.5px; font-weight: 500; border-radius: 999px; padding: 0 7px;
-                   background: var(--warning-track, #fef3c7); color: var(--warning-text, #92400e); }
-    .dl-link { font-size: 12px; border: 1px solid var(--hairline); border-radius: 6px; padding: 2px 8px; color: var(--ink-2); }
-    .dl-link:hover { background: #f5f5f5; }
-    .mode-sw { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: #ececee; border-radius: 12px; }
-    .mode-sw button { border-radius: 9px; padding: 7px 8px; font-size: 13px; font-weight: 500; color: var(--ink-2); }
-    .mode-sw button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+    .report-item.active { background: #EEF4FF; }
+    .pending-tag { flex-shrink: 0; font-size: 10.5px; font-weight: 600; border-radius: 999px; padding: 0 7px;
+                   background: var(--warning-track); color: var(--warning-text); }
+    .dl-link { font-size: 12px; border: 1px solid var(--hairline); border-radius: 8px; padding: 2px 8px; color: var(--ink-2); }
+    .dl-link:hover { background: #FAF8F5; }
+    .mode-sw { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: #F4F1EA; border: 1px solid var(--hairline); border-radius: 14px; }
+    .mode-sw button { border-radius: 10px; padding: 7px 8px; font-size: 13px; font-weight: 500; color: var(--ink-2); }
+    .mode-sw button[aria-pressed="true"] { background: #16325C; color: #ffffff; box-shadow: 0 4px 10px -2px rgba(22,50,92,.25); }
     /* thanh bước pháp luật */
     .step-btn { display: flex; align-items: center; gap: 8px; min-width: 0; text-align: left; border: 1px solid var(--hairline); border-radius: 12px;
                 padding: 8px 12px; background: var(--surface); font-size: 13px; font-weight: 500; }
-    .step-btn[aria-current="step"] { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
-    .step-btn:disabled { color: var(--ink-3); background: #f3f3f4; cursor: not-allowed; }
-    .step-btn .num { flex-shrink: 0; width: 22px; height: 22px; border-radius: 999px; background: var(--ink); color: #fff; font-size: 12px; display: grid; place-items: center; }
+    .step-btn[aria-current="step"] { border-color: #2563EB; box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
+    .step-btn:disabled { color: var(--ink-3); background: #FAF8F5; cursor: not-allowed; }
+    .step-btn .num { flex-shrink: 0; width: 22px; height: 22px; border-radius: 999px; background: #16325C; color: #fff; font-size: 12px; display: grid; place-items: center; }
     .step-btn:disabled .num { background: var(--neutral-fill); }
-    .src-chip { font-size: 10.5px; font-weight: 500; border-radius: 999px; padding: 1px 8px; border: 1px solid var(--hairline); color: var(--ink-2); background: #f5f5f6; cursor: help; white-space: nowrap; }
-    .src-chip.vbpl { background: #e6f0ff; color: #1d4ed8; border-color: #c7dcff; }
-    .src-chip.text { background: var(--good-track); color: var(--good-text); border-color: #bfe5bf; }
-    .src-chip.user { background: #f1e8ff; color: #6d28d9; border-color: #dcc9fb; }
-    .src-chip.inherited { background: var(--warning-track); color: var(--warning-text); border-color: #f3d98f; }
-    .lf-input { width: 100%; border: 1px solid #d4d4d8; border-radius: 8px; padding: 7px 10px; font-size: 13px; outline: none; background: #fff; }
-    .lf-input:focus { border-color: #737373; }
+    .src-chip { font-size: 10.5px; font-weight: 500; border-radius: 999px; padding: 1px 8px; border: 1px solid var(--hairline); color: var(--ink-2); background: #FAF8F5; cursor: help; white-space: nowrap; }
+    .src-chip.vbpl { background: #EEF4FF; color: #16325C; border-color: #BFDBFE; }
+    .src-chip.text { background: var(--good-track); color: var(--good-text); border-color: #A7F3D0; }
+    .src-chip.user { background: #FDF6E7; color: #9A5B13; border-color: #F1DFB6; }
+    .src-chip.inherited { background: var(--warning-track); color: var(--warning-text); border-color: #F1DFB6; }
+    .lf-input { width: 100%; border: 1px solid #D8D2C5; border-radius: 10px; padding: 7px 10px; font-size: 13px; outline: none; background: #fff; }
+    .lf-input:focus { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
     .lf-input.warn { border-color: var(--warning); background: #fffbeb; }
     .w-delete { background: var(--critical-track); color: var(--critical-text); text-decoration: line-through; border-radius: 3px; }
     .w-insert { background: var(--good-track); color: var(--good-text); border-radius: 3px; }
     .legal-text { white-space: pre-wrap; word-break: break-word; font-size: 12.5px; line-height: 1.55; }
-    .btn-primary { background: var(--ink); color: #fff; border-radius: 8px; padding: 7px 14px; font-size: 13px; font-weight: 500; }
-    .btn-primary:disabled { background: #a3a3a3; cursor: not-allowed; }
-    .btn-ghost { border: 1px solid #d4d4d8; background: #fff; border-radius: 8px; padding: 7px 14px; font-size: 13px; }
-    .btn-ghost:hover { background: #f5f5f5; }
+    .btn-primary { background: #16325C; color: #fff; border-radius: 10px; padding: 8px 14px; font-size: 13px; font-weight: 600; transition: all .15s; }
+    .btn-primary:hover:not(:disabled) { background: #1E437A; }
+    .btn-primary:disabled { background: #94A3B8; cursor: not-allowed; }
+    .btn-ghost { border: 1px solid #D8D2C5; background: #fff; border-radius: 10px; padding: 7px 14px; font-size: 13px; }
+    .btn-ghost:hover { background: #FAF8F5; }
     .banner { border-radius: 12px; padding: 10px 14px; font-size: 13px; display: flex; gap: 8px; align-items: flex-start; }
-    .banner.warning { background: var(--warning-track); color: var(--warning-text); border: 1px solid #f3d98f; }
-    .banner.critical { background: var(--critical-track); color: var(--critical-text); border: 1px solid #efb7b7; }
-    .banner.good { background: var(--good-track); color: var(--good-text); border: 1px solid #bfe5bf; }
-    .banner.info { background: #f1f5f9; color: #334155; border: 1px solid #dbe3ec; }
+    .banner.warning { background: var(--warning-track); color: var(--warning-text); border: 1px solid #F1DFB6; }
+    .banner.critical { background: var(--critical-track); color: var(--critical-text); border: 1px solid #FECDD3; }
+    .banner.good { background: var(--good-track); color: var(--good-text); border: 1px solid #A7F3D0; }
+    .banner.info { background: #EEF4FF; color: #16325C; border: 1px solid #BFDBFE; }
   </style>
 </head>
 <body class="min-h-screen">
   <!-- Top bar -->
-  <header class="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-neutral-200">
-    <div class="max-w-[1320px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
-      <div class="flex items-center gap-3 min-w-0">
-        <a href="/" class="flex items-center gap-1.5 text-[13px] text-neutral-600 hover:text-black rounded-lg px-2 py-1 hover:bg-neutral-100 flex-shrink-0">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-          <span>Quay lại chat</span>
-        </a>
-        <h1 class="text-[15px] font-semibold truncate">Nạp tài liệu &amp; kiểm tra chất lượng</h1>
-      </div>
-      <span id="ocr-badge" class="hidden sm:inline text-[12px] text-neutral-500"></span>
+  <header class="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-[#E6E2D8]">
+    <div class="max-w-[1360px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <a href="/" class="flex items-center gap-2.5 min-w-0">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-[#16325C] to-[#2563EB] text-white flex items-center justify-center shadow-sm flex-shrink-0">
+          <svg class="w-4 h-4 text-sky-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5L20 7V17L12 21.5L4 17V7L12 2.5Z"/><path d="M12 12V21.5"/><path d="M12 12L20 7"/><path d="M12 12L4 7"/></svg>
+        </div>
+        <h1 class="font-serif text-[17px] font-semibold text-[#16325C] truncate">Just-ice · Nạp tài liệu &amp; Kiểm tra chất lượng</h1>
+      </a>
+      <nav class="hidden md:flex items-center gap-1 p-1 rounded-full bg-[#F4F1EA] border border-[#E6E2D8] text-xs font-medium">
+        <a href="/" class="px-3 py-1 rounded-full text-[#475569] hover:text-[#16325C]">Hỏi đáp Luật</a>
+        <a href="/contract-studio/" class="px-3 py-1 rounded-full text-[#475569] hover:text-[#16325C]">Contract Studio</a>
+        <a href="/contracts/ask" class="px-3 py-1 rounded-full text-[#475569] hover:text-[#16325C]">Đồ thị Hợp đồng</a>
+        <a href="/upload" class="px-3 py-1 rounded-full bg-[#16325C] text-white">Nạp tài liệu</a>
+        <a href="/review" class="px-3 py-1 rounded-full text-[#475569] hover:text-[#16325C]">Duyệt kho luật</a>
+      </nav>
+      <span id="ocr-badge" class="hidden sm:inline-flex items-center px-3 py-1 rounded-full bg-[#F4F1EA] border border-[#E6E2D8] text-[11.5px] font-medium text-[#475569]"></span>
     </div>
   </header>
 
-  <main class="max-w-[1320px] mx-auto px-4 sm:px-6 py-5 grid grid-cols-1 lg:grid-cols-[340px_minmax(0,1fr)] gap-5">
-    <!-- ============ LEFT: upload + history ============ -->
-    <aside class="space-y-5 min-w-0">
-      <div class="mode-sw" role="group" aria-label="Loại tài liệu">
-        <button id="mode-normal" type="button" aria-pressed="true">Tài liệu thường</button>
-        <button id="mode-legal" type="button" aria-pressed="false">Văn bản pháp luật</button>
-      </div>
-
-      <div id="legal-left" class="hidden space-y-5">
-        <section class="card p-4 space-y-3">
-          <h2 class="text-[14px] font-semibold">Tải lên văn bản pháp luật</h2>
-          <label id="legal-dropzone" for="legal-file" class="dropzone block border-2 border-dashed border-neutral-300 rounded-xl p-5 text-center cursor-pointer transition-colors">
-            <svg class="w-7 h-7 mx-auto text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-            <div class="mt-2 text-[13px] text-neutral-700 font-medium">Kéo thả file vào đây hoặc bấm để chọn</div>
-            <div class="mt-1 text-[11.5px] text-neutral-500">PDF · DOCX · TXT · ảnh scan — tải từ vbpl</div>
-            <input id="legal-file" type="file" class="hidden" accept=".pdf,.docx,.txt,.md,.png,.jpg,.jpeg,.tif,.tiff,.webp">
-          </label>
-          <div id="legal-picked" class="text-[12.5px] text-neutral-700"></div>
-          <input id="legal-url" type="url" placeholder="Hoặc dán link vbpl: https://vbpl.vn/van-ban/chi-tiet/…" class="lf-input">
-          <button id="legal-upload" class="w-full btn-primary">Tải lên</button>
-          <p class="text-[11.5px] text-neutral-500 leading-snug">Kho luật chỉ nhận Luật / Bộ luật / Nghị quyết / VBHN của VPQH. Văn bản chỉ vào kho sau khi bạn xác nhận đủ 3 bước.</p>
-          <div id="legal-status" class="text-[12.5px] hidden" role="status" aria-live="polite"></div>
-        </section>
-        <section class="card p-2">
-          <div class="flex items-center justify-between px-2 pt-2 pb-1">
-            <h2 class="text-[14px] font-semibold">Bản nháp &amp; lịch sử</h2>
-            <span id="legal-count" class="text-[12px] text-neutral-500"></span>
-          </div>
-          <ul id="legal-history" class="max-h-[40vh] overflow-y-auto"></ul>
-        </section>
-        <section class="card p-4">
-          <h2 class="text-[14px] font-semibold">Chỉ dẫn đang chờ luật gốc</h2>
-          <p class="text-[11.5px] text-neutral-500 mt-0.5">Sẽ tự áp dụng khi luật gốc vào kho.</p>
-          <ul id="legal-pending" class="mt-2 space-y-1.5 text-[12.5px]"></ul>
-        </section>
-      </div>
-
-      <div id="normal-left" class="space-y-5">
-      <section class="card p-4 space-y-3">
-        <h2 class="text-[14px] font-semibold">Tải lên</h2>
-        <label id="dropzone" for="file-input" class="dropzone block border-2 border-dashed border-neutral-300 rounded-xl p-5 text-center cursor-pointer transition-colors">
-          <svg class="w-7 h-7 mx-auto text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-          <div class="mt-2 text-[13px] text-neutral-700 font-medium">Kéo thả file vào đây hoặc bấm để chọn</div>
-          <div class="mt-1 text-[11.5px] text-neutral-500">PDF · DOCX · TXT · MD · CSV · XLSX · ảnh scan (PNG, JPG, TIFF, WEBP)</div>
-          <input id="file-input" type="file" multiple class="hidden" accept=".pdf,.docx,.txt,.md,.csv,.xlsx,.png,.jpg,.jpeg,.tif,.tiff,.webp">
-        </label>
-        <ul id="file-list" class="space-y-1 text-[12.5px] text-neutral-700"></ul>
-        <input id="url-input" type="url" placeholder="Hoặc dán URL văn bản luật" class="w-full border border-neutral-300 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-neutral-500">
-        <button id="btn-upload" class="w-full bg-neutral-900 hover:bg-black disabled:bg-neutral-400 text-white rounded-lg py-2 text-[13px] font-medium transition-colors">Trích xuất &amp; OCR</button>
-        <p class="text-[11.5px] text-neutral-500 leading-snug">Bước này chỉ đọc / OCR và kiểm tra chất lượng. Tài liệu <b>chưa</b> vào kho tra cứu cho tới khi bạn bấm "Embedding &amp; lưu vào kho" ở báo cáo.</p>
-        <div id="upload-status" class="text-[12.5px] hidden" role="status" aria-live="polite"></div>
-      </section>
-
-      <section class="card p-2">
-        <div class="flex items-center justify-between px-2 pt-2 pb-1">
-          <h2 class="text-[14px] font-semibold">Lịch sử nạp</h2>
-          <span id="history-count" class="text-[12px] text-neutral-500"></span>
+  <main class="max-w-[1360px] mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <!-- Top Workbench Bar: Title + Mode Switcher -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-1">
+      <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FDF6E7] border border-[#F1DFB6] text-[#9A5B13] text-[11px] font-semibold mb-1.5">
+          <span>Kiểm định đầu vào · OCR &amp; Kho Luật</span>
         </div>
-        <ul id="history" class="max-h-[52vh] overflow-y-auto"></ul>
-      </section>
+        <h2 class="font-serif text-[22px] sm:text-[26px] font-semibold text-[#16325C] leading-tight">Nạp &amp; Kiểm tra Chất lượng Tài liệu</h2>
       </div>
-    </aside>
+      <div class="mode-sw w-full md:w-[340px] flex-shrink-0" role="group" aria-label="Loại tài liệu">
+        <button id="mode-normal" type="button" aria-pressed="true" class="cursor-pointer transition-all">Tài liệu thường</button>
+        <button id="mode-legal" type="button" aria-pressed="false" class="cursor-pointer transition-all">Văn bản pháp luật</button>
+      </div>
+    </div>
 
-    <!-- ============ RIGHT: detail ============ -->
-    <section id="detail" class="min-w-0">
-      <div id="detail-empty" class="card p-10 text-center text-neutral-500">
-        <div class="text-[15px] font-medium text-neutral-700">Chưa chọn tài liệu</div>
-        <div class="mt-1 text-[13px]">Nạp một tài liệu hoặc chọn trong lịch sử để xem báo cáo từng trang sau OCR.</div>
-      </div>
-      <div id="detail-body" class="hidden space-y-5"></div>
-    </section>
-    <section id="legal-detail" class="hidden min-w-0 space-y-4">
-      <nav id="legal-steps" aria-label="Các bước" class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-        <button class="step-btn" data-step="1" type="button"><span class="num">1</span><span class="min-w-0">Text đúng chưa?</span></button>
-        <button class="step-btn" data-step="2" type="button" disabled><span class="num">2</span><span class="min-w-0">Hệ thống hiểu đúng chưa?</span></button>
-        <button class="step-btn" data-step="3" type="button" disabled><span class="num">3</span><span class="min-w-0">Đưa vào kho</span></button>
-      </nav>
-      <div id="legal-empty" class="card p-10 text-center text-neutral-500">
-        <div class="text-[15px] font-medium text-neutral-700">Chưa chọn bản nháp</div>
-        <div class="mt-1 text-[13px]">Tải một văn bản pháp luật lên hoặc chọn bản nháp trong lịch sử. Mỗi bước chỉ mở sau khi bạn xác nhận bước trước.</div>
-      </div>
-      <div id="legal-body" class="hidden space-y-4"></div>
-    </section>
+    <div class="grid grid-cols-1 lg:grid-cols-[390px_minmax(0,1fr)] gap-6 items-start">
+      <!-- ============ LEFT: upload + history ============ -->
+      <aside class="space-y-5 min-w-0">
+        <div id="legal-left" class="hidden space-y-5">
+          <section class="card p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-serif text-[16px] font-semibold text-[#16325C]">Tải lên văn bản pháp luật</h3>
+              <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#EEF4FF] text-[#2563EB]">3 bước</span>
+            </div>
+            <label id="legal-dropzone" for="legal-file" class="dropzone group block border-2 border-dashed border-[#D8D2C5] hover:border-[#2563EB]/70 bg-[#FAF8F5]/80 rounded-2xl p-6 text-center cursor-pointer transition-all">
+              <div class="w-11 h-11 mx-auto rounded-2xl bg-white border border-[#E6E2D8] shadow-xs flex items-center justify-center text-[#16325C] group-hover:text-[#2563EB] transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+              </div>
+              <div class="mt-3 text-[13.5px] text-[#16325C] font-semibold">Kéo thả file vào đây hoặc bấm chọn</div>
+              <div class="mt-1 text-[11.5px] text-[#64748B]">PDF · DOCX · TXT · ảnh scan — tải từ vbpl</div>
+              <input id="legal-file" type="file" class="hidden" accept=".pdf,.docx,.txt,.md,.png,.jpg,.jpeg,.tif,.tiff,.webp">
+            </label>
+            <div id="legal-picked" class="text-[12.5px] text-[#141B29]"></div>
+            <div class="space-y-1.5">
+              <label for="legal-url" class="block text-[11.5px] font-medium text-[#475569]">Hoặc nhập đường dẫn trực tiếp</label>
+              <input id="legal-url" type="url" placeholder="https://vbpl.vn/van-ban/chi-tiet/…" class="lf-input">
+            </div>
+            <button id="legal-upload" class="w-full btn-primary py-2.5 text-[13.5px] shadow-[0_8px_18px_-6px_rgba(22,50,92,0.4)] cursor-pointer">Tải lên</button>
+            <p class="text-[11.5px] text-[#64748B] leading-relaxed bg-[#FAF8F5] border border-[#E6E2D8] rounded-xl p-3">Kho luật chỉ nhận Luật / Bộ luật / Nghị quyết / VBHN của VPQH. Văn bản chỉ vào kho sau khi bạn xác nhận đủ 3 bước.</p>
+            <div id="legal-status" class="text-[12.5px] hidden" role="status" aria-live="polite"></div>
+          </section>
+          <section class="card p-4">
+            <div class="flex items-center justify-between pb-2.5 mb-1 border-b border-[#E6E2D8]/70">
+              <h3 class="text-[14px] font-semibold text-[#16325C]">Bản nháp &amp; lịch sử</h3>
+              <span id="legal-count" class="text-[11.5px] font-medium px-2 py-0.5 rounded-full bg-[#F4F1EA] text-[#475569]"></span>
+            </div>
+            <ul id="legal-history" class="max-h-[38vh] overflow-y-auto space-y-1"></ul>
+          </section>
+          <section class="card p-4">
+            <h3 class="text-[14px] font-semibold text-[#16325C]">Chỉ dẫn đang chờ luật gốc</h3>
+            <p class="text-[11.5px] text-[#64748B] mt-0.5">Sẽ tự áp dụng khi luật gốc vào kho.</p>
+            <ul id="legal-pending" class="mt-2.5 space-y-1.5 text-[12.5px]"></ul>
+          </section>
+        </div>
+
+        <div id="normal-left" class="space-y-5">
+          <section class="card p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-serif text-[16px] font-semibold text-[#16325C]">Tải lên tài liệu</h3>
+              <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#0F766E]">Kiểm định OCR</span>
+            </div>
+            <label id="dropzone" for="file-input" class="dropzone group block border-2 border-dashed border-[#D8D2C5] hover:border-[#2563EB]/70 bg-[#FAF8F5]/80 rounded-2xl p-6 text-center cursor-pointer transition-all">
+              <div class="w-11 h-11 mx-auto rounded-2xl bg-white border border-[#E6E2D8] shadow-xs flex items-center justify-center text-[#16325C] group-hover:text-[#2563EB] transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+              </div>
+              <div class="mt-3 text-[13.5px] text-[#16325C] font-semibold">Kéo thả file vào đây hoặc bấm chọn</div>
+              <div class="mt-2 flex flex-wrap justify-center gap-1 text-[10.5px] font-medium text-[#475569]">
+                <span class="px-2 py-0.5 rounded-full bg-white border border-[#E6E2D8]">PDF</span>
+                <span class="px-2 py-0.5 rounded-full bg-white border border-[#E6E2D8]">DOCX</span>
+                <span class="px-2 py-0.5 rounded-full bg-white border border-[#E6E2D8]">TXT/MD</span>
+                <span class="px-2 py-0.5 rounded-full bg-white border border-[#E6E2D8]">CSV/XLSX</span>
+                <span class="px-2 py-0.5 rounded-full bg-white border border-[#E6E2D8]">Ảnh scan</span>
+              </div>
+              <input id="file-input" type="file" multiple class="hidden" accept=".pdf,.docx,.txt,.md,.csv,.xlsx,.png,.jpg,.jpeg,.tif,.tiff,.webp">
+            </label>
+            <ul id="file-list" class="space-y-1.5 text-[12.5px] text-[#141B29]"></ul>
+            <div class="space-y-1.5">
+              <label for="url-input" class="block text-[11.5px] font-medium text-[#475569]">Hoặc dán URL văn bản</label>
+              <input id="url-input" type="url" placeholder="https://vbpl.vn/..." class="lf-input">
+            </div>
+            <button id="btn-upload" class="w-full btn-primary py-2.5 text-[13.5px] shadow-[0_8px_18px_-6px_rgba(22,50,92,0.4)] cursor-pointer">Trích xuất &amp; OCR</button>
+            <p class="text-[11.5px] text-[#64748B] leading-relaxed bg-[#FAF8F5] border border-[#E6E2D8] rounded-xl p-3">Bước này chỉ đọc / OCR và kiểm tra chất lượng. Tài liệu <b>chưa</b> vào kho tra cứu cho tới khi bạn bấm &ldquo;Embedding &amp; lưu vào kho&rdquo; ở báo cáo.</p>
+            <div id="upload-status" class="text-[12.5px] hidden" role="status" aria-live="polite"></div>
+          </section>
+
+          <section class="card p-4">
+            <div class="flex items-center justify-between pb-2.5 mb-1 border-b border-[#E6E2D8]/70">
+              <h3 class="text-[14px] font-semibold text-[#16325C]">Lịch sử nạp</h3>
+              <span id="history-count" class="text-[11.5px] font-medium px-2 py-0.5 rounded-full bg-[#F4F1EA] text-[#475569]"></span>
+            </div>
+            <ul id="history" class="max-h-[48vh] overflow-y-auto space-y-1"></ul>
+          </section>
+        </div>
+      </aside>
+
+      <!-- ============ RIGHT: detail ============ -->
+      <section id="detail" class="min-w-0">
+        <div id="detail-empty" class="card p-8 sm:p-10 relative overflow-hidden">
+          <div class="pointer-events-none absolute -top-24 -right-24 w-64 h-64 rounded-full bg-[#EEF4FF] blur-3xl opacity-80"></div>
+          <div class="pointer-events-none absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-[#FDF6E7] blur-3xl opacity-90"></div>
+          <div class="relative max-w-2xl mx-auto text-center py-4">
+            <div class="w-12 h-12 mx-auto rounded-2xl bg-[#EEF4FF] border border-[#BFDBFE] text-[#16325C] flex items-center justify-center mb-4">
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <h3 class="font-serif text-[22px] font-semibold text-[#16325C]">Báo cáo kiểm định từng trang sau OCR</h3>
+            <p class="mt-2 text-[13.5px] text-[#475569] leading-relaxed">
+              Tải tài liệu ở cột bên trái hoặc chọn một báo cáo trong lịch sử để xem bản đồ độ đầy đủ, phát hiện trang mờ/vỡ dấu và đối chiếu từng trang trước khi lập chỉ mục.
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-7 text-left">
+              <div class="p-4 rounded-2xl bg-[#FAF8F5] border border-[#E6E2D8]">
+                <div class="w-7 h-7 rounded-full bg-[#16325C] text-white text-xs font-semibold flex items-center justify-center mb-2.5">1</div>
+                <div class="text-[13px] font-semibold text-[#16325C]">Trích xuất &amp; OCR</div>
+                <p class="text-[12px] text-[#64748B] mt-1 leading-snug">Tự nhận diện PDF text, bảng biểu và OCR ảnh scan (nếu bật).</p>
+              </div>
+              <div class="p-4 rounded-2xl bg-[#FAF8F5] border border-[#E6E2D8]">
+                <div class="w-7 h-7 rounded-full bg-[#2563EB] text-white text-xs font-semibold flex items-center justify-center mb-2.5">2</div>
+                <div class="text-[13px] font-semibold text-[#16325C]">Bản đồ chất lượng</div>
+                <p class="text-[12px] text-[#64748B] mt-1 leading-snug">Chấm điểm độ đầy đủ từng trang, che PII và so sánh với ảnh gốc.</p>
+              </div>
+              <div class="p-4 rounded-2xl bg-[#FAF8F5] border border-[#E6E2D8]">
+                <div class="w-7 h-7 rounded-full bg-[#0F766E] text-white text-xs font-semibold flex items-center justify-center mb-2.5">3</div>
+                <div class="text-[13px] font-semibold text-[#16325C]">Embedding &amp; Lưu kho</div>
+                <p class="text-[12px] text-[#64748B] mt-1 leading-snug">Chỉ đưa vào kho tra cứu khi bạn duyệt xong báo cáo chất lượng.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="detail-body" class="hidden space-y-5"></div>
+      </section>
+
+      <section id="legal-detail" class="hidden min-w-0 space-y-4">
+        <nav id="legal-steps" aria-label="Các bước" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <button class="step-btn cursor-pointer transition-all" data-step="1" type="button"><span class="num">1</span><span class="min-w-0">Text đúng chưa?</span></button>
+          <button class="step-btn cursor-pointer transition-all" data-step="2" type="button" disabled><span class="num">2</span><span class="min-w-0">Hệ thống hiểu đúng chưa?</span></button>
+          <button class="step-btn cursor-pointer transition-all" data-step="3" type="button" disabled><span class="num">3</span><span class="min-w-0">Đưa vào kho</span></button>
+        </nav>
+        <div id="legal-empty" class="card p-8 sm:p-10 relative overflow-hidden">
+          <div class="pointer-events-none absolute -top-24 -right-24 w-64 h-64 rounded-full bg-[#EEF4FF] blur-3xl opacity-80"></div>
+          <div class="pointer-events-none absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-[#FDF6E7] blur-3xl opacity-90"></div>
+          <div class="relative max-w-2xl mx-auto text-center py-4">
+            <div class="w-12 h-12 mx-auto rounded-2xl bg-[#FDF6E7] border border-[#F1DFB6] text-[#9A5B13] flex items-center justify-center mb-4">
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            </div>
+            <h3 class="font-serif text-[22px] font-semibold text-[#16325C]">Quy trình 3 bước nạp Văn bản Pháp luật</h3>
+            <p class="mt-2 text-[13.5px] text-[#475569] leading-relaxed">
+              Tải lên văn bản từ máy hoặc link vbpl.vn ở cột trái, hoặc chọn bản nháp trong lịch sử. Mỗi bước chỉ mở khóa sau khi bạn xác nhận bước trước.
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-7 text-left">
+              <div class="p-4 rounded-2xl bg-[#FAF8F5] border border-[#E6E2D8]">
+                <div class="w-7 h-7 rounded-full bg-[#16325C] text-white text-xs font-semibold flex items-center justify-center mb-2.5">1</div>
+                <div class="text-[13px] font-semibold text-[#16325C]">Xác nhận Text gốc</div>
+                <p class="text-[12px] text-[#64748B] mt-1 leading-snug">Kiểm tra văn bản trích xuất, bảng biểu và phụ lục đi kèm.</p>
+              </div>
+              <div class="p-4 rounded-2xl bg-[#FAF8F5] border border-[#E6E2D8]">
+                <div class="w-7 h-7 rounded-full bg-[#2563EB] text-white text-xs font-semibold flex items-center justify-center mb-2.5">2</div>
+                <div class="text-[13px] font-semibold text-[#16325C]">Siêu dữ liệu &amp; Chỉ dẫn</div>
+                <p class="text-[12px] text-[#64748B] mt-1 leading-snug">Rà soát số hiệu, ngày hiệu lực và thao tác sửa đổi/bổ sung.</p>
+              </div>
+              <div class="p-4 rounded-2xl bg-[#FAF8F5] border border-[#E6E2D8]">
+                <div class="w-7 h-7 rounded-full bg-[#0F766E] text-white text-xs font-semibold flex items-center justify-center mb-2.5">3</div>
+                <div class="text-[13px] font-semibold text-[#16325C]">Đưa vào Kho phiên bản</div>
+                <p class="text-[12px] text-[#64748B] mt-1 leading-snug">Công bố snapshot mới, dựng chỉ mục vector và cập nhật đồ thị.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="legal-body" class="hidden space-y-4"></div>
+      </section>
+    </div>
   </main>
 
   <div id="tooltip" class="fixed z-50 hidden max-w-[280px] bg-white border border-neutral-200 rounded-lg shadow-lg px-3 py-2 text-[12px] leading-snug"></div>
@@ -343,8 +457,8 @@
           <div class="text-[12px] text-neutral-500 mt-0.5">Tài liệu mới được trích xuất. Chatbot chưa tìm thấy nội dung này cho tới khi embedding.</div>
           ${warn}
           <div class="mt-3 flex flex-wrap items-center gap-2">
-            <button id="act-index" class="text-[12.5px] bg-neutral-900 hover:bg-black disabled:bg-neutral-400 text-white rounded-lg px-3.5 py-1.5 font-medium">Embedding &amp; lưu vào kho</button>
-            <button id="act-discard" class="text-[12.5px] border border-neutral-200 rounded-lg px-3 py-1.5 hover:bg-neutral-50" style="color:var(--critical-text)">Bỏ, không lưu</button>
+            <button id="act-index" class="btn-primary text-[12.5px] cursor-pointer">Embedding &amp; lưu vào kho</button>
+            <button id="act-discard" class="text-[12.5px] border border-[#FECDD3] bg-[#FFF1F2] hover:bg-[#FFE4E6] rounded-xl px-3.5 py-1.5 font-medium transition-colors cursor-pointer" style="color:var(--critical-text)">Bỏ, không lưu</button>
             <span class="flex-1"></span>
             ${dl}
           </div>
@@ -487,7 +601,7 @@
           <div class="card p-5 ${pii.length ? '' : 'hidden'}">
             <h3 class="text-[14px] font-semibold">PII đã che trước khi index</h3>
             <div class="mt-3 flex flex-wrap gap-1.5">
-              ${pii.map(([k, n]) => `<span class="chip">🔒 ${esc(k)} <span class="tabular">×${n}</span></span>`).join('')}
+              ${pii.map(([k, n]) => `<span class="chip inline-flex items-center gap-1.5"><svg class="w-3 h-3 text-[#16325C]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>${esc(k)} <span class="tabular">×${n}</span></span>`).join('')}
             </div>
             <p class="mt-3 text-[12px] text-neutral-500">Giá trị gốc không được lưu vào chunk, embedding hay log.</p>
           </div>
